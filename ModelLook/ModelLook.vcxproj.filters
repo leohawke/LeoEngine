@@ -1,0 +1,272 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{6d3c3b35-85fb-4b70-9b1e-71c124fd37d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IndePlatform">
+      <UniqueIdentifier>{24f1e163-935f-4920-abd8-ddb06577922e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IndePlatform\BaseHead">
+      <UniqueIdentifier>{b7fa7f34-4cbe-4354-befe-75d9566e85fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IndePlatform\WinSource">
+      <UniqueIdentifier>{6a8bc9b0-9144-4e87-a67f-1bcfeeb29301}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IndePlatform\BaseSource">
+      <UniqueIdentifier>{6a5038ee-1270-4ac8-a0cc-1b2b62b7e28f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="WinMain">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{9504ba25-fa09-439b-b186-84fc502aef74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{92f3fbf2-df4a-4289-bd00-8d46eb23296a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\HLSL">
+      <UniqueIdentifier>{e20a3409-4cdf-4df4-b05d-0601f69c05e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\HLSL\NormalMap">
+      <UniqueIdentifier>{094a4d48-5286-4d58-b926-fd5a4638e8c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\HLSL\NormalLine">
+      <UniqueIdentifier>{f0695efa-48bf-4c9c-85b0-300f194e65b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{3741c472-42c0-410e-99ce-f2aabb5fa4c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\HLSL\Line">
+      <UniqueIdentifier>{cbbf3604-f506-406b-86a5-602df3aa4d7c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="WinMain.cpp">
+      <Filter>WinMain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\Core\Geometry.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\Core\Mesh.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\Core\MeshLoad.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\Core\Vertex.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\IndePlatform\ThreadSync.cpp">
+      <Filter>IndePlatform\WinSource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\IndePlatform\memory.cpp">
+      <Filter>IndePlatform\BaseSource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\IndePlatform\raii.cpp">
+      <Filter>IndePlatform\BaseSource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\IndePlatform\Singleton.cpp">
+      <Filter>IndePlatform\BaseSource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\IndePlatform\string.cpp">
+      <Filter>IndePlatform\BaseSource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\IndePlatform\type_info.cpp">
+      <Filter>IndePlatform\BaseSource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\d3dx11.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\Debug.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\DeviceManger.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\exception.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\File.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\Input.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\leomath.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\Notation.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\Mgr.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\TextureMgr.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\timer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\window.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\RenderStates.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\ShaderMgr.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\Core\effect.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\Core\RenderSync.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Axis.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\Core\EffectLine.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\All\IndePlatform\algorithm.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\any.h">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\any_iterator.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\BaseMacro.h">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\bitseg.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\clock.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\container.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\EndianSwap.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\functional.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\iterator.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\ldef.h">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\leoint.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\memory.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\path.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\platform.h">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\raii.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\Singleton.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\string.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\ThreadSync.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\tuple.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\type_op.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\utility.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\variadic.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\LightBuffer.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\LightHelper.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\RenderStates.hpp">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\ShaderMgr.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Axis.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\All\Shader\LightBuffer.hlsli">
+      <Filter>Shader\HLSL</Filter>
+    </None>
+    <None Include="..\All\Shader\LightHelper.hlsli">
+      <Filter>Shader\HLSL</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\All\Shader\NormalMapPS.hlsl">
+      <Filter>Shader\HLSL\NormalMap</Filter>
+    </FxCompile>
+    <FxCompile Include="..\All\Shader\NormalMapVS.hlsl">
+      <Filter>Shader\HLSL\NormalMap</Filter>
+    </FxCompile>
+    <FxCompile Include="..\All\Shader\NormalLineGS.hlsl">
+      <Filter>Shader\HLSL\NormalLine</Filter>
+    </FxCompile>
+    <FxCompile Include="..\All\Shader\NormalLinePS.hlsl">
+      <Filter>Shader\HLSL\NormalLine</Filter>
+    </FxCompile>
+    <FxCompile Include="..\All\Shader\NormalLineVS.hlsl">
+      <Filter>Shader\HLSL\NormalLine</Filter>
+    </FxCompile>
+    <FxCompile Include="..\All\Shader\LineVS.hlsl">
+      <Filter>Shader\HLSL\Line</Filter>
+    </FxCompile>
+    <FxCompile Include="..\All\Shader\LinePS.hlsl">
+      <Filter>Shader\HLSL\Line</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ModelLook.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="需求.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="ModelLook.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

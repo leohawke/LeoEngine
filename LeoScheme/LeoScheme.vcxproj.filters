@@ -1,0 +1,147 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="IndePlatform">
+      <UniqueIdentifier>{e7a4110b-5c6e-4629-a28f-3df6d9821674}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IndePlatform\BaseHead">
+      <UniqueIdentifier>{c2ab2399-ba5e-4fc6-9e53-e5592ffcfaa5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IndePlatform\WinSource">
+      <UniqueIdentifier>{71fa62ee-d751-4dd5-b403-fee5a4ea1b7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IndePlatform\BaseSource">
+      <UniqueIdentifier>{529f9881-34df-45a5-92f7-2e534d23623c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sexp">
+      <UniqueIdentifier>{6cc86564-dcdb-49a1-a0e6-29678fbef406}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\All\IndePlatform\Abstract.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\algorithm.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\any.h">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\any_iterator.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\BaseMacro.h">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\bitseg.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\clock.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\container.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\EndianSwap.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\functional.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\iterator.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\ldef.h">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\leoint.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\memory.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\path.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\platform.h">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\raii.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\Singleton.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\string.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\ThreadSync.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\tuple.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\type_op.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\utility.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\IndePlatform\variadic.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="Sexp\Sexp.hpp">
+      <Filter>Sexp</Filter>
+    </ClInclude>
+    <ClInclude Include="scheme.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\All\IndePlatform\ThreadSync.cpp">
+      <Filter>IndePlatform\WinSource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\IndePlatform\any.cpp">
+      <Filter>IndePlatform\BaseSource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\IndePlatform\memory.cpp">
+      <Filter>IndePlatform\BaseSource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\IndePlatform\raii.cpp">
+      <Filter>IndePlatform\BaseSource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\IndePlatform\Singleton.cpp">
+      <Filter>IndePlatform\BaseSource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\IndePlatform\string.cpp">
+      <Filter>IndePlatform\BaseSource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\IndePlatform\type_info.cpp">
+      <Filter>IndePlatform\BaseSource</Filter>
+    </ClCompile>
+    <ClCompile Include="Sexp\Sexp.cpp">
+      <Filter>Sexp</Filter>
+    </ClCompile>
+    <ClCompile Include="Sexp_Test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="scheme.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

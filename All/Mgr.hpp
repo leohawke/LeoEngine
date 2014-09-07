@@ -1,0 +1,110 @@
+#pragma once
+
+
+#include <string>
+#include <set>
+#include <unordered_map>
+#include <vector>
+#include <string.h>
+#include <memory>
+#include <array>
+#include "IndePlatform\BaseMacro.h"
+#include "IndePlatform\Singleton.hpp"
+#include "IndePlatform\leoint.hpp"
+#include "d3dx11.hpp"
+#if defined DEBUG || defined _DEBUG
+#include <d3d11sdklayers.h> //for D3D11Debug
+#endif
+#include "window.hpp"
+#include "COM.hpp"
+namespace leo
+{
+	namespace win
+	{
+		class KeysState;
+	}
+	namespace global
+	{
+		///DeviceMgr
+		extern ID3D11Device* globalD3DDevice;
+		extern ID3D11DeviceContext* globalD3DContext;
+		extern IDXGISwapChain* globalDXGISwapChain;
+		extern ID3D11Texture2D* globalD3DDepthTexture;
+		extern ID3D11DepthStencilView* globalD3DDepthStencilView;
+		extern ID3D11RenderTargetView* globalD3DRenderTargetView;
+		extern ID3D11Texture2D*	globalD3DRenderTargetTexture2D;
+		extern std::set<std::pair<unsigned int, unsigned int>> globalDXGISizeSet;
+		//share by DeviceMgr and Window
+		extern std::pair<unsigned int, unsigned int> globalWindowSize;
+		extern float globalAspect;
+		//WindowMgr
+		extern win::HWND globalHwnd;
+		//GUID
+		extern std::unordered_map<std::size_t, wchar_t*> globalStringTable;
+
+		//
+		extern win::KeysState globalKeysState;
+
+#if defined DEBUG || defined _DEBUG
+		extern ID3D11Debug* globalD3DDebug;
+#endif
+
+		void Init();
+		void Destroy();
+	}
+	
+	
+	
+
+	inline std::size_t hash(const wchar_t* str)
+	{
+		auto sid = std::_Hash_seq((unsigned char*)str,wcslen(str)*sizeof(wchar_t)/sizeof(char));
+
+		auto it = global::globalStringTable.find(sid);
+
+		if (it == global::globalStringTable.end())
+		{
+			global::globalStringTable[sid] = _wcsdup(str);
+		}
+		return sid;
+	}
+	inline std::size_t hash(const std::wstring& str)
+	{
+		return hash(str.c_str());
+	}
+	
+
+	class OutputWindow : public win::Window
+	{
+	public:
+		using MsgFunction = std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)>;
+	public:
+		bool Create(HINSTANCE hInstance,
+			std::pair<leo::uint16,leo::uint16>& clientSize,
+			LPCWSTR classname = L"OutputWindow",
+			DWORD style = WS_BORDER,
+			DWORD exStyle = 0,
+			LPCWSTR iconRes = nullptr,
+			LPCWSTR smalliconRes = nullptr
+			);
+	public:
+		DefGetter(const _NOEXCEPT, win::HWND, Hwnd,global::globalHwnd);
+		DefGetter(_NOEXCEPT, win::HWND&, Hwnd,global::globalHwnd);
+
+		HINSTANCE	GetHinstance() const;
+
+		BOOL		IsAlive() const;
+		BOOL		IsMin() const;
+
+		void		Destroy();
+
+		void		BindMsgFunc(UINT message, MsgFunction msgFunction);
+
+		std::pair<leo::uint16, leo::uint16> ClientSize() const lnothrow;
+	public:
+		virtual		LRESULT	WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	private:
+		std::unordered_map<UINT, MsgFunction>	m_userMessages;			// User message map
+		std::wstring m_regName;
+	};
+}

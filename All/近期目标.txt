@@ -1,0 +1,54 @@
+地形系统
+
+
+2个 Displacement Maps
+
+不同的tiels大小<8*8 Patch>
+
+Debug:
+渲染Tiels
+渲染Patchs
+
+
+cbuffer ChangeOnHardWare : register(b0)
+{
+	//Render target size for screen-space calculations
+	float2 gScreenSize;
+	//Pixels per tri edge
+	int gTessllatedTriWidth = 10;
+}
+
+
+cbuffer ChangeOnMatrix : register(b1)
+{
+	row_major float4x4 gWorldViewProj;
+	
+	row_major float4x4 gWorldViewLOD;
+	row_major float4x4 gWorldViewProjLOD;
+
+	//The proj matrix does not vary between the LOD and view-centre vsets.  
+	//Only the view matrix varies
+	row_major float4x4 gProj;
+}
+
+float ClipToScrrenSpaceTessellation(float4 clip0,float4 clip1)
+{
+	clip0 /= clip0.w;
+	clip1 /= clip1.w;
+
+	clip0.xy *= gScreenSize;
+	clip1.xy *= gScreenSize;
+
+	const float d = distance(clip0, clip1);
+
+	return clamp(d / gTessellatedTriWidth, 0,64);
+}
+
+// Project an edge into clip space and return the number of triangles that are required to fit across it
+// in screenspace.
+float EdgeToScreenSpaceTessellation(float3 p0, float3 p1)
+{
+	float4 clip0 = mul(float4(p0,1), gWorldViewProjLOD);
+	float4 clip1 = mul(float4(p1,1), gWorldViewProjLOD);
+	return ClipToScreenSpaceTessellation(clip0, clip1);
+}

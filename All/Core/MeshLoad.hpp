@@ -1,0 +1,57 @@
+#pragma once
+#include <cstdint>
+#include <cstddef>
+#include <string>
+#include <functional>
+#include <DirectXMath.h>
+namespace leo
+{
+	class MeshFile
+	{
+	private:
+	public:
+		struct MeshFileHeader
+		{
+			std::uint8_t numsubset;
+			std::uint32_t numvertice;
+			std::uint32_t numindex;
+		};
+		struct MeshMaterial
+		{
+			DirectX::XMFLOAT3 ambient;
+			DirectX::XMFLOAT3 diffuse;
+			DirectX::XMFLOAT3 specular;
+			DirectX::XMFLOAT3 reflect;
+			float specPow;
+			float alphaclip;
+			wchar_t diffusefile[260];
+			wchar_t normalmapfile[260];
+		};
+		struct MeshSubSet
+		{
+			std::uint32_t indexoffset;
+			std::uint32_t indexcount;
+		};
+		struct MeshVertex
+		{
+			DirectX::XMFLOAT3 pos;
+			DirectX::XMFLOAT3 normal;
+			DirectX::XMFLOAT2 tex;
+			DirectX::XMFLOAT3 tangent;
+		};
+		static void m3dTol3d(const std::wstring& m3dfilename, const std::wstring& l3dfilename);
+
+		static void sdkmeshTol3d(const std::wstring& sdkmeshfilename, const std::wstring& l3dfilename);
+
+
+		//1.........n
+		//.
+		//.
+		//.
+		//.
+		//m
+		static void terrainTol3d(const std::function<float(float, float)>& f, std::pair<std::uint32_t, std::uint32_t> size, std::pair<std::uint16_t, std::uint16_t> mn, const std::wstring& l3dfilename);
+
+		static void w3eTol3d(const std::wstring& w3efilename, const std::wstring& l3dfilename);
+	};
+}

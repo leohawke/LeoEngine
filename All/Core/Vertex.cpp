@@ -1,0 +1,56 @@
+#include "..\d3dx11.hpp"
+#include "Vertex.hpp"
+
+namespace leo
+{
+	namespace InputLayoutDesc
+	{
+		extern const D3D11_INPUT_ELEMENT_DESC Basic[3]
+			=
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, sizeof(float3), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, sizeof(float3) + sizeof(float3), D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		};
+
+		extern const D3D11_INPUT_ELEMENT_DESC BasicV[3]
+			=
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		};
+
+		extern const D3D11_INPUT_ELEMENT_DESC NormalMap[4]
+			=
+		{
+			Basic[0], Basic[1], Basic[2],
+			{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, sizeof(Vertex::Basic), D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		};
+
+		extern const D3D11_INPUT_ELEMENT_DESC NormalMapV[4]
+			=
+		{
+			BasicV[0], BasicV[1], BasicV[2],
+			{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, sizeof(Vertex::BasicV), D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		};
+
+		extern const D3D11_INPUT_ELEMENT_DESC BillBoard[2]
+			=
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "SIZE", 0, DXGI_FORMAT_R32G32_FLOAT, 0, sizeof(float3), D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		};
+
+		extern const D3D11_INPUT_ELEMENT_DESC Sky[1] =
+		{
+			{ "POSITION",0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 }
+		};
+
+		extern const D3D11_INPUT_ELEMENT_DESC PostEffect[2] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, sizeof(float3), D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		};
+	}
+}

@@ -1,0 +1,56 @@
+一般的,LOD系统
+
+VS是固定的
+由参数决定细分程度,由Tess完成
+
+Debug作用
+:
+显示法线<顶点都拥有法线?>
+{
+IA D3D11_PRIMITIVE_TOPOLOGY_POINTLIST
+struct GSInput
+{
+	float3 PosL : POSITION;
+	float3 NormalL : NORMALIZE;
+};
+XYZ的1到底对应现实世界的多少单位?
+GS:
+[maxvertexcount(2)]
+void main(
+	point GSInput input[1], 
+	inout LineStream< GSOutput > output
+)
+//世界坐标系!
+v[0] = input[0]
+v[1] = input[0] + normal<标准化>*?
+}
+特殊的
+非常远,BillBoard绘制
+/*
+也可以传入三角形计算
+*/
+
+BillBoard
+集合,使用一组贴图<硬编码数值?>,而点统一VB,一次CALL PS不同,使用GS?
+{
+数量不确定
+使用N+/贴图数量次Call
+auto NUMofcall = (NumofBillBoard + Texture2DArraySize - 1) /NumofBillBoard + Texture2DArraySize - 1;
+for(i: 0 to Numofcall - 1)
+	draw(Texture2DArraySize,i*Texture2DArraySize);
+draw(NumofBillBoard-i*Texture2DArraySize),i*Texture2DArraySize);
+
+GS:
+add params PrimID :SV_PrimitiveID
+output texcoord = input texcoord,PrimID
+
+}
+
+监听<Debug用>
+Render(该对象,相机,RENDER类型打包)
+单个,照常绘制 PS不同                                       
+
+
+能收到其他线程的消息
+
+诸如:退出

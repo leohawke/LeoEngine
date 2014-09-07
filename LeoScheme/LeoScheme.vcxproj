@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{9C92E335-FB4D-4185-8A8E-4DDB0FC12378}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>LeoScheme</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(SolutionDir)All\;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\All\IndePlatform\Abstract.hpp" />
+    <ClInclude Include="..\All\IndePlatform\algorithm.hpp" />
+    <ClInclude Include="..\All\IndePlatform\any.h" />
+    <ClInclude Include="..\All\IndePlatform\any_iterator.hpp" />
+    <ClInclude Include="..\All\IndePlatform\BaseMacro.h" />
+    <ClInclude Include="..\All\IndePlatform\bitseg.hpp" />
+    <ClInclude Include="..\All\IndePlatform\clock.hpp" />
+    <ClInclude Include="..\All\IndePlatform\container.hpp" />
+    <ClInclude Include="..\All\IndePlatform\EndianSwap.hpp" />
+    <ClInclude Include="..\All\IndePlatform\functional.hpp" />
+    <ClInclude Include="..\All\IndePlatform\iterator.hpp" />
+    <ClInclude Include="..\All\IndePlatform\ldef.h" />
+    <ClInclude Include="..\All\IndePlatform\leoint.hpp" />
+    <ClInclude Include="..\All\IndePlatform\memory.hpp" />
+    <ClInclude Include="..\All\IndePlatform\path.hpp" />
+    <ClInclude Include="..\All\IndePlatform\platform.h" />
+    <ClInclude Include="..\All\IndePlatform\raii.hpp" />
+    <ClInclude Include="..\All\IndePlatform\Singleton.hpp" />
+    <ClInclude Include="..\All\IndePlatform\string.hpp" />
+    <ClInclude Include="..\All\IndePlatform\ThreadSync.hpp" />
+    <ClInclude Include="..\All\IndePlatform\tuple.hpp" />
+    <ClInclude Include="..\All\IndePlatform\type_op.hpp" />
+    <ClInclude Include="..\All\IndePlatform\utility.hpp" />
+    <ClInclude Include="..\All\IndePlatform\variadic.hpp" />
+    <ClInclude Include="scheme.h" />
+    <ClInclude Include="Sexp\Sexp.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\All\IndePlatform\any.cpp" />
+    <ClCompile Include="..\All\IndePlatform\memory.cpp" />
+    <ClCompile Include="..\All\IndePlatform\raii.cpp" />
+    <ClCompile Include="..\All\IndePlatform\Singleton.cpp" />
+    <ClCompile Include="..\All\IndePlatform\string.cpp" />
+    <ClCompile Include="..\All\IndePlatform\ThreadSync.cpp" />
+    <ClCompile Include="..\All\IndePlatform\type_info.cpp" />
+    <ClCompile Include="scheme.cpp" />
+    <ClCompile Include="Sexp\Sexp.cpp" />
+    <ClCompile Include="Sexp_Test.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
