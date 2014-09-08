@@ -20,7 +20,7 @@
 #define Core_TileRing_h
 
 #include "..\leomath.hpp"
-
+#include "..\IndePlatform\memory.hpp"
 struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct ID3D11Buffer;
@@ -53,7 +53,7 @@ namespace leo
 		TileRing(ID3D11Device*, int holeWidth, int outerWidth, float tileSize);
 		~TileRing();
 
-		void SetRenderingState(ID3D11DeviceContext*) const;
+		void IASet(ID3D11DeviceContext*) const;
 
 		int   outerWidth() const { return mOuterWidth; }
 		int   nTiles()     const { return mnTiles; }
@@ -64,14 +64,14 @@ namespace leo
 	private:
 		void CreateInstanceDataVB(ID3D11Device*);
 		bool InRing(int x, int y) const;
-		void AssignNeighbourSizes(int x, int y,Vertex::Adjacency*) const;
+		void AssignNeighbourSizes(int x, int y,Vertex::Adjacency&) const;
 
-		ID3D11Buffer* mPositionsVB;
+		ID3D11Buffer* mPositionsVB = nullptr;
 
 		const int mHoleWidth, mOuterWidth, mRingWidth;
 		const int mnTiles;
 		const float mtileSize;
-		Vertex::InstanceData* mVBData;
+		std::unique_ptr<Vertex::InstanceData[]> mVBData = nullptr;
 	};
 
 }

@@ -20,6 +20,11 @@ cbuffer ChangeOnMatrix : register(b2)
 	row_major float4x4 gProj;
 }
 
+cbuffer ChangeOnCamera : register(b3)
+{
+	float3 gEyePos;
+	float3 gViewDir;
+}
 float ClipToScreenSpaceTessellation(float4 clip0, float4 clip1)
 {
 	clip0 /= clip0.w;
@@ -188,7 +193,7 @@ HS_CONSTANT_DATA_OUTPUT TerrainScreenspaceLODConstantsHS(InputPatch<VS_CONTROL_P
 	const float  sideLen = max(abs(ip[1].vPosition.x - ip[0].vPosition.x), abs(ip[1].vPosition.x - ip[2].vPosition.x));		// assume square & uniform
 	const float  diagLen = sqrt(2 * sideLen*sideLen);
 
-	if (!inFrustum(centre, g_EyePos / WORLD_SCALE, g_ViewDir, diagLen))
+	if (!inFrustum(centre, gEyePos / WORLD_SCALE, gViewDir, diagLen))
 	{
 		Output.Inside[0] = Output.Inside[1] = -1;
 		Output.Edges[0] = Output.Edges[1] = Output.Edges[2] = Output.Edges[3] = -1;
@@ -286,101 +291,3 @@ HS_OUTPUT TerrainScreenspaceLODHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 4> p, uint
 	return Output;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// 输入控制点
-struct VS_CONTROL_POINT_OUTPUT
-{
-	float3 vPosition : WORLDPOS;
-	// TODO:  更改/添加其他资料
-};
-
-// 输出控制点
-struct HS_CONTROL_POINT_OUTPUT
-{
-	float3 vPosition : WORLDPOS; 
-};
-
-// 输出修补程序常量数据。
-struct HS_CONSTANT_DATA_OUTPUT
-{
-	float EdgeTessFactor[3]			: SV_TessFactor; // 例如，对于四象限域，将为 [4]
-	float InsideTessFactor			: SV_InsideTessFactor; // 例如，对于四象限域，将为 Inside[2]
-	// TODO:  更改/添加其他资料
-};
-
-#define NUM_CONTROL_POINTS 3
-
-// 修补程序常量函数
-HS_CONSTANT_DATA_OUTPUT CalcHSPatchConstants(
-	InputPatch<VS_CONTROL_POINT_OUTPUT, NUM_CONTROL_POINTS> ip,
-	uint PatchID : SV_PrimitiveID)
-{
-	HS_CONSTANT_DATA_OUTPUT Output;
-
-	// 在此处插入代码以计算输出
-	Output.EdgeTessFactor[0] = 
-		Output.EdgeTessFactor[1] = 
-		Output.EdgeTessFactor[2] = 
-		Output.InsideTessFactor = 15; // 例如，可改为计算动态分割因子
-
-	return Output;
-}
-
-[domain("tri")]
-[partitioning("fractional_odd")]
-[outputtopology("triangle_cw")]
-[outputcontrolpoints(3)]
-[patchconstantfunc("CalcHSPatchConstants")]
-HS_CONTROL_POINT_OUTPUT main( 
-	InputPatch<VS_CONTROL_POINT_OUTPUT, NUM_CONTROL_POINTS> ip, 
-	uint i : SV_OutputControlPointID,
-	uint PatchID : SV_PrimitiveID )
-{
-	HS_CONTROL_POINT_OUTPUT Output;
-
-	// 在此处插入代码以计算输出
-	Output.vPosition = ip[i].vPosition;
-
-	return Output;
-}

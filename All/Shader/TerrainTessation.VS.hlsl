@@ -18,15 +18,6 @@ struct VS_CONTROL_POINT_OUTPUT
 };
 
 
-Texture2D gCoarseHeightMap : register(t1);
-SamplerState ClampLinear : register(s1)
-{
-	Filter = MIN_MAG_MIP_LINEAR;
-	AddressU = Clamp;
-	AddressV = Clamp;
-};
-
-
 cbuffer SizeAndOnSet : register(b1)
 {
 	float gTileSize = 1;

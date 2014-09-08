@@ -31,6 +31,17 @@ namespace leo
 	public:
 		void Apply(ID3D11DeviceContext* context);
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow;
+
+		void SetCoarseHeightMap(ID3D11ShaderResourceView* srv);
+		void SetDetailNoiseTexure(ID3D11ShaderResourceView* srv);
+
+		void SetTexureOffset(const float3& offset, ID3D11DeviceContext* context);
+		void SetDetailNoiseScale(const float& scale, ID3D11DeviceContext* context);
+		void SetDetailUVScale(const float2& scale, ID3D11DeviceContext* context);
+		void SetTileSize(const float& size, ID3D11DeviceContext* context);
+
+#ifdef DEBUG
+#endif
 	private:
 		//in vs,s1
 		ID3D11SamplerState* mSamplerClampLinear = nullptr;

@@ -25,18 +25,19 @@ namespace leo
 {
 	namespace Vertex
 	{
+		struct Adjacency
+		{
+			// These are the size of the neighbours along +/- x or y axes.  For interior tiles
+			// this is 1.  For edge tiles it is 0.5 or 2.0.
+			float neighbourMinusX;
+			float neighbourMinusY;
+			float neighbourPlusX;
+			float neighbourPlusY;
+		};
 		struct Terrain
 		{
 			float2 position;
-			struct Adjacency
-			{
-				// These are the size of the neighbours along +/- x or y axes.  For interior tiles
-				// this is 1.  For edge tiles it is 0.5 or 2.0.
-				float neighbourMinusX;
-				float neighbourMinusY;
-				float neighbourPlusX;
-				float neighbourPlusY;
-			} adjacency;
+			Adjacency adjacency;
 			//int32 VertexId;
 			//int32 InstanceId;
 		};

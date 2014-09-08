@@ -15,6 +15,8 @@ cbuffer ScaleAndTexOffsetOnSet : register(b0)
 	float3 gTextureWorldOffset;	// Offset of fractal terrain in texture space.
 	float     gDetailNoiseScale = 0.2;
 	float2    gDetailUVScale = 1;				// x is scale; y is 1/scale
+	float  gCoarseSampleSpacing;
+	float gfDisplacementHeight;
 }
 
 Texture2D gDetailNoiseTexture :register(t0);
@@ -23,6 +25,15 @@ SamplerState RepeatLinear : register(s0)
 	Filter = MIN_MAG_MIP_LINEAR;
 	AddressU = Repeat;
 	AddressV = Repeat;
+};
+
+
+Texture2D gCoarseHeightMap : register(t1);
+SamplerState ClampLinear : register(s1)
+{
+	Filter = MIN_MAG_MIP_LINEAR;
+	AddressU = Clamp;
+	AddressV = Clamp;
 };
 
 float2 worldXZtoHeightUV(float2 worldXZ)
@@ -92,5 +103,15 @@ struct Adjacency
 	float neighbourMinusY : ADJACENCY_SIZES1;
 	float neighbourPlusX : ADJACENCY_SIZES2;
 	float neighbourPlusY : ADJACENCY_SIZES3;
+};
+
+struct MeshVertex
+{
+	float4 vPosition        : SV_Position;
+	float2 vWorldXZ         : TEXCOORD1;
+	float3 vNormal          : NORMAL;
+#ifdef DEBUG
+	float3 debugColour      : COLOR;
+#endif
 };
 #endif

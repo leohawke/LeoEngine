@@ -204,6 +204,9 @@
     <ClCompile Include="Core\Terrain.Tessation.Effect.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Terrain.TileRing.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.hpp">
@@ -401,6 +404,9 @@
     <ClInclude Include="Core\Terrain.Tessation.Effect.hpp">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Terrain.TileRing.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">
@@ -466,6 +472,12 @@
       <Filter>Shader\HLSL\TerrainTessllation</Filter>
     </FxCompile>
     <FxCompile Include="Shader\TerrainTessation.VS.hlsl">
+      <Filter>Shader\HLSL\TerrainTessllation</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\TerrainTessation.PS.hlsl">
+      <Filter>Shader\HLSL\TerrainTessllation</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\TerrainTessation.DS.hlsl">
       <Filter>Shader\HLSL\TerrainTessllation</Filter>
     </FxCompile>
   </ItemGroup>
