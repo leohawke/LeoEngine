@@ -6,7 +6,8 @@
 
 #include <cstdint>
 #include <cstddef>
-
+#include <mutex>
+#include <condition_variable>
 #include "raii.hpp"
 
 namespace leo
@@ -119,6 +120,8 @@ namespace leo
 		~ConditionVariable() = default;
 		void Wait(Mutex& mutex);
 		bool TimedWait(Mutex& mutex,std::uint32_t millis);
+		void Wait(CriticalSection& mutex);
+		bool TimedWait(CriticalSection& mutex, std::uint32_t millis);
 		void NotifySingle();
 		void Notify();
 

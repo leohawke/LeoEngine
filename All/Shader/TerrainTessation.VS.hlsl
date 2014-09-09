@@ -21,13 +21,10 @@ struct VS_CONTROL_POINT_OUTPUT
 cbuffer SizeAndOnSet : register(b1)
 {
 	float gTileSize = 1;
-}
 #ifdef DEBUG
-cbuffer DebugOnSet : register(b2)
-{
 	bool gDebugShowTiles = false;
-}
 #endif
+}
 
 // There's no vertex data.  Position and UV coords are created purely from vertex and instance IDs.
 void ReconstructPosition(VertexIn input, out float3 pos, out int2 intUV)

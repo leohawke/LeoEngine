@@ -1,0 +1,117 @@
+#
+# SFSEXP: Small, Fast S-Expression Library version 1.0
+# Written by Matthew Sottile (matt@lanl.gov)
+#
+# Copyright (2004). The Regents of the University of California. This material
+# was produced under U.S. Government contract W-7405-ENG-36 for Los Alamos
+# National Laboratory, which is operated by the University of California for
+# the U.S. Department of Energy. The U.S. Government has rights to use,
+# reproduce, and distribute this software. NEITHER THE GOVERNMENT NOR THE
+# UNIVERSITY MAKES ANY WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY
+# FOR THE USE OF THIS SOFTWARE. If software is modified to produce derivative
+# works, such modified software should be clearly marked, so as not to confuse
+# it with the version available from LANL.
+#
+# Additionally, this program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at your
+# option) any later version. Accordingly, this program is distributed in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+# the GNU General Public License for more details.
+#
+# LA-CC-04-094
+# 
+
+SHELL = /bin/sh
+
+#
+# source files
+#
+CFILES = cstring.c sexp_ops.c sexp.c faststack.c io.c parser.c
+
+#
+# target
+#
+LIBSEXP = libsexp.a
+
+#
+# various debug flags
+#
+PROFFLAGS = -g
+DEBUGFLAGS = -g -D_DEBUG_
+DEBUGMMFLAGS = -g -D_DEBUG_ -D_NO_MEMORY_MANAGEMENT_
+
+##
+## TAU instrumentation stuff
+##
+TAUROOTDIR = @TAUROOT@
+
+##########################################################################
+
+OBJECTS = $(CFILES:.c=.o)
+
+all: $(LIBSEXP)
+
+#
+# profiling using TAU.  gprof is too limited if we want to do hand
+# instrumentation and look at detail beyond function call granularity.
+#
+prof:
+	$(CC) $(PROFFLAGS) -c *.c
+	ar cr $(LIBSEXP) $(OBJECTS)
+	ranlib $(LIBSEXP)
+
+#
+# debug, without disabling any code in the non-debug version (IE: still
+# use the custom memory management goop)
+#
+debug:
+	$(CC) $(DEBUGFLAGS) -c *.c
+	ar cr $(LIBSEXP) $(OBJECTS)
+	ranlib $(LIBSEXP)
+
+# note: mallocdebug target requires malloc_util.c and malloc_util.h,
+#       that are not publicly available at the moment (gotta get
+#       permission from erik)
+mallocdebug:
+	$(CC) -D_DEBUG_MALLOCS_ $(DEBUGFLAGS) -c *.c
+	ar cr $(LIBSEXP) malloc_util.o $(OBJECTS)
+	ranlib $(LIBSEXP)
+
+#
+# debug, with no memory management
+#
+debugnomm:
+	$(CC) $(DEBUGMMFLAGS) -c *.c
+	ar cr $(LIBSEXP) $(OBJECTS)
+	ranlib $(LIBSEXP)
+
+# 
+# limiting memory
+#
+limitmem:
+	$(CC) -O2 -Wall -D_SEXP_LIMIT_MEMORY_ -c *.c
+	ar cr $(LIBSEXP) sexp_memory.o $(OBJECTS)
+	ranlib $(LIBSEXP)
+
+#
+# normal target
+#
+$(LIBSEXP) : $(OBJECTS)
+	ar cr $(LIBSEXP) $(OBJECTS)
+	ranlib $(LIBSEXP)
+
+.c.o:
+	$(CC) -O2 -Wall $(CFLAGS) -c $<
+
+.c:
+	$(CC) -O2 -Wall $(CFLAGS) -c $<
+
+#
+#
+#
+clean:
+	rm -f $(OBJECTS)
+	rm -f $(LIBSEXP)
+	rm -f *~ *.o

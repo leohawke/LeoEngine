@@ -18,13 +18,11 @@ cbuffer ChangeOnMatrix : register(b2)
 	//The proj matrix does not vary between the LOD and view-centre vsets.  
 	//Only the view matrix varies
 	row_major float4x4 gProj;
-}
 
-cbuffer ChangeOnCamera : register(b3)
-{
 	float3 gEyePos;
 	float3 gViewDir;
 }
+
 float ClipToScreenSpaceTessellation(float4 clip0, float4 clip1)
 {
 	clip0 /= clip0.w;
