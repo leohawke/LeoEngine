@@ -19,8 +19,16 @@ cbuffer ScaleAndTexOffsetOnSet : register(b0)
 	float gfDisplacementHeight;
 }
 
-Texture2D gDetailNoiseTexture :register(t0);
-SamplerState RepeatLinear : register(s0)
+Texture2D gCoarseHeightMap : register(t0);
+SamplerState ClampLinear : register(s0)
+{
+	Filter = MIN_MAG_MIP_LINEAR;
+	AddressU = Clamp;
+	AddressV = Clamp;
+};
+
+Texture2D gDetailNoiseTexture :register(t1);
+SamplerState RepeatLinear : register(s1)
 {
 	Filter = MIN_MAG_MIP_LINEAR;
 	AddressU = Repeat;
@@ -28,13 +36,7 @@ SamplerState RepeatLinear : register(s0)
 };
 
 
-Texture2D gCoarseHeightMap : register(t1);
-SamplerState ClampLinear : register(s1)
-{
-	Filter = MIN_MAG_MIP_LINEAR;
-	AddressU = Clamp;
-	AddressV = Clamp;
-};
+
 
 float2 worldXZtoHeightUV(float2 worldXZ)
 {

@@ -24,22 +24,19 @@ SamplerState RepeatPoint:register(s4)
 //--------------------------------------------------------------------------------------
 // Smooth shading pixel shader section
 //--------------------------------------------------------------------------------------
-Texture2D gTerrainColourTexture1 : register(t2);
-Texture2D gTerrainColourTexture2 : register(t3);
+Texture2D gTerrainColorTexture1 : register(t2);
+Texture2D gTerrainColorTexture2 : register(t3);
 Texture2D gDetailNoiseGradTexture : register(t4);
 Texture2D gCoarseGradientMap : register(t5);
 Texture2D gNoiseTexture : register(t6);
 cbuffer ParamOnSet : register(b1)
 {
 	float3 gFractalOctaves;
+#ifdef DEBUG
+	bool gDebugShowPatches = false;
+#endif
 }
 
-#ifdef DEBUG
-cbuffer DebugOnSet : register(b2)
-{
-	bool gDebugShowPatches = false;
-}
-#endif
 // A very simple, regular procedural terrain for debugging cracks etc.
 float debugSineHills(float2 uv)
 {
@@ -121,8 +118,8 @@ float4 SmoothShadePS(MeshVertex input) : SV_Target
 	const float2 texUV = input.vWorldXZ + 2 * float2(gTextureWorldOffset.x, -gTextureWorldOffset.z);;
 
 	// We apply two textures at vastly different scales: macro and micro detail.
-	float3 macroDetail = gTerrainColourTexture1.Sample(RepeatMaxAniso, texUV).xyz;				// we know that this is grey only
-		float4 microDetail = gTerrainColourTexture2.Sample(RepeatMedAniso, texUV * 50);
+	float3 macroDetail = gTerrainColorTexture1.Sample(RepeatMaxAniso, texUV).xyz;				// we know that this is grey only
+		float4 microDetail = gTerrainColorTexture2.Sample(RepeatMedAniso, texUV * 50);
 		float  gaussian = gNoiseTexture.Sample(RepeatPoint, texUV * 50.0 / 256.0).x;
 	float  uniformRandom = frac(gaussian * 10);
 	float  randomizedDetail = 1;

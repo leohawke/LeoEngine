@@ -56,6 +56,47 @@ namespace leo
 	public:
 		void Apply(ID3D11DeviceContext* context);
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow;
+
+		//Common
+		void SetCoarseHeightMap(ID3D11ShaderResourceView* srv);
+		void SetDetailNoiseTexture(ID3D11ShaderResourceView* srv);
+
+		void SetTexureOffset(const float3& offset, ID3D11DeviceContext* context);
+		void SetDetailNoiseScale(const float& scale, ID3D11DeviceContext* context);
+		void SetDetailUVScale(const float2& scale, ID3D11DeviceContext* context);
+		void SetCoarseSampleSpacing(const float& space, ID3D11DeviceContext* context);
+		void SetDisplacementHeight(const float& height, ID3D11DeviceContext* context);
+		//EndCommon
+
+		//VertextShader
+		void SetTileSize(const float& size, ID3D11DeviceContext* context);
+#ifdef DEBUG
+		void SetShowTiles(bool enable, ID3D11DeviceContext* context);
+#endif
+		//EndVertexShader
+
+		//HullShader
+		void SetScreenSize(const float2& size, ID3D11DeviceContext* context);
+#ifdef DEBUG
+		//uint pixel
+		void SetTriWidth(const int& width, ID3D11DeviceContext* context);
+#endif
+		void SetWolrdViewProj(const float4x4& matrix, ID3D11DeviceContext* context);
+		void SetLodWorldView(const float4x4& matrix, ID3D11DeviceContext* context);
+		void SetProj(const float4x4& matrix, ID3D11DeviceContext* context);
+		void SetEyePos(const float3& pos, ID3D11DeviceContext* context);
+		void SetEyeDir(const float3& dir, ID3D11DeviceContext* context);
+		//EndHullShader
+#ifdef DEBUG
+		void SetDebugShowPatches(bool enable, ID3D11DeviceContext* context);
+#endif
+
+		void SetTerrainColorTextures(ID3D11ShaderResourceView* srv0, ID3D11ShaderResourceView* srv1);
+		void SetDetailNoiseGradTexture(ID3D11ShaderResourceView* srv);
+		void SetCoarseGradientMap(ID3D11ShaderResourceView* srv);
+		void SetNoiseTexture(ID3D11ShaderResourceView* srv);
+
+		void SetFractalOctaves(const float3& octs, ID3D11DeviceContext* context);
 	public:
 		static const std::unique_ptr<TerrainTessationEffect>& GetInstance(ID3D11Device* device = nullptr);
 	};
