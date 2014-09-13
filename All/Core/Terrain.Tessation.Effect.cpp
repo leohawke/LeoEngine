@@ -1,3 +1,4 @@
+#include "..\IndePlatform\platform.h"
 #include "..\d3dx11.hpp"
 #include "Terrain.Tessation.Effect.hpp"
 #include "..\IndePlatform\Singleton.hpp"
@@ -35,13 +36,13 @@ namespace leo
 #endif
 		{
 			leo::RenderStates sss;
-			CD3D11_SAMPLER_DESC LinearClamp;
+			CD3D11_SAMPLER_DESC LinearClamp(D3D11_DEFAULT);
 			LinearClamp.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 			LinearClamp.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
 			LinearClamp.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
 			mSamplerClampLinear = sss.CreateSamplerState(L"LinearClamp", LinearClamp);
 
-			CD3D11_SAMPLER_DESC LinearRepeat;
+			CD3D11_SAMPLER_DESC LinearRepeat(D3D11_DEFAULT);
 			LinearRepeat.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 			LinearClamp.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 			LinearClamp.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -55,7 +56,7 @@ namespace leo
 			mHwTessellationDS = sm.CreateDomainShader(L"Shader\\TerrainTessation.DS.cso", nullptr);
 			mHwTessellationPS = sm.CreatePixelShader(L"Shader\\TerrainTessation.PS.cso", nullptr);
 
-			CD3D11_SAMPLER_DESC MaxAnisoRepeat;
+			CD3D11_SAMPLER_DESC MaxAnisoRepeat(D3D11_DEFAULT);
 			MaxAnisoRepeat.Filter = D3D11_FILTER_ANISOTROPIC;
 			MaxAnisoRepeat.MaxAnisotropy = 16;
 			MaxAnisoRepeat.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -71,48 +72,163 @@ namespace leo
 		~TerrainTessationEffectDelegate()
 		{}
 	public:
-		void Apply(ID3D11DeviceContext* context);
-		bool SetLevel(EffectConfig::EffectLevel l) lnothrow;
-		//Common
-		void SetCoarseHeightMap(ID3D11ShaderResourceView* srv);
-		void SetDetailNoiseTexture(ID3D11ShaderResourceView* srv);
+		void Apply(ID3D11DeviceContext* con)
+		{
+			ID3D11Buffer* mVSCBArrays[] = {mCBParams.mBuffer,mVSCBSizeOnset.mBuffer};
+			ID3D11SamplerState* mVSSSArrays[] = { mSamplerClampLinear, mSamplerRepeatLinear };
+			ID3D11ShaderResourceView* mVSSRVArrays[] = { mCoarseHeightMap, mDetailNoiseTexture };
 
-		void SetTexureOffset(const float3& offset, ID3D11DeviceContext* context);
-		void SetDetailNoiseScale(const float& scale, ID3D11DeviceContext* context);
-		void SetDetailUVScale(const float2& scale, ID3D11DeviceContext* context);
-		void SetCoarseSampleSpacing(const float& space, ID3D11DeviceContext* context);
-		void SetDisplacementHeight(const float& height, ID3D11DeviceContext* context);
+			context_wrapper context(con);
+			context.VSSetShader(mHwTessellationVS, nullptr, 0);
+			context.VSSetConstantBuffers(0, 2,mVSCBArrays);
+		}
+		bool SetLevel(EffectConfig::EffectLevel l) lnothrow
+		{
+			//Tessation need SM 5.0 ,//a haha
+			return true;
+		}
+		//Common
+		void SetCoarseHeightMap(ID3D11ShaderResourceView* srv)
+		{
+			mCoarseHeightMap = srv;
+		}
+		void SetDetailNoiseTexture(ID3D11ShaderResourceView* srv)
+		{
+			mDetailNoiseTexture = srv;
+		}
+
+		void SetTexureOffset(const float3& offset, ID3D11DeviceContext* context)
+		{
+			memcpy(mCBParams.gTextureWorldOffset, offset);
+			if (context)
+				mCBParams.Update(context);
+		}
+		void SetDetailNoiseScale(const float& scale, ID3D11DeviceContext* context)
+		{
+			mCBParams.gDetailNoiseScale = scale;
+			if (context)
+				mCBParams.Update(context);
+		}
+		void SetDetailUVScale(const float2& scale, ID3D11DeviceContext* context)
+		{
+			memcpy(mCBParams.gDetailUVScale, scale);
+			if (context)
+				mCBParams.Update(context);
+		}
+		void SetCoarseSampleSpacing(const float& space, ID3D11DeviceContext* context)
+		{
+			mCBParams.gCoarseSampleSpacing = space;
+			if (context)
+				mCBParams.Update(context);
+		}
+		void SetDisplacementHeight(const float& height, ID3D11DeviceContext* context)
+		{
+			mCBParams.gfDisplacementHeight = height;
+			if (context)
+				mCBParams.Update(context);
+		}
 		//EndCommon
 
 		//VertextShader
-		void SetTileSize(const float& size, ID3D11DeviceContext* context);
+		void SetTileSize(const float& size, ID3D11DeviceContext* context)
+		{
+			mVSCBSizeOnset.gTileSize = size;
+			if (context)
+				mVSCBSizeOnset.Update(context);
+		}
 #ifdef DEBUG
-		void SetShowTiles(bool enable, ID3D11DeviceContext* context);
+		void SetShowTiles(bool enable, ID3D11DeviceContext* context)
+		{
+			mVSCBSizeOnset.gDebugShowTiles = enable;
+			if (context)
+				mVSCBSizeOnset.Update(context);
+		}
 #endif
 		//EndVertexShader
 
 		//HullShader
-		void SetScreenSize(const float2& size, ID3D11DeviceContext* context);
+		void SetScreenSize(const float2& size, ID3D11DeviceContext* context)
+		{
+			mCBPerHardWare.gScreenSize = size;
+			if (context)
+				mCBPerHardWare.Update(context);
+		}
 #ifdef DEBUG
 		//uint pixel
-		void SetTriWidth(const int& width, ID3D11DeviceContext* context);
+		void SetTriWidth(const int& width, ID3D11DeviceContext* context)
+		{
+			mCBPerHardWare.gTessellatedTriWidth = width;
+			if (context)
+				mCBPerHardWare.Update(context);
+		}
 #endif
-		void SetWolrdViewProj(const float4x4& matrix, ID3D11DeviceContext* context);
-		void SetLodWorldView(const float4x4& matrix, ID3D11DeviceContext* context);
-		void SetProj(const float4x4& matrix, ID3D11DeviceContext* context);
-		void SetEyePos(const float3& pos, ID3D11DeviceContext* context);
-		void SetEyeDir(const float3& dir, ID3D11DeviceContext* context);
+		void SetWolrdViewProj(CXMMATRIX matrix, ID3D11DeviceContext* context)
+		{
+			mHSCBPerMatrix.gWorldViewProj = XMMatrixTranspose(matrix);
+			mDSCBPerCamera.gWorldViewProj = mHSCBPerMatrix.gWorldViewProj;
+			if (context){
+				mHSCBPerMatrix.Update(context);
+				mDSCBPerCamera.Update(context);
+			}
+		}
+		void SetLodWorldView(CXMMATRIX matrix, ID3D11DeviceContext* context)
+		{
+			mHSCBPerMatrix.gWorldViewLOD = XMMatrixTranspose(matrix);
+			if (context)
+				mHSCBPerMatrix.Update(context);
+		}
+		void SetProj(CXMMATRIX matrix, ID3D11DeviceContext* context)
+		{
+			mHSCBPerMatrix.gProj = XMMatrixTranspose(matrix);
+			mHSCBPerMatrix.gWorldViewProjLOD = XMMatrixTranspose(mHSCBPerMatrix.gWorldViewLOD)*matrix;
+			if (context)
+				mHSCBPerMatrix.Update(context);
+		}
+		void SetEyePos(const float3& pos, ID3D11DeviceContext* context)
+		{
+			memcpy(mHSCBPerMatrix.gEyePos, pos);
+			if (context)
+				mHSCBPerMatrix.Update(context);
+		}
+		void SetEyeDir(const float3& dir, ID3D11DeviceContext* context)
+		{
+			memcpy(mHSCBPerMatrix.gViewDir, dir);
+			if (context)
+				mHSCBPerMatrix.Update(context);
+		}
 		//EndHullShader
 #ifdef DEBUG
-		void SetDebugShowPatches(bool enable, ID3D11DeviceContext* context);
+		void SetDebugShowPatches(bool enable, ID3D11DeviceContext* context)
+		{
+			mPSCBPerSet.gDebugShowPatches = enable;
+			memset(mDSCBPerDebug.gDebugShowPatches, enable);
+		}
 #endif
 
-		void SetTerrainColorTextures(ID3D11ShaderResourceView* srv0, ID3D11ShaderResourceView* srv1);
-		void SetDetailNoiseGradTexture(ID3D11ShaderResourceView* srv);
-		void SetCoarseGradientMap(ID3D11ShaderResourceView* srv);
-		void SetNoiseTexture(ID3D11ShaderResourceView* srv);
+		void SetTerrainColorTextures(ID3D11ShaderResourceView* srv0, ID3D11ShaderResourceView* srv1)
+		{
+			mTerrainColorTexture1 = srv0;
+			mTerrainColorTexture2 = srv1;
+		}
+		void SetDetailNoiseGradTexture(ID3D11ShaderResourceView* srv)
+		{
+			mDetailNoiseGradTexture = srv;
+		}
+		void SetCoarseGradientMap(ID3D11ShaderResourceView* srv)
+		{
+			mCoarseGradientMap = srv;
+		}
+		void SetNoiseTexture(ID3D11ShaderResourceView* srv)
+		{
+			mNoiseTexture = srv;
+		}
 
-		void SetFractalOctaves(const float3& octs, ID3D11DeviceContext* context);
+		void SetFractalOctaves(const float3& octs, ID3D11DeviceContext* context)
+		{
+			memcpy(mPSCBPerSet.gFractalOctaves, octs);
+			if (context)
+				mPSCBPerSet.Update(context);
+		}
 	private:
 		//Common
 		//slot 0
@@ -189,7 +305,7 @@ namespace leo
 #ifdef DEBUG
 		struct DSDebugOnSet 
 		{
-			int32 gDebugShowPatches[4];
+			bool gDebugShowPatches[16];
 			const static uint8 slot = 1;
 		};
 		ShaderConstantBuffer<DSDebugOnSet> mDSCBPerDebug;
@@ -227,7 +343,7 @@ namespace leo
 
 	const std::unique_ptr<TerrainTessationEffect>& TerrainTessationEffect::GetInstance(ID3D11Device* device)
 	{
-		auto mInstance = unique_raw<TerrainTessationEffect>(new TerrainTessationEffectDelegate(device));
+		static auto mInstance = unique_raw<TerrainTessationEffect>(new TerrainTessationEffectDelegate(device));
 		return mInstance;
 	}
 
@@ -355,7 +471,7 @@ namespace leo
 			);
 	}
 #endif
-	void TerrainTessationEffect::SetWolrdViewProj(const float4x4& matrix, ID3D11DeviceContext* context)
+	void TerrainTessationEffect::SetWolrdViewProj(CXMMATRIX matrix, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
@@ -363,7 +479,7 @@ namespace leo
 			matrix,context
 			);
 	}
-	void TerrainTessationEffect::SetLodWorldView(const float4x4& matrix, ID3D11DeviceContext* context)
+	void TerrainTessationEffect::SetLodWorldView(CXMMATRIX matrix, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
@@ -371,7 +487,7 @@ namespace leo
 			matrix, context
 			);
 	}
-	void TerrainTessationEffect::SetProj(const float4x4& matrix, ID3D11DeviceContext* context)
+	void TerrainTessationEffect::SetProj(CXMMATRIX matrix, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 

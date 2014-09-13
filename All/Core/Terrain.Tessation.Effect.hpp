@@ -81,9 +81,9 @@ namespace leo
 		//uint pixel
 		void SetTriWidth(const int& width, ID3D11DeviceContext* context);
 #endif
-		void SetWolrdViewProj(const float4x4& matrix, ID3D11DeviceContext* context);
-		void SetLodWorldView(const float4x4& matrix, ID3D11DeviceContext* context);
-		void SetProj(const float4x4& matrix, ID3D11DeviceContext* context);
+		void SetWolrdViewProj(CXMMATRIX matrix, ID3D11DeviceContext* context);
+		void SetLodWorldView(CXMMATRIX matrix, ID3D11DeviceContext* context);
+		void SetProj(CXMMATRIX matrix, ID3D11DeviceContext* context);
 		void SetEyePos(const float3& pos, ID3D11DeviceContext* context);
 		void SetEyeDir(const float3& dir, ID3D11DeviceContext* context);
 		//EndHullShader

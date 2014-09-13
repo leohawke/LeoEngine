@@ -157,7 +157,7 @@ namespace leo
 	{
 		auto sid = hash(name);
 		ID3D11BlendState* blendstate = nullptr;
-		if (global::globalStringTable.find(sid) == global::globalStringTable.end())
+		if (globalRenderStates.find(sid) != globalRenderStates.end())
 		{
 			auto & rs = globalRenderStates[sid];
 			if (rs.type != RenderState::RS_TYPE::Blend)
@@ -180,7 +180,7 @@ namespace leo
 	{
 		auto sid = hash(name);
 		ID3D11DepthStencilState* depthstate = nullptr;
-		if (global::globalStringTable.find(sid) == global::globalStringTable.end())
+		if (globalRenderStates.find(sid) != globalRenderStates.end())
 		{
 			auto & rs = globalRenderStates[sid];
 			if (rs.type != RenderState::RS_TYPE::DepthStencil)
@@ -203,7 +203,7 @@ namespace leo
 	{
 		auto sid = hash(name);
 		ID3D11RasterizerState* rasterizerstate = nullptr;
-		if (global::globalStringTable.find(sid) == global::globalStringTable.end())
+		if (globalRenderStates.find(sid) != globalRenderStates.end())
 		{
 			auto & rs = globalRenderStates[sid];
 			if (rs.type != RenderState::RS_TYPE::Rasterizer)
@@ -226,7 +226,7 @@ namespace leo
 	{
 		auto sid = hash(name);
 		ID3D11SamplerState* samplestate = nullptr;
-		if (global::globalStringTable.find(sid) == global::globalStringTable.end())
+		if (globalRenderStates.find(sid) != globalRenderStates.end())
 		{
 			auto & rs = globalRenderStates[sid];
 			if (rs.type != RenderState::RS_TYPE::Sampler)
