@@ -15,6 +15,7 @@
 #include <Core\EffectLine.hpp>
 #include <Core\Terrain.Tessation.Effect.hpp>
 #include <Core\Terrain.TileRing.h>
+#include <COM.hpp>
 
 #include <TextureMgr.h>
 #include <RenderStates.hpp>
@@ -85,6 +86,9 @@ void ReleaseRes()
 	leo::win::ReleaseCOM(mGradientMapRTV);
 	leo::win::ReleaseCOM(mTriStripIB);
 	leo::win::ReleaseCOM(mQuadListIB);
+
+	for (auto & tile : mTileRings)
+		tile.reset(nullptr);
 }
 static void CreateAmplifiedHeights(ID3D11Device* device);
 
@@ -318,11 +322,12 @@ void BuildRes()
 
 	leo::TextureMgr tm;
 
-	mTessation->SetTerrainColorTextures(tm.LoadTextureSRV(L"Resource/TerrainTessellation/LunarSurface1.dds"), tm.LoadTextureSRV(L"Resource/TerrainTessellation/LunarMicroDetail1.dds"));
-	mTessation->SetNoiseTexture(tm.LoadTextureSRV(L"GaussianNoise256.jpg"));
-	mTessation->SetDetailNoiseTexture(tm.LoadTextureSRV(L"fBm5Octaves.dds"));
-	mTessation->SetDetailNoiseGradTexture(tm.LoadTextureSRV(L"fBm5OctavesGrad.dds"));
-
+	
+	mTessation->SetTerrainColorTextures(tm.LoadTextureSRV(L"Resource\\TerrainTessellation\\LunarSurface1.dds"), tm.LoadTextureSRV(L"Resource\\TerrainTessellation\\LunarMicroDetail1.dds"));
+	mTessation->SetNoiseTexture(tm.LoadTextureSRV(L"Resource\\GaussianNoise256.jpg"));
+	mTessation->SetDetailNoiseTexture(tm.LoadTextureSRV(L"Resource\\fBm5Octaves.dds"));
+	mTessation->SetDetailNoiseGradTexture(tm.LoadTextureSRV(L"Resource\\fBm5OctavesGrad.dds"));
+	
 	CreateAmplifiedHeights(leo::DeviceMgr().GetDevice());
 
 #ifdef DEBUG
@@ -339,7 +344,7 @@ void BuildRes()
 	mTessation->SetFractalOctaves(leo::float3(mRidgeOctaves*1.f, mfBmOctaves*1.f, mTexTwistOctaves*1.f), nullptr);
 	const float DETAIL_UV_SCALE = std::powf(2.f, std::max(mRidgeOctaves, mTexTwistOctaves) + mfBmOctaves - 4.f);
 	mTessation->SetDetailUVScale(leo::float2(DETAIL_UV_SCALE, 1.f / DETAIL_UV_SCALE), nullptr);
-
+	
 	//TileRing
 	int widths[] = { 0, 16, 16, 16, 16 };
 	nRings = sizeof(widths) / sizeof(widths[0]) - 1;
@@ -386,6 +391,7 @@ void BuildRes()
 		};
 
 		leo::dxcall(leo::DeviceMgr().GetDevice()->CreateBuffer(&iBufferDesc, &initData, &mTriStripIB));
+		leo::dx::DebugCOM(mTriStripIB, L"mTriStripIB");
 	}
 	{
 		D3D11_SUBRESOURCE_DATA initData;
@@ -396,7 +402,7 @@ void BuildRes()
 		for (auto y = 0; y != VTX_PER_TILE_EDGE - 1; ++y)
 		{
 			const int rowStart = y*VTX_PER_TILE_EDGE;
-			for (auto x = 0; x != VTX_PER_TILE_EDGE; ++x)
+			for (auto x = 0; x != VTX_PER_TILE_EDGE-1; ++x)
 			{
 				pIndices[index++] = rowStart + x;
 				pIndices[index++] = rowStart + x + VTX_PER_TILE_EDGE;
@@ -416,6 +422,7 @@ void BuildRes()
 		};
 
 		leo::dxcall(leo::DeviceMgr().GetDevice()->CreateBuffer(&iBufferDesc, &initData, &mQuadListIB));
+		leo::dx::DebugCOM(mQuadListIB, L"mQuadListIB");
 	}
 }
 
@@ -452,7 +459,8 @@ static void CreateAmplifiedHeights(ID3D11Device* device)
 	
 	leo::dxcall(device->CreateShaderResourceView(pTex, &SRVDesc, &mHeightMapSRV));
 	leo::dxcall(device->CreateRenderTargetView(pTex, &RTVDesc, &mHeightMapRTV));
-
+	leo::dx::DebugCOM(mHeightMapRTV, L"mHeightMapRTV");
+	leo::dx::DebugCOM(mHeightMapSRV, L"mHeightMapSRV");
 	leo::win::ReleaseCOM(pTex);
 
 	desc.Format = DXGI_FORMAT_R16G16_FLOAT;
@@ -464,6 +472,9 @@ static void CreateAmplifiedHeights(ID3D11Device* device)
 	SRVDesc.Format = RTVDesc.Format = desc.Format;
 	leo::dxcall(device->CreateShaderResourceView(pTex, &SRVDesc, &mGradientMapSRV));
 	leo::dxcall(device->CreateRenderTargetView(pTex, &RTVDesc, &mGradientMapRTV));
+	leo::dx::DebugCOM(mGradientMapSRV, L"mGradientMapSRV");
+	leo::dx::DebugCOM(mGradientMapRTV, L"mGradientMapRTV");
+	leo::win::ReleaseCOM(pTex);
 
 }
 
@@ -570,7 +581,27 @@ void TerrainRender(ID3D11DeviceContext* con, leo::Camera* pCamera)
 
 		mTessation->SetEyeDir(leo::float3(dir.x, dir.y, dir.z), nullptr);
 	}
+
+	con->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
+	con->IASetIndexBuffer(mQuadListIB, DXGI_FORMAT_R32_UINT, 0);
 	
+	for (int i = 0; i != nRings; ++i)
+	{
+		auto& pRing = mTileRings[i];
+		pRing->IASet(con);
+
+		//g_HeightMapVar->SetResource(g_pHeightMapSRV);
+		//g_GradientMapVar->SetResource(g_pGradientMapSRV);
+		mTessation->SetTileSize(pRing->tileSize(),nullptr);
+
+		// Need to apply the pass after setting its vars.
+		mTessation->Apply(con);
+
+		// Instancing is used: one tiles is one instance and the index buffer describes all the 
+		// NxN patches within one tile.
+		const int nIndices = QUAD_LIST_INDEX_COUNT;
+		con->DrawIndexedInstanced(nIndices, pRing->nTiles(), 0, 0, 0);
+	}
 }
 
 float nonlinearCameraSpeed(float f)
