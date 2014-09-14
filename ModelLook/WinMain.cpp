@@ -75,6 +75,17 @@ ID3D11ShaderResourceView* mHeightMapSRV = nullptr;
 ID3D11RenderTargetView* mHeightMapRTV = nullptr;
 ID3D11ShaderResourceView* mGradientMapSRV = nullptr;
 ID3D11RenderTargetView* mGradientMapRTV = nullptr;
+ID3D11Buffer* mTriStripIB = nullptr;
+ID3D11Buffer* mQuadListIB = nullptr;
+void ReleaseRes()
+{
+	leo::win::ReleaseCOM(mHeightMapSRV);
+	leo::win::ReleaseCOM(mHeightMapRTV);
+	leo::win::ReleaseCOM(mGradientMapSRV);
+	leo::win::ReleaseCOM(mGradientMapRTV);
+	leo::win::ReleaseCOM(mTriStripIB);
+	leo::win::ReleaseCOM(mQuadListIB);
+}
 static void CreateAmplifiedHeights(ID3D11Device* device);
 
 
@@ -260,6 +271,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 	pMesh.reset(nullptr);
 
+	ReleaseRes();
 	leo::global::Destroy();
 #ifdef DEBUG
 	leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
@@ -321,18 +333,95 @@ void BuildRes()
 	mTessation->SetDebugShowPatches(false, nullptr);
 #endif
 
-	mTessation->SetDetailNoiseScale(0.001f*mDetailNoiseScale);
+	mTessation->SetDetailNoiseScale(0.001f*mDetailNoiseScale,nullptr);
 	mTessation->SetCoarseSampleSpacing(WORLD_SCALE * mTileRings[nRings - 1]->outerWidth() / COARSE_HEIGHT_MAP_SIZE, nullptr);
 
-	mTessation->SetFractalOctaves(leo::float3(mRidgeOctaves, mfBmOctaves, mTexTwistOctaves), nullptr);
+	mTessation->SetFractalOctaves(leo::float3(mRidgeOctaves*1.f, mfBmOctaves*1.f, mTexTwistOctaves*1.f), nullptr);
 	const float DETAIL_UV_SCALE = std::powf(2.f, std::max(mRidgeOctaves, mTexTwistOctaves) + mfBmOctaves - 4.f);
 	mTessation->SetDetailUVScale(leo::float2(DETAIL_UV_SCALE, 1.f / DETAIL_UV_SCALE), nullptr);
 
+	//TileRing
+	int widths[] = { 0, 16, 16, 16, 16 };
+	nRings = sizeof(widths) / sizeof(widths[0]) - 1;
+	assert(nRings < MAX_RINGS);
+
+	float tileWidth = 0.125f;
+	for (auto i = 0; i != nRings; ++i)
+	{
+		mTileRings[i] = std::make_unique<leo::TileRing>(leo::DeviceMgr().GetDevice(), widths[i] / 2, widths[i + 1], tileWidth);
+		tileWidth *= 2.f;
+	}
+
+	const int PATCHES_PER_TILE_EDGE = VTX_PER_TILE_EDGE - 1;
+	SNAP_GRID_SIZE = WORLD_SCALE * mTileRings[nRings - 1]->tileSize() / PATCHES_PER_TILE_EDGE;
+	//CreateTriIB
+	{
+		D3D11_SUBRESOURCE_DATA initData;
+
+		auto index = 0;
+		auto pIndices = std::make_unique<unsigned long[]>(TRI_STRIP_INDEX_COUNT);
+
+		for (auto y = 0; y != VTX_PER_TILE_EDGE - 1; ++y)
+		{
+			const int rowStart = y*VTX_PER_TILE_EDGE;
+			for (auto x = 0; x != VTX_PER_TILE_EDGE; ++x)
+			{
+				pIndices[index++] = rowStart + x;
+				pIndices[index++] = rowStart + x + VTX_PER_TILE_EDGE;
+			}
+
+			pIndices[index] = pIndices[index - 1];
+			++index;
+			pIndices[index++] = rowStart + VTX_PER_TILE_EDGE;
+		}
+		assert(index == TRI_STRIP_INDEX_COUNT);
+
+		initData.pSysMem = pIndices.get();
+		D3D11_BUFFER_DESC iBufferDesc =
+		{
+			sizeof(unsigned long) * TRI_STRIP_INDEX_COUNT,
+			D3D11_USAGE_DEFAULT,
+			D3D11_BIND_INDEX_BUFFER,
+			0, 0
+		};
+
+		leo::dxcall(leo::DeviceMgr().GetDevice()->CreateBuffer(&iBufferDesc, &initData, &mTriStripIB));
+	}
+	{
+		D3D11_SUBRESOURCE_DATA initData;
+
+		auto index = 0;
+		auto pIndices = std::make_unique<unsigned long[]>(QUAD_LIST_INDEX_COUNT);
+
+		for (auto y = 0; y != VTX_PER_TILE_EDGE - 1; ++y)
+		{
+			const int rowStart = y*VTX_PER_TILE_EDGE;
+			for (auto x = 0; x != VTX_PER_TILE_EDGE; ++x)
+			{
+				pIndices[index++] = rowStart + x;
+				pIndices[index++] = rowStart + x + VTX_PER_TILE_EDGE;
+				pIndices[index++] = rowStart + x + VTX_PER_TILE_EDGE + 1;
+				pIndices[index++] = rowStart + x + 1;
+			}
+		}
+		assert(index == QUAD_LIST_INDEX_COUNT);
+
+		initData.pSysMem = pIndices.get();
+		D3D11_BUFFER_DESC iBufferDesc =
+		{
+			sizeof(unsigned long) * QUAD_LIST_INDEX_COUNT,
+			D3D11_USAGE_DEFAULT,
+			D3D11_BIND_INDEX_BUFFER,
+			0, 0
+		};
+
+		leo::dxcall(leo::DeviceMgr().GetDevice()->CreateBuffer(&iBufferDesc, &initData, &mQuadListIB));
+	}
 }
 
 static void CreateAmplifiedHeights(ID3D11Device* device)
 {
-	D3D11_TEXTURE2D_DESC desc;
+	CD3D11_TEXTURE2D_DESC desc;
 	desc.Width = COARSE_HEIGHT_MAP_SIZE;
 	desc.Height = COARSE_HEIGHT_MAP_SIZE;
 	desc.MipLevels = 1;
@@ -345,8 +434,7 @@ static void CreateAmplifiedHeights(ID3D11Device* device)
 	desc.CPUAccessFlags = 0;
 	desc.MiscFlags = 0;
 
-	D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc;
-	ZeroMemory(&SRVDesc, sizeof(SRVDesc));
+	CD3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc;
 	SRVDesc.Format = desc.Format;
 	SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	SRVDesc.Texture2D.MipLevels = 1;
@@ -483,4 +571,16 @@ void TerrainRender(ID3D11DeviceContext* con, leo::Camera* pCamera)
 		mTessation->SetEyeDir(leo::float3(dir.x, dir.y, dir.z), nullptr);
 	}
 	
+}
+
+float nonlinearCameraSpeed(float f)
+{
+	// Make the slider control logarithmic.
+	return pow(10.0f, f / 100.0f);	// f [1,400]
+}
+
+float invNonlinearCameraSpeed(float f)
+{
+	// Make the slider control logarithmic.
+	return 100.0f * (logf(f) / logf(10.0f));
 }

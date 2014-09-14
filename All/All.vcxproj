@@ -428,7 +428,7 @@
   <ItemGroup>
     <Text Include="Core\接口说明.txt" />
     <CustomBuild Include="Resource\build_config.txt">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy /Y %(RootDir)%(Directory) $(OutDir)%(RelativeDir)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">xcopy /s /Y %(RootDir)%(Directory)*.* $(OutDir)%(RelativeDir)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy /Y %(RootDir)%(Directory) $(OutDir)%(RelativeDir)</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">复制 %(RootDir)%(Directory) 到 $(OutDir)%(RelativeDir)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">复制 %(RootDir)%(Directory) 到 $(OutDir)%(RelativeDir)</Message>

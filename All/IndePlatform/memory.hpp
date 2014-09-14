@@ -183,7 +183,7 @@ namespace leo
 }
 #endif
 
-namespace stdex
+namespace leo
 {
 	//  Description: Implements an aligned allocator for STL
 	//               based on the Mallocator (http://blogs.msdn.com/b/vcblog/archive/2008/08/28/the-mallocator.aspx)
@@ -435,7 +435,7 @@ namespace leo
 	//本质上的分配器.使用标准分配器(uint8_t)
 	namespace __leo
 	{
-		using base_alloc = ::stdex::aligned_alloc < std::uint8_t, 16 > ;
+		using base_alloc = ::leo::aligned_alloc < std::uint8_t, 16 > ;
 	}
 	template<MemoryCategory cate>
 	class CateAlloc : public __leo::base_alloc

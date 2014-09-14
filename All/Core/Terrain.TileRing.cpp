@@ -8,7 +8,13 @@ namespace leo
 {
 	namespace Vertex
 	{
-		using InstanceData = Vertex::Terrain;
+		struct InstanceData
+		{
+			float2 position;
+			Adjacency adjacency;
+			//int32 VertexId;
+			//int32 InstanceId;
+		};
 	}
 
 	TileRing::TileRing(ID3D11Device* device, int holeWidth, int outerWidth, float tileSize)
@@ -82,7 +88,7 @@ namespace leo
 		ZeroMemory(&initData, sizeof(D3D11_SUBRESOURCE_DATA));
 
 		int index = 0;
-		mVBData = std::make_unique<Vertex::InstanceData[]>(mnTiles);
+		mVBData.resize(mnTiles);
 
 		const float halfWidth = 0.5f * (float)mOuterWidth;
 		for (int y = 0; y < mOuterWidth; ++y)
@@ -100,7 +106,7 @@ namespace leo
 		}
 		assert(index == mnTiles);
 
-		initData.pSysMem = mVBData.get();
+		initData.pSysMem = mVBData.data();
 		D3D11_BUFFER_DESC vbDesc =
 		{
 			sizeof(Vertex::InstanceData) * mnTiles,

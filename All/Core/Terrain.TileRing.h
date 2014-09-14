@@ -21,6 +21,7 @@
 
 #include "..\leomath.hpp"
 #include "..\IndePlatform\memory.hpp"
+#include <vector>
 struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct ID3D11Buffer;
@@ -71,7 +72,7 @@ namespace leo
 		const int mHoleWidth, mOuterWidth, mRingWidth;
 		const int mnTiles;
 		const float mtileSize;
-		std::unique_ptr<Vertex::InstanceData[]> mVBData = nullptr;
+		std::vector<Vertex::InstanceData, leo::aligned_alloc<Vertex::InstanceData,16>> mVBData;
 	};
 
 }
