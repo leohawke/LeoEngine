@@ -3,6 +3,7 @@
 #include "Terrain.Tessation.Effect.hpp"
 #include "..\IndePlatform\Singleton.hpp"
 #include "..\IndePlatform\memory.hpp"
+#include "..\IndePlatform\utility.hpp"
 #include "..\RenderStates.hpp"
 #include "..\ShaderMgr.h"
 namespace leo
@@ -74,6 +75,10 @@ namespace leo
 	public:
 		void Apply(ID3D11DeviceContext* con)
 		{
+			mCBParams.Update(con);
+			mCBPerHardWare.Update(con);
+
+			mVSCBSizeOnset.Update(con);
 			ID3D11Buffer* mVSCBArrays[] = {mCBParams.mBuffer,mVSCBSizeOnset.mBuffer};
 			ID3D11SamplerState* mVSSSArrays[] = { mSamplerClampLinear, mSamplerRepeatLinear };
 			ID3D11ShaderResourceView* mVSSRVArrays[] = { mCoarseHeightMap, mDetailNoiseTexture };
@@ -81,6 +86,39 @@ namespace leo
 			context_wrapper context(con);
 			context.VSSetShader(mHwTessellationVS, nullptr, 0);
 			context.VSSetConstantBuffers(0, 2,mVSCBArrays);
+			context->VSSetShaderResources(0, 2, mVSSRVArrays);
+			context->VSSetSamplers(0, 2, mVSSSArrays);
+
+			mHSCBPerMatrix.Update(con);
+			ID3D11Buffer* mHSCBArrays[] = { mCBParams.mBuffer, mCBPerHardWare.mBuffer, mHSCBPerMatrix.mBuffer };
+			context->HSSetShader(mHwTessellationHS, nullptr, 0);
+			context->HSSetConstantBuffers(0, 3, mHSCBArrays);
+			context->HSSetShaderResources(0, 2, mVSSRVArrays);
+			context->HSSetSamplers(0, 2, mVSSSArrays);
+
+			mDSCBPerCamera.Update(con);
+#ifdef DEBUG
+			mDSCBPerDebug.Update(con);
+#endif
+			ID3D11Buffer* mDSCBArrays[] = { mCBParams.mBuffer,mDSCBPerCamera.mBuffer
+#ifdef DEBUG
+				,mDSCBPerDebug.mBuffer
+#endif
+			};
+			context->DSSetShader(mHwTessellationDS, nullptr, 0);
+			context->DSSetConstantBuffers(0,static_cast<UINT>(leo::arrlen(mDSCBArrays)), mDSCBArrays);
+			context->DSSetShaderResources(0, 2, mVSSRVArrays);
+			context->DSSetSamplers(0, 2, mVSSSArrays);
+
+			mPSCBPerSet.Update(con);
+			ID3D11Buffer* mPSCBArrays[] = { mCBParams.mBuffer, mPSCBPerSet.mBuffer};
+			ID3D11SamplerState* mPSSSArrays[] = { mSamplerClampLinear, mSamplerRepeatLinear, mSamplerRepeatMaxAniso, mSamplerRepeatMedAniso, mSamplerRepeatPoint };
+			ID3D11ShaderResourceView* mPSSRVArrays[] = { mCoarseHeightMap, mDetailNoiseTexture, mTerrainColorTexture1, mTerrainColorTexture2, mDetailNoiseGradTexture, mCoarseGradientMap, mNoiseTexture };
+
+			context.PSSetShader(mHwTessellationPS, nullptr, 0);
+			context.PSSetConstantBuffers(0, static_cast<UINT>(leo::arrlen(mPSCBArrays)), mPSCBArrays);
+			context.PSSetShaderResources(0, 7, mPSSRVArrays);
+			context.PSSetSamplers(0, 5, mPSSSArrays);
 		}
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow
 		{
