@@ -889,6 +889,32 @@ namespace leo
 		context->GSSetShader(pShader, ppClassInstances, NumClassInstances);
 	}
 
+	void STDMETHODCALLTYPE context_wrapper::HSSetShader(
+		/* [annotation] */
+		_In_opt_  ID3D11HullShader *pShader,
+		/* [annotation] */
+		_In_reads_opt_(NumClassInstances)  ID3D11ClassInstance *const *ppClassInstances,
+		UINT NumClassInstances)
+	{
+		std::uint64_t f = 1;
+		f <<= state::hssetshader;
+		swap_states[1]->f |= f;
+		context->HSSetShader(pShader, ppClassInstances, NumClassInstances);
+	}
+
+	void STDMETHODCALLTYPE context_wrapper::DSSetShader(
+		/* [annotation] */
+		_In_opt_  ID3D11DomainShader *pShader,
+		/* [annotation] */
+		_In_reads_opt_(NumClassInstances)  ID3D11ClassInstance *const *ppClassInstances,
+		UINT NumClassInstances)
+	{
+		std::uint64_t f = 1;
+		f <<= state::dssetshader;
+		swap_states[1]->f |= f;
+		context->DSSetShader(pShader, ppClassInstances, NumClassInstances);
+	}
+
 	void STDMETHODCALLTYPE context_wrapper::OMSetRenderTargets(
 		/* [annotation] */
 		_In_range_(0, D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT)  UINT NumViews,
@@ -1039,6 +1065,10 @@ namespace leo
 			context->RSSetState(nullptr);
 		if (and(state::pssetshader))
 			context->PSSetShader(nullptr, nullptr, 0);
+		if (and(state::hssetshader))
+			context->HSSetShader(nullptr, nullptr, 0);
+		if (and(state::dssetshader))
+			context->DSSetShader(nullptr, nullptr, 0);
 		if (and(state::gssetshader))
 			context->GSSetShader(nullptr, nullptr, 0);
 		if (and(state::omsetblendstate))
