@@ -91,7 +91,7 @@ namespace leo
 
 			mHSCBPerMatrix.Update(con);
 			ID3D11Buffer* mHSCBArrays[] = { mCBParams.mBuffer, mCBPerHardWare.mBuffer, mHSCBPerMatrix.mBuffer };
-			context->HSSetShader(mHwTessellationHS, nullptr, 0);
+			context.HSSetShader(mHwTessellationHS, nullptr, 0);
 			context->HSSetConstantBuffers(0, 3, mHSCBArrays);
 			context->HSSetShaderResources(0, 2, mVSSRVArrays);
 			context->HSSetSamplers(0, 2, mVSSSArrays);
@@ -105,7 +105,7 @@ namespace leo
 				,mDSCBPerDebug.mBuffer
 #endif
 			};
-			context->DSSetShader(mHwTessellationDS, nullptr, 0);
+			context.DSSetShader(mHwTessellationDS, nullptr, 0);
 			context->DSSetConstantBuffers(0,static_cast<UINT>(leo::arrlen(mDSCBArrays)), mDSCBArrays);
 			context->DSSetShaderResources(0, 2, mVSSRVArrays);
 			context->DSSetSamplers(0, 2, mVSSSArrays);

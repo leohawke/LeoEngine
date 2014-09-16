@@ -240,12 +240,17 @@ namespace leo
 
 				total_record = end_rssetscissorrects,
 
+				
 				//清除
-				pssetshader = total_record + 1,//上一帧设置,这一帧要清除
+				hssetshader = total_record + 1,//上一帧设置,这一帧要清除
 				//清除
-				gssetshader = pssetshader + 1,//上一帧设置,这一帧要清除
+				dssetshader = hssetshader + 1,//上一帧设置,这一帧要清除
 				//清除
-				omsetblendstate = gssetshader + 1,//上一帧设置,这一帧要清除
+				gssetshader = dssetshader + 1,//上一帧设置,这一帧要清除
+				//清除
+				pssetshader = gssetshader + 1,//上一帧设置,这一帧要清除
+				//清除
+				omsetblendstate = pssetshader + 1,//上一帧设置,这一帧要清除
 				//清除
 				sosettargets = omsetblendstate + 1,//上一帧设置,这一帧要清除
 				//清除
@@ -291,6 +296,20 @@ namespace leo
 		inline void STDMETHODCALLTYPE GSSetShader(
 			/* [annotation] */
 			_In_opt_  ID3D11GeometryShader *pShader,
+			/* [annotation] */
+			_In_reads_opt_(NumClassInstances)  ID3D11ClassInstance *const *ppClassInstances,
+			UINT NumClassInstances);
+
+		inline void STDMETHODCALLTYPE HSSetShader(
+			/* [annotation] */
+			_In_opt_  ID3D11HullShader *pShader,
+			/* [annotation] */
+			_In_reads_opt_(NumClassInstances)  ID3D11ClassInstance *const *ppClassInstances,
+			UINT NumClassInstances);
+
+		inline void STDMETHODCALLTYPE DSSetShader(
+			/* [annotation] */
+			_In_opt_  ID3D11DomainShader *pShader,
 			/* [annotation] */
 			_In_reads_opt_(NumClassInstances)  ID3D11ClassInstance *const *ppClassInstances,
 			UINT NumClassInstances);
