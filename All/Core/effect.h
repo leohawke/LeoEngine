@@ -300,14 +300,14 @@ namespace leo
 			_In_reads_opt_(NumClassInstances)  ID3D11ClassInstance *const *ppClassInstances,
 			UINT NumClassInstances);
 
-		inline void STDMETHODCALLTYPE HSSetShader(
+		void STDMETHODCALLTYPE HSSetShader(
 			/* [annotation] */
 			_In_opt_  ID3D11HullShader *pShader,
 			/* [annotation] */
 			_In_reads_opt_(NumClassInstances)  ID3D11ClassInstance *const *ppClassInstances,
 			UINT NumClassInstances);
 
-		inline void STDMETHODCALLTYPE DSSetShader(
+		void STDMETHODCALLTYPE DSSetShader(
 			/* [annotation] */
 			_In_opt_  ID3D11DomainShader *pShader,
 			/* [annotation] */
@@ -346,7 +346,7 @@ namespace leo
 			/* [annotation] */
 			_In_reads_opt_(NumBuffers)  const UINT *pOffsets);
 
-		inline void STDMETHODCALLTYPE RSSetState(
+		void STDMETHODCALLTYPE RSSetState(
 			/* [annotation] */
 			_In_opt_  ID3D11RasterizerState *pRasterizerState);
 

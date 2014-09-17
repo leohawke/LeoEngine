@@ -480,6 +480,15 @@
     <FxCompile Include="Shader\TerrainTessation.DS.hlsl">
       <Filter>Shader\HLSL\TerrainTessllation</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\TerrainHeightVS.hlsl">
+      <Filter>Shader\HLSL\TerrainTessllation</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\TerrainHeightPS.hlsl">
+      <Filter>Shader\HLSL\TerrainTessllation</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\TerrainGradHeightPS.hlsl">
+      <Filter>Shader\HLSL\TerrainTessllation</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Gaussian_color.hlsl">
@@ -492,6 +501,9 @@
       <Filter>Shader\HLSL</Filter>
     </None>
     <None Include="Shader\TerrainTessationCommon.hlsli">
+      <Filter>Shader\HLSL\TerrainTessllation</Filter>
+    </None>
+    <None Include="Shader\INoise.hlsli">
       <Filter>Shader\HLSL\TerrainTessllation</Filter>
     </None>
   </ItemGroup>

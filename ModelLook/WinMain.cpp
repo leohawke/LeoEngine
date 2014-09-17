@@ -18,6 +18,7 @@
 #include <COM.hpp>
 
 #include <TextureMgr.h>
+#include <ShaderMgr.h>
 #include <RenderStates.hpp>
 #include <exception.hpp>
 
@@ -76,6 +77,16 @@ ID3D11ShaderResourceView* mHeightMapSRV = nullptr;
 ID3D11RenderTargetView* mHeightMapRTV = nullptr;
 ID3D11ShaderResourceView* mGradientMapSRV = nullptr;
 ID3D11RenderTargetView* mGradientMapRTV = nullptr;
+struct CommonParamsOnSet
+{
+	leo::XMFLOAT3 gTextureWorldOffset;	// Offset of fractal terrain in texture space.
+	float     gDetailNoiseScale = 0.2;
+	leo::XMFLOAT2    gDetailUVScale = leo::XMFLOAT2(1.f, 1.f);				// x is scale; y is 1/scale
+	float  gCoarseSampleSpacing;
+	float gfDisplacementHeight;
+	const static leo::uint8 slot = 0;
+};
+leo::Effect::ShaderConstantBuffer<CommonParamsOnSet>* mpCBParams;
 ID3D11Buffer* mTriStripIB = nullptr;
 ID3D11Buffer* mQuadListIB = nullptr;
 void ReleaseRes()
@@ -89,9 +100,62 @@ void ReleaseRes()
 
 	for (auto & tile : mTileRings)
 		tile.reset(nullptr);
-}
-static void CreateAmplifiedHeights(ID3D11Device* device);
 
+	delete mpCBParams;
+}
+
+static void CreateAmplifiedHeights(ID3D11Device* device);
+static void InitializeHeights(ID3D11DeviceContext* pContext)
+{
+	auto eye = pCamera->GetOrigin();
+	eye.y = 0.f;
+	if (SNAP_GRID_SIZE > 0)
+	{
+		eye.x = floorf(eye.x / SNAP_GRID_SIZE) * SNAP_GRID_SIZE;
+		eye.z = floorf(eye.z / SNAP_GRID_SIZE)*SNAP_GRID_SIZE;
+	}
+	eye.x /= WORLD_SCALE;
+	eye.y /= WORLD_SCALE;
+	eye.z /= WORLD_SCALE;
+	eye.z *= -1;
+	mpCBParams->gTextureWorldOffset = leo::float3(eye.x, eye.y, eye.z);
+
+	{
+		static const D3D11_VIEWPORT vp = { 0, 0, COARSE_HEIGHT_MAP_SIZE, COARSE_HEIGHT_MAP_SIZE, 0.f, 1.f };
+		leo::context_wrapper context(pContext);
+		context.VSSetShader(leo::ShaderMgr().CreateVertexShader(L"Shader\\TerrainHeightVS.cso"), nullptr, 0);
+		context.PSSetShader(leo::ShaderMgr().CreatePixelShader(L"Shader\\TerrainHeightPS.cso"), nullptr, 0);
+		context.OMSetDepthStencilState(leo::RenderStates().GetDepthStencilState(L"NoDepthDSS"),0);
+		context.RSSetState(leo::RenderStates().GetRasterizerState(L"NoCullRS"));
+		mpCBParams->Update(context);
+		context.PSSetConstantBuffers(0, 1, &mpCBParams->mBuffer);
+		context.RSSetViewports(1, &vp);
+		context->IASetInputLayout(nullptr);
+		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+		context.OMSetRenderTargets(1, &mHeightMapRTV, nullptr);
+		context->Draw(4, 0);
+	}
+	{
+		//do nothing,bug fix!
+		leo::context_wrapper context(pContext);
+	}
+	{
+		static const D3D11_VIEWPORT vp = { 0, 0, COARSE_HEIGHT_MAP_SIZE, COARSE_HEIGHT_MAP_SIZE, 0.f, 1.f };
+		leo::context_wrapper context(pContext);
+		auto LinearClamp = leo::RenderStates().GetSamplerState(L"LinearClamp");
+		context.PSSetShaderResources(0, 1, &mHeightMapSRV);
+		context.PSSetSamplers(0, 1, &LinearClamp);
+		context.PSSetShader(leo::ShaderMgr().CreatePixelShader(L"Shader\\TerrainGradHeightPS.cso"), nullptr, 0);
+		context.RSSetViewports(1, &vp);
+		context.OMSetDepthStencilState(leo::RenderStates().GetDepthStencilState(L"NoDepthDSS"), 0);
+		context.OMSetRenderTargets(1, &mGradientMapRTV, nullptr);
+		context->Draw(4, 0);
+	}
+	{
+		//do nothing,bug fix!
+		leo::context_wrapper context(pContext);
+	}
+}
 
 void DeviceEvent()
 {
@@ -268,7 +332,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 		}
 		else
 			::WaitMessage();
-		std::this_thread::sleep_for(std::chrono::milliseconds(0));
 	}
 	renderThreadRun = false;
 	renderThread.join();
@@ -476,6 +539,7 @@ static void CreateAmplifiedHeights(ID3D11Device* device)
 	leo::dx::DebugCOM(mGradientMapRTV, L"mGradientMapRTV");
 	leo::win::ReleaseCOM(pTex);
 
+	mpCBParams = new leo::Effect::ShaderConstantBuffer<CommonParamsOnSet>(device);
 }
 
 void Render()
@@ -523,9 +587,13 @@ void Render()
 
 void TerrainRender(ID3D11DeviceContext* con, leo::Camera* pCamera)
 {
+	static bool b = false;
+	leo::call_once(b, InitializeHeights, con);
+
 	auto& mTessation = leo::TerrainTessationEffect::GetInstance(leo::DeviceMgr().GetDevice());
 
-
+	mTessation->SetCoarseHeightMap(mHeightMapSRV);
+	mTessation->SetCoarseGradientMap(mGradientMapSRV);
 	{
 		auto eye = pCamera->GetOrigin();
 		eye.y = 0.f;
@@ -539,7 +607,7 @@ void TerrainRender(ID3D11DeviceContext* con, leo::Camera* pCamera)
 		eye.z /= WORLD_SCALE;
 		eye.z *= -1;
 		mTessation->SetTexureOffset(leo::float3(eye.x, eye.y, eye.z), nullptr);
-
+		
 		
 		
 
