@@ -1000,7 +1000,7 @@ namespace leo
 		for (std::uint8_t i = 0; i != NumViewports; ++i)
 			f |= (static_cast<std::uint64_t>(1) << (state::rssetviewprots + i));
 		swap_states[1]->f |= f;
-		UINT num;
+		UINT num = NumViewports;
 		context->RSGetViewports(&num, &swap_states[1]->ptr[state::rssetviewprots - 1].v);
 		context->RSSetViewports(NumViewports, pViewports);
 	}
@@ -1015,7 +1015,7 @@ namespace leo
 		for (std::uint8_t i = 0; i != NumRects; ++i)
 			f |= (static_cast<std::uint64_t>(1) << (state::rssetscissorrects + i));
 		swap_states[1]->f |= f;
-		UINT num;
+		UINT num = NumRects;
 		context->RSGetScissorRects(&num, (&swap_states[1]->ptr[state::rssetscissorrects - 1].r));
 		context->RSSetScissorRects(NumRects, pRects);
 	}
@@ -1042,7 +1042,7 @@ namespace leo
 		{
 			auto numrt = count(state::omsetrendertargets, state::end_omsetrendertargets);
 			auto pRTV = reinterpret_cast<ID3D11RenderTargetView**>(&swap_states[0]->ptr[state::omsetrendertargets - 1].p);
-			auto pDSV = reinterpret_cast<ID3D11DepthStencilView*>(&swap_states[0]->ptr[state::omsetdepthstencilview - 1].p);
+			auto pDSV = reinterpret_cast<ID3D11DepthStencilView*>(swap_states[0]->ptr[state::omsetdepthstencilview - 1].p);
 			context->OMSetRenderTargets(numrt, pRTV, pDSV);
 			for (uint32 i = 0; i != numrt; ++i)
 				leo::win::ReleaseCOM(pRTV[i]);
