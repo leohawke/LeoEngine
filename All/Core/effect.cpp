@@ -980,7 +980,7 @@ namespace leo
 		context->SOSetTargets(NumBuffers, ppSOTargets, pOffsets);
 	}
 
-	inline void STDMETHODCALLTYPE context_wrapper::RSSetState(
+	void STDMETHODCALLTYPE context_wrapper::RSSetState(
 		/* [annotation] */
 		_In_opt_  ID3D11RasterizerState *pRasterizerState)
 	{
