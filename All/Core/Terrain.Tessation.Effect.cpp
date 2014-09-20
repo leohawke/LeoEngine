@@ -228,7 +228,7 @@ namespace leo
 		void SetProj(CXMMATRIX matrix, ID3D11DeviceContext* context)
 		{
 			mHSCBPerMatrix.gProj = XMMatrixTranspose(matrix);
-			mHSCBPerMatrix.gWorldViewProjLOD = XMMatrixTranspose(mHSCBPerMatrix.gWorldViewLOD)*matrix;
+			mHSCBPerMatrix.gWorldViewProjLOD = XMMatrixTranspose(XMMatrixTranspose(mHSCBPerMatrix.gWorldViewLOD)*matrix);
 			if (context)
 				mHSCBPerMatrix.Update(context);
 		}
