@@ -58,8 +58,8 @@ namespace leo
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow;
 
 		//Common
-		void SetCoarseHeightMap(ID3D11ShaderResourceView* srv);
-		void SetDetailNoiseTexture(ID3D11ShaderResourceView* srv);
+		void SetCoarseHeightMap(ID3D11ShaderResourceView* srv,ID3D11DeviceContext* context = nullptr);
+		void SetDetailNoiseTexture(ID3D11ShaderResourceView* srv, ID3D11DeviceContext* context = nullptr);
 
 		void SetTexureOffset(const float3& offset, ID3D11DeviceContext* context);
 		void SetDetailNoiseScale(const float& scale, ID3D11DeviceContext* context);
@@ -93,7 +93,7 @@ namespace leo
 
 		void SetTerrainColorTextures(ID3D11ShaderResourceView* srv0, ID3D11ShaderResourceView* srv1);
 		void SetDetailNoiseGradTexture(ID3D11ShaderResourceView* srv);
-		void SetCoarseGradientMap(ID3D11ShaderResourceView* srv);
+		void SetCoarseGradientMap(ID3D11ShaderResourceView* srv, ID3D11DeviceContext* context = nullptr);
 		void SetNoiseTexture(ID3D11ShaderResourceView* srv);
 
 		void SetFractalOctaves(const float3& octs, ID3D11DeviceContext* context);

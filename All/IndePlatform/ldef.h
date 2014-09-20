@@ -188,7 +188,7 @@
 #endif
 
 #if LB_HAS_NOEXCEPT
-#	define lnothrow ynoexcept
+#	define lnothrow lnoexcept
 #elif LB_IMPL_GNUCPP >= 30300
 #	define lnothrow __attribute__ ((nothrow))
 #else

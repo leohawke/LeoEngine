@@ -14,9 +14,9 @@ namespace leo
 		{
 			{ "POSITION_2D", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
 			{ "ADJACENCY_SIZES", 0, DXGI_FORMAT_R32_FLOAT, 0, sizeof(float2), D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-			{ "ADJACENCY_SIZES", 1, DXGI_FORMAT_R32_FLOAT, 0, sizeof(float2)+4, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-			{ "ADJACENCY_SIZES", 2, DXGI_FORMAT_R32_FLOAT, 0, sizeof(float2)+8, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-			{ "ADJACENCY_SIZES", 3, DXGI_FORMAT_R32_FLOAT, 0, sizeof(float2)+12, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "ADJACENCY_SIZES", 1, DXGI_FORMAT_R32_FLOAT, 0, sizeof(float2) + 4, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "ADJACENCY_SIZES", 2, DXGI_FORMAT_R32_FLOAT, 0, sizeof(float2) + 8, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "ADJACENCY_SIZES", 3, DXGI_FORMAT_R32_FLOAT, 0, sizeof(float2) + 12, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
 		};
 	}
 }
@@ -30,7 +30,7 @@ namespace leo
 			:mCBParams(device), mCBPerHardWare(device),
 			mVSCBSizeOnset(device),
 			mHSCBPerMatrix(device),
-			mDSCBPerCamera(device), 
+			mDSCBPerCamera(device),
 			mPSCBPerSet(device),
 #ifdef DEBUG
 			mDSCBPerDebug(device)
@@ -62,7 +62,7 @@ namespace leo
 			MaxAnisoRepeat.MaxAnisotropy = 16;
 			MaxAnisoRepeat.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 			MaxAnisoRepeat.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-			mSamplerRepeatMaxAniso = sss.CreateSamplerState(L"MaxAnisoRepeat",MaxAnisoRepeat);
+			mSamplerRepeatMaxAniso = sss.CreateSamplerState(L"MaxAnisoRepeat", MaxAnisoRepeat);
 			MaxAnisoRepeat.MaxAnisotropy = 4;
 			mSamplerRepeatMedAniso = sss.CreateSamplerState(L"MedAnisoRepeat", MaxAnisoRepeat);
 
@@ -79,13 +79,13 @@ namespace leo
 			mCBPerHardWare.Update(con);
 
 			mVSCBSizeOnset.Update(con);
-			ID3D11Buffer* mVSCBArrays[] = {mCBParams.mBuffer,mVSCBSizeOnset.mBuffer};
+			ID3D11Buffer* mVSCBArrays[] = { mCBParams.mBuffer, mVSCBSizeOnset.mBuffer };
 			ID3D11SamplerState* mVSSSArrays[] = { mSamplerClampLinear, mSamplerRepeatLinear };
 			ID3D11ShaderResourceView* mVSSRVArrays[] = { mCoarseHeightMap, mDetailNoiseTexture };
 
 			context_wrapper context(con);
 			context.VSSetShader(mHwTessellationVS, nullptr, 0);
-			context.VSSetConstantBuffers(0, 2,mVSCBArrays);
+			context.VSSetConstantBuffers(0, 2, mVSCBArrays);
 			context->VSSetShaderResources(0, 2, mVSSRVArrays);
 			context->VSSetSamplers(0, 2, mVSSSArrays);
 
@@ -100,18 +100,18 @@ namespace leo
 #ifdef DEBUG
 			mDSCBPerDebug.Update(con);
 #endif
-			ID3D11Buffer* mDSCBArrays[] = { mCBParams.mBuffer,mDSCBPerCamera.mBuffer
+			ID3D11Buffer* mDSCBArrays[] = { mCBParams.mBuffer, mDSCBPerCamera.mBuffer
 #ifdef DEBUG
-				,mDSCBPerDebug.mBuffer
+				, mDSCBPerDebug.mBuffer
 #endif
 			};
 			context.DSSetShader(mHwTessellationDS, nullptr, 0);
-			context->DSSetConstantBuffers(0,static_cast<UINT>(leo::arrlen(mDSCBArrays)), mDSCBArrays);
+			context->DSSetConstantBuffers(0, static_cast<UINT>(leo::arrlen(mDSCBArrays)), mDSCBArrays);
 			context->DSSetShaderResources(0, 2, mVSSRVArrays);
 			context->DSSetSamplers(0, 2, mVSSSArrays);
 
 			mPSCBPerSet.Update(con);
-			ID3D11Buffer* mPSCBArrays[] = { mCBParams.mBuffer, mPSCBPerSet.mBuffer};
+			ID3D11Buffer* mPSCBArrays[] = { mCBParams.mBuffer, mPSCBPerSet.mBuffer };
 			ID3D11SamplerState* mPSSSArrays[] = { mSamplerClampLinear, mSamplerRepeatLinear, mSamplerRepeatMaxAniso, mSamplerRepeatMedAniso, mSamplerRepeatPoint };
 			ID3D11ShaderResourceView* mPSSRVArrays[] = { mCoarseHeightMap, mDetailNoiseTexture, mTerrainColorTexture1, mTerrainColorTexture2, mDetailNoiseGradTexture, mCoarseGradientMap, mNoiseTexture };
 
@@ -125,12 +125,22 @@ namespace leo
 			//Tessation need SM 5.0 ,//a haha
 			return true;
 		}
-		//Common
-		void SetCoarseHeightMap(ID3D11ShaderResourceView* srv)
+			//Common
+			void SetCoarseHeightMap(ID3D11ShaderResourceView* srv, ID3D11DeviceContext* context)
 		{
 			mCoarseHeightMap = srv;
+			//means unbind
+			if (context && !srv)
+			{
+				context->VSSetShaderResources(0, 1, &mCoarseHeightMap);
+				context->HSSetShaderResources(0, 1, &mCoarseHeightMap);
+
+				context->DSSetShaderResources(0, 1, &mCoarseHeightMap);
+
+				context->PSSetShaderResources(0, 1, &mCoarseHeightMap);
+			}
 		}
-		void SetDetailNoiseTexture(ID3D11ShaderResourceView* srv)
+		void SetDetailNoiseTexture(ID3D11ShaderResourceView* srv, ID3D11DeviceContext* context)
 		{
 			mDetailNoiseTexture = srv;
 		}
@@ -252,9 +262,13 @@ namespace leo
 		{
 			mDetailNoiseGradTexture = srv;
 		}
-		void SetCoarseGradientMap(ID3D11ShaderResourceView* srv)
+		void SetCoarseGradientMap(ID3D11ShaderResourceView* srv, ID3D11DeviceContext* context)
 		{
 			mCoarseGradientMap = srv;
+			if (context && !srv)
+			{
+				context->PSSetShaderResources(5, 1, &mCoarseGradientMap);
+			}
 		}
 		void SetNoiseTexture(ID3D11ShaderResourceView* srv)
 		{
@@ -279,7 +293,7 @@ namespace leo
 		{
 			XMFLOAT3 gTextureWorldOffset;	// Offset of fractal terrain in texture space.
 			float     gDetailNoiseScale = 0.2;
-			XMFLOAT2    gDetailUVScale = XMFLOAT2(1.f,1.f);				// x is scale; y is 1/scale
+			XMFLOAT2    gDetailUVScale = XMFLOAT2(1.f, 1.f);				// x is scale; y is 1/scale
 			float  gCoarseSampleSpacing;
 			float gfDisplacementHeight;
 			const static uint8 slot = 0;
@@ -341,7 +355,7 @@ namespace leo
 		};
 		ShaderConstantBuffer<DSPerCamera> mDSCBPerCamera;
 #ifdef DEBUG
-		struct DSDebugOnSet 
+		struct DSDebugOnSet
 		{
 			bool gDebugShowPatches[16];
 			const static uint8 slot = 1;
@@ -358,7 +372,7 @@ namespace leo
 		ID3D11SamplerState* mSamplerRepeatMedAniso = nullptr;
 		//Point => Nearest s4
 		ID3D11SamplerState* mSamplerRepeatPoint = nullptr;
-		
+
 		ID3D11ShaderResourceView* mTerrainColorTexture1 = nullptr;
 		ID3D11ShaderResourceView* mTerrainColorTexture2 = nullptr;
 		ID3D11ShaderResourceView* mDetailNoiseGradTexture = nullptr;
@@ -404,20 +418,20 @@ namespace leo
 	}
 
 		//Common
-	void TerrainTessationEffect::SetCoarseHeightMap(ID3D11ShaderResourceView* srv){
+		void TerrainTessationEffect::SetCoarseHeightMap(ID3D11ShaderResourceView* srv, ID3D11DeviceContext* context){
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
 		return ((TerrainTessationEffectDelegate*)this)->SetCoarseHeightMap(
-			srv
+			srv,context
 			);
 	}
 
-	void TerrainTessationEffect::SetDetailNoiseTexture(ID3D11ShaderResourceView* srv)
+	void TerrainTessationEffect::SetDetailNoiseTexture(ID3D11ShaderResourceView* srv, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
 		return ((TerrainTessationEffectDelegate*)this)->SetDetailNoiseTexture(
-			srv
+			srv,context
 			);
 	}
 
@@ -426,25 +440,25 @@ namespace leo
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
 		return ((TerrainTessationEffectDelegate*)this)->SetTexureOffset(
-			offset,context
+			offset, context
 			);
 	}
-	
+
 	void TerrainTessationEffect::SetDetailNoiseScale(const float& scale, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
 		return ((TerrainTessationEffectDelegate*)this)->SetDetailNoiseScale(
-			scale,context
+			scale, context
 			);
 	}
-	
+
 	void TerrainTessationEffect::SetDetailUVScale(const float2& scale, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
 		return ((TerrainTessationEffectDelegate*)this)->SetDetailUVScale(
-			scale,context
+			scale, context
 			);
 	}
 
@@ -453,7 +467,7 @@ namespace leo
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
 		return ((TerrainTessationEffectDelegate*)this)->SetCoarseSampleSpacing(
-			space,context
+			space, context
 			);
 	}
 
@@ -462,7 +476,7 @@ namespace leo
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
 		return ((TerrainTessationEffectDelegate*)this)->SetDisplacementHeight(
-			height,context
+			height, context
 			);
 	}
 	//EndCommon
@@ -473,7 +487,7 @@ namespace leo
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
 		return ((TerrainTessationEffectDelegate*)this)->SetTileSize(
-			size,context
+			size, context
 			);
 	}
 
@@ -483,7 +497,7 @@ namespace leo
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
 		return ((TerrainTessationEffectDelegate*)this)->SetShowTiles(
-			enable,context
+			enable, context
 			);
 	}
 #endif
@@ -495,7 +509,7 @@ namespace leo
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
 		return ((TerrainTessationEffectDelegate*)this)->SetScreenSize(
-			size,context
+			size, context
 			);
 	}
 #ifdef DEBUG
@@ -505,7 +519,7 @@ namespace leo
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
 		return ((TerrainTessationEffectDelegate*)this)->SetTriWidth(
-			width,context
+			width, context
 			);
 	}
 #endif
@@ -514,7 +528,7 @@ namespace leo
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
 		return ((TerrainTessationEffectDelegate*)this)->SetWolrdViewProj(
-			matrix,context
+			matrix, context
 			);
 	}
 	void TerrainTessationEffect::SetLodWorldView(CXMMATRIX matrix, ID3D11DeviceContext* context)
@@ -538,7 +552,7 @@ namespace leo
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
 		return ((TerrainTessationEffectDelegate*)this)->SetEyePos(
-			pos,context
+			pos, context
 			);
 	}
 	void TerrainTessationEffect::SetEyeDir(const float3& dir, ID3D11DeviceContext* context)
@@ -546,7 +560,7 @@ namespace leo
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
 		return ((TerrainTessationEffectDelegate*)this)->SetEyeDir(
-			dir,context
+			dir, context
 			);
 	}
 	//EndHullShader
@@ -556,7 +570,7 @@ namespace leo
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
 		return ((TerrainTessationEffectDelegate*)this)->SetDebugShowPatches(
-			enable,context
+			enable, context
 			);
 	}
 #endif
@@ -566,7 +580,7 @@ namespace leo
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
 		return ((TerrainTessationEffectDelegate*)this)->SetTerrainColorTextures(
-			srv0,srv1
+			srv0, srv1
 			);
 	}
 	void TerrainTessationEffect::SetDetailNoiseGradTexture(ID3D11ShaderResourceView* srv)
@@ -577,12 +591,12 @@ namespace leo
 			srv
 			);
 	}
-	void TerrainTessationEffect::SetCoarseGradientMap(ID3D11ShaderResourceView* srv)
+	void TerrainTessationEffect::SetCoarseGradientMap(ID3D11ShaderResourceView* srv, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
 		return ((TerrainTessationEffectDelegate*)this)->SetCoarseGradientMap(
-			srv
+			srv,context
 			);
 	}
 	void TerrainTessationEffect::SetNoiseTexture(ID3D11ShaderResourceView* srv)
@@ -599,7 +613,7 @@ namespace leo
 		lassume(dynamic_cast<TerrainTessationEffectDelegate*>(this));
 
 		return ((TerrainTessationEffectDelegate*)this)->SetFractalOctaves(
-			octs,context
+			octs, context
 			);
 	}
 }

@@ -1,9 +1,11 @@
 #ifndef IndePlatform_RAII_Hpp
 #define IndePlatform_RAII_Hpp
 
-
+#include "ldef.h"
 #include <memory>
 #include <functional>
+
+
 namespace leo
 {
 	template<typename _Ty>
@@ -80,17 +82,17 @@ namespace leo
 		Handle xm_hObj;
 
 	public:
-		 UniqueHandle() _NOEXCEPT : UniqueHandle(Closer_t()()) {
+		 UniqueHandle() lnothrow : UniqueHandle(Closer_t()()) {
 		}
-		 explicit UniqueHandle(Handle hObj) _NOEXCEPT : xm_hObj(hObj) {
+		 explicit UniqueHandle(Handle hObj) lnothrow : xm_hObj(hObj) {
 		}
-		UniqueHandle(UniqueHandle &&rhs) _NOEXCEPT : UniqueHandle(rhs.Release()) {
+		UniqueHandle(UniqueHandle &&rhs) lnothrow : UniqueHandle(rhs.Release()) {
 		}
-		UniqueHandle &operator=(Handle hObj) _NOEXCEPT{
+		UniqueHandle &operator=(Handle hObj) lnothrow{
 			Reset(hObj);
 			return *this;
 		}
-			UniqueHandle &operator=(UniqueHandle &&rhs) _NOEXCEPT{
+			UniqueHandle &operator=(UniqueHandle &&rhs) lnothrow{
 			Reset(std::move(rhs));
 			return *this;
 		}
@@ -102,33 +104,33 @@ namespace leo
 		void operator=(const UniqueHandle &) = delete;
 
 	public:
-		bool IsGood() const _NOEXCEPT{
+		bool IsGood() const lnothrow{
 			return Get() != Closer_t()();
 		}
-			Handle Get() const _NOEXCEPT{
+			Handle Get() const lnothrow{
 			return xm_hObj;
 		}
-			Handle Release() _NOEXCEPT{
+			Handle Release() lnothrow{
 			const Handle hOld = xm_hObj;
 			xm_hObj = Closer_t()();
 			return hOld;
 		}
 
-			void Reset(Handle hObj = Closer_t()()) _NOEXCEPT{
+			void Reset(Handle hObj = Closer_t()()) lnothrow{
 			const Handle hOld = xm_hObj;
 			xm_hObj = hObj;
 			if (hOld != Closer_t()()){
 				Closer_t()(hOld);
 			}
 		}
-			void Reset(UniqueHandle &&rhs) _NOEXCEPT{
+			void Reset(UniqueHandle &&rhs) lnothrow{
 			if (&rhs == this){
 				return;
 			}
 			Reset(rhs.Release());
 		}
 
-			void Swap(UniqueHandle &rhs) _NOEXCEPT{
+			void Swap(UniqueHandle &rhs) lnothrow{
 			if (&rhs == this){
 				return;
 			}
@@ -136,29 +138,29 @@ namespace leo
 		}
 
 	public:
-		explicit operator bool() const _NOEXCEPT{
+		explicit operator bool() const lnothrow{
 			return IsGood();
 		}
-			explicit operator Handle() const _NOEXCEPT{
+			explicit operator Handle() const lnothrow{
 			return Get();
 		}
 
-			bool operator==(const UniqueHandle &rhs) const _NOEXCEPT{
+			bool operator==(const UniqueHandle &rhs) const lnothrow{
 			return Get() == rhs.Get();
 		}
-			bool operator!=(const UniqueHandle &rhs) const _NOEXCEPT{
+			bool operator!=(const UniqueHandle &rhs) const lnothrow{
 			return Get() != rhs.Get();
 		}
-			bool operator<(const UniqueHandle &rhs) const _NOEXCEPT{
+			bool operator<(const UniqueHandle &rhs) const lnothrow{
 			return Get() < rhs.Get();
 		}
-			bool operator<=(const UniqueHandle &rhs) const _NOEXCEPT{
+			bool operator<=(const UniqueHandle &rhs) const lnothrow{
 			return Get() <= rhs.Get();
 		}
-			bool operator>(const UniqueHandle &rhs) const _NOEXCEPT{
+			bool operator>(const UniqueHandle &rhs) const lnothrow{
 			return Get() > rhs.Get();
 		}
-			bool operator>=(const UniqueHandle &rhs) const _NOEXCEPT{
+			bool operator>=(const UniqueHandle &rhs) const lnothrow{
 			return Get() >= rhs.Get();
 		}
 	};

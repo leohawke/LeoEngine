@@ -132,6 +132,7 @@ static void InitializeHeights(ID3D11DeviceContext* pContext)
 		context.RSSetViewports(1, &vp);
 		context->IASetInputLayout(nullptr);
 		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+		
 		context.OMSetRenderTargets(1, &mHeightMapRTV, nullptr);
 		context->Draw(4, 0);
 	}
@@ -147,6 +148,7 @@ static void InitializeHeights(ID3D11DeviceContext* pContext)
 		context.PSSetSamplers(0, 1, &LinearClamp);
 		context.PSSetShader(leo::ShaderMgr().CreatePixelShader(L"Shader\\TerrainGradHeightPS.cso"), nullptr, 0);
 		context.RSSetViewports(1, &vp);
+		context.RSSetState(leo::RenderStates().GetRasterizerState(L"NoCullRS"));
 		context.OMSetDepthStencilState(leo::RenderStates().GetDepthStencilState(L"NoDepthDSS"), 0);
 		context.OMSetRenderTargets(1, &mGradientMapRTV, nullptr);
 		context->Draw(4, 0);
@@ -588,9 +590,16 @@ void Render()
 void TerrainRender(ID3D11DeviceContext* con, leo::Camera* pCamera)
 {
 	static bool b = false;
-	leo::call_once(b, InitializeHeights, con);
+	//leo::call_once(b, InitializeHeights, con);
 
 	auto& mTessation = leo::TerrainTessationEffect::GetInstance(leo::DeviceMgr().GetDevice());
+
+
+	mTessation->SetCoarseHeightMap(nullptr,con);
+	mTessation->SetCoarseGradientMap(nullptr,con);
+
+	InitializeHeights(con);
+
 
 	mTessation->SetCoarseHeightMap(mHeightMapSRV);
 	mTessation->SetCoarseGradientMap(mGradientMapSRV);

@@ -12,11 +12,11 @@ static const float WORLD_UV_REPEATS_RECIP = 1.0 / WORLD_UV_REPEATS;
 
 cbuffer ScaleAndTexOffsetOnSet : register(b0)
 {
-	float3 gTextureWorldOffset;	// Offset of fractal terrain in texture space.
-	float     gDetailNoiseScale = 0.2;
-	float2    gDetailUVScale = 1;				// x is scale; y is 1/scale
-	float  gCoarseSampleSpacing;
-	float gfDisplacementHeight;
+	float3 gTextureWorldOffset : packoffset(c0);	// Offset of fractal terrain in texture space.
+	float     gDetailNoiseScale : packoffset(c0.w);
+	float2    gDetailUVScale : packoffset(c1);				// x is scale; y is 1/scale
+		float  gCoarseSampleSpacing : packoffset(c1.z);
+	float gfDisplacementHeight : packoffset(c1.w);
 }
 
 Texture2D gCoarseHeightMap : register(t0);

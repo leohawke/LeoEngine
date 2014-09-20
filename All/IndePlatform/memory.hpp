@@ -671,7 +671,7 @@ namespace leo
 	template<typename T,typename U>
 	void inline memcpy(T& dst, const U& src)
 	{
-		auto size = std::max(sizeof(T), sizeof(U));
+		auto size = std::min(sizeof(T), sizeof(U));
 		std::memcpy(&dst, &src, size);
 	}
 

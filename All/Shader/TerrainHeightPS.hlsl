@@ -43,7 +43,7 @@ float4 InitializationPS(DeformVertex input) : SV_Target
 	return float4(debugXRamps(uv),  1);
 #endif
 #ifdef Flat
-	return float4(debugFlat(uv),  1)
+	return float4(debugFlat(uv), 1);
 #endif
 #ifdef SineHills
 	return float4(debugSineHills(uv),  1);
