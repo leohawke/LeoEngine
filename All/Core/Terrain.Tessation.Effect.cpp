@@ -69,6 +69,8 @@ namespace leo
 			LinearRepeat.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
 			//Point => Nearest
 			mSamplerRepeatPoint = sss.CreateSamplerState(L"NearestRepeat", LinearRepeat);
+
+			mRasterCullFront = sss.GetRasterizerState(L"FrontCullRS");
 		}
 		~TerrainTessationEffectDelegate()
 		{}
@@ -119,6 +121,8 @@ namespace leo
 			context.PSSetConstantBuffers(0, static_cast<UINT>(leo::arrlen(mPSCBArrays)), mPSCBArrays);
 			context.PSSetShaderResources(0, 7, mPSSRVArrays);
 			context.PSSetSamplers(0, 5, mPSSSArrays);
+
+			context.RSSetState(mRasterCullFront);
 		}
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow
 		{
@@ -282,6 +286,7 @@ namespace leo
 				mPSCBPerSet.Update(context);
 		}
 	private:
+		ID3D11RasterizerState* mRasterCullFront = nullptr;
 		//Common
 		//slot 0
 		ID3D11SamplerState* mSamplerClampLinear = nullptr;
