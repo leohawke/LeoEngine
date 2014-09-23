@@ -31,9 +31,9 @@ namespace leo
 		CD3D11_RASTERIZER_DESC frontCullDesc(D3D11_DEFAULT);
 		frontCullDesc.FillMode = D3D11_FILL_SOLID;
 		frontCullDesc.CullMode = D3D11_CULL_FRONT;
-		noCullDesc.FrontCounterClockwise = false;
-		noCullDesc.DepthClipEnable = true;
-		p->CreateRasterizerState(L"FrontCullRS", noCullDesc);
+		frontCullDesc.FrontCounterClockwise = false;
+		frontCullDesc.DepthClipEnable = true;
+		p->CreateRasterizerState(L"FrontCullRS", frontCullDesc);
 
 		// EqualDSS
 		CD3D11_DEPTH_STENCIL_DESC equalsDesc(D3D11_DEFAULT);
