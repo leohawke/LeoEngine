@@ -144,11 +144,11 @@ namespace leo
 
 		if (EffectConfig::GetInstance()->NormalLine())
 		{
-			auto & mEffect = EffectNormalLine::GetInstance();
+			auto & mLineEffect = EffectNormalLine::GetInstance();
 			context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-			mEffect->World(world);
-			mEffect->ViewProj(camera.ViewProj());
-			mEffect->Apply(context);
+			mLineEffect->World(world);
+			mLineEffect->ViewProj(camera.ViewProj());
+			mLineEffect->Apply(context);
 			for (auto it = m_subsets.cbegin(); it != m_subsets.cend(); ++it)
 			{
 				context->DrawIndexed(it->m_indexcount, it->m_indexoffset, 0);

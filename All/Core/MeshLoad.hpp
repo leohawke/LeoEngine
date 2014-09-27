@@ -3,7 +3,8 @@
 #include <cstddef>
 #include <string>
 #include <functional>
-#include <DirectXMath.h>
+
+#include "..\leomath.hpp"
 namespace leo
 {
 	class MeshFile

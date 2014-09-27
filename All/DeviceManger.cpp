@@ -126,7 +126,7 @@ namespace leo
 				LogPrintf(L"AdapterIndex: %u VendorId: %u ", i, adapterDesc.VendorId);
 				LogPrintf(L"DeviceId: %u SubSysId: %u ", adapterDesc.DeviceId, adapterDesc.SubSysId);
 				LogPrintf(L"Revision: %u\n\t", adapterDesc.Revision);
-				LogPrintf(L"Description: %s\n\t", adapterDesc.Description);
+				LogPrintf(L"Description: %ls\n\t", adapterDesc.Description);
 				LogPrintf(L"DedicatedVideoMemory: %lu\n\t", adapterDesc.DedicatedVideoMemory);
 				LogPrintf(L"DedicatedSystemMemory: %lu\n\t", adapterDesc.DedicatedSystemMemory);
 				LogPrintf(L"SharedSystemMemory: %lu\n", adapterDesc.SharedSystemMemory);

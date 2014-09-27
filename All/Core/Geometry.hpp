@@ -604,11 +604,11 @@ namespace leo
 
 			static const XMVECTORI32 SelectY =
 			{
-				XM_SELECT_0, XM_SELECT_1, XM_SELECT_0, XM_SELECT_0
+				static_cast<int32_t>(XM_SELECT_0), static_cast<int32_t>(XM_SELECT_1), static_cast<int32_t>(XM_SELECT_0), static_cast<int32_t>(XM_SELECT_0)
 			};
 			static const XMVECTORI32 SelectZ =
 			{
-				XM_SELECT_0, XM_SELECT_0, XM_SELECT_1, XM_SELECT_0
+				static_cast<int32_t>(XM_SELECT_0), static_cast<int32_t>(XM_SELECT_0), static_cast<int32_t>(XM_SELECT_1), static_cast<int32_t>(XM_SELECT_0)
 			};
 
 			// Load the box.

@@ -34,9 +34,7 @@ namespace leo
 	struct variadic_param
 	{
 		template<typename _type, typename... _tParams>
-		lconstfn static auto
-			get(_type&&, _tParams&&... args)
-			-> decltype(variadic_param<_vN - 1>::get(lforward(args)...))
+		lconstfn static auto get(_type&&, _tParams&&... args) -> decltype(variadic_param<_vN - 1>::get(lforward(args)...))
 		{
 			static_assert(sizeof...(args) == _vN,
 				"Wrong variadic arguments number found.");
@@ -49,18 +47,19 @@ namespace leo
 	struct variadic_param<0U>
 	{
 		template<typename _type>
-		lconstfn static auto
-			get(_type&& arg) -> decltype(lforward(arg))
+		lconstfn static auto get(_type&& arg) -> decltype(lforward(arg))
 		{
 			return lforward(arg);
 		}
 	};
 
 	template<size_t _vN, typename... _tParams>
-	lconstexpr auto
-		//取指定位置的变长参数
-		varg(_tParams&&... args)
-		-> decltype(variadic_param<_vN>::get(lforward(args)...))
+#if LB_IMPL_MSCPP != 1900
+	lconstexpr
+#else
+	lconstfn
+#endif
+	auto varg(_tParams&&... args) -> decltype(variadic_param<_vN>::get(lforward(args)...))
 	{
 		static_assert(_vN < sizeof...(args),
 			"Out-of-range index of variadic argument found.");

@@ -2650,8 +2650,11 @@ HRESULT GenerateMipMaps( const Image* srcImages, size_t nimages, const TexMetada
 
     if ( !_CalculateMipLevels(metadata.width, metadata.height, levels) )
         return E_INVALIDARG;
-
+#if _MSC_VER >= 1900
+	std::vector<Image> baseImages;
+#else
     std::vector<const Image> baseImages;
+#endif
     baseImages.reserve( metadata.arraySize );
     for( size_t item=0; item < metadata.arraySize; ++item )
     {
@@ -2956,8 +2959,11 @@ HRESULT GenerateMipMaps3D( const Image* srcImages, size_t nimages, const TexMeta
 
     if ( !_CalculateMipLevels3D(metadata.width, metadata.height, metadata.depth, levels) )
         return E_INVALIDARG;
-
+#if _MSC_VER >= 1900
+	std::vector<Image> baseImages;
+#else
     std::vector<const Image> baseImages;
+#endif
     baseImages.reserve( metadata.depth );
     for( size_t slice=0; slice < metadata.depth; ++slice )
     {

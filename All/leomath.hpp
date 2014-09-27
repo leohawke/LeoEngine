@@ -2,9 +2,11 @@
 #define leomath_hpp
 #include <algorithm>
 #include <cmath>
-
+#pragma warning(push)
+#pragma warning(disable : 4838)
 #include <DirectXMath.h>
 #include <DirectXCollision.h>
+#pragma warning(pop)
 
 //#include "declara.h"
 #ifndef NOMINMAX

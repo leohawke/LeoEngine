@@ -1031,11 +1031,11 @@ namespace leo
 
 		auto count = [&](state::state_type beg, state::state_type end)
 		{
-			std::uint8_t count = 0;
+			std::uint8_t _count = 0;
 			for (std::uint8_t i = beg; i <= end; ++i)
 				if (and(i))
-					++count;
-			return count;
+					++_count;
+			return _count;
 		};
 
 		if (and(state::omsetrendertargets))

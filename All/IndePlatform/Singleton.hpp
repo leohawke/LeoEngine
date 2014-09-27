@@ -18,7 +18,7 @@ namespace leo
 	protected:
 		Singleton()
 		{
-			auto f = [&]()
+			auto f = [this]()
 			{
 				this->~Singleton();
 			};

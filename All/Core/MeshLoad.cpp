@@ -1,4 +1,4 @@
-#include "..\Win.hpp"
+#include "..\IndePlatform\platform.h"
 
 #include "MeshLoad.hpp"
 #include "..\file.hpp"

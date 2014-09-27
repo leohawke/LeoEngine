@@ -1,13 +1,21 @@
+////////////////////////////////////////////////////////////////////////////
+//
+//  Leo Engine Source File.
+//  Copyright (C), FNS Studios, 2014-2014.
+// -------------------------------------------------------------------------
+//  File name:   IndePlatform/ldef.hpp
+//  Version:     v1.01
+//  Created:     02/06/2014 by leo hawke.
+//  Compilers:   Visual Studio.NET 2013
+//  Description: 
+// -------------------------------------------------------------------------
+//  History:
+//		2014-9-27 11:02: 强制要求编译器支持alignas以及noexcept(以VS14 CTP1支持特性为主)
+//
+////////////////////////////////////////////////////////////////////////////
 #ifndef IndePlatform_ldef_h
 #define IndePlatform_ldef_h
 
-#include <cstddef> //std::nullptr_t,std::size_t,std::ptrdiff_t,offsetof;
-#include <climits> //CHAR_BIT;
-#include <cassert> //assert;
-#include <cstdint>
-#include <cwchar>  //std::wint_t;
-#include <utility> //std::foward;
-#include <type_traits> //std:is_class,std::is_standard_layout;
 
 //def LB_IMPL_CPP
 //brief C++实现支持版本
@@ -22,8 +30,16 @@
 //brief Microsof C++ 实现支持版本
 //定义为 _MSC_VER 描述的版本号
 #ifdef _MSC_VER
-#undef LB_IMPL_MSCPP
-#define LB_IMPL_MSCPP _MSC_VER
+#	undef LB_IMPL_MSCPP
+#	define LB_IMPL_MSCPP _MSC_VER
+#elif
+#	undef LB_IMPL_CLANGPP
+#	define LB_IMPL_CLANGPP (__clang__ * 10000 + __clang_minor__ * 100 \
+			+ __clang_patchlevel__)
+#	elif defined(__GNUC__)
+#		undef LB_IMPL_GNUCPP
+#		define LB_IMPL_GNUCPP (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 \
+			+ __GNUC_PATCHLEVEL__)
 #endif
 
 //禁止CL编译器的安全警告
@@ -38,6 +54,13 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#include <cstddef> //std::nullptr_t,std::size_t,std::ptrdiff_t,offsetof;
+#include <climits> //CHAR_BIT;
+#include <cassert> //assert;
+#include <cstdint>
+#include <cwchar>  //std::wint_t;
+#include <utility> //std::foward;
+#include <type_traits> //std:is_class,std::is_standard_layout;
 
 #ifndef __has_feature
 #define __has_feature(...) 0
@@ -63,7 +86,12 @@
 //内建 alignas 支持
 #undef  LB_HAS_ALIGNAS
 #define LB_HAS_ALIGNAS \
-	(__has_feature(cxx_alignas) || __has_extension(cxx_alignas))
+	(__has_feature(cxx_alignas) || __has_extension(cxx_alignas) || \
+		LB_IMPL_CPP >= 201103L || LB_IMPL_MSCPP >= 1900)
+#if !LB_HAS_ALIGNAS
+#error "compiler must support alignas"
+#endif
+
 
 #undef LB_HAS_ALIGNOF
 #define LB_HAS_ALIGNOF (LB_IMPL_CPP >= 201103L)
@@ -73,16 +101,23 @@
 #define LB_HAS_BUILTIN_NULLPTR \
 	(__has_feature(cxx_nullptr) || __has_extension(cxx_nullptr) || \
 	 LB_IMPL_CPP >= 201103L || LB_IMPL_MSCPP >= 1600)
-
+#if !LB_HAS_BUILTIN_NULLPTR
+#error "compiler must support builtin_nullptr"
+#endif
 #undef LB_HAS_CONSTEXPR
 #define LB_HAS_CONSTEXPR \
 	(__has_feature(cxx_constexpr) || __has_extension(cxx_constexpr) || \
-	LB_IMPL_MSCPP > 2000)
-
+	LB_IMPL_CPP >= 201103L || LB_IMPL_MSCPP >= 1900)
+#if !LB_HAS_CONSTEXPR
+#error "compiler must support constexpr"
+#endif
 #undef LB_HAS_NOEXCEPT
 #define LB_HAS_NOEXCEPT \
-	(__has_feature(cxx_noexcept) || __has_extension(cxx_noexcept) || LB_IMPL_CPP >= 201103L)
-
+	(__has_feature(cxx_noexcept) || __has_extension(cxx_noexcept) || \
+		LB_IMPL_CPP >= 201103L || LB_IMPL_MSCPP >= 1900)
+#if !LB_HAS_NOEXCEPT
+#error "compiler must support noexcept"
+#endif
 #undef LB_HAS_THREAD_LOCAL
 #define LB_HAS_THREAD_LOCAL \
 	(__has_feature(cxx_thread_local) || (LB_IMPL_CPP >= 201103L \
@@ -166,7 +201,7 @@
 #endif
 
 //编译器常量
-#if LB_HAS_CONSTEXPR
+#if LB_HAS_CONSTEXPR && !LB_IMPL_MSCPP
 #	define lconstexpr constexpr
 #	define lconstfn constexpr
 #else
@@ -287,7 +322,7 @@ namespace leo
 		using raw_tag = empty_base<>;
 
 		//成员计算静态类型检查. 
-		template<bool bMemObjPtr,bool bNoExcept,typename T>
+		template<bool bMemObjPtr, bool bNoExcept, typename T>
 		class offsetof_check
 		{
 			static_assert(std::is_class<T>::value, "Non class type found.");
@@ -303,7 +338,7 @@ namespace leo
 	(decltype(sizeof(leo::stdex::offsetof_check<std::is_member_object_pointer< \
 	decltype(&type::member)>::value,lnoexcept(offsetof(type,member)), \
 	type))(offsetof(type,meber)))
-	
+
 #define lforward(expr) std::forward<decltype(expr)>(expr)
 
 		template<typename type, typename ...tParams>
@@ -313,7 +348,7 @@ namespace leo
 			return lforward(arg);
 		}
 
-//无序求值
+		//无序求值
 #define lunseq leo::stdex::unsequenced
 	}
 }

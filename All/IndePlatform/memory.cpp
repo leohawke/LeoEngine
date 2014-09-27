@@ -1,7 +1,6 @@
-#include "..\Win.hpp"
+#include "platform.h"
 
 #include "memory.hpp"
-#include "..\debug.hpp"
 #include <set>
 
 namespace leo

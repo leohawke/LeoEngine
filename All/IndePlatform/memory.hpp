@@ -652,9 +652,9 @@ namespace leo
 			pos += size;
 			return	p;
 		}
-		void	Free(std::size_t pos)
+		void Free(std::size_t p)
 		{
-			this->pos = pos;
+			this->pos = p;
 		}
 		void	Clear()
 		{
