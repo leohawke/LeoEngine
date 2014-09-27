@@ -171,8 +171,6 @@
     <ClCompile Include="..\All\Core\Mesh.cpp" />
     <ClCompile Include="..\All\Core\MeshLoad.cpp" />
     <ClCompile Include="..\All\Core\RenderSync.cpp" />
-    <ClCompile Include="..\All\Core\Terrain.Tessation.Effect.cpp" />
-    <ClCompile Include="..\All\Core\Terrain.TileRing.cpp" />
     <ClCompile Include="..\All\Core\Vertex.cpp" />
     <ClCompile Include="..\All\d3dx11.cpp" />
     <ClCompile Include="..\All\Debug.cpp" />

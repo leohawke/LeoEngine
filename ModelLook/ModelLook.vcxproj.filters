@@ -134,12 +134,6 @@
     <ClCompile Include="..\All\Core\EffectLine.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\All\Core\Terrain.Tessation.Effect.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\Core\Terrain.TileRing.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\All\IndePlatform\algorithm.hpp">
