@@ -96,8 +96,19 @@ MeshVertex TerrainDisplaceDS(HS_CONSTANT_DATA_OUTPUT input,
 {
 	MeshVertex Output = (MeshVertex)0;
 
+
+#ifdef LEO_TEST
+	const static float4 ScreenPos[4] = { float4(+1.f, +1.f, 1.f, 1.f),
+		float4(+1.f, -1.f, 1.f, 1.f),
+		float4(-1.f, +1.f, 1.f, 1.f),
+		float4(-1.f, -1.f, 1.f, 1.f) };
+#endif
 	const float3 worldPos = TessellatedWorldPos(input, UV, terrainQuad);
+#ifndef LEO_TEST
 	Output.vPosition = mul(float4(worldPos.xyz, 1), gWorldViewProj);
+#else
+	Output.vPosition = ScreenPos[PatchID % 4];
+#endif
 #ifdef DEBUG
 	Output.debugColour = lerpDebugColours(input.debugColour, UV);
 #endif

@@ -191,6 +191,9 @@ HS_CONSTANT_DATA_OUTPUT TerrainScreenspaceLODConstantsHS(InputPatch<VS_CONTROL_P
 	const float  sideLen = max(abs(ip[1].vPosition.x - ip[0].vPosition.x), abs(ip[1].vPosition.x - ip[2].vPosition.x));		// assume square & uniform
 	const float  diagLen = sqrt(2 * sideLen*sideLen);
 
+	Output.Inside[0] = Output.Inside[1] = 1;
+	Output.Edges[0] = Output.Edges[1] = Output.Edges[2] = Output.Edges[3] = 1;
+#if 0
 	if (!inFrustum(centre, gEyePos / WORLD_SCALE, gViewDir, diagLen))
 	{
 		Output.Inside[0] = Output.Inside[1] = -1;
@@ -264,7 +267,7 @@ HS_CONSTANT_DATA_OUTPUT TerrainScreenspaceLODConstantsHS(InputPatch<VS_CONTROL_P
 		Output.debugColour[3] = DEBUG_COLOURS[clamp(log2(Output.Edges[3]), 0, 5)];
 		Output.debugColour[4] = DEBUG_COLOURS[clamp(log2(Output.Inside[0]), 0, 5)];
 	}
-
+#endif
 	return Output;
 }
 

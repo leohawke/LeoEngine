@@ -45,9 +45,6 @@
     <Filter Include="Shader\HLSL\Line">
       <UniqueIdentifier>{cbbf3604-f506-406b-86a5-602df3aa4d7c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shader\HLSL\TerrainTessllation">
-      <UniqueIdentifier>{81303d81-f428-4935-90aa-1db03458f316}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -238,9 +235,6 @@
     <None Include="..\All\Shader\LightHelper.hlsli">
       <Filter>Shader\HLSL</Filter>
     </None>
-    <None Include="..\All\Shader\TerrainTessationCommon.hlsli">
-      <Filter>Shader\HLSL\TerrainTessllation</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\All\Shader\NormalMapPS.hlsl">
@@ -263,18 +257,6 @@
     </FxCompile>
     <FxCompile Include="..\All\Shader\LinePS.hlsl">
       <Filter>Shader\HLSL\Line</Filter>
-    </FxCompile>
-    <FxCompile Include="..\All\Shader\TerrainTessation.DS.hlsl">
-      <Filter>Shader\HLSL\TerrainTessllation</Filter>
-    </FxCompile>
-    <FxCompile Include="..\All\Shader\TerrainTessation.HS.hlsl">
-      <Filter>Shader\HLSL\TerrainTessllation</Filter>
-    </FxCompile>
-    <FxCompile Include="..\All\Shader\TerrainTessation.PS.hlsl">
-      <Filter>Shader\HLSL\TerrainTessllation</Filter>
-    </FxCompile>
-    <FxCompile Include="..\All\Shader\TerrainTessation.VS.hlsl">
-      <Filter>Shader\HLSL\TerrainTessllation</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
