@@ -160,6 +160,7 @@
     <ClInclude Include="Core\CoreObject.hpp" />
     <ClInclude Include="Core\RenderSync.hpp" />
     <ClInclude Include="Core\Sky.hpp" />
+    <ClInclude Include="Core\Terrain.hpp" />
     <ClInclude Include="Core\Vertex.hpp" />
     <ClInclude Include="Core\Water.hpp" />
     <ClInclude Include="D3DX11\D3DX11.h" />
@@ -174,6 +175,7 @@
     <ClInclude Include="IndePlatform\BaseMacro.h" />
     <ClInclude Include="IndePlatform\bitseg.hpp" />
     <ClInclude Include="IndePlatform\clock.hpp" />
+    <ClInclude Include="IndePlatform\ConstexprMath.hpp" />
     <ClInclude Include="IndePlatform\container.hpp" />
     <ClInclude Include="IndePlatform\EndianSwap.hpp" />
     <ClInclude Include="IndePlatform\functional.hpp" />

@@ -32,7 +32,7 @@
 #ifdef _MSC_VER
 #	undef LB_IMPL_MSCPP
 #	define LB_IMPL_MSCPP _MSC_VER
-#elif
+#elif __clang__
 #	undef LB_IMPL_CLANGPP
 #	define LB_IMPL_CLANGPP (__clang__ * 10000 + __clang_minor__ * 100 \
 			+ __clang_patchlevel__)

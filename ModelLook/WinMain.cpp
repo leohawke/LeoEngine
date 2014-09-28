@@ -13,6 +13,7 @@
 #include <Core\Geometry.hpp>
 #include <Core\RenderSync.hpp>
 #include <Core\EffectLine.hpp>
+#include <Core\Terrain.hpp>
 #include <COM.hpp>
 
 #include <TextureMgr.h>
@@ -90,9 +91,7 @@ std::wstring GetOpenL3dFile()
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	LogPrintf(L"%S\n", L"Intel(R) HD Graphics 3000");
-	LogPrintf(L"%ls\n", L"Intel(R) HD Graphics 3000");
-	LogPrintf(L"%s\n", L"Intel(R) HD Graphics 3000");
+	leo::Terrain<> terr;
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 	leo::DeviceMgr DeviceMgr;
 	leo::OutputWindow win;

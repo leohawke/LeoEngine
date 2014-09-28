@@ -392,6 +392,12 @@
     <ClInclude Include="Core\EffectLine.hpp">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Terrain.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="IndePlatform\ConstexprMath.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">
