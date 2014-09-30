@@ -244,6 +244,61 @@
 
 namespace leo
 {
+#if LB_HAS_BUILTIN_NULLPTR
+	using std::nullptr_t;
+#else
+	const class nullptr_t
+	{
+	public:
+		template<typename _type>
+		inline
+			operator _type*() const
+		{
+			return 0;
+		}
+
+		template<class _tClass, typename _type>
+		inline
+			operator _type _tClass::*() const
+		{
+			return 0;
+		}
+		template<typename _type>
+		bool
+			equals(const _type& rhs) const
+		{
+			return rhs == 0;
+		}
+
+		void operator&() const = delete;
+	} nullptr = {};
+
+	template<typename _type>
+	inline bool
+		operator==(nullptr_t lhs, const _type& rhs)
+	{
+		return lhs.equals(rhs);
+	}
+	template<typename _type>
+	inline bool
+		operator==(const _type& lhs, nullptr_t rhs)
+	{
+		return rhs.equals(lhs);
+	}
+
+	template<typename _type>
+	inline bool
+		operator!=(nullptr_t lhs, const _type& rhs)
+	{
+		return !lhs.equals(rhs);
+	}
+	template<typename _type>
+	inline bool
+		operator!=(const _type& lhs, nullptr_t rhs)
+	{
+		return !rhs.equals(lhs);
+	}
+#endif
 	namespace stdex
 	{
 		//char无unsigned和signed指定
@@ -259,61 +314,7 @@ namespace leo
 		using std::size_t;
 		using std::wint_t;
 
-#if LB_HAS_BUILTIN_NULLPTR
-		using std::nullptr_t;
-#else
-		const class nullptr_t
-		{
-		public:
-			template<typename _type>
-			inline
-				operator _type*() const
-			{
-				return 0;
-			}
 
-			template<class _tClass, typename _type>
-			inline
-				operator _type _tClass::*() const
-			{
-				return 0;
-			}
-			template<typename _type>
-			bool
-				equals(const _type& rhs) const
-			{
-				return rhs == 0;
-			}
-
-			void operator&() const = delete;
-		} nullptr = {};
-
-		template<typename _type>
-		inline bool
-			operator==(nullptr_t lhs, const _type& rhs)
-		{
-			return lhs.equals(rhs);
-		}
-		template<typename _type>
-		inline bool
-			operator==(const _type& lhs, nullptr_t rhs)
-		{
-			return rhs.equals(lhs);
-		}
-
-		template<typename _type>
-		inline bool
-			operator!=(nullptr_t lhs, const _type& rhs)
-		{
-			return !lhs.equals(rhs);
-		}
-		template<typename _type>
-		inline bool
-			operator!=(const _type& lhs, nullptr_t rhs)
-		{
-			return !rhs.equals(lhs);
-		}
-#endif
 		template<typename...>
 		struct empty_base
 		{};

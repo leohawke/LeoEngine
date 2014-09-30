@@ -2,6 +2,7 @@
 #define leomath_hpp
 #include <algorithm>
 #include <cmath>
+#include "IndePlatform\LeoMath.h"
 #pragma warning(push)
 #pragma warning(disable : 4838)
 #include <DirectXMath.h>
@@ -19,34 +20,25 @@
 namespace leo
 {
 	using namespace DirectX;
-#if defined LEO_PROFILE_MATH
-	using float2 = XMFLOAT2A;
-	using float3 = XMFLOAT3A;
-	using float4 = XMFLOAT4A;
 	using float4x4 = XMFLOAT4X4A;
-
-#define loadfloat2 XMLoadFloat2A
-#define savefloat2 XMStoreFloat2A
-#define loadfloat3 XMLoadFloat3A
-#define savefloat3 XMStoreFloat3A
-#define loadfloat4 XMLoadFloat4A
-#define savefloat4 XMStoreFloat4A
 #define loadfloat4x4 XMLoadFloat4x4A
 #define savefloat4x4 XMStoreFloat4x4A
-
+#if defined LEO_PACK_STORGE
+	namespace storge
+	{
+		using float2 = XMFLOAT2A;
+		using float3 = XMFLOAT3A;
+		using float4 = XMFLOAT4A;
+		using float4x4 = XMFLOAT4X4A;
+	};
 #else
-	using float2 = XMFLOAT2;
-	using float3 = XMFLOAT3;
-	using float4 = XMFLOAT4;
-	using float4x4 = XMFLOAT4X4;
-#define loadfloat2 XMLoadFloat2
-#define savefloat2 XMStoreFloat2
-#define loadfloat3 XMLoadFloat3
-#define savefloat3 XMStoreFloat3
-#define loadfloat4 XMLoadFloat4
-#define savefloat4 XMStoreFloat4
-#define loadfloat4x4 XMLoadFloat4x4
-#define savefloat4x4 XMStoreFloat4x4
+	namespace storge
+	{
+		using float2 = XMFLOAT2;
+		using float3 = XMFLOAT3;
+		using float4 = XMFLOAT4;
+		using float4x4 = XMFLOAT4X4;
+	};
 #endif
 
 	template<typename T>
@@ -310,8 +302,8 @@ namespace leo
 
 	inline float Distance(const float3& a, const float3& b)
 	{
-		XMVECTOR x = XMLoadFloat3(&a);
-		XMVECTOR y = XMLoadFloat3(&b);
+		XMVECTOR x = load(a);
+		XMVECTOR y = load(b);
 		XMVECTOR length = XMVector3Length(XMVectorSubtract(x, y));
 		return XMVectorGetX(length);
 	}

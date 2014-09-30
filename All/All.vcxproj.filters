@@ -198,6 +198,9 @@
     <ClCompile Include="Core\EffectLine.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="IndePlatform\leo_impl_convert_impl.cpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.hpp">
@@ -396,6 +399,12 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="IndePlatform\ConstexprMath.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="IndePlatform\LeoMath.h">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="IndePlatform\leo_math_convert_impl.h">
       <Filter>IndePlatform\BaseHead</Filter>
     </ClInclude>
   </ItemGroup>

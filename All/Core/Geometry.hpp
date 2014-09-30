@@ -183,7 +183,7 @@ namespace leo
 			// Load the box.
 			XMVECTOR vCenter = XMLoadFloat3(&Center);
 			XMVECTOR vExtents = XMLoadFloat3(&Extents);
-			XMVECTOR vOrientation = loadfloat4(&mOrientation);
+			XMVECTOR vOrientation = load(mOrientation);
 
 			assert(DirectX::Internal::XMQuaternionIsUnit(vOrientation));
 
@@ -211,7 +211,7 @@ namespace leo
 			// Store the box.
 			XMStoreFloat3(&out.Center, vCenter);
 			XMStoreFloat3(&out.Extents, vExtents);
-			savefloat4(&out.mOrientation, vOrientation);
+			save(out.mOrientation, vOrientation);
 		}
 		void XM_CALLCONV Transform(OrientedBox& out, const SQT& sqt) const
 		{
@@ -225,14 +225,14 @@ namespace leo
 			// Load the box
 			XMVECTOR vCenter = XMLoadFloat3(&Center);
 			XMVECTOR vExtents = XMLoadFloat3(&Extents);
-			XMVECTOR vOrientation = loadfloat4(&mOrientation);
+			XMVECTOR vOrientation = load(mOrientation);
 
 			assert(DirectX::Internal::XMQuaternionIsUnit(vOrientation));
 
 			for (size_t i = 0; i < CORNER_COUNT; ++i)
 			{
 				XMVECTOR C = XMVector3Rotate(vExtents * g_BoxOffset[i], vOrientation) + vCenter;
-				savefloat3(&corners[i], C);
+				save(corners[i], C);
 			}
 		}
 
@@ -240,7 +240,7 @@ namespace leo
 		{
 			XMVECTOR center = XMLoadFloat3(&Center);
 			XMVECTOR extents = XMLoadFloat3(&Extents);
-			XMVECTOR orientation = loadfloat4(&mOrientation);
+			XMVECTOR orientation = load(mOrientation);
 			XMVECTOR local_point = XMVector3InverseRotate(Point - center, orientation);
 			return XMVector3InBounds(local_point, extents) ? CONTAINS : DISJOINT;
 		}
@@ -248,7 +248,7 @@ namespace leo
 		{
 			// Load the box center & orientation.
 			XMVECTOR center = XMLoadFloat3(&Center);
-			XMVECTOR orientation = loadfloat4(&mOrientation);
+			XMVECTOR orientation = load(mOrientation);
 
 			// Transform the triangle vertices into the space of the box.
 			XMVECTOR TV0 = XMVector3InverseRotate(V0 - center, orientation);
@@ -269,7 +269,7 @@ namespace leo
 
 			XMVECTOR BoxCenter = XMLoadFloat3(&Center);
 			XMVECTOR BoxExtents = XMLoadFloat3(&Extents);
-			XMVECTOR BoxOrientation = loadfloat4(&mOrientation);
+			XMVECTOR BoxOrientation = load(mOrientation);
 
 			assert(DirectX::Internal::XMQuaternionIsUnit(BoxOrientation));
 
@@ -321,13 +321,13 @@ namespace leo
 			// Load the boxes
 			XMVECTOR aCenter = XMLoadFloat3(&Center);
 			XMVECTOR aExtents = XMLoadFloat3(&Extents);
-			XMVECTOR aOrientation = loadfloat4(&mOrientation);
+			XMVECTOR aOrientation = load(mOrientation);
 
 			assert(DirectX::Internal::XMQuaternionIsUnit(aOrientation));
 
 			XMVECTOR bCenter = XMLoadFloat3(&box.Center);
 			XMVECTOR bExtents = XMLoadFloat3(&box.Extents);
-			XMVECTOR bOrientation = loadfloat4(&box.mOrientation);
+			XMVECTOR bOrientation = load(box.mOrientation);
 
 			assert(DirectX::Internal::XMQuaternionIsUnit(bOrientation));
 
@@ -361,8 +361,8 @@ namespace leo
 		bool Intersects(const OrientedBox& box) const
 		{
 			// Build the 3x3 rotation matrix that defines the orientation of B relative to A.
-			XMVECTOR A_quat = loadfloat4(&mOrientation);
-			XMVECTOR B_quat = loadfloat4(&box.mOrientation);
+			XMVECTOR A_quat = load(mOrientation);
+			XMVECTOR B_quat = load(box.mOrientation);
 
 			assert(DirectX::Internal::XMQuaternionIsUnit(A_quat));
 			assert(DirectX::Internal::XMQuaternionIsUnit(B_quat));
@@ -572,7 +572,7 @@ namespace leo
 			// Load the box.
 			XMVECTOR vCenter = XMLoadFloat3(&Center);
 			XMVECTOR vExtents = XMLoadFloat3(&Extents);
-			XMVECTOR BoxOrientation = loadfloat4(&mOrientation);
+			XMVECTOR BoxOrientation = load(mOrientation);
 
 			assert(DirectX::Internal::XMQuaternionIsUnit(BoxOrientation));
 
@@ -614,7 +614,7 @@ namespace leo
 			// Load the box.
 			XMVECTOR vCenter = XMLoadFloat3(&Center);
 			XMVECTOR vExtents = XMLoadFloat3(&Extents);
-			XMVECTOR vOrientation = loadfloat4(&mOrientation);
+			XMVECTOR vOrientation = load(mOrientation);
 
 			assert(DirectX::Internal::XMQuaternionIsUnit(vOrientation));
 
@@ -681,7 +681,7 @@ namespace leo
 			// Load the box.
 			XMVECTOR vCenter = XMLoadFloat3(&Center);
 			XMVECTOR vExtents = XMLoadFloat3(&Extents);
-			XMVECTOR BoxOrientation = loadfloat4(&mOrientation);
+			XMVECTOR BoxOrientation = load(mOrientation);
 
 			assert(DirectX::Internal::XMQuaternionIsUnit(BoxOrientation));
 
@@ -749,7 +749,7 @@ namespace leo
 			// Compute the center of mass and inertia tensor of the points.
 			for (size_t i = 0; i < Count; ++i)
 			{
-				XMVECTOR Point = loadfloat3(pPoints + i);
+				XMVECTOR Point = load(*(pPoints + i));
 
 				CenterOfMass += Point;
 			}
@@ -764,7 +764,7 @@ namespace leo
 
 			for (size_t i = 0; i < Count; ++i)
 			{
-				XMVECTOR Point = loadfloat3(pPoints+i) - CenterOfMass;
+				XMVECTOR Point = load(*(pPoints + i)) - CenterOfMass;
 
 				XX_YY_ZZ += Point * Point;
 
@@ -819,11 +819,11 @@ namespace leo
 			// Find the minimum OBB using the eigenvectors as the axes.
 			XMVECTOR vMin, vMax;
 
-			vMin = vMax = XMVector3TransformNormal(XMLoadFloat3(pPoints), InverseR);
+			vMin = vMax = XMVector3TransformNormal(load(*pPoints), InverseR);
 
 			for (size_t i = 1; i < Count; ++i)
 			{
-				XMVECTOR Point = XMVector3TransformNormal(loadfloat3(pPoints + i),
+				XMVECTOR Point = XMVector3TransformNormal(load(*(pPoints + i)),
 					InverseR);
 
 				vMin = XMVectorMin(vMin, Point);
@@ -837,7 +837,7 @@ namespace leo
 			// Store center, extents, and orientation.
 			XMStoreFloat3(&Out.Center, vCenter);
 			XMStoreFloat3(&Out.Extents, (vMax - vMin) * 0.5f);
-			savefloat4(&Out.mOrientation, vOrientation);
+			save(Out.mOrientation, vOrientation);
 		}
 	};
 
@@ -996,19 +996,19 @@ namespace leo
 			_update();
 		}
 
-		DefGetter(_NOEXCEPT, float&, Fov, mFov);
+		DefGetter(lnoexcept, float&, Fov, mFov);
 
-		DefGetter(_NOEXCEPT, float&, Far, Far);
+		DefGetter(lnoexcept, float&, Far, Far);
 
-		DefGetter(_NOEXCEPT, float&, Near, Near);
+		DefGetter(lnoexcept, float&, Near, Near);
 
-		DefGetter(_NOEXCEPT, float&, Aspect, mAspect);
+		DefGetter(lnoexcept, float&, Aspect, mAspect);
 
-		DefGetter(_NOEXCEPT, float&, Height, mNearHeight);
+		DefGetter(lnoexcept, float&, Height, mNearHeight);
 
-		DefGetter(_NOEXCEPT, XMFLOAT3&, Origin, Origin);
+		DefGetter(lnoexcept, XMFLOAT3&, Origin, Origin);
 
-		DefGetter(const _NOEXCEPT, XMFLOAT3, Origin, Origin);
+		DefGetter(const lnoexcept, XMFLOAT3, Origin, Origin);
 		inline XMMATRIX Proj() const
 		{
 			return loadfloat4x4(&mMatrix);

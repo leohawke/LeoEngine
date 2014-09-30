@@ -5,6 +5,8 @@
 
 
 #include <memory>// smart ptr
+#include <cstdlib>
+#include <cstring>
 #include "type_op.hpp"
 
 //存储和智能指针特性
@@ -166,7 +168,6 @@ namespace leo
 #include <new>//::operator new
 #include <cstdint>//std::uint8_t
 #include <cstddef>//std::size_t
-#include <allocators>
 #include <array>
 #include <cassert>
 
@@ -516,7 +517,7 @@ namespace leo
 
 		void operator delete[](void* ptr, const char*, int, const char*)
 		{
-			impl::deallocate(ptr);
+			impl.deallocate(ptr);
 		}
 	};
 
@@ -661,7 +662,7 @@ namespace leo
 			pos = 0;
 		}
 		//一字节请调用Alloc
-		DefGetter(const _NOEXCEPT, decltype(pos), Pos, pos)
+		DefGetter(const lnoexcept, decltype(pos), Pos, pos)
 	public:
 	};
 }

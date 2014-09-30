@@ -36,16 +36,16 @@ namespace leo
 
 		void inline Rotation(const float4& quaternion)
 		{
-			auto o = XMMatrixRotationQuaternion(loadfloat4(&mSQT.q));
-			auto n = XMMatrixRotationQuaternion(loadfloat4(&quaternion));
-			savefloat4(&mSQT.q, XMQuaternionRotationMatrix(o*n));
+			auto o = XMMatrixRotationQuaternion(load(mSQT.q));
+			auto n = XMMatrixRotationQuaternion(load(quaternion));
+			save(mSQT.q, XMQuaternionRotationMatrix(o*n));
 		}
 
 		void inline Translation(const float3& offset)
 		{
-			auto t = loadfloat3(&mSQT.t);
-			auto off = loadfloat3(&offset);
-			savefloat3(&mSQT.t, t + off);
+			auto t = load(mSQT.t);
+			auto off = load(offset);
+			save(mSQT.t, t + off);
 		}
 
 		void inline Transform(const SQT& sqt)

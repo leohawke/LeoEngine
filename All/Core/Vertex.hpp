@@ -38,9 +38,9 @@ namespace leo
 		{
 			BasicV operator=(const Basic& basic)
 			{
-				pos = loadfloat3(&basic.pos);
-				normal = loadfloat3(&basic.normal);
-				tex = loadfloat2(&basic.tex);
+				pos = load(basic.pos);
+				normal = load(basic.normal);
+				tex = load(basic.tex);
 				return *this;
 			}
 			XMVECTOR pos;
@@ -76,10 +76,10 @@ namespace leo
 		{
 			NormalMapV operator=(const NormalMap& NormalMap)
 			{
-				pos = loadfloat3(&NormalMap.pos);
-				normal = loadfloat3(&NormalMap.normal);
-				tex = loadfloat2(&NormalMap.tex);
-				tangent = loadfloat3(&NormalMap.tangent);
+				pos = load(NormalMap.pos);
+				normal = load(NormalMap.normal);
+				tex = load(NormalMap.tex);
+				tangent = load(NormalMap.tangent);
 				return *this;
 			}
 			XMVECTOR pos;

@@ -91,7 +91,7 @@ std::wstring GetOpenL3dFile()
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	leo::Terrain<> terr;
+	leo::Terrain<> terr((ID3D11Device*)nullptr,L"test");
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 	leo::DeviceMgr DeviceMgr;
 	leo::OutputWindow win;

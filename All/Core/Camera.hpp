@@ -116,9 +116,9 @@ namespace leo
 		
 		void Yaw(float angle)
 		{
-			XMMATRIX R = XMMatrixRotationAxis(loadfloat3(&mUp), angle);
-			savefloat3(&mUp, XMVector3TransformNormal(loadfloat3(&mRight), R));
-			savefloat3(&mLook, XMVector3TransformNormal(loadfloat3(&mLook), R));
+			XMMATRIX R = XMMatrixRotationAxis(load(mUp), angle);
+			save(mUp, XMVector3TransformNormal(load(mRight), R));
+			save(mLook, XMVector3TransformNormal(load(mLook), R));
 		}
 		//RBUTTON LEFT/RIGHT
 		void RotateY(float angle)
@@ -127,23 +127,23 @@ namespace leo
 
 			XMMATRIX R = XMMatrixRotationY(angle);
 
-			savefloat3(&mRight, XMVector3TransformNormal(loadfloat3(&mRight), R));
-			savefloat3(&mUp, XMVector3TransformNormal(loadfloat3(&mUp), R));
-			savefloat3(&mLook, XMVector3TransformNormal(loadfloat3(&mLook), R));
+			save(mRight, XMVector3TransformNormal(load(mRight), R));
+			save(mUp, XMVector3TransformNormal(load(mUp), R));
+			save(mLook, XMVector3TransformNormal(load(mLook), R));
 		}
 		//RBUTTON UP/DOWN
 		void Pitch(float angle)
 		{
-			XMMATRIX R = XMMatrixRotationAxis(loadfloat3(&mRight), angle);
-			savefloat3(&mUp, XMVector3TransformNormal(loadfloat3(&mUp), R));
-			savefloat3(&mLook, XMVector3TransformNormal(loadfloat3(&mLook), R));
+			XMMATRIX R = XMMatrixRotationAxis(load(mRight), angle);
+			save(mUp, XMVector3TransformNormal(load(mUp), R));
+			save(mLook, XMVector3TransformNormal(load(mLook), R));
 		}
 		//MIDDBUTTON UP/DOWN
 		void Roll(float angle)
 		{
-			XMMATRIX R = XMMatrixRotationAxis(loadfloat3(&mLook), angle);
-			savefloat3(&mUp, XMVector3TransformNormal(XMLoadFloat3(&mUp), R));
-			savefloat3(&mLook, XMVector3TransformNormal(XMLoadFloat3(&mRight), R));
+			XMMATRIX R = XMMatrixRotationAxis(load(mLook), angle);
+			save(mUp, XMVector3TransformNormal(load(mUp), R));
+			save(mLook, XMVector3TransformNormal(load(mRight), R));
 		}
 
 		void UpdateViewMatrix()
