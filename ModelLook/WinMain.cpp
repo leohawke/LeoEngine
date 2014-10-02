@@ -226,7 +226,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	renderThread.join();
 
 	pMesh.reset(nullptr);
-
+	pTerrain.reset(nullptr);
 	leo::global::Destroy();
 #ifdef DEBUG
 	leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
@@ -241,8 +241,8 @@ void BuildRes()
 
 	using leo::float3;
 
-	auto Eye = float3(0.f,0.f,-10.f);
-	auto At = float3(0.f,0.f,0.f);
+	auto Eye = float3(0.f,5.f,-18.f);
+	auto At = float3(0.f,-1.f,0.f);
 	auto Up = float3(0.f,1.f, 0.f);
 
 	pCamera->LookAt(Eye, At, Up);
@@ -268,7 +268,6 @@ void BuildRes()
 	leo::EffectLine::GetInstance(leo::DeviceMgr().GetDevice());
 	leo::Axis::GetInstance(leo::DeviceMgr().GetDevice());
 
-	leo::DeviceMgr().GetDeviceContext()->RSSetState(leo::RenderStates().GetRasterizerState(L"WireframeRS"));
 
 	struct TerrainFileHeader
 	{
@@ -283,9 +282,13 @@ void BuildRes()
 	mTerrainFileHeader.mVerChunkNum = 16;
 	wcscpy(mTerrainFileHeader.mHeightMap, L"Resource\\fBm5OctavesGrad.dds");
 
-	auto & pFile = leo::win::File::Open(L"Resource\\Test.Terrain", leo::win::File::TO_READ);
-	pFile->Write(0, &mTerrainFileHeader, sizeof(mTerrainFileHeader));
+	{
+		auto & pFile = leo::win::File::Open(L"Resource\\Test.Terrain", leo::win::File::TO_WRITE);
+		pFile->Write(0, &mTerrainFileHeader, sizeof(mTerrainFileHeader));
+	}
 	pTerrain = std::make_unique < leo::Terrain<> >(leo::DeviceMgr().GetDevice(), L"Resource\\Test.Terrain");
+
+	leo::DeviceMgr().GetDeviceContext()->RSSetState(leo::RenderStates().GetRasterizerState(L"NoCullRS"));
 }
 
 
@@ -321,6 +324,8 @@ void Render()
 			pMesh->Render(devicecontext, *pCamera);
 		
 		leo::Axis::GetInstance()->Render(devicecontext, *pCamera);
+
+		pTerrain->Render(devicecontext, *pCamera);
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 

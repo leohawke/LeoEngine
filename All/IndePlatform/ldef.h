@@ -88,7 +88,7 @@
 #define LB_HAS_ALIGNAS \
 	(__has_feature(cxx_alignas) || __has_extension(cxx_alignas) || \
 		LB_IMPL_CPP >= 201103L || LB_IMPL_MSCPP >= 1900)
-#if !LB_HAS_ALIGNAS
+#if !LB_HAS_ALIGNAS && LB_IMPL_MSCPP != 1800
 #error "compiler must support alignas"
 #endif
 
@@ -108,14 +108,14 @@
 #define LB_HAS_CONSTEXPR \
 	(__has_feature(cxx_constexpr) || __has_extension(cxx_constexpr) || \
 	LB_IMPL_CPP >= 201103L || LB_IMPL_MSCPP >= 1900)
-#if !LB_HAS_CONSTEXPR
+#if !LB_HAS_CONSTEXPR && LB_IMPL_MSCPP != 1800
 #error "compiler must support constexpr"
 #endif
 #undef LB_HAS_NOEXCEPT
 #define LB_HAS_NOEXCEPT \
 	(__has_feature(cxx_noexcept) || __has_extension(cxx_noexcept) || \
 		LB_IMPL_CPP >= 201103L || LB_IMPL_MSCPP >= 1900)
-#if !LB_HAS_NOEXCEPT
+#if !LB_HAS_NOEXCEPT && LB_IMPL_MSCPP != 1800
 #error "compiler must support noexcept"
 #endif
 #undef LB_HAS_THREAD_LOCAL
@@ -198,6 +198,12 @@
 #	define lalignof alignof
 #else
 #	define lalignof(_type) std::alignment_of<_type>::value
+#endif
+
+#if LB_HAS_ALIGNAS
+#	define lalignof alignas
+#else
+#	define lalignas(_n) _declspec(align(_n))
 #endif
 
 //±‡“Î∆˜≥£¡ø

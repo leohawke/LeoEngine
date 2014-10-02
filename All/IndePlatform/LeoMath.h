@@ -38,7 +38,8 @@ namespace leo
 	struct half3;
 	struct half4;
 
-	struct alignas(16) float2
+	
+	struct lalignas(16) float2
 	{
 		union{
 			struct{
@@ -50,21 +51,21 @@ namespace leo
 			float data[2];
 		};
 
-		float2() lnoexcept = default;
+		float2() lnoexcept() = default;
 
-		float2(float X,float Y) lnoexcept
+		float2(float X,float Y) lnoexcept()
 			:u(X), v(Y)
 		{}
 
 		template<typename T>
-		explicit float2(const T& src) lnoexcept
+		explicit float2(const T& src) lnoexcept()
 		{
 			static_assert(sizeof(T) >= sizeof(float2), "Need More Data");
 			std::memcpy(this, &src, sizeof(float2));
 		}
 
 		template<typename T>
-		float2& operator=(const T& src) lnoexcept
+		float2& operator=(const T& src) lnoexcept()
 		{
 			static_assert(sizeof(T) >= sizeof(float2), "Need More Data");
 			std::memcpy(this, &src, sizeof(float2));
@@ -72,14 +73,14 @@ namespace leo
 		}
 
 		template<typename T>
-		T* operator&() lnoexcept
+		T* operator&() lnoexcept()
 		{
 			static_assert(sizeof(float2) >= sizeof(T), "Data Don't Enough");
 			return reinterpret_cast<T*>(this);
 		}
 	};
 
-	struct alignas(16) float3
+	struct lalignas(16) float3
 	{
 		union{
 			struct{
@@ -91,21 +92,21 @@ namespace leo
 			float data[3];
 		};
 
-		float3() lnoexcept = default;
+		float3() lnoexcept() = default;
 
-		float3(float X, float Y,float Z) lnoexcept
+		float3(float X, float Y,float Z) lnoexcept()
 			:u(X), v(Y), w(Z)
 		{}
 
 		template<typename T>
-		explicit float3(const T& src) lnoexcept
+		explicit float3(const T& src) lnoexcept()
 		{
 			static_assert(sizeof(T) >= sizeof(float3), "Need More Data");
 			std::memcpy(this, &src, sizeof(float3));
 		}
 
 		template<typename T>
-		float3& operator=(const T& src) lnoexcept
+		float3& operator=(const T& src) lnoexcept()
 		{
 			static_assert(sizeof(T) >= sizeof(float3), "Need More Data");
 			std::memcpy(this, &src, sizeof(float3));
@@ -113,14 +114,14 @@ namespace leo
 		}
 
 		template<typename T>
-		T* operator &() lnoexcept
+		T* operator &() lnoexcept()
 		{
 			static_assert(sizeof(float3) >= sizeof(T), "Data Don't Enough");
 			return reinterpret_cast<T*>(this);
 		}
 	};
 
-	struct alignas(16) float4
+	struct lalignas(16) float4
 	{
 		union{
 			struct{
@@ -129,21 +130,21 @@ namespace leo
 			float data[4];
 		};
 
-		float4() lnoexcept = default;
+		float4() lnoexcept() = default;
 
-		float4(float X, float Y, float Z,float W) lnoexcept
+		float4(float X, float Y, float Z,float W) lnoexcept()
 			:x(X), y(Y), z(Z), w(W)
 		{}
 
 		template<typename T>
-		explicit float4(const T& src) lnoexcept
+		explicit float4(const T& src) lnoexcept()
 		{
 			static_assert(sizeof(T) >= sizeof(float4), "Need More Data");
 			std::memcpy(this, &src, sizeof(float4));
 		}
 
 		template<typename T>
-		float4& operator=(const T& src) lnoexcept
+		float4& operator=(const T& src) lnoexcept()
 		{
 			static_assert(sizeof(T) >= sizeof(float4), "Need More Data");
 			std::memcpy(this, &src, sizeof(float4));
@@ -151,7 +152,7 @@ namespace leo
 		}
 
 		template<typename T>
-		T* operator &() lnoexcept
+		T* operator &() lnoexcept()
 		{
 			static_assert(sizeof(float4) >= sizeof(T), "Data Don't Enough");
 			return reinterpret_cast<T*>(this);
@@ -166,42 +167,42 @@ namespace leo
 	//(-1) ^ S * 2 ^ (E - 15) * (1 + M / 2 ^ 10), if 0 < E < 31,
 	//(-1) ^ S * INF, if E == 31 and M == 0, or
 	//NaN, if E == 31 and M != 0,
-	struct alignas(2) half
+	struct lalignas(2) half
 	{
 		uint16 data;
-		explicit half(float f) lnoexcept
+		explicit half(float f) lnoexcept()
 			:data(details::float_to_half(f))
 		{
 			
 		}
 
-		explicit half(int16 i) lnoexcept
+		explicit half(int16 i) lnoexcept()
 			:half(float(i))
 		{
 		}
 
-		half& operator=(float f) lnoexcept
+		half& operator=(float f) lnoexcept()
 		{
 			*this = half(f);
 		}
 
-		half& operator=(int16 i) lnoexcept
+		half& operator=(int16 i) lnoexcept()
 		{
 			*this = half(i);
 		}
 
-		explicit operator float() const lnoexcept
+		explicit operator float() const lnoexcept()
 		{
 			return details::half_to_float(data);
 		}
 
-		explicit operator int16() const lnoexcept
+		explicit operator int16() const lnoexcept()
 		{
 			return static_cast<int16>(details::half_to_float(data));
 		}
 	};
 
-	struct alignas(4) half2
+	struct lalignas(4) half2
 	{
 		union{
 			struct{
@@ -213,7 +214,7 @@ namespace leo
 			uint16 data[2];
 		};
 
-		half2(float X, float Y) lnoexcept
+		half2(float X, float Y) lnoexcept()
 			:u(half(X).data), v(half(Y).data)
 		{}
 
@@ -233,12 +234,12 @@ namespace leo
 			uint16 data[2];
 		};
 
-		half3(float X, float Y,float Z) lnoexcept
+		half3(float X, float Y,float Z) lnoexcept()
 			:u(half(X).data), v(half(Y).data), w(half(Z).data)
 		{}
 	};
 
-	struct alignas(8) half4
+	struct lalignas(8) half4
 	{
 		union{
 			struct{
@@ -247,7 +248,7 @@ namespace leo
 			uint16 data[4];
 		};
 
-		half4(float X, float Y, float Z, float W) lnoexcept
+		half4(float X, float Y, float Z, float W) lnoexcept()
 			:x(half(X).data), y(half(Y).data), z(half(Z).data), w(half(W).data)
 		{}
 	};

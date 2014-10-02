@@ -662,7 +662,7 @@ namespace leo
 			pos = 0;
 		}
 		//一字节请调用Alloc
-		DefGetter(const lnoexcept, decltype(pos), Pos, pos)
+		DefGetter(const lnoexcept(), decltype(pos), Pos, pos)
 	public:
 	};
 }

@@ -996,19 +996,19 @@ namespace leo
 			_update();
 		}
 
-		DefGetter(lnoexcept, float&, Fov, mFov);
+		DefGetter(lnoexcept(), float&, Fov, mFov);
 
-		DefGetter(lnoexcept, float&, Far, Far);
+		DefGetter(lnoexcept(), float&, Far, Far);
 
-		DefGetter(lnoexcept, float&, Near, Near);
+		DefGetter(lnoexcept(), float&, Near, Near);
 
-		DefGetter(lnoexcept, float&, Aspect, mAspect);
+		DefGetter(lnoexcept(), float&, Aspect, mAspect);
 
-		DefGetter(lnoexcept, float&, Height, mNearHeight);
+		DefGetter(lnoexcept(), float&, Height, mNearHeight);
 
-		DefGetter(lnoexcept, XMFLOAT3&, Origin, Origin);
+		DefGetter(lnoexcept(), XMFLOAT3&, Origin, Origin);
 
-		DefGetter(const lnoexcept, XMFLOAT3, Origin, Origin);
+		DefGetter(const lnoexcept(), XMFLOAT3, Origin, Origin);
 		inline XMMATRIX Proj() const
 		{
 			return loadfloat4x4(&mMatrix);

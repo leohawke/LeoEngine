@@ -32,13 +32,16 @@ namespace leo
 			pow()
 			{}
 #endif
-			static constexpr std::uintmax_t value = 1;
+			static lconstexpr std::uintmax_t value = 1;
+
+#ifndef LB_IMPL_MSCPP
 			template<typename T>
-			constexpr explicit operator T() noexcept
+			lconstexpr explicit operator T()  lnoexcept
 			{
 				static_assert(leo::is_integral<T>::value, "T must is integral type");
 				return static_cast<T>(value);
 			}
+#endif
 		};
 
 		template<std::uintmax_t base>
@@ -48,13 +51,16 @@ namespace leo
 			pow()
 			{}
 #endif
-			static constexpr std::uintmax_t value = base;
+			static lconstexpr std::uintmax_t value = base;
+
+#ifndef LB_IMPL_MSCPP
 			template<typename T>
-			constexpr explicit operator T()  noexcept
+			lconstexpr explicit operator T()  lnoexcept
 			{
 				static_assert(leo::is_integral<T>::value, "T must is integral type");
 				return static_cast<T>(value);
 			}
+#endif
 		};
 
 		template<std::uintmax_t base, size_t exp>
@@ -64,13 +70,17 @@ namespace leo
 			pow()
 			{}
 #endif
-			static constexpr std::uintmax_t value = pow<base, exp / 2>::value *pow<base, exp - exp / 2>::value;
+
+			static lconstexpr std::uintmax_t value = pow<base, exp / 2>::value *pow<base, exp - exp / 2>::value;
+
+#ifndef LB_IMPL_MSCPP
 			template<typename T>
-			constexpr explicit operator T()  noexcept
+			lconstexpr explicit operator T()  lnoexcept
 			{
 				static_assert(leo::is_integral<T>::value, "T must is integral type");
 				return static_cast<T>(value);
 			}
+#endif
 		};
 	}
 

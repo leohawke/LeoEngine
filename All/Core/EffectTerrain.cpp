@@ -26,8 +26,8 @@ namespace leo
 			mVSCBPerMatrix.Update(con);
 			context.VSSetConstantBuffers(0, 1, &mVSCBPerMatrix.mBuffer);
 			context.PSSetShader(mPS, nullptr, 0);
-			context.PSSetShaderResources(0, 1, &mSRV);
-			context.PSSetSamplers(0, 1, &mSS);
+			context->VSSetShaderResources(0, 1, &mSRV);
+			context->VSSetSamplers(0, 1, &mSS);
 		}
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow
 		{
@@ -35,17 +35,26 @@ namespace leo
 		}
 		void ViewProjMatrix(CXMMATRIX matrix, ID3D11DeviceContext* context )
 		{
-			mVSCBPerMatrix.gViwProj = XMMatrixTranspose(matrix);
+			mVSCBPerMatrix.gViwProj =XMMatrixTranspose(matrix);
 			if (context)
 				mVSCBPerMatrix.Update(context);
 		}
-		void WorldOffset(const float3& offset, ID3D11DeviceContext* context)
+		void WorldOffset(const float2& offset, ID3D11DeviceContext* context)
 		{
-			mVSCBPerMatrix.gOffset = offset;
+			mVSCBPerMatrix.gOffsetUVScale.x = offset.x;
+			mVSCBPerMatrix.gOffsetUVScale.y = offset.y;
+
 			if (context)
 				mVSCBPerMatrix.Update(context);
 		}
+		void UVScale(const float2& scale, ID3D11DeviceContext* context)
+		{
+			mVSCBPerMatrix.gOffsetUVScale.z = scale.x;
+			mVSCBPerMatrix.gOffsetUVScale.w = scale.y;
 
+			if (context)
+				mVSCBPerMatrix.Update(context);
+		}
 		void HeightMap(ID3D11ShaderResourceView * srv, ID3D11DeviceContext * context)
 		{
 			mSRV = srv;
@@ -57,7 +66,7 @@ namespace leo
 		struct vsCBMatrix
 		{
 			XMMATRIX gViwProj;
-			float3 gOffset;
+			float4 gOffsetUVScale;
 			const static std::uint8_t slot = 0;
 		};
 		ShaderConstantBuffer<vsCBMatrix> mVSCBPerMatrix;
@@ -83,12 +92,21 @@ namespace leo
 			matrix,context
 			);
 	}
-	void EffectTerrain::WorldOffset(const float3 & offset, ID3D11DeviceContext * context)
+	void EffectTerrain::WorldOffset(const float2 & offset, ID3D11DeviceContext * context)
 	{
 		lassume(dynamic_cast<EffectTerrainDelegate *>(this));
 
 		return ((EffectTerrainDelegate *)this)->WorldOffset(
 			offset, context
+			);
+	}
+
+	void EffectTerrain::UVScale(const float2& scale, ID3D11DeviceContext* context)
+	{
+		lassume(dynamic_cast<EffectTerrainDelegate *>(this));
+
+		return ((EffectTerrainDelegate *)this)->UVScale(
+			scale, context
 			);
 	}
 	void leo::EffectTerrain::HeightMap(ID3D11ShaderResourceView * srv, ID3D11DeviceContext * context)

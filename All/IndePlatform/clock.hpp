@@ -58,8 +58,8 @@ namespace leo
 			mElapse = newelapse;
 		}
 		
-		DefGetter(const lnoexcept,duration,Elapse,mElapse)
-		DefGetter(const lnoexcept,duration,Delta, mDelta)
+		DefGetter(const lnoexcept(),duration,Elapse,mElapse)
+		DefGetter(const lnoexcept(),duration,Delta, mDelta)
 	};
 
 	class GameClock
@@ -93,7 +93,7 @@ namespace leo
 			//, m_clock()
 		{}
 		template<typename RETURN = Clock::duration::rep, typename TIMEUINT = Clock::duration::period>
-		RETURN GetTimeCycles() const lnoexcept
+		RETURN GetTimeCycles() const lnoexcept()
 		{
 			std::chrono::duration<RETURN, TIMEUINT> result =
 			std::chrono::duration_cast<decltype(result)>(m_timecycles);
@@ -120,7 +120,7 @@ namespace leo
 			m_ispaused = ispause;
 		}
 
-		bool Paused() const lnoexcept
+		bool Paused() const lnoexcept()
 		{
 			return m_ispaused;
 		}
@@ -130,7 +130,7 @@ namespace leo
 			m_timescale = scales;
 		}
 
-		decltype(m_timescale) TimeScale() const lnoexcept
+		decltype(m_timescale) TimeScale() const lnoexcept()
 		{
 			return m_timescale;
 		}

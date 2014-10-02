@@ -87,7 +87,7 @@ namespace leo
 			Catch_DX_Exception
 
 			//Create IndexBuffer
-			std::array<std::vector<std::uint16_t>, MAXLOD + 1> mIndexsArray;
+			std::array<std::vector<std::uint32_t>, MAXLOD + 1> mIndexsArray;
 			for (auto slotLod = 0; slotLod != MAXLOD + 1; ++slotLod){
 				auto powdelta = static_cast<std::uint16_t>(std::pow(2, slotLod));
 				for (auto slotY = 0; slotY < MAXEDGEVERTEX - 1;){
@@ -107,7 +107,8 @@ namespace leo
 					slotY += powdelta;
 				}
 				try{
-					CD3D11_BUFFER_DESC ibDesc(sizeof(std::uint16_t)*mIndexsArray[slotLod].size(), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+					mIndexNum[slotLod] = mIndexsArray[slotLod].size();
+					CD3D11_BUFFER_DESC ibDesc(sizeof(std::uint32_t)*mIndexsArray[slotLod].size(), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
 					D3D11_SUBRESOURCE_DATA ibDataDesc = { mIndexsArray[slotLod].data(), 0, 0 };
 
 					dxcall(device->CreateBuffer(&ibDesc, &ibDataDesc, &mIndexBuffer[slotLod]));
@@ -148,6 +149,7 @@ namespace leo
 			auto & mEffect = EffectTerrain::GetInstance();
 			mEffect->ViewProjMatrix(camera.ViewProj());
 			mEffect->HeightMap(mHeightMap);
+			mEffect->UVScale(float2(1.f / mHorChunkNum / mChunkSize, 1.f / mVerChunkNum / mChunkSize));
 			mEffect->Apply(context);
 
 			for (auto slotX = 0; slotX != mHorChunkNum; ++slotX)
@@ -157,10 +159,11 @@ namespace leo
 					auto offset =load(float3(slotX*mChunkSize, 0, -slotY*mChunkSize));
 					if (camera.Contains(topleft+offset,topright+offset,buttomleft+offset))
 					{
-						mEffect->WorldOffset(float3(slotX*mChunkSize, 0, -slotY*mChunkSize),context);
+						float2 worldoffset(-mHorChunkNum*mChunkSize / 2 + slotX*mChunkSize, +mVerChunkNum*mChunkSize / 2 + -slotY*mChunkSize);
+						mEffect->WorldOffset(worldoffset,context);
 
 						auto lodlevel = mChunkVector[slotY*mHorChunkNum + slotX].mLodLevel = (std::rand() % MAXLOD);
-						context->IASetIndexBuffer(mIndexBuffer[lodlevel], DXGI_FORMAT_R16G16_UINT, 0);
+						context->IASetIndexBuffer(mIndexBuffer[lodlevel], DXGI_FORMAT_R32_UINT, 0);
 						context->DrawIndexed(mIndexNum[lodlevel], 0, 0);
 					}
 				}
