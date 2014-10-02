@@ -168,10 +168,12 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\All\Core\EffectLine.cpp" />
+    <ClCompile Include="..\All\Core\EffectTerrain.cpp" />
     <ClCompile Include="..\All\Core\Geometry.cpp" />
     <ClCompile Include="..\All\Core\Mesh.cpp" />
     <ClCompile Include="..\All\Core\MeshLoad.cpp" />
     <ClCompile Include="..\All\Core\RenderSync.cpp" />
+    <ClCompile Include="..\All\Core\Terrain.cpp" />
     <ClCompile Include="..\All\Core\Vertex.cpp" />
     <ClCompile Include="..\All\d3dx11.cpp" />
     <ClCompile Include="..\All\Debug.cpp" />

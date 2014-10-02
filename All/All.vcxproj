@@ -99,12 +99,15 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Core\EffectLine.cpp" />
+    <ClCompile Include="Core\EffectTerrain.cpp" />
     <ClCompile Include="Core\GaussBlur.cpp" />
     <ClCompile Include="Core\Geometry.cpp" />
     <ClCompile Include="Core\Mesh.cpp" />
     <ClCompile Include="Core\MeshLoad.cpp" />
     <ClCompile Include="Core\RenderSync.cpp" />
     <ClCompile Include="Core\Sky.cpp" />
+    <ClCompile Include="Core\Terrain.cpp" />
+    <ClCompile Include="Core\TerrainEffect.cpp" />
     <ClCompile Include="Core\Vertex.cpp" />
     <ClCompile Include="Core\Water.cpp" />
     <ClCompile Include="d3dx11.cpp" />
@@ -162,6 +165,7 @@
     <ClInclude Include="Core\RenderSync.hpp" />
     <ClInclude Include="Core\Sky.hpp" />
     <ClInclude Include="Core\Terrain.hpp" />
+    <ClInclude Include="Core\EffectTerrain.hpp" />
     <ClInclude Include="Core\Vertex.hpp" />
     <ClInclude Include="Core\Water.hpp" />
     <ClInclude Include="D3DX11\D3DX11.h" />
@@ -263,6 +267,15 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)%(RelativeDir)%(Filename).cso</ObjectFileOutput>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\TerrainPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\TerrainVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)%(RelativeDir)%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="Shader\WaterPS.hlsl">
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)%(RelativeDir)%(Filename).cso</ObjectFileOutput>

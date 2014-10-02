@@ -39,6 +39,7 @@
 leo::Event event;
 std::unique_ptr<leo::Mesh> pMesh = nullptr;
 std::unique_ptr<leo::Camera> pCamera = nullptr;
+std::unique_ptr<leo::Terrain<>> pTerrain = nullptr;
 
 std::atomic<bool> renderAble = false;
 std::atomic<bool> renderThreadRun = true;
@@ -91,7 +92,6 @@ std::wstring GetOpenL3dFile()
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	leo::Terrain<> terr((ID3D11Device*)nullptr,L"test");
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 	leo::DeviceMgr DeviceMgr;
 	leo::OutputWindow win;
@@ -253,6 +253,7 @@ void BuildRes()
 	pCamera->SetFrustum(leo::PROJECTION_TYPE::PERSPECTIVE);
 
 	auto& pEffect =  leo::EffectNormalMap::GetInstance(leo::DeviceMgr().GetDevice());
+	leo::EffectTerrain::GetInstance(leo::DeviceMgr().GetDevice());
 	
 
 	leo::DirectionLight dirlight;
@@ -268,6 +269,23 @@ void BuildRes()
 	leo::Axis::GetInstance(leo::DeviceMgr().GetDevice());
 
 	leo::DeviceMgr().GetDeviceContext()->RSSetState(leo::RenderStates().GetRasterizerState(L"WireframeRS"));
+
+	struct TerrainFileHeader
+	{
+		float mChunkSize;
+		std::uint32_t mHorChunkNum;
+		std::uint32_t mVerChunkNum;
+		wchar_t mHeightMap[leo::win::file::max_path];
+	}mTerrainFileHeader;
+
+	mTerrainFileHeader.mChunkSize = 18;
+	mTerrainFileHeader.mHorChunkNum = 32;
+	mTerrainFileHeader.mVerChunkNum = 16;
+	wcscpy(mTerrainFileHeader.mHeightMap, L"Resource\\fBm5OctavesGrad.dds");
+
+	auto & pFile = leo::win::File::Open(L"Resource\\Test.Terrain", leo::win::File::TO_READ);
+	pFile->Write(0, &mTerrainFileHeader, sizeof(mTerrainFileHeader));
+	pTerrain = std::make_unique < leo::Terrain<> >(leo::DeviceMgr().GetDevice(), L"Resource\\Test.Terrain");
 }
 
 

@@ -16,6 +16,7 @@
 #ifndef Core_Terrain_hpp
 #define Core_Terrain_hpp
 
+#include "..\IndePlatform\platform.h"
 #include "..\IndePlatform\\ConstexprMath.hpp"
 #include "..\IndePlatform\leoint.hpp"
 #include "..\IndePlatform\LeoMath.h"
@@ -24,6 +25,7 @@
 #include "..\DeviceMgr.h"
 #include "..\TextureMgr.h"
 #include "..\ShaderMgr.h"
+#include "EffectTerrain.hpp"
 #include "..\file.hpp"
 #include <vector>
 
@@ -32,10 +34,7 @@ namespace leo
 {
 	namespace InputLayoutDesc
 	{
-		static const D3D11_INPUT_ELEMENT_DESC Terrain[] = 
-		{
-			{"POSITION",0,DXGI_FORMAT_R16G16_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0}
-		};
+		extern const D3D11_INPUT_ELEMENT_DESC Terrain[1];
 	}
 	template<std::uint8_t MAXLOD = 4,size_t MAXEDGEVERTEX = 256,size_t TRIWIDTH = 12>
 	//static_assert(pow(2,MAXLOD) <= MAXEDGEVERTEX)
@@ -146,9 +145,10 @@ namespace leo
 			context->IASetVertexBuffers(0, 1, &mCommonVertexBuffer, strides, offsets);
 			context->IASetInputLayout(ShaderMgr().CreateInputLayout(InputLayoutDesc::Terrain));
 			
-			//effect->Apply
-			//improve projview
-			//improve heightmap
+			auto & mEffect = EffectTerrain::GetInstance();
+			mEffect->ViewProjMatrix(camera.ViewProj());
+			mEffect->HeightMap(mHeightMap);
+			mEffect->Apply(context);
 
 			for (auto slotX = 0; slotX != mHorChunkNum; ++slotX)
 			{
@@ -157,7 +157,8 @@ namespace leo
 					auto offset =load(float3(slotX*mChunkSize, 0, -slotY*mChunkSize));
 					if (camera.Contains(topleft+offset,topright+offset,buttomleft+offset))
 					{
-						//Test
+						mEffect->WorldOffset(float3(slotX*mChunkSize, 0, -slotY*mChunkSize),context);
+
 						auto lodlevel = mChunkVector[slotY*mHorChunkNum + slotX].mLodLevel = (std::rand() % MAXLOD);
 						context->IASetIndexBuffer(mIndexBuffer[lodlevel], DXGI_FORMAT_R16G16_UINT, 0);
 						context->DrawIndexed(mIndexNum[lodlevel], 0, 0);

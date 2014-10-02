@@ -88,6 +88,9 @@
     <Filter Include="Shader\HLSL\Line">
       <UniqueIdentifier>{31feaacd-c847-49bd-b2a5-b242b2bcc6a9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader\HLSL\Terrain">
+      <UniqueIdentifier>{e0bdb8b8-5f41-45c5-978d-c24c68298682}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Debug.cpp">
@@ -200,6 +203,15 @@
     </ClCompile>
     <ClCompile Include="IndePlatform\leo_impl_convert_impl.cpp">
       <Filter>IndePlatform\BaseHead</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\TerrainEffect.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\EffectTerrain.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Terrain.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -407,6 +419,9 @@
     <ClInclude Include="IndePlatform\leo_math_convert_impl.h">
       <Filter>IndePlatform\BaseHead</Filter>
     </ClInclude>
+    <ClInclude Include="Core\EffectTerrain.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">
@@ -467,6 +482,12 @@
     </FxCompile>
     <FxCompile Include="Shader\LinePS.hlsl">
       <Filter>Shader\HLSL\Line</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\TerrainVS.hlsl">
+      <Filter>Shader\HLSL\Terrain</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\TerrainPS.hlsl">
+      <Filter>Shader\HLSL\Terrain</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

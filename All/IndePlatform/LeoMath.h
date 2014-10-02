@@ -216,6 +216,9 @@ namespace leo
 		half2(float X, float Y) lnoexcept
 			:u(half(X).data), v(half(Y).data)
 		{}
+
+		half2()
+		{}
 	};
 
 	struct half3
@@ -250,13 +253,13 @@ namespace leo
 	};
 
 	template<typename T>
-	__m128 load(const T& data)
+	__m128 inline load(const T& data)
 	{
 		return load<T>(data);
 	}
 
 	template<>
-	__m128 load<float2>(const float2& data)
+	__m128 inline load<float2>(const float2& data)
 	{
 #ifdef LM_ARM_NEON_INTRINSICS
 		float32x2_t x = vld1_f32_ex( reinterpret_cast<const float*>(pSource), 64 );
@@ -269,7 +272,7 @@ namespace leo
 	}
 
 	template<>
-	__m128 load<float3>(const float3& data)
+	__m128 inline load<float3>(const float3& data)
 	{
 		
 #ifdef LM_ARM_NEON_INTRINSICS
@@ -287,7 +290,7 @@ namespace leo
 	}
 
 	template<>
-	__m128 load<float4>(const float4& data)
+	__m128 inline load<float4>(const float4& data)
 	{
 #ifdef LM_ARM_NEON_INTRINSICS
 		return vld1q_f32_ex(reinterpret_cast<const float*>(&data), 128);
@@ -297,13 +300,13 @@ namespace leo
 	}
 
 	template<typename T>
-	void save(T& data,__m128 vector)
+	void inline save(T& data, __m128 vector)
 	{
 		return save<T>(data,vector);
 	}
 
 	template<>
-	void  save<float2>(float2& data, __m128 vector)
+	void  inline save<float2>(float2& data, __m128 vector)
 	{
 #if defined(LM_ARM_NEON_INTRINSICS)
 		float32x2_t VL = vget_low_f32(vector);
@@ -319,7 +322,7 @@ namespace leo
                                      ((fp1) << 2) | ((fp0)))
 
 	template<>
-	void  save<float3>(float3& data, __m128 vector)
+	void inline save<float3>(float3& data, __m128 vector)
 	{
 #if defined(LM_ARM_NEON_INTRINSICS)
 		float32x2_t VL = vget_low_f32(vector);
@@ -333,7 +336,7 @@ namespace leo
 	}
 
 	template<>
-	void  save<float4>(float4& data, __m128 vector)
+	void  inline save<float4>(float4& data, __m128 vector)
 	{
 #if defined(LM_ARM_NEON_INTRINSICS)
 		vst1q_f32_ex( reinterpret_cast<float*>(&data),vector, 128 );

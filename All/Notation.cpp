@@ -119,8 +119,8 @@ wstring Notation::xUnescapeAndConstruct(const wchar_t *pwchBegin, std::size_t uL
 			}
 			else {
 				*(pwchWrite++) = L'x';
-				for (std::size_t i = 0; i < uBufferIndex; ++i){
-					*(pwchWrite++) = awchHexBuffer[i];
+				for (std::size_t _i = 0; _i < uBufferIndex; ++_i){
+					*(pwchWrite++) = awchHexBuffer[_i];
 				}
 				eState = NORMAL;
 				break;

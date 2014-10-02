@@ -15,7 +15,7 @@ namespace leo
 		XMVECTOR oCenter = XMLoadFloat3(&box.Center) - vCenter;
 
 		XMVECTOR oExtents = XMLoadFloat3(&box.Extents);
-		XMVECTOR oOrientation = loadfloat4(&box.mOrientation);
+		XMVECTOR oOrientation =load(box.mOrientation);
 
 		assert(DirectX::Internal::XMQuaternionIsUnit(oOrientation));
 
@@ -48,7 +48,7 @@ namespace leo
 
 		XMVECTOR boxCenter = XMLoadFloat3(&box.Center);
 		XMVECTOR boxExtents = XMLoadFloat3(&box.Extents);
-		XMVECTOR boxOrientation = loadfloat4(&box.mOrientation);
+		XMVECTOR boxOrientation =load(box.mOrientation);
 
 		assert(DirectX::Internal::XMQuaternionIsUnit(boxOrientation));
 
@@ -85,13 +85,13 @@ namespace leo
 		// Load the box
 		XMVECTOR vCenter = XMLoadFloat3(&Center);
 		XMVECTOR vExtents = XMLoadFloat3(&Extents);
-		XMVECTOR vOrientation = loadfloat4(&mOrientation);
+		XMVECTOR vOrientation =load(mOrientation);
 
 		assert(DirectX::Internal::XMQuaternionIsUnit(vOrientation));
 
 		for (size_t i = 0; i < BoundingFrustum::CORNER_COUNT; ++i)
 		{
-			XMVECTOR C = XMVector3InverseRotate(loadfloat3(&Corners[i]) - vCenter, vOrientation);
+			XMVECTOR C = XMVector3InverseRotate(load(Corners[i]) - vCenter, vOrientation);
 
 			if (!XMVector3InBounds(C, vExtents))
 				return INTERSECTS;
@@ -267,12 +267,12 @@ namespace leo
 					tangent.y = 0.0f;
 					tangent.z = +radius*sinf(phi)*cosf(theta);
 
-					XMVECTOR T = loadfloat3(&tangent);
-					savefloat3(&tangent, XMVector3Normalize(T));
+					XMVECTOR T = load(tangent);
+					save(tangent, XMVector3Normalize(T));
 
-					XMVECTOR p = loadfloat3(&pos);
+					XMVECTOR p = load(pos);
 					float3 normal;
-					savefloat3(&normal, XMVector3Normalize(p));
+					save(normal, XMVector3Normalize(p));
 
 					float2 tex;
 					tex.x = theta / XM_2PI;
@@ -476,13 +476,13 @@ namespace leo
 			for (uint32 i = 0; i < result.Vertices.size(); ++i)
 			{
 				// Project onto unit sphere.
-				XMVECTOR n = XMVector3Normalize(loadfloat3(&result.Vertices[i].pos));
+				XMVECTOR n = XMVector3Normalize(load(result.Vertices[i].pos));
 
 				// Project onto sphere.
 				XMVECTOR p = radius*n;
 
-				savefloat3(&result.Vertices[i].pos, p);
-				savefloat3(&result.Vertices[i].normal, n);
+				save(result.Vertices[i].pos, p);
+				save(result.Vertices[i].normal, n);
 
 				// Derive texture coordinates from spherical coordinates.
 				auto theta = atanr(
@@ -499,8 +499,8 @@ namespace leo
 				result.Vertices[i].tangent.y = 0.0f;
 				result.Vertices[i].tangent.z = +radius*sinf(phi)*cosf(theta);
 
-				XMVECTOR T = loadfloat3(&result.Vertices[i].tangent);
-				savefloat3(&result.Vertices[i].tangent, XMVector3Normalize(T));
+				XMVECTOR T = load(result.Vertices[i].tangent);
+				save(result.Vertices[i].tangent, XMVector3Normalize(T));
 			}
 
 			return std::move(result);
