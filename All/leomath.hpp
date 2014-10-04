@@ -58,19 +58,9 @@ namespace leo
 		float pad;
 	};
 
-	using std::max;
-	using std::min;
-	const float LM_PI = 3.14159265f;
-	const float LM_HALFPI = LM_PI / 2.0f;
-	const float LM_QUARPI = LM_PI / 4.0f;
-	//radian per degree
-	const float LM_RPD = LM_PI / 180.0f;
+	
 
-	template<typename _Ty>
-	inline void clamp(const _Ty& _Min, const _Ty& _Max,_Ty & _X)
-	{
-		_X = max(_Min, min(_Max, _X));
-	}
+	
 
 	template<typename _Ty>
 	//单位:角度
@@ -86,19 +76,6 @@ namespace leo
 		return std::cos(degree*LM_RPD);
 	}
 
-	template<typename _Ty>
-	//单位:弧度
-	inline _Ty sinr(const _Ty& radian)
-	{
-		return std::sin(radian);
-	}
-
-	template<typename _Ty>
-	//单位:弧度
-	inline _Ty cosr(const _Ty& radian)
-	{
-		return std::cos(radian);
-	}
 
 	template<typename _Ty>
 	//单位:角度
@@ -107,12 +84,6 @@ namespace leo
 		return std::tan(degree *LM_RPD);
 	}
 
-	template<typename _Ty>
-	//单位:弧度
-	inline _Ty tanr(const _Ty& radian)
-	{
-		return std::tan(radian);
-	}
 
 	template<typename _Tx,typename _Ty>
 	//单位:弧度
@@ -139,20 +110,10 @@ namespace leo
 	}
 #else
 	//单位:弧度
-	inline __declspec(naked) double __stdcall sincosr(double *pcos, double rad)
-	{
-		__asm
-		{
-			mov eax, dword ptr[esp+4]
-			fld qword ptr[esp+8]
-			fsincos
-			fstp qword ptr[eax]
-			ret 12
-		}
-	}
+	
 #endif
 	//单位:角度
-	inline double sincosd(double* pcos, double degree)
+	inline float sincosd(float* pcos, float degree)
 	{
 		return sincosr(pcos, degree*LM_RPD);
 	}
@@ -220,31 +181,6 @@ namespace leo
 		return matrix.r[3];
 	}
 
-	template<>
-	inline void clamp(const float2& min, const float2& max, float2 & val)
-	{
-		clamp(min.x, max.x, val.x);
-		clamp(min.y, max.y, val.y);
-	}
-	
-
-	template<>
-	inline void clamp(const float3& min, const float3& max, float3 & val)
-	{
-		clamp(min.x, max.x, val.x);
-		clamp(min.y, max.y, val.y);
-		clamp(min.z, max.z, val.z);
-	}
-
-	template<>
-	inline void clamp(const float4& min, const float4& max, float4 & val)
-	{
-		clamp(min.x, max.x, val.x);
-		clamp(min.y, max.y, val.y);
-		clamp(min.z, max.z, val.z);
-		clamp(min.w, max.w, val.w);
-	}
-
 	template<typename T>
 	inline T Normalize(const T& val)
 	{
@@ -300,13 +236,7 @@ namespace leo
 		return T(x, y, z);
 	}
 
-	inline float Distance(const float3& a, const float3& b)
-	{
-		XMVECTOR x = load(a);
-		XMVECTOR y = load(b);
-		XMVECTOR length = XMVector3Length(XMVectorSubtract(x, y));
-		return XMVectorGetX(length);
-	}
+	
 
 	//3*3
 	inline void QuaternionToMatrix(const float4& quaternion, float4x4& matrix)
@@ -386,7 +316,7 @@ namespace leo
 	inline float4 EulerAngleToQuaternion(const float3& eulerangle)
 	{
 		float4 q;
-		double cos_i, sin_i, cos_j, sin_j, cos_k, sin_k;
+		float cos_i, sin_i, cos_j, sin_j, cos_k, sin_k;
 		sin_i = sincosd(&cos_i, eulerangle.x / 2.f);
 		sin_j = sincosd(&cos_j, eulerangle.y / 2.f);
 		sin_k = sincosd(&cos_k, eulerangle.z / 2.f);
