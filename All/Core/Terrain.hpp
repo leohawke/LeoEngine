@@ -2,7 +2,7 @@
 //  Leo Engine Source File.
 //  Copyright (C), FNS Studios, 2014-2014.
 // -------------------------------------------------------------------------
-//  File name:   Core/Terrain.h[[
+//  File name:   Core/Terrain.h
 //  Version:     v1.00
 //  Created:     8/29/2014 by leo hawke.
 //  Compilers:   Visual Studio.NET 2013
@@ -20,6 +20,7 @@
 #include "..\IndePlatform\\ConstexprMath.hpp"
 #include "..\IndePlatform\leoint.hpp"
 #include "..\IndePlatform\LeoMath.h"
+#include "..\IndePlatform\memory.hpp"
 #include "Camera.hpp"
 #include "..\exception.hpp"
 #include "..\DeviceMgr.h"
@@ -36,9 +37,9 @@ namespace leo
 	{
 		extern const D3D11_INPUT_ELEMENT_DESC Terrain[1];
 	}
-	template<std::uint8_t MAXLOD = 4,size_t MAXEDGEVERTEX = 256,size_t TRIWIDTH = 12>
+	template<std::uint8_t MAXLOD = 4, size_t MAXEDGEVERTEX = 256, size_t TRIWIDTH = 12>
 	//static_assert(pow(2,MAXLOD) <= MAXEDGEVERTEX)
-	class Terrain
+	class Terrain : public LodAlloc
 	{
 	public:
 		//TerrainFile fomrat:
@@ -49,7 +50,7 @@ namespace leo
 		//std::uint32_t mVerChunkNum;
 		//std::wchar_t mHeightMap[file::max_path];
 		//}
-		Terrain(ID3D11Device* device,const std::wstring& terrainfilename)
+		Terrain(ID3D11Device* device, const std::wstring& terrainfilename)
 		{
 			struct TerrainFileHeader
 			{
@@ -79,27 +80,27 @@ namespace leo
 				}
 			}
 			try{
-				CD3D11_BUFFER_DESC vbDesc(sizeof(Vertex)*mVertexs.size(),D3D11_BIND_VERTEX_BUFFER,D3D11_USAGE_IMMUTABLE);
-				D3D11_SUBRESOURCE_DATA vbDataDesc = { vbDataDesc.pSysMem = mVertexs.data() ,0,0};
-				
+				CD3D11_BUFFER_DESC vbDesc(sizeof(Vertex)*mVertexs.size(), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+				D3D11_SUBRESOURCE_DATA vbDataDesc = { vbDataDesc.pSysMem = mVertexs.data(), 0, 0 };
+
 				dxcall(device->CreateBuffer(&vbDesc, &vbDataDesc, &mCommonVertexBuffer));
 			}
 			Catch_DX_Exception
 
-			//Create IndexBuffer
-			std::array<std::vector<std::uint32_t>, MAXLOD + 1> mIndexsArray;
+				//Create IndexBuffer
+				std::array<std::vector<std::uint32_t>, MAXLOD + 1> mIndexsArray;
 			for (auto slotLod = 0; slotLod != MAXLOD + 1; ++slotLod){
 				auto powdelta = static_cast<std::uint16_t>(std::pow(2, slotLod));
 				for (auto slotY = 0; slotY < MAXEDGEVERTEX - 1;){
 					for (auto slotX = 0; slotX < MAXEDGEVERTEX - 1;)
 					{
-						auto baseIndex =static_cast<std::uint16_t>(slotY*MAXEDGEVERTEX + slotX);
+						auto baseIndex = static_cast<std::uint16_t>(slotY*MAXEDGEVERTEX + slotX);
 						mIndexsArray[slotLod].emplace_back(baseIndex);
-						mIndexsArray[slotLod].emplace_back(baseIndex+powdelta);
+						mIndexsArray[slotLod].emplace_back(baseIndex + powdelta);
 						mIndexsArray[slotLod].emplace_back(baseIndex + powdelta*static_cast<std::uint16_t>(MAXEDGEVERTEX));
 
-						mIndexsArray[slotLod].emplace_back(baseIndex+powdelta);
-						mIndexsArray[slotLod].emplace_back(baseIndex + powdelta*static_cast<std::uint16_t>(MAXEDGEVERTEX) + powdelta);
+						mIndexsArray[slotLod].emplace_back(baseIndex + powdelta);
+						mIndexsArray[slotLod].emplace_back(baseIndex + powdelta*static_cast<std::uint16_t>(MAXEDGEVERTEX)+powdelta);
 						mIndexsArray[slotLod].emplace_back(baseIndex + powdelta*static_cast<std::uint16_t>(MAXEDGEVERTEX));
 
 						slotX += powdelta;
@@ -136,7 +137,7 @@ namespace leo
 	public:
 		void Render(ID3D11DeviceContext* context, const Camera& camera)
 		{
-			auto topleft =load(float3(-mHorChunkNum*mChunkSize / 2, 0, +mVerChunkNum*mChunkSize / 2));
+			auto topleft = load(float3(-mHorChunkNum*mChunkSize / 2, 0, +mVerChunkNum*mChunkSize / 2));
 			auto topright = load(float3(-mHorChunkNum*mChunkSize / 2 + mChunkSize, 0, +mVerChunkNum*mChunkSize / 2));
 			auto buttomleft = load(float3(-mHorChunkNum*mChunkSize / 2, 0, +mVerChunkNum*mChunkSize / 2 - mChunkSize));
 
@@ -145,7 +146,7 @@ namespace leo
 			UINT offsets[] = { 0 };
 			context->IASetVertexBuffers(0, 1, &mCommonVertexBuffer, strides, offsets);
 			context->IASetInputLayout(ShaderMgr().CreateInputLayout(InputLayoutDesc::Terrain));
-			
+
 			auto & mEffect = EffectTerrain::GetInstance();
 			mEffect->ViewProjMatrix(camera.ViewProj());
 			mEffect->HeightMap(mHeightMap);
@@ -156,11 +157,11 @@ namespace leo
 			{
 				for (auto slotY = 0; slotY != mVerChunkNum; ++slotY)
 				{
-					auto offset =load(float3(slotX*mChunkSize, 0, -slotY*mChunkSize));
-					if (camera.Contains(topleft+offset,topright+offset,buttomleft+offset))
+					auto offset = load(float3(slotX*mChunkSize, 0, -slotY*mChunkSize));
+					if (camera.Contains(topleft + offset, topright + offset, buttomleft + offset))
 					{
 						float2 worldoffset(-mHorChunkNum*mChunkSize / 2 + slotX*mChunkSize, +mVerChunkNum*mChunkSize / 2 + -slotY*mChunkSize);
-						mEffect->WorldOffset(worldoffset,context);
+						mEffect->WorldOffset(worldoffset, context);
 
 						auto lodlevel = mChunkVector[slotY*mHorChunkNum + slotX].mLodLevel = (std::rand() % MAXLOD);
 						context->IASetIndexBuffer(mIndexBuffer[lodlevel], DXGI_FORMAT_R32_UINT, 0);
@@ -181,7 +182,7 @@ namespace leo
 			}
 			half2 pos;
 		};
-		
+
 		class Chunk
 		{
 		public:
@@ -191,10 +192,10 @@ namespace leo
 			{}
 			Chunk()
 			{}
-			std::uint8_t mLodLevel = MAXLOD/2;
+			std::uint8_t mLodLevel = MAXLOD / 2;
 		};
 		std::array<Vertex, MAXEDGEVERTEX*MAXEDGEVERTEX> mVertexs;
-		
+
 		std::vector<Chunk> mChunkVector;
 		float mChunkSize;
 		std::uint16_t mHorChunkNum;
@@ -204,6 +205,38 @@ namespace leo
 		ID3D11Buffer* mCommonVertexBuffer;
 		std::array<ID3D11Buffer*, MAXLOD + 1> mIndexBuffer;
 		std::array<UINT, MAXLOD + 1> mIndexNum;
+
+		float2 mScreenSize;
+	private:
+		uint8 ClipToScrrenSpaceLod(XMVECTOR clip0, XMVECTOR clip1)
+		{
+			clip0 /= XMVectorSplatW(clip0);
+			clip1 /= XMVectorSplatW(clip1);
+
+			auto gScrrenSize = load(float4(mScreenSize.x, mChunkSize.y, 1.f, 1.f));
+			clip0 *= gScreenSize;
+			clip1 *= gScreenSize;
+
+			float d = XMVectorGetX(XMVector4Length(clip0 - clip1)) / TRIWIDTH;
+
+			uint8 Lod = 0;
+
+			for (; Lod <= MAXLOD;++Lod)
+			{
+				if (d > (MAXEDGEVERTEX >> Lod))
+					break;
+			}
+
+			return Lod;
+		}
+
+		uint8 EdgeToScreenSpaceLod(const float3& p0,const float3& p1,const float3& offset,CXMMATRIX matrix)
+		{
+			auto voffset = load(float4(offset, 0.f));
+			auto clip0 =(load(float4(po,1.f))+voffset)*matrix;
+			auto clip1 = (load(float4(p1, 1.f)) + voffset)*matrix;
+			return ClipToScreenSpaceLod(clip0, clip1);
+		}
 	};
 }
 
