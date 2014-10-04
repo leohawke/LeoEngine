@@ -921,7 +921,7 @@ namespace leo
 	private:
 		void _update()
 		{
-			double sinfov, cosfov;
+			float sinfov, cosfov;
 			sinfov = sincosr(&cosfov, mFov / 2.f);
 			auto cotfov = static_cast<float>(cosfov / sinfov);
 			auto tanfov = static_cast<float>(sinfov / cosfov);
