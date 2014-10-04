@@ -69,7 +69,7 @@ namespace leo
 			//Create VertexBuffer
 			auto beginX = -mTerrainFileHeader.mChunkSize / 2;
 			auto beginY = mTerrainFileHeader.mChunkSize / 2;
-			auto delta = mTerrainFileHeader.mChunkSize / MAXEDGEVERTEX;
+			auto delta = mTerrainFileHeader.mChunkSize / (MAXEDGEVERTEX-1);
 			for (auto slotY = 0; slotY != MAXEDGEVERTEX; ++slotY)
 			{
 				auto y = beginY - slotY*delta;
@@ -79,6 +79,7 @@ namespace leo
 					mVertexs[slotY*MAXEDGEVERTEX + slotX] = half2(x, y);
 				}
 			}
+			DebugPrintf("topright %u %u\n", mVertexs[MAXEDGEVERTEX - 1].pos.x, half(mTerrainFileHeader.mChunkSize / 2).data);
 			try{
 				CD3D11_BUFFER_DESC vbDesc(sizeof(Vertex)*mVertexs.size(), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
 				D3D11_SUBRESOURCE_DATA vbDataDesc = { vbDataDesc.pSysMem = mVertexs.data(), 0, 0 };
@@ -153,6 +154,7 @@ namespace leo
 			mEffect->UVScale(float2(1.f / mHorChunkNum / mChunkSize, 1.f / mVerChunkNum / mChunkSize));
 			mEffect->Apply(context);
 
+#if 0
 			for (auto slotX = 0; slotX != mHorChunkNum; ++slotX)
 			{
 				for (auto slotY = 0; slotY != mVerChunkNum; ++slotY)
@@ -163,12 +165,29 @@ namespace leo
 						float2 worldoffset(-mHorChunkNum*mChunkSize / 2 + slotX*mChunkSize, +mVerChunkNum*mChunkSize / 2 + -slotY*mChunkSize);
 						mEffect->WorldOffset(worldoffset, context);
 
-						auto lodlevel = mChunkVector[slotY*mHorChunkNum + slotX].mLodLevel = (std::rand() % MAXLOD);
+						auto lodlevel = mChunkVector[slotY*mHorChunkNum + slotX].mLodLevel = EdgeToScreenSpaceLod(topleft+offset,topright+offset,camera.ViewProj());
 						context->IASetIndexBuffer(mIndexBuffer[lodlevel], DXGI_FORMAT_R32_UINT, 0);
 						context->DrawIndexed(mIndexNum[lodlevel], 0, 0);
 					}
 				}
 			}
+#else
+			auto leftx = details::half_to_float(mVertexs[0].pos.x);
+			auto rightx = details::half_to_float(mVertexs[MAXEDGEVERTEX - 1].pos.x);
+			//DebugPrintf("%f %f %f what the fuck\n", leftx, rightx, rightx - leftx);
+			auto delta = mChunkSize / (MAXEDGEVERTEX - 1);
+			auto offset = load(float3(mHorChunkNum / 2 * mChunkSize, 0, -mVerChunkNum / 2 * mChunkSize));
+			float2 worldoffset(0.f,0.f);
+			mEffect->WorldOffset(worldoffset, context);
+			auto lodlevel =EdgeToScreenSpaceLod(topleft + offset, topright + offset, camera.ViewProj());
+			context->IASetIndexBuffer(mIndexBuffer[0], DXGI_FORMAT_R32_UINT, 0);
+			context->DrawIndexed(mIndexNum[0], 0, 0);
+			worldoffset.x += mChunkSize;
+			mEffect->WorldOffset(worldoffset, context);
+			lodlevel = EdgeToScreenSpaceLod(topleft + offset, topright + offset, camera.ViewProj());
+			context->IASetIndexBuffer(mIndexBuffer[0], DXGI_FORMAT_R32_UINT, 0);
+			context->DrawIndexed(mIndexNum[0], 0, 0);
+#endif
 		}
 	private:
 		struct Vertex
@@ -208,12 +227,12 @@ namespace leo
 
 		float2 mScreenSize;
 	private:
-		uint8 ClipToScrrenSpaceLod(XMVECTOR clip0, XMVECTOR clip1)
+		uint8 ClipToScreenSpaceLod(XMVECTOR clip0, XMVECTOR clip1)
 		{
 			clip0 /= XMVectorSplatW(clip0);
 			clip1 /= XMVectorSplatW(clip1);
 
-			auto gScrrenSize = load(float4(mScreenSize.x, mChunkSize.y, 1.f, 1.f));
+			auto gScreenSize = load(float4(mScreenSize, 1.f, 1.f));
 			clip0 *= gScreenSize;
 			clip1 *= gScreenSize;
 
@@ -221,7 +240,7 @@ namespace leo
 
 			uint8 Lod = 0;
 
-			for (; Lod <= MAXLOD;++Lod)
+			for (; Lod < MAXLOD;++Lod)
 			{
 				if (d > (MAXEDGEVERTEX >> Lod))
 					break;
@@ -230,11 +249,10 @@ namespace leo
 			return Lod;
 		}
 
-		uint8 EdgeToScreenSpaceLod(const float3& p0,const float3& p1,const float3& offset,CXMMATRIX matrix)
+		uint8 EdgeToScreenSpaceLod(XMVECTOR p0, XMVECTOR p1, CXMMATRIX matrix)
 		{
-			auto voffset = load(float4(offset, 0.f));
-			auto clip0 =(load(float4(po,1.f))+voffset)*matrix;
-			auto clip1 = (load(float4(p1, 1.f)) + voffset)*matrix;
+			auto clip0 = XMVector4Transform(p0, matrix);
+			auto clip1 = XMVector4Transform(p1,matrix);
 			return ClipToScreenSpaceLod(clip0, clip1);
 		}
 	};
