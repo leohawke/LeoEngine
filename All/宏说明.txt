@@ -1,0 +1,12 @@
+platform.h 平台相关宏
+PLATFORM_WIN32 win7/8/8.1/10/xbox one
+PLATFORM_WINRT win8/10/WP8 sotre
+ARCH_XENON 目标平台架构为XBOX360
+ARCH_X86
+ARCH_AMD64 指定目标平台为AMD64架构(X8664)
+ARCH_ARM 指定目标平台为ARM架构,产生宏LM_ARM_NEON_INTRINSICS
+MULTI_THREAD 多线程
+ldef.h 编译器相关宏
+LB_IMPL_MSCPP MSVC编译器
+LB_IMPL_GCC mingw-g++编译器
+LB_IMPL_CLANG clang编译器

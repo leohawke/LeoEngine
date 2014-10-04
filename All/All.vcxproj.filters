@@ -507,6 +507,7 @@
     </Text>
     <Text Include="一个渲染对象需求.txt" />
     <Text Include="近期目标.txt" />
+    <Text Include="宏说明.txt" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="d3dcompiler_47.dll">

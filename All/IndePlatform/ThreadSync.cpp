@@ -1,4 +1,4 @@
-#ifdef WIN32
+#ifdef PLATFORM_WIN32
 
 #include "platform.h"
 #include "ThreadSync.hpp"
