@@ -145,9 +145,9 @@ namespace leo
 	public:
 		void Render(ID3D11DeviceContext* context, const Camera& camera)
 		{
-			auto topleft = load(float3(-mHorChunkNum*mChunkSize / 2, 0, +mVerChunkNum*mChunkSize / 2));
-			auto topright = load(float3(-mHorChunkNum*mChunkSize / 2 + mChunkSize, 0, +mVerChunkNum*mChunkSize / 2));
-			auto buttomleft = load(float3(-mHorChunkNum*mChunkSize / 2, 0, +mVerChunkNum*mChunkSize / 2 - mChunkSize));
+			auto topleft = load(float3(-(mHorChunkNum+1)*mChunkSize / 2, 0, +(mVerChunkNum+1)*mChunkSize / 2));
+			auto topright = load(float3(-(mHorChunkNum - 1)*mChunkSize / 2, 0, +(mVerChunkNum + 1)*mChunkSize / 2));
+			auto buttomleft = load(float3(-(mHorChunkNum + 1)*mChunkSize / 2, 0, +(mVerChunkNum - 1)*mChunkSize / 2));
 
 			context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			UINT strides[] = { sizeof(Terrain::Vertex) };
@@ -161,12 +161,13 @@ namespace leo
 			mEffect->UVScale(float2(1.f / mHorChunkNum / mChunkSize, 1.f / mVerChunkNum / mChunkSize));
 			mEffect->Apply(context);
 
-#if 0
 			for (auto slotX = 0; slotX != mHorChunkNum; ++slotX)
 			{
 				for (auto slotY = 0; slotY != mVerChunkNum; ++slotY)
 				{
 					auto offset = load(float3(slotX*mChunkSize, 0, -slotY*mChunkSize));
+					//auto offset = load(float3(slotX*mChunkSize - mChunkSize / 2, 0, -slotY*mChunkSize + mChunkSize / 2));
+					//see calc topleft,topright,...
 					if (camera.Contains(topleft + offset, topright + offset, buttomleft + offset))
 					{
 						float2 worldoffset(-mHorChunkNum*mChunkSize / 2 + slotX*mChunkSize, +mVerChunkNum*mChunkSize / 2 + -slotY*mChunkSize);
@@ -178,23 +179,6 @@ namespace leo
 					}
 				}
 			}
-#else
-			auto leftx = details::half_to_float(mVertexs[0].pos.x);
-			auto rightx = details::half_to_float(mVertexs[MAXEDGEVERTEX - 1].pos.x);
-			//DebugPrintf("%f %f %f what the fuck\n", leftx, rightx, rightx - leftx);
-			auto delta = mChunkSize / (MAXEDGEVERTEX - 1);
-			auto offset = load(float3(mHorChunkNum / 2 * mChunkSize, 0, -mVerChunkNum / 2 * mChunkSize));
-			float2 worldoffset(0.f,0.f);
-			mEffect->WorldOffset(worldoffset, context);
-			auto lodlevel =EdgeToScreenSpaceLod(topleft + offset, topright + offset, camera.ViewProj());
-			context->IASetIndexBuffer(mIndexBuffer[4], DXGI_FORMAT_R32_UINT, 0);
-			context->DrawIndexed(mIndexNum[4], 0, 0);
-			worldoffset.x += mChunkSize;
-			mEffect->WorldOffset(worldoffset, context);
-			lodlevel = EdgeToScreenSpaceLod(topleft + offset, topright + offset, camera.ViewProj());
-			context->IASetIndexBuffer(mIndexBuffer[4], DXGI_FORMAT_R32_UINT, 0);
-			context->DrawIndexed(mIndexNum[4], 0, 0);
-#endif
 		}
 	private:
 		struct Vertex
