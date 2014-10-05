@@ -275,6 +275,7 @@ namespace leo
 
 	void DeviceMgr::ReSize(const size_type& size)
 	{
+		global::globalClientSize = size;
 		global::globalD3DContext->OMSetRenderTargets(0, nullptr, nullptr);
 		leo::win::ReleaseCOM(global::globalD3DRenderTargetTexture2D);
 		leo::win::ReleaseCOM(global::globalD3DRenderTargetView);

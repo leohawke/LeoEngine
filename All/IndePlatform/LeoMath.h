@@ -337,6 +337,11 @@ namespace leo
 		{
 		}
 
+		template<typename _Tx,typename _Ty>
+		float4(const std::pair<_Tx, _Ty> XY, float Z, float W) lnoexcept()
+			: x(XY.first), y(XY.second), z(Z), w(W)
+		{}
+
 		template<typename T>
 		explicit float4(const T& src) lnoexcept()
 		{

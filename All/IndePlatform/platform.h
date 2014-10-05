@@ -28,15 +28,26 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
+
 
 #ifndef ARCH_XENON
 #undef STRICT
 #define STRICT
+#ifndef NOMINMAX
+#define NOMINMAX
 #include <Windows.h>
 #include <windowsx.h>
+#undef NOMINMAX
+#else
+#include <Windows.h>
+#include <windowsx.h>
+#endif
+
+#endif
+
+#ifdef max
+#undef min
+#undef max
 #endif
 
 #ifdef MULTI_THREAD

@@ -1,4 +1,4 @@
-#include "Win.hpp"
+#include "Indeplatform\platform.h"
 
 #include <DXGIFormat.h>
 #include <assert.h>

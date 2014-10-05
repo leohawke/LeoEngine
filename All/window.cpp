@@ -147,10 +147,9 @@ namespace leo
 	{
 		RECT r;
 		GetClientRect(global::globalHwnd, &r);
-		std::pair<leo::uint16, leo::uint16> mClientSize;
-		mClientSize.first = static_cast<leo::uint16>(r.right - r.left);
-		mClientSize.second = static_cast<leo::uint16>(r.bottom - r.top);
-		return mClientSize;
+		global::globalClientSize.first = static_cast<leo::uint16>(r.right - r.left);
+		global::globalClientSize.second = static_cast<leo::uint16>(r.bottom - r.top);
+		return global::globalClientSize;
 	}
 
 	LRESULT OutputWindow::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

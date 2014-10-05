@@ -96,13 +96,20 @@ namespace leo
 					for (auto slotX = 0; slotX < MAXEDGEVERTEX - 1;)
 					{
 						auto baseIndex = static_cast<std::uint16_t>(slotY*MAXEDGEVERTEX + slotX);
-						mIndexsArray[slotLod].emplace_back(baseIndex);
-						mIndexsArray[slotLod].emplace_back(baseIndex + powdelta);
-						mIndexsArray[slotLod].emplace_back(baseIndex + powdelta*static_cast<std::uint16_t>(MAXEDGEVERTEX));
+						auto xdelta = powdelta;
+						if (slotX + xdelta > MAXEDGEVERTEX-1)
+							xdelta -= (slotX + xdelta+1 - MAXEDGEVERTEX);
+						auto ydelta = powdelta;
+						if (slotY + ydelta > MAXEDGEVERTEX-1)
+							ydelta -= (slotY + ydelta + 1 - MAXEDGEVERTEX);
 
-						mIndexsArray[slotLod].emplace_back(baseIndex + powdelta);
-						mIndexsArray[slotLod].emplace_back(baseIndex + powdelta*static_cast<std::uint16_t>(MAXEDGEVERTEX)+powdelta);
-						mIndexsArray[slotLod].emplace_back(baseIndex + powdelta*static_cast<std::uint16_t>(MAXEDGEVERTEX));
+						mIndexsArray[slotLod].emplace_back(baseIndex);
+						mIndexsArray[slotLod].emplace_back(baseIndex + xdelta);
+						mIndexsArray[slotLod].emplace_back(baseIndex + ydelta*static_cast<std::uint16_t>(MAXEDGEVERTEX));
+
+						mIndexsArray[slotLod].emplace_back(baseIndex + xdelta);
+						mIndexsArray[slotLod].emplace_back(baseIndex + ydelta*static_cast<std::uint16_t>(MAXEDGEVERTEX)+xdelta);
+						mIndexsArray[slotLod].emplace_back(baseIndex + ydelta*static_cast<std::uint16_t>(MAXEDGEVERTEX));
 
 						slotX += powdelta;
 					}
@@ -180,13 +187,13 @@ namespace leo
 			float2 worldoffset(0.f,0.f);
 			mEffect->WorldOffset(worldoffset, context);
 			auto lodlevel =EdgeToScreenSpaceLod(topleft + offset, topright + offset, camera.ViewProj());
-			context->IASetIndexBuffer(mIndexBuffer[0], DXGI_FORMAT_R32_UINT, 0);
-			context->DrawIndexed(mIndexNum[0], 0, 0);
+			context->IASetIndexBuffer(mIndexBuffer[4], DXGI_FORMAT_R32_UINT, 0);
+			context->DrawIndexed(mIndexNum[4], 0, 0);
 			worldoffset.x += mChunkSize;
 			mEffect->WorldOffset(worldoffset, context);
 			lodlevel = EdgeToScreenSpaceLod(topleft + offset, topright + offset, camera.ViewProj());
-			context->IASetIndexBuffer(mIndexBuffer[0], DXGI_FORMAT_R32_UINT, 0);
-			context->DrawIndexed(mIndexNum[0], 0, 0);
+			context->IASetIndexBuffer(mIndexBuffer[4], DXGI_FORMAT_R32_UINT, 0);
+			context->DrawIndexed(mIndexNum[4], 0, 0);
 #endif
 		}
 	private:
@@ -225,10 +232,12 @@ namespace leo
 		std::array<ID3D11Buffer*, MAXLOD + 1> mIndexBuffer;
 		std::array<UINT, MAXLOD + 1> mIndexNum;
 
-		float2 mScreenSize;
+		std::pair<uint16,uint16> mScreenSize;
 	private:
 		uint8 ClipToScreenSpaceLod(XMVECTOR clip0, XMVECTOR clip1)
 		{
+			mScreenSize = DeviceMgr().GetClientSize();
+
 			clip0 /= XMVectorSplatW(clip0);
 			clip1 /= XMVectorSplatW(clip1);
 

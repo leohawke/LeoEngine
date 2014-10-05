@@ -21,13 +21,16 @@ namespace leo
 		extern ID3D11DepthStencilView* globalD3DDepthStencilView = nullptr;
 		extern ID3D11RenderTargetView* globalD3DRenderTargetView = nullptr;
 		extern ID3D11Texture2D*	globalD3DRenderTargetTexture2D = nullptr;
-		std::set<std::pair<unsigned int, unsigned int>> globalDXGISizeSet;
+
+
+		std::set<std::pair<leo::uint16, leo::uint16>> globalDXGISizeSet;
 
 #if defined DEBUG || defined _DEBUG
 		extern ID3D11Debug* globalD3DDebug = nullptr;
 #endif
 		//share by DeviceMgr and Window
-		std::pair<unsigned int, unsigned int> globalWindowSize;
+		std::pair<leo::uint16, leo::uint16> globalClientSize;
+
 		float globalAspect;
 		//WindowMgr
 		win::HWND globalHwnd;

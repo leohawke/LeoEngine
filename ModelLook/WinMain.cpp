@@ -121,7 +121,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 		{
 			if (mHasDuration > mNeedDuration)
 			{
-				auto size = std::make_pair<int, int>(LOWORD(lParam), HIWORD(lParam));
+				auto size = std::make_pair<leo::uint16, leo::uint16>(LOWORD(lParam), HIWORD(lParam));
 				DeviceMgr.ReSize(size);
 				mHasDuration = leo::Clock::ToDuration(0.f);
 			}

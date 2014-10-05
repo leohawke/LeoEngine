@@ -88,20 +88,21 @@ namespace leo
 		{
 			Delegate::GetInstance();
 		}
-		using size_type = std::pair<unsigned int, unsigned int>;
+		using size_type = std::pair<leo::uint16, leo::uint16>;
 	public:
 		void ToggleFullScreen(bool flags);
 		void ReSize(const size_type& size);
 		const decltype(global::globalDXGISizeSet) & QuerySize();
 		bool CreateDevice(bool fullscreen, const size_type& size);
 		void DestroyDevice();
-		DefGetter(const _NOEXCEPT, ID3D11Device*, Device, global::globalD3DDevice);
-		DefGetter(const _NOEXCEPT, ID3D11DeviceContext*, DeviceContext, global::globalD3DContext);
-		DefGetter(const _NOEXCEPT, IDXGISwapChain*, SwapChain, global::globalDXGISwapChain);
-		DefGetter(const _NOEXCEPT, ID3D11Texture2D*, DepthStencilTexture, global::globalD3DDepthTexture);
-		DefGetter(const _NOEXCEPT, ID3D11DepthStencilView*, DepthStencilView, global::globalD3DDepthStencilView);
-		DefGetter(const _NOEXCEPT, ID3D11RenderTargetView*, RenderTargetView, global::globalD3DRenderTargetView);
-		DefGetter(const _NOEXCEPT, ID3D11Texture2D*, RenderTargetTexture2D, global::globalD3DRenderTargetTexture2D);
-		DefGetter(const _NOEXCEPT, float, Aspect, global::globalAspect);
+		DefGetter(const lnoexcept(), ID3D11Device*, Device, global::globalD3DDevice);
+		DefGetter(const lnoexcept(), ID3D11DeviceContext*, DeviceContext, global::globalD3DContext);
+		DefGetter(const lnoexcept(), IDXGISwapChain*, SwapChain, global::globalDXGISwapChain);
+		DefGetter(const lnoexcept(), ID3D11Texture2D*, DepthStencilTexture, global::globalD3DDepthTexture);
+		DefGetter(const lnoexcept(), ID3D11DepthStencilView*, DepthStencilView, global::globalD3DDepthStencilView);
+		DefGetter(const lnoexcept(), ID3D11RenderTargetView*, RenderTargetView, global::globalD3DRenderTargetView);
+		DefGetter(const lnoexcept(), ID3D11Texture2D*, RenderTargetTexture2D, global::globalD3DRenderTargetTexture2D);
+		DefGetter(const lnoexcept(), float, Aspect, global::globalAspect);
+		DefGetter(const lnoexcept(), size_type, ClientSize, global::globalClientSize);
 	};
 }
