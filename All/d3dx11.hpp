@@ -2,14 +2,12 @@
 //must compiler by cl
 #pragma once
 
-#include <cstddef>
-#include <cstdint>
 #include <string>
 #include <map>
+#include <algorithm>
 
 #include "IndePlatform\utility.hpp"
 #include "IndePlatform\leoint.hpp"
-#include "leomath.hpp"
 #include "COM.hpp"
 #include <comdef.h>
 #include <d3d11.h>
@@ -17,16 +15,7 @@
 #pragma comment(lib,"d3d11.lib")
 #pragma comment(lib,"dxguid.lib")
 
-#ifndef ALIGN16
-#define ALIGN16 _declspec(align(16))
-#endif
-#ifndef ALIGN8
-#define ALIGN8 _declspec(align(16))
-#endif
-#ifdef max
-#undef max
-#undef min
-#endif
+
 namespace leo
 {
 	//interface ptr
@@ -217,6 +206,8 @@ namespace leo
 		protected:
 			std::wstring name;
 		};
+
+		using std::max;
 
 		inline unsigned int NumMipLevels(unsigned int width,unsigned int height)
 		{
