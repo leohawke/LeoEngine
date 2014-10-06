@@ -278,8 +278,8 @@ void BuildRes()
 	}mTerrainFileHeader;
 
 	mTerrainFileHeader.mChunkSize = 18;
-	mTerrainFileHeader.mHorChunkNum = 32;
-	mTerrainFileHeader.mVerChunkNum = 16;
+	mTerrainFileHeader.mHorChunkNum = 6;
+	mTerrainFileHeader.mVerChunkNum = 2;
 	wcscpy(mTerrainFileHeader.mHeightMap, L"Resource\\fBm5OctavesGrad.dds");
 
 	{
