@@ -24,7 +24,6 @@
 // Does not capture mipmap chains, only the top-most texture level is saved
 
 // For 2D array textures and cubemaps, it captures only the first image in the array
-
 #include <assert.h>
 
 #if !defined(WINAPI_FAMILY) || (WINAPI_FAMILY != WINAPI_FAMILY_PHONE_APP) || (_WIN32_WINNT > _WIN32_WINNT_WIN8)
@@ -38,7 +37,7 @@
 #endif
 
 #include <memory>
-
+#include <algorithm>
 #include "ScreenGrab.h"
 
 using Microsoft::WRL::ComPtr;
