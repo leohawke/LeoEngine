@@ -49,8 +49,10 @@ namespace leo
 			mMatrix(2, 3) = 0.0f;
 			mMatrix(3, 3) = 1.0f;
 
-			auto temp = MatrixToQuaternion(mMatrix);
-			memcpy(Orientation,temp);
+			XMVECTOR det;
+			XMStoreFloat4(&Orientation,XMQuaternionRotationMatrix(XMMatrixInverse(&det,loadfloat4x4(&mMatrix))));
+			//auto temp = MatrixToQuaternion(mMatrix);
+			//memcpy(Orientation,temp);
 		}
 	public:
 		XMMATRIX View() const
