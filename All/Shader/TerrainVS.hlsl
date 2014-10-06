@@ -15,7 +15,7 @@ struct VertexIn
 float4 main(VertexIn vin) : SV_POSITION
 {
 	float2 newpos = f16tof32(vin.pos) + gOffset;
-	float2 uv = newpos*gUVScale;
+	float2 uv = newpos*gUVScale+float2(0.5f,0.5f);
 	float3 heightpos = float3(newpos.x, gHeightMap.SampleLevel(gClampLinear, uv,0).x, newpos.y);
 	float4 pos = float4(heightpos, 1.f);
 	return mul(pos, gViewProj);
