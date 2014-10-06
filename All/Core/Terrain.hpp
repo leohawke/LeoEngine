@@ -145,9 +145,9 @@ namespace leo
 	public:
 		void Render(ID3D11DeviceContext* context, const Camera& camera)
 		{
-			auto topleft = load(float3(-(mHorChunkNum+1)*mChunkSize / 2, 0, +(mVerChunkNum+1)*mChunkSize / 2));
-			auto topright = load(float3(-(mHorChunkNum - 1)*mChunkSize / 2, 0, +(mVerChunkNum + 1)*mChunkSize / 2));
-			auto buttomleft = load(float3(-(mHorChunkNum + 1)*mChunkSize / 2, 0, +(mVerChunkNum - 1)*mChunkSize / 2));
+			auto topleft = load(float3(-(mHorChunkNum)*mChunkSize / 2, 0, +(mVerChunkNum)*mChunkSize / 2));
+			auto topright = load(float3(-(mHorChunkNum - 2)*mChunkSize / 2, 0, +(mVerChunkNum)*mChunkSize / 2));
+			auto buttomleft = load(float3(-(mHorChunkNum)*mChunkSize / 2, 0, +(mVerChunkNum - 2)*mChunkSize / 2));
 
 			context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			UINT strides[] = { sizeof(Terrain::Vertex) };
@@ -165,12 +165,12 @@ namespace leo
 			{
 				for (auto slotY = 0; slotY != mVerChunkNum; ++slotY)
 				{
+					//auto offset = load(float3(slotX*mChunkSize, 0, -slotY*mChunkSize));
 					auto offset = load(float3(slotX*mChunkSize, 0, -slotY*mChunkSize));
-					//auto offset = load(float3(slotX*mChunkSize - mChunkSize / 2, 0, -slotY*mChunkSize + mChunkSize / 2));
 					//see calc topleft,topright,...
 					if (camera.Contains(topleft + offset, topright + offset, buttomleft + offset))
 					{
-						float2 worldoffset(-mHorChunkNum*mChunkSize / 2 + slotX*mChunkSize, +mVerChunkNum*mChunkSize / 2 + -slotY*mChunkSize);
+						float2 worldoffset(-(mHorChunkNum-1)*mChunkSize / 2 + slotX*mChunkSize, +(mVerChunkNum-1)*mChunkSize / 2-slotY*mChunkSize);
 						mEffect->WorldOffset(worldoffset, context);
 
 						auto lodlevel = mChunkVector[slotY*mHorChunkNum + slotX].mLodLevel = EdgeToScreenSpaceLod(topleft+offset,topright+offset,camera.ViewProj());
