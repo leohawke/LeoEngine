@@ -996,6 +996,7 @@ namespace leo
 			_update();
 		}
 
+
 		DefGetter(lnoexcept(), float&, Fov, mFov);
 
 		DefGetter(lnoexcept(), float&, Far, Far);
@@ -1014,6 +1015,8 @@ namespace leo
 			return loadfloat4x4(&mMatrix);
 		}
 		//¹Ø¼üº¯Êý
+	protected:
+
 	protected:
 		using Frustum::Origin;
 		using Frustum::Orientation;

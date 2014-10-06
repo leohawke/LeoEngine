@@ -500,6 +500,9 @@
     <None Include="Shader\LightHelper.hlsli">
       <Filter>Shader\HLSL</Filter>
     </None>
+    <None Include="Shader\Noise.hlsli">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Core\接口说明.txt">

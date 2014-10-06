@@ -9,7 +9,7 @@ namespace leo
 	//Look方向 N
 	//上方向 V
 	// 右方向 U
-	class Camera : public ViewFrustum,public GeneralAllocatedObject
+	class Camera : public ViewFrustum, public GeneralAllocatedObject
 	{
 	public:
 		Camera()
@@ -25,7 +25,7 @@ namespace leo
 			mUp = Normalize(Cross(mLook, mRight));
 			mRight = Cross(mUp, mLook);
 
-			auto x = -Dot(Origin,mRight);
+			auto x = -Dot(Origin, mRight);
 			auto y = -Dot(Origin, mUp);
 			auto z = -Dot(Origin, mLook);
 
@@ -49,10 +49,8 @@ namespace leo
 			mMatrix(2, 3) = 0.0f;
 			mMatrix(3, 3) = 1.0f;
 
-			XMVECTOR det;
-			XMStoreFloat4(&Orientation,XMQuaternionRotationMatrix(XMMatrixInverse(&det,loadfloat4x4(&mMatrix))));
-			//auto temp = MatrixToQuaternion(mMatrix);
-			//memcpy(Orientation,temp);
+			auto temp = MatrixToQuaternion(mMatrix);
+			memcpy(Orientation, temp);
 		}
 	public:
 		XMMATRIX View() const
@@ -86,9 +84,10 @@ namespace leo
 		{
 			ViewFrustum::SetFrustum(projtype);
 		}
+
 		void LookAt(const float3& pos, const float3& target, const float3& up)
 		{
-			memcpy(Origin,pos);
+			memcpy(Origin, pos);
 			mLook = Normalize(Subtract(target, pos));
 			mRight = Normalize(Cross(up, mLook));
 			mUp = Cross(mLook, mRight);
@@ -102,20 +101,20 @@ namespace leo
 			mLook = N_look;
 			_update();
 		}
-		
+
 		//W/S
 		void Walk(float d)
 		{
 			auto temp = MultiplyAdd(d, mLook, Origin);
-			memcpy(Origin,temp);
+			memcpy(Origin, temp);
 		}
 		//A/D
 		void Strafe(float d)
 		{
 			auto temp = MultiplyAdd(d, mRight, Origin);
-			memcpy(Origin,temp);
+			memcpy(Origin, temp);
 		}
-		
+
 		void Yaw(float angle)
 		{
 			XMMATRIX R = XMMatrixRotationAxis(load(mUp), angle);
@@ -151,6 +150,33 @@ namespace leo
 		void UpdateViewMatrix()
 		{
 			_update();
+		}
+
+	public:
+		inline ContainmentType Contains(FXMVECTOR V0, FXMVECTOR V1, FXMVECTOR V2) const
+		{
+			auto mView = View();
+
+			// Create 6 planes (do it inline to encourage use of registers)
+			XMVECTOR NearPlane = XMVectorSet(0.0f, 0.0f, -1.0f, Near);
+			
+
+			XMVECTOR FarPlane = XMVectorSet(0.0f, 0.0f, 1.0f, -Far);
+			
+
+			XMVECTOR RightPlane = XMVectorSet(1.0f, 0.0f, -RightSlope, 0.0f);
+			
+
+			XMVECTOR LeftPlane = XMVectorSet(-1.0f, 0.0f, LeftSlope, 0.0f);
+			
+
+			XMVECTOR TopPlane = XMVectorSet(0.0f, 1.0f, -TopSlope, 0.0f);
+			
+
+			XMVECTOR BottomPlane = XMVectorSet(0.0f, -1.0f, BottomSlope, 0.0f);
+			
+
+			return TriangleTests::ContainedBy(XMVector3Transform(V0, mView), XMVector3Transform(V1, mView), XMVector3Transform(V2, mView), NearPlane, FarPlane, RightPlane, LeftPlane, TopPlane, BottomPlane);
 		}
 	private:
 		float4x4 mMatrix;

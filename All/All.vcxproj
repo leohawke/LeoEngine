@@ -389,6 +389,7 @@
     </FxCompile>
     <None Include="Shader\LightBuffer.hlsli" />
     <None Include="Shader\LightHelper.hlsli" />
+    <None Include="Shader\Noise.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DirectXTex\DirectXTex_Desktop_2013.vcxproj">

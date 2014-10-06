@@ -177,6 +177,10 @@ namespace leo
 						context->IASetIndexBuffer(mIndexBuffer[lodlevel], DXGI_FORMAT_R32_UINT, 0);
 						context->DrawIndexed(mIndexNum[lodlevel], 0, 0);
 					}
+					else
+					{
+
+					}
 				}
 			}
 		}
