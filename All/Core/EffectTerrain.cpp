@@ -9,6 +9,9 @@ namespace leo
 	public:
 		EffectTerrainDelegate(ID3D11Device* device)
 			:mVSCBPerMatrix(device)
+#ifdef DEBUG
+			, mPSCBPerLodColor(device)
+#endif
 		{
 			leo::ShaderMgr SM;
 			ID3D11InputLayout* mLayout = nullptr;
@@ -26,6 +29,7 @@ namespace leo
 			mVSCBPerMatrix.Update(con);
 			context.VSSetConstantBuffers(0, 1, &mVSCBPerMatrix.mBuffer);
 			context.PSSetShader(mPS, nullptr, 0);
+			context.PSSetConstantBuffers(0, 1, &mPSCBPerLodColor.mBuffer);
 			context->VSSetShaderResources(0, 1, &mSRV);
 			context->VSSetSamplers(0, 1, &mSS);
 		}
@@ -61,6 +65,14 @@ namespace leo
 			if (context)
 				context->PSSetShaderResources(0, 1, &mSRV);
 		}
+
+#ifdef DEBUG
+		void LodColor(const float4& color, ID3D11DeviceContext* context)
+		{
+			mPSCBPerLodColor.gColor = color;
+			mPSCBPerLodColor.Update(context);
+		}
+#endif
 	public:
 	private:
 		struct vsCBMatrix
@@ -70,6 +82,15 @@ namespace leo
 			const static std::uint8_t slot = 0;
 		};
 		ShaderConstantBuffer<vsCBMatrix> mVSCBPerMatrix;
+
+#ifdef DEBUG
+		struct psLodColor
+		{
+			float4 gColor;
+			const static std::uint8_t slot = 0;
+		};
+		ShaderConstantBuffer<psLodColor> mPSCBPerLodColor;
+#endif
 
 		ID3D11VertexShader* mVS = nullptr;
 		ID3D11PixelShader* mPS = nullptr;
@@ -126,7 +147,16 @@ namespace leo
 			l
 			);
 	}
+#ifdef DEBUG
+	void EffectTerrain::LodColor(const float4& color, ID3D11DeviceContext* context)
+	{
+		lassume(dynamic_cast<EffectTerrainDelegate *>(this));
 
+		return ((EffectTerrainDelegate *)this)->LodColor(
+			color,context
+			);
+	}
+#endif
 	const std::unique_ptr<EffectTerrain>& EffectTerrain::GetInstance(ID3D11Device * device)
 	{
 		static auto mInstance = std::unique_ptr<EffectTerrain>(new EffectTerrainDelegate(device));

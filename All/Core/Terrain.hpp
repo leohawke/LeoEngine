@@ -79,7 +79,6 @@ namespace leo
 					mVertexs[slotY*MAXEDGEVERTEX + slotX] = half2(x, y);
 				}
 			}
-			DebugPrintf("topright %u %u\n", mVertexs[MAXEDGEVERTEX - 1].pos.x, half(mTerrainFileHeader.mChunkSize / 2).data);
 			try{
 				CD3D11_BUFFER_DESC vbDesc(sizeof(Vertex)*mVertexs.size(), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
 				D3D11_SUBRESOURCE_DATA vbDataDesc = { vbDataDesc.pSysMem = mVertexs.data(), 0, 0 };
@@ -174,6 +173,24 @@ namespace leo
 						mEffect->WorldOffset(worldoffset, context);
 
 						auto lodlevel = mChunkVector[slotY*mHorChunkNum + slotX].mLodLevel = EdgeToScreenSpaceLod(buttomleft + offset, topright + offset, camera.ViewProj());
+
+#ifdef DEBUG
+						static std::array<float4, 256> mLodColor;
+						static bool has_call = false;
+						
+						auto init_lod_color = [&]()
+						{
+							mLodColor[0] = float4(1.f, 0.f, 0.f, 1.f);
+							mLodColor[1] = float4(0.f, 1.f, 0.f, 1.f);
+							mLodColor[2] = float4(0.f, 0.f, 1.f, 1.f);
+							mLodColor[3] = float4(1.f, 1.f, 0.f, 1.f);
+							mLodColor[4] = float4(1.f, 1.f, 1.f, 1.f);
+						};
+						leo::call_once(has_call, init_lod_color);
+
+						mEffect->LodColor(mLodColor[lodlevel],context);
+#endif
+
 						context->IASetIndexBuffer(mIndexBuffer[lodlevel], DXGI_FORMAT_R32_UINT, 0);
 						context->DrawIndexed(mIndexNum[lodlevel], 0, 0);
 					}
@@ -228,8 +245,8 @@ namespace leo
 			const auto Vmin = XMVectorSet(-1.f, -1.f, 0.f, 0.f);
 			const auto Vmax = XMVectorSet(1.f, 1.f, 0.f, 0.f);
 
-			clip0 = XMVectorClamp(clip0, Vmin, Vmax);
 			clip1 = XMVectorClamp(clip1, Vmin, Vmax);
+			clip0 = XMVectorClamp(clip0, Vmin, clip1);
 
 			auto gScreenSize = load(float4(mScreenSize, 1.f, 1.f));
 			clip0 *= gScreenSize;
@@ -241,7 +258,7 @@ namespace leo
 
 			for (; Lod < MAXLOD;++Lod)
 			{
-				if (d > (MAXEDGEVERTEX >> Lod))
+				if (d >((MAXEDGEVERTEX >> Lod) - (MAXEDGEVERTEX >> (Lod+2))))
 					break;
 			}
 
