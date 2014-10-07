@@ -16,7 +16,7 @@ namespace leo
 			mPS = SM.CreatePixelShader(L"Shader\\TerrainPS.cso");
 
 			leo::RenderStates SS;
-			mSS = SS.GetSamplerState(L"LinearClamp");
+			mSS = SS.GetSamplerState(L"NearestRepeat");
 		}
 		void Apply(ID3D11DeviceContext* con)
 		{

@@ -166,20 +166,16 @@ namespace leo
 				for (auto slotY = 0; slotY != mVerChunkNum; ++slotY)
 				{
 					//auto offset = load(float3(slotX*mChunkSize, 0, -slotY*mChunkSize));
-					auto offset = load(float3(slotX*mChunkSize, 0, -slotY*mChunkSize));
+					auto offset = load(float4(slotX*mChunkSize, 0, -slotY*mChunkSize,1.f));
 					//see calc topleft,topright,...
 					if (camera.Contains(topleft + offset, topright + offset, buttomleft + offset))
 					{
 						float2 worldoffset(-(mHorChunkNum-1)*mChunkSize / 2 + slotX*mChunkSize, +(mVerChunkNum-1)*mChunkSize / 2-slotY*mChunkSize);
 						mEffect->WorldOffset(worldoffset, context);
 
-						auto lodlevel = mChunkVector[slotY*mHorChunkNum + slotX].mLodLevel = EdgeToScreenSpaceLod(topleft+offset,topright+offset,camera.ViewProj());
+						auto lodlevel = mChunkVector[slotY*mHorChunkNum + slotX].mLodLevel = EdgeToScreenSpaceLod(buttomleft + offset, topright + offset, camera.ViewProj());
 						context->IASetIndexBuffer(mIndexBuffer[lodlevel], DXGI_FORMAT_R32_UINT, 0);
 						context->DrawIndexed(mIndexNum[lodlevel], 0, 0);
-					}
-					else
-					{
-
 					}
 				}
 			}
@@ -226,8 +222,14 @@ namespace leo
 		{
 			mScreenSize = DeviceMgr().GetClientSize();
 
-			clip0 /= XMVectorSplatW(clip0);
-			clip1 /= XMVectorSplatW(clip1);
+			clip0 =XMVectorDivide(clip0,XMVectorSplatW(clip0));
+			clip1 = XMVectorDivide(clip1, XMVectorSplatW(clip1));
+
+			const auto Vmin = XMVectorSet(-1.f, -1.f, 0.f, 0.f);
+			const auto Vmax = XMVectorSet(1.f, 1.f, 0.f, 0.f);
+
+			clip0 = XMVectorClamp(clip0, Vmin, Vmax);
+			clip1 = XMVectorClamp(clip1, Vmin, Vmax);
 
 			auto gScreenSize = load(float4(mScreenSize, 1.f, 1.f));
 			clip0 *= gScreenSize;

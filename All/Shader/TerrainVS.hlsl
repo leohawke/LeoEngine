@@ -25,7 +25,7 @@ float4 main(VertexIn vin) : SV_POSITION
 {
 	float2 newpos = f16tof32(vin.pos) + gOffset;
 	float2 uv = newpos*gUVScale + float2(0.5f, 0.5f);
-	float y =hybridTerrain(uv, int3(4, 4, 4));
+	float y =hybridTerrain(uv, int3(3,3,1));
 	float3 heightpos = float3(newpos.x,y , newpos.y);
 	float4 pos = float4(heightpos, 1.f);
 	return mul(pos, gViewProj);
