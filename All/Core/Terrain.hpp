@@ -172,7 +172,7 @@ namespace leo
 						float2 worldoffset(-(mHorChunkNum-1)*mChunkSize / 2 + slotX*mChunkSize, +(mVerChunkNum-1)*mChunkSize / 2-slotY*mChunkSize);
 						mEffect->WorldOffset(worldoffset, context);
 
-						auto lodlevel = mChunkVector[slotY*mHorChunkNum + slotX].mLodLevel = EdgeToScreenSpaceLod(buttomleft + offset, topright + offset, camera.ViewProj());
+						auto lodlevel = mChunkVector[slotY*mHorChunkNum + slotX].mLodLevel = DetermineLod(buttomleft + offset, topright + offset, camera.View(),camera.Proj());
 
 #ifdef DEBUG
 						static std::array<float4, 256> mLodColor;
@@ -242,17 +242,17 @@ namespace leo
 			clip0 =XMVectorDivide(clip0,XMVectorSplatW(clip0));
 			clip1 = XMVectorDivide(clip1, XMVectorSplatW(clip1));
 
-			const auto Vmin = XMVectorSet(-1.f, -1.f, 0.f, 0.f);
-			const auto Vmax = XMVectorSet(1.f, 1.f, 0.f, 0.f);
+			//const auto Vmin = XMVectorSet(-1.f, -1.f, 0.f, 0.f);
+			//const auto Vmax = XMVectorSet(1.f, 1.f, 0.f, 0.f);
 
-			clip1 = XMVectorClamp(clip1, Vmin, Vmax);
-			clip0 = XMVectorClamp(clip0, Vmin, clip1);
+			//clip1 = XMVectorClamp(clip1, Vmin, Vmax);
+			//clip0 = XMVectorClamp(clip0, Vmin, clip1);
 
 			auto gScreenSize = load(float4(mScreenSize, 1.f, 1.f));
 			clip0 *= gScreenSize;
 			clip1 *= gScreenSize;
 
-			float d = XMVectorGetX(XMVector4Length(clip0 - clip1)) / TRIWIDTH;
+			float d = XMVectorGetX(XMVector2Length(clip0 - clip1)) / TRIWIDTH;
 
 			uint8 Lod = 0;
 
@@ -265,11 +265,36 @@ namespace leo
 			return Lod;
 		}
 
-		uint8 EdgeToScreenSpaceLod(XMVECTOR p0, XMVECTOR p1, CXMMATRIX matrix)
+		uint8 EdgeToScreenSpaceLod(XMVECTOR p0, XMVECTOR p1)
 		{
-			auto clip0 = XMVector4Transform(p0, matrix);
-			auto clip1 = XMVector4Transform(p1,matrix);
-			return ClipToScreenSpaceLod(clip0, clip1);
+			return ClipToScreenSpaceLod(p0, p1);
+		}
+
+		uint8 DistanceToCameraLod(XMVECTOR p0, XMVECTOR p1)
+		{
+			auto center = XMVectorDivide(XMVectorAdd(p0, p1), XMVectorReplicate(2.f));
+			auto distance = XMVectorGetX(XMVector3Length(center));
+			auto lod = distance / mChunkSize;
+			auto ilod = int(lod - 0.5f);
+			if (ilod < 0)
+				return 0;
+			if (ilod > MAXLOD)
+				return MAXLOD;
+			return uint8(ilod);
+		}
+
+		uint8 DetermineLod(XMVECTOR p0, XMVECTOR p1, CXMMATRIX view,CXMMATRIX proj)
+		{
+			auto vp0 = XMVector4Transform(p0, view);
+			auto vp1 = XMVector4Transform(p1, view);
+			auto cameralod = DistanceToCameraLod(vp0, vp1);
+
+			auto pp0 = XMVector4Transform(p0, proj);
+			auto pp1 = XMVector4Transform(p1, proj);
+			auto edgelod = EdgeToScreenSpaceLod(pp0, pp1);
+
+			auto lod = min(cameralod, edgelod);
+			return lod;
 		}
 	};
 }
