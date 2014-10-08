@@ -153,34 +153,22 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 		}
 			break;
 		case ID_ROLL_LEFT:
-			if (pMesh){
-				pMesh->Roll(-1.f);
-			}
+			pCamera->Roll(-1.f);
 			break;
 		case ID_ROLL_RIGHT:
-			if (pMesh){
-				pMesh->Roll(+1.f);
-			}
+			pCamera->Roll(+1.f);
 			break;
 		case ID_YAW_FRONT:
-			if (pMesh){
-				pMesh->Yaw(-1.f);
-			}
+			pCamera->Yaw(-1.f);
 			break;
 		case ID_YAW_BACK:
-			if (pMesh){
-				pMesh->Yaw(+1.f);
-			}
+			pCamera->Yaw(+1.f);
 			break;
 		case ID_PITCH_UP:
-			if (pMesh){
-				pMesh->Pitch(-1.f);
-			}
+			pCamera->Pitch(-1.f);
 			break;
 		case ID_PITCH_DOWN:
-			if (pMesh){
-				pMesh->Pitch(+1.f);
-			}
+			pCamera->Pitch(+1.f);
 		case ID_NORMALLINE:
 			if (!leo::EffectConfig::GetInstance()->NormalLine())
 			{
@@ -241,8 +229,8 @@ void BuildRes()
 
 	using leo::float3;
 
-	auto Eye = float3(0.f,5.f,-18.f);
-	auto At = float3(0.f,-1.f,0.f);
+	auto Eye = float3(0.f,8.f,-8.f);
+	auto At = float3(0.f,0.f,1.f);
 	auto Up = float3(0.f,1.f, 0.f);
 
 	pCamera->LookAt(Eye, At, Up);
@@ -251,6 +239,9 @@ void BuildRes()
 
 	pCamera->SetFrustum(leo::def::frustum_fov, leo::DeviceMgr().GetAspect(), leo::def::frustum_near, leo::def::frustum_far);
 	pCamera->SetFrustum(leo::PROJECTION_TYPE::PERSPECTIVE);
+
+	auto proj = pCamera->Proj();
+	auto testproj = leo::XMMatrixPerspectiveFovLH(leo::def::frustum_fov, leo::DeviceMgr().GetAspect(), leo::def::frustum_near, leo::def::frustum_far);
 
 	auto& pEffect =  leo::EffectNormalMap::GetInstance(leo::DeviceMgr().GetDevice());
 	leo::EffectTerrain::GetInstance(leo::DeviceMgr().GetDevice());
@@ -278,9 +269,9 @@ void BuildRes()
 	}mTerrainFileHeader;
 
 	mTerrainFileHeader.mChunkSize = 18;
-	mTerrainFileHeader.mHorChunkNum = 6;
+	mTerrainFileHeader.mHorChunkNum = 2;
 	mTerrainFileHeader.mVerChunkNum = 2;
-	wcscpy(mTerrainFileHeader.mHeightMap, L"Resource\\fBm5OctavesGrad.dds");
+	wcscpy(mTerrainFileHeader.mHeightMap, L"Resource\\GaussianNoise256.jpg");
 
 	{
 		auto & pFile = leo::win::File::Open(L"Resource\\Test.Terrain", leo::win::File::TO_WRITE);
@@ -288,7 +279,7 @@ void BuildRes()
 	}
 	pTerrain = std::make_unique < leo::Terrain<> >(leo::DeviceMgr().GetDevice(), L"Resource\\Test.Terrain");
 
-	leo::DeviceMgr().GetDeviceContext()->RSSetState(leo::RenderStates().GetRasterizerState(L"NoCullRS"));
+	leo::DeviceMgr().GetDeviceContext()->RSSetState(leo::RenderStates().GetRasterizerState(L"WireframeRS"));
 }
 
 
