@@ -229,8 +229,8 @@ void BuildRes()
 
 	using leo::float3;
 
-	auto Eye = float3(0.f,8.f,-8.f);
-	auto At = float3(0.f,0.f,1.f);
+	auto Eye = float3(0.f,8.f,0.f);
+	auto At = float3(0.f,0.f,8.f);
 	auto Up = float3(0.f,1.f, 0.f);
 
 	pCamera->LookAt(Eye, At, Up);
@@ -269,8 +269,8 @@ void BuildRes()
 	}mTerrainFileHeader;
 
 	mTerrainFileHeader.mChunkSize = 18;
-	mTerrainFileHeader.mHorChunkNum = 2;
-	mTerrainFileHeader.mVerChunkNum = 2;
+	mTerrainFileHeader.mHorChunkNum = 4;
+	mTerrainFileHeader.mVerChunkNum = 4;
 	wcscpy(mTerrainFileHeader.mHeightMap, L"Resource\\GaussianNoise256.jpg");
 
 	{

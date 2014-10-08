@@ -76,7 +76,7 @@ namespace leo
 				for (auto slotX = 0; slotX <= MAXEDGE; ++slotX)
 				{
 					auto x = beginX + slotX*delta;
-					mVertexs[slotY*MAXEDGE + slotX] = half2(x, y);
+					mVertexs[slotY*(MAXEDGE+1) + slotX] = half2(x, y);
 				}
 			}
 			try{
@@ -108,7 +108,7 @@ namespace leo
 				for (auto slotY = 0; slotY < MAXEDGE;){
 					for (auto slotX = 0; slotX < MAXEDGE;)
 					{
-						auto baseIndex = static_cast<std::uint16_t>(slotY*MAXEDGE + slotX);
+						auto baseIndex = static_cast<std::uint16_t>(slotY*(MAXEDGE+1) + slotX);
 						auto xdelta = powdelta;
 						//if (slotX + xdelta > MAXEDGE)
 							//xdelta -= (slotX + xdelta+1 - MAXEDGE);
@@ -118,35 +118,88 @@ namespace leo
 
 						mIndexs.emplace_back(baseIndex);
 						mIndexs.emplace_back(baseIndex + xdelta);
-						mIndexs.emplace_back(baseIndex + ydelta*MAXEDGE);
+						mIndexs.emplace_back(baseIndex + ydelta*(MAXEDGE + 1));
 
 						mIndexs.emplace_back(baseIndex + xdelta);
-						mIndexs.emplace_back(baseIndex + ydelta*MAXEDGE+xdelta);
-						mIndexs.emplace_back(baseIndex + ydelta*MAXEDGE);
+						mIndexs.emplace_back(baseIndex + ydelta*(MAXEDGE + 1) + xdelta);
+						mIndexs.emplace_back(baseIndex + ydelta*(MAXEDGE + 1));
 
 						slotX += powdelta;
 					}
 					slotY += powdelta;
 				}
 				mIndexInfo[slotLod].mCount = mIndexs.size() - mIndexInfo[slotLod].mOffset;
-
+#if 0
 				mIndexInfo[slotLod].mCrackOffset[(uint8)DIRECTION_2D_TYPE::DIRECTION_LEFT] = mIndexs.size();
-				//Todo : Insert Left Crack
+				if (slotLod != MAXLOD)
+				{
+					for (auto slotY = 0; slotY < MAXEDGE;)
+					{
+						auto baseIndex = slotY* (MAXEDGE + 1);
+						mIndexs.emplace_back(baseIndex);
+						slotY += powdelta;
+						baseIndex = slotY* (MAXEDGE + 1);
+						mIndexs.emplace_back(baseIndex);
+						slotY += powdelta;
+						baseIndex = slotY* (MAXEDGE + 1);
+						mIndexs.emplace_back(baseIndex);
+					}
+				}
 				mIndexInfo[slotLod].mCrackCount[(uint8)DIRECTION_2D_TYPE::DIRECTION_LEFT] = mIndexs.size() - mIndexInfo[slotLod].mCrackOffset[(uint8)DIRECTION_2D_TYPE::DIRECTION_LEFT];
 
 				mIndexInfo[slotLod].mCrackOffset[(uint8)DIRECTION_2D_TYPE::DIRECTION_RIGHT] = mIndexs.size();
-				//Todo : Insert Right Crack
+				if (slotLod != MAXLOD)
+				{
+					for (auto slotY = 0; slotY < MAXEDGE;)
+					{
+						auto baseIndex = slotY* (MAXEDGE + 1)+MAXEDGE;
+						mIndexs.emplace_back(baseIndex);
+						slotY += powdelta;
+						baseIndex = slotY* (MAXEDGE + 1) + MAXEDGE;
+						mIndexs.emplace_back(baseIndex);
+						slotY += powdelta;
+						baseIndex = slotY* (MAXEDGE + 1) + MAXEDGE;
+						mIndexs.emplace_back(baseIndex);
+					}
+				}
 				mIndexInfo[slotLod].mCrackCount[(uint8)DIRECTION_2D_TYPE::DIRECTION_RIGHT] = mIndexs.size() - mIndexInfo[slotLod].mCrackOffset[(uint8)DIRECTION_2D_TYPE::DIRECTION_RIGHT];
 
 				mIndexInfo[slotLod].mCrackOffset[(uint8)DIRECTION_2D_TYPE::DIRECTION_TOP] = mIndexs.size();
-				//Todo : Insert Top Crack
+				if (slotLod != MAXLOD)
+				{
+					for (auto slotX = 0; slotX < MAXEDGE;)
+					{
+						auto baseIndex = slotX;
+						mIndexs.emplace_back(baseIndex);
+						slotX += powdelta;
+						baseIndex = slotX;
+						mIndexs.emplace_back(baseIndex);
+						slotX += powdelta;
+						baseIndex = slotX;
+						mIndexs.emplace_back(baseIndex);
+					}
+				}
 				mIndexInfo[slotLod].mCrackCount[(uint8)DIRECTION_2D_TYPE::DIRECTION_TOP] = mIndexs.size() - mIndexInfo[slotLod].mCrackOffset[(uint8)DIRECTION_2D_TYPE::DIRECTION_TOP];
 
 				mIndexInfo[slotLod].mCrackOffset[(uint8)DIRECTION_2D_TYPE::DIRECTION_BOTTOM] = mIndexs.size();
-				//Todo : Insert Bottom Crack
+				if (slotLod != MAXLOD)
+				{
+					for (auto slotX = 0; slotX < MAXEDGE;)
+					{
+						auto baseIndex =MAXEDGE*(MAXEDGE+1) + slotX;
+						mIndexs.emplace_back(baseIndex);
+						slotX += powdelta;
+						baseIndex = MAXEDGE*(MAXEDGE + 1) + slotX;
+						mIndexs.emplace_back(baseIndex);
+						slotX += powdelta;
+						baseIndex = MAXEDGE*(MAXEDGE + 1) + slotX;
+						mIndexs.emplace_back(baseIndex);
+					}
+				}
 				mIndexInfo[slotLod].mCrackCount[(uint8)DIRECTION_2D_TYPE::DIRECTION_BOTTOM] = mIndexs.size() - mIndexInfo[slotLod].mCrackOffset[(uint8)DIRECTION_2D_TYPE::DIRECTION_BOTTOM];
+#endif
 			}
-			assert(mIndexCount == mIndexs.size());
+			//assert(mIndexCount == mIndexs.size());
 			try{
 				CD3D11_BUFFER_DESC ibDesc(sizeof(std::uint32_t)*mIndexs.size(), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
 				D3D11_SUBRESOURCE_DATA ibDataDesc = { mIndexs.data(), 0, 0 };
@@ -199,10 +252,12 @@ namespace leo
 					//see calc topleft,topright,...
 					if (camera.Contains(topleft + offset, topright + offset, buttomleft + offset))
 					{
+						x = slotX;
+						y = slotY;
 						float2 worldoffset(-(mHorChunkNum-1)*mChunkSize / 2 + slotX*mChunkSize, +(mVerChunkNum-1)*mChunkSize / 2-slotY*mChunkSize);
 						mEffect->WorldOffset(worldoffset, context);
 
-						auto lodlevel = mChunkVector[slotY*mHorChunkNum + slotX].mLodLevel = DetermineLod(buttomleft + offset, topright + offset, camera.View(),camera.Proj());
+						auto lodlevel = mChunkVector[slotY*mHorChunkNum + slotX].mLodLevel = DetermineLod(topleft + offset, topright + offset, camera.View(), camera.Proj());
 
 #ifdef DEBUG
 						static std::array<float4, 256> mLodColor;
@@ -218,7 +273,8 @@ namespace leo
 						};
 						leo::call_once(has_call, init_lod_color);
 
-						mEffect->LodColor(mLodColor[lodlevel],context);
+
+						mEffect->LodColor(mLodColor[lodlevel], context);
 #endif
 
 						context->DrawIndexed(mIndexInfo[lodlevel].mCount, mIndexInfo[lodlevel].mOffset, 0);
@@ -261,6 +317,7 @@ namespace leo
 		ID3D11Buffer* mCommonVertexBuffer;
 		ID3D11Buffer* mCommonIndexBuffer;
 
+		int x, y;
 		struct Index
 		{
 			std::uint32_t mOffset;
@@ -272,25 +329,52 @@ namespace leo
 
 		std::pair<uint16,uint16> mScreenSize;
 	private:
+#if 0
 		uint8 ClipToScreenSpaceLod(XMVECTOR clip0, XMVECTOR clip1)
 		{
 			mScreenSize = DeviceMgr().GetClientSize();
 
-			clip0 =XMVectorDivide(clip0,XMVectorSplatW(clip0));
+			clip0 = XMVectorDivide(clip0, XMVectorSplatW(clip0));
 			clip1 = XMVectorDivide(clip1, XMVectorSplatW(clip1));
 
-			//const auto Vmin = XMVectorSet(-1.f, -1.f, 0.f, 0.f);
-			//const auto Vmax = XMVectorSet(1.f, 1.f, 0.f, 0.f);
 
-			//clip1 = XMVectorClamp(clip1, Vmin, Vmax);
-			//clip0 = XMVectorClamp(clip0, Vmin, clip1);
+			float2 p0, p1;
+			save(p0, clip0);
+			save(p1, clip1);
 
+			auto in_ndc = [](const float2& p)
+			{
+				return p.x >= -1.f && p.x <= 1.f && p.y >= -1.f && p.y <= 1.f;
+			};
+
+			
+			if (in_ndc(p0) && in_ndc(p1))
+			{
+				goto allin;
+			}
+			if (in_ndc(p0)){
+				p1.x = 1.f;
+			}
+			else if (in_ndc(p1)){
+				p0.x = -1.f;
+			}
+			else
+				return MAXLOD;
+
+			clip0 = load(p0);
+			clip1 = load(p1);
+
+			DebugPrintf("%d %d\n", x, y);
+			assert(p0.x <= p1.x);
+
+			allin:
 			auto gScreenSize = load(float4(mScreenSize, 1.f, 1.f));
 			clip0 *= gScreenSize;
 			clip1 *= gScreenSize;
 
 			float d = XMVectorGetX(XMVector2Length(clip0 - clip1)) / MINEDGEPIXEL;
-			d /= 2;
+			
+			//d /= 2;
 			uint8 Lod = 0;
 
 			for (; Lod < MAXLOD;++Lod)
@@ -306,7 +390,7 @@ namespace leo
 		{
 			return ClipToScreenSpaceLod(p0, p1);
 		}
-
+#endif
 		uint8 DistanceToCameraLod(XMVECTOR p0, XMVECTOR p1)
 		{
 			auto center = XMVectorDivide(XMVectorAdd(p0, p1), XMVectorReplicate(2.f));
@@ -326,12 +410,12 @@ namespace leo
 			auto vp1 = XMVector4Transform(p1, view);
 			auto cameralod = DistanceToCameraLod(vp0, vp1);
 
-			auto pp0 = XMVector4Transform(p0, proj);
-			auto pp1 = XMVector4Transform(p1, proj);
-			auto edgelod = EdgeToScreenSpaceLod(pp0, pp1);
+			//auto pp0 = XMVector4Transform(vp0, proj);
+			//auto pp1 = XMVector4Transform(vp1, proj);
+			//auto edgelod = EdgeToScreenSpaceLod(pp0, pp1);
 
-			auto lod = min(cameralod, edgelod);
-			return lod;
+			//auto lod = max(cameralod, MAXLOD);
+			return cameralod;
 		}
 	};
 }
