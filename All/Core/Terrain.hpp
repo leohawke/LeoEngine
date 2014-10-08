@@ -37,8 +37,8 @@ namespace leo
 	{
 		extern const D3D11_INPUT_ELEMENT_DESC Terrain[1];
 	}
-	template<std::uint8_t MAXLOD = 4, size_t MAXEDGEVERTEX = 256, size_t TRIWIDTH = 12>
-	//static_assert(pow(2,MAXLOD) <= MAXEDGEVERTEX)
+	template<std::uint8_t MAXLOD = 4, std::uint16_t MAXEDGE = 256, std::uint8_t MINEDGEPIXEL = 6>
+	//static_assert(pow(2,MAXLOD) <= MAXEDGE)
 	class Terrain : public LodAlloc
 	{
 	public:
@@ -69,14 +69,14 @@ namespace leo
 			//Create VertexBuffer
 			auto beginX = -mTerrainFileHeader.mChunkSize / 2;
 			auto beginY = mTerrainFileHeader.mChunkSize / 2;
-			auto delta = mTerrainFileHeader.mChunkSize / (MAXEDGEVERTEX-1);
-			for (auto slotY = 0; slotY != MAXEDGEVERTEX; ++slotY)
+			auto delta = mTerrainFileHeader.mChunkSize / (MAXEDGE);
+			for (auto slotY = 0; slotY <= MAXEDGE; ++slotY)
 			{
 				auto y = beginY - slotY*delta;
-				for (auto slotX = 0; slotX != MAXEDGEVERTEX; ++slotX)
+				for (auto slotX = 0; slotX <= MAXEDGE; ++slotX)
 				{
 					auto x = beginX + slotX*delta;
-					mVertexs[slotY*MAXEDGEVERTEX + slotX] = half2(x, y);
+					mVertexs[slotY*MAXEDGE + slotX] = half2(x, y);
 				}
 			}
 			try{
@@ -88,55 +88,84 @@ namespace leo
 			Catch_DX_Exception
 
 				//Create IndexBuffer
-				std::array<std::vector<std::uint32_t>, MAXLOD + 1> mIndexsArray;
+			std::vector<std::uint32_t> mIndexs {};
+			std::size_t mIndexCount = 0;
+			std::size_t mLodCount = MAXEDGE*MAXEDGE * 6;
+			std::size_t mCrackCount = MAXEDGE / 2 * 3 * 4;
+			for (auto slotLod = 0; slotLod != MAXLOD + 1; ++slotLod)
+			{
+				mIndexCount += mLodCount;
+				mLodCount >>= 2;
+				if (slotLod != MAXLOD)
+					mIndexCount += mCrackCount;
+				mCrackCount >>= 1;
+			}
+			mIndexs.reserve(mIndexCount);
 			for (auto slotLod = 0; slotLod != MAXLOD + 1; ++slotLod){
 				auto powdelta = static_cast<std::uint16_t>(std::pow(2, slotLod));
-				for (auto slotY = 0; slotY < MAXEDGEVERTEX - 1;){
-					for (auto slotX = 0; slotX < MAXEDGEVERTEX - 1;)
+
+				mIndexInfo[slotLod].mOffset = mIndexs.size();
+				for (auto slotY = 0; slotY < MAXEDGE;){
+					for (auto slotX = 0; slotX < MAXEDGE;)
 					{
-						auto baseIndex = static_cast<std::uint16_t>(slotY*MAXEDGEVERTEX + slotX);
+						auto baseIndex = static_cast<std::uint16_t>(slotY*MAXEDGE + slotX);
 						auto xdelta = powdelta;
-						if (slotX + xdelta > MAXEDGEVERTEX-1)
-							xdelta -= (slotX + xdelta+1 - MAXEDGEVERTEX);
+						//if (slotX + xdelta > MAXEDGE)
+							//xdelta -= (slotX + xdelta+1 - MAXEDGE);
 						auto ydelta = powdelta;
-						if (slotY + ydelta > MAXEDGEVERTEX-1)
-							ydelta -= (slotY + ydelta + 1 - MAXEDGEVERTEX);
+						//if (slotY + ydelta > MAXEDGE)
+							//ydelta -= (slotY + ydelta + 1 - MAXEDGE);
 
-						mIndexsArray[slotLod].emplace_back(baseIndex);
-						mIndexsArray[slotLod].emplace_back(baseIndex + xdelta);
-						mIndexsArray[slotLod].emplace_back(baseIndex + ydelta*static_cast<std::uint16_t>(MAXEDGEVERTEX));
+						mIndexs.emplace_back(baseIndex);
+						mIndexs.emplace_back(baseIndex + xdelta);
+						mIndexs.emplace_back(baseIndex + ydelta*MAXEDGE);
 
-						mIndexsArray[slotLod].emplace_back(baseIndex + xdelta);
-						mIndexsArray[slotLod].emplace_back(baseIndex + ydelta*static_cast<std::uint16_t>(MAXEDGEVERTEX)+xdelta);
-						mIndexsArray[slotLod].emplace_back(baseIndex + ydelta*static_cast<std::uint16_t>(MAXEDGEVERTEX));
+						mIndexs.emplace_back(baseIndex + xdelta);
+						mIndexs.emplace_back(baseIndex + ydelta*MAXEDGE+xdelta);
+						mIndexs.emplace_back(baseIndex + ydelta*MAXEDGE);
 
 						slotX += powdelta;
 					}
 					slotY += powdelta;
 				}
-				try{
-					mIndexNum[slotLod] = mIndexsArray[slotLod].size();
-					CD3D11_BUFFER_DESC ibDesc(sizeof(std::uint32_t)*mIndexsArray[slotLod].size(), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
-					D3D11_SUBRESOURCE_DATA ibDataDesc = { mIndexsArray[slotLod].data(), 0, 0 };
+				mIndexInfo[slotLod].mCount = mIndexs.size() - mIndexInfo[slotLod].mOffset;
 
-					dxcall(device->CreateBuffer(&ibDesc, &ibDataDesc, &mIndexBuffer[slotLod]));
-				}
-				Catch_DX_Exception
+				mIndexInfo[slotLod].mCrackOffset[(uint8)DIRECTION_2D_TYPE::DIRECTION_LEFT] = mIndexs.size();
+				//Todo : Insert Left Crack
+				mIndexInfo[slotLod].mCrackCount[(uint8)DIRECTION_2D_TYPE::DIRECTION_LEFT] = mIndexs.size() - mIndexInfo[slotLod].mCrackOffset[(uint8)DIRECTION_2D_TYPE::DIRECTION_LEFT];
+
+				mIndexInfo[slotLod].mCrackOffset[(uint8)DIRECTION_2D_TYPE::DIRECTION_RIGHT] = mIndexs.size();
+				//Todo : Insert Right Crack
+				mIndexInfo[slotLod].mCrackCount[(uint8)DIRECTION_2D_TYPE::DIRECTION_RIGHT] = mIndexs.size() - mIndexInfo[slotLod].mCrackOffset[(uint8)DIRECTION_2D_TYPE::DIRECTION_RIGHT];
+
+				mIndexInfo[slotLod].mCrackOffset[(uint8)DIRECTION_2D_TYPE::DIRECTION_TOP] = mIndexs.size();
+				//Todo : Insert Top Crack
+				mIndexInfo[slotLod].mCrackCount[(uint8)DIRECTION_2D_TYPE::DIRECTION_TOP] = mIndexs.size() - mIndexInfo[slotLod].mCrackOffset[(uint8)DIRECTION_2D_TYPE::DIRECTION_TOP];
+
+				mIndexInfo[slotLod].mCrackOffset[(uint8)DIRECTION_2D_TYPE::DIRECTION_BOTTOM] = mIndexs.size();
+				//Todo : Insert Bottom Crack
+				mIndexInfo[slotLod].mCrackCount[(uint8)DIRECTION_2D_TYPE::DIRECTION_BOTTOM] = mIndexs.size() - mIndexInfo[slotLod].mCrackOffset[(uint8)DIRECTION_2D_TYPE::DIRECTION_BOTTOM];
 			}
+			assert(mIndexCount == mIndexs.size());
+			try{
+				CD3D11_BUFFER_DESC ibDesc(sizeof(std::uint32_t)*mIndexs.size(), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+				D3D11_SUBRESOURCE_DATA ibDataDesc = { mIndexs.data(), 0, 0 };
 
+				dxcall(device->CreateBuffer(&ibDesc, &ibDataDesc, &mCommonIndexBuffer));
+			}
+			Catch_DX_Exception
 			leo::TextureMgr tm;
 			mHeightMap = tm.LoadTextureSRV(mTerrainFileHeader.mHeightMap);
 		}
 		~Terrain()
 		{
 			leo::win::ReleaseCOM(mCommonVertexBuffer);
-			for (auto & i : mIndexBuffer)
-				leo::win::ReleaseCOM(i);
+			leo::win::ReleaseCOM(mCommonIndexBuffer);
 		}
 #ifdef LB_IMPL_MSCPP
-		static_assert(leo::constexprmath::pow<2, MAXLOD>::value <= MAXEDGEVERTEX, "The n LOD's edgevertex is 2 times (n+1) LOD's edgevertex");
+		static_assert(leo::constexprmath::pow<2, MAXLOD>::value < MAXEDGE, "The n LOD's edgevertex is 2 times (n+1) LOD's edgevertex");
 #else
-		static_assert(leo::constexprmath::pow<2, MAXLOD>() <= MAXEDGEVERTEX, "The n LOD's edgevertex is 2 times (n+1) LOD's edgevertex");
+		static_assert(leo::constexprmath::pow<2, MAXLOD>() < MAXEDGE, "The n LOD's edgevertex is 2 times (n+1) LOD's edgevertex");
 #endif
 		static_assert(MAXLOD < 8, "Too Large LOD result in 'out of memory'");
 
@@ -153,6 +182,7 @@ namespace leo
 			UINT offsets[] = { 0 };
 			context->IASetVertexBuffers(0, 1, &mCommonVertexBuffer, strides, offsets);
 			context->IASetInputLayout(ShaderMgr().CreateInputLayout(InputLayoutDesc::Terrain));
+			context->IASetIndexBuffer(mCommonIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 			auto & mEffect = EffectTerrain::GetInstance();
 			mEffect->ViewProjMatrix(camera.ViewProj());
@@ -191,8 +221,7 @@ namespace leo
 						mEffect->LodColor(mLodColor[lodlevel],context);
 #endif
 
-						context->IASetIndexBuffer(mIndexBuffer[lodlevel], DXGI_FORMAT_R32_UINT, 0);
-						context->DrawIndexed(mIndexNum[lodlevel], 0, 0);
+						context->DrawIndexed(mIndexInfo[lodlevel].mCount, mIndexInfo[lodlevel].mOffset, 0);
 					}
 				}
 			}
@@ -213,7 +242,7 @@ namespace leo
 		class Chunk
 		{
 		public:
-			//row0 : [0.MAXEDGEVERTEX)
+			//row0 : [0.MAXEDGE)
 			explicit Chunk(std::uint8_t lodlevel)
 				:mLodLevel(lodlevel)
 			{}
@@ -221,7 +250,7 @@ namespace leo
 			{}
 			std::uint8_t mLodLevel = MAXLOD / 2;
 		};
-		std::array<Vertex, MAXEDGEVERTEX*MAXEDGEVERTEX> mVertexs;
+		std::array<Vertex, (MAXEDGE+1)*(MAXEDGE+1)> mVertexs;
 
 		std::vector<Chunk> mChunkVector;
 		float mChunkSize;
@@ -230,8 +259,16 @@ namespace leo
 
 		ID3D11ShaderResourceView* mHeightMap;
 		ID3D11Buffer* mCommonVertexBuffer;
-		std::array<ID3D11Buffer*, MAXLOD + 1> mIndexBuffer;
-		std::array<UINT, MAXLOD + 1> mIndexNum;
+		ID3D11Buffer* mCommonIndexBuffer;
+
+		struct Index
+		{
+			std::uint32_t mOffset;
+			std::uint32_t mCount;
+			std::uint32_t mCrackOffset[DIRECTION_2D_TYPE::DIRECTIONS_2DS];
+			std::uint32_t mCrackCount[DIRECTION_2D_TYPE::DIRECTIONS_2DS];
+		};
+		std::array<Index, MAXLOD + 1> mIndexInfo;
 
 		std::pair<uint16,uint16> mScreenSize;
 	private:
@@ -252,13 +289,13 @@ namespace leo
 			clip0 *= gScreenSize;
 			clip1 *= gScreenSize;
 
-			float d = XMVectorGetX(XMVector2Length(clip0 - clip1)) / TRIWIDTH;
-
+			float d = XMVectorGetX(XMVector2Length(clip0 - clip1)) / MINEDGEPIXEL;
+			d /= 2;
 			uint8 Lod = 0;
 
 			for (; Lod < MAXLOD;++Lod)
 			{
-				if (d >((MAXEDGEVERTEX >> Lod) - (MAXEDGEVERTEX >> (Lod+2))))
+				if (d >((MAXEDGE >> Lod) - (MAXEDGE >> (Lod+2))))
 					break;
 			}
 
