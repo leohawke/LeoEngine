@@ -211,7 +211,6 @@ namespace leo
 			mHeightMap = tm.LoadTextureSRV(mTerrainFileHeader.mHeightMap);
 
 			mWeightMap = tm.LoadTextureSRV(L"Resource\\weight.jpg");
-			tm.LoadTexture2DArraySRV(std::array<const wchar_t*, 4>({ L"Resource\\tree0.dds", L"Resource\\tree1.dds", L"Resource\\tree2.dds", L"Resource\\tree3.dds" }));
 			mMatArrayMap = tm.LoadTexture2DArraySRV(std::array<const wchar_t*, 3>({ L"Resource\\Grass.jpg", L"Resource\\Soil.jpg", L"Resource\\Snow.jpg" }));
 		}
 		~Terrain()
@@ -255,13 +254,15 @@ namespace leo
 				{
 					//auto offset = load(float3(slotX*mChunkSize, 0, -slotY*mChunkSize));
 					auto offset = load(float4(slotX*mChunkSize, 0, -slotY*mChunkSize,1.f));
+					auto chunkIndex = slotY*mHorChunkNum + slotX;
 					//see calc topleft,topright,...
 					if (camera.Contains(topleft + offset, topright + offset, buttomleft + offset))
 					{
+						mChunkVector[chunkIndex].mVisiable = true;
+						auto lodlevel = mChunkVector[slotY*mHorChunkNum + slotX].mLodLevel = DetermineLod(topleft + offset, topright + offset, camera.View(), camera.Proj());
+
 						float2 worldoffset(-(mHorChunkNum-1)*mChunkSize / 2 + slotX*mChunkSize, +(mVerChunkNum-1)*mChunkSize / 2-slotY*mChunkSize);
 						mEffect->WorldOffset(worldoffset, context);
-
-						auto lodlevel = mChunkVector[slotY*mHorChunkNum + slotX].mLodLevel = DetermineLod(topleft + offset, topright + offset, camera.View(), camera.Proj());
 
 #ifdef DEBUG
 						static std::array<float4, 256> mLodColor;
@@ -282,6 +283,43 @@ namespace leo
 #endif
 
 						context->DrawIndexed(mIndexInfo[lodlevel].mCount, mIndexInfo[lodlevel].mOffset, 0);
+					}
+					else
+						mChunkVector[chunkIndex].mVisiable = true;
+				}
+			}
+			for (auto slotX = 0; slotX != mHorChunkNum; ++slotX)
+			{
+				for (auto slotY = 0; slotY != mVerChunkNum; ++slotY)
+				{
+					auto chunkIndex = slotY*mHorChunkNum + slotX;
+					if (mChunkVector[chunkIndex].mVisiable){
+						//auto offset = load(float3(slotX*mChunkSize, 0, -slotY*mChunkSize));
+						auto offset = load(float4(slotX*mChunkSize, 0, -slotY*mChunkSize, 1.f));
+						auto chunkIndex = slotY*mHorChunkNum + slotX;
+						float2 worldoffset(-(mHorChunkNum - 1)*mChunkSize / 2 + slotX*mChunkSize, +(mVerChunkNum - 1)*mChunkSize / 2 - slotY*mChunkSize);
+						mEffect->WorldOffset(worldoffset, context);
+
+						if (slotX > 0)//Left
+						{
+							auto nNeighbourIndex = chunkIndex - 1;
+							DrawCrack(mChunkVector[chunkIndex], nNeighbourIndex, DIRECTION_2D_TYPE::DIRECTION_LEFT);
+						}
+						if (slotX < mHorChunkNum - 1)//Right
+						{
+							auto nNeighbourIndex = chunkIndex + 1;
+							DrawCrack(mChunkVector[chunkIndex], nNeighbourIndex, DIRECTION_2D_TYPE::DIRECTION_RIGHT);
+						}
+						if (slotY > 0)//Top
+						{
+							auto nNeighbourIndex = chunkIndex - mHorChunkNum;
+							DrawCrack(mChunkVector[chunkIndex], nNeighbourIndex, DIRECTION_2D_TYPE::DIRECTION_TOP);
+						}
+						if (slotY < mVerChunkNum - 1)//Bottom
+						{
+							auto nNeighbourIndex = chunkIndex + mHorChunkNum;
+							DrawCrack(mChunkVector[chunkIndex], nNeighbourIndex, DIRECTION_2D_TYPE::DIRECTION_BOTTOM);
+						}
 					}
 				}
 			}
@@ -423,6 +461,11 @@ namespace leo
 
 			//auto lod = max(cameralod, MAXLOD);
 			return cameralod;
+		}
+
+		void DrawCrack(const Chunk& chunkInfo, std::size_t neigbourIndex, DIRECTION_2D_TYPE direct)
+		{
+
 		}
 	};
 }

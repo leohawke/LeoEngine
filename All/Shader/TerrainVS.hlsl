@@ -30,8 +30,14 @@ struct VertexOut
 VertexOut main(VertexIn vin)
 {
 	float2 newpos = f16tof32(vin.pos) + gOffset;
-	float2 uv = newpos*gUVScale + float2(0.5f, 0.5f);
-	float y = hybridTerrain(newpos, int3(3, 3, 1));
+		float2 uv = newpos*gUVScale + float2(0.5f, 0.5f);
+		uv.y = 1.f - uv.y;
+	float NoiseScale = 5.f;
+#if 0
+	float y = hybridTerrain(NoiseScale*uv, int3(3, 3, 1))-0.5f;
+#endif
+	float y = inoise(NoiseScale*uv);
+	y *= 5;
 	VertexOut vout;
 	vout.PosH = mul(float4(newpos.x, y, newpos.y, 1.f), gViewProj);
 	vout.Tex = uv;

@@ -23,6 +23,7 @@ SamplerState RepeatLinear:register(s0)
 float4 main(PixelIn pin) : SV_TARGET
 {
 	float3 weight = gAlphaTexture.Sample(RepeatLinear, pin.Tex).xyz;
+	weight = normalize(weight);
 		float4 color = weight.x *gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 0.f));
 		color += weight.y*gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 1.f));
 	color += weight.z*gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 2.f));

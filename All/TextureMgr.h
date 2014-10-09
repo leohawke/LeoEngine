@@ -226,14 +226,15 @@ namespace leo
 				if (buffer_pos + string_len > buffer_size)
 				{
 					buffer_size - buffer_pos > 0 ? std::memcpy(&buffer[buffer_pos], s, buffer_size - buffer_pos) : 0;
-					buffer_pos = 4097;
+					buffer_pos = 2047;
 					break;
 				}
-				std::memcpy(&buffer[buffer_pos], s, string_len);
+				std::memcpy(&buffer[buffer_pos], s, string_len*sizeof(wchar_t));
 				buffer_pos += string_len;
 			}
 			buffer[buffer_pos] = wchar_t();
 			auto sid = hash(buffer);
+			std::memset(buffer, 0, 4096);
 			return sid;
 		}
 
@@ -248,14 +249,15 @@ namespace leo
 				if (buffer_pos + string_len > buffer_size)
 				{
 					buffer_size - buffer_pos > 0 ? memcpy(&buffer[buffer_pos], s.c_str(), buffer_size - buffer_pos) : 0;
-					buffer_pos = 4097;
+					buffer_pos = 2047;
 					break;
 				}
-				memcpy(&buffer[buffer_pos], s.c_str(), string_len);
+				memcpy(&buffer[buffer_pos], s.c_str(), string_len*sizeof(wchar_t));
 				buffer_pos += string_len;
 			}
 			buffer[buffer_pos] = wchar_t();
 			auto sid = hash(buffer);
+			std::memset(buffer, 0, 4096);
 			return sid;
 		}
 	private:
