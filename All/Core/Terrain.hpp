@@ -303,22 +303,22 @@ namespace leo
 						if (slotX > 0)//Left
 						{
 							auto nNeighbourIndex = chunkIndex - 1;
-							DrawCrack(mChunkVector[chunkIndex], nNeighbourIndex, DIRECTION_2D_TYPE::DIRECTION_LEFT);
+							DrawCrack(mChunkVector[chunkIndex], nNeighbourIndex, DIRECTION_2D_TYPE::DIRECTION_LEFT, context);
 						}
 						if (slotX < mHorChunkNum - 1)//Right
 						{
 							auto nNeighbourIndex = chunkIndex + 1;
-							DrawCrack(mChunkVector[chunkIndex], nNeighbourIndex, DIRECTION_2D_TYPE::DIRECTION_RIGHT);
+							DrawCrack(mChunkVector[chunkIndex], nNeighbourIndex, DIRECTION_2D_TYPE::DIRECTION_RIGHT, context);
 						}
 						if (slotY > 0)//Top
 						{
 							auto nNeighbourIndex = chunkIndex - mHorChunkNum;
-							DrawCrack(mChunkVector[chunkIndex], nNeighbourIndex, DIRECTION_2D_TYPE::DIRECTION_TOP);
+							DrawCrack(mChunkVector[chunkIndex], nNeighbourIndex, DIRECTION_2D_TYPE::DIRECTION_TOP, context);
 						}
 						if (slotY < mVerChunkNum - 1)//Bottom
 						{
 							auto nNeighbourIndex = chunkIndex + mHorChunkNum;
-							DrawCrack(mChunkVector[chunkIndex], nNeighbourIndex, DIRECTION_2D_TYPE::DIRECTION_BOTTOM);
+							DrawCrack(mChunkVector[chunkIndex], nNeighbourIndex, DIRECTION_2D_TYPE::DIRECTION_BOTTOM,context);
 						}
 					}
 				}
@@ -463,9 +463,12 @@ namespace leo
 			return cameralod;
 		}
 
-		void DrawCrack(const Chunk& chunkInfo, std::size_t neigbourIndex, DIRECTION_2D_TYPE direct)
+		void DrawCrack(const Chunk& chunkInfo, std::size_t neigbourIndex, DIRECTION_2D_TYPE direct,ID3D11DeviceContext* context)
 		{
-
+			if (mChunkVector[neigbourIndex].mVisiable && mChunkVector[neigbourIndex].mLodLevel > chunkInfo.mLodLevel)
+			{
+				context->DrawIndexed(mIndexInfo[chunkInfo.mLodLevel].mCrackOffset[direct], mIndexInfo[chunkInfo.mLodLevel].mCrackCount[direct]);
+			}
 		}
 	};
 }
