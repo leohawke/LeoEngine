@@ -467,7 +467,7 @@ namespace leo
 		{
 			if (mChunkVector[neigbourIndex].mVisiable && mChunkVector[neigbourIndex].mLodLevel > chunkInfo.mLodLevel)
 			{
-				context->DrawIndexed(mIndexInfo[chunkInfo.mLodLevel].mCrackOffset[direct], mIndexInfo[chunkInfo.mLodLevel].mCrackCount[direct]);
+				context->DrawIndexed(mIndexInfo[chunkInfo.mLodLevel].mCrackOffset[(uint8)direct], mIndexInfo[chunkInfo.mLodLevel].mCrackCount[(uint8)direct],0);
 			}
 		}
 	};
