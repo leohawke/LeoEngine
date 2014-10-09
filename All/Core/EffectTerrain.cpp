@@ -20,6 +20,8 @@ namespace leo
 
 			leo::RenderStates SS;
 			mSS = SS.GetSamplerState(L"NearestRepeat");
+
+			mPSSS = SS.GetSamplerState(L"LinearRepeat");
 		}
 		void Apply(ID3D11DeviceContext* con)
 		{
@@ -29,9 +31,15 @@ namespace leo
 			mVSCBPerMatrix.Update(con);
 			context.VSSetConstantBuffers(0, 1, &mVSCBPerMatrix.mBuffer);
 			context.PSSetShader(mPS, nullptr, 0);
+#ifdef DEBUG
 			context.PSSetConstantBuffers(0, 1, &mPSCBPerLodColor.mBuffer);
+#endif
 			context->VSSetShaderResources(0, 1, &mSRV);
 			context->VSSetSamplers(0, 1, &mSS);
+
+			context.PSSetSamplers(0, 1, &mPSSS);
+			ID3D11ShaderResourceView* mArray[] = { mWeightSRV, mPSSRVArray };
+			context.PSSetShaderResources(0, 2, mArray);
 		}
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow
 		{
@@ -63,9 +71,22 @@ namespace leo
 		{
 			mSRV = srv;
 			if (context)
-				context->PSSetShaderResources(0, 1, &mSRV);
+				context->VSSetShaderResources(0, 1, &mSRV);
 		}
 
+		void WeightMap(ID3D11ShaderResourceView* srv, ID3D11DeviceContext* context)
+		{
+			mWeightSRV = srv;
+			if (context)
+				context->PSSetShaderResources(0, 1, &mWeightSRV);
+		}
+
+		void MatArrayMap(ID3D11ShaderResourceView* srv, ID3D11DeviceContext * context)
+		{
+			mPSSRVArray = srv;
+			if (context)
+				context->PSSetShaderResources(1, 1, &mPSSRVArray);
+		}
 #ifdef DEBUG
 		void LodColor(const float4& color, ID3D11DeviceContext* context)
 		{
@@ -96,6 +117,10 @@ namespace leo
 		ID3D11PixelShader* mPS = nullptr;
 		ID3D11SamplerState* mSS = nullptr;
 		ID3D11ShaderResourceView* mSRV = nullptr;
+
+		ID3D11ShaderResourceView* mWeightSRV = nullptr;
+		ID3D11ShaderResourceView* mPSSRVArray = nullptr;
+		ID3D11SamplerState* mPSSS = nullptr;
 	};
 	void EffectTerrain::Apply(ID3D11DeviceContext * context)
 	{
@@ -139,6 +164,26 @@ namespace leo
 			);
 	}
 	
+	void leo::EffectTerrain::MatArrayMap(ID3D11ShaderResourceView * srv, ID3D11DeviceContext * context)
+	{
+		lassume(dynamic_cast<EffectTerrainDelegate *>(this));
+
+		return ((EffectTerrainDelegate *)this)->MatArrayMap(
+			srv, context
+			);
+	}
+
+	void leo::EffectTerrain::WeightMap(ID3D11ShaderResourceView * srv, ID3D11DeviceContext * context)
+	{
+		lassume(dynamic_cast<EffectTerrainDelegate *>(this));
+
+		return ((EffectTerrainDelegate *)this)->WeightMap(
+			srv, context
+			);
+	}
+
+
+
 	bool EffectTerrain::SetLevel(EffectConfig::EffectLevel l) lnothrow
 	{
 		lassume(dynamic_cast<EffectTerrainDelegate *>(this));

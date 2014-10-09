@@ -29,7 +29,10 @@ namespace leo
 		void HeightMap(ID3D11ShaderResourceView* srv, ID3D11DeviceContext* context = nullptr);
 #ifdef DEBUG
 		void LodColor(const float4& color, ID3D11DeviceContext* context);
+
 #endif
+		void MatArrayMap(ID3D11ShaderResourceView * srv, ID3D11DeviceContext * context = nullptr);
+		void WeightMap(ID3D11ShaderResourceView * srv, ID3D11DeviceContext * context = nullptr);
 	public:
 		static const std::unique_ptr<EffectTerrain>& GetInstance(ID3D11Device* device = nullptr);
 	};

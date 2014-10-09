@@ -209,6 +209,10 @@ namespace leo
 			Catch_DX_Exception
 			leo::TextureMgr tm;
 			mHeightMap = tm.LoadTextureSRV(mTerrainFileHeader.mHeightMap);
+
+			mWeightMap = tm.LoadTextureSRV(L"Resource\\weight.jpg");
+			tm.LoadTexture2DArraySRV(std::array<const wchar_t*, 4>({ L"Resource\\tree0.dds", L"Resource\\tree1.dds", L"Resource\\tree2.dds", L"Resource\\tree3.dds" }));
+			mMatArrayMap = tm.LoadTexture2DArraySRV(std::array<const wchar_t*, 3>({ L"Resource\\Grass.jpg", L"Resource\\Soil.jpg", L"Resource\\Snow.jpg" }));
 		}
 		~Terrain()
 		{
@@ -241,6 +245,8 @@ namespace leo
 			mEffect->ViewProjMatrix(camera.ViewProj());
 			mEffect->HeightMap(mHeightMap);
 			mEffect->UVScale(float2(1.f / mHorChunkNum / mChunkSize, 1.f / mVerChunkNum / mChunkSize));
+			mEffect->WeightMap(mWeightMap);
+			mEffect->MatArrayMap(mMatArrayMap);
 			mEffect->Apply(context);
 
 			for (auto slotX = 0; slotX != mHorChunkNum; ++slotX)
@@ -252,8 +258,6 @@ namespace leo
 					//see calc topleft,topright,...
 					if (camera.Contains(topleft + offset, topright + offset, buttomleft + offset))
 					{
-						x = slotX;
-						y = slotY;
 						float2 worldoffset(-(mHorChunkNum-1)*mChunkSize / 2 + slotX*mChunkSize, +(mVerChunkNum-1)*mChunkSize / 2-slotY*mChunkSize);
 						mEffect->WorldOffset(worldoffset, context);
 
@@ -305,6 +309,7 @@ namespace leo
 			Chunk()
 			{}
 			std::uint8_t mLodLevel = MAXLOD / 2;
+			bool mVisiable = false;
 		};
 		std::array<Vertex, (MAXEDGE+1)*(MAXEDGE+1)> mVertexs;
 
@@ -314,10 +319,12 @@ namespace leo
 		std::uint16_t mVerChunkNum;
 
 		ID3D11ShaderResourceView* mHeightMap;
+
+		ID3D11ShaderResourceView* mWeightMap;
+		ID3D11ShaderResourceView* mMatArrayMap;
 		ID3D11Buffer* mCommonVertexBuffer;
 		ID3D11Buffer* mCommonIndexBuffer;
 
-		int x, y;
 		struct Index
 		{
 			std::uint32_t mOffset;
