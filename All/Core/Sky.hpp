@@ -28,7 +28,7 @@ namespace leo
 
 		DefGetter(const lnothrow, ID3D11ShaderResourceView*, CubeMapSRV, mCubeMapSRV);
 
-		void Render(ID3D11DeviceContext* context, const Camera& camera, effect& eff);
+		void Render(ID3D11DeviceContext* context, const Camera& camera);
 
 		~Sky()
 		{

@@ -1,7 +1,7 @@
 #include <string>
 #include  "..\d3dx11.hpp"
 #include "Camera.hpp"
-#include "Effect.hpp"
+#include "Effect.h"
 #include "Sky.hpp"
 #include "..\TextureMgr.h"
 #include "..\ShaderMgr.h"
@@ -55,7 +55,7 @@ namespace leo
 	{
 		mCubeMapSRV = (cubemapSRV);
 	}
-	void Sky::Render(ID3D11DeviceContext* context, const Camera& camera, effect& eff)
+	void Sky::Render(ID3D11DeviceContext* context, const Camera& camera)
 	{
 		static UINT strides[] = { sizeof(float4) };
 		static UINT offsets[] = { 0 };
@@ -64,19 +64,16 @@ namespace leo
 		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 		context->IASetInputLayout(ShaderMgr().CreateInputLayout(InputLayoutDesc::Sky));
 
-		cbChangeOnCamera mCamera;
-		memcpy(mCamera.gEyePos, camera.GetOrigin());
-		auto world = XMMatrixTranslation(mCamera.gEyePos.x, mCamera.gEyePos.y, mCamera.gEyePos.z);
+		auto & mEffect = EffectSky::GetInstance();
+		float3 pos;
+		memcpy(pos, camera.GetOrigin());
+		auto world = XMMatrixTranslation(pos.x, pos.y, pos.z);
 		
-		mCamera.gViewProj =world * camera.ViewProj();
-
-		
-
-		eff.VSSetConstantBuffer(mCamera.slot, &mCamera);
-		eff.Apply(context);
+		mEffect->EyePos(pos);
+		mEffect->ViewProj(world*camera.ViewProj());
 		
 		context->PSSetShaderResources(0, 1, &mCubeMapSRV);
-
+		mEffect->Apply(context);
 
 		context->Draw(4, 0);
 	}

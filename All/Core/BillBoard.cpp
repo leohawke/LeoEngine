@@ -1,4 +1,4 @@
-#include "Effect.hpp"
+#include "Effect.h"
 #include "BillBoard.hpp"
 /*
 #include <cstdint>
@@ -53,9 +53,9 @@ namespace leo
 			win::ReleaseCOM(mVertexBuffer);
 	}
 
-	void BillBoard::Render(ID3D11DeviceContext* context, const Camera& camera,effect& eff)
+	void BillBoard::Render(ID3D11DeviceContext* context, const Camera& camera)
 	{
-		auto center = loadfloat3(&mData.mCenterW);
+		auto center = load(mData.mCenterW);
 		auto result = camera.Contains(center);
 		if (!camera.Contains(center))
 			return;
@@ -77,13 +77,13 @@ namespace leo
 		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 		context->IASetInputLayout(ShaderMgr().CreateInputLayout(InputLayoutDesc::BillBoard));
 
-		cbChangeOnCamera mCamera;
-		memcpy(camera.GetOrigin(), mCamera.gEyePos);
-		mCamera.gViewProj = camera.ViewProj();
+		auto& mEffect = EffectSprite::GetInstance();
 
-		eff.GSSetConstantBuffer(mCamera.slot, &mCamera);
-
-		eff.Apply(context);
+		float3 eyepos;
+		memcpy(eyepos, camera.GetOrigin());
+		mEffect->EyePos(eyepos);
+		mEffect->ViewProj(camera.ViewProj());
+		mEffect->Apply(context);
 		context->PSSetShaderResources(0, 1, &mTexDiffuse);
 
 		

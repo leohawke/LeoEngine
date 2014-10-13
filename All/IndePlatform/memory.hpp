@@ -662,13 +662,14 @@ namespace leo
 			pos = 0;
 		}
 		//一字节请调用Alloc
-		DefGetter(const lnoexcept(), decltype(pos), Pos, pos)
+		DefGetter(const lnothrow, decltype(pos), Pos, pos)
 	public:
 	};
 }
 
 namespace leo
 {
+#undef min
 	template<typename T,typename U>
 	void inline memcpy(T& dst, const U& src)
 	{

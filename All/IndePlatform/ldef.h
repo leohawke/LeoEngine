@@ -201,7 +201,7 @@
 #endif
 
 #if LB_HAS_ALIGNAS
-#	define lalignof alignas
+#	define lalignas alignas
 #else
 #	define lalignas(_n) _declspec(align(_n))
 #endif

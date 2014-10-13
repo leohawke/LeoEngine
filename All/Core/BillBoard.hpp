@@ -59,7 +59,7 @@ namespace leo
 
 		~BillBoard();
 
-		void Render(ID3D11DeviceContext* context, const Camera& camera,effect& eff);
+		void Render(ID3D11DeviceContext* context, const Camera& camera);
 	};
 }
 

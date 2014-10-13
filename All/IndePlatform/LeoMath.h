@@ -49,14 +49,18 @@ namespace leo
 	const float LM_QUARPI = LM_PI / 4.0f;
 	//radian per degree
 	const float LM_RPD = LM_PI / 180.0f;
+
+	const std::uint8_t zero = 0;
+	const std::uint8_t one = 1;
+	const std::uint8_t two = 2;
+	const std::uint8_t four = 4;
+	const std::uint8_t eight = 8;
 }
 
 //Trigonometry Function<uint Radian>
 namespace leo
 {
-#if LB_IMPL_MSCPP && PLATFORM_64BIT
-#error "Unsuppot MSVC X64"
-#else
+#if LB_IMPL_MSCPP && !PLATFORM_64BIT
 	//from LH_MOUSE
 	inline __declspec(naked) float __stdcall sincosr(float *pcos, float rad)
 	{
@@ -146,6 +150,44 @@ namespace leo
 				fdiv
 		}
 	}
+#else
+	inline float acosr(float r){
+		return std::acos(r);
+	}
+
+	inline float asinr(float r){
+		return std::asin(r);
+	}
+
+	inline float atanr(float r){
+		return std::atan(r);
+	}
+
+	inline float sinr(float r){
+		return std::sin(r);
+	}
+
+	inline float cosr(float r){
+		return std::cos(r);
+	}
+
+	inline float tanr(float r){
+		return std::tan(r);
+	}
+
+	inline float sqrt(float f)
+	{
+		return std::sqrt(r);
+	}
+
+	inline float rsqrt(float f){
+		return 1.f/sqrt(f);
+	}
+
+	inlien float sincosr(float *pcos, float rad){
+		*pcos = cosr(rad);
+		return sinr(rad);
+	}
 #endif
 }
 
@@ -175,21 +217,21 @@ namespace leo
 			float data[2];
 		};
 
-		float2() lnoexcept() = default;
+		float2() lnothrow = default;
 
-		float2(float X, float Y) lnoexcept()
+		float2(float X, float Y) lnothrow
 			:u(X), v(Y)
 		{}
 
 		template<typename T>
-		explicit float2(const T& src) lnoexcept()
+		explicit float2(const T& src) lnothrow
 		{
 			static_assert(sizeof(T) >= sizeof(float2), "Need More Data");
 			std::memcpy(this, &src, sizeof(float2));
 		}
 
 		template<typename T>
-		float2& operator=(const T& src) lnoexcept()
+		float2& operator=(const T& src) lnothrow
 		{
 			static_assert(sizeof(T) >= sizeof(float2), "Need More Data");
 			std::memcpy(this, &src, sizeof(float2));
@@ -197,18 +239,18 @@ namespace leo
 		}
 
 		template<typename T>
-		T* operator&() lnoexcept()
+		T* operator&() lnothrow
 		{
 			static_assert(sizeof(float2) >= sizeof(T), "Data Don't Enough");
 			return reinterpret_cast<T*>(this);
 		}
 
-		float2 max(const float2& rhs)  const lnoexcept()
+		float2 max(const float2& rhs)  const lnothrow
 		{
 			return float2(leo::max(x, rhs.x), leo::max(y, rhs.y));
 		}
 
-		float2 min(const float2& rhs) const lnoexcept()
+		float2 min(const float2& rhs) const lnothrow
 		{
 			return float2(leo::min(x, rhs.x), leo::min(y, rhs.y));
 		}
@@ -235,31 +277,31 @@ namespace leo
 			float data[3];
 		};
 
-		float3() lnoexcept() = default;
+		float3() lnothrow = default;
 
-		float3(float X, float Y, float Z) lnoexcept()
+		float3(float X, float Y, float Z) lnothrow
 			:u(X), v(Y), w(Z)
 		{}
 
-		float3(const float2& XY, float Z) lnoexcept()
+		float3(const float2& XY, float Z) lnothrow
 			: x(XY.x), y(XY.y), z(Z)
 		{
 		}
 
-		float3(float X,const float2& YZ) lnoexcept()
+		float3(float X,const float2& YZ) lnothrow
 			: x(X), y(YZ.x), z(YZ.y)
 		{
 		}
 
 		template<typename T>
-		explicit float3(const T& src) lnoexcept()
+		explicit float3(const T& src) lnothrow
 		{
 			static_assert(sizeof(T) >= sizeof(float3), "Need More Data");
 			std::memcpy(this, &src, sizeof(float3));
 		}
 
 		template<typename T>
-		float3& operator=(const T& src) lnoexcept()
+		float3& operator=(const T& src) lnothrow
 		{
 			static_assert(sizeof(T) >= sizeof(float3), "Need More Data");
 			std::memcpy(this, &src, sizeof(float3));
@@ -267,17 +309,17 @@ namespace leo
 		}
 
 		template<typename T>
-		T* operator &() lnoexcept()
+		T* operator &() lnothrow
 		{
 			static_assert(sizeof(float3) >= sizeof(T), "Data Don't Enough");
 			return reinterpret_cast<T*>(this);
 		}
-		float3 max(const float3& rhs)  const lnoexcept()
+		float3 max(const float3& rhs)  const lnothrow
 		{
 			return float3(leo::max(x, rhs.x), leo::max(y, rhs.y), leo::max(z, rhs.z));
 		}
 
-		float3 min(const float3& rhs) const lnoexcept()
+		float3 min(const float3& rhs) const lnothrow
 		{
 			return float3(leo::min(x, rhs.x), leo::min(y, rhs.y), leo::min(z, rhs.z));
 		}
@@ -301,56 +343,56 @@ namespace leo
 			float data[4];
 		};
 
-		float4() lnoexcept() = default;
+		float4() lnothrow = default;
 
-		float4(float X, float Y, float Z, float W) lnoexcept()
+		float4(float X, float Y, float Z, float W) lnothrow
 			:x(X), y(Y), z(Z), w(W)
 		{}
 
-		float4(const float2& XY, const float2& ZW) lnoexcept()
+		float4(const float2& XY, const float2& ZW) lnothrow
 			: x(XY.x), y(XY.y), z(ZW.x), w(ZW.y)
 		{
 		}
 
-		float4(const float2& XY,float Z,float W) lnoexcept()
+		float4(const float2& XY,float Z,float W) lnothrow
 			: x(XY.x), y(XY.y), z(Z), w(W)
 		{
 		}
 
-		float4(float X,const float2& YZ, float W) lnoexcept()
+		float4(float X,const float2& YZ, float W) lnothrow
 			: x(X), y(YZ.x), z(YZ.y), w(W)
 		{
 		}
 
-		float4(float X, float Y, const float2& ZW) lnoexcept()
+		float4(float X, float Y, const float2& ZW) lnothrow
 			: x(X), y(Y), z(ZW.x), w(ZW.y)
 		{
 		}
 
-		float4(const float3& XYZ, float W) lnoexcept()
+		float4(const float3& XYZ, float W) lnothrow
 			: x(XYZ.x), y(XYZ.y), z(XYZ.z), w(W)
 		{
 		}
 
-		float4(float X, const float3& YZW) lnoexcept()
+		float4(float X, const float3& YZW) lnothrow
 			: x(X), y(YZW.x), z(YZW.y), w(YZW.z)
 		{
 		}
 
 		template<typename _Tx,typename _Ty>
-		float4(const std::pair<_Tx, _Ty> XY, float Z, float W) lnoexcept()
+		float4(const std::pair<_Tx, _Ty> XY, float Z, float W) lnothrow
 			: x(XY.first), y(XY.second), z(Z), w(W)
 		{}
 
 		template<typename T>
-		explicit float4(const T& src) lnoexcept()
+		explicit float4(const T& src) lnothrow
 		{
 			static_assert(sizeof(T) >= sizeof(float4), "Need More Data");
 			std::memcpy(this, &src, sizeof(float4));
 		}
 
 		template<typename T>
-		float4& operator=(const T& src) lnoexcept()
+		float4& operator=(const T& src) lnothrow
 		{
 			static_assert(sizeof(T) >= sizeof(float4), "Need More Data");
 			std::memcpy(this, &src, sizeof(float4));
@@ -358,17 +400,17 @@ namespace leo
 		}
 
 		template<typename T>
-		T* operator &() lnoexcept()
+		T* operator &() lnothrow
 		{
 			static_assert(sizeof(float4) >= sizeof(T), "Data Don't Enough");
 			return reinterpret_cast<T*>(this);
 		}
-		float4 max(const float4& rhs)  const lnoexcept()
+		float4 max(const float4& rhs)  const lnothrow
 		{
 			return float4(leo::max(x, rhs.x), leo::max(y, rhs.y), leo::max(z, rhs.z), leo::max(w, rhs.w));
 		}
 
-		float4 min(const float4& rhs) const lnoexcept()
+		float4 min(const float4& rhs) const lnothrow
 		{
 			return float4(leo::min(x, rhs.x), leo::min(y, rhs.y), leo::min(z, rhs.z), leo::min(w, rhs.w));
 		}
@@ -394,33 +436,33 @@ namespace leo
 	struct lalignas(2) half
 	{
 		uint16 data;
-		explicit half(float f) lnoexcept()
+		explicit half(float f) lnothrow
 			:data(details::float_to_half(f))
 		{
 
 		}
 
-		explicit half(int16 i) lnoexcept()
+		explicit half(int16 i) lnothrow
 			: half(float(i))
 		{
 		}
 
-		half& operator=(float f) lnoexcept()
+		half& operator=(float f) lnothrow
 		{
 			*this = half(f);
 		}
 
-		half& operator=(int16 i) lnoexcept()
+		half& operator=(int16 i) lnothrow
 		{
 			*this = half(i);
 		}
 
-		explicit operator float() const lnoexcept()
+		explicit operator float() const lnothrow
 		{
 			return details::half_to_float(data);
 		}
 
-		explicit operator int16() const lnoexcept()
+		explicit operator int16() const lnothrow
 		{
 			return static_cast<int16>(details::half_to_float(data));
 		}
@@ -438,7 +480,7 @@ namespace leo
 			uint16 data[2];
 		};
 
-		half2(float X, float Y) lnoexcept()
+		half2(float X, float Y) lnothrow
 			:u(half(X).data), v(half(Y).data)
 		{}
 
@@ -458,7 +500,7 @@ namespace leo
 			uint16 data[2];
 		};
 
-		half3(float X, float Y, float Z) lnoexcept()
+		half3(float X, float Y, float Z) lnothrow
 			:u(half(X).data), v(half(Y).data), w(half(Z).data)
 		{}
 	};
@@ -472,7 +514,7 @@ namespace leo
 			uint16 data[4];
 		};
 
-		half4(float X, float Y, float Z, float W) lnoexcept()
+		half4(float X, float Y, float Z, float W) lnothrow
 			:x(half(X).data), y(half(Y).data), z(half(Z).data), w(half(W).data)
 		{}
 	};
@@ -716,6 +758,7 @@ namespace leo
 		// Prepare for the division
 		vLengthSq = _mm_sqrt_ps(vLengthSq);
 		return _mm_cvtss_f32(vLengthSq);
+
 #endif
 	}
 }

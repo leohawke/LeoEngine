@@ -118,12 +118,12 @@
     </ClCompile>
     <ClCompile Include="File.cpp" />
     <ClCompile Include="IndePlatform\any.cpp" />
-    <ClCompile Include="IndePlatform\leo_impl_convert_impl.cpp" />
     <ClCompile Include="IndePlatform\memory.cpp" />
     <ClCompile Include="IndePlatform\raii.cpp" />
     <ClCompile Include="IndePlatform\Singleton.cpp" />
     <ClCompile Include="IndePlatform\string.cpp" />
     <ClCompile Include="IndePlatform\ThreadSync.cpp" />
+    <ClCompile Include="IndePlatform\Tree_Test.cpp" />
     <ClCompile Include="IndePlatform\type_info.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="leomath.cpp" />
@@ -138,7 +138,7 @@
     <ClCompile Include="RenderStates.cpp" />
     <ClCompile Include="ShaderMgr.cpp" />
     <ClCompile Include="test.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Mgr.cpp" />
@@ -196,6 +196,7 @@
     <ClInclude Include="IndePlatform\Singleton.hpp" />
     <ClInclude Include="IndePlatform\string.hpp" />
     <ClInclude Include="IndePlatform\ThreadSync.hpp" />
+    <ClInclude Include="IndePlatform\Tree.hpp" />
     <ClInclude Include="IndePlatform\tuple.hpp" />
     <ClInclude Include="IndePlatform\type_op.hpp" />
     <ClInclude Include="IndePlatform\utility.hpp" />
@@ -418,7 +419,7 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">复制 %(RootDir)%(Directory) 到 $(OutDir)%(RelativeDir)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)\copy.log</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)\copy.log</Outputs>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
     <Text Include="一个渲染对象需求.txt" />
     <Text Include="宏说明.txt" />

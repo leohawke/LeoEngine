@@ -2,7 +2,7 @@
 #include "..\DeviceMgr.h"
 #include "..\ShaderMgr.h"
 #include "GaussBlur.hpp"
-#include "Effect.hpp"
+#include "Effect.h"
 #include "Vertex.hpp"
 #include "..\exception.hpp"
 #include "Geometry.hpp"
@@ -266,7 +266,7 @@ namespace leo
 		leo::win::ReleaseCOM(mRowCS);
 	}
 
-	void GaussBlur::Render(ID3D11DeviceContext* context, const Camera& camera, effect& eff)
+	void GaussBlur::Render(ID3D11DeviceContext* context, const Camera& camera)
 	{
 		DeviceMgr dm;
 		auto rtt = dm.GetRenderTargetTexture2D();
@@ -326,7 +326,8 @@ namespace leo
 		context->IASetVertexBuffers(0, 1, &mVertexBuffer, strides, offsets);
 		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
-		eff.Apply(context);
+		auto & mEffect = EffectUnPack::GetInstance();
+		mEffect->Apply(context);
 
 		context->PSSetShaderResources(0, 1, &mInSRV);
 		context->Draw(4, 0);

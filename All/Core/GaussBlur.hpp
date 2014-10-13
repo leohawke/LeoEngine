@@ -51,7 +51,7 @@ namespace leo
 
 		void ReCompiler(ID3D11Device* device);
 
-		void Render(ID3D11DeviceContext* context, const Camera& camera, effect& eff);
+		void Render(ID3D11DeviceContext* context, const Camera& camera);
 	public:
 		static const std::unique_ptr<GaussBlur>& GetInstance(ID3D11Device* device = nullptr,
 			const std::pair<uint16, uint16>& size = { 1280, 768 }, bool color = true,

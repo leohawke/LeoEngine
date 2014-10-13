@@ -201,9 +201,6 @@
     <ClCompile Include="Core\EffectLine.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="IndePlatform\leo_impl_convert_impl.cpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClCompile>
     <ClCompile Include="Core\TerrainEffect.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -212,6 +209,9 @@
     </ClCompile>
     <ClCompile Include="Core\Terrain.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="IndePlatform\Tree_Test.cpp">
+      <Filter>IndePlatform\BaseSource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -421,6 +421,9 @@
     </ClInclude>
     <ClInclude Include="Core\Camera.hpp">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="IndePlatform\Tree.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

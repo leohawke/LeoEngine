@@ -178,6 +178,37 @@ namespace leo
 
 			return TriangleTests::ContainedBy(XMVector3Transform(V0, mView), XMVector3Transform(V1, mView), XMVector3Transform(V2, mView), NearPlane, FarPlane, RightPlane, LeftPlane, TopPlane, BottomPlane);
 		}
+
+		inline ContainmentType Contains(FXMVECTOR V0) const
+		{
+			auto mView = View();
+
+			XMVECTOR Planes[6];
+			Planes[0] = XMVectorSet(0.0f, 0.0f, -1.0f, Near);
+			Planes[1] = XMVectorSet(0.0f, 0.0f, 1.0f, -Far);
+			Planes[2] = XMVectorSet(1.0f, 0.0f, -RightSlope, 0.0f);
+			Planes[3] = XMVectorSet(-1.0f, 0.0f, LeftSlope, 0.0f);
+			Planes[4] = XMVectorSet(0.0f, 1.0f, -TopSlope, 0.0f);
+			Planes[5] = XMVectorSet(0.0f, -1.0f, BottomSlope, 0.0f);
+
+			// Transform point into local space of frustum.
+			XMVECTOR TPoint = XMVector3Transform(V0,View());
+
+			// Set w to one.
+			TPoint = XMVectorInsert<0, 0, 0, 0, 1>(TPoint, XMVectorSplatOne());
+
+			XMVECTOR Zero = XMVectorZero();
+			XMVECTOR Outside = Zero;
+
+			// Test point against each plane of the frustum.
+			for (size_t i = 0; i < 6; ++i)
+			{
+				XMVECTOR Dot = XMVector4Dot(TPoint, Planes[i]);
+				Outside = XMVectorOrInt(Outside, XMVectorGreater(Dot, Zero));
+			}
+
+			return XMVector4NotEqualInt(Outside, XMVectorTrueInt()) ? CONTAINS : DISJOINT;
+		}
 	private:
 		float4x4 mMatrix;
 
