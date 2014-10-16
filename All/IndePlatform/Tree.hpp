@@ -19,7 +19,12 @@
 #include "memory.hpp"
 #include "LeoMath.h"
 #include <vector>
+#include <functional>
+#include <stack>
 namespace leo{
+
+
+
 
 	template<typename ValueType, typename Alloc = std::allocator<ValueType>>
 	class QuadTree
@@ -121,11 +126,6 @@ namespace leo{
 				if (has_value_no_child){
 					node->mChildNodes[index] = mNodeAlloc.allocate(1);
 					mNodeAlloc.construct(node->mChildNodes[index], CalcRect(node->mRect, index));
-					NodeInsert(node->mChildNodes[index], std::move(*node->mLeafValues[index].first), node->mLeafValues[index].second);
-					//已经move,只需要释放内存
-					//警告:in VC++14 CTP ,the second parmter will be check
-					mValueAlloc.deallocate(node->mLeafValues[index].first, 1);
-					node->mLeafValues[index].first = nullptr;
 				}
 				NodeInsert(node->mChildNodes[index], value, pos);
 			}
@@ -155,11 +155,6 @@ namespace leo{
 				if (has_value_no_child){
 					node->mChildNodes[index] = mNodeAlloc.allocate(1);
 					mNodeAlloc.construct(node->mChildNodes[index], CalcRect(node->mRect, index));
-					NodeInsert(node->mChildNodes[index], std::move(*node->mLeafValues[index].first), node->mLeafValues[index].second);
-					//已经move,只需要释放内存
-					//警告:in VC++14 CTP ,the second parmter will be check
-					mValueAlloc.deallocate(node->mLeafValues[index].first, 1);
-					node->mLeafValues[index].first = nullptr;
 				}
 				NodeInsert(node->mChildNodes[index], std::move(value), pos);
 			}
@@ -185,11 +180,85 @@ namespace leo{
 			mNodeAlloc.deallocate(node, 1);
 		}
 
-		
+		bool IsEmpty(Node * node)
+		{
+			if (node == nullptr)
+				return true;
+			for (auto leafvalue : node->mLeafValues){
+				if (leafvalue.first != nullptr)
+					return false;
+			}
+			for (auto childnode : node->mChildNodes){
+				if (!IsEmpty(childnode))
+					return false;
+			}
+			return true;
+		}
+
+		bool FindNodeAndDelete(Node* node,const value_type& value)
+		{
+			if (node == nullptr)
+				return false;
+			//值查找
+			bool finded = false;
+			for (auto &leafvalue : node->mLeafValues){
+				if (!finded && (leafvalue.first != nullptr) && *leafvalue.first == value){
+					mValueAlloc.destroy(leafvalue.first);
+					mValueAlloc.deallocate(leafvalue.first, 1);
+					leafvalue.first = nullptr;
+					finded = true;
+				}
+			}
+			for (auto & childnode : node->mChildNodes)
+				if (!finded)
+				finded = FindNodeAndDelete(childnode,value);
+				
+			for (auto & childnode : node->mChildNodes){
+				if (childnode != nullptr && IsEmpty(childnode)){
+					mNodeAlloc.destroy(childnode);
+					mNodeAlloc.deallocate(childnode, 1);
+					childnode = nullptr;
+				}
+			}
+			return finded;
+		}
 	private:
 		Node * mRootNode = nullptr;
 		value_alloc mValueAlloc;
 		node_alloc mNodeAlloc;
+
+
+		template<typename F,bool = std::is_function<F>::value>
+		struct value_function {
+			enum : bool {
+				value = false
+			};
+		};
+
+		template<typename RET,typename... Opt>
+		struct value_function<RET(const value_type&,Opt...),true>{
+			enum : bool{
+				value = true
+			};
+		};
+
+		template<typename RET,class C,typename... Opt>
+		struct value_function < RET(C::*)(const value_type&, Opt...), false > {
+			enum : bool {
+				value = true
+			};
+		};
+
+		template<typename RET, class C, typename... Opt>
+		struct value_function < RET(C::*)(const value_type&, Opt...) const, false > {
+			enum : bool {
+				value = true
+			};
+		};
+
+		template<class Fr>
+		struct value_function<Fr, false> : value_function < decltype(&Fr::operator()) >
+		{};
 	public:
 		QuadTree(const float4& rect)
 		{
@@ -201,9 +270,38 @@ namespace leo{
 		{
 			NodeDelete(mRootNode);
 		}
+
 		void Insert(const value_type& value, const float2& pos)
 		{
 			NodeInsert(mRootNode, value, pos);
+		}
+
+		void Erase(const value_type& value)
+		{
+			FindNodeAndDelete(mRootNode, value);
+		}
+
+		template<typename F,typename... OptPara>
+		typename std::enable_if<value_function<typename std::remove_reference<F>::type>::value>::type
+		Iterator(const F& f, OptPara&&... args)
+		{
+			std::stack<Node*> mNodeStack;
+
+			mNodeStack.push(mRootNode);
+
+			while (!mNodeStack.empty()){
+				auto & node = mNodeStack.top();
+				mNodeStack.pop();
+
+				for (auto & leafvalue : node->mLeafValues){
+					if (leafvalue.first != nullptr)
+						f(*leafvalue.first, std::forward<OptPara>(args)...);
+				}
+
+				for (auto childnode : node->mChildNodes){
+					childnode != nullptr? mNodeStack.push(childnode) : 0;
+				}
+			}
 		}
 	};
 
