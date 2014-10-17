@@ -67,7 +67,15 @@ namespace leo
 			mVerChunkNum = mTerrainFileHeader.mVerChunkNum;
 			mChunkSize = mTerrainFileHeader.mChunkSize;
 			mChunkVector.resize(mHorChunkNum*mVerChunkNum);
-
+			for (auto slotX = 0; slotX != mHorChunkNum; ++slotX)
+			{
+				for (auto slotY = 0; slotY != mVerChunkNum; ++slotY)
+				{
+					auto chunkIndex = slotY*mHorChunkNum + slotX;
+					mChunkVector[chunkIndex].mSlotX = slotX;
+					mChunkVector[chunkIndex].mSlotY = slotY;
+				}
+			}
 			//Create VertexBuffer
 			auto beginX = -mTerrainFileHeader.mChunkSize / 2;
 			auto beginY = mTerrainFileHeader.mChunkSize / 2;
@@ -507,8 +515,8 @@ namespace leo
 
 			if (camera.Contains(vv[0], vv[1], vv[2])){
 				//top
-				v[1] = float3(v[0].x + rect.z / 2, 0, v[0].y);
-				v[2] = float3(v[0].x, 0, v[0].y-rect.w/2);
+				v[1] = float3(v[0].x + rect.z / 2, 0, v[0].z);
+				v[2] = float3(v[0].x, 0, v[0].z-rect.w/2);
 				auto leftv0 = v[2];
 				vv[1] = XMVector3TransformCoord(load(v[1]), camera.View());
 				vv[2] = XMVector3TransformCoord(load(v[2]), camera.View());
@@ -523,8 +531,8 @@ namespace leo
 
 				//right
 				v[0] = v[1];
-				v[1] = float3(v[0].x + rect.z / 2, 0, v[0].y);
-				v[2] = float3(v[0].x, 0, v[0].y - rect.w / 2);
+				v[1] = float3(v[0].x + rect.z / 2, 0, v[0].z);
+				v[2] = float3(v[0].x, 0, v[0].z - rect.w / 2);
 				vv[0] = XMVector3TransformCoord(load(v[0]), camera.View());
 				vv[1] = XMVector3TransformCoord(load(v[1]), camera.View());
 				vv[2] = XMVector3TransformCoord(load(v[2]), camera.View());
@@ -536,8 +544,8 @@ namespace leo
 
 				//left
 				v[0] = leftv0;
-				v[1] = float3(v[0].x + rect.z / 2, 0, v[0].y);
-				v[2] = float3(v[0].x, 0, v[0].y - rect.w / 2);
+				v[1] = float3(v[0].x + rect.z / 2, 0, v[0].z);
+				v[2] = float3(v[0].x, 0, v[0].z - rect.w / 2);
 				vv[0] = XMVector3TransformCoord(load(v[0]), camera.View());
 				vv[1] = XMVector3TransformCoord(load(v[1]), camera.View());
 				vv[2] = XMVector3TransformCoord(load(v[2]), camera.View());
@@ -549,8 +557,8 @@ namespace leo
 
 				//down
 				v[0] = v[1];
-				v[1] = float3(v[0].x + rect.z / 2, 0, v[0].y);
-				v[2] = float3(v[0].x, 0, v[0].y - rect.w / 2);
+				v[1] = float3(v[0].x + rect.z / 2, 0, v[0].z);
+				v[2] = float3(v[0].x, 0, v[0].z - rect.w / 2);
 				vv[0] = XMVector3TransformCoord(load(v[0]), camera.View());
 				vv[1] = XMVector3TransformCoord(load(v[1]), camera.View());
 				vv[2] = XMVector3TransformCoord(load(v[2]), camera.View());
