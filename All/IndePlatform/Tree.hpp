@@ -18,6 +18,7 @@
 #include "utility.hpp"
 #include "memory.hpp"
 #include "LeoMath.h"
+#include "tuple.hpp"
 #include <vector>
 #include <functional>
 #include <stack>
@@ -57,7 +58,7 @@ namespace leo{
 		using value_alloc = Alloc;
 		using node_alloc = typename value_alloc::template rebind<node_type>::other;
 
-
+	private:
 		bool InRect(const float4& rect, const float2& pos) const
 		{
 			if (pos.x < rect.x - rect.z / 2 || pos.x > rect.x + rect.z / 2 || pos.y < rect.y - rect.w / 2 || pos.y > rect.y + rect.w / 2)
@@ -81,22 +82,22 @@ namespace leo{
 			result.z = rect.z / 2;
 			result.w = rect.w / 2;
 			switch (dire)
-			{
+			{ 
 			case 0:
-				result.x = rect.x + result.z / 2;
-				result.y = rect.y + result.w / 2;
+				result.x = rect.x + result.z / 4;
+				result.y = rect.y + result.w / 4;
 				break;
 			case 1:
-				result.x = rect.x + result.z / 2;
-				result.y = rect.y - result.w / 2;
+				result.x = rect.x + result.z / 4;
+				result.y = rect.y - result.w / 4;
 				break;
 			case 2:
-				result.x = rect.x - result.z / 2;
-				result.y = rect.y + result.w / 2;
+				result.x = rect.x - result.z / 4;
+				result.y = rect.y + result.w / 4;
 				break;
 			case 3:
-				result.x = rect.x - result.z / 2;
-				result.y = rect.y - result.w / 2;
+				result.x = rect.x - result.z / 4;
+				result.y = rect.y - result.w / 4;
 				break;
 			}
 			return result;
@@ -259,6 +260,52 @@ namespace leo{
 		template<class Fr>
 		struct value_function<Fr, false> : value_function < decltype(&Fr::operator()) >
 		{};
+
+		template<typename F, bool = std::is_function<F>::value>
+		struct clip_function{
+			enum : bool {
+				value = false
+			};
+		};
+
+		template<typename... Opt>
+		struct clip_function<bool(const float4&, Opt...), true>{
+			enum : bool{
+				value = true
+			};
+		};
+
+		template<class C, typename... Opt>
+		struct clip_function <bool(C::*)(const float4&, Opt...), false > {
+			enum : bool {
+				value = true
+			};
+		};
+
+		template<class C, typename... Opt>
+		struct clip_function <bool(C::*)(const float4&, Opt...) const, false > {
+			enum : bool {
+				value = true
+			};
+		};
+
+		template<class Fr>
+		struct clip_function<Fr, false> : clip_function < decltype(&Fr::operator()) >
+		{};
+
+		template<typename F,typename FP,typename T,std::size_t... I>
+		auto apply_impl(const F&f, const FP&  fp, const T& t,index_sequence<I...>)
+			->decltype(f(fp, std::get<I>(t)...))
+		{
+			return f(fp, std::get<I>(t)...);
+		}
+
+		template<typename F, typename FP, typename T>
+		auto apply(const F& f, const FP& fp, const T&t) ->
+			decltype(apply_impl(f, fp, t, make_index_sequence<std::tuple_size<T>::value>()))
+		{
+			return apply_impl(f, fp, t, make_index_sequence<std::tuple_size<T>::value>());
+		}
 	public:
 		QuadTree(const float4& rect)
 		{
@@ -283,7 +330,7 @@ namespace leo{
 
 		template<typename F,typename... OptPara>
 		typename std::enable_if<value_function<typename std::remove_reference<F>::type>::value>::type
-		Iterator(const F& f, OptPara&&... args)
+		Iterator(const F& f,const std::tuple<OptPara...>& args)
 		{
 			std::stack<Node*> mNodeStack;
 
@@ -295,11 +342,41 @@ namespace leo{
 
 				for (auto & leafvalue : node->mLeafValues){
 					if (leafvalue.first != nullptr)
-						f(*leafvalue.first, std::forward<OptPara>(args)...);
+						apply(f,*leafvalue.first,args);
 				}
 
 				for (auto childnode : node->mChildNodes){
 					childnode != nullptr? mNodeStack.push(childnode) : 0;
+				}
+			}
+		}
+
+		template<typename F1,typename F2,typename... Opt1,typename... Opt2>
+		typename std::enable_if<value_function<typename std::remove_reference<F1>::type>::value && 
+								clip_function<typename std::remove_reference<F2>::type>::value>
+								::type Iterator(const F1& value_func, const std::tuple<Opt1...>& args1, const F2& clip_func, const std::tuple<Opt2...>& args2)
+		{
+			std::stack<Node*> mNodeStack;
+
+			mNodeStack.push(mRootNode);
+
+			while (!mNodeStack.empty()){
+				auto & node = mNodeStack.top();
+				mNodeStack.pop();
+
+				if (!apply(clip_func,node->mRect,args2))
+					continue;
+
+				for (auto & leafvalue : node->mLeafValues){
+					if (leafvalue.first != nullptr)
+						apply(value_func,*leafvalue.first,args1);
+				}
+
+				for (auto childnode : node->mChildNodes){
+					if (childnode != nullptr){
+						if (apply(clip_func, childnode->mRect, args2))
+							mNodeStack.push(childnode);
+					}
 				}
 			}
 		}

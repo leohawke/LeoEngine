@@ -231,7 +231,7 @@ namespace leo
 	public:
 		void Render(ID3D11DeviceContext* context, const Camera& camera)
 		{
-			auto topleft = load(float3(-(mHorChunkNum)*mChunkSize / 2, 0, +(mVerChunkNum)*mChunkSize / 2));
+			auto topleft =load(float3(-(mHorChunkNum)*mChunkSize / 2, 0, +(mVerChunkNum)*mChunkSize / 2));
 			auto topright = load(float3(-(mHorChunkNum - 2)*mChunkSize / 2, 0, +(mVerChunkNum)*mChunkSize / 2));
 			auto buttomleft = load(float3(-(mHorChunkNum)*mChunkSize / 2, 0, +(mVerChunkNum - 2)*mChunkSize / 2));
 
@@ -250,6 +250,10 @@ namespace leo
 			mEffect->MatArrayMap(mMatArrayMap);
 			mEffect->Apply(context);
 
+			mNeedDrawChunk.clear();
+			
+			DetermineDrawChunk(float4(0, 0, mHorChunkNum*mChunkSize, mVerChunkNum*mChunkSize), camera);
+
 			for (auto slotX = 0; slotX != mHorChunkNum; ++slotX)
 			{
 				for (auto slotY = 0; slotY != mVerChunkNum; ++slotY)
@@ -258,7 +262,8 @@ namespace leo
 					auto offset = load(float4(slotX*mChunkSize, 0, -slotY*mChunkSize,1.f));
 					auto chunkIndex = slotY*mHorChunkNum + slotX;
 					//see calc topleft,topright,...
-					if (camera.Contains(topleft + offset, topright + offset, buttomleft + offset))
+
+					if (camera.Contains( XMVector3Transform(topleft + offset, camera.View()), XMVector3Transform(topright + offset, camera.View()), XMVector3Transform(buttomleft + offset, camera.View())))
 					{
 						mChunkVector[chunkIndex].mVisiable = true;
 						auto lodlevel = mChunkVector[slotY*mHorChunkNum + slotX].mLodLevel = DetermineLod(topleft + offset, topright + offset, camera.View(), camera.Proj());
@@ -350,6 +355,10 @@ namespace leo
 			{}
 			std::uint8_t mLodLevel = MAXLOD / 2;
 			bool mVisiable = false;
+
+			//自索引,用户绘制Crack
+			std::uint32_t mSlotX;
+			std::uint32_t mSlotY;
 		};
 		std::array<Vertex, (MAXEDGE+1)*(MAXEDGE+1)> mVertexs;
 
@@ -375,6 +384,8 @@ namespace leo
 		std::array<Index, MAXLOD + 1> mIndexInfo;
 
 		std::pair<uint16,uint16> mScreenSize;
+
+		std::vector<Chunk*> mNeedDrawChunk;
 	private:
 #if 0
 		uint8 ClipToScreenSpaceLod(XMVECTOR clip0, XMVECTOR clip1)
@@ -470,6 +481,84 @@ namespace leo
 			if (mChunkVector[neigbourIndex].mVisiable && mChunkVector[neigbourIndex].mLodLevel > chunkInfo.mLodLevel)
 			{
 				context->DrawIndexed(mIndexInfo[chunkInfo.mLodLevel].mCrackOffset[(uint8)direct], mIndexInfo[chunkInfo.mLodLevel].mCrackCount[(uint8)direct],0);
+			}
+		}
+
+		void DetermineDrawChunk(const float4& rect, const Camera& camera)
+		{
+
+			if (std::abs(rect.z - mChunkSize) <= 0.1f){
+				auto slotX = (int)((rect.x - mChunkSize / 2) / mChunkSize)+mHorChunkNum/2;
+				auto slotY = (int)((mVerChunkNum*mChunkSize / 2 - (rect.y + mChunkSize / 2)) / mChunkSize);
+				mNeedDrawChunk.push_back(&mChunkVector[slotY*mHorChunkNum + slotX]);
+				return;
+			}
+
+			float3 v[3];
+			v[0] = float3(rect.x - rect.z / 2, 0, rect.y + rect.w / 2);
+			v[1] = float3(rect.x + rect.z / 2, 0, rect.y + rect.w / 2);
+			v[2] = float3(rect.x - rect.z / 2, 0, rect.y - rect.w / 2);
+
+			XMVECTOR vv[3] = {
+				XMVector3TransformCoord(load(v[0]), camera.View()),
+				XMVector3TransformCoord(load(v[1]), camera.View()),
+				XMVector3TransformCoord(load(v[2]), camera.View())
+			};
+
+			if (camera.Contains(vv[0], vv[1], vv[2])){
+				//top
+				v[1] = float3(v[0].x + rect.z / 2, 0, v[0].y);
+				v[2] = float3(v[0].x, 0, v[0].y-rect.w/2);
+				auto leftv0 = v[2];
+				vv[1] = XMVector3TransformCoord(load(v[1]), camera.View());
+				vv[2] = XMVector3TransformCoord(load(v[2]), camera.View());
+				float4 childrect;
+				childrect.z = rect.z / 2;
+				childrect.w = rect.w / 2;
+				if (camera.Contains(vv[0], vv[1], vv[2])){
+					childrect.x = rect.x - rect.z / 4;
+					childrect.y = rect.y + rect.w / 4;
+					DetermineDrawChunk(childrect, camera);
+				}
+
+				//right
+				v[0] = v[1];
+				v[1] = float3(v[0].x + rect.z / 2, 0, v[0].y);
+				v[2] = float3(v[0].x, 0, v[0].y - rect.w / 2);
+				vv[0] = XMVector3TransformCoord(load(v[0]), camera.View());
+				vv[1] = XMVector3TransformCoord(load(v[1]), camera.View());
+				vv[2] = XMVector3TransformCoord(load(v[2]), camera.View());
+				if (camera.Contains(vv[0], vv[1], vv[2])){
+					childrect.x = rect.x + rect.z / 4;
+					childrect.y = rect.y + rect.w / 4;
+					DetermineDrawChunk(childrect, camera);
+				}
+
+				//left
+				v[0] = leftv0;
+				v[1] = float3(v[0].x + rect.z / 2, 0, v[0].y);
+				v[2] = float3(v[0].x, 0, v[0].y - rect.w / 2);
+				vv[0] = XMVector3TransformCoord(load(v[0]), camera.View());
+				vv[1] = XMVector3TransformCoord(load(v[1]), camera.View());
+				vv[2] = XMVector3TransformCoord(load(v[2]), camera.View());
+				if (camera.Contains(vv[0], vv[1], vv[2])){
+					childrect.x = rect.x - rect.z / 4;
+					childrect.y = rect.y - rect.w / 4;
+					DetermineDrawChunk(childrect, camera);
+				}
+
+				//down
+				v[0] = v[1];
+				v[1] = float3(v[0].x + rect.z / 2, 0, v[0].y);
+				v[2] = float3(v[0].x, 0, v[0].y - rect.w / 2);
+				vv[0] = XMVector3TransformCoord(load(v[0]), camera.View());
+				vv[1] = XMVector3TransformCoord(load(v[1]), camera.View());
+				vv[2] = XMVector3TransformCoord(load(v[2]), camera.View());
+				if (camera.Contains(vv[0], vv[1], vv[2])){
+					childrect.x = rect.x + rect.z / 4;
+					childrect.y = rect.y - rect.w / 4;
+					DetermineDrawChunk(childrect, camera);
+				}
 			}
 		}
 	};

@@ -155,8 +155,6 @@ namespace leo
 	public:
 		inline ContainmentType Contains(FXMVECTOR V0, FXMVECTOR V1, FXMVECTOR V2) const
 		{
-			auto mView = View();
-
 			// Create 6 planes (do it inline to encourage use of registers)
 			XMVECTOR NearPlane = XMVectorSet(0.0f, 0.0f, -1.0f, Near);
 			
@@ -176,7 +174,7 @@ namespace leo
 			XMVECTOR BottomPlane = XMVectorSet(0.0f, -1.0f, BottomSlope, 0.0f);
 			
 
-			return TriangleTests::ContainedBy(XMVector3Transform(V0, mView), XMVector3Transform(V1, mView), XMVector3Transform(V2, mView), NearPlane, FarPlane, RightPlane, LeftPlane, TopPlane, BottomPlane);
+			return TriangleTests::ContainedBy(V0, V1, V2, NearPlane, FarPlane, RightPlane, LeftPlane, TopPlane, BottomPlane);
 		}
 
 		inline ContainmentType Contains(FXMVECTOR V0) const
@@ -192,7 +190,7 @@ namespace leo
 			Planes[5] = XMVectorSet(0.0f, -1.0f, BottomSlope, 0.0f);
 
 			// Transform point into local space of frustum.
-			XMVECTOR TPoint = XMVector3Transform(V0,View());
+			XMVECTOR TPoint = V0;
 
 			// Set w to one.
 			TPoint = XMVectorInsert<0, 0, 0, 0, 1>(TPoint, XMVectorSplatOne());

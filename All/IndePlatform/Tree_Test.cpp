@@ -25,7 +25,7 @@ int main()
 	mQuad.Erase(2);
 	mQuad.Erase(3);
 	mQuad.Erase(4);
-
-	mQuad.Iterator([](const int& i, std::ostream& cout){cout << i << ' '; }, std::cout);
+	mQuad.Erase(1);
+	mQuad.Iterator([](const int& i, std::ostream& cout){cout << i << ' '; },std::make_tuple(std::ref(std::cout)), [](const leo::float4&, bool result){return result; },std::make_tuple(true));
 	return 0;
 }

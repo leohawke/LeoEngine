@@ -154,6 +154,68 @@ namespace leo
 		using type = sequence_fold_t<_fBinary,
 			sequence_fold_t<_fBinary, _tState, head>, tail>;
 	};
+
+	template<class T,T... Ints>
+	struct integer_sequence
+	{
+		static size_t size(){
+			return sizeof...(Ints);
+		}
+	};
+
+	template<size_t...Ints>
+	using index_sequence = integer_sequence <size_t,Ints... > ;
+
+	namespace details{
+		template<class T,size_t N>
+		struct sequence_make;
+
+
+
+		template<class T>
+		struct sequence_make<T,1>{
+			using type = integer_sequence < T, 0 > ;
+		};
+
+		template<class T>
+		struct sequence_make<T,2>{
+			using type = integer_sequence < T, 0, 1 > ;
+		};
+
+		template<class T>
+		struct sequence_make<T, 3>{
+			using type = integer_sequence < T, 0, 1, 2 > ;
+		};
+
+		template<class T>
+		struct sequence_make<T,4>{
+			using type = integer_sequence < T, 0, 1, 2, 3 > ;
+		};
+
+		template<class T>
+		struct sequence_make<T,5>{
+			using type = integer_sequence < T, 0, 1, 2, 3, 4 > ;
+		};
+
+		template<class T>
+		struct sequence_make<T,6>{
+			using type = integer_sequence < T, 0, 1, 2, 3, 4, 5 > ;
+		};
+
+		template<class T>
+		struct sequence_make<T,7>{
+			using type = integer_sequence < T, 0, 1, 2, 3, 4, 5, 6 > ;
+		};
+	}
+#if 0
+	template<class T,size_t N>
+	using make_integer_sequence = typename details::sequence_make<T, N>::type;
+#endif
+	template<size_t N>
+	using make_index_sequence = typename details::sequence_make < size_t, N >::type;
+
+	template<class... T>
+	using index_sequence_for = make_index_sequence < sizeof...(T) > ;
 }
 
 #endif
