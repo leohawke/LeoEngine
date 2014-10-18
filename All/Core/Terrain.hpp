@@ -239,7 +239,7 @@ namespace leo
 	public:
 		void Render(ID3D11DeviceContext* context, const Camera& camera)
 		{
-			auto topleft =load(float3(-(mHorChunkNum)*mChunkSize / 2, 0, +(mVerChunkNum)*mChunkSize / 2));
+			auto topleft = load(float3(-(mHorChunkNum)*mChunkSize / 2, 0, +(mVerChunkNum)*mChunkSize / 2));
 			auto topright = load(float3(-(mHorChunkNum - 2)*mChunkSize / 2, 0, +(mVerChunkNum)*mChunkSize / 2));
 			auto buttomleft = load(float3(-(mHorChunkNum)*mChunkSize / 2, 0, +(mVerChunkNum - 2)*mChunkSize / 2));
 
@@ -259,9 +259,24 @@ namespace leo
 			mEffect->Apply(context);
 
 			mNeedDrawChunk.clear();
-			
+
 			DetermineDrawChunk(float4(0, 0, mHorChunkNum*mChunkSize, mVerChunkNum*mChunkSize), camera);
 
+			for (auto chunk : mNeedDrawChunk){
+				auto slotX = chunk->mSlotX;
+				auto slotY = chunk->mSlotY;
+				auto offset = load(float4(slotX*mChunkSize, 0,slotY*-mChunkSize, 1.f));
+				auto chunkIndex = slotY*mHorChunkNum + slotX;
+
+				auto lodlevel = mChunkVector[slotY*mHorChunkNum + slotX].mLodLevel = DetermineLod(topleft + offset, topright + offset, camera.View(), camera.Proj());
+
+				float2 worldoffset(-(mHorChunkNum-1)*mChunkSize / 2 + slotX*mChunkSize, +(mVerChunkNum-1)*mChunkSize / 2-slotY*mChunkSize);
+				mEffect->WorldOffset(worldoffset, context);
+
+				context->DrawIndexed(mIndexInfo[lodlevel].mCount, mIndexInfo[lodlevel].mOffset, 0);
+			}
+
+#if 0
 			for (auto slotX = 0; slotX != mHorChunkNum; ++slotX)
 			{
 				for (auto slotY = 0; slotY != mVerChunkNum; ++slotY)
@@ -338,6 +353,7 @@ namespace leo
 					}
 				}
 			}
+#endif
 		}
 	private:
 		struct Vertex

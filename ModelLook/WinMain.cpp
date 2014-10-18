@@ -291,16 +291,16 @@ void Render()
 		leo::DeviceMgr dm;
 
 		if (GetAsyncKeyState('W') & 0X8000)
-			pCamera->Walk(+0.2f);
+			pCamera->Walk(+0.05f);
 
 		if (GetAsyncKeyState('S') & 0X8000)
-			pCamera->Walk(-0.2f);
+			pCamera->Walk(-0.05f);
 
 		if (GetAsyncKeyState('A') & 0X8000)
-			pCamera->Strafe(-0.2f);
+			pCamera->Strafe(-0.05f);
 
 		if (GetAsyncKeyState('D') & 0X8000)
-			pCamera->Strafe(+0.2f);
+			pCamera->Strafe(+0.05f);
 
 		pCamera->UpdateViewMatrix();
 

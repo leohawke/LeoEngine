@@ -156,22 +156,22 @@ namespace leo
 		inline ContainmentType Contains(FXMVECTOR V0, FXMVECTOR V1, FXMVECTOR V2) const
 		{
 			// Create 6 planes (do it inline to encourage use of registers)
-			XMVECTOR NearPlane = XMVectorSet(0.0f, 0.0f, -1.0f, Near);
+			XMVECTOR NearPlane = XMVectorSet(0.0f, 0.0f, -1.0f, Near-0.1f);
 			
 
-			XMVECTOR FarPlane = XMVectorSet(0.0f, 0.0f, 1.0f, -Far);
+			XMVECTOR FarPlane = XMVectorSet(0.0f, 0.0f, 1.0f, -Far-0.1f);
 			
 
-			XMVECTOR RightPlane = XMVectorSet(1.0f, 0.0f, -RightSlope, 0.0f);
+			XMVECTOR RightPlane = XMVectorSet(1.0f, 0.0f, -RightSlope-0.1f, 0.0f);
 			
 
-			XMVECTOR LeftPlane = XMVectorSet(-1.0f, 0.0f, LeftSlope, 0.0f);
+			XMVECTOR LeftPlane = XMVectorSet(-1.0f, 0.0f, LeftSlope-0.1f, 0.0f);
 			
 
-			XMVECTOR TopPlane = XMVectorSet(0.0f, 1.0f, -TopSlope, 0.0f);
+			XMVECTOR TopPlane = XMVectorSet(0.0f, 1.0f, -TopSlope-0.1f, 0.0f);
 			
 
-			XMVECTOR BottomPlane = XMVectorSet(0.0f, -1.0f, BottomSlope, 0.0f);
+			XMVECTOR BottomPlane = XMVectorSet(0.0f, -1.0f, BottomSlope-0.1f, 0.0f);
 			
 
 			return TriangleTests::ContainedBy(V0, V1, V2, NearPlane, FarPlane, RightPlane, LeftPlane, TopPlane, BottomPlane);
