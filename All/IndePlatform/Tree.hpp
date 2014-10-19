@@ -294,7 +294,7 @@ namespace leo{
 		{};
 
 		template<typename F,typename FP,typename T,std::size_t... I>
-		auto apply_impl(const F&f, const FP&  fp, const T& t,index_sequence<I...>)
+		auto apply_impl(const F&f, const FP&  fp, const T& t, index_sequence<I...>)
 			->decltype(f(fp, std::get<I>(t)...))
 		{
 			return f(fp, std::get<I>(t)...);
@@ -302,9 +302,9 @@ namespace leo{
 
 		template<typename F, typename FP, typename T>
 		auto apply(const F& f, const FP& fp, const T&t) ->
-			decltype(apply_impl(f, fp, t, make_index_sequence<std::tuple_size<T>::value>()))
+			decltype(apply_impl(f, fp, t, make_index_sequence_t<std::tuple_size<T>::value>()))
 		{
-			return apply_impl(f, fp, t, make_index_sequence<std::tuple_size<T>::value>());
+			return apply_impl(f, fp, t, make_index_sequence_t<std::tuple_size<T>::value>());
 		}
 	public:
 		QuadTree(const float4& rect)

@@ -155,67 +155,30 @@ namespace leo
 			sequence_fold_t<_fBinary, _tState, head>, tail>;
 	};
 
-	template<class T,T... Ints>
-	struct integer_sequence
+#if LB_IMPL_CPP <= 201103L
+
+	template<size_t... I>
+	using index_sequence = variadic_sequence<I...>;
+
+	template<size_t>
+	struct make_index_sequence;
+
+	template<size_t _vN>
+	using make_index_sequence_t = typename make_index_sequence<_vN>::type;
+
+	template<size_t _vN>
+	struct make_index_sequence
 	{
-		static size_t size(){
-			return sizeof...(Ints);
-		}
+		using type = make_successor_t<make_index_sequence_t<_vN - 1>>;
 	};
 
-	template<size_t...Ints>
-	using index_sequence = integer_sequence <size_t,Ints... > ;
+	template<>
+	struct make_index_sequence<0>
+	{
+		using type = variadic_sequence<>;
+	};
 
-	namespace details{
-		template<class T,size_t N>
-		struct sequence_make;
-
-
-
-		template<class T>
-		struct sequence_make<T,1>{
-			using type = integer_sequence < T, 0 > ;
-		};
-
-		template<class T>
-		struct sequence_make<T,2>{
-			using type = integer_sequence < T, 0, 1 > ;
-		};
-
-		template<class T>
-		struct sequence_make<T, 3>{
-			using type = integer_sequence < T, 0, 1, 2 > ;
-		};
-
-		template<class T>
-		struct sequence_make<T,4>{
-			using type = integer_sequence < T, 0, 1, 2, 3 > ;
-		};
-
-		template<class T>
-		struct sequence_make<T,5>{
-			using type = integer_sequence < T, 0, 1, 2, 3, 4 > ;
-		};
-
-		template<class T>
-		struct sequence_make<T,6>{
-			using type = integer_sequence < T, 0, 1, 2, 3, 4, 5 > ;
-		};
-
-		template<class T>
-		struct sequence_make<T,7>{
-			using type = integer_sequence < T, 0, 1, 2, 3, 4, 5, 6 > ;
-		};
-	}
-#if 0
-	template<class T,size_t N>
-	using make_integer_sequence = typename details::sequence_make<T, N>::type;
 #endif
-	template<size_t N>
-	using make_index_sequence = typename details::sequence_make < size_t, N >::type;
-
-	template<class... T>
-	using index_sequence_for = make_index_sequence < sizeof...(T) > ;
 }
 
 #endif

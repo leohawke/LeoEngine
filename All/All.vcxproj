@@ -123,7 +123,6 @@
     <ClCompile Include="IndePlatform\Singleton.cpp" />
     <ClCompile Include="IndePlatform\string.cpp" />
     <ClCompile Include="IndePlatform\ThreadSync.cpp" />
-    <ClCompile Include="IndePlatform\Tree_Test.cpp" />
     <ClCompile Include="IndePlatform\type_info.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="leomath.cpp" />
