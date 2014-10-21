@@ -21,7 +21,7 @@ namespace leo
 {
 	namespace details
 	{
-#define MATH_CONVERT_FIRST
+#define MATH_CONVERT_SECOND
 		inline std::uint16_t float_to_half(float value)
 		{
 			uint32_t IValue = reinterpret_cast<uint32_t *>(&value)[0];

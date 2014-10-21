@@ -189,6 +189,21 @@ namespace leo
 		return sinr(rad);
 	}
 #endif
+
+	inline float atanr(float x, float y)
+	{
+		float theta = 0.f;
+		if (x >= 0.f)
+		{
+			theta = atanr(y / x);
+
+			if (theta < 0.f)
+				theta += 2.0f*LM_PI;
+		}
+		else
+			theta = atanr(y / x) + LM_PI;
+		return theta;
+	}
 }
 
 
@@ -230,7 +245,7 @@ namespace leo
 			std::memcpy(this, &src, sizeof(float2));
 		}
 
-		template<typename T>
+			template<typename T>
 		float2& operator=(const T& src) lnothrow
 		{
 			static_assert(sizeof(T) >= sizeof(float2), "Need More Data");
@@ -238,19 +253,19 @@ namespace leo
 			return *this;
 		}
 
-		template<typename T>
+			template<typename T>
 		T* operator&() lnothrow
 		{
 			static_assert(sizeof(float2) >= sizeof(T), "Data Don't Enough");
 			return reinterpret_cast<T*>(this);
 		}
 
-		float2 max(const float2& rhs)  const lnothrow
+			float2 max(const float2& rhs)  const lnothrow
 		{
 			return float2(leo::max(x, rhs.x), leo::max(y, rhs.y));
 		}
 
-		float2 min(const float2& rhs) const lnothrow
+			float2 min(const float2& rhs) const lnothrow
 		{
 			return float2(leo::min(x, rhs.x), leo::min(y, rhs.y));
 		}
@@ -288,7 +303,7 @@ namespace leo
 		{
 		}
 
-		float3(float X,const float2& YZ) lnothrow
+		float3(float X, const float2& YZ) lnothrow
 			: x(X), y(YZ.x), z(YZ.y)
 		{
 		}
@@ -300,7 +315,7 @@ namespace leo
 			std::memcpy(this, &src, sizeof(float3));
 		}
 
-		template<typename T>
+			template<typename T>
 		float3& operator=(const T& src) lnothrow
 		{
 			static_assert(sizeof(T) >= sizeof(float3), "Need More Data");
@@ -308,18 +323,18 @@ namespace leo
 			return *this;
 		}
 
-		template<typename T>
+			template<typename T>
 		T* operator &() lnothrow
 		{
 			static_assert(sizeof(float3) >= sizeof(T), "Data Don't Enough");
 			return reinterpret_cast<T*>(this);
 		}
-		float3 max(const float3& rhs)  const lnothrow
+			float3 max(const float3& rhs)  const lnothrow
 		{
 			return float3(leo::max(x, rhs.x), leo::max(y, rhs.y), leo::max(z, rhs.z));
 		}
 
-		float3 min(const float3& rhs) const lnothrow
+			float3 min(const float3& rhs) const lnothrow
 		{
 			return float3(leo::min(x, rhs.x), leo::min(y, rhs.y), leo::min(z, rhs.z));
 		}
@@ -354,12 +369,12 @@ namespace leo
 		{
 		}
 
-		float4(const float2& XY,float Z,float W) lnothrow
+		float4(const float2& XY, float Z, float W) lnothrow
 			: x(XY.x), y(XY.y), z(Z), w(W)
 		{
 		}
 
-		float4(float X,const float2& YZ, float W) lnothrow
+		float4(float X, const float2& YZ, float W) lnothrow
 			: x(X), y(YZ.x), z(YZ.y), w(W)
 		{
 		}
@@ -379,7 +394,7 @@ namespace leo
 		{
 		}
 
-		template<typename _Tx,typename _Ty>
+		template<typename _Tx, typename _Ty>
 		float4(const std::pair<_Tx, _Ty> XY, float Z, float W) lnothrow
 			: x(XY.first), y(XY.second), z(Z), w(W)
 		{}
@@ -391,7 +406,7 @@ namespace leo
 			std::memcpy(this, &src, sizeof(float4));
 		}
 
-		template<typename T>
+			template<typename T>
 		float4& operator=(const T& src) lnothrow
 		{
 			static_assert(sizeof(T) >= sizeof(float4), "Need More Data");
@@ -399,18 +414,18 @@ namespace leo
 			return *this;
 		}
 
-		template<typename T>
+			template<typename T>
 		T* operator &() lnothrow
 		{
 			static_assert(sizeof(float4) >= sizeof(T), "Data Don't Enough");
 			return reinterpret_cast<T*>(this);
 		}
-		float4 max(const float4& rhs)  const lnothrow
+			float4 max(const float4& rhs)  const lnothrow
 		{
 			return float4(leo::max(x, rhs.x), leo::max(y, rhs.y), leo::max(z, rhs.z), leo::max(w, rhs.w));
 		}
 
-		float4 min(const float4& rhs) const lnothrow
+			float4 min(const float4& rhs) const lnothrow
 		{
 			return float4(leo::min(x, rhs.x), leo::min(y, rhs.y), leo::min(z, rhs.z), leo::min(w, rhs.w));
 		}
@@ -426,7 +441,15 @@ namespace leo
 	}
 
 	struct lalignas(16) float4x4{
-			float4 r[4];
+		float4 r[4];
+
+		float& operator()(uint8 row, uint8 col){
+			return r[row].data[col];
+		}
+
+		float operator()(uint8 row, uint8 col) const{
+			return r[row].data[col];
+		}
 	};
 
 
@@ -457,17 +480,17 @@ namespace leo
 			*this = half(f);
 		}
 
-		half& operator=(int16 i) lnothrow
+			half& operator=(int16 i) lnothrow
 		{
 			*this = half(i);
 		}
 
-		explicit operator float() const lnothrow
+			explicit operator float() const lnothrow
 		{
 			return details::half_to_float(data);
 		}
 
-		explicit operator int16() const lnothrow
+			explicit operator int16() const lnothrow
 		{
 			return static_cast<int16>(details::half_to_float(data));
 		}
@@ -571,13 +594,10 @@ namespace leo
 #endif
 	}
 
-	std::array<__m128, 4> load(const float4x4& data){
+	inline std::array<__m128, 4> load(const float4x4& data){
 		return std::array < __m128, 4 >
 		{
-				load(data.r[0]),
-				load(data.r[0]),
-				load(data.r[0]),
-				load(data.r[0])
+			{load(data.r[0]), load(data.r[1]), load(data.r[2]), load(data.r[3])}
 		};
 	}
 
@@ -637,7 +657,7 @@ namespace leo{
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vdupq_lane_f32(vget_low_f32(v), 1);
 #elif defined(LM_SSE_INTRINSICS)
-		return LM_PERMUTE_PS(v, _MM_SHUFFLE(1,1,1,1));
+		return LM_PERMUTE_PS(v, _MM_SHUFFLE(1, 1, 1, 1));
 #endif
 	}
 
@@ -645,7 +665,7 @@ namespace leo{
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vdupq_lane_f32(vget_low_f32(v), 0);
 #elif defined(LM_SSE_INTRINSICS)
-		return LM_PERMUTE_PS(v, _MM_SHUFFLE(0,0,0,0));
+		return LM_PERMUTE_PS(v, _MM_SHUFFLE(0, 0, 0, 0));
 #endif
 	}
 
@@ -653,15 +673,24 @@ namespace leo{
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vdupq_lane_f32(vget_high_f32(v),1);
 #elif defined(LM_SSE_INTRINSICS)
-		return LM_PERMUTE_PS(v, _MM_SHUFFLE(3,3,3,3));
+		return LM_PERMUTE_PS(v, _MM_SHUFFLE(3, 3, 3, 3));
 #endif
 	}
+
+	inline __m128 Subtract(__m128 sl, __m128 sr){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		return vsubq_f32(sl,sr);
+#elif defined(LM_SSE_INTRINSICS)
+		return _mm_sub_ps(sl,sr);
+#endif
+	}
+
 
 	inline __m128 MultipyAdd(__m128 ml, __m128 mr, __m128 ar){
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vmlaq_f32(ar,ml,mr);
 #elif defined(LM_SSE_INTRINSICS)
-		return _mm_add_ps(_mm_mul_ps(ml,mr),ar);
+		return _mm_add_ps(_mm_mul_ps(ml, mr), ar);
 #endif
 	}
 
@@ -682,12 +711,12 @@ namespace leo{
 		Reciprocal = vmulq_f32(S, Reciprocal);
 		return vmulq_f32(dl, Reciprocal);
 #elif defined(LM_SSE_INTRINSICS)
-		return _mm_div_ps(dl,dr);
+		return _mm_div_ps(dl, dr);
 #endif
 	}
-	
+
 	template<uint8 D = 3>
-	inline __m128 TransformCoord(__m128 v, std::arrry<__m128, 4> m){
+	inline __m128 TransformCoord(__m128 v,const std::array<__m128, 4>& m){
 #if defined(LM_SSE_INTRINSICS) || defined(LM_ARM_NEON_INTRINSICS)
 		auto z = SplatZ(v);
 		auto y = SplatY(v);
@@ -695,7 +724,7 @@ namespace leo{
 
 		auto result = MultiplyAdd(z, m[2], m[3]);
 		result = MultipyAdd(y, m[1], result);
-		result = MultiplyAdd(x, m[0], result);
+		result = MultipyAdd(x, m[0], result);
 
 		auto w = SplatW(result);
 
@@ -704,13 +733,13 @@ namespace leo{
 	}
 
 	template<>
-	inline __m128 TransformCoord<2>(__m128 v, std::arrry<__m128, 4> m){
+	inline __m128 TransformCoord<2>(__m128 v, const std::array<__m128, 4>& m){
 #if defined(LM_SSE_INTRINSICS) || defined(LM_ARM_NEON_INTRINSICS)
 		auto y = SplatY(v);
 		auto x = SplatX(v);
 
-		auto result = MultiplyAdd(y, m[1], m[3]);
-		result = MultiplyAdd(x, m[0], result);
+		auto result = MultipyAdd(y, m[1], m[3]);
+		result = MultipyAdd(x, m[0], result);
 
 		auto w = SplatW(result);
 
@@ -733,7 +762,7 @@ namespace leo
 #if 0
 		auto x = load(left);
 		auto y = load(right);
-		auto V = x-y;
+		auto V = Subtract(x, y);
 #if defined(LM_ARM_NEON_INTRINSICS)
 		auto VL = vget_low_f32(V);
 		// Dot2
@@ -772,7 +801,7 @@ namespace leo
 	{
 		auto x = load(left);
 		auto y = load(right);
-		auto V = x - y;
+		auto V = Subtract(x, y);
 #if defined(LM_ARM_NEON_INTRINSICS)
 		// Dot3
 		float32x4_t vTemp = vmulq_f32(V, V);
@@ -817,7 +846,7 @@ namespace leo
 	{
 		auto x = load(left);
 		auto y = load(right);
-		auto V = x - y;
+		auto V = Subtract(x, y);
 #if defined(LM_ARM_NEON_INTRINSICS)
 		// Dot4
 		float32x4_t vTemp = vmulq_f32(V, V);
@@ -841,9 +870,9 @@ namespace leo
 		return vgetq_lane_f32(vcombine_f32(Result, Result),0);
 #elif defined(LM_SSE_INTRINSICS)
 		// Perform the dot product on x,y,z and w
-		XMVECTOR vLengthSq = _mm_mul_ps(V, V);
+		auto vLengthSq = _mm_mul_ps(V, V);
 		// vTemp has z and w
-		XMVECTOR vTemp = LM_PERMUTE_PS(vLengthSq, _MM_SHUFFLE(3, 2, 3, 2));
+		auto vTemp = LM_PERMUTE_PS(vLengthSq, _MM_SHUFFLE(3, 2, 3, 2));
 		// x+z, y+w
 		vLengthSq = _mm_add_ps(vLengthSq, vTemp);
 		// x+z,x+z,x+z,y+w

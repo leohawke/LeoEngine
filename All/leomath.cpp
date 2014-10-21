@@ -51,12 +51,12 @@ namespace leo
 	{
 		auto result = QuaternionToMatrix(q);
 
-		result._11 *= s;
-		result._22 *= s;
-		result._33 *= s;
-		result._41 = t.x;
-		result._42 = t.y;
-		result._43 = t.z;
+		result(0,0) *= s;
+		result(1,1) *= s;
+		result(2,2) *= s;
+		result(3,0) = t.x;
+		result(3,1) = t.y;
+		result(3,2) = t.z;
 
 		
 

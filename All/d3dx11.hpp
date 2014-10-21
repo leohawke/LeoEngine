@@ -2,12 +2,11 @@
 //must compiler by cl
 #pragma once
 
-#include <string>
-#include <map>
-#include <algorithm>
 
 #include "IndePlatform\utility.hpp"
 #include "IndePlatform\leoint.hpp"
+
+#include "IndePlatform\platform.h"
 #include "COM.hpp"
 #include <comdef.h>
 #include <d3d11.h>
@@ -15,6 +14,9 @@
 #pragma comment(lib,"d3d11.lib")
 #pragma comment(lib,"dxguid.lib")
 
+#include <string>
+#include <map>
+#include <algorithm>
 
 namespace leo
 {

@@ -947,34 +947,34 @@ namespace leo
 			switch (mProjType)
 			{
 			case leo::PROJECTION_TYPE::PERSPECTIVE:
-				mMatrix.m[0][0] = cotfov / mAspect;
-				mMatrix.m[1][1] = cotfov;
+				mMatrix(0,0) = cotfov / mAspect;
+				mMatrix(1,1) = cotfov;
 				break;
 			case leo::PROJECTION_TYPE::ORTHOGRAPHIC:
-				mMatrix.m[0][0] = 2.0f / width;
-				mMatrix.m[1][1] = 2.0f / mNearHeight;
+				mMatrix(0, 0) = 2.0f / width;
+				mMatrix(1, 1) = 2.0f / mNearHeight;
 				break;
 			default:
 				break;
 			}
 			//矩阵的相同值
 			{
-				mMatrix.m[0][1] = 0.0f;
-				mMatrix.m[0][2] = 0.0f;
-				mMatrix.m[0][3] = 0.0f;
+				mMatrix(0, 1) = 0.0f;
+				mMatrix(0, 2) = 0.0f;
+				mMatrix(0, 3) = 0.0f;
 
-				mMatrix.m[1][2] = 0.0f;
-				mMatrix.m[1][3] = 0.0f;
-				mMatrix.m[1][0] = 0.0f;
-				mMatrix.m[2][0] = 0.0f;
-				mMatrix.m[2][1] = 0.0f;
-				mMatrix.m[2][2] = fRange;
-				mMatrix.m[2][3] = 1.0f;
+				mMatrix(1,2) = 0.0f;
+				mMatrix(1,3) = 0.0f;
+				mMatrix(1,0) = 0.0f;
+				mMatrix(2, 0) = 0.0f;
+				mMatrix(2, 1) = 0.0f;
+				mMatrix(2, 2) = fRange;
+				mMatrix(2,3) = 1.0f;
 
-				mMatrix.m[3][0] = 0.0f;
-				mMatrix.m[3][1] = 0.0f;
-				mMatrix.m[3][2] = -fRange * Near;
-				mMatrix.m[3][3] = 0.0f;
+				mMatrix(3, 0) = 0.0f;
+				mMatrix(3, 1) = 0.0f;
+				mMatrix(3, 2) = -fRange*Near;
+				mMatrix(3, 3) = 0.0f;
 			}
 
 			RightSlope = +tanfov*mAspect;
@@ -989,6 +989,8 @@ namespace leo
 				TopSlope /= Far;
 				BottomSlope /= Far;
 			}
+
+
 		}
 	public:
 		//构造函数过长而分拆的函数
