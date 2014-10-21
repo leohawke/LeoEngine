@@ -183,6 +183,7 @@
     <ClInclude Include="IndePlatform\container.hpp" />
     <ClInclude Include="IndePlatform\EndianSwap.hpp" />
     <ClInclude Include="IndePlatform\functional.hpp" />
+    <ClInclude Include="IndePlatform\Geometry.hpp" />
     <ClInclude Include="IndePlatform\iterator.hpp" />
     <ClInclude Include="IndePlatform\ldef.h" />
     <ClInclude Include="IndePlatform\leoint.hpp" />

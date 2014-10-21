@@ -428,6 +428,9 @@
     <ClInclude Include="IndePlatform\platform_macro.h">
       <Filter>IndePlatform\BaseHead</Filter>
     </ClInclude>
+    <ClInclude Include="IndePlatform\Geometry.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">

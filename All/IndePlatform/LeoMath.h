@@ -4,13 +4,13 @@
 //  Copyright (C), FNS Studios, 2014-2014.
 // -------------------------------------------------------------------------
 //  File name:   IndePlatform/leomath.h
-//  Version:     v1.00
+//  Version:     v1.01
 //  Created:     9/28/2014 by leo hawke.
 //  Compilers:   Visual Studio.NET 2013
 //  Description: 要求目标处理器<X86支持SSE2指令集><X64支持MMX指令集>
 // -------------------------------------------------------------------------
 //  History:
-//
+//			 10/21/2014 改动了头文件,新增了函数
 ////////////////////////////////////////////////////////////////////////////
 
 #ifndef IndePlatform_LeoMath_h
@@ -32,6 +32,13 @@ namespace leo
                                      ((fp1) << 2) | ((fp0)))
 
 #define LM_PERMUTE_PS( v, c ) _mm_shuffle_ps( v, v, c )
+
+#ifdef LM_ARM_NEON_INTRINSICS
+#define LM_VMULQ_N_F32( a, b ) vmulq_n_f32( (a), (b) )
+#define LM_VMLAQ_N_F32( a, b, c ) vmlaq_n_f32( (a), (b), (c) )
+#define LM_VMULQ_LANE_F32( a, b, c ) vmulq_lane_f32( (a), (b), (c) )
+#define LM_VMLAQ_LANE_F32( a, b, c, d ) vmlaq_lane_f32( (a), (b), (c), (d) )
+#endif
 }
 
 //Inhert std::
@@ -205,8 +212,6 @@ namespace leo
 		return theta;
 	}
 }
-
-
 
 //Data Structure And Control Function
 namespace leo
@@ -578,9 +583,9 @@ namespace leo
 		{
 			uint32_t i[4];
 			__m128 v;
-		} g_XMMask3 = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000 };
+		} g_LMMask3 = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000 };
 		__m128 V = _mm_load_ps(&data.x);
-		return _mm_and_ps(V, g_XMMask3.v);
+		return _mm_and_ps(V, g_LMMask3.v);
 #endif
 	}
 
@@ -677,11 +682,17 @@ namespace leo{
 #endif
 	}
 
+	inline __m128 SplatOne(){
+		const static float4 one(1.f, 1.f, 1.f, 1.f);
+		const static auto _mone = load(one);
+		return _mone;
+	}
+
 	inline __m128 Subtract(__m128 sl, __m128 sr){
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vsubq_f32(sl,sr);
 #elif defined(LM_SSE_INTRINSICS)
-		return _mm_sub_ps(sl,sr);
+		return _mm_sub_ps(sl, sr);
 #endif
 	}
 
@@ -716,7 +727,7 @@ namespace leo{
 	}
 
 	template<uint8 D = 3>
-	inline __m128 TransformCoord(__m128 v,const std::array<__m128, 4>& m){
+	inline __m128 TransformCoord(__m128 v, const std::array<__m128, 4>& m){
 #if defined(LM_SSE_INTRINSICS) || defined(LM_ARM_NEON_INTRINSICS)
 		auto z = SplatZ(v);
 		auto y = SplatY(v);
@@ -745,6 +756,324 @@ namespace leo{
 
 		return Divide(result, w);
 #endif
+	}
+
+	template<uint8 D = 3>
+	inline __m128 TransformNormal(__m128 v, const std::array<__m128, 4>& m){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		float32x2_t VL = vget_low_f32(v);
+		auto vResult = LM_VMULQ_LANE_F32(m[0], VL, 0); // X
+		vResult = LM_VMLAQ_LANE_F32(vResult, m[1], VL, 1); // Y
+		return LM_VMLAQ_LANE_F32(vResult, m[2], vget_high_f32(V), 0); // Z
+#elif defined(LM_SSE_INTRINSICS)
+		auto vResult = LM_PERMUTE_PS(v, _MM_SHUFFLE(0, 0, 0, 0));
+		vResult = _mm_mul_ps(vResult, m[0]);
+		auto vTemp = LM_PERMUTE_PS(v, _MM_SHUFFLE(1, 1, 1, 1));
+		vTemp = _mm_mul_ps(vTemp, m[1]);
+		vResult = _mm_add_ps(vResult, vTemp);
+		vTemp = LM_PERMUTE_PS(v, _MM_SHUFFLE(2, 2, 2, 2));
+		vTemp = _mm_mul_ps(vTemp, m[2]);
+		vResult = _mm_add_ps(vResult, vTemp);
+		return vResult;
+#else // _LM_VMX128_INTRINSICS_
+#endif
+	}
+
+	template<>
+	inline __m128 TransformNormal<2>(__m128 v, const std::array<__m128, 4>& m){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		float32x2_t VL = vget_low_f32(v);
+		float32x4_t Result = LM_VMULQ_LANE_F32(m[1], VL, 1); // Y
+		return LM_VMLAQ_LANE_F32(Result, m[0], VL, 0); // X
+#elif defined(LM_SSE_INTRINSICS)
+		auto vResult = LM_PERMUTE_PS(v, _MM_SHUFFLE(0, 0, 0, 0));
+		vResult = _mm_mul_ps(vResult, m[0]);
+		auto vTemp = LM_PERMUTE_PS(v, _MM_SHUFFLE(1, 1, 1, 1));
+		vTemp = _mm_mul_ps(vTemp, m[1]);
+		vResult = _mm_add_ps(vResult, vTemp);
+		return vResult;
+#else // _LM_VMX128_INTRINSICS_
+#endif // _LM_VMX128_INTRINSICS_
+	}
+
+	inline __m128 Transform(__m128 v, const std::array<__m128, 4>& m){
+#if defined(_LM_ARM_NEON_INTRINSICS)
+		float32x2_t VL = vget_low_f32(v);
+		LMVECTOR vResult = LM_VMULQ_LANE_F32(m[0], VL, 0); // X
+		vResult = LM_VMLAQ_LANE_F32(vResult,m[1], VL, 1); // Y
+		float32x2_t VH = vget_high_f32(v);
+		vResult = LM_VMLAQ_LANE_F32(vResult, m[2], VH, 0); // Z
+		return LM_VMLAQ_LANE_F32(vResult,m[3], VH, 1); // W
+#elif defined(LM_SSE_INTRINSICS)
+		// Splat x,y,z and w
+		auto vTempX = LM_PERMUTE_PS(v, _MM_SHUFFLE(0, 0, 0, 0));
+		auto vTempY = LM_PERMUTE_PS(v, _MM_SHUFFLE(1, 1, 1, 1));
+		auto vTempZ = LM_PERMUTE_PS(v, _MM_SHUFFLE(2, 2, 2, 2));
+		auto vTempW = LM_PERMUTE_PS(v, _MM_SHUFFLE(3, 3, 3, 3));
+		// Mul by the matrix
+		vTempX = _mm_mul_ps(vTempX, m[0]);
+		vTempY = _mm_mul_ps(vTempY, m[1]);
+		vTempZ = _mm_mul_ps(vTempZ, m[2]);
+		vTempW = _mm_mul_ps(vTempW, m[3]);
+		// Add them all together
+		vTempX = _mm_add_ps(vTempX, vTempY);
+		vTempZ = _mm_add_ps(vTempZ, vTempW);
+		vTempX = _mm_add_ps(vTempX, vTempZ);
+		return vTempX;
+#else // _LM_VMX128_INTRINSICS_
+#endif // _LM_VMX128_INTRINSICS_
+	}
+
+	template<uint8 D = 3>
+	inline __m128 Normalize(__m128 V){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		// Dot3
+		float32x4_t vTemp = vmulq_f32(V, V);
+		float32x2_t v1 = vget_low_f32(vTemp);
+		float32x2_t v2 = vget_high_f32(vTemp);
+		v1 = vpadd_f32(v1, v1);
+		v2 = vdup_lane_f32(v2, 0);
+		v1 = vadd_f32(v1, v2);
+		uint32x2_t VEqualsZero = vceq_f32(v1, vdup_n_f32(0));
+		uint32x2_t VEqualsInf = vceq_f32(v1, vget_low_f32(g_XMInfinity));
+		// Reciprocal sqrt (2 iterations of Newton-Raphson)
+		float32x2_t S0 = vrsqrte_f32(v1);
+		float32x2_t P0 = vmul_f32(v1, S0);
+		float32x2_t R0 = vrsqrts_f32(P0, S0);
+		float32x2_t S1 = vmul_f32(S0, R0);
+		float32x2_t P1 = vmul_f32(v1, S1);
+		float32x2_t R1 = vrsqrts_f32(P1, S1);
+		v2 = vmul_f32(S1, R1);
+		// Normalize
+		auto vResult = vmulq_f32(V, vcombine_f32(v2, v2));
+		vResult = vbslq_f32(vcombine_f32(VEqualsZero, VEqualsZero), vdupq_n_f32(0), vResult);
+		return vbslq_f32(vcombine_f32(VEqualsInf, VEqualsInf), g_XMQNaN, vResult);
+#elif defined(LM_SSE_INTRINSICS)
+		// Perform the dot product on x,y and z only
+		auto vLengthSq = _mm_mul_ps(V, V);
+		auto vTemp = LM_PERMUTE_PS(vLengthSq, _MM_SHUFFLE(2, 1, 2, 1));
+		vLengthSq = _mm_add_ss(vLengthSq, vTemp);
+		vTemp = LM_PERMUTE_PS(vTemp, _MM_SHUFFLE(1, 1, 1, 1));
+		vLengthSq = _mm_add_ss(vLengthSq, vTemp);
+		vLengthSq = LM_PERMUTE_PS(vLengthSq, _MM_SHUFFLE(0, 0, 0, 0));
+		// Prepare for the division
+		auto vResult = _mm_sqrt_ps(vLengthSq);
+		// Create zero with a single instruction
+		auto vZeroMask = _mm_setzero_ps();
+		// Test for a divide by zero (Must be FP to detect -0.0)
+		vZeroMask = _mm_cmpneq_ps(vZeroMask, vResult);
+		// Failsafe on zero (Or epsilon) length planes
+		// If the length is infinity, set the elements to zero
+		vLengthSq = _mm_cmpneq_ps(vLengthSq, g_XMInfinity);
+		// Divide to perform the normalization
+		vResult = _mm_div_ps(V, vResult);
+		// Any that are infinity, set to zero
+		vResult = _mm_and_ps(vResult, vZeroMask);
+		// Select qnan or result based on infinite length
+		auto vTemp1 = _mm_andnot_ps(vLengthSq, g_XMQNaN);
+		auto vTemp2 = _mm_and_ps(vResult, vLengthSq);
+		vResult = _mm_or_ps(vTemp1, vTemp2);
+		return vResult;
+#endif // _LM_VMX128_INTRINSICS_
+	}
+
+	template<>
+	inline __m128 Normalize<2>(__m128 V){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		float32x2_t VL = vget_low_f32(V);
+		// Dot2
+		float32x2_t vTemp = vmul_f32(VL, VL);
+		vTemp = vpadd_f32(vTemp, vTemp);
+		uint32x2_t VEqualsZero = vceq_f32(vTemp, vdup_n_f32(0));
+		uint32x2_t VEqualsInf = vceq_f32(vTemp, vget_low_f32(g_XMInfinity));
+		// Reciprocal sqrt (2 iterations of Newton-Raphson)
+		float32x2_t S0 = vrsqrte_f32(vTemp);
+		float32x2_t P0 = vmul_f32(vTemp, S0);
+		float32x2_t R0 = vrsqrts_f32(P0, S0);
+		float32x2_t S1 = vmul_f32(S0, R0);
+		float32x2_t P1 = vmul_f32(vTemp, S1);
+		float32x2_t R1 = vrsqrts_f32(P1, S1);
+		vTemp = vmul_f32(S1, R1);
+		// Normalize
+		float32x2_t Result = vmul_f32(VL, vTemp);
+		Result = vbsl_f32(VEqualsZero, vdup_n_f32(0), Result);
+		Result = vbsl_f32(VEqualsInf, vget_low_f32(g_XMQNaN), Result);
+		return vcombine_f32(Result, Result);
+#elif defined(LM_SSE_INTRINSICS)
+		// Perform the dot product on x and y only
+		auto vLengthSq = _mm_mul_ps(V, V);
+		auto vTemp = LM_PERMUTE_PS(vLengthSq, _MM_SHUFFLE(1, 1, 1, 1));
+		vLengthSq = _mm_add_ss(vLengthSq, vTemp);
+		vLengthSq = LM_PERMUTE_PS(vLengthSq, _MM_SHUFFLE(0, 0, 0, 0));
+		// Prepare for the division
+		auto vResult = _mm_sqrt_ps(vLengthSq);
+		// Create zero with a single instruction
+		auto vZeroMask = _mm_setzero_ps();
+		// Test for a divide by zero (Must be FP to detect -0.0)
+		vZeroMask = _mm_cmpneq_ps(vZeroMask, vResult);
+		// Failsafe on zero (Or epsilon) length planes
+		// If the length is infinity, set the elements to zero
+		vLengthSq = _mm_cmpneq_ps(vLengthSq, g_XMInfinity);
+		// Reciprocal mul to perform the normalization
+		vResult = _mm_div_ps(V, vResult);
+		// Any that are infinity, set to zero
+		vResult = _mm_and_ps(vResult, vZeroMask);
+		// Select qnan or result based on infinite length
+		auto vTemp1 = _mm_andnot_ps(vLengthSq, g_XMQNaN);
+		auto vTemp2 = _mm_and_ps(vResult, vLengthSq);
+		vResult = _mm_or_ps(vTemp1, vTemp2);
+		return vResult;
+#else // _LM_VMX128_INTRINSICS_
+#endif // _LM_VMX128_INTRINSICS_
+	}
+
+	template<uint8 D = 3>
+	inline __m128 Length(__m128 V){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		// Dot3
+		float32x4_t vTemp = vmulq_f32(V, V);
+		float32x2_t v1 = vget_low_f32(vTemp);
+		float32x2_t v2 = vget_high_f32(vTemp);
+		v1 = vpadd_f32(v1, v1);
+		v2 = vdup_lane_f32(v2, 0);
+		v1 = vadd_f32(v1, v2);
+		const float32x2_t zero = vdup_n_f32(0);
+		uint32x2_t VEqualsZero = vceq_f32(v1, zero);
+		// Sqrt
+		float32x2_t S0 = vrsqrte_f32(v1);
+		float32x2_t P0 = vmul_f32(v1, S0);
+		float32x2_t R0 = vrsqrts_f32(P0, S0);
+		float32x2_t S1 = vmul_f32(S0, R0);
+		float32x2_t P1 = vmul_f32(v1, S1);
+		float32x2_t R1 = vrsqrts_f32(P1, S1);
+		float32x2_t Result = vmul_f32(S1, R1);
+		Result = vmul_f32(v1, Result);
+		Result = vbsl_f32(VEqualsZero, zero, Result);
+		return vcombine_f32(Result, Result);
+#elif defined(LM_SSE_INTRINSICS)
+		// Perform the dot product on x,y and z
+		auto vLengthSq = _mm_mul_ps(V, V);
+		// vTemp has z and y
+		auto vTemp = LM_PERMUTE_PS(vLengthSq, _MM_SHUFFLE(1, 2, 1, 2));
+		// x+z, y
+		vLengthSq = _mm_add_ss(vLengthSq, vTemp);
+		// y,y,y,y
+		vTemp = LM_PERMUTE_PS(vTemp, _MM_SHUFFLE(1, 1, 1, 1));
+		// x+z+y,??,??,??
+		vLengthSq = _mm_add_ss(vLengthSq, vTemp);
+		// Splat the length squared
+		vLengthSq = LM_PERMUTE_PS(vLengthSq, _MM_SHUFFLE(0, 0, 0, 0));
+		// Get the length
+		vLengthSq = _mm_sqrt_ps(vLengthSq);
+		return vLengthSq;
+#else // _LM_VMX128_INTRINSICS_
+#endif // _LM_VMX128_INTRINSICS_
+	}
+
+	template<uint8 D = 4>
+	inline bool Less(__m128 lhs, __m128 rhs){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		uint32x4_t vResult = vcltq_f32(V1, V2);
+		int8x8x2_t vTemp = vzip_u8(vget_low_u8(vResult), vget_high_u8(vResult));
+		vTemp = vzip_u16(vTemp.val[0], vTemp.val[1]);
+		return (vget_lane_u32(vTemp.val[1], 1) == 0xFFFFFFFFU);
+#elif defined(LM_SSE_INTRINSICS)
+		auto vTemp = _mm_cmplt_ps(lhs, rhs);
+		return ((_mm_movemask_ps(vTemp) == 0x0f) != 0);
+#else
+#endif
+	}
+
+	inline __m128 Abs(__m128 V){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		return vabsq_f32(V);
+#elif defined(LM_SSE_INTRINSICS)
+		auto vResult = _mm_setzero_ps();
+		vResult = _mm_sub_ps(vResult, V);
+		vResult = _mm_max_ps(vResult, V);
+		return vResult;
+#else // _LM_VMX128_INTRINSICS_
+#endif // _LM_VMX128_INTRINSICS_
+	}
+
+	template<uint8 D = 3>
+	inline __m128 Cross(__m128 V1, __m128 V2){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		float32x2_t v1xy = vget_low_f32(V1);
+		float32x2_t v2xy = vget_low_f32(V2);
+
+		float32x2_t v1yx = vrev64_f32(v1xy);
+		float32x2_t v2yx = vrev64_f32(v2xy);
+
+		float32x2_t v1zz = vdup_lane_f32(vget_high_f32(V1), 0);
+		float32x2_t v2zz = vdup_lane_f32(vget_high_f32(V2), 0);
+
+		auto vResult = vmulq_f32(vcombine_f32(v1yx, v1xy), vcombine_f32(v2zz, v2yx));
+		vResult = vmlsq_f32(vResult, vcombine_f32(v1zz, v1yx), vcombine_f32(v2yx, v2xy));
+		vResult = veorq_u32(vResult, g_XMFlipY);
+		return vandq_u32(vResult, g_XMMask3);
+#elif defined(LM_SSE_INTRINSICS)
+		// y1,z1,x1,w1
+		auto vTemp1 = LM_PERMUTE_PS(V1, _MM_SHUFFLE(3, 0, 2, 1));
+		// z2,x2,y2,w2
+		auto vTemp2 = LM_PERMUTE_PS(V2, _MM_SHUFFLE(3, 1, 0, 2));
+		// Perform the left operation
+		auto vResult = _mm_mul_ps(vTemp1, vTemp2);
+		// z1,x1,y1,w1
+		vTemp1 = LM_PERMUTE_PS(vTemp1, _MM_SHUFFLE(3, 0, 2, 1));
+		// y2,z2,x2,w2
+		vTemp2 = LM_PERMUTE_PS(vTemp2, _MM_SHUFFLE(3, 1, 0, 2));
+		// Perform the right operation
+		vTemp1 = _mm_mul_ps(vTemp1, vTemp2);
+		// Subract the right from left, and return answer
+		vResult = _mm_sub_ps(vResult, vTemp1);
+		// Set w to zero
+		return _mm_and_ps(vResult, g_XMMask3);
+#else // _XM_VMX128_INTRINSICS_
+#endif // _XM_VMX128_INTRINSICS_
+	}
+
+	template<uint8 D = 3>
+	inline __m128 Dot(__m128 V1, __m128 V2){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		float32x4_t vTemp = vmulq_f32(V1, V2);
+		float32x2_t v1 = vget_low_f32(vTemp);
+		float32x2_t v2 = vget_high_f32(vTemp);
+		v1 = vpadd_f32(v1, v1);
+		v2 = vdup_lane_f32(v2, 0);
+		v1 = vadd_f32(v1, v2);
+		return vcombine_f32(v1, v1);
+#elif defined(LM_SSE_INTRINSICS)
+		// Perform the dot product
+		auto vDot = _mm_mul_ps(V1, V2);
+		// x=Dot.vector4_f32[1], y=Dot.vector4_f32[2]
+		auto vTemp = LM_PERMUTE_PS(vDot, _MM_SHUFFLE(2, 1, 2, 1));
+		// Result.vector4_f32[0] = x+y
+		vDot = _mm_add_ss(vDot, vTemp);
+		// x=Dot.vector4_f32[2]
+		vTemp = LM_PERMUTE_PS(vTemp, _MM_SHUFFLE(1, 1, 1, 1));
+		// Result.vector4_f32[0] = (x+y)+z
+		vDot = _mm_add_ss(vDot, vTemp);
+		// Splat x
+		return LM_PERMUTE_PS(vDot, _MM_SHUFFLE(0, 0, 0, 0));
+#else // _LM_VMX128_INTRINSICS_
+#endif // _LM_VMX128_INTRINSICS_
+	}
+}
+
+namespace leo{
+	namespace details{
+		inline __m128 SplatEpsilon(){
+			const static float4 eps(1.0e-4f, 1.0e-4f, 1.0e-4f, 1.0e-4f);
+			const static auto _meps = load(eps);
+			return _meps;
+		}
+
+		template<uint8 D = 3>
+		inline bool IsUnit(__m128 V){
+			auto Difference = Subtract(Length<>(V), SplatOne());
+			return Less<>(Abs(Difference), SplatEpsilon());
+		}
 	}
 }
 
@@ -780,7 +1109,7 @@ namespace leo
 		auto Result = vmul_f32(S1, R1);
 		Result = vmul_f32(vTemp, Result);
 		Result = vbsl_f32(VEqualsZero, zero, Result);
-		return vgetq_lane_f32(vcombine_f32(Result, Result),0);
+		return vgetq_lane_f32(vcombine_f32(Result, Result), 0);
 #elif defined(LM_SSE_INTRINSICS)
 		// Perform the dot product on x and y
 		auto vLengthSq = _mm_mul_ps(V, V);
@@ -822,7 +1151,7 @@ namespace leo
 		float32x2_t Result = vmul_f32(S1, R1);
 		Result = vmul_f32(v1, Result);
 		Result = vbsl_f32(VEqualsZero, zero, Result);
-		return vgetq_lane_f32(vcombine_f32(Result, Result),0);
+		return vgetq_lane_f32(vcombine_f32(Result, Result), 0);
 #elif defined(LM_SSE_INTRINSICS)
 		// Perform the dot product on x,y and z
 		__m128 vLengthSq = _mm_mul_ps(V, V);
@@ -867,7 +1196,7 @@ namespace leo
 		float32x2_t Result = vmul_f32(S1, R1);
 		Result = vmul_f32(v1, Result);
 		Result = vbsl_f32(VEqualsZero, zero, Result);
-		return vgetq_lane_f32(vcombine_f32(Result, Result),0);
+		return vgetq_lane_f32(vcombine_f32(Result, Result), 0);
 #elif defined(LM_SSE_INTRINSICS)
 		// Perform the dot product on x,y,z and w
 		auto vLengthSq = _mm_mul_ps(V, V);

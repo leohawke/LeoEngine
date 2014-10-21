@@ -9,7 +9,7 @@
 #include "..\IndePlatform\memory.hpp"
 #include "..\leomath.hpp"
 #include <type_traits>
-
+#include <vector>
 struct D3D11_INPUT_ELEMENT_DESC;
 
 namespace leo
@@ -145,6 +145,54 @@ namespace leo
 		extern const D3D11_INPUT_ELEMENT_DESC Sky[1];
 
 		extern const D3D11_INPUT_ELEMENT_DESC PostEffect[2];
+	}
+
+	namespace helper
+	{
+		struct MeshData
+		{
+			std::vector < Vertex::NormalMap> Vertices;
+			std::vector<uint32> Indices;
+		};
+
+		///<summary>
+		/// Creates a box centered at the origin with the given dimensions.
+		///</summary>
+		MeshData CreateBox(float width, float height, float depth);
+
+		///<summary>
+		/// Creates a sphere centered at the origin with the given radius.  The
+		/// slices and stacks parameters control the degree of tessellation.
+		///</summary>
+		MeshData CreateSphere(float radius, uint32 sliceCount, uint32 stackCount);
+
+		///<summary>
+		/// Creates a geosphere centered at the origin with the given radius.  The
+		/// depth controls the level of tessellation.
+		///</summary>
+		MeshData CreateGeosphere(float radius, uint32 numSubdivisions);
+
+
+		///<summary>
+		/// Creates a cylinder parallel to the y-axis, and centered about the origin.  
+		/// The bottom and top radius can vary to form various cone shapes rather than true
+		// cylinders.  The slices and stacks parameters control the degree of tessellation.
+		///</summary>
+		//MeshData CreateCylinder(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount);
+
+		///<summary>
+		/// Creates an mxn grid in the xz-plane with m rows and n columns, centered
+		/// at the origin with the specified width and depth.
+		///</summary>
+		MeshData CreateGrid(float width, float depth, uint32 m, uint32 n);
+
+		///<summary>
+		/// Creates a quad covering the screen in NDC coordinates.  This is useful for
+		/// postprocessing effects.
+		///IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP)
+		///</summary>
+		lconstexpr std::array<Vertex::PostEffect, 4>& CreateFullscreenQuad();
+
 	}
 }
 #endif

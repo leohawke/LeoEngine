@@ -8,9 +8,8 @@
 #include "..\IndePlatform\leoint.hpp"
 #include "..\IndePlatform\memory.hpp"
 
-#include "Vertex.hpp"
 
-#include <vector>
+
 namespace leo
 {
 	enum class FRUSTUM_PLANE_TYPE : std::uint8_t
@@ -42,11 +41,11 @@ namespace leo
 		PERSPECTIVE
 	};
 
+	class Triangle;
 	class Box;
 	class Sphere;
 	class OrientedBox;
 	class Frustum;
-
 
 	namespace def
 	{
@@ -55,6 +54,7 @@ namespace leo
 		const float frustum_fov = 75.f / 180.f*LM_PI;
 		const float frustum_aspect = 16.f / 9.f;
 	}
+
 
 	class Box :public BoundingBox
 	{
@@ -1056,53 +1056,7 @@ namespace leo
 		float4x4 mMatrix;
 	};
 
-	namespace helper
-	{
-		struct MeshData
-		{
-			std::vector < Vertex::NormalMap> Vertices;
-			std::vector<uint32> Indices;
-		};
 
-		///<summary>
-		/// Creates a box centered at the origin with the given dimensions.
-		///</summary>
-		MeshData CreateBox(float width, float height, float depth);
-
-		///<summary>
-		/// Creates a sphere centered at the origin with the given radius.  The
-		/// slices and stacks parameters control the degree of tessellation.
-		///</summary>
-		MeshData CreateSphere(float radius, uint32 sliceCount, uint32 stackCount);
-
-		///<summary>
-		/// Creates a geosphere centered at the origin with the given radius.  The
-		/// depth controls the level of tessellation.
-		///</summary>
-		MeshData CreateGeosphere(float radius, uint32 numSubdivisions);
-
-		
-		///<summary>
-		/// Creates a cylinder parallel to the y-axis, and centered about the origin.  
-		/// The bottom and top radius can vary to form various cone shapes rather than true
-		// cylinders.  The slices and stacks parameters control the degree of tessellation.
-		///</summary>
-		//MeshData CreateCylinder(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount);
-		
-		///<summary>
-		/// Creates an mxn grid in the xz-plane with m rows and n columns, centered
-		/// at the origin with the specified width and depth.
-		///</summary>
-		MeshData CreateGrid(float width, float depth, uint32 m, uint32 n);
-
-		///<summary>
-		/// Creates a quad covering the screen in NDC coordinates.  This is useful for
-		/// postprocessing effects.
-		///IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP)
-		///</summary>
-		lconstexpr std::array<Vertex::PostEffect,4>& CreateFullscreenQuad();
-		
-	}
 }
 
 #endif

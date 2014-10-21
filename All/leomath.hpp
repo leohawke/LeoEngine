@@ -20,7 +20,7 @@
 namespace leo
 {
 	using namespace DirectX;
-
+	
 	inline XMMATRIX loadfloat4x4(const float4x4* m){
 #if defined(LM_ARM_NEON_INTRINSICS)
 		XMMATRIX M;
