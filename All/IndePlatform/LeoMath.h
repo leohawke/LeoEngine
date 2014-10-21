@@ -17,12 +17,12 @@
 #define IndePlatform_LeoMath_h
 
 #include "ldef.h"
-#include "platform.h"
+#include "platform_macro.h"
 #include "leoint.hpp"
 #include "memory.hpp"
 #include <immintrin.h>
 #include "leo_math_convert_impl.h"
-
+#include <array>
 
 //Macro
 namespace leo
@@ -425,6 +425,11 @@ namespace leo
 		return lhs.min(rhs);
 	}
 
+	struct lalignas(16) float4x4{
+			float4 r[4];
+	};
+
+
 	//The HALF data type is equivalent to the IEEE 754 binary16 format
 	//consisting of a sign bit, a 5-bit biased exponent, and a 10-bit mantissa.
 	//[15] SEEEEEMMMMMMMMMM [0]
@@ -566,6 +571,16 @@ namespace leo
 #endif
 	}
 
+	std::array<__m128, 4> load(const float4x4& data){
+		return std::array < __m128, 4 >
+		{
+				load(data.r[0]),
+				load(data.r[0]),
+				load(data.r[0]),
+				load(data.r[0])
+		};
+	}
+
 	template<typename T>
 	void inline save(T& data, __m128 vector)
 	{
@@ -608,21 +623,105 @@ namespace leo
 	}
 }
 
-#pragma warning(push)
-#pragma warning(disable : 4838)
-#include <DirectXMath.h>
-#include <DirectXCollision.h>
-#pragma warning(pop)
-namespace leo
-{
-	using namespace DirectX;
+//__m128,std::arrry<__m128,4> operator def
+namespace leo{
+	inline __m128 SplatZ(__m128 v){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		return vdupq_lane_f32(vget_high_f32(v), 0);
+#elif defined(LM_SSE_INTRINSICS)
+		return LM_PERMUTE_PS(v, _MM_SHUFFLE(2, 2, 2, 2));
+#endif
+	}
+
+	inline __m128 SplatY(__m128 v){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		return vdupq_lane_f32(vget_low_f32(v), 1);
+#elif defined(LM_SSE_INTRINSICS)
+		return LM_PERMUTE_PS(v, _MM_SHUFFLE(1,1,1,1));
+#endif
+	}
+
+	inline __m128 SplatX(__m128 v){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		return vdupq_lane_f32(vget_low_f32(v), 0);
+#elif defined(LM_SSE_INTRINSICS)
+		return LM_PERMUTE_PS(v, _MM_SHUFFLE(0,0,0,0));
+#endif
+	}
+
+	inline __m128 SplatW(__m128 v){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		return vdupq_lane_f32(vget_high_f32(v),1);
+#elif defined(LM_SSE_INTRINSICS)
+		return LM_PERMUTE_PS(v, _MM_SHUFFLE(3,3,3,3));
+#endif
+	}
+
+	inline __m128 MultipyAdd(__m128 ml, __m128 mr, __m128 ar){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		return vmlaq_f32(ar,ml,mr);
+#elif defined(LM_SSE_INTRINSICS)
+		return _mm_add_ps(_mm_mul_ps(ml,mr),ar);
+#endif
+	}
+
+
+	//1.Calculate an estimate for the reciprocal of the divisor (D): X0.
+	//2.Compute successively more accurate estimates of the reciprocal: (X1...X1)
+	//3.Compute the quotient by multiplying the dividend by the reciprocal of the divisor: Q = NXs.
+	// find the reciprocal of D, it is necessary to find a function f(X) which has a zero at X=1/D
+	//f(x) = 1/X - D 
+	//see href : http://en.wikipedia.org/wiki/Division_algorithm
+	inline __m128 Divide(__m128 dl, __m128 dr){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		// 2 iterations of Newton-Raphson refinement of reciprocal
+		float32x4_t Reciprocal = vrecpeq_f32(dr);
+		float32x4_t S = vrecpsq_f32(Reciprocal, dr);
+		Reciprocal = vmulq_f32(S, Reciprocal);
+		S = vrecpsq_f32(Reciprocal, dr);
+		Reciprocal = vmulq_f32(S, Reciprocal);
+		return vmulq_f32(dl, Reciprocal);
+#elif defined(LM_SSE_INTRINSICS)
+		return _mm_div_ps(dl,dr);
+#endif
+	}
+	
+	template<uint8 D = 3>
+	inline __m128 TransformCoord(__m128 v, std::arrry<__m128, 4> m){
+#if defined(LM_SSE_INTRINSICS) || defined(LM_ARM_NEON_INTRINSICS)
+		auto z = SplatZ(v);
+		auto y = SplatY(v);
+		auto x = SplatX(v);
+
+		auto result = MultiplyAdd(z, m[2], m[3]);
+		result = MultipyAdd(y, m[1], result);
+		result = MultiplyAdd(x, m[0], result);
+
+		auto w = SplatW(result);
+
+		return Divide(result, w);
+#endif
+	}
+
+	template<>
+	inline __m128 TransformCoord<2>(__m128 v, std::arrry<__m128, 4> m){
+#if defined(LM_SSE_INTRINSICS) || defined(LM_ARM_NEON_INTRINSICS)
+		auto y = SplatY(v);
+		auto x = SplatX(v);
+
+		auto result = MultiplyAdd(y, m[1], m[3]);
+		result = MultiplyAdd(x, m[0], result);
+
+		auto w = SplatW(result);
+
+		return Divide(result, w);
+#endif
+	}
 }
 
 //Other Function
 namespace leo
 {
-
-
 	template<typename _Ty>
 	inline void clamp(const _Ty& _Min, const _Ty& _Max, _Ty & _X)
 	{

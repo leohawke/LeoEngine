@@ -191,7 +191,9 @@
     <ClInclude Include="IndePlatform\memory.hpp" />
     <ClInclude Include="IndePlatform\path.hpp" />
     <ClInclude Include="IndePlatform\platform.h" />
+    <ClInclude Include="IndePlatform\platform_macro.h" />
     <ClInclude Include="IndePlatform\raii.hpp" />
+    <ClInclude Include="IndePlatform\ray.hpp" />
     <ClInclude Include="IndePlatform\Singleton.hpp" />
     <ClInclude Include="IndePlatform\string.hpp" />
     <ClInclude Include="IndePlatform\ThreadSync.hpp" />
