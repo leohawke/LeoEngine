@@ -111,94 +111,92 @@ namespace leo{
 
 			auto Zero = XMVectorZero();
 
-			auto e1 = Subtract(p1, p0);// V1 - V0;
-			auto e2 = Subtract(p2, p0);// V2 - V0;
+			auto e1 = Subtract(p1, p0);// V1 - p0;
+			auto e2 = Subtract(p2, p0);// V2 - p0;
 
 			// p = Direction ^ e2;
-			auto p = Cross(Direction, e2);
+			auto p = Cross<>(Direction, e2);
 
 			// det = e1 * p;
-			auto det = Dot(e1, p);
+			auto det = Dot<>(e1, p);
 
-			XMVECTOR u, v, t;
+			__m128 u, v, t;
 
-			if (XMVector3GreaterOrEqual(det, g_RayEpsilon))
+			auto Origin = load(mOrigin);
+			if (GreaterOrEqual<>(det, g_RayEpsilon))
 			{
 				// Determinate is positive (front side of the triangle).
-				XMVECTOR s = Origin - V0;
+				auto s =Subtract( Origin ,p0);
 
 				// u = s * p;
-				u = XMVector3Dot(s, p);
+				u = Dot<>(s, p);
 
-				XMVECTOR NoIntersection = XMVectorLess(u, Zero);
-				NoIntersection = XMVectorOrInt(NoIntersection, XMVectorGreater(u, det));
+				auto NoIntersection = LessExt(u, Zero);
+				NoIntersection = OrInt(NoIntersection, GreaterExt(u, det));
 
 				// q = s ^ e1;
-				XMVECTOR q = XMVector3Cross(s, e1);
+				auto q = Cross<>(s, e1);
 
 				// v = Direction * q;
-				v = XMVector3Dot(Direction, q);
+				v = Dot<>(Direction, q);
 
-				NoIntersection = XMVectorOrInt(NoIntersection, XMVectorLess(v, Zero));
-				NoIntersection = XMVectorOrInt(NoIntersection, XMVectorGreater(u + v, det));
+				NoIntersection = OrInt(NoIntersection, LessExt(v, Zero));
+				NoIntersection = OrInt(NoIntersection, GreaterExt(u + v, det));
 
 				// t = e2 * q;
-				t = XMVector3Dot(e2, q);
+				t = Dot<>(e2, q);
 
-				NoIntersection = XMVectorOrInt(NoIntersection, XMVectorLess(t, Zero));
+				NoIntersection = OrInt(NoIntersection, LessExt(t, Zero));
 
-				if (XMVector4EqualInt(NoIntersection, XMVectorTrueInt()))
+				if (EqualInt<>(NoIntersection, XMVectorTrueInt()))
 				{
-					Dist = 0.f;
-					return false;
+					return { false, 0.f };
 				}
 			}
-			else if (XMVector3LessOrEqual(det, g_RayNegEpsilon))
+			else if (LessOrEqual<>(det, g_RayNegEpsilon))
 			{
 				// Determinate is negative (back side of the triangle).
-				XMVECTOR s = Origin - V0;
+				auto s =Subtract(Origin, p0);
 
 				// u = s * p;
-				u = XMVector3Dot(s, p);
+				u = Dot<>(s, p);
 
-				XMVECTOR NoIntersection = XMVectorGreater(u, Zero);
-				NoIntersection = XMVectorOrInt(NoIntersection, XMVectorLess(u, det));
+				XMVECTOR NoIntersection = GreaterExt(u, Zero);
+				NoIntersection = OrInt(NoIntersection, LessExt(u, det));
 
 				// q = s ^ e1;
 				XMVECTOR q = XMVector3Cross(s, e1);
 
 				// v = Direction * q;
-				v = XMVector3Dot(Direction, q);
+				v = Dot<>(Direction, q);
 
-				NoIntersection = XMVectorOrInt(NoIntersection, XMVectorGreater(v, Zero));
-				NoIntersection = XMVectorOrInt(NoIntersection, XMVectorLess(u + v, det));
+				NoIntersection = OrInt(NoIntersection, GreaterExt(v, Zero));
+				NoIntersection = OrInt(NoIntersection, LessExt(u + v, det));
 
 				// t = e2 * q;
-				t = XMVector3Dot(e2, q);
+				t = Dot<>(e2, q);
 
-				NoIntersection = XMVectorOrInt(NoIntersection, XMVectorGreater(t, Zero));
+				NoIntersection = OrInt(NoIntersection, GreaterExt(t, Zero));
 
-				if (XMVector4EqualInt(NoIntersection, XMVectorTrueInt()))
+				if (EqualInt<>(NoIntersection, XMVectorTrueInt()))
 				{
-					Dist = 0.f;
-					return false;
+					return{ false, 0.f };
 				}
 			}
 			else
 			{
 				// Parallel ray.
-				Dist = 0.f;
-				return false;
+				return{ false, 0.f };
 			}
 
-			t = XMVectorDivide(t, det);
+			t = Divide(t, det);
 
 			// (u / det) and (v / dev) are the barycentric cooridinates of the intersection.
 
 			// Store the x-component to *pDist
-			XMStoreFloat(&Dist, t);
-
-			return true;
+			float dist = 0.f;
+			save(dist, t);
+			return	{true,dist};
 		}
 	};
 }

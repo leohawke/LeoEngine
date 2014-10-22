@@ -5,6 +5,7 @@
 #include "Sky.hpp"
 #include "..\TextureMgr.h"
 #include "..\ShaderMgr.h"
+#include "Vertex.hpp"
 namespace leo
 {
 	Sky::Sky(ID3D11Device* device, float skySphereRadius)

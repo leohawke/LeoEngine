@@ -18,6 +18,7 @@
 #include	 "..\TextureMgr.h"
 #include "..\ShaderMgr.h"
 #include "Camera.hpp"
+#include "Vertex.hpp"
 namespace leo
 {
 	ID3D11Buffer* BillBoard::mVertexBuffer = nullptr;

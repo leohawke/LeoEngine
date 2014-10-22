@@ -120,6 +120,7 @@
     <ClCompile Include="IndePlatform\any.cpp" />
     <ClCompile Include="IndePlatform\memory.cpp" />
     <ClCompile Include="IndePlatform\raii.cpp" />
+    <ClCompile Include="IndePlatform\ray_Test.cpp" />
     <ClCompile Include="IndePlatform\Singleton.cpp" />
     <ClCompile Include="IndePlatform\string.cpp" />
     <ClCompile Include="IndePlatform\ThreadSync.cpp" />

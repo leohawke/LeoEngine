@@ -210,6 +210,9 @@
     <ClCompile Include="Core\Terrain.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="IndePlatform\ray_Test.cpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.hpp">
