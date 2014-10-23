@@ -1,9 +1,10 @@
 #include <core\Camera.hpp>
 #include <Core\EffectLine.hpp>
-
+#include <Core\Vertex.hpp>
 #include <ShaderMgr.h>
 #include <d3dx11.hpp>
 #include <exception.hpp>
+
 #include "Axis.hpp"
 namespace leo
 {

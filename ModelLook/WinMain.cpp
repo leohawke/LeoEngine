@@ -46,6 +46,74 @@ std::atomic<bool> renderThreadRun = true;
 
 std::mutex mSizeMutex;
 
+class Box{
+	ID3D11Buffer* mVB = nullptr;
+	ID3D11Buffer* mIB = nullptr;
+	ID3D11Buffer* mVSCB = nullptr;
+	ID3D11Buffer* mPSCB = nullptr;
+
+
+	ID3D11VertexShader* mVS = nullptr;
+	ID3D11PixelShader* mPS = nullptr;
+	ID3D11InputLayout* mLayout = nullptr;
+
+public:
+	void Build(ID3D11Device* device){
+		auto meshdata = leo::helper::CreateBox(1, 1, 1);
+		CD3D11_BUFFER_DESC vbDesc(sizeof(leo::Vertex::NormalMap) *meshdata.Vertices.size(), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+		D3D11_SUBRESOURCE_DATA vbsubDesc;
+		vbsubDesc.pSysMem = meshdata.Vertices.data();
+
+		CD3D11_BUFFER_DESC ibDesc(sizeof(std::uint32_t)*meshdata.Indices.size(), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+		D3D11_SUBRESOURCE_DATA ibsubDesc;
+		ibsubDesc.pSysMem = meshdata.Vertices.data();
+		try{
+			leo::dxcall(device->CreateBuffer(&vbDesc, &vbsubDesc, &mVB));
+			leo::dxcall(device->CreateBuffer(&ibDesc, &ibsubDesc, &mIB));
+
+			leo::ShaderMgr::ShaderBlob vsblob(L"Shader\\NormalMapVS.cso");
+			leo::dxcall(device->CreateVertexShader(vsblob.GetBufferPointer(), vsblob.GetBufferSize(), nullptr, &mVS));
+			leo::dxcall(device->CreateInputLayout(leo::InputLayoutDesc::NormalMap, leo::arrlen(leo::InputLayoutDesc::NormalMap), vsblob.GetBufferPointer(), vsblob.GetBufferSize(), &mLayout));
+
+			leo::ShaderMgr::ShaderBlob psblob(L"Shader\\LinePS.cso");
+			leo::dxcall(device->CreatePixelShader(psblob.GetBufferPointer(), psblob.GetBufferSize(), nullptr, &mPS));
+		}
+		Catch_DX_Exception
+		Catch_Win32_Exception
+	}
+	void Release(){
+
+	}
+
+	void Apply(ID3D11DeviceContext* context){
+
+	}
+
+	void Color(const leo::float4& color){
+
+	}
+
+	void Sqt(const leo::SQT& sqt){
+
+	}
+
+	struct VScbPerFrame
+	{
+		leo::XMMATRIX world;
+		leo::XMMATRIX worldinvtranspose;
+		leo::XMMATRIX worldviewproj;
+	public:
+		const static std::uint8_t slot = 0;
+	};
+	leo::Effect::ShaderConstantBuffer<VScbPerFrame> mVertexShaderConstantBufferPerFrame;
+
+	struct PScbPerColor{
+		leo::float4 mColor;
+		const static std::uint8_t slot = 0;
+	};
+	leo::Effect::ShaderConstantBuffer<PScbPerColor> mPixelShaderConstantBufferPerColor;
+} mBox;
+
 
 void DeviceEvent()
 {

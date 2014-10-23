@@ -3,9 +3,6 @@
 #ifndef Core_Vertex_Hpp
 #define Core_Vertex_Hpp
 
-#if defined (_MSC_VER) && (_MSC_VER >= 1020)
-#pragma once
-#endif
 #include "..\IndePlatform\memory.hpp"
 #include "..\leomath.hpp"
 #include <type_traits>

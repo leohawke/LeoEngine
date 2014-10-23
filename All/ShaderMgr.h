@@ -29,6 +29,7 @@ namespace leo
 				return mInstance;
 			}
 		};
+	public:
 		class ShaderBlob
 		{
 		public:

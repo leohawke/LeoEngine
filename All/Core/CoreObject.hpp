@@ -19,33 +19,31 @@
 namespace leo
 {
 
-	class SQTObject :public GeneralAllocatedObject
+	class SQTObject :public GeneralAllocatedObject,public SQT
 	{
-	protected:
-		SQT mSQT;
 	public:
 		SQTObject(const SQT& sqt)
-			:mSQT(sqt)
+			:SQT(sqt)
 		{}
 		~SQTObject() = default;
 	public:
 		void inline Scale(float s)
 		{
-			mSQT.s *= s;
+			this->s *= s;
 		}
 
 		void inline Rotation(const float4& quaternion)
 		{
-			auto o = XMMatrixRotationQuaternion(load(mSQT.q));
+			auto o = XMMatrixRotationQuaternion(load(q));
 			auto n = XMMatrixRotationQuaternion(load(quaternion));
-			save(mSQT.q, XMQuaternionRotationMatrix(o*n));
+			save(q, XMQuaternionRotationMatrix(o*n));
 		}
 
 		void inline Translation(const float3& offset)
 		{
-			auto t = load(mSQT.t);
+			auto vt = load(this->t);
 			auto off = load(offset);
-			save(mSQT.t, t + off);
+			save(t, vt + off);
 		}
 
 		void inline Transform(const SQT& sqt)
