@@ -3,13 +3,17 @@
 #include "platform.h"
 #include "ThreadSync.hpp"
 
-
+namespace leo{
+	void CloseHandle(void * handle){
+		::CloseHandle(handle);
+	}
+}
 
 
 namespace leo
 {
 	Event::Event(bool bManualReset)
-		:SyncHandle(::CreateEventW(nullptr, bManualReset, false, nullptr))
+		:SyncHandle(::CreateEventW(nullptr, bManualReset, false, nullptr),leo::CloseHandle)
 	{}
 
 	void Event::Reset()
@@ -33,7 +37,7 @@ namespace leo
 	}
 
 	Mutex::Mutex()
-		:SyncHandle(CreateMutexW(nullptr,false,nullptr))
+		:SyncHandle(CreateMutexW(nullptr, false, nullptr), leo::CloseHandle)
 	{}
 
 	void Mutex::Lock()
@@ -82,7 +86,7 @@ namespace leo
 	}
 
 	Semaphore::Semaphore(int nMaximumCount)
-		:SyncHandle(::CreateSemaphoreW(nullptr,0,nMaximumCount,nullptr))
+		:SyncHandle(::CreateSemaphoreW(nullptr, 0, nMaximumCount, nullptr), leo::CloseHandle)
 	{}
 
 	void Semaphore::Acquire()

@@ -667,6 +667,18 @@ namespace leo{
 			return _meps;
 		}
 
+		inline __m128 SplatRayEpsilon(){
+			const static float4 eps(1.0e-20f, 1.0e-20f, 1.0e-20f, 1.0e-20f);
+			const static auto _meps = load(eps);
+			return _meps;
+		}
+
+		inline __m128 SplatNegRayEpsilon(){
+			const static float4 eps(-1.0e-20f, -1.0e-20f, -1.0e-20f, -1.0e-20f);
+			const static auto _meps = load(eps);
+			return _meps;
+		}
+
 		template<uint8 D = 3>
 		inline bool IsUnit(__m128 V){
 			auto Difference = Subtract(Length<>(V), SplatOne());
@@ -674,21 +686,31 @@ namespace leo{
 		}
 
 		inline __m128 SplatInfinity(){
-			const static int infinity[4] = { 0x7F800000, 0x7F800000, 0x7F800000, 0x7F800000 };
+			const static lalignas(16) int infinity[4] = { 0x7F800000, 0x7F800000, 0x7F800000, 0x7F800000 };
 			const static auto _minfinity = load(*reinterpret_cast<const float4 *>(infinity));
 			return _minfinity;
 		}
 
 		inline __m128 SplatQNaN(){
-			const static int qnan[4] = { 0x7FC00000, 0x7FC00000, 0x7FC00000, 0x7FC00000 };
+			const static lalignas(16) int qnan[4] = { 0x7FC00000, 0x7FC00000, 0x7FC00000, 0x7FC00000 };
 			const static auto _mqnan = load(*reinterpret_cast<const float4 *>(qnan));
 			return _mqnan;
 		}
 
 		inline __m128 SplatMask3(){
-			const static int mask3[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000 };
+			const static lalignas(16) int mask3[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000 };
 			const static auto _mmask3 = load(*reinterpret_cast<const float4 *>(mask3));
 			return _mmask3;
+		}
+
+		inline __m128 SplatTrueInt(){
+#if defined(LM_ARM_NEON_INTRINSICS)
+			return vdupq_n_s32(-1);
+#elif defined(LM_SSE_INTRINSICS)
+			__m128i V = _mm_set1_epi32(-1);
+			return _mm_castsi128_ps(V);
+#else // _XM_VMX128_INTRINSICS_
+#endif // _XM_VMX128_INTRINSICS_
 		}
 	}
 }
@@ -733,7 +755,11 @@ namespace leo{
 		return _mone;
 	}
 
-
+	inline __m128 SplatZero(){
+		const static float4 zero(0.f, 0.f, 0.f, 0.f);
+		const static auto _mzero = load(zero);
+		return _mzero;
+	}
 
 	inline __m128 Subtract(__m128 sl, __m128 sr){
 #if defined(LM_ARM_NEON_INTRINSICS)
@@ -960,7 +986,7 @@ namespace leo{
 		vZeroMask = _mm_cmpneq_ps(vZeroMask, vResult);
 		// Failsafe on zero (Or epsilon) length planes
 		// If the length is infinity, set the elements to zero
-		vLengthSq = _mm_cmpneq_ps(vLengthSq,details::SplatInfinity());
+		vLengthSq = _mm_cmpneq_ps(vLengthSq, details::SplatInfinity());
 		// Reciprocal mul to perform the normalization
 		vResult = _mm_div_ps(V, vResult);
 		// Any that are infinity, set to zero

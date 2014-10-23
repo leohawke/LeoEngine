@@ -109,7 +109,7 @@ namespace leo{
 
 			assert(details::IsUnit<>(Direction));
 
-			auto Zero = XMVectorZero();
+			auto Zero = SplatZero();
 
 			auto e1 = Subtract(p1, p0);// V1 - p0;
 			auto e2 = Subtract(p2, p0);// V2 - p0;
@@ -123,7 +123,7 @@ namespace leo{
 			__m128 u, v, t;
 
 			auto Origin = load(mOrigin);
-			if (GreaterOrEqual<>(det, g_RayEpsilon))
+			if (GreaterOrEqual<>(det,details::SplatRayEpsilon()))
 			{
 				// Determinate is positive (front side of the triangle).
 				auto s =Subtract( Origin ,p0);
@@ -148,12 +148,12 @@ namespace leo{
 
 				NoIntersection = OrInt(NoIntersection, LessExt(t, Zero));
 
-				if (EqualInt<>(NoIntersection, XMVectorTrueInt()))
+				if (EqualInt<>(NoIntersection, details::SplatTrueInt()))
 				{
 					return { false, 0.f };
 				}
 			}
-			else if (LessOrEqual<>(det, g_RayNegEpsilon))
+			else if (LessOrEqual<>(det,details::SplatNegRayEpsilon()))
 			{
 				// Determinate is negative (back side of the triangle).
 				auto s =Subtract(Origin, p0);
@@ -178,7 +178,7 @@ namespace leo{
 
 				NoIntersection = OrInt(NoIntersection, GreaterExt(t, Zero));
 
-				if (EqualInt<>(NoIntersection, XMVectorTrueInt()))
+				if (EqualInt<>(NoIntersection,details::SplatTrueInt()))
 				{
 					return{ false, 0.f };
 				}

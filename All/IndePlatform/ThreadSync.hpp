@@ -1,5 +1,3 @@
-// CopyRight 2014. LeoHawke. All rights reserved.
-
 #ifndef IndePlatform_ThreadSync_Hpp
 #define IndePlatform_ThreadSync_Hpp
 
@@ -8,40 +6,67 @@
 #include <cstddef>
 #include <mutex>
 #include <condition_variable>
-#include "raii.hpp"
+#include "ldef.h"
+#include "platform_macro.h"
 
 namespace leo
 {
-	class SyncHandle : public UniqueHandle <HandleCloser>
+
+	class SyncHandle
 	{
 	public:
-		using handle = HandleCloser::value_type;
-	public:
 		SyncHandle() = default;
-		explicit SyncHandle(handle hObj) _NOEXCEPT : UniqueHandle<HandleCloser>(hObj) {
+		template<typename T,typename F>
+		explicit SyncHandle(T* hObj, F&& f) lnothrow
+			:mHandle(hObj), mDeleter(lforward(f))
+		{
 		}
-		SyncHandle(SyncHandle &&rhs) _NOEXCEPT : UniqueHandle<HandleCloser>(rhs.Release()) {
+
+		SyncHandle(SyncHandle &&rhs) lnothrow
+			 :mHandle(rhs.Release()),mDeleter(std::move(rhs.mDeleter)) 
+		{
 		}
-		SyncHandle &operator=(handle hObj) _NOEXCEPT{
+
+		template<typename T>
+		SyncHandle &operator=(T* hObj) lnothrow {
 			Reset(hObj);
 			return *this;
 		}
-		SyncHandle &operator=(SyncHandle &&rhs) _NOEXCEPT{
-			Reset(std::move(rhs));
+		SyncHandle &operator=(SyncHandle &&rhs) lnothrow {
+			Reset(rhs.Release());
+			mDeleter = std::move(rhs.mDeleter);
 			return *this;
 		}
-		~SyncHandle() = default;
+		~SyncHandle(){
+			Reset(mHandle);
+		}
 	private:
-		using UniqueHandle < HandleCloser >::Get;
+		void * mHandle = nullptr;
+		std::function<void(void *)> mDeleter;
 	public:
-		handle GetHandle() const
+		void * GetHandle() const
 		{
-			return Get();
+			return mHandle;
 		}
 
-		operator handle() const
+		void * Release(){
+			auto ptr = mHandle;
+			mHandle = nullptr;
+			return ptr;
+		}
+
+		template<typename T>
+		void Reset(T* hObj){
+			if (mHandle){
+				mDeleter(mHandle);
+			}
+			mHandle = hObj;
+		}
+
+		template<typename T>
+		operator T *() const
 		{
-			return GetHandle();
+			return reinterpret_cast<T*>(GetHandle());
 		}
 	};
 
@@ -103,7 +128,7 @@ namespace leo
 		} mCs;
 	};
 
-#ifdef WIN32
+#ifdef PLATFORM_WIN32
 	class Semaphore : public SyncHandle
 	{
 	public:
