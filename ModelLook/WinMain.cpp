@@ -6,6 +6,7 @@
 #include <IndePlatform\Singleton.hpp>
 #include <IndePlatform\ThreadSync.hpp>
 #include <IndePlatform\clock.hpp>
+#include <IndePlatform\ray.hpp>
 
 #include <Core\Mesh.hpp>
 #include <Core\Effect.h>
@@ -57,6 +58,9 @@ class Box{
 	ID3D11PixelShader* mPS = nullptr;
 	ID3D11InputLayout* mLayout = nullptr;
 
+	std::size_t mIndexNum = 0;
+
+	leo::Box mBoundingBox;
 public:
 	void Build(ID3D11Device* device){
 		auto meshdata = leo::helper::CreateBox(1, 1, 1);
@@ -66,7 +70,24 @@ public:
 
 		CD3D11_BUFFER_DESC ibDesc(sizeof(std::uint32_t)*meshdata.Indices.size(), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
 		D3D11_SUBRESOURCE_DATA ibsubDesc;
-		ibsubDesc.pSysMem = meshdata.Vertices.data();
+		ibsubDesc.pSysMem = meshdata.Indices.data();
+		mIndexNum = meshdata.Indices.size();
+
+		D3D11_BUFFER_DESC Desc;
+		Desc.Usage = D3D11_USAGE_DEFAULT;
+		Desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		Desc.CPUAccessFlags = 0;
+		Desc.MiscFlags = 0;
+		Desc.StructureByteStride = 0;
+		Desc.ByteWidth = sizeof(VScbPerFrame);
+
+		D3D11_BUFFER_DESC psDesc;
+		psDesc.Usage = D3D11_USAGE_DEFAULT;
+		psDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		psDesc.CPUAccessFlags = 0;
+		psDesc.MiscFlags = 0;
+		psDesc.StructureByteStride = 0;
+		psDesc.ByteWidth = sizeof(PScbPerColor);
 		try{
 			leo::dxcall(device->CreateBuffer(&vbDesc, &vbsubDesc, &mVB));
 			leo::dxcall(device->CreateBuffer(&ibDesc, &ibsubDesc, &mIB));
@@ -77,24 +98,63 @@ public:
 
 			leo::ShaderMgr::ShaderBlob psblob(L"Shader\\LinePS.cso");
 			leo::dxcall(device->CreatePixelShader(psblob.GetBufferPointer(), psblob.GetBufferSize(), nullptr, &mPS));
+			leo::dxcall(device->CreateBuffer(&Desc, nullptr, &mVSCB));
+			leo::dxcall(device->CreateBuffer(&psDesc, nullptr, &mPSCB));
 		}
 		Catch_DX_Exception
-		Catch_Win32_Exception
+			Catch_Win32_Exception
+
+		leo::BoundingBox::CreateFromPoints(mBoundingBox, meshdata.Vertices.size(),(leo::XMFLOAT3*)meshdata.Vertices.data(), sizeof(leo::Vertex::NormalMap));
+
+		mBoundingBox;
 	}
 	void Release(){
-
+		leo::win::ReleaseCOM(mVB);
+		leo::win::ReleaseCOM(mIB);
+		leo::win::ReleaseCOM(mVSCB);
+		leo::win::ReleaseCOM(mPSCB);
+		leo::win::ReleaseCOM(mVS);
+		leo::win::ReleaseCOM(mPS);
+		leo::win::ReleaseCOM(mLayout);
 	}
 
 	void Apply(ID3D11DeviceContext* context){
-
+		context->IASetInputLayout(mLayout);
+		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		context->IASetIndexBuffer(mIB, DXGI_FORMAT_R32_UINT, 0);
+		UINT strides[] = { sizeof(leo::Vertex::NormalMap) };
+		UINT offsets[] = { 0 };
+		context->IASetVertexBuffers(0, 1, &mVB, strides, offsets);
+		context->VSSetShader(mVS, nullptr, 0);
+		context->PSSetShader(mPS, nullptr, 0);
+		context->UpdateSubresource(mVSCB, 0, nullptr, &mVScb,0,0);
+		context->UpdateSubresource(mPSCB, 0, nullptr, &mPScb, 0, 0);
+		context->VSSetConstantBuffers(0, 1, &mVSCB);
+		context->PSSetConstantBuffers(0, 1, &mPSCB);
 	}
 
-	void Color(const leo::float4& color){
-
+	void Draw(ID3D11DeviceContext* context){
+		context->DrawIndexed(mIndexNum, 0, 0);
 	}
 
-	void Sqt(const leo::SQT& sqt){
+	void Camera(const leo::Camera& camera){
+		mVScb.worldviewproj = leo::XMMatrixTranspose(leo::XMMatrixTranspose(mVScb.world) * camera.ViewProj());
+	}
 
+	void Color(const leo::float4& color, ID3D11DeviceContext* context = nullptr){
+		mPScb.mColor = color;
+		if (context)
+			context->UpdateSubresource(mPSCB, 0, nullptr, &mPScb, 0, 0);
+	}
+
+	void Sqt(const leo::SQT& sqt, ID3D11DeviceContext* context = nullptr){
+		mVScb.world = leo::XMMatrixTranspose(sqt.operator DirectX::XMMATRIX());
+		if (context)
+			context->UpdateSubresource(mVSCB, 0, nullptr, &mVScb, 0, 0);
+	}
+
+	leo::Box& GetBoundingBox(){
+		return mBoundingBox;
 	}
 
 	struct VScbPerFrame
@@ -104,14 +164,12 @@ public:
 		leo::XMMATRIX worldviewproj;
 	public:
 		const static std::uint8_t slot = 0;
-	};
-	leo::Effect::ShaderConstantBuffer<VScbPerFrame> mVertexShaderConstantBufferPerFrame;
+	} mVScb;
 
 	struct PScbPerColor{
 		leo::float4 mColor;
 		const static std::uint8_t slot = 0;
-	};
-	leo::Effect::ShaderConstantBuffer<PScbPerColor> mPixelShaderConstantBufferPerColor;
+	} mPScb;
 } mBox;
 
 
@@ -204,6 +262,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 	win.BindMsgFunc(WM_SIZE, sizeproc);
 
+	DeviceEvent();
+	BuildRes();
+
 	auto cmdmsgproc = [&](HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)-> LRESULT
 	{
 		switch (LOWORD(wParam))
@@ -256,9 +317,39 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 		return 0;
 	};
 	win.BindMsgFunc(WM_COMMAND, cmdmsgproc);
+	
 
-	DeviceEvent();
-	BuildRes();
+	leo::ViewPort vp;
+	UINT numVp = 1;
+	D3D11_VIEWPORT dvp;
+	DeviceMgr.GetDeviceContext()->RSGetViewports(&numVp, &dvp);
+	vp.mHeight = dvp.Height;
+	vp.mMaxDepth = dvp.MaxDepth;
+	vp.mMinDepth = dvp.MinDepth;
+	vp.mTLX = dvp.TopLeftX;
+	vp.mTLY = dvp.TopLeftY;
+	vp.mWindth = dvp.Width;
+	leo::float4x4 proj;
+	leo::XMStoreFloat4x4A((leo::XMFLOAT4X4A*)&proj, pCamera->Proj());
+	
+	auto mouseproc = [&](HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
+		auto x = (float)GET_X_LPARAM(lParam);
+		auto y = (float)GET_Y_LPARAM(lParam);
+		leo::float4x4 inv;
+		leo::XMVECTOR temp;
+		leo::XMStoreFloat4x4A((leo::XMFLOAT4X4A*)&inv, leo::XMMatrixInverse(&temp, pCamera->View())*leo::XMMatrixInverse(&temp, leo::XMMatrixTranspose(mBox.mVScb.world)));
+		auto ray = leo::Ray::Pick(vp, proj, leo::float2(x, y)).Transform(inv).Normalize();
+		if (ray.Intersect(mBox.GetBoundingBox()).first)
+			mBox.Color(leo::float4(0.f, 1.f, 0.f, 1.f));
+		else
+			mBox.Color(leo::float4(1.f, 0.f, 1.f, 1.f));
+		return 0;
+	};
+	win.BindMsgFunc(WM_LBUTTONDOWN, mouseproc);
+	mBox.Color(leo::float4(1.f, 0.f, 0.f, 1.f));
+
+	
+	
 
 	std::thread renderThread(Render);
 
@@ -283,6 +374,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 	pMesh.reset(nullptr);
 	pTerrain.reset(nullptr);
+	mBox.Release();
 	leo::global::Destroy();
 #ifdef DEBUG
 	leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
@@ -297,7 +389,7 @@ void BuildRes()
 
 	using leo::float3;
 
-	auto Eye = float3(0.f,8.f,0.f);
+	auto Eye = float3(0.f,0.f,-5.f);
 	auto At = float3(0.f,0.f,8.f);
 	auto Up = float3(0.f,1.f, 0.f);
 
@@ -347,6 +439,8 @@ void BuildRes()
 	}
 	pTerrain = std::make_unique < leo::Terrain<> >(leo::DeviceMgr().GetDevice(), L"Resource\\Test.Terrain");
 
+	mBox.Build(leo::DeviceMgr().GetDevice());
+	mBox.Sqt(leo::SQT());
 	//leo::DeviceMgr().GetDeviceContext()->RSSetState(leo::RenderStates().GetRasterizerState(L"WireframeRS"));
 }
 
@@ -384,7 +478,12 @@ void Render()
 		
 		leo::Axis::GetInstance()->Render(devicecontext, *pCamera);
 
-		pTerrain->Render(devicecontext, *pCamera);
+		//pTerrain->Render(devicecontext, *pCamera);
+
+		mBox.Apply(devicecontext);
+		
+		mBox.Camera(*pCamera);
+		mBox.Draw(devicecontext);
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 

@@ -6,7 +6,7 @@
 #include <thread>
 namespace leo
 {
-	class RenderSyncDelegate : CONCRETE(RenderSync), public Singleton < RenderSyncDelegate >
+	class RenderSyncDelegate : CONCRETE(RenderSync), public Singleton < RenderSyncDelegate,false >
 	{
 	public:
 		RenderSyncDelegate()

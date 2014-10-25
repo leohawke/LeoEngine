@@ -17,8 +17,8 @@ namespace leo
 	public:
 		SyncHandle() = default;
 		template<typename T,typename F>
-		explicit SyncHandle(T* hObj, F&& f) lnothrow
-			:mHandle(hObj), mDeleter(lforward(f))
+		explicit SyncHandle(T* hObj,const F& f) lnothrow
+			:mHandle(hObj), mDeleter(f)
 		{
 		}
 
@@ -38,7 +38,9 @@ namespace leo
 			return *this;
 		}
 		~SyncHandle(){
-			Reset(mHandle);
+			if (mHandle){
+				mDeleter(mHandle);
+			}
 		}
 	private:
 		void * mHandle = nullptr;

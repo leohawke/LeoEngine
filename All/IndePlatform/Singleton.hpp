@@ -9,7 +9,7 @@ namespace leo
 	{
 		void SingletonRegister(const std::function<void()>& f,const std::type_info&);
 	}
-	template<typename Single>
+	template<typename Single,bool Manged = true>
 	//单列模式基类
 	//0.继承Singleton ->class Sample : public Singleton<Sample>
 	//1.析构函数修饰为public,并完成资源释放
@@ -31,7 +31,22 @@ namespace leo
 		}
 	};
 
-	class SingletonManger : public Singleton<SingletonManger>
+	template<typename Single>
+	class Singleton < Single, false >
+	{
+	protected:
+		Singleton()
+		{
+			details::SingletonRegister([]{}, typeid(Single));
+		}
+	public:
+		virtual ~Singleton()
+		{
+			//assert(0);
+		}
+	};
+
+	class SingletonManger : public Singleton<SingletonManger,false>
 	{
 	protected:
 		SingletonManger() = default;
