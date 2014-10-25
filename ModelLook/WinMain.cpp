@@ -137,8 +137,10 @@ public:
 		context->DrawIndexed(mIndexNum, 0, 0);
 	}
 
-	void Camera(const leo::Camera& camera){
+	void Camera(const leo::Camera& camera, ID3D11DeviceContext* context = nullptr){
 		mVScb.worldviewproj = leo::XMMatrixTranspose(leo::XMMatrixTranspose(mVScb.world) * camera.ViewProj());
+		if (context)
+			context->UpdateSubresource(mVSCB, 0, nullptr, &mVScb, 0, 0);
 	}
 
 	void Color(const leo::float4& color, ID3D11DeviceContext* context = nullptr){
@@ -173,6 +175,8 @@ public:
 } mBox;
 
 
+leo::SQTObject mBoxSqts[10];
+bool mBoxPicked[10];
 void DeviceEvent()
 {
 	while (!leo::DeviceMgr().GetDevice())
@@ -337,12 +341,15 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 		auto y = (float)GET_Y_LPARAM(lParam);
 		leo::float4x4 inv;
 		leo::XMVECTOR temp;
-		leo::XMStoreFloat4x4A((leo::XMFLOAT4X4A*)&inv, leo::XMMatrixInverse(&temp, pCamera->View())*leo::XMMatrixInverse(&temp, leo::XMMatrixTranspose(mBox.mVScb.world)));
-		auto ray = leo::Ray::Pick(vp, proj, leo::float2(x, y)).Transform(inv).Normalize();
-		if (ray.Intersect(mBox.GetBoundingBox()).first)
-			mBox.Color(leo::float4(0.f, 1.f, 0.f, 1.f));
-		else
-			mBox.Color(leo::float4(1.f, 0.f, 1.f, 1.f));
+		auto ray = leo::Ray::Pick(vp, proj, leo::float2(x, y));
+		for (auto i = 0; i != 10;++i){
+			leo::XMStoreFloat4x4A((leo::XMFLOAT4X4A*)&inv, leo::XMMatrixInverse(&temp, pCamera->View())*leo::XMMatrixInverse(&temp, mBoxSqts[i].operator DirectX::XMMATRIX()));
+
+			if (ray.Transform(inv).Normalize().Intersect(mBox.GetBoundingBox()).first)
+				mBoxPicked[i] = true;
+			else
+				mBoxPicked[i] = false;
+		}
 		return 0;
 	};
 	win.BindMsgFunc(WM_LBUTTONDOWN, mouseproc);
@@ -440,7 +447,19 @@ void BuildRes()
 	pTerrain = std::make_unique < leo::Terrain<> >(leo::DeviceMgr().GetDevice(), L"Resource\\Test.Terrain");
 
 	mBox.Build(leo::DeviceMgr().GetDevice());
-	mBox.Sqt(leo::SQT());
+
+
+	for (auto& sqt : mBoxSqts){
+		if (auto y = std::rand() % 2)
+			sqt.Yaw(y / 10.f);
+		else
+			sqt.Yaw(-y / 10.f);
+		leo::float3 s(std::rand() % 5 - 2.5f, std::rand() % 5 - 2.5f, std::rand() % 5 - 2.5f);
+		sqt.Translation(s);
+	}
+
+	for (auto & pick : mBoxPicked)
+		pick = false;
 	//leo::DeviceMgr().GetDeviceContext()->RSSetState(leo::RenderStates().GetRasterizerState(L"WireframeRS"));
 }
 
@@ -482,8 +501,15 @@ void Render()
 
 		mBox.Apply(devicecontext);
 		
-		mBox.Camera(*pCamera);
-		mBox.Draw(devicecontext);
+		for (auto i = 0; i != 10;++i){
+			mBox.Sqt(mBoxSqts[i]);
+			if (mBoxPicked[i])
+				mBox.Color(leo::float4(1.f,0.f,1.f,1.f),devicecontext);
+			else
+				mBox.Color(leo::float4(0.f, 1.f, 1.f, 1.f), devicecontext);
+			mBox.Camera(*pCamera,devicecontext);
+			mBox.Draw(devicecontext);
+		}
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 

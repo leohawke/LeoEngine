@@ -22,6 +22,8 @@ namespace leo
 	class SQTObject :public GeneralAllocatedObject,public SQT
 	{
 	public:
+		SQTObject() = default;
+
 		SQTObject(const SQT& sqt)
 			:SQT(sqt)
 		{}
