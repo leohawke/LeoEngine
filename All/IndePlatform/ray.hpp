@@ -17,7 +17,7 @@
 #define IndePlatform_leo_math_ray_h
 
 #include "LeoMath.h"
-#include "..\Core\Geometry.hpp"
+#include "Geometry.hpp"
 
 namespace leo{
 	struct lalignas(16) ViewPort{
@@ -78,17 +78,22 @@ namespace leo{
 			return Ray(mOrigin,dir);
 		}
 
+		std::pair<bool, float> Intersect(const Sphere& sphere) const{
+			return sphere.Intersects(*this);
+		}
+
+		std::pair<bool, float> Intersect(const Triangle& tri) const{
+			return tri.Intersects(*this);
+		}
+
+#if 0
 		std::pair<bool,float> Intersect(const Box& box) const{
 			float dist = 0.f;
 			auto result = box.Intersects(load(mOrigin), load(mDir),dist);
 			return std::make_pair(result, dist);
 		}
 
-		std::pair<bool, float> Intersect(const Sphere& sphere) const{
-			float dist = 0.f;
-			auto result = sphere.Intersects(load(mOrigin), load(mDir), dist);
-			return std::make_pair(result, dist);
-		}
+		
 
 		std::pair<bool, float> Intersect(const OrientedBox& obox) const{
 			float dist = 0.f;
@@ -104,101 +109,152 @@ namespace leo{
 
 		//std::pair<bool, float> Intersect(const Triangle& tri) const;
 
-		std::pair<bool, float> Intersect(__m128 p0, __m128 p1, __m128 p2) const{
-			auto Direction = load(mDir);
+#endif
+	};
 
-			assert(details::IsUnit<>(Direction));
+	std::pair<bool, float> Sphere::Intersects(const Ray& ray) const{
+		const auto Direction = load(ray.mDir);
 
-			auto Zero = SplatZero();
+		assert(details::IsUnit<>(Direction));
 
-			auto e1 = Subtract(p1, p0);// V1 - p0;
-			auto e2 = Subtract(p2, p0);// V2 - p0;
+		auto mCenter = load(GetCenter());
+		auto mRadius = Splat(GetRadius());
 
-			// p = Direction ^ e2;
-			auto p = Cross<>(Direction, e2);
+		auto Origin = load(ray.mOrigin);
 
-			// det = e1 * p;
-			auto det = Dot<>(e1, p);
+		// l is the vector from the ray origin to the center of the sphere.
+		auto l = Subtract(mCenter, Origin);
+		auto l2 = Dot<>(l, l);
 
-			__m128 u, v, t;
+		// s is the projection of the l onto the ray direction.
+		auto s = Dot<>(l, Direction);
 
-			auto Origin = load(mOrigin);
-			if (GreaterOrEqual<>(det,details::SplatRayEpsilon()))
-			{
-				// Determinate is positive (front side of the triangle).
-				auto s =Subtract( Origin ,p0);
+		auto r2 = Multiply(mRadius, mRadius);
 
-				// u = s * p;
-				u = Dot<>(s, p);
+		// m2 is squared distance from the center of the sphere to the projection.
+		auto m2 = Subtract(l2, Multiply(s, s));
 
-				auto NoIntersection = LessExt(u, Zero);
-				NoIntersection = OrInt(NoIntersection, GreaterExt(u, det));
+		// If the ray origin is outside the sphere and the center of the sphere is 
+		// behind the ray origin there is no intersection.
+		auto NoIntersection = AndInt(LessExt(s, SplatZero()), GreaterExt(l2, r2));
 
-				// q = s ^ e1;
-				auto q = Cross<>(s, e1);
+		// If the squared distance from the center of the sphere to the projection
+		// is greater than the radius squared the ray will miss the sphere.
+		NoIntersection = OrInt(NoIntersection, GreaterExt(m2, r2));
 
-				// v = Direction * q;
-				v = Dot<>(Direction, q);
+		// The ray hits the sphere, compute the nearest intersection point.
+		auto q = Sqrt(Subtract(r2, m2));
+		auto t1 = Subtract(s, q);
+		auto t2 = Add(s, q);
 
-				NoIntersection = OrInt(NoIntersection, LessExt(v, Zero));
-				NoIntersection = OrInt(NoIntersection, GreaterExt(u + v, det));
-
-				// t = e2 * q;
-				t = Dot<>(e2, q);
-
-				NoIntersection = OrInt(NoIntersection, LessExt(t, Zero));
-
-				if (EqualInt<>(NoIntersection, details::SplatTrueInt()))
-				{
-					return { false, 0.f };
-				}
-			}
-			else if (LessOrEqual<>(det,details::SplatNegRayEpsilon()))
-			{
-				// Determinate is negative (back side of the triangle).
-				auto s =Subtract(Origin, p0);
-
-				// u = s * p;
-				u = Dot<>(s, p);
-
-				XMVECTOR NoIntersection = GreaterExt(u, Zero);
-				NoIntersection = OrInt(NoIntersection, LessExt(u, det));
-
-				// q = s ^ e1;
-				XMVECTOR q = XMVector3Cross(s, e1);
-
-				// v = Direction * q;
-				v = Dot<>(Direction, q);
-
-				NoIntersection = OrInt(NoIntersection, GreaterExt(v, Zero));
-				NoIntersection = OrInt(NoIntersection, LessExt(u + v, det));
-
-				// t = e2 * q;
-				t = Dot<>(e2, q);
-
-				NoIntersection = OrInt(NoIntersection, GreaterExt(t, Zero));
-
-				if (EqualInt<>(NoIntersection,details::SplatTrueInt()))
-				{
-					return{ false, 0.f };
-				}
-			}
-			else
-			{
-				// Parallel ray.
-				return{ false, 0.f };
-			}
-
-			t = Divide(t, det);
-
-			// (u / det) and (v / dev) are the barycentric cooridinates of the intersection.
-
-			// Store the x-component to *pDist
+		auto OriginInside = LessOrEqualExt(l2, r2);
+		auto t = Select(t1, t2, OriginInside);
+		if (NotEqualInt<>(NoIntersection, details::SplatTrueInt())){
 			float dist = 0.f;
 			save(dist, t);
-			return	{true,dist};
+			return{ true, dist };
 		}
-	};
+
+		return{ false, 0.f };
+	}
+
+	std::pair<bool, float> Triangle::Intersects(const Ray& ray) const{
+		auto Direction = load(ray.mDir);
+
+		assert(details::IsUnit<>(Direction));
+
+		auto Zero = SplatZero();
+
+		auto p0 = load(p[0]);
+		auto p1 = load(p[1]);
+		auto p2 = load(p[2]);
+		auto e1 = Subtract(p1, p0);// V1 - p0;
+		auto e2 = Subtract(p2, p0);// V2 - p0;
+
+		// p = Direction ^ e2;
+		auto p = Cross<>(Direction, e2);
+
+		// det = e1 * p;
+		auto det = Dot<>(e1, p);
+
+		__m128 u, v, t;
+
+		auto Origin = load(ray.mOrigin);
+		if (GreaterOrEqual<>(det, details::SplatRayEpsilon()))
+		{
+			// Determinate is positive (front side of the triangle).
+			auto s = Subtract(Origin, p0);
+
+			// u = s * p;
+			u = Dot<>(s, p);
+
+			auto NoIntersection = LessExt(u, Zero);
+			NoIntersection = OrInt(NoIntersection, GreaterExt(u, det));
+
+			// q = s ^ e1;
+			auto q = Cross<>(s, e1);
+
+			// v = Direction * q;
+			v = Dot<>(Direction, q);
+
+			NoIntersection = OrInt(NoIntersection, LessExt(v, Zero));
+			NoIntersection = OrInt(NoIntersection, GreaterExt(u + v, det));
+
+			// t = e2 * q;
+			t = Dot<>(e2, q);
+
+			NoIntersection = OrInt(NoIntersection, LessExt(t, Zero));
+
+			if (EqualInt<>(NoIntersection, details::SplatTrueInt()))
+			{
+				return{ false, 0.f };
+			}
+		}
+		else if (LessOrEqual<>(det, details::SplatNegRayEpsilon()))
+		{
+			// Determinate is negative (back side of the triangle).
+			auto s = Subtract(Origin, p0);
+
+			// u = s * p;
+			u = Dot<>(s, p);
+
+			auto NoIntersection = GreaterExt(u, Zero);
+			NoIntersection = OrInt(NoIntersection, LessExt(u, det));
+
+			// q = s ^ e1;
+			auto q = Cross<>(s, e1);
+
+			// v = Direction * q;
+			v = Dot<>(Direction, q);
+
+			NoIntersection = OrInt(NoIntersection, GreaterExt(v, Zero));
+			NoIntersection = OrInt(NoIntersection, LessExt(u + v, det));
+
+			// t = e2 * q;
+			t = Dot<>(e2, q);
+
+			NoIntersection = OrInt(NoIntersection, GreaterExt(t, Zero));
+
+			if (EqualInt<>(NoIntersection, details::SplatTrueInt()))
+			{
+				return{ false, 0.f };
+			}
+		}
+		else
+		{
+			// Parallel ray.
+			return{ false, 0.f };
+		}
+
+		t = Divide(t, det);
+
+		// (u / det) and (v / dev) are the barycentric cooridinates of the intersection.
+
+		// Store the x-component to *pDist
+		float dist = 0.f;
+		save(dist, t);
+		return{ true, dist };
+	}
 }
 
 #endif

@@ -63,9 +63,10 @@ namespace leo{
 	struct OrientedBox;
 	struct Frustum;
 
-	struct Triangle{
+	struct Ray;
+
+	struct lalignas(16) Triangle{
 		float3 p[3];
-	public:
 		Triangle() = default;
 		Triangle(const float3& p0, const float3& p1, const float3& p2){
 			p[0] = p0;
@@ -73,9 +74,25 @@ namespace leo{
 			p[2] = p2;
 		}
 
-		void operator=(const Triangle& tri){
-			std::memcpy(this, &tri, sizeof(Triangle));
+
+		std::pair<bool, float> Intersects(const Ray& sphere) const;
+	};
+
+		
+	struct lalignas(16) Sphere{
+		float4 mCenterRadius;
+		inline float3 GetCenter() const{
+			return float3(mCenterRadius);
 		}
+		inline float GetRadius() const{
+			return mCenterRadius.w;
+		}
+
+		Sphere(const float3& center,float radius)
+			:mCenterRadius(center,radius)
+		{}
+
+		std::pair<bool, float> Intersects(const Ray& sphere) const;
 	};
 }
 

@@ -653,8 +653,19 @@ namespace leo
 		vst1q_lane_f32(pDestination, vector, 0);
 #elif defined(LM_SSE_INTRINSICS)
 		_mm_store_ss(&data, vector);
-#else // _XM_VMX128_INTRINSICS_
-#endif // _XM_VMX128_INTRINSICS_
+#else // _LM_VMX128_INTRINSICS_
+#endif // _LM_VMX128_INTRINSICS_
+	}
+
+	inline __m128 Select(__m128 V1, __m128 V2, __m128 Control){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		return vbslq_f32(Control, V2, V1);
+#elif defined(LM_SSE_INTRINSICS)
+		auto vTemp1 = _mm_andnot_ps(Control, V1);
+		auto vTemp2 = _mm_and_ps(V2, Control);
+		return _mm_or_ps(vTemp1, vTemp2);
+#else // _LM_VMX128_INTRINSICS_
+#endif // _LM_VMX128_INTRINSICS_
 	}
 }
 
@@ -709,8 +720,8 @@ namespace leo{
 #elif defined(LM_SSE_INTRINSICS)
 			__m128i V = _mm_set1_epi32(-1);
 			return _mm_castsi128_ps(V);
-#else // _XM_VMX128_INTRINSICS_
-#endif // _XM_VMX128_INTRINSICS_
+#else // _LM_VMX128_INTRINSICS_
+#endif // _LM_VMX128_INTRINSICS_
 		}
 	}
 }
@@ -761,6 +772,15 @@ namespace leo{
 		return _mzero;
 	}
 
+	inline __m128 Splat(float value){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		return vld1q_dup_f32(&value);
+#elif defined(LM_SSE_INTRINSICS)
+		return _mm_load_ps1(&value);
+#else // _LM_VMX128_INTRINSICS_
+#endif // _LM_VMX128_INTRINSICS_
+	}
+
 	inline __m128 Subtract(__m128 sl, __m128 sr){
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vsubq_f32(sl,sr);
@@ -769,6 +789,13 @@ namespace leo{
 #endif
 	}
 
+	inline __m128 Add(__m128 al, __m128 ar){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		return vaddq_f32(al,ar);
+#elif defined(LM_SSE_INTRINSICS)
+		return _mm_add_ps(al, ar);
+#endif
+	}
 
 	inline __m128 MultiplyAdd(__m128 ml, __m128 mr, __m128 ar){
 #if defined(LM_ARM_NEON_INTRINSICS)
@@ -778,6 +805,13 @@ namespace leo{
 #endif
 	}
 
+	inline __m128 Multiply(__m128 ml, __m128 mr){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		return vmulq_f32(ml, mr);
+#elif defined(LM_SSE_INTRINSICS)
+		return _mm_mul_ps(ml, mr);
+#endif
+	}
 
 	//1.Calculate an estimate for the reciprocal of the divisor (D): X0.
 	//2.Compute successively more accurate estimates of the reciprocal: (X1...X1)
@@ -1120,6 +1154,31 @@ namespace leo{
 #else // _LM_VMX128_INTRINSICS_
 #endif // _LM_VMX128_INTRINSICS_
 	}
+
+	inline __m128 Sqrt(__m128 V){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		// 3 iterations of Newton-Raphson refinment of sqrt
+		float32x4_t S0 = vrsqrteq_f32(V);
+		float32x4_t P0 = vmulq_f32(V, S0);
+		float32x4_t R0 = vrsqrtsq_f32(P0, S0);
+		float32x4_t S1 = vmulq_f32(S0, R0);
+		float32x4_t P1 = vmulq_f32(V, S1);
+		float32x4_t R1 = vrsqrtsq_f32(P1, S1);
+		float32x4_t S2 = vmulq_f32(S1, R1);
+		float32x4_t P2 = vmulq_f32(V, S2);
+		float32x4_t R2 = vrsqrtsq_f32(P2, S2);
+		float32x4_t S3 = vmulq_f32(S2, R2);
+
+		auto VEqualsInfinity = EqualInt(V, g_LMInfinity.v);
+		auto VEqualsZero = Equal(V, vdupq_n_f32(0));
+		auto Result = vmulq_f32(V, S3);
+		auto Select = EqualInt(VEqualsInfinity, VEqualsZero);
+		return Select(V, Result, Select);
+#elif defined(LM_SSE_INTRINSICS)
+		return _mm_sqrt_ps(V);
+#else // _LM_VMX128_INTRINSICS_
+#endif // _LM_VMX128_INTRINSICS_
+	}
 }
 
 //__m128 logic operator def
@@ -1166,6 +1225,14 @@ namespace leo{
 #endif
 	}
 
+	inline __m128 LessOrEqualExt(__m128 lhs, __m128 rhs){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		return vcleq_f32(lhs, rhs);
+#elif defined(LM_SSE_INTRINSICS)
+		return _mm_cmple_ps(lhs, rhs);
+#else // _LMVMX128_INTRINSICS_
+#endif // _LMVMX128_INTRINSICS_
+	}
 
 	inline __m128 LessExt(__m128 lhs, __m128 rhs){
 #if defined(LM_ARM_NEON_INTRINSICS)
@@ -1174,6 +1241,14 @@ namespace leo{
 		return _mm_cmplt_ps(lhs, rhs);
 #else // LM_VMX128_INTRINSICS_
 #endif // LM_VMX128_INTRINSICS_
+	}
+
+	inline __m128 AndInt(__m128 lhs, __m128 rhs){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		return vandq_u32(lhs, rhs);
+#elif defined(LM_SSE_INTRINSICS)
+		return _mm_and_ps(lhs, rhs);
+#endif
 	}
 
 	inline __m128 OrInt(__m128 lhs, __m128 rhs){
@@ -1198,6 +1273,20 @@ namespace leo{
 #else
 #endif
 	}
+
+	template<uint8 D = 4>
+	inline bool NotEqualInt(__m128 V1, __m128 V2){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		uint32x4_t vResult = vceqq_u32(V1, V2);
+		int8x8x2_t vTemp = vzip_u8(vget_low_u8(vResult), vget_high_u8(vResult));
+		vTemp = vzip_u16(vTemp.val[0], vTemp.val[1]);
+		return (vget_lane_u32(vTemp.val[1], 1) != 0xFFFFFFFFU);
+#elif defined(LM_SSE_INTRINSICS)
+		__m128i vTemp = _mm_cmpeq_epi32(_mm_castps_si128(V1), _mm_castps_si128(V2));
+		return ((_mm_movemask_ps(_mm_castsi128_ps(vTemp)) != 0xf) != 0);
+#else
+#endif
+}
 
 	inline __m128 GreaterExt(__m128 V1, __m128 V2){
 #if defined(LM_ARM_NEON_INTRINSICS)
