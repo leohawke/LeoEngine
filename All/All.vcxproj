@@ -159,6 +159,7 @@
     <ClInclude Include="Core\GaussBlur.hpp" />
     <ClInclude Include="Core\Geometry.hpp" />
     <ClInclude Include="Core\EffectLine.hpp" />
+    <ClInclude Include="Core\Joint.hpp" />
     <ClInclude Include="Core\Mesh.hpp" />
     <ClInclude Include="Core\MeshLoad.hpp" />
     <ClInclude Include="Core\CoreObject.hpp" />

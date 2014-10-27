@@ -11,6 +11,7 @@
 #include "IndePlatform\BaseMacro.h"
 #include "IndePlatform\Singleton.hpp"
 #include "IndePlatform\leoint.hpp"
+#include "IndePlatform\utility.hpp"
 #include "d3dx11.hpp"
 #if defined DEBUG || defined _DEBUG
 #include <d3d11sdklayers.h> //for D3D11Debug
@@ -40,8 +41,6 @@ namespace leo
 		extern float globalAspect;
 		//WindowMgr
 		extern win::HWND globalHwnd;
-		//GUID
-		extern std::unordered_map<std::size_t, wchar_t*> globalStringTable;
 
 		//
 		extern win::KeysState globalKeysState;
@@ -56,23 +55,6 @@ namespace leo
 	
 	
 	
-
-	inline std::size_t hash(const wchar_t* str)
-	{
-		auto sid = std::_Hash_seq((unsigned char*)str,wcslen(str)*sizeof(wchar_t)/sizeof(char));
-
-		auto it = global::globalStringTable.find(sid);
-
-		if (it == global::globalStringTable.end())
-		{
-			global::globalStringTable[sid] = _wcsdup(str);
-		}
-		return sid;
-	}
-	inline std::size_t hash(const std::wstring& str)
-	{
-		return hash(str.c_str());
-	}
 	
 
 	class OutputWindow : public win::Window

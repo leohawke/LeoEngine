@@ -153,7 +153,7 @@ namespace leo
 		template<typename... _tParams>
 		lconstfn
 			boxed_value(_tParams&&... args)
-			: value(yforward(args)...)
+			: value(lforward(args)...)
 		{}
 
 		operator _type&() lnothrow
@@ -428,6 +428,58 @@ namespace leo
 	};
 }
 
+
+#include <unordered_map>
+
+namespace leo{
+	namespace details{
+		static class StringTableDelegate{
+		public:
+			~StringTableDelegate(){
+				for (auto &str : mMap)
+				{
+					free(str.second);
+				}
+			}
+			inline std::size_t hash(const wchar_t* str){
+				auto sid = std::_Hash_seq((unsigned char*)str, wcslen(str)*sizeof(wchar_t) / sizeof(char));
+
+				if (mMap.find(sid) == mMap.end())
+					mMap[sid] = _wcsdup(str);
+				return sid;
+			}
+			inline std::size_t hash(const std::wstring& str){
+				return hash(str.c_str());
+			}
+
+			const wchar_t* unhash(std::size_t sid){
+				auto it = mMap.find(sid);
+
+				if (it == mMap.end())
+					return nullptr;
+
+				return mMap[sid];
+			}
+		private:
+			std::unordered_map<std::size_t, wchar_t*> mMap;
+		} mTable;
+	}
+
+	std::size_t hash(const wchar_t* str){
+		details::mTable.hash(str);
+	}
+
+	std::size_t hash(const std::wstring& str){
+		details::mTable.hash(str);
+	}
+
+	const wchar_t* unhash(std::size_t sid){
+		if (auto str = details::mTable.unhash(sid))
+			return str;
+		else
+			throw std::invalid_argument("该资源不存在");
+	}
+}
 #if !LB_HAS_BUILTIN_NULLPTR
 using leo::stdex::nullptr;
 #endif

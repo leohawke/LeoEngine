@@ -434,6 +434,9 @@
     <ClInclude Include="IndePlatform\Geometry.hpp">
       <Filter>IndePlatform\BaseHead</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Joint.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">

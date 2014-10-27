@@ -34,18 +34,12 @@ namespace leo
 		float globalAspect;
 		//WindowMgr
 		win::HWND globalHwnd;
-		//GUID
-		std::unordered_map<std::size_t, wchar_t*> globalStringTable;
 		//
 		win::KeysState globalKeysState;
 		void Init()
 		{}
 		void Destroy()
 		{
-			for (auto &str : globalStringTable)
-			{
-				free(str.second);
-			}
 		}
 	}
 }
