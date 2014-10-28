@@ -434,7 +434,10 @@
     <ClInclude Include="IndePlatform\Geometry.hpp">
       <Filter>IndePlatform\BaseHead</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Joint.hpp">
+    <ClInclude Include="Core\SkeletonAnimation.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Skeleton.hpp">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
