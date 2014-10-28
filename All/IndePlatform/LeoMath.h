@@ -419,6 +419,8 @@ namespace leo
 			return *this;
 		}
 
+
+
 			template<typename T>
 		T* operator &() lnothrow
 		{
@@ -697,19 +699,19 @@ namespace leo{
 		}
 
 		inline __m128 SplatInfinity(){
-			const static lalignas(16) int infinity[4] = { 0x7F800000, 0x7F800000, 0x7F800000, 0x7F800000 };
+			const static lalignas(16) uint32 infinity[4] = { 0x7F800000, 0x7F800000, 0x7F800000, 0x7F800000 };
 			const static auto _minfinity = load(*reinterpret_cast<const float4 *>(infinity));
 			return _minfinity;
 		}
 
 		inline __m128 SplatQNaN(){
-			const static lalignas(16) int qnan[4] = { 0x7FC00000, 0x7FC00000, 0x7FC00000, 0x7FC00000 };
+			const static lalignas(16) uint32 qnan[4] = { 0x7FC00000, 0x7FC00000, 0x7FC00000, 0x7FC00000 };
 			const static auto _mqnan = load(*reinterpret_cast<const float4 *>(qnan));
 			return _mqnan;
 		}
 
 		inline __m128 SplatMask3(){
-			const static lalignas(16) int mask3[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000 };
+			const static lalignas(16) uint32 mask3[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000 };
 			const static auto _mmask3 = load(*reinterpret_cast<const float4 *>(mask3));
 			return _mmask3;
 		}
@@ -723,6 +725,38 @@ namespace leo{
 #else // _LM_VMX128_INTRINSICS_
 #endif // _LM_VMX128_INTRINSICS_
 		}
+
+		inline __m128 SplatAbsMask(){
+			const static lalignas(16) uint32 absmask[4] = { 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF };
+			const static auto _mabsmask = load(*reinterpret_cast<const float4 *>(absmask));
+			return _mabsmask;
+		}
+
+		inline __m128 IsInfinite(__m128 V){
+#if defined(LM_ARM_NEON_INTRINSICS)
+			// Mask off the sign bit
+			uint32x4_t vTemp = vandq_u32(V, g_XMAbsMask);
+			// Compare to infinity
+			vTemp = vceqq_f32(vTemp, g_XMInfinity);
+			// If any are infinity, the signs are true.
+			return vTemp;
+#elif defined(LM_SSE_INTRINSICS)
+			// Mask off the sign bit
+			__m128 vTemp = _mm_and_ps(V, SplatAbsMask());
+			// Compare to infinity
+			vTemp = _mm_cmpeq_ps(vTemp, SplatInfinity());
+			// If any are infinity, the signs are true.
+			return vTemp;
+#else // _XM_VMX128_INTRINSICS_
+#endif // _XM_VMX128_INTRINSICS_
+		}
+
+		inline __m128 SplatNegativeZero(){
+			const static lalignas(16) uint32 zero[4] = { 0x80000000, 0x80000000, 0x80000000, 0x80000000 };
+			const static auto _mzero = load(*reinterpret_cast<const float4 *>(zero));
+			return _mzero;
+		}
+
 	}
 }
 
@@ -770,6 +804,18 @@ namespace leo{
 		const static float4 zero(0.f, 0.f, 0.f, 0.f);
 		const static auto _mzero = load(zero);
 		return _mzero;
+	}
+
+	inline __m128 SplatNegativeOne(){
+		const static float4 one(-1.f, -1.f, -1.f, -1.f);
+		const static auto _mone = load(one);
+		return _mone;
+	}
+
+	inline __m128 SplatHalfPi(){
+		const static float4 halfpi(LM_HALFPI, LM_HALFPI, LM_HALFPI, LM_HALFPI);
+		const static auto _mone = load(halfpi);
+		return _mone;
 	}
 
 	inline __m128 Splat(float value){
@@ -1155,6 +1201,28 @@ namespace leo{
 #endif // _LM_VMX128_INTRINSICS_
 	}
 
+	template<>
+	inline __m128 Dot<4>(__m128 V1, __m128 V2){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		float32x4_t vTemp = vmulq_f32(V1, V2);
+		float32x2_t v1 = vget_low_f32(vTemp);
+		float32x2_t v2 = vget_high_f32(vTemp);
+		v1 = vpadd_f32( v1, v1 );
+		v2 = vpadd_f32( v2, v2 );
+		v1 = vadd_f32( v1, v2 );
+		return vcombine_f32( v1, v1 );
+#elif defined(LM_SSE_INTRINSICS)
+		auto vTemp2 = V2;
+		auto vTemp = _mm_mul_ps(V1, vTemp2);
+		vTemp2 = _mm_shuffle_ps(vTemp2, vTemp, _MM_SHUFFLE(1, 0, 0, 0)); // Copy X to the Z position and Y to the W position
+		vTemp2 = _mm_add_ps(vTemp2, vTemp);          // Add Z = X+Z; W = Y+W;
+		vTemp = _mm_shuffle_ps(vTemp, vTemp2, _MM_SHUFFLE(0, 3, 0, 0));  // Copy W to the Z position
+		vTemp = _mm_add_ps(vTemp, vTemp2);           // Add Z and W together
+		return LM_PERMUTE_PS(vTemp, _MM_SHUFFLE(2, 2, 2, 2));    // Splat Z and return
+#else // _XM_VMX128_INTRINSICS_
+#endif // _XM_VMX128_INTRINSICS_
+	}
+
 	inline __m128 Sqrt(__m128 V){
 #if defined(LM_ARM_NEON_INTRINSICS)
 		// 3 iterations of Newton-Raphson refinment of sqrt
@@ -1243,6 +1311,15 @@ namespace leo{
 #endif // LM_VMX128_INTRINSICS_
 	}
 
+	inline __m128 EqualExt(__m128 V1, __m128 V2){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		return vceqq_f32( V1, V2 );
+#elif defined(LM_SSE_INTRINSICS)
+		return _mm_cmpeq_ps(V1, V2);
+#else // _XM_VMX128_INTRINSICS_
+#endif // _XM_VMX128_INTRINSICS_
+	}
+
 	inline __m128 AndInt(__m128 lhs, __m128 rhs){
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vandq_u32(lhs, rhs);
@@ -1260,6 +1337,8 @@ namespace leo{
 #endif
 	}
 
+
+
 	template<uint8 D = 4>
 	inline bool EqualInt(__m128 V1, __m128 V2){
 #if defined(LM_ARM_NEON_INTRINSICS)
@@ -1274,6 +1353,16 @@ namespace leo{
 #endif
 	}
 
+	inline __m128 EqualIntExt(__m128 V1, __m128 V2){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		return vceqq_u32(V1, V2);
+#elif defined(LM_SSE_INTRINSICS)
+		__m128i V = _mm_cmpeq_epi32(_mm_castps_si128(V1), _mm_castps_si128(V2));
+		return _mm_castsi128_ps(V);
+#else // _XM_VMX128_INTRINSICS_
+#endif // _XM_VMX128_INTRINSICS_
+	}
+
 	template<uint8 D = 4>
 	inline bool NotEqualInt(__m128 V1, __m128 V2){
 #if defined(LM_ARM_NEON_INTRINSICS)
@@ -1286,7 +1375,7 @@ namespace leo{
 		return ((_mm_movemask_ps(_mm_castsi128_ps(vTemp)) != 0xf) != 0);
 #else
 #endif
-}
+	}
 
 	inline __m128 GreaterExt(__m128 V1, __m128 V2){
 #if defined(LM_ARM_NEON_INTRINSICS)
@@ -1307,7 +1396,348 @@ namespace leo{
 #endif
 }
 
+//__m128 Trigonometry Function
+namespace leo{
+	inline __m128 atan(__m128 V){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		float32x4_t absV = vabsq_f32(V);
+		float32x4_t invV = XMVectorReciprocal(V);
+		uint32x4_t comp = vcgtq_f32(V, SplatOne());
+		uint32x4_t sign = vbslq_f32(comp, SplatOne(), SplatNegativeOne);
+		comp = vcleq_f32(absV, SplatOne());
+		sign = vbslq_f32(comp, SplatZero(), sign);
+		uint32x4_t x = vbslq_f32(comp, V, invV);
 
+		float32x4_t x2 = vmulq_f32(x, x);
+
+		// Compute polynomial approximation
+		const XMVECTOR TC1 = g_XMATanCoefficients1;
+		XMVECTOR vConstants = vdupq_lane_f32(vget_high_f32(TC1), 0);
+		XMVECTOR Result = XM_VMLAQ_LANE_F32(vConstants, x2, vget_high_f32(TC1), 1);
+
+		vConstants = vdupq_lane_f32(vget_low_f32(TC1), 1);
+		Result = vmlaq_f32(vConstants, Result, x2);
+
+		vConstants = vdupq_lane_f32(vget_low_f32(TC1), 0);
+		Result = vmlaq_f32(vConstants, Result, x2);
+
+		const XMVECTOR TC0 = g_XMATanCoefficients0;
+		vConstants = vdupq_lane_f32(vget_high_f32(TC0), 1);
+		Result = vmlaq_f32(vConstants, Result, x2);
+
+		vConstants = vdupq_lane_f32(vget_high_f32(TC0), 0);
+		Result = vmlaq_f32(vConstants, Result, x2);
+
+		vConstants = vdupq_lane_f32(vget_low_f32(TC0), 1);
+		Result = vmlaq_f32(vConstants, Result, x2);
+
+		vConstants = vdupq_lane_f32(vget_low_f32(TC0), 0);
+		Result = vmlaq_f32(vConstants, Result, x2);
+
+		Result = vmlaq_f32(SplatOne(), Result, x2);
+		Result = vmulq_f32(Result, x);
+
+		float32x4_t result1 = vmulq_f32(sign, SplatHalfPi());
+		result1 = vsubq_f32(result1, Result);
+
+		comp = vceqq_f32(sign, SplatZero());
+		Result = vbslq_f32(comp, Result, result1);
+		return Result;
+#elif defined(LM_SSE_INTRINSICS)
+		__m128 absV = XMVectorAbs(V);
+		__m128 invV = _mm_div_ps(SplatOne(), V);
+		__m128 comp = _mm_cmpgt_ps(V, SplatOne());
+		__m128 select0 = _mm_and_ps(comp, SplatOne());
+		__m128 select1 = _mm_andnot_ps(comp, SplatNegativeOne());
+		__m128 sign = _mm_or_ps(select0, select1);
+		comp = _mm_cmple_ps(absV, SplatOne());
+		select0 = _mm_and_ps(comp, SplatZero());
+		select1 = _mm_andnot_ps(comp, sign);
+		sign = _mm_or_ps(select0, select1);
+		select0 = _mm_and_ps(comp, V);
+		select1 = _mm_andnot_ps(comp, invV);
+		__m128 x = _mm_or_ps(select0, select1);
+
+		__m128 x2 = _mm_mul_ps(x, x);
+
+		// Compute polynomial approximation
+		const auto TC1 = load(float4(-0.0752896400f, +0.0429096138f, -0.0161657367f, +0.0028662257f));
+		auto vConstants = LM_PERMUTE_PS(TC1, _MM_SHUFFLE(3, 3, 3, 3));
+		__m128 Result = _mm_mul_ps(vConstants, x2);
+
+		vConstants = LM_PERMUTE_PS(TC1, _MM_SHUFFLE(2, 2, 2, 2));
+		Result = _mm_add_ps(Result, vConstants);
+		Result = _mm_mul_ps(Result, x2);
+
+		vConstants = LM_PERMUTE_PS(TC1, _MM_SHUFFLE(1, 1, 1, 1));
+		Result = _mm_add_ps(Result, vConstants);
+		Result = _mm_mul_ps(Result, x2);
+
+		vConstants = LM_PERMUTE_PS(TC1, _MM_SHUFFLE(0, 0, 0, 0));
+		Result = _mm_add_ps(Result, vConstants);
+		Result = _mm_mul_ps(Result, x2);
+
+		const auto TC0 = load(float4(-0.3333314528f, +0.1999355085f, -0.1420889944f, +0.1065626393f));
+		vConstants = LM_PERMUTE_PS(TC0, _MM_SHUFFLE(3, 3, 3, 3));
+		Result = _mm_add_ps(Result, vConstants);
+		Result = _mm_mul_ps(Result, x2);
+
+		vConstants = LM_PERMUTE_PS(TC0, _MM_SHUFFLE(2, 2, 2, 2));
+		Result = _mm_add_ps(Result, vConstants);
+		Result = _mm_mul_ps(Result, x2);
+
+		vConstants = LM_PERMUTE_PS(TC0, _MM_SHUFFLE(1, 1, 1, 1));
+		Result = _mm_add_ps(Result, vConstants);
+		Result = _mm_mul_ps(Result, x2);
+
+		vConstants = LM_PERMUTE_PS(TC0, _MM_SHUFFLE(0, 0, 0, 0));
+		Result = _mm_add_ps(Result, vConstants);
+		Result = _mm_mul_ps(Result, x2);
+		Result = _mm_add_ps(Result, SplatOne());
+		Result = _mm_mul_ps(Result, x);
+		__m128 result1 = _mm_mul_ps(sign, SplatHalfPi());
+		result1 = _mm_sub_ps(result1, Result);
+
+		comp = _mm_cmpeq_ps(sign, SplatZero());
+		select0 = _mm_and_ps(comp, Result);
+		select1 = _mm_andnot_ps(comp, result1);
+		Result = _mm_or_ps(select0, select1);
+		return Result;
+#else // _XM_VMX128_INTRINSICS_
+#endif // _XM_VMX128_INTRINSICS_
+	}
+
+	inline __m128 atan2(__m128 Y, __m128 X){
+		// Return the inverse tangent of Y / X in the range of -Pi to Pi with the following exceptions:
+
+		//     Y == 0 and X is Negative         -> Pi with the sign of Y
+		//     y == 0 and x is positive         -> 0 with the sign of y
+		//     Y != 0 and X == 0                -> Pi / 2 with the sign of Y
+		//     Y != 0 and X is Negative         -> atan(y/x) + (PI with the sign of Y)
+		//     X == -Infinity and Finite Y      -> Pi with the sign of Y
+		//     X == +Infinity and Finite Y      -> 0 with the sign of Y
+		//     Y == Infinity and X is Finite    -> Pi / 2 with the sign of Y
+		//     Y == Infinity and X == -Infinity -> 3Pi / 4 with the sign of Y
+		//     Y == Infinity and X == +Infinity -> Pi / 4 with the sign of Y
+
+		static const auto ATan2Constants = load(float4(LM_PI, LM_HALFPI, LM_QUARPI, LM_PI * 3.0f / 4.0f));
+
+		auto Zero = SplatZero();
+		auto ATanResultValid = details::SplatTrueInt();
+
+		auto Pi = SplatX(ATan2Constants);
+		auto PiOverTwo = SplatY(ATan2Constants);
+		auto PiOverFour = SplatZ(ATan2Constants);
+		auto ThreePiOverFour = SplatW(ATan2Constants);
+
+		auto YEqualsZero = EqualExt(Y, Zero);
+		auto XEqualsZero = EqualExt(X, Zero);
+		auto XIsPositive = AndInt(X, details::SplatNegativeZero());
+		XIsPositive = EqualIntExt(XIsPositive, Zero);
+		auto YEqualsInfinity = details::IsInfinite(Y);
+		auto XEqualsInfinity = details::IsInfinite(X);
+
+		auto YSign = AndInt(Y, details::SplatNegativeZero());
+		Pi = OrInt(Pi, YSign);
+		PiOverTwo = OrInt(PiOverTwo, YSign);
+		PiOverFour = OrInt(PiOverFour, YSign);
+		ThreePiOverFour = OrInt(ThreePiOverFour, YSign);
+
+		auto R1 = Select(Pi, YSign, XIsPositive);
+		auto R2 = Select(ATanResultValid, PiOverTwo, XEqualsZero);
+		auto R3 = Select(R2, R1, YEqualsZero);
+		auto R4 = Select(ThreePiOverFour, PiOverFour, XIsPositive);
+		auto R5 = Select(PiOverTwo, R4, XEqualsInfinity);
+		auto Result = Select(R3, R5, YEqualsInfinity);
+		ATanResultValid = EqualIntExt(Result, ATanResultValid);
+
+		auto V = Divide(Y, X);
+
+		auto R0 = atan(V);
+
+		R1 = Select(Pi, Zero, XIsPositive);
+		R2 = Add(R0, R1);
+
+		return Select(Result, R2, ATanResultValid);
+	}
+
+	inline __m128 sin(__m128 V){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		// Force the value within the bounds of pi
+		XMVECTOR x = XMVectorModAngles(V);
+
+		// Map in [-pi/2,pi/2] with sin(y) = sin(x).
+		uint32x4_t sign = vandq_u32(x, SplatNegativeZero());
+		uint32x4_t c = vorrq_u32(g_XMPi, sign);  // pi when x >= 0, -pi when x < 0
+		float32x4_t absx = vabsq_f32(x);
+		float32x4_t rflx = vsubq_f32(c, x);
+		uint32x4_t comp = vcleq_f32(absx, SplatHalfPi());
+		x = vbslq_f32(comp, x, rflx);
+
+		float32x4_t x2 = vmulq_f32(x, x);
+
+		// Compute polynomial approximation
+		const XMVECTOR SC1 = g_XMSinCoefficients1;
+		const XMVECTOR SC0 = g_XMSinCoefficients0;
+		XMVECTOR vConstants = vdupq_lane_f32(vget_high_f32(SC0), 1);
+		XMVECTOR Result = XM_VMLAQ_LANE_F32(vConstants, x2, vget_low_f32(SC1), 0);
+
+		vConstants = vdupq_lane_f32(vget_high_f32(SC0), 0);
+		Result = vmlaq_f32(vConstants, Result, x2);
+
+		vConstants = vdupq_lane_f32(vget_low_f32(SC0), 1);
+		Result = vmlaq_f32(vConstants, Result, x2);
+
+		vConstants = vdupq_lane_f32(vget_low_f32(SC0), 0);
+		Result = vmlaq_f32(vConstants, Result, x2);
+
+		Result = vmlaq_f32(g_XMOne, Result, x2);
+		Result = vmulq_f32(Result, x);
+		return Result;
+#elif defined(LM_SSE_INTRINSICS)
+		// Force the value within the bounds of pi
+		XMVECTOR x = XMVectorModAngles(V);
+
+		// Map in [-pi/2,pi/2] with sin(y) = sin(x).
+		__m128 sign = _mm_and_ps(x,details::SplatNegativeZero());
+		__m128 c = _mm_or_ps(g_XMPi, sign);  // pi when x >= 0, -pi when x < 0
+		__m128 absx = _mm_andnot_ps(sign, x);  // |x|
+		__m128 rflx = _mm_sub_ps(c, x);
+		__m128 comp = _mm_cmple_ps(absx, SplatHalfPi());
+		__m128 select0 = _mm_and_ps(comp, x);
+		__m128 select1 = _mm_andnot_ps(comp, rflx);
+		x = _mm_or_ps(select0, select1);
+
+		__m128 x2 = _mm_mul_ps(x, x);
+
+		// Compute polynomial approximation
+		const auto SC1 = load(float4(-2.3889859e-08f, -0.16665852f /*Est1*/, +0.0083139502f /*Est2*/, -0.00018524670f /*Est3*/));
+		auto vConstants = LM_PERMUTE_PS(SC1, _MM_SHUFFLE(0, 0, 0, 0));
+		__m128 Result = _mm_mul_ps(vConstants, x2);
+
+		const auto SC0 = load(float4(-0.16666667f, +0.0083333310f, -0.00019840874f, +2.7525562e-06f));
+		vConstants = LM_PERMUTE_PS(SC0, _MM_SHUFFLE(3, 3, 3, 3));
+		Result = _mm_add_ps(Result, vConstants);
+		Result = _mm_mul_ps(Result, x2);
+
+		vConstants = LM_PERMUTE_PS(SC0, _MM_SHUFFLE(2, 2, 2, 2));
+		Result = _mm_add_ps(Result, vConstants);
+		Result = _mm_mul_ps(Result, x2);
+
+		vConstants = LM_PERMUTE_PS(SC0, _MM_SHUFFLE(1, 1, 1, 1));
+		Result = _mm_add_ps(Result, vConstants);
+		Result = _mm_mul_ps(Result, x2);
+
+		vConstants = LM_PERMUTE_PS(SC0, _MM_SHUFFLE(0, 0, 0, 0));
+		Result = _mm_add_ps(Result, vConstants);
+		Result = _mm_mul_ps(Result, x2);
+		Result = _mm_add_ps(Result, SplatOne());
+		Result = _mm_mul_ps(Result, x);
+		return Result;
+#else // _XM_VMX128_INTRINSICS_
+#endif // _XM_VMX128_INTRINSICS_
+	}
+}
+
+//quaternionslerp
+namespace leo{
+	inline __m128 QuaternionDot(__m128 Q0, __m128 Q1){
+		return Dot<4>(Q0, Q1);
+	}
+
+	inline __m128 QuaternionSlerp(__m128 Q0, __m128 Q1, float t){
+		return QuaternionSlerp(Q0, Q1, Splat(t));
+	}
+	inline __m128 QuaternionSlerp(__m128 Q0, __m128 Q1, __m128 T){
+#if defined(LM_ARM_NEON_INTRINSICS)
+
+		const autoF32 OneMinusEpsilon = { 1.0f - 0.00001f, 1.0f - 0.00001f, 1.0f - 0.00001f, 1.0f - 0.00001f };
+
+		auto CosOmega = XMQuaternionDot(Q0, Q1);
+
+		const auto Zero = Zero();
+		auto Control = Less(CosOmega, Zero);
+		auto Sign = Select(SplatOne().v, SplatNegativeOne.v, Control);
+
+		CosOmega = Multiply(CosOmega, Sign);
+
+		Control = Less(CosOmega, OneMinusEpsilon);
+
+		auto SinOmega = NegativeMultiplySubtract(CosOmega, CosOmega, SplatOne().v);
+		SinOmega = Sqrt(SinOmega);
+
+		auto Omega = ATan2(SinOmega, CosOmega);
+
+		auto SignMask = SplatSignMask();
+		auto V01 = ShiftLeft(T, Zero, 2);
+		SignMask = ShiftLeft(SignMask, Zero, 3);
+		V01 = XorInt(V01, SignMask);
+		V01 = Add(g_XMIdentityR0.v, V01);
+
+		auto InvSinOmega = Reciprocal(SinOmega);
+
+		auto S0 = Multiply(V01, Omega);
+		S0 = Sin(S0);
+		S0 = Multiply(S0, InvSinOmega);
+
+		S0 = Select(V01, S0, Control);
+
+		auto S1 = SplatY(S0);
+		S0 = SplatX(S0);
+
+		S1 = Multiply(S1, Sign);
+
+		auto Result = Multiply(Q0, S0);
+		Result = MultiplyAdd(Q1, S1, Result);
+
+		return Result;
+
+#elif defined(LM_SSE_INTRINSICS)
+		static const auto OneMinusEpsilon = load(float4(1.0f - 0.00001f, 1.0f - 0.00001f, 1.0f - 0.00001f, 1.0f - 0.00001f));
+		static const lalignas(16) uint32 _signmask2[] = { 0x80000000, 0x00000000, 0x00000000, 0x00000000 };
+		static const auto SignMask2 = load(*reinterpret_cast<const float4*>(_signmask2));
+		static const lalignas(16) uint32 _maskxy[] = { 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000, 0x00000000 };
+		static const auto MaskXY = load(*reinterpret_cast<const float4*>(_maskxy));
+
+		auto CosOmega = QuaternionDot(Q0, Q1);
+
+		const auto Zero = SplatZero();
+		auto Control = LessExt(CosOmega, Zero);
+		auto Sign = Select(SplatOne(), SplatNegativeOne(), Control);
+
+		CosOmega = _mm_mul_ps(CosOmega, Sign);
+
+		Control = LessExt(CosOmega, OneMinusEpsilon);
+
+		auto SinOmega = _mm_mul_ps(CosOmega, CosOmega);
+		SinOmega = _mm_sub_ps(SplatOne(), SinOmega);
+		SinOmega = _mm_sqrt_ps(SinOmega);
+
+		auto Omega = atan2(SinOmega, CosOmega);
+
+		auto V01 = LM_PERMUTE_PS(T, _MM_SHUFFLE(2, 3, 0, 1));
+		V01 = _mm_and_ps(V01, MaskXY);
+		V01 = _mm_xor_ps(V01, SignMask2);
+		V01 = _mm_add_ps(g_XMIdentityR0, V01);
+
+		auto S0 = _mm_mul_ps(V01, Omega);
+		S0 = sin(S0);
+		S0 = _mm_div_ps(S0, SinOmega);
+
+		S0 = Select(V01, S0, Control);
+
+		auto S1 = SplatY(S0);
+		S0 = SplatX(S0);
+
+		S1 = _mm_mul_ps(S1, Sign);
+		auto Result = _mm_mul_ps(Q0, S0);
+		S1 = _mm_mul_ps(S1, Q1);
+		Result = _mm_add_ps(Result, S1);
+		return Result;
+#else // _XM_VMX128_INTRINSICS_
+#endif // _XM_VMX128_INTRINSICS_
+	}
+}
 
 //Other Function
 namespace leo
