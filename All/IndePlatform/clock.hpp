@@ -1,140 +1,144 @@
 // CopyRight 2014. LeoHawke. All rights reserved.
-
+//系统时间,当前时间,转换为任意单位,程序运行逝去时间
+//游戏时间,暂停,转换为任意单位,游戏逝去时间`
+//时钟类,返回从构造时间过去的时间
 #ifndef IndePlatform_Clock_Hpp
 #define IndePlatform_Clock_Hpp
 
 
 #include <chrono>
 #include <thread>
+
+#include "Singleton.hpp"
 #include "BaseMacro.h"
 
 namespace leo
 {
-	//不能暂停,不能缩放,不提供返回精度选择
-	class Clock
-	{
-	public:
-		using steady_clock = std::chrono::steady_clock;
-		using time_point = steady_clock::time_point;
+	namespace clock{
+		using time_point = std::chrono::steady_clock::time_point;
 		using duration = time_point::duration;
-	public:
-		template<typename VARG = float, typename TIMEUNIT = std::chrono::seconds::period>
-		//重载任何数值类型的值到标准时钟,默认float(默认时间单位:秒)
-		static inline Clock::duration ToDuration(const VARG& time)
-		{
-			std::chrono::duration<VARG, TIMEUNIT> result(time);
-			return std::chrono::duration_cast<Clock::duration>(result);
-		}
-		
-		template<typename RETURN = float, typename TIMEUNIT = std::chrono::seconds::period>
-		//注意:系统时钟单位不是浮点数,如果想返回浮点数,你必须在模板参数指定浮点数类型,默认float(默认时间单位:秒)
-		static inline RETURN DurationTo(const Clock::duration& dura)
-		{
-			std::chrono::duration<RETURN, TIMEUNIT> result =
-				std::chrono::duration_cast<decltype(result)>(dura);
-			return result.count();
-		}
 
-		static inline time_point Now()
-		{
+		inline time_point now(){
 			return std::chrono::steady_clock::now();
 		}
-	private:
-		duration mElapse;
-		duration mDelta;
-		time_point mStart;
-	public:
-		Clock()
-			:mStart(steady_clock::now()), mElapse(), mDelta()
-		{
-			//Todo:
-		}
-		virtual ~Clock()
-		{}
-		void Update()
-		{
-			duration newelapse = std::chrono::steady_clock::now() - mStart;
-			mDelta = newelapse - mElapse;
-			mElapse = newelapse;
-		}
-		
-		DefGetter(const lnoexcept(),duration,Elapse,mElapse)
-		DefGetter(const lnoexcept(),duration,Delta, mDelta)
-	};
 
-	class GameClock
-	{
-	private:
-		bool	m_ispaused;
-		float	m_timescale;
-		Clock::duration m_timecycles;
-		//clock m_clock;
+		template<typename VARG = float, typename TIMEUNIT = std::chrono::seconds>
 		//重载任何数值类型的值到标准时钟,默认float(默认时间单位:秒)
-		template<typename VARG = float, typename TIMEUNIT = std::chrono::seconds::period>
-		static inline Clock::duration DurationToCycle(const VARG& time)
+		static inline duration to_duration(const VARG& time)
 		{
-			std::chrono::duration< Clock::duration::rep, TIMEUNIT> result(time);
-			return std::chrono::duration_cast<Clock::duration>(result);
+			std::chrono::duration<VARG,typename TIMEUNIT::period> result(time);
+			return std::chrono::duration_cast<duration>(result);
 		}
+
+		template<typename RETURN = float, typename TIMEUNIT = std::chrono::seconds>
 		//注意:系统时钟单位不是浮点数,如果想返回浮点数,你必须在模板参数指定浮点数类型,默认float(默认时间单位:秒)
-		template<typename RETURN = float, typename TIMEUNIT = std::chrono::seconds::period>
-		static inline RETURN CycleToDuration(const Clock::duration& dura)
+		static inline RETURN duration_to(const duration& dura)
 		{
-			std::chrono::duration<RETURN, TIMEUNIT> result =
+			std::chrono::duration<RETURN,typename TIMEUNIT::period> result =
 				std::chrono::duration_cast<decltype(result)>(dura);
 			return result.count();
 		}
-	public:
-		template<typename VARG = float, typename TIMEUNIT = std::chrono::seconds::period>
-		explicit GameClock(const VARG& starttime = {})
-			:m_ispaused(false)
-			, m_timescale(1.f)
-			, m_timecycles(DurationToCycle<VARG,TIMEUNIT>(starttime))
-			//, m_clock()
-		{}
-		template<typename RETURN = Clock::duration::rep, typename TIMEUINT = Clock::duration::period>
-		RETURN GetTimeCycles() const lnoexcept()
-		{
-			std::chrono::duration<RETURN, TIMEUINT> result =
-			std::chrono::duration_cast<decltype(result)>(m_timecycles);
-			return result.count();
-		}
-		template<typename RETURN = float, typename TIMEUNIT = std::chrono::seconds::period>
-		RETURN CalcDeltas(const GameClock& other)
-		{
-			return CycleToDuration<RETURN, TIMEUNIT>(this->m_timecycles - other.m_timecycles);
-		}
 
-		template<typename VARG = float, typename TIMEUNIT = std::chrono::seconds::period>
-		void Update(const VARG& dt)
-		{
-			if (!m_ispaused)
-			{
-				auto dtScaleCycles = DurationToCycle<VARG, TIMEUNIT>(m_timescale*dt);
-				m_timecycles += dtScaleCycles;
+		class ProgramClock : public Singleton<ProgramClock> {
+			time_point mStart = now();
+		public:
+			template<typename RETURN = float, typename TIMEUNIT = std::chrono::seconds>
+			//默认浮点,单位为秒
+			static RETURN GetElapse() {
+				return duration_to<RETURN,TIMEUNIT>(now() -GetInstance().mStart);
 			}
-		}
 
-		void Paused(bool ispause)
-		{
-			m_ispaused = ispause;
-		}
+			static void Reset(){
+				GetInstance().mStart = now();
+			}
+		private:
+			static ProgramClock& GetInstance(){
+				static ProgramClock c;
+				return c;
+			}
+		};
 
-		bool Paused() const lnoexcept()
-		{
-			return m_ispaused;
-		}
+		class GameClock : public Singleton<GameClock>{
+		private:
+			bool	mPaused = false;
+			float	mScale = 1.f;
+			duration mElapse;
 
-		void TimeScale(decltype(m_timescale) scales)
-		{
-			m_timescale = scales;
-		}
+			static GameClock& GetInstance(){
+				static GameClock c;
+				return c;
+			}
+		public:
 
-		decltype(m_timescale) TimeScale() const lnoexcept()
-		{
-			return m_timescale;
-		}
-	};
+			template<typename VARG = float, typename TIMEUNIT = std::chrono::seconds>
+			static void Reset(const VARG& starttime = {}){
+				GetInstance().mPaused = false;
+				GetInstance().mScale = 1.f;
+				GetInstance().mElapse = to_duration<VARG, TIMEUNIT>(starttime);
+			}
+
+			template<typename RETURN = float, typename TIMEUNIT = std::chrono::seconds>
+			static RETURN Now() lnothrow
+			{
+				std::chrono::duration<RETURN, typename TIMEUNIT::period> result =
+				std::chrono::duration_cast<decltype(result)>(GetInstance().mElapse);
+				return result.count();
+			}
+
+
+#if 0
+			template<typename RETURN = float, typename TIMEUNIT = std::chrono::seconds>
+			RETURN CalcDeltas(const GameClock& other)
+			{
+				return duration_to<RETURN, TIMEUNIT>(this->m_timecycles - other.m_timecycles);
+			}
+#endif
+
+			template<typename VARG = float, typename TIMEUNIT = std::chrono::seconds>
+			static void Update(const VARG& dt)
+			{
+				if (GetInstance().mPaused)
+				{
+					auto dtScaleCycles = to_duration<VARG, TIMEUNIT>(GetInstance().mScale*dt);
+					GetInstance().mElapse += dtScaleCycles;
+				}
+			}
+
+			static void Pause()
+			{
+				GetInstance().mPaused = false;
+			}
+
+			static bool GetIsPause() lnothrow
+			{
+				return GetInstance().mPaused;
+			}
+
+			static bool Continue(){
+				GetInstance().mPaused = true;
+			}
+
+			static void TimeScale(float scales)
+			{
+				GetInstance().mScale = scales;
+			}
+
+			static float TimeScale() lnothrow
+			{
+				return GetInstance().mScale;
+			}
+		};
+
+		class Clock{
+			time_point mStart = now();
+		public:
+			template<typename RETURN = float, typename TIMEUNIT = std::chrono::seconds>
+			//默认浮点,单位为秒
+			RETURN GetElapse() {
+				return duration_to<RETURN, TIMEUNIT>(now() - mStart);
+			}
+		};
+	}
 
 }
 #endif

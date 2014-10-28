@@ -465,15 +465,15 @@ namespace leo{
 		} mTable;
 	}
 
-	std::size_t hash(const wchar_t* str){
-		details::mTable.hash(str);
+	inline std::size_t hash(const wchar_t* str){
+		return details::mTable.hash(str);
 	}
 
-	std::size_t hash(const std::wstring& str){
-		details::mTable.hash(str);
+	inline std::size_t hash(const std::wstring& str){
+		return details::mTable.hash(str);
 	}
 
-	const wchar_t* unhash(std::size_t sid){
+	inline const wchar_t* unhash(std::size_t sid){
 		if (auto str = details::mTable.unhash(sid))
 			return str;
 		else

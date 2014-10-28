@@ -2,6 +2,7 @@
 #define leomath_hpp
 #include <algorithm>
 #include <cmath>
+//增加插值函数
 #include "IndePlatform\LeoMath.h"
 #pragma warning(push)
 #pragma warning(disable : 4838)
@@ -364,6 +365,7 @@ namespace leo
 	};
 
 	//memory struct
+	//增加插值函数
 	struct SQT
 	{
 		SQT();

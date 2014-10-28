@@ -68,12 +68,12 @@ namespace leo
 			std::uint8_t m_key;
 			bool m_valid = false;
 			float m_dtMax;//单位,秒
-			Clock::time_point m_tLast;//上次下降沿来临时的时间点
+			clock::time_point m_tLast;//上次下降沿来临时的时间点
 		public:
 			KeyTapDetector(std::uint8_t key, float dtMax) :
-				m_key(key), m_dtMax(dtMax), m_tLast(Clock::Now())
+				m_key(key), m_dtMax(dtMax), m_tLast(clock::now())
 			{
-				m_tLast += Clock::ToDuration(-dtMax);
+				m_tLast +=clock::to_duration<>(-dtMax);
 			}
 			//随时调用获取是否作出手势
 			bool GetValid() const
@@ -86,8 +86,8 @@ namespace leo
 			{
 				if (win::KeyFallingEdge(m_key))
 				{
-					auto curr = Clock::Now();
-					auto dt = Clock::DurationTo(curr - m_tLast);
+					auto curr = clock::now();
+					auto dt = clock::duration_to<>(curr - m_tLast);
 					m_tLast = curr;
 					if (dt < m_dtMax)
 						m_valid = true;
@@ -105,10 +105,10 @@ namespace leo
 			float m_dtMax;
 			std::function<void()> m_callback;
 			uint8 m_curr;
-			Clock::time_point m_start;
+			clock::time_point m_start;
 		public:
 			KeySequenceDetector(std::initializer_list<std::uint8_t> keys, float dtmax, std::function<void()> callback)
-				:m_keys(std::make_unique<std::uint8_t[]>(keys.size())), m_count(static_cast<uint8>(keys.size())), m_dtMax(dtmax), m_callback(callback), m_curr(0), m_start(Clock::Now())
+				:m_keys(std::make_unique<std::uint8_t[]>(keys.size())), m_count(static_cast<uint8>(keys.size())), m_dtMax(dtmax), m_callback(callback), m_curr(0), m_start(clock::now())
 			{
 				std::copy(keys.begin(), keys.end(), m_keys.get());
 			}
@@ -128,12 +128,12 @@ namespace leo
 				{
 					if (m_curr == 0)
 					{
-						m_start = Clock::Now();
+						m_start = clock::now();
 						++m_curr;
 						return;
 					}
 
-					float dt = Clock::DurationTo(Clock::Now() - m_start);
+					float dt = clock::duration_to<>(clock::now() - m_start);
 					if (dt < m_dtMax)
 					{
 						++m_curr;
@@ -158,10 +158,10 @@ namespace leo
 			bool m_valid = false;
 			bool m_flag = false;
 			float m_dtMin;
-			Clock::time_point m_tLast;//上次按下键的时间点
+			clock::time_point m_tLast;//上次按下键的时间点
 		public:
 			KeyHoldDetector(std::uint8_t key, float dtmin = 1.f)
-				:m_key(key), m_dtMin(dtmin), m_tLast(Clock::Now())
+				:m_key(key), m_dtMin(dtmin), m_tLast(clock::now())
 			{}
 
 			bool GetValid() const
@@ -171,7 +171,7 @@ namespace leo
 		protected:
 			void Update()
 			{
-				auto curr = Clock::Now();
+				auto curr = clock::now();
 				if (leo::win::KeyRisingEdge(m_key))
 				{
 					m_flag = false;
@@ -185,7 +185,7 @@ namespace leo
 				}
 				if (m_flag)
 				{
-					auto dt = Clock::DurationTo(curr - m_tLast);
+					auto dt = clock::duration_to<>(curr - m_tLast);
 					if (dt > m_dtMin)
 					{
 						m_tLast = curr;
@@ -203,20 +203,20 @@ namespace leo
 			std::uint8_t m_key;
 			float m_dtMin;
 			std::function<void()> m_callback;
-			Clock::time_point m_tLast;//下降沿的时间点
+			clock::time_point m_tLast;//下降沿的时间点
 		public:
 			KeySeqHoldDetector(std::uint8_t key, float dtmin, std::function<void()> callback)
-				:m_key(key), m_dtMin(dtmin), m_callback(callback), m_tLast(Clock::Now())
+				:m_key(key), m_dtMin(dtmin), m_callback(callback), m_tLast(clock::now())
 			{
 			}
 		protected:
 			void Update()
 			{
-				auto curr = Clock::Now();
+				auto curr = clock::now();
 				auto dt = m_dtMin;
 				if (leo::win::KeyRisingEdge(m_key))
 				{
-					dt = Clock::DurationTo(curr - m_tLast);
+					dt = clock::duration_to<>(curr - m_tLast);
 					if (dt > m_dtMin)
 					{
 						std::thread t(m_callback);
