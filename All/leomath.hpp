@@ -292,9 +292,9 @@ namespace leo
 	inline float3 QuaternionToEulerAngle(const float4& quaternion)
 	{
 		float3 q;
-		q.x = atan2(2 * (quaternion.w*quaternion.x + quaternion.y*quaternion.z), (1 - 2 * (quaternion.y*quaternion.y + quaternion.x*quaternion.x)));
+		q.x = ::atan2(2 * (quaternion.w*quaternion.x + quaternion.y*quaternion.z), (1 - 2 * (quaternion.y*quaternion.y + quaternion.x*quaternion.x)));
 		q.y = asin(2 * (quaternion.w*quaternion.y - quaternion.z*quaternion.x));
-		q.z = atan2(2 * (quaternion.w*quaternion.z + quaternion.x*quaternion.y), (1 - 2 * (quaternion.z*quaternion.z + quaternion.y*quaternion.y)));
+		q.z = ::atan2(2 * (quaternion.w*quaternion.z + quaternion.x*quaternion.y), (1 - 2 * (quaternion.z*quaternion.z + quaternion.y*quaternion.y)));
 		return q;
 	}
 
@@ -372,11 +372,35 @@ namespace leo
 		SQT(const SeqSQT& lvalue);
 		void operator=(const SeqSQT& lvalue);
 		operator float4x4() const;
-		operator XMMATRIX() const;
+		operator std::array<__m128, 4>() const{
+			return load(operator float4x4());
+		}
 		float4 q;
 		float3 t;
 		float s;
+
+		SQT(const float4& Q, const float3& T, float S)
+			:q(Q), t(T), s(S){
+		}
 	};
+
+	SQT Lerp(const SQT& t1, const SQT& t2, float w){
+		auto s = t1.s*(1.f - w) + t2.s *w;
+
+		auto T = Splat(w);
+		
+		auto t1T = load(t1.t);
+		auto t2T = load(t2.t);
+		float3 t;
+		save(t, Lerp(t1T, t2T, T));
+		
+		auto t1Q = load(t1.q);
+		auto t2Q = load(t2.q);
+		float4 q;
+		save(q, QuaternionSlerp(t1Q, t2Q, T));
+
+		return SQT{ q, t, s };
+	}
 
 }
 

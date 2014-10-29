@@ -1,4 +1,5 @@
 #include "..\d3dx11.hpp"
+#include <cstddef>
 #include "Vertex.hpp"
 
 namespace leo
@@ -51,6 +52,12 @@ namespace leo
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, sizeof(float3), D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		};
+
+		extern const D3D11_INPUT_ELEMENT_DESC Skinned[5] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, loffsetof(Vertex::Skinned, mTexCoord), D3D11_INPUT_PER_VERTEX_DATA, 0 }
 		};
 	}
 

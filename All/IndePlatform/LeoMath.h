@@ -52,8 +52,11 @@ namespace leo
 namespace leo
 {
 	const float LM_PI = 3.14159265f;
+	const float LM_TWOPI = LM_PI*2.f;
 	const float LM_HALFPI = LM_PI / 2.0f;
 	const float LM_QUARPI = LM_PI / 4.0f;
+
+	const float LM_1DIV2PI = 0.159154943f;
 	//radian per degree
 	const float LM_RPD = LM_PI / 180.0f;
 
@@ -659,6 +662,16 @@ namespace leo
 #endif // _LM_VMX128_INTRINSICS_
 	}
 
+	void inline save(float4x4& data, const std::array<__m128, 4>& M){
+#if defined(LM_SSE_INTRINSICS)
+		_mm_store_ps(&data.r[0].x, M[0]);
+		_mm_store_ps(&data.r[1].x, M[1]);
+		_mm_store_ps(&data.r[2].x, M[2]);
+		_mm_store_ps(&data.r[3].x, M[3]);
+#else // _LM_VMX128_INTRINSICS_
+#endif // _LM_VMX128_INTRINSICS_
+	}
+
 	inline __m128 Select(__m128 V1, __m128 V2, __m128 Control){
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vbslq_f32(Control, V2, V1);
@@ -757,6 +770,12 @@ namespace leo{
 			return _mzero;
 		}
 
+		inline __m128 SplatR0(){
+			const static float4	r0(1.0f, 0.0f, 0.0f, 0.0f);
+			const static auto _mr0 = load(r0);
+			return _mr0;
+		}
+
 	}
 }
 
@@ -818,6 +837,24 @@ namespace leo{
 		return _mone;
 	}
 
+	inline __m128 SplatPi(){
+		const static float4 pi(LM_PI, LM_PI, LM_PI, LM_PI);
+		const static auto _mpi = load(pi);
+		return _mpi;
+	}
+
+	inline __m128 SplatTwoPi(){
+		const static float4 twopi(LM_TWOPI, LM_TWOPI, LM_TWOPI, LM_TWOPI);
+		const static auto _mtwo = load(twopi);
+		return _mtwo;
+	}
+
+	inline __m128 SplatReciprocalTwoPi(){
+		const static float4 rtwopi(LM_1DIV2PI, LM_1DIV2PI, LM_1DIV2PI, LM_1DIV2PI);
+		const static auto _mrtwopi = load(rtwopi);
+		return _mrtwopi;
+	}
+
 	inline __m128 Splat(float value){
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vld1q_dup_f32(&value);
@@ -857,6 +894,71 @@ namespace leo{
 #elif defined(LM_SSE_INTRINSICS)
 		return _mm_mul_ps(ml, mr);
 #endif
+	}
+
+	inline std::array<__m128, 4> Multiply(const std::array<__m128, 4>& M1, const std::array<__m128, 4>& M2){
+#if defined(LM_SSE_INTRINSICS)
+		std::array<__m128, 4> mResult;
+		// Use vW to hold the original row
+		auto vW = M1[0];
+		// Splat the component X,Y,Z then W
+		auto vX = LM_PERMUTE_PS(vW, _MM_SHUFFLE(0, 0, 0, 0));
+		auto vY = LM_PERMUTE_PS(vW, _MM_SHUFFLE(1, 1, 1, 1));
+		auto vZ = LM_PERMUTE_PS(vW, _MM_SHUFFLE(2, 2, 2, 2));
+		vW = LM_PERMUTE_PS(vW, _MM_SHUFFLE(3, 3, 3, 3));
+		// Perform the operation on the first row
+		vX = _mm_mul_ps(vX, M2[0]);
+		vY = _mm_mul_ps(vY, M2[1]);
+		vZ = _mm_mul_ps(vZ, M2[2]);
+		vW = _mm_mul_ps(vW, M2[3]);
+		// Perform a binary add to reduce cumulative errors
+		vX = _mm_add_ps(vX, vZ);
+		vY = _mm_add_ps(vY, vW);
+		vX = _mm_add_ps(vX, vY);
+		mResult[0] = vX;
+		// Repeat for the other 3 rows
+		vW = M1[1];
+		vX = LM_PERMUTE_PS(vW, _MM_SHUFFLE(0, 0, 0, 0));
+		vY = LM_PERMUTE_PS(vW, _MM_SHUFFLE(1, 1, 1, 1));
+		vZ = LM_PERMUTE_PS(vW, _MM_SHUFFLE(2, 2, 2, 2));
+		vW = LM_PERMUTE_PS(vW, _MM_SHUFFLE(3, 3, 3, 3));
+		vX = _mm_mul_ps(vX, M2[0]);
+		vY = _mm_mul_ps(vY, M2[1]);
+		vZ = _mm_mul_ps(vZ, M2[2]);
+		vW = _mm_mul_ps(vW, M2[3]);
+		vX = _mm_add_ps(vX, vZ);
+		vY = _mm_add_ps(vY, vW);
+		vX = _mm_add_ps(vX, vY);
+		mResult[1] = vX;
+		vW = M1[2];
+		vX = LM_PERMUTE_PS(vW, _MM_SHUFFLE(0, 0, 0, 0));
+		vY = LM_PERMUTE_PS(vW, _MM_SHUFFLE(1, 1, 1, 1));
+		vZ = LM_PERMUTE_PS(vW, _MM_SHUFFLE(2, 2, 2, 2));
+		vW = LM_PERMUTE_PS(vW, _MM_SHUFFLE(3, 3, 3, 3));
+		vX = _mm_mul_ps(vX, M2[0]);
+		vY = _mm_mul_ps(vY, M2[1]);
+		vZ = _mm_mul_ps(vZ, M2[2]);
+		vW = _mm_mul_ps(vW, M2[3]);
+		vX = _mm_add_ps(vX, vZ);
+		vY = _mm_add_ps(vY, vW);
+		vX = _mm_add_ps(vX, vY);
+		mResult[2] = vX;
+		vW = M1[3];
+		vX = LM_PERMUTE_PS(vW, _MM_SHUFFLE(0, 0, 0, 0));
+		vY = LM_PERMUTE_PS(vW, _MM_SHUFFLE(1, 1, 1, 1));
+		vZ = LM_PERMUTE_PS(vW, _MM_SHUFFLE(2, 2, 2, 2));
+		vW = LM_PERMUTE_PS(vW, _MM_SHUFFLE(3, 3, 3, 3));
+		vX = _mm_mul_ps(vX, M2[0]);
+		vY = _mm_mul_ps(vY, M2[1]);
+		vZ = _mm_mul_ps(vZ, M2[2]);
+		vW = _mm_mul_ps(vW, M2[3]);
+		vX = _mm_add_ps(vX, vZ);
+		vY = _mm_add_ps(vY, vW);
+		vX = _mm_add_ps(vX, vY);
+		mResult[3] = vX;
+		return mResult;
+#else // _LM_VMX128_INTRINSICS_
+#endif // _LM_VMX128_INTRINSICS_
 	}
 
 	//1.Calculate an estimate for the reciprocal of the divisor (D): X0.
@@ -1247,6 +1349,29 @@ namespace leo{
 #else // _LM_VMX128_INTRINSICS_
 #endif // _LM_VMX128_INTRINSICS_
 	}
+
+	inline __m128 Round(__m128 V){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		static const autoI32 magic = { 0x4B000000, 0x4B000000, 0x4B000000, 0x4B000000 };
+		uint32x4_t sign = vandq_u32(V, g_XMNegativeZero);
+		uint32x4_t sMagic = vorrq_u32(magic, sign);
+		auto vResult = vaddq_f32(V, sMagic);
+		vResult = vsubq_f32(vResult, sMagic);
+		return vResult;
+#elif defined(LM_SSE_INTRINSICS)
+		static const lalignas(16) uint32 magic[] = { 0x4B000000, 0x4B000000, 0x4B000000, 0x4B000000 };
+		__m128 sign = _mm_and_ps(V, details::SplatNegativeZero());
+		__m128 sMagic = _mm_or_ps(load(*(float4*)(magic)), sign);
+		auto vResult = _mm_add_ps(V, sMagic);
+		vResult = _mm_sub_ps(vResult, sMagic);
+		return vResult;
+#else // _XM_VMX128_INTRINSICS_
+#endif // _XM_VMX128_INTRINSICS_
+	}
+
+	inline __m128 Lerp(__m128 V1, __m128 V2, __m128 T){
+		return MultiplyAdd(V1, Subtract(SplatOne(), T), Multiply(V2, T));
+	}
 }
 
 //__m128 logic operator def
@@ -1398,6 +1523,25 @@ namespace leo{
 
 //__m128 Trigonometry Function
 namespace leo{
+	inline __m128 modangle(__m128 Angles){
+#if defined(LM_ARM_NEON_INTRINSICS)
+		// Modulo the range of the given angles such that -XM_PI <= Angles < XM_PI
+		auto vResult = vmulq_f32(Angles, SplatReciprocalTwoPi());
+		// Use the inline function due to complexity for rounding
+		vResult = XMVectorRound(vResult);
+		return vmlsq_f32( Angles, vResult, SplatTwoPi() );
+#elif defined(LM_SSE_INTRINSICS)
+		// Modulo the range of the given angles such that -XM_PI <= Angles < XM_PI
+		auto vResult = _mm_mul_ps(Angles, SplatReciprocalTwoPi());
+		// Use the inline function due to complexity for rounding
+		vResult = Round(vResult);
+		vResult = _mm_mul_ps(vResult, SplatTwoPi());
+		vResult = _mm_sub_ps(Angles, vResult);
+		return vResult;
+#else // _XM_VMX128_INTRINSICS_
+#endif // _XM_VMX128_INTRINSICS_
+	}
+
 	inline __m128 atan(__m128 V){
 #if defined(LM_ARM_NEON_INTRINSICS)
 		float32x4_t absV = vabsq_f32(V);
@@ -1411,9 +1555,9 @@ namespace leo{
 		float32x4_t x2 = vmulq_f32(x, x);
 
 		// Compute polynomial approximation
-		const XMVECTOR TC1 = g_XMATanCoefficients1;
-		XMVECTOR vConstants = vdupq_lane_f32(vget_high_f32(TC1), 0);
-		XMVECTOR Result = XM_VMLAQ_LANE_F32(vConstants, x2, vget_high_f32(TC1), 1);
+		const auto TC1 = g_XMATanCoefficients1;
+		auto vConstants = vdupq_lane_f32(vget_high_f32(TC1), 0);
+		auto Result = XM_VMLAQ_LANE_F32(vConstants, x2, vget_high_f32(TC1), 1);
 
 		vConstants = vdupq_lane_f32(vget_low_f32(TC1), 1);
 		Result = vmlaq_f32(vConstants, Result, x2);
@@ -1421,7 +1565,7 @@ namespace leo{
 		vConstants = vdupq_lane_f32(vget_low_f32(TC1), 0);
 		Result = vmlaq_f32(vConstants, Result, x2);
 
-		const XMVECTOR TC0 = g_XMATanCoefficients0;
+		const auto TC0 = g_XMATanCoefficients0;
 		vConstants = vdupq_lane_f32(vget_high_f32(TC0), 1);
 		Result = vmlaq_f32(vConstants, Result, x2);
 
@@ -1444,7 +1588,7 @@ namespace leo{
 		Result = vbslq_f32(comp, Result, result1);
 		return Result;
 #elif defined(LM_SSE_INTRINSICS)
-		__m128 absV = XMVectorAbs(V);
+		__m128 absV = Abs(V);
 		__m128 invV = _mm_div_ps(SplatOne(), V);
 		__m128 comp = _mm_cmpgt_ps(V, SplatOne());
 		__m128 select0 = _mm_and_ps(comp, SplatOne());
@@ -1564,7 +1708,7 @@ namespace leo{
 	inline __m128 sin(__m128 V){
 #if defined(LM_ARM_NEON_INTRINSICS)
 		// Force the value within the bounds of pi
-		XMVECTOR x = XMVectorModAngles(V);
+		auto x = XMVectorModAngles(V);
 
 		// Map in [-pi/2,pi/2] with sin(y) = sin(x).
 		uint32x4_t sign = vandq_u32(x, SplatNegativeZero());
@@ -1577,10 +1721,10 @@ namespace leo{
 		float32x4_t x2 = vmulq_f32(x, x);
 
 		// Compute polynomial approximation
-		const XMVECTOR SC1 = g_XMSinCoefficients1;
-		const XMVECTOR SC0 = g_XMSinCoefficients0;
-		XMVECTOR vConstants = vdupq_lane_f32(vget_high_f32(SC0), 1);
-		XMVECTOR Result = XM_VMLAQ_LANE_F32(vConstants, x2, vget_low_f32(SC1), 0);
+		const auto SC1 = g_XMSinCoefficients1;
+		const auto SC0 = g_XMSinCoefficients0;
+		auto vConstants = vdupq_lane_f32(vget_high_f32(SC0), 1);
+		auto Result = XM_VMLAQ_LANE_F32(vConstants, x2, vget_low_f32(SC1), 0);
 
 		vConstants = vdupq_lane_f32(vget_high_f32(SC0), 0);
 		Result = vmlaq_f32(vConstants, Result, x2);
@@ -1596,11 +1740,11 @@ namespace leo{
 		return Result;
 #elif defined(LM_SSE_INTRINSICS)
 		// Force the value within the bounds of pi
-		XMVECTOR x = XMVectorModAngles(V);
+		auto x = modangle(V);
 
 		// Map in [-pi/2,pi/2] with sin(y) = sin(x).
-		__m128 sign = _mm_and_ps(x,details::SplatNegativeZero());
-		__m128 c = _mm_or_ps(g_XMPi, sign);  // pi when x >= 0, -pi when x < 0
+		__m128 sign = _mm_and_ps(x, details::SplatNegativeZero());
+		__m128 c = _mm_or_ps(SplatPi(), sign);  // pi when x >= 0, -pi when x < 0
 		__m128 absx = _mm_andnot_ps(sign, x);  // |x|
 		__m128 rflx = _mm_sub_ps(c, x);
 		__m128 comp = _mm_cmple_ps(absx, SplatHalfPi());
@@ -1645,9 +1789,6 @@ namespace leo{
 		return Dot<4>(Q0, Q1);
 	}
 
-	inline __m128 QuaternionSlerp(__m128 Q0, __m128 Q1, float t){
-		return QuaternionSlerp(Q0, Q1, Splat(t));
-	}
 	inline __m128 QuaternionSlerp(__m128 Q0, __m128 Q1, __m128 T){
 #if defined(LM_ARM_NEON_INTRINSICS)
 
@@ -1718,7 +1859,7 @@ namespace leo{
 		auto V01 = LM_PERMUTE_PS(T, _MM_SHUFFLE(2, 3, 0, 1));
 		V01 = _mm_and_ps(V01, MaskXY);
 		V01 = _mm_xor_ps(V01, SignMask2);
-		V01 = _mm_add_ps(g_XMIdentityR0, V01);
+		V01 = _mm_add_ps(details::SplatR0(), V01);
 
 		auto S0 = _mm_mul_ps(V01, Omega);
 		S0 = sin(S0);
@@ -1737,6 +1878,11 @@ namespace leo{
 #else // _XM_VMX128_INTRINSICS_
 #endif // _XM_VMX128_INTRINSICS_
 	}
+
+	inline __m128 QuaternionSlerp(__m128 Q0, __m128 Q1, float t){
+		return QuaternionSlerp(Q0, Q1, Splat(t));
+	}
+
 }
 
 //Other Function

@@ -341,11 +341,17 @@ namespace leo
 
 #define lunused(...) static_cast<void>(__VA_ARGS__)
 
+#if LB_HAS_NOEXCEPT
 #define loffsetof(type,member) \
 	(decltype(sizeof(leo::stdex::offsetof_check<std::is_member_object_pointer< \
 	decltype(&type::member)>::value,lnoexcept(offsetof(type,member)), \
-	type))(offsetof(type,meber)))
-
+	type>))(offsetof(type,member)))
+#else
+#define loffsetof(type,member) \
+	(decltype(sizeof(leo::stdex::offsetof_check<std::is_member_object_pointer< \
+	decltype(&type::member)>::value,true, \
+	type>))(offsetof(type,member)))
+#endif
 #define lforward(expr) std::forward<decltype(expr)>(expr)
 
 		template<typename type, typename ...tParams>

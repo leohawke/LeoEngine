@@ -198,7 +198,7 @@ namespace leo{
 			v = Dot<>(Direction, q);
 
 			NoIntersection = OrInt(NoIntersection, LessExt(v, Zero));
-			NoIntersection = OrInt(NoIntersection, GreaterExt(u + v, det));
+			NoIntersection = OrInt(NoIntersection, GreaterExt(Add( u, v), det));
 
 			// t = e2 * q;
 			t = Dot<>(e2, q);
@@ -228,7 +228,7 @@ namespace leo{
 			v = Dot<>(Direction, q);
 
 			NoIntersection = OrInt(NoIntersection, GreaterExt(v, Zero));
-			NoIntersection = OrInt(NoIntersection, LessExt(u + v, det));
+			NoIntersection = OrInt(NoIntersection, LessExt(Add(u, v), det));
 
 			// t = e2 * q;
 			t = Dot<>(e2, q);

@@ -210,8 +210,8 @@
     <ClCompile Include="Core\Terrain.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="IndePlatform\ray_Test.cpp">
-      <Filter>IndePlatform\BaseHead</Filter>
+    <ClCompile Include="IndePlatform\leoMathTest.cpp">
+      <Filter>IndePlatform\BaseSource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

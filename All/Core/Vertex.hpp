@@ -95,6 +95,16 @@ namespace leo
 			float2 tex;
 		};
 
+		struct Skinned{
+			float3 mPos;
+			float3 mNormal;
+			float2 mTexCoord;
+			//关节索引
+			uint8 mJointIndices[4];
+			//关节权重
+			float3 mJointWeights;
+		};
+
 		template<typename T>
 		struct is_vertex : std::false_type
 		{};
@@ -142,6 +152,8 @@ namespace leo
 		extern const D3D11_INPUT_ELEMENT_DESC Sky[1];
 
 		extern const D3D11_INPUT_ELEMENT_DESC PostEffect[2];
+
+		extern const D3D11_INPUT_ELEMENT_DESC Skinned[5];
 	}
 
 	namespace helper

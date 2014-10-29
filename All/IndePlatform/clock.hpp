@@ -78,6 +78,7 @@ namespace leo
 			}
 
 			template<typename RETURN = float, typename TIMEUNIT = std::chrono::seconds>
+			//µ•Œª,√Î
 			static RETURN Now() lnothrow
 			{
 				std::chrono::duration<RETURN, typename TIMEUNIT::period> result =
