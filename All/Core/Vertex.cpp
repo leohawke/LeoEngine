@@ -56,8 +56,12 @@ namespace leo
 
 		extern const D3D11_INPUT_ELEMENT_DESC Skinned[5] =
 		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, loffsetof(Vertex::Skinned, mTexCoord), D3D11_INPUT_PER_VERTEX_DATA, 0 }
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, loffsetof(Vertex::Skinned, mNormal), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, loffsetof(Vertex::Skinned, mTexCoord), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "JOINTINDICES", 0, DXGI_FORMAT_R32_UINT, 0, loffsetof(Vertex::Skinned, mJointIndices), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "JOINTWEIGHTS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, loffsetof(Vertex::Skinned,mJointWeights),
+			 D3D11_INPUT_PER_VERTEX_DATA,0}
 		};
 	}
 

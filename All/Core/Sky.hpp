@@ -6,9 +6,7 @@
 #include "..\IndePlatform\BaseMacro.h"
 #include "..\COM.hpp"
 #include <string>
-#ifdef LB_IMPL_MSCPP
-#pragma once
-#endif
+
 
 struct ID3D11Device;
 struct ID3D11Buffer;

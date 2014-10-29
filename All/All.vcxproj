@@ -165,6 +165,7 @@
     <ClInclude Include="Core\CoreObject.hpp" />
     <ClInclude Include="Core\RenderSync.hpp" />
     <ClInclude Include="Core\SkeletonAnimation.hpp" />
+    <ClInclude Include="Core\SkeltonModel.hpp" />
     <ClInclude Include="Core\Sky.hpp" />
     <ClInclude Include="Core\Terrain.hpp" />
     <ClInclude Include="Core\EffectTerrain.hpp" />
@@ -273,6 +274,10 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)%(RelativeDir)%(Filename).cso</ObjectFileOutput>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\SkinPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Shader\TerrainPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>

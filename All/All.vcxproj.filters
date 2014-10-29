@@ -91,6 +91,9 @@
     <Filter Include="Shader\HLSL\Terrain">
       <UniqueIdentifier>{e0bdb8b8-5f41-45c5-978d-c24c68298682}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader\HLSL\Skin">
+      <UniqueIdentifier>{4b04bd29-c013-4ac2-a17c-b6e0b6b63a6d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Debug.cpp">
@@ -440,6 +443,9 @@
     <ClInclude Include="Core\Skeleton.hpp">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Core\SkeltonModel.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">
@@ -506,6 +512,9 @@
     </FxCompile>
     <FxCompile Include="Shader\TerrainPS.hlsl">
       <Filter>Shader\HLSL\Terrain</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\SkinPS.hlsl">
+      <Filter>Shader\HLSL\Skin</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

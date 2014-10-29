@@ -3,7 +3,7 @@
 //  Leo Engine Source File.
 //  Copyright (C), FNS Studios, 2014-2014.
 // -------------------------------------------------------------------------
-//  File name:   Core/Joint.hpp
+//  File name:   Core/SkeletonAnimation.hpp
 //  Version:     v1.00
 //  Created:     10/28/2014 by leo hawke.
 //  Compilers:   Visual Studio.NET 2013
@@ -106,6 +106,10 @@ namespace leo{
 			}
 
 			return mSkePose;
+		}
+
+		void SetData(AnimationClip&& mClip){
+			mClip = std::move(mClip);
 		}
 	};
 
