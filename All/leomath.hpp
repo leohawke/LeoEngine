@@ -222,6 +222,8 @@ namespace leo
 		return matrix;
 	}
 
+	//This function only uses the upper 3x3 portion of the float4x4. Note if the input matrix contains scales, shears,
+	//or other non-rotation transformations in the upper 3x3 matrix, then the output of this function is ill-defined.
 	inline float4 MatrixToQuaternion(const float4x4& M)
 	{
 		float4 q;
@@ -245,7 +247,7 @@ namespace leo
 				float inv4y = 0.5f / sqrtf(fourYSqr);
 				q.x = (M(0, 1) + M(1, 0))*inv4y;
 				q.y = fourYSqr*inv4y;
-				q.z = (M(1, 2) - M(2, 1))*inv4y;
+				q.z = (M(1, 2) + M(2, 1))*inv4y;
 				q.w = (M(2, 0) - M(0, 2))*inv4y;
 			}
 		}
@@ -267,7 +269,7 @@ namespace leo
 				float fourWSqr = opr22 + sum10;
 				float inv4w = 0.5f / sqrtf(fourWSqr);
 				q.x = (M(1, 2) - M(2, 1))*inv4w;
-				q.y = (M(2, 0) + M(0, 2))*inv4w;
+				q.y = (M(2, 0) - M(0, 2))*inv4w;
 				q.z = (M(0, 1) - M(1, 0))*inv4w;
 				q.w = fourWSqr*inv4w;
 			}
@@ -359,8 +361,8 @@ namespace leo
 		SeqSQT();
 		SeqSQT(const SQT& lvalue);
 		void operator=(const SQT& lvalue);
-		float3 q;//Å·À­½Ç
-		float3 t;
+		float a[3];//Å·À­½Ç
+		float t[3];
 		float s;
 	};
 
@@ -371,6 +373,7 @@ namespace leo
 		SQT();
 		SQT(const SeqSQT& lvalue);
 		void operator=(const SeqSQT& lvalue);
+
 		operator float4x4() const;
 		operator std::array<__m128, 4>() const{
 			return load(operator float4x4());
@@ -382,9 +385,11 @@ namespace leo
 		SQT(const float4& Q, const float3& T, float S)
 			:q(Q), t(T), s(S){
 		}
+
+		
 	};
 
-	SQT Lerp(const SQT& t1, const SQT& t2, float w){
+	inline SQT Lerp(const SQT& t1, const SQT& t2, float w){
 		auto s = t1.s*(1.f - w) + t2.s *w;
 
 		auto T = Splat(w);

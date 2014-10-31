@@ -62,6 +62,8 @@ namespace leo
 
 		DefGetter(const _NOEXCEPT, ID3D11Buffer*, VertexBuffer, m_vertexbuff);
 		DefGetter(const _NOEXCEPT, ID3D11Buffer*, IndexBuffer, m_indexbuff);
+
+		friend class SkeltonModel;
 	};
 }
 #endif

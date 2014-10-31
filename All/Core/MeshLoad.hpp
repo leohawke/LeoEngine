@@ -40,6 +40,25 @@ namespace leo
 			DirectX::XMFLOAT2 tex;
 			DirectX::XMFLOAT3 tangent;
 		};
+
+		struct SkeletonHeader{
+			std::uint32_t numjoint;
+			std::uint32_t numframe;
+			bool loop;
+			//吗,时间默认为1帧糊弄着再说
+		};
+
+		struct Joint{
+
+			float data[16];
+			wchar_t name[260];
+			std::uint8_t parent;
+		};
+
+		struct JointAnimaSample{
+			std::unique_ptr<float[]> data;
+			//size = numframe*16
+		};
 		static void m3dTol3d(const std::wstring& m3dfilename, const std::wstring& l3dfilename);
 
 		static void sdkmeshTol3d(const std::wstring& sdkmeshfilename, const std::wstring& l3dfilename);

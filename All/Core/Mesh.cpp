@@ -128,7 +128,7 @@ namespace leo
 		auto & mEffect = EffectNormalMap::GetInstance();
 
 
-		XMMATRIX world =this->operator DirectX::XMMATRIX();
+		XMMATRIX world =convert(this->operator std::array<__m128, 4U>());
 		mEffect->WorldMatrix(world);
 		mEffect->WorldViewProjMatrix(world*camera.ViewProj());
 

@@ -2,23 +2,26 @@
 
 #include "..\leomath.hpp"
 int main(){
-	leo::float4 q0;
-	leo::float4 q1;
+
+	leo::SQT sqt;
 
 	auto r0 = leo::XMMatrixRotationY(1.f);
-	auto r1 = leo::XMMatrixRotationY(0.5f);
 
-	leo::XMStoreFloat4A((leo::XMFLOAT4A*)(&q0),leo::XMQuaternionRotationMatrix(r0));
-	leo::XMStoreFloat4A((leo::XMFLOAT4A*)(&q1), leo::XMQuaternionRotationMatrix(r1));
+	
 
-	auto drt = leo::XMQuaternionSlerp(load(q0), load(q1), 0.5f);
-	leo::float4 dqt;
-	save(dqt, drt);
+	r0 = leo::XMMatrixMultiply(r0, leo::XMMatrixScaling(2.f, 2.f, 2.f));
 
-	auto rt = leo::QuaternionSlerp(load(q0), load(q1), 0.5f);
-	leo::float4 qt;
-	save(qt, rt);
+	auto q = leo::XMQuaternionRotationMatrix(r0);
+	auto invq = leo::XMMatrixRotationQuaternion(q);
+	auto invinvq = leo::XMQuaternionRotationMatrix(invq);
+	leo::float4 checkq;
+	leo::save(checkq, q);
 
-	qt.x;
+	leo::float4x4 f4x4;
+	leo::XMStoreFloat4x4A((leo::XMFLOAT4X4A*)&f4x4, r0);
+
+	sqt = f4x4;
+
+	auto check = leo::MatrixToQuaternion(f4x4);
 	return 0;
 }

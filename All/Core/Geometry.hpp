@@ -56,6 +56,10 @@ namespace leo
 	}
 
 
+	inline DirectX::XMMATRIX convert(const std::array<__m128, 4>& matrix){
+		return{ matrix[0], matrix[1], matrix[2], matrix[3] };
+	}
+
 	class Box :public BoundingBox
 	{
 	public:
@@ -77,7 +81,8 @@ namespace leo
 		using BoundingBox::Transform;
 		void XM_CALLCONV Transform(Box& out, const SQT& sqt) const
 		{
-			Transform(out, sqt.operator DirectX::XMMATRIX());
+			
+			Transform(out, convert(sqt.operator std::array<__m128, 4U>()));
 		}
 
 	public:
@@ -126,7 +131,7 @@ namespace leo
 		using BoundingSphere::Transform;
 		void XM_CALLCONV Transform(Sphere& out, const SQT& sqt) const
 		{
-			Transform(out, sqt.operator DirectX::XMMATRIX());
+			Transform(out, convert(sqt.operator std::array<__m128, 4U>()));
 		}
 		
 		float& radius(float r)
@@ -230,7 +235,7 @@ namespace leo
 		}
 		void XM_CALLCONV Transform(OrientedBox& out, const SQT& sqt) const
 		{
-			Transform(out, sqt.operator DirectX::XMMATRIX());
+			Transform(out, convert(sqt.operator std::array<__m128, 4U>()));
 		}
 	public:
 		void GetCorners(float3* corners) const
@@ -892,7 +897,7 @@ namespace leo
 		using BoundingFrustum::Transform;
 		void    XM_CALLCONV     Transform(Frustum& Out, const SQT& sqt) const
 		{
-			Transform(Out, sqt.operator DirectX::XMMATRIX());
+			Transform(Out, convert(sqt.operator std::array<__m128, 4U>()));
 		}
 
 		void GetCorners(float3* Corners) const

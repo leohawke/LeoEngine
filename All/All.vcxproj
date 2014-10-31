@@ -105,6 +105,7 @@
     <ClCompile Include="Core\Mesh.cpp" />
     <ClCompile Include="Core\MeshLoad.cpp" />
     <ClCompile Include="Core\RenderSync.cpp" />
+    <ClCompile Include="Core\SkeletonModel.cpp" />
     <ClCompile Include="Core\Sky.cpp" />
     <ClCompile Include="Core\Terrain.cpp" />
     <ClCompile Include="Core\TerrainEffect.cpp" />
@@ -165,7 +166,7 @@
     <ClInclude Include="Core\CoreObject.hpp" />
     <ClInclude Include="Core\RenderSync.hpp" />
     <ClInclude Include="Core\SkeletonAnimation.hpp" />
-    <ClInclude Include="Core\SkeltonModel.hpp" />
+    <ClInclude Include="Core\SkeletonModel.hpp" />
     <ClInclude Include="Core\Sky.hpp" />
     <ClInclude Include="Core\Terrain.hpp" />
     <ClInclude Include="Core\EffectTerrain.hpp" />
@@ -275,9 +276,10 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)%(RelativeDir)%(Filename).cso</ObjectFileOutput>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
     </FxCompile>
-    <FxCompile Include="Shader\SkinPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    <FxCompile Include="Shader\SkinVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)%(RelativeDir)%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="Shader\TerrainPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>

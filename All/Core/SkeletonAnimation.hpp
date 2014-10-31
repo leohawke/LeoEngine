@@ -29,8 +29,8 @@ namespace leo{
 		//骨骼,存放关节数目
 		std::shared_ptr<Skeleton> mSkeleton;
 		//每秒多少帧
-		float mFPS;
-		//帧数目
+		float mFPS = 60.f;
+		//帧最大索引
 		std::uint8_t mFCount;
 		std::unique_ptr<AnimationSample[]> mSamples;
 		bool mLoop;
@@ -45,6 +45,15 @@ namespace leo{
 		//单位,帧
 		float CalcFrame(float t) const{
 			return mFCount*t;
+		}
+
+		leo::AnimationClip& operator=(leo::AnimationClip&& rvalue){
+			mSkeleton = std::move(rvalue.mSkeleton);
+			mFPS = rvalue.mFPS;
+			mFCount = rvalue.mFCount;
+			mLoop = rvalue.mLoop;
+			mSamples = std::move(rvalue.mSamples);
+			return *this;
 		}
 	};
 
@@ -108,8 +117,9 @@ namespace leo{
 			return mSkePose;
 		}
 
-		void SetData(AnimationClip&& mClip){
-			mClip = std::move(mClip);
+		void SetData(AnimationClip&& clip){
+			mClip = std::move(clip);
+			mSkePose.mSkeleton = mClip.mSkeleton;
 		}
 	};
 

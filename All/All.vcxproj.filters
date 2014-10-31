@@ -216,6 +216,9 @@
     <ClCompile Include="IndePlatform\leoMathTest.cpp">
       <Filter>IndePlatform\BaseSource</Filter>
     </ClCompile>
+    <ClCompile Include="Core\SkeletonModel.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.hpp">
@@ -443,7 +446,7 @@
     <ClInclude Include="Core\Skeleton.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\SkeltonModel.hpp">
+    <ClInclude Include="Core\SkeletonModel.hpp">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
@@ -513,7 +516,7 @@
     <FxCompile Include="Shader\TerrainPS.hlsl">
       <Filter>Shader\HLSL\Terrain</Filter>
     </FxCompile>
-    <FxCompile Include="Shader\SkinPS.hlsl">
+    <FxCompile Include="Shader\SkinVS.hlsl">
       <Filter>Shader\HLSL\Skin</Filter>
     </FxCompile>
   </ItemGroup>

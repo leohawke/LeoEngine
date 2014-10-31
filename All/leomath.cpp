@@ -16,7 +16,7 @@ namespace leo
 	SQT::SQT(const SeqSQT& lvalue)
 		:s(lvalue.s), t(lvalue.t)
 	{
-		q = EulerAngleToQuaternion(lvalue.q);
+		q = EulerAngleToQuaternion(float3(lvalue.a));
 	}
 
 	SQT::SQT()
@@ -37,9 +37,11 @@ namespace leo
 	}
 
 	SeqSQT::SeqSQT(const SQT& lvalue)
-		:s(lvalue.s), t(lvalue.t)
+		:s(lvalue.s)
 	{
-		q = QuaternionToEulerAngle(lvalue.q);
+		std::memcpy(&t, &lvalue.t, sizeof(float) * 3);
+		auto rvalue = QuaternionToEulerAngle(lvalue.q);
+		std::memcpy(&a,&rvalue,sizeof(float)*3);
 	}
 
 	void SeqSQT::operator=(const SQT& lvalue)
@@ -62,11 +64,5 @@ namespace leo
 
 
 		return result;
-	}
-
-	SQT::operator XMMATRIX() const
-	{
-		auto result = operator leo::float4x4();
-		return loadfloat4x4(&result);
 	}
 }

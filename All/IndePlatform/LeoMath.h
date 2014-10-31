@@ -316,6 +316,10 @@ namespace leo
 		{
 		}
 
+		explicit float3(const float* src) lnothrow{
+			std::memcpy(&x, src, sizeof(float) * 3);
+		}
+
 		template<typename T>
 		explicit float3(const T& src) lnothrow
 		{
@@ -407,6 +411,10 @@ namespace leo
 			: x(XY.first), y(XY.second), z(Z), w(W)
 		{}
 
+		explicit float4(const float* src) lnothrow{
+			std::memcpy(&x, src, sizeof(float) * 4);
+		}
+
 		template<typename T>
 		explicit float4(const T& src) lnothrow
 		{
@@ -460,6 +468,13 @@ namespace leo
 		float operator()(uint8 row, uint8 col) const{
 			return r[row].data[col];
 		}
+
+
+		explicit float4x4(const float* t){
+			std::memcpy(r, t, sizeof(r));
+		}
+
+		float4x4() = default;
 	};
 
 
