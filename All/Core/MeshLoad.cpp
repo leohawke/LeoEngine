@@ -43,6 +43,7 @@ namespace leo
 	std::uint8_t parent;
 	关节信息n
 	动画X:
+	动画名字   ----------------wchar_t[260]
 	关节0信息:
 	采样1	 -----------------SeqSqt;
 	.....
@@ -73,17 +74,29 @@ namespace leo
 		return XMFLOAT2(lhs.x - rhs.x, lhs.y - rhs.y);
 	}
 
+	static void saveclips(std::unique_ptr<win::File>& fout, std::uint64_t& fileoffset, const std::vector<MeshFile::AnimatClip>& clips, std::uint32_t numJoint)
+	{
+		for (auto & clip : clips){
+			fout->Write(fileoffset, clip.name, sizeof(clip.name));
+			fileoffset += sizeof(clip.name);
+			for (auto i = 0u; i != numJoint; ++i){
+				fout->Write(fileoffset, clip.data[i].data.get(), sizeof(SeqSQT)* clip.data[i].size);
+				fileoffset += sizeof(SeqSQT)* clip.data[i].size;
+			}
+		}
+	}
+
 	void MeshFile::m3dTol3d(const std::wstring& m3dfilename, const std::wstring& l3dfilename)
 	{
 		MeshFileHeader l3d_header;
 
 		std::ifstream fin(m3dfilename);
-		auto fout = win::File::OpenNoThrow(m3dfilename, win::File::TO_WRITE);
+		auto fout = win::File::OpenNoThrow(l3dfilename,win::File::TO_WRITE);
 		UINT numSRVs = 0;
 		UINT numVertices = 0;
 		UINT numTriangles = 0;
 		UINT numJoints = 0;
-		UINT numFrames = 0;
+		UINT numAnimations = 0;
 
 		std::string ignore;
 		float fignore;
@@ -98,7 +111,7 @@ namespace leo
 				fin >> ignore >> numVertices;
 				fin >> ignore >> numTriangles;
 				fin >> ignore >> numJoints;
-				fin >> ignore >> numFrames;
+				fin >> ignore >> numAnimations;
 			}
 			l3d_header.numsubset = numSRVs;
 			l3d_header.numvertice = numVertices;
@@ -162,9 +175,9 @@ namespace leo
 		//读取写入顶点信息
 		{
 			fin >> ignore; // vertices header text
-			uint8 jointIndices[4];
+			uint32 jointIndices[4];
 			float weights[3];
-			if (numJoints)
+			if (!numJoints)
 				for (UINT i = 0; i < numVertices; ++i)
 				{
 				fin >> ignore >> vertices[i].pos.x >> vertices[i].pos.y >> vertices[i].pos.z;
@@ -181,7 +194,7 @@ namespace leo
 				fin >> ignore >> vertices[i].tex.x >> vertices[i].tex.y;
 				fin >> ignore >> weights[0] >> weights[1] >> weights[2] >> fignore;
 				fin >> ignore >> jointIndices[0] >> jointIndices[1] >> jointIndices[2] >> jointIndices[3];
-				const uint32 indices = (jointIndices[0] << 24) || (jointIndices[1] << 16) || (jointIndices[2] << 8) || jointIndices[3];
+				const uint32 indices = (jointIndices[0] << 24) | (jointIndices[1] << 16) | (jointIndices[2] << 8) | jointIndices[3];
 				veradjInfo[i].indices = indices;
 				std::memcpy(veradjInfo[i].weights, weights, sizeof(float) * 3);
 				}
@@ -204,7 +217,7 @@ namespace leo
 		if (!numJoints)
 			return;
 
-		SkeletonHeader ske_header{ numJoints, numFrames, false };
+		SkeletonHeader ske_header{ numJoints, numAnimations, false };
 		{
 			fout->Write(fileoffset, &ske_header, sizeof(ske_header));
 			fileoffset += sizeof(ske_header);
@@ -244,38 +257,50 @@ namespace leo
 			fileoffset += joints.size()*sizeof(Joint);
 		}
 
-		std::vector<JointAnimaSample> jointsSamples(numJoints);
+		std::vector<AnimatClip> clips(numAnimations);
+		for (auto & clip : clips)
+			clip.data = std::make_unique<JointAnimaSample[]>(numJoints);
+
 		float4 q;
 		float3 a;
-		for (auto & js : jointsSamples)
-			js.data = std::make_unique<SeqSQT[]>(numFrames);
-
+		fin >> ignore;// AnimationClips header text
+		std::string clipName;
+		std::wstring wclipName;
+		UINT numFrames = 0;
+		for (auto & clip : clips)
 		{
+			fin >> ignore >> clipName;
 			fin >> ignore;
-			for (auto s = 0u; s != numFrames; ++s){
-				fin >> ignore >> ignore >> ignore;
-				{
-					fin >> ignore >> ignore >> iignore;
-					fin >> ignore;
-					for (auto j = 0u; j != numJoints; ++j){
-						auto  & seqSqt = jointsSamples[j].data[s];
-						fin >> ignore >> fignore;
-						fin >> ignore >> seqSqt.t[0]; 
-						fin >> ignore >> seqSqt.s >> seqSqt.s >> seqSqt.s;
-						fin >> ignore >> q.x >> q.y >> q.z >> q.w;
-						a = QuaternionToEulerAngle(q);
-						seqSqt.a[0] = a.x; seqSqt.a[1] = a.y; seqSqt.a[2] = a.z;
-					}
-					fin >> ignore;
+			wclipName = towstring(clipName);
+			wclipName.resize(259);
+			std::wcscpy(clip.name, wclipName.c_str());
+
+			for (auto j = 0u; j != numJoints; ++j){
+				auto & jointSamples = clip.data[j];
+				fin >> ignore >> ignore >> numFrames;
+				fin >> ignore;
+
+				jointSamples.size = numFrames;
+				jointSamples.data = std::make_unique<JointAnimaSample::SampleInfo[]>(jointSamples.size);
+
+				for (auto f = 0u; f != numFrames; ++f){
+					auto & sampleInfo = jointSamples.data[f];
+					fin >> ignore >> sampleInfo.timepoint;
+					fin >> ignore >> sampleInfo.t[0] >> sampleInfo.t[1] >> sampleInfo.t[2];
+					fin >> ignore >> sampleInfo.s >> sampleInfo.s >> sampleInfo.s;
+					fin >> ignore >> q.x >> q.y >> q.z >> q.w;
+					a = QuaternionToEulerAngle(q);
+					sampleInfo.a[0] = a.x; sampleInfo.a[1] = a.y; sampleInfo.a[2] = a.z;
 				}
 				fin >> ignore;
 			}
+
+
+			fin >> ignore;
+			
 		}
 
-		for (auto j = 0u; j != numJoints; ++j){
-			fout->Write(fileoffset, jointsSamples[j].data.get(), sizeof(SeqSQT)*numFrames);
-			fileoffset += sizeof(SeqSQT)*numFrames;
-		}
+		saveclips(fout, fileoffset, clips, numJoints);
 	}
 
 	namespace helper

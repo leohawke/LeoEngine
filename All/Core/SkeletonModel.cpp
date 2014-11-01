@@ -70,6 +70,9 @@ namespace leo{
 			std::vector<MeshFile::Joint> joints(ske_header.numjoint);
 			fin->Read(&adjinfos[0], sizeof(MeshFile::Joint)*joints.size(), fileoffset);
 			fileoffset += sizeof(MeshFile::Joint)*joints.size();
+		}
+		Catch_Win32_Exception
+#if 0
 
 			std::vector<MeshFile::JointAnimaSample> anima(ske_header.numframe);
 			for (auto & data : anima){
@@ -98,8 +101,9 @@ namespace leo{
 				mClip.mSamples[f].mJointsPose[j] = anima[j].data[f];
 				}
 			mAnimation.SetData(std::move(mClip));
-		}
-		Catch_Win32_Exception
+		
+
+#endif
 	}
 }
 

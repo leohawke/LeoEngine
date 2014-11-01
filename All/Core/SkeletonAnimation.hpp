@@ -24,7 +24,7 @@ namespace leo{
 		//一个被侵入的类,大小取决于关节数目->AnimationClip.mSkeleton.mJointCount;
 		std::unique_ptr<JointPose[]> mJointsPose;
 		//每个采样都有自己的持续时间
-		float mTimeTotal;
+		float mTimePoint;
 	};
 
 	struct AnimationClip{
@@ -33,23 +33,25 @@ namespace leo{
 		//帧最大索引
 		std::uint8_t mFCount;
 		std::unique_ptr<AnimationSample[]> mSamples;
+		float mTotalTime;
 		bool mLoop;
 		//if ture => arrsize(mSamples) = mFCount;
 		//else => arrsiez(mSamples) => mFCount +1;
 
 		//单位,秒
 		float GetTotalTime() const{
-			return mFCount*mFPS;
+			return mTotalTime;
 		}
 
 		//单位,帧
+		//这个函数有错误
 		float CalcFrame(float t) const{
 			return mFCount*t;
 		}
 
 		leo::AnimationClip& operator=(leo::AnimationClip&& rvalue){
 			mSkeleton = std::move(rvalue.mSkeleton);
-			mFPS = rvalue.mFPS;
+			mTotalTime = rvalue.mTotalTime;
 			mFCount = rvalue.mFCount;
 			mLoop = rvalue.mLoop;
 			mSamples = std::move(rvalue.mSamples);
@@ -109,9 +111,9 @@ namespace leo{
 			for (auto jointIndex = 0u; jointIndex != mClip.mSkeleton->mJointCount; ++jointIndex){
 				auto & joint = mSkePose.mSkeleton->mJoints[jointIndex];
 				if (joint.mParent != 0xFFu){
-					mSkePose.mGlobalPoses[jointIndex] = mSkePose.mGlobalPoses[joint.mParent] * mSkePose.mLocalPoses[jointIndex];
+					save(mSkePose.mGlobalPoses[jointIndex] ,Multiply(load(mSkePose.mGlobalPoses[joint.mParent]),mSkePose.mLocalPoses[jointIndex].operator std::array<__m128, 4U>()));
 				}
-				save(mSkePose.mSkinMatrixs[jointIndex],Multiply(load(joint.mInvBindPose),mSkePose.mGlobalPoses[jointIndex]));
+				save(mSkePose.mSkinMatrixs[jointIndex],Multiply(load(joint.mInvBindPose),load(mSkePose.mGlobalPoses[jointIndex])));
 			}
 
 			return mSkePose;

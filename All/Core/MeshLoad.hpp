@@ -43,7 +43,7 @@ namespace leo
 
 		struct SkeletonHeader{
 			std::uint32_t numjoint;
-			std::uint32_t numframe;
+			std::uint32_t numanima;
 			bool loop;
 			//吗,时间默认为1帧糊弄着再说
 		};
@@ -65,8 +65,16 @@ namespace leo
 		};
 
 		struct JointAnimaSample{
-			std::unique_ptr<SeqSQT[]> data;
-			//size = numframe
+			struct SampleInfo : public SeqSQT{
+				float timepoint;
+			};
+			std::unique_ptr<SampleInfo[]> data;
+			std::uint32_t size;
+		};
+
+		struct AnimatClip{
+			wchar_t name[260];
+			std::unique_ptr<JointAnimaSample[]> data;
 		};
 		static void m3dTol3d(const std::wstring& m3dfilename, const std::wstring& l3dfilename);
 
