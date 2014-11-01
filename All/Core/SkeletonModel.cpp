@@ -19,6 +19,18 @@ namespace leo{
 		return result;
 	}
 
+	struct SkeletonVertexAnimationInfo{
+		uint32 mIndices;
+		float3 mWeights;
+		SkeletonVertexAnimationInfo(const MeshFile::SkeletonAdjInfo& info)
+			:mIndices(info.indices),mWeights(info.weights){
+		}
+		SkeletonVertexAnimationInfo& operator=(const MeshFile::SkeletonAdjInfo& info){
+			mIndices = info.indices;
+			mWeights = info.weights;
+		}
+	};
+
 	void SkeletonModel::LoadFromFile(const std::wstring& filename, ID3D11Device* device){
 		mMesh.Load(filename, device);
 
@@ -38,14 +50,32 @@ namespace leo{
 
 			leo::MeshFile::SkeletonHeader ske_header;
 			fin->Read(&ske_header, sizeof(ske_header), fileoffset);
+			fileoffset += sizeof(ske_header);
+
+
+			std::vector<leo::MeshFile::SkeletonAdjInfo> adjinfos(l3d_header.numvertice);
+			fin->Read(&adjinfos[0], sizeof(MeshFile::SkeletonAdjInfo)*adjinfos.size(), fileoffset);
+
+			fileoffset += sizeof(MeshFile::SkeletonAdjInfo)*adjinfos.size();
+			try{
+				std::vector<SkeletonVertexAnimationInfo> animationdatas(adjinfos.begin(), adjinfos.end());
+				CD3D11_BUFFER_DESC aniVbdesc; (sizeof(SkeletonVertexAnimationInfo)*animationdatas.size(), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+				D3D11_SUBRESOURCE_DATA aniSubDesc;
+				aniSubDesc.pSysMem = animationdatas.data();
+				dxcall(device->CreateBuffer(&aniVbdesc, &aniSubDesc, &mAnimationDataBUffer));
+			}
+			Catch_DX_Exception
+
 
 			std::vector<MeshFile::Joint> joints(ske_header.numjoint);
+			fin->Read(&adjinfos[0], sizeof(MeshFile::Joint)*joints.size(), fileoffset);
+			fileoffset += sizeof(MeshFile::Joint)*joints.size();
 
 			std::vector<MeshFile::JointAnimaSample> anima(ske_header.numframe);
 			for (auto & data : anima){
-				data.data = make_unique<float[]>(ske_header.numframe * 16);
+				data.data = make_unique<SeqSQT[]>(ske_header.numframe);
 			}
-
+			//Todo:
 			mSkeleton = leo::make_shared<Skeleton>();
 			mSkeleton->mJointCount = ske_header.numjoint;
 
@@ -65,7 +95,7 @@ namespace leo{
 
 			for (auto f = 0u; f != mClip.mFCount; ++f)
 				for (auto j = 0u; j != ske_header.numjoint; ++j){
-				mClip.mSamples[f].mJointsPose[j] = &anima[j].data[f * 16];
+				mClip.mSamples[f].mJointsPose[j] = anima[j].data[f];
 				}
 			mAnimation.SetData(std::move(mClip));
 		}

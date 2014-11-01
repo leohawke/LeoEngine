@@ -48,16 +48,25 @@ namespace leo
 			//吗,时间默认为1帧糊弄着再说
 		};
 
+		struct SkeletonAdjInfo{
+			std::uint32_t indices;
+			float weights[3];
+		};
+
 		struct Joint{
 
 			float data[16];
 			wchar_t name[260];
 			std::uint8_t parent;
+
+			float& operator()(uint8 row, uint8 col){
+				return data[row * 4 + col];
+			}
 		};
 
 		struct JointAnimaSample{
-			std::unique_ptr<float[]> data;
-			//size = numframe*16
+			std::unique_ptr<SeqSQT[]> data;
+			//size = numframe
 		};
 		static void m3dTol3d(const std::wstring& m3dfilename, const std::wstring& l3dfilename);
 

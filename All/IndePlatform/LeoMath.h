@@ -323,22 +323,22 @@ namespace leo
 		template<typename T>
 		explicit float3(const T& src) lnothrow
 		{
-			static_assert(sizeof(T) >= sizeof(float3), "Need More Data");
-			std::memcpy(this, &src, sizeof(float3));
+			static_assert(sizeof(T) >= sizeof(float)*3, "Need More Data");
+			std::memcpy(this, &src, sizeof(float) * 3);
 		}
 
 			template<typename T>
 		float3& operator=(const T& src) lnothrow
 		{
-			static_assert(sizeof(T) >= sizeof(float3), "Need More Data");
-			std::memcpy(this, &src, sizeof(float3));
+			static_assert(sizeof(T) >= sizeof(float) * 3, "Need More Data");
+			std::memcpy(this, &src, sizeof(float) * 3);
 			return *this;
 		}
 
 			template<typename T>
 		T* operator &() lnothrow
 		{
-			static_assert(sizeof(float3) >= sizeof(T), "Data Don't Enough");
+			static_assert(sizeof(float) * 3 >= sizeof(T), "Data Don't Enough");
 			return reinterpret_cast<T*>(this);
 		}
 			float3 max(const float3& rhs)  const lnothrow

@@ -29,6 +29,7 @@ namespace leo{
 	class Camera;
 	class Mesh;
 	class SkeletonModel{
+
 		leo::Mesh mMesh;
 
 		ID3D11Buffer* mAnimationDataBUffer;

@@ -33,6 +33,22 @@ namespace leo
 	索引1
 	...
 	*/
+	//附带骨骼动画信息1.01
+	/*
+	动画头: SkeletonHeader
+	附加顶点数据---------------------索引 std::uint32_t
+				--------------------权重	 float[3];
+	关节信息0   --------------------float data[16];
+									wchar_t name[260];
+									std::uint8_t parent;
+	关节信息n
+	采样信息0   
+	采样1信息:
+		关节0的采样	 -----------------SeqSqt;
+		关节1的采样	 -----------------
+	采样2....
+	采样n
+	*/
 	template<>
 	struct Vertex::is_vertex<MeshFile::MeshVertex> : std::true_type
 	{};
@@ -61,8 +77,8 @@ namespace leo
 		UINT numSRVs = 0;
 		UINT numVertices = 0;
 		UINT numTriangles = 0;
-		UINT numBones = 0;
-		UINT numAnimationClips = 0;
+		UINT numJoints = 0;
+		UINT numFrames = 0;
 
 		std::string ignore;
 		float fignore;
@@ -76,8 +92,8 @@ namespace leo
 				fin >> ignore >> numSRVs;
 				fin >> ignore >> numVertices;
 				fin >> ignore >> numTriangles;
-				fin >> ignore >> numBones;
-				fin >> ignore >> numAnimationClips;
+				fin >> ignore >> numJoints;
+				fin >> ignore >> numFrames;
 			}
 			l3d_header.numsubset = numSRVs;
 			l3d_header.numvertice = numVertices;
@@ -137,16 +153,33 @@ namespace leo
 			fileoffset += subsets.size()*sizeof(MeshSubSet);
 		}
 		std::vector<MeshVertex> vertices(numVertices);
+		std::vector<SkeletonAdjInfo> veradjInfo(numVertices);
 		//读取写入顶点信息
 		{
 			fin >> ignore; // vertices header text
-			for (UINT i = 0; i < numVertices; ++i)
-			{
+			uint8 jointIndices[4];
+			float weights[3];
+			if (numJoints)
+				for (UINT i = 0; i < numVertices; ++i)
+				{
+					fin >> ignore >> vertices[i].pos.x >> vertices[i].pos.y >> vertices[i].pos.z;
+					fin >> ignore >> vertices[i].tangent.x >> vertices[i].tangent.y >> vertices[i].tangent.z>>fignore;
+					fin >> ignore >> vertices[i].normal.x >> vertices[i].normal.y >> vertices[i].normal.z;
+					fin >> ignore >> vertices[i].tex.x >> vertices[i].tex.y;
+				}
+			else
+				for (UINT i = 0; i < numVertices; ++i)
+				{
 				fin >> ignore >> vertices[i].pos.x >> vertices[i].pos.y >> vertices[i].pos.z;
-				fin >> ignore >> vertices[i].tangent.x >> vertices[i].tangent.y >> vertices[i].tangent.z>>fignore;
+				fin >> ignore >> vertices[i].tangent.x >> vertices[i].tangent.y >> vertices[i].tangent.z >> fignore;
 				fin >> ignore >> vertices[i].normal.x >> vertices[i].normal.y >> vertices[i].normal.z;
 				fin >> ignore >> vertices[i].tex.x >> vertices[i].tex.y;
-			}
+				fin >> ignore >> weights[0] >> weights[1] >> weights[2] >> fignore;
+				fin >> ignore >> jointIndices[0] >> jointIndices[1] >> jointIndices[2] >> jointIndices[3];
+				const uint32 indices = (jointIndices[0] << 24) || (jointIndices[1] << 16) || (jointIndices[2] << 8) || jointIndices[3];
+				veradjInfo[i].indices = indices;
+				std::memcpy(veradjInfo[i].weights, weights, sizeof(float) * 3);
+				}
 			fout->Write(fileoffset, &vertices[0], vertices.size()*sizeof(MeshVertex));
 			fileoffset += vertices.size()*sizeof(MeshVertex);
 		}
@@ -161,6 +194,41 @@ namespace leo
 			}
 			fout->Write(fileoffset, &indices[0], indices.size()*sizeof(std::uint32_t));
 			fileoffset += indices.size()*sizeof(std::uint32_t);
+		}
+
+		SkeletonHeader ske_header{ numJoints, numFrames, false };
+		{
+			fout->Write(fileoffset, &ske_header, sizeof(ske_header));
+			fileoffset += sizeof(ske_header);
+		}
+
+		//Todo 写入附加信息
+
+		std::wstring jointname{ L"Joint:    " };
+		jointname += m3dfilename;
+		jointname.resize(260);
+		std::vector<Joint> joints(numJoints);
+		{
+			fin >> ignore; // BoneOffsets header text
+			for (UINT i = 0; i < numJoints; ++i)
+			{
+				fin >> ignore >>
+					joints[i](0, 0) >> joints[i](0, 1) >> joints[i](0, 2) >> joints[i](0, 3) >>
+					joints[i](1, 0) >> joints[i](1, 1) >> joints[i](1, 2) >> joints[i](1, 3) >>
+					joints[i](2, 0) >> joints[i](2, 1) >> joints[i](2, 2) >> joints[i](2, 3) >>
+					joints[i](3, 0) >> joints[i](3, 1) >> joints[i](3, 2) >> joints[i](3, 3);
+			}
+
+			fin >> ignore; // BoneHierarchy header text
+			for (UINT i = 0; i < numJoints; ++i)
+			{
+				fin >> ignore >> joints[i].parent;
+				jointname[7] = numJoints;
+				std::memcpy(joints[i].name, jointname.data(), sizeof(wchar_t) * 260);
+			}
+
+			fout->Write(fileoffset, &joints[0], joints.size()*sizeof(Joint));
+			fileoffset += joints.size()*sizeof(Joint);
 		}
 	}
 
