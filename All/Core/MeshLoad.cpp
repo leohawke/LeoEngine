@@ -13,21 +13,21 @@ namespace leo
 	/*文件格式:
 	文件头 MeshFileHeader
 	材质0-------------------DirectX::XMFLOAT3 ambient;
-							DirectX::XMFLOAT3 diffuse;
-							DirectX::XMFLOAT3 specular;
-							DirectX::XMFLOAT3 reflect;
-							float specPow;
-							float alphaclip;
-							wchar_t diffusefile[260];
-							wchar_t normalmapfile[260]; 
+	DirectX::XMFLOAT3 diffuse;
+	DirectX::XMFLOAT3 specular;
+	DirectX::XMFLOAT3 reflect;
+	float specPow;
+	float alphaclip;
+	wchar_t diffusefile[260];
+	wchar_t normalmapfile[260];
 	材质1
 	....
 	顶点0 ------------------XMFLOAT3 pos;
-							XMFLOAT3 normal;
-							XMFLOAT2 tex;
-							XMFLOAT3 tangent;
-	顶点1 
-	顶点2 
+	XMFLOAT3 normal;
+	XMFLOAT2 tex;
+	XMFLOAT3 tangent;
+	顶点1
+	顶点2
 	...
 	索引0 ------------------std::uint32_t
 	索引1
@@ -35,19 +35,24 @@ namespace leo
 	*/
 	//附带骨骼动画信息1.01
 	/*
-	动画头: SkeletonHeader
+	动画头: SkeletonHeader           ------------add动画数量
 	附加顶点数据---------------------索引 std::uint32_t
-				--------------------权重	 float[3];
+	--------------------权重	 float[3];
 	关节信息0   --------------------float data[16];
-									wchar_t name[260];
-									std::uint8_t parent;
+	wchar_t name[260];
+	std::uint8_t parent;
 	关节信息n
-	采样信息0   
-	采样1信息:
-		关节0的采样	 -----------------SeqSqt;
-		关节1的采样	 -----------------
-	采样2....
-	采样n
+	动画X:
+	关节0信息:
+	采样1	 -----------------SeqSqt;
+	.....
+	采样n	 -----------------
+	关节i信息
+	.....
+	关节n信息
+	动画I:
+	....
+	动画Y:
 	*/
 	template<>
 	struct Vertex::is_vertex<MeshFile::MeshVertex> : std::true_type
@@ -73,7 +78,7 @@ namespace leo
 		MeshFileHeader l3d_header;
 
 		std::ifstream fin(m3dfilename);
-		auto fout = win::File::OpenNoThrow(m3dfilename,win::File::TO_WRITE);
+		auto fout = win::File::OpenNoThrow(m3dfilename, win::File::TO_WRITE);
 		UINT numSRVs = 0;
 		UINT numVertices = 0;
 		UINT numTriangles = 0;
@@ -138,7 +143,7 @@ namespace leo
 		//读取和写入网格索引
 		{
 			fin >> ignore; // subset header text
-			
+
 			for (UINT i = 0; i < numSRVs; ++i)
 			{
 				fin >> ignore >> iignore;//Id
@@ -162,10 +167,10 @@ namespace leo
 			if (numJoints)
 				for (UINT i = 0; i < numVertices; ++i)
 				{
-					fin >> ignore >> vertices[i].pos.x >> vertices[i].pos.y >> vertices[i].pos.z;
-					fin >> ignore >> vertices[i].tangent.x >> vertices[i].tangent.y >> vertices[i].tangent.z>>fignore;
-					fin >> ignore >> vertices[i].normal.x >> vertices[i].normal.y >> vertices[i].normal.z;
-					fin >> ignore >> vertices[i].tex.x >> vertices[i].tex.y;
+				fin >> ignore >> vertices[i].pos.x >> vertices[i].pos.y >> vertices[i].pos.z;
+				fin >> ignore >> vertices[i].tangent.x >> vertices[i].tangent.y >> vertices[i].tangent.z >> fignore;
+				fin >> ignore >> vertices[i].normal.x >> vertices[i].normal.y >> vertices[i].normal.z;
+				fin >> ignore >> vertices[i].tex.x >> vertices[i].tex.y;
 				}
 			else
 				for (UINT i = 0; i < numVertices; ++i)
@@ -196,13 +201,21 @@ namespace leo
 			fileoffset += indices.size()*sizeof(std::uint32_t);
 		}
 
+		if (!numJoints)
+			return;
+
 		SkeletonHeader ske_header{ numJoints, numFrames, false };
 		{
 			fout->Write(fileoffset, &ske_header, sizeof(ske_header));
 			fileoffset += sizeof(ske_header);
 		}
+		veradjInfo;
+		{
+			fout->Write(fileoffset, veradjInfo.data(), sizeof(SkeletonAdjInfo)*veradjInfo.size());
+			fileoffset += sizeof(SkeletonAdjInfo)*veradjInfo.size();
+		}
 
-		//Todo 写入附加信息
+
 
 		std::wstring jointname{ L"Joint:    " };
 		jointname += m3dfilename;
@@ -229,6 +242,39 @@ namespace leo
 
 			fout->Write(fileoffset, &joints[0], joints.size()*sizeof(Joint));
 			fileoffset += joints.size()*sizeof(Joint);
+		}
+
+		std::vector<JointAnimaSample> jointsSamples(numJoints);
+		float4 q;
+		float3 a;
+		for (auto & js : jointsSamples)
+			js.data = std::make_unique<SeqSQT[]>(numFrames);
+
+		{
+			fin >> ignore;
+			for (auto s = 0u; s != numFrames; ++s){
+				fin >> ignore >> ignore >> ignore;
+				{
+					fin >> ignore >> ignore >> iignore;
+					fin >> ignore;
+					for (auto j = 0u; j != numJoints; ++j){
+						auto  & seqSqt = jointsSamples[j].data[s];
+						fin >> ignore >> fignore;
+						fin >> ignore >> seqSqt.t[0]; 
+						fin >> ignore >> seqSqt.s >> seqSqt.s >> seqSqt.s;
+						fin >> ignore >> q.x >> q.y >> q.z >> q.w;
+						a = QuaternionToEulerAngle(q);
+						seqSqt.a[0] = a.x; seqSqt.a[1] = a.y; seqSqt.a[2] = a.z;
+					}
+					fin >> ignore;
+				}
+				fin >> ignore;
+			}
+		}
+
+		for (auto j = 0u; j != numJoints; ++j){
+			fout->Write(fileoffset, jointsSamples[j].data.get(), sizeof(SeqSQT)*numFrames);
+			fileoffset += sizeof(SeqSQT)*numFrames;
 		}
 	}
 
@@ -268,7 +314,7 @@ namespace leo
 		static void _calc_normal(const std::true_type&, std::vector<T>& vertices, std::vector<U>& indices)
 		{
 			static_assert(std::is_same<T, XMVECTOR>::value, "T must be XMVECTOR");
-			for (auto i = 0; i != indices.size()/3; ++i)
+			for (auto i = 0; i != indices.size() / 3; ++i)
 			{
 				U ind[3];
 				ind[0] = indices[i * 3 + 0];
@@ -297,7 +343,7 @@ namespace leo
 		//CPU版本
 		static void _calc_normal(const std::false_type&, std::vector<T>& vertices, std::vector<U>& indices)
 		{
-			for (auto i = 0; i != indices.size()/3; ++i)
+			for (auto i = 0; i != indices.size() / 3; ++i)
 			{
 				U ind[3];
 				ind[0] = indices[i * 3 + 0];
@@ -338,7 +384,7 @@ namespace leo
 		static void _calc_tangent(const std::true_type&, std::vector<T>& vertices, std::vector<U>& indices)
 		{
 			static_assert(std::is_same<T, XMVECTOR>::value, "T must be XMVECTOR");
-			for (auto i = 0; i != indices.size()/3; ++i)
+			for (auto i = 0; i != indices.size() / 3; ++i)
 			{
 				U ind[3];
 				ind[0] = indices[i * 3 + 0];
@@ -411,7 +457,7 @@ namespace leo
 			for (auto &v : vertices)
 				v.tangent = Normalize(v.tangent);
 		}
-		
+
 		template<typename T, typename U>
 		static void ClacNormalTangent(std::vector<T>& vertices, std::vector<U>& indices)
 		{
@@ -432,7 +478,7 @@ namespace leo
 		l3d_header.numindex = (m - 1)*(n - 1) * 6;
 		l3d_header.numsubset = 1;
 
-		auto fout = win::File::OpenNoThrow(l3dfilename,win::File::TO_WRITE);
+		auto fout = win::File::OpenNoThrow(l3dfilename, win::File::TO_WRITE);
 
 		std::uint64_t offset = 0;
 		fout->Write(offset, &l3d_header, sizeof(MeshFileHeader));
@@ -484,17 +530,17 @@ namespace leo
 			for (auto j = 0; j != n - 1; ++j)
 			{
 				indices[k] = i*n + j;
-				indices[k+1] = i*n + j+1;
-				indices[k+2] = (i+1)*n + j;
+				indices[k + 1] = i*n + j + 1;
+				indices[k + 2] = (i + 1)*n + j;
 				indices[k + 3] = (i + 1)*n + j;
-				indices[k+4] = i*n + j+1;
-				indices[k + 5] = (i + 1)*n + j+1;
+				indices[k + 4] = i*n + j + 1;
+				indices[k + 5] = (i + 1)*n + j + 1;
 				k += 6;
 			}
 		}
 
-		
-	
+
+
 		helper::ClacNormalTangent(vertices, indices);
 
 		for (auto &v : vertices)
@@ -535,9 +581,9 @@ namespace leo
 			char id[4];//"W3E!"
 			char version[4];//0X0000000B
 			tileset_type maintileset;
-		};	
+		};
 
-		auto fin = win::File::OpenNoThrow(w3efilename,win::File::TO_READ);
+		auto fin = win::File::OpenNoThrow(w3efilename, win::File::TO_READ);
 
 		std::uint64_t offset = 0;
 
@@ -549,21 +595,21 @@ namespace leo
 			Raise_Error_Exception(ERROR_INVALID_PARAMETER, "不是一个W3E文件");
 
 		std::int32_t custom_tilesets_flag;
-		fin->Read(&custom_tilesets_flag,4, offset);
+		fin->Read(&custom_tilesets_flag, 4, offset);
 		offset += 4;
 		std::int32_t tiesetsnum;
-		fin->Read(&tiesetsnum,4, offset);
+		fin->Read(&tiesetsnum, 4, offset);
 		offset += 4;
 
-		auto tilesetsIds = std::make_unique<char[]>(4*tiesetsnum);
-		fin->Read(tilesetsIds.get(), 4 * tiesetsnum,offset);
-		offset += 4*tiesetsnum;
+		auto tilesetsIds = std::make_unique<char[]>(4 * tiesetsnum);
+		fin->Read(tilesetsIds.get(), 4 * tiesetsnum, offset);
+		offset += 4 * tiesetsnum;
 
 		std::int32_t clifftilesetsnum;
-		fin->Read(&clifftilesetsnum, 4,offset);
+		fin->Read(&clifftilesetsnum, 4, offset);
 		offset += 4;
 
-		auto clifftilesetsIds = std::make_unique<char[]>(4*clifftilesetsnum);
+		auto clifftilesetsIds = std::make_unique<char[]>(4 * clifftilesetsnum);
 		fin->Read(clifftilesetsIds.get(), 4 * clifftilesetsnum, offset);
 		offset += 4 * clifftilesetsnum;
 
@@ -574,7 +620,7 @@ namespace leo
 		fin->Read(&my, 4, offset);
 		offset += 4;
 		auto n = mx; auto m = my;
-		auto width = (n-1) * 16; auto height = (m-1) * 16;
+		auto width = (n - 1) * 16; auto height = (m - 1) * 16;
 
 		float xoffset, yoffset;
 		fin->Read(&xoffset, 4, offset);
@@ -638,7 +684,7 @@ namespace leo
 		l3d_header.numindex = (m - 1)*(n - 1) * 6;
 		l3d_header.numsubset = 1;
 
-		auto fout = win::File::OpenNoThrow(l3dfilename,win::File::TO_WRITE);
+		auto fout = win::File::OpenNoThrow(l3dfilename, win::File::TO_WRITE);
 		offset = 0;
 		fout->Write(offset, &l3d_header, sizeof(MeshFileHeader));
 		offset += sizeof(MeshFileHeader);
@@ -674,9 +720,9 @@ namespace leo
 			for (auto j = 0; j != n; ++j)
 			{
 				float x = -halfWidht + j*dx;
-				float y = (tilepoints[i*n + j].height - 0X2000 + (tilepoints[i*n + j].clifftype_celllayer&0X0F-2)*0x0200)/32.f;
+				float y = (tilepoints[i*n + j].height - 0X2000 + (tilepoints[i*n + j].clifftype_celllayer & 0X0F - 2) * 0x0200) / 32.f;
 				vertices[i*n + j].pos = XMFLOAT3(x, y, z);
-				vertices[i*n + j].tex = XMFLOAT2(j*du, 1-i*dv);
+				vertices[i*n + j].tex = XMFLOAT2(j*du, 1 - i*dv);
 			}
 		}
 
@@ -686,11 +732,11 @@ namespace leo
 		{
 			for (auto j = 0; j != n - 1; ++j)
 			{
-				indices[k] =	(i + 1)*n + j;
+				indices[k] = (i + 1)*n + j;
 				indices[k + 1] = i*n + j + 1;
-				indices[k + 2] =  i*n + j;
-				
-				
+				indices[k + 2] = i*n + j;
+
+
 				indices[k + 3] = (i + 1)*n + j + 1;
 				indices[k + 4] = i*n + j + 1;
 				indices[k + 5] = (i + 1)*n + j;

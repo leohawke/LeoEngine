@@ -23,13 +23,13 @@ namespace leo{
 	struct AnimationSample{
 		//一个被侵入的类,大小取决于关节数目->AnimationClip.mSkeleton.mJointCount;
 		std::unique_ptr<JointPose[]> mJointsPose;
+		//每个采样都有自己的持续时间
+		float mTimeTotal;
 	};
 
 	struct AnimationClip{
 		//骨骼,存放关节数目
 		std::shared_ptr<Skeleton> mSkeleton;
-		//每秒多少帧
-		float mFPS = 60.f;
 		//帧最大索引
 		std::uint8_t mFCount;
 		std::unique_ptr<AnimationSample[]> mSamples;

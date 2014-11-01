@@ -35,7 +35,8 @@ namespace leo{
 		ID3D11Buffer* mAnimationDataBUffer;
 
 		std::shared_ptr<Skeleton> mSkeleton;
-		Animation mAnimation;
+		//一个骨骼不止一个动画
+		std::map<std::size_t,Animation> mAnimations;
 	public:
 		void LoadFromFile(const std::wstring& filename,ID3D11Device* device);
 
