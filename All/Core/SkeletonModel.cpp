@@ -141,7 +141,7 @@ namespace leo{
 				convertAnimaSample(mClip.mSamples, clip.data, numframe, mSkeleton->mJointCount);
 
 				auto sid = hash(name);
-				mAnimations.insert(std::make_pair(sid, Animation()));
+				mAnimations.emplace(sid, Animation());
 				mAnimations[sid].SetData(std::move(mClip));
 			}
 		

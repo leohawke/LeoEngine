@@ -66,6 +66,14 @@ namespace leo{
 			mSamples = std::move(rvalue.mSamples);
 			return *this;
 		}
+
+		AnimationClip(leo::AnimationClip&& rvalue)
+			:mSkeleton(std::move(rvalue.mSkeleton)), mFCount(rvalue.mFCount),
+			mLoop(rvalue.mLoop),mSamples(std::move(rvalue.mSamples)){
+
+		}
+
+		AnimationClip() = default;
 	};
 
 	class Animation{
@@ -77,7 +85,15 @@ namespace leo{
 		//用于存放计算结果
 		SkeletonPose mSkePose;
 		//播放速率
-		float mSpeed;
+		float mSpeed = 1.f;
+	public:
+		Animation(Animation&& rvalue)
+			:mClip(std::move(rvalue.mClip)), mT(rvalue.mT), mElapsed(rvalue.mElapsed), mSkePose(std::move(mSkePose)),
+			mSpeed(rvalue.mSpeed){
+
+		}
+
+		Animation() = default;
 
 		std::pair<uint32, uint32> CalcFrameIndex(float frame){
 			auto first = (uint32)(std::floor(frame));
@@ -131,7 +147,7 @@ namespace leo{
 
 		void SetData(AnimationClip&& clip){
 			mClip = std::move(clip);
-			mSkePose.mSkeleton = mClip.mSkeleton;
+			mSkePose.mSkeleton =std::move( mClip.mSkeleton);
 		}
 	};
 
