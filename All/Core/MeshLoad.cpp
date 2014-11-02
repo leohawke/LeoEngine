@@ -246,9 +246,13 @@ namespace leo
 			}
 
 			fin >> ignore; // BoneHierarchy header text
-			for (UINT i = 0; i < numJoints; ++i)
+			int index;
+			fin >> ignore >> index;
+			joints[0].parent = 0xFFu;
+			for (UINT i = 1; i < numJoints; ++i)
 			{
-				fin >> ignore >> joints[i].parent;
+				fin >> ignore >>iignore;
+				joints[i].parent = iignore;
 				jointname[7] = numJoints;
 				std::memcpy(joints[i].name, jointname.data(), sizeof(wchar_t) * 260);
 			}
