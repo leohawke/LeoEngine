@@ -65,16 +65,15 @@ namespace leo
 		};
 
 		struct JointAnimaSample{
-			struct SampleInfo : public SeqSQT{
-				float timepoint;
-			};
-			std::unique_ptr<SampleInfo[]> data;
-			std::uint32_t size;
+			//一个动画中的一个关节的所有采样信息
+			std::unique_ptr<SeqSQT[]> data;
 		};
 
 		struct AnimatClip{
 			wchar_t name[260];
-			std::unique_ptr<JointAnimaSample[]> data;
+			std::uint32_t size;
+			std::unique_ptr<float[]> timedata;
+			std::unique_ptr<JointAnimaSample[]> data;//size = numjoints
 		};
 		static void m3dTol3d(const std::wstring& m3dfilename, const std::wstring& l3dfilename);
 

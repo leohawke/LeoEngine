@@ -44,6 +44,8 @@ namespace leo
 	关节信息n
 	动画X:
 	动画名字   ----------------wchar_t[260]
+	动画采样数 ----------------std::uint32_t
+	动画采样时间点 ------------float [动画采样数]
 	关节0信息:
 	采样1	 -----------------SeqSqt;
 	.....
@@ -79,9 +81,13 @@ namespace leo
 		for (auto & clip : clips){
 			fout->Write(fileoffset, clip.name, sizeof(clip.name));
 			fileoffset += sizeof(clip.name);
+			fout->Write(fileoffset, &clip.size, sizeof(std::uint32_t));
+			fileoffset += sizeof(std::uint32_t);
+			fout->Write(fileoffset, clip.timedata.get(), sizeof(float)*clip.size);
+			fileoffset += sizeof(float)*clip.size;
 			for (auto i = 0u; i != numJoint; ++i){
-				fout->Write(fileoffset, clip.data[i].data.get(), sizeof(SeqSQT)* clip.data[i].size);
-				fileoffset += sizeof(SeqSQT)* clip.data[i].size;
+				fout->Write(fileoffset, clip.data[i].data.get(), sizeof(SeqSQT)* clip.size);
+				fileoffset += sizeof(SeqSQT)* clip.size;
 			}
 		}
 	}
@@ -264,6 +270,7 @@ namespace leo
 		std::vector<AnimatClip> clips(numAnimations);
 		for (auto & clip : clips)
 			clip.data = std::make_unique<JointAnimaSample[]>(numJoints);
+		
 
 		float4 q;
 		float3 a;
@@ -279,17 +286,21 @@ namespace leo
 			wclipName.resize(259);
 			std::wcscpy(clip.name, wclipName.c_str());
 
+			bool alloc = false;
 			for (auto j = 0u; j != numJoints; ++j){
 				auto & jointSamples = clip.data[j];
 				fin >> ignore >> ignore >> numFrames;
 				fin >> ignore;
 
-				jointSamples.size = numFrames;
-				jointSamples.data = std::make_unique<JointAnimaSample::SampleInfo[]>(jointSamples.size);
+				if (!alloc){
+					clip.size = numFrames;
+					clip.timedata = std::make_unique<float[]>(clip.size);
+				}
+				jointSamples.data = std::make_unique<SeqSQT[]>(clip.size);
 
 				for (auto f = 0u; f != numFrames; ++f){
 					auto & sampleInfo = jointSamples.data[f];
-					fin >> ignore >> sampleInfo.timepoint;
+					fin >> ignore >> clip.timedata[f];
 					fin >> ignore >> sampleInfo.t[0] >> sampleInfo.t[1] >> sampleInfo.t[2];
 					fin >> ignore >> sampleInfo.s >> sampleInfo.s >> sampleInfo.s;
 					fin >> ignore >> q.x >> q.y >> q.z >> q.w;

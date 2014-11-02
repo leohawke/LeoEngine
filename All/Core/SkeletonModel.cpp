@@ -31,6 +31,15 @@ namespace leo{
 		}
 	};
 
+	//dst 采样,关节
+	//src 关节,采样
+	static void convertAnimaSample(std::unique_ptr<AnimationSample[]>& dst, std::unique_ptr < MeshFile::JointAnimaSample[]>& src, std::uint32_t numFrame, std::uint32_t numJoint){
+		for (auto f = 0u; f != numFrame; ++f)
+			for (auto j = 0u; j != numJoint; ++j){
+				dst[f].mJointsPose[j] = src[j].data[f];
+			}
+	}
+
 	void SkeletonModel::LoadFromFile(const std::wstring& filename, ID3D11Device* device){
 		mMesh.Load(filename, device);
 
@@ -70,14 +79,13 @@ namespace leo{
 			std::vector<MeshFile::Joint> joints(ske_header.numjoint);
 			fin->Read(&adjinfos[0], sizeof(MeshFile::Joint)*joints.size(), fileoffset);
 			fileoffset += sizeof(MeshFile::Joint)*joints.size();
-		}
-		Catch_Win32_Exception
-#if 0
+		
 
-			std::vector<MeshFile::JointAnimaSample> anima(ske_header.numframe);
-			for (auto & data : anima){
-				data.data = make_unique<SeqSQT[]>(ske_header.numframe);
-			}
+
+			std::vector<MeshFile::AnimatClip> anima(ske_header.numanima);
+			for (auto & data : anima)
+				data.data = make_unique<MeshFile::JointAnimaSample[]>(ske_header.numjoint);
+			
 			//Todo:
 			mSkeleton = leo::make_shared<Skeleton>();
 			mSkeleton->mJointCount = ske_header.numjoint;
@@ -89,21 +97,57 @@ namespace leo{
 				mSkeleton->mJoints[i] =convert(joints[i]);
 
 			AnimationClip mClip;
-			mClip.mSkeleton = mSkeleton;
-			mClip.mFCount =ske_header.loop? ske_header.numframe :ske_header.numframe-1;
-			mClip.mSamples = std::make_unique<AnimationSample[]>(mClip.mFCount);
-			for (auto i = 0u; i != mClip.mFCount; ++i){
-				mClip.mSamples[i].mJointsPose = std::make_unique<JointPose[]>(ske_header.numjoint);
-			}
+			
+			wchar_t name[260];
+			std::uint32_t numframe;
+			for (auto & clip : anima){
+				//读入名字和帧数量
+				fin->Read(name, sizeof(name), fileoffset);
+				fileoffset += sizeof(name);
+				fin->Read(&numframe, sizeof(uint32), fileoffset);
+				fileoffset += sizeof(uint32);
 
-			for (auto f = 0u; f != mClip.mFCount; ++f)
+				//分配时间内存并读入
+				clip.timedata = std::make_unique<float[]>(numframe);
+				fin->Read(clip.timedata.get(), sizeof(float)*numframe, fileoffset);
+				fileoffset += sizeof(float)*numframe;
+
+				//写入部分信息
+				mClip.mSkeleton = mSkeleton;
+				mClip.mFCount = numframe-1;
+				mClip.mLoop = true;
+
+				//为读入分配足够内存
+				for (auto j = 0u; j != ske_header.numjoint; ++j)
+					clip.data[j].data = std::make_unique<SeqSQT[]>(numframe);
+
+				//开始读入
 				for (auto j = 0u; j != ske_header.numjoint; ++j){
-				mClip.mSamples[f].mJointsPose[j] = anima[j].data[f];
+					fin->Read(clip.data[j].data.get(), sizeof(SeqSQT)*numframe, fileoffset);
+					fileoffset += sizeof(SeqSQT)*numframe;
 				}
-			mAnimation.SetData(std::move(mClip));
+
+				
+
+				//转换读入SampleInfo至AnimationSample
+				//1.分配内存
+				//2.写入时间信息
+				mClip.mSamples = std::make_unique<AnimationSample[]>(numframe);
+				for (auto f = 0u; f != numframe; ++f){
+					mClip.mSamples[f].mJointsPose = std::make_unique<JointPose[]>(mSkeleton->mJointCount);
+					mClip.mSamples[f].mTimePoint = clip.timedata[f];
+				}
+
+				convertAnimaSample(mClip.mSamples, clip.data, numframe, mSkeleton->mJointCount);
+
+				auto sid = hash(name);
+				mAnimations.insert(std::make_pair(sid, Animation()));
+				mAnimations[sid].SetData(std::move(mClip));
+			}
 		
 
-#endif
+		}
+		Catch_Win32_Exception
 	}
 }
 

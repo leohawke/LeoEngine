@@ -33,25 +33,34 @@ namespace leo{
 		//帧最大索引
 		std::uint8_t mFCount;
 		std::unique_ptr<AnimationSample[]> mSamples;
-		float mTotalTime;
 		bool mLoop;
 		//if ture => arrsize(mSamples) = mFCount;
 		//else => arrsiez(mSamples) => mFCount +1;
 
 		//单位,秒
 		float GetTotalTime() const{
-			return mTotalTime;
+			return mSamples[mFCount].mTimePoint;
 		}
 
 		//单位,帧
-		//这个函数有错误
 		float CalcFrame(float t) const{
-			return mFCount*t;
+			if (t == 1.f)
+				if (mLoop)
+					return mFCount + 0.5f;
+				else
+					return float(mFCount);
+			auto time = t*GetTotalTime();
+			auto f = 0u;
+			for(; f != mFCount - 1; ++f)
+				if ((time > mSamples[f].mTimePoint) && (time < mSamples[f + 1].mTimePoint))
+					break;
+			auto delta = mSamples[f + 1].mTimePoint - mSamples[f].mTimePoint;
+			auto frac = (time - mSamples[f].mTimePoint) / delta;
+			return f + frac;
 		}
 
 		leo::AnimationClip& operator=(leo::AnimationClip&& rvalue){
 			mSkeleton = std::move(rvalue.mSkeleton);
-			mTotalTime = rvalue.mTotalTime;
 			mFCount = rvalue.mFCount;
 			mLoop = rvalue.mLoop;
 			mSamples = std::move(rvalue.mSamples);
@@ -73,10 +82,11 @@ namespace leo{
 		std::pair<uint32, uint32> CalcFrameIndex(float frame){
 			auto first = (uint32)(std::floor(frame));
 			auto second = first + 1u;
+
 			if (mClip.mLoop)
-				first %= mClip.mFCount, second %= mClip.mFCount;
+				first %= (mClip.mFCount + 1), second %= (mClip.mFCount + 1);
 			else
-				first %= (mClip.mFCount+1), second %= (mClip.mFCount+1);
+				clamp(0u, unsigned int(mClip.mFCount), second);
 			return{ first, second };
 		}
 		float CalcFrameInterpolate(float frame){
