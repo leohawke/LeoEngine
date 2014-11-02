@@ -219,6 +219,9 @@
     <ClCompile Include="Core\SkeletonModel.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\EffectSkeleton.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.hpp">
@@ -447,6 +450,9 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\SkeletonModel.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\EffectSkeleton.hpp">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

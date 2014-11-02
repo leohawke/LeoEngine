@@ -79,21 +79,35 @@ namespace leo{
 	class Animation{
 		AnimationClip mClip;
 		//range (0,1),Current Time State 
-		float mT;
+		float mT = 0.f;
 		//ctor/loop's Game Elapsed
-		float mElapsed;
+		float mElapsed = clock::GameClock::Now<>();;
 		//用于存放计算结果
 		SkeletonPose mSkePose;
 		//播放速率
 		float mSpeed = 1.f;
 	public:
 		Animation(Animation&& rvalue)
-			:mClip(std::move(rvalue.mClip)), mT(rvalue.mT), mElapsed(rvalue.mElapsed), mSkePose(std::move(mSkePose)),
+			:mClip(std::move(rvalue.mClip)), mT(rvalue.mT), mElapsed(rvalue.mElapsed), mSkePose(std::move(rvalue.mSkePose)),
 			mSpeed(rvalue.mSpeed){
-
 		}
 
-		Animation() = default;
+#ifdef DEBUG
+		~Animation(){
+			mSpeed = 0.f;
+		}
+#endif
+
+		Animation(AnimationClip&& clip, std::shared_ptr<Skeleton> skeleton)
+			:mClip(std::move(clip)){
+			mSkePose.mSkeleton = skeleton;
+			mSkePose.mGlobalPoses = std::make_unique<float4x4[]>(skeleton->mJointCount);
+			mSkePose.mSkinMatrixs = std::make_unique<float4x4[]>(skeleton->mJointCount);
+			mSkePose.mLocalPoses = std::make_unique<JointPose[]>(skeleton->mJointCount);
+#ifdef DEBUG
+			mT = 0.f;
+#endif
+		}
 
 		std::pair<uint32, uint32> CalcFrameIndex(float frame){
 			auto first = (uint32)(std::floor(frame));
@@ -145,10 +159,6 @@ namespace leo{
 			return mSkePose;
 		}
 
-		void SetData(AnimationClip&& clip){
-			mClip = std::move(clip);
-			mSkePose.mSkeleton =std::move( mClip.mSkeleton);
-		}
 	};
 
 	//在这里计算蒙皮调色板,返回为一堆矩阵的引用,即SkeltonPose的引用

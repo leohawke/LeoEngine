@@ -80,6 +80,8 @@ namespace leo
 			SetCurrentDirectory(dir.c_str());
 			ReadSubSets(fin, fileoffset, m_subsets, device);
 			SetCurrentDirectory(L"..\\");
+			dir.resize(260);
+			GetCurrentDirectory(260, &dir[0]);
 			std::vector<vertex_type> vertices(l3d_header.numvertice);
 			ReadVertices(fin, fileoffset, vertices);
 			std::vector<std::uint32_t> indices(l3d_header.numindex);

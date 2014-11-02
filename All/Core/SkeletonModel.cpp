@@ -1,14 +1,12 @@
 #include "..\IndePlatform\platform.h"
 #include "..\d3dx11.hpp"
 #include "Mesh.hpp"
-
+#include "..\ShaderMgr.h"
 #include "SkeletonModel.hpp"
 
 #include "MeshLoad.hpp"
 #include "..\file.hpp"
 
-#pragma warning( push )
-#pragma warning(disable:4316)
 namespace leo{
 
 	static Joint convert(const MeshFile::Joint& joint){
@@ -57,6 +55,9 @@ namespace leo{
 			fileoffset += sizeof(MeshFile::MeshVertex)*l3d_header.numvertice;
 			fileoffset += sizeof(std::uint32_t) * l3d_header.numindex;
 
+			if (fileoffset >= fin->GetSize())
+				return;
+
 			leo::MeshFile::SkeletonHeader ske_header;
 			fin->Read(&ske_header, sizeof(ske_header), fileoffset);
 			fileoffset += sizeof(ske_header);
@@ -68,7 +69,7 @@ namespace leo{
 			fileoffset += sizeof(MeshFile::SkeletonAdjInfo)*adjinfos.size();
 			try{
 				std::vector<SkeletonVertexAnimationInfo> animationdatas(adjinfos.begin(), adjinfos.end());
-				CD3D11_BUFFER_DESC aniVbdesc; (sizeof(SkeletonVertexAnimationInfo)*animationdatas.size(), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+				CD3D11_BUFFER_DESC aniVbdesc(sizeof(SkeletonVertexAnimationInfo)*animationdatas.size(), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
 				D3D11_SUBRESOURCE_DATA aniSubDesc;
 				aniSubDesc.pSysMem = animationdatas.data();
 				dxcall(device->CreateBuffer(&aniVbdesc, &aniSubDesc, &mAnimationDataBUffer));
@@ -77,7 +78,7 @@ namespace leo{
 
 
 			std::vector<MeshFile::Joint> joints(ske_header.numjoint);
-			fin->Read(&adjinfos[0], sizeof(MeshFile::Joint)*joints.size(), fileoffset);
+			fin->Read(&joints[0], sizeof(MeshFile::Joint)*joints.size(), fileoffset);
 			fileoffset += sizeof(MeshFile::Joint)*joints.size();
 		
 
@@ -141,15 +142,56 @@ namespace leo{
 				convertAnimaSample(mClip.mSamples, clip.data, numframe, mSkeleton->mJointCount);
 
 				auto sid = hash(name);
-				mAnimations.emplace(sid, Animation());
-				mAnimations[sid].SetData(std::move(mClip));
+				mAnimations.emplace(sid,Animation(std::move(mClip),mSkeleton));
 			}
 		
 
 		}
 		Catch_Win32_Exception
 	}
-}
 
-#pragma warning( pop )
+	void SkeletonModel::Update(){
+		
+	}
+
+	void SkeletonModel::Render(ID3D11DeviceContext* context, const Camera& camera){
+		context->IASetIndexBuffer(mMesh.m_indexbuff, DXGI_FORMAT_R32_UINT, 0);
+		static UINT strides[] = { sizeof(Mesh::vertex_type),sizeof(SkeletonVertexAnimationInfo) };
+		static UINT offsets[] = { 0 };
+		ID3D11Buffer* vbs[] = { mMesh.m_vertexbuff,mAnimationDataBUffer };
+		context->IASetVertexBuffers(0, 1, vbs, strides, offsets);
+		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		context->IASetInputLayout(ShaderMgr().CreateInputLayout(InputLayoutDesc::Skinned));
+
+		auto & mEffect = EffectNormalMap::GetInstance();
+
+
+		XMMATRIX world = convert(this->operator std::array<__m128, 4U>());
+		mEffect->WorldMatrix(world);
+		mEffect->WorldViewProjMatrix(world*camera.ViewProj());
+
+		mEffect->Apply(context);
+
+		for (auto it = m_subsets.cbegin(); it != m_subsets.cend(); ++it)
+		{
+			mEffect->Mat(it->m_mat, context);
+			mEffect->DiffuseSRV(it->m_texdiff);
+			mEffect->NormalMapSRV(it->m_texnormalmap, context);
+			context->DrawIndexed(it->m_indexcount, it->m_indexoffset, 0);
+		}
+
+		if (EffectConfig::GetInstance()->NormalLine())
+		{
+			auto & mLineEffect = EffectNormalLine::GetInstance();
+			context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+			mLineEffect->World(world);
+			mLineEffect->ViewProj(camera.ViewProj());
+			mLineEffect->Apply(context);
+			for (auto it = m_subsets.cbegin(); it != m_subsets.cend(); ++it)
+			{
+				context->DrawIndexed(it->m_indexcount, it->m_indexoffset, 0);
+			}
+		}
+	}
+}
 

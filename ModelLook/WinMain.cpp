@@ -15,6 +15,8 @@
 #include <Core\EffectLine.hpp>
 #include <Core\Terrain.hpp>
 #include <Core\Sky.hpp>
+#include <Core\SkeletonModel.hpp>
+#include <Core\MeshLoad.hpp>
 #include <COM.hpp>
 
 #include <TextureMgr.h>
@@ -42,6 +44,7 @@ std::unique_ptr<leo::Mesh> pMesh = nullptr;
 std::unique_ptr<leo::Camera> pCamera = nullptr;
 std::unique_ptr<leo::Terrain<3,64,6>> pTerrain = nullptr;
 std::unique_ptr<leo::Sky> pSky = nullptr;
+std::unique_ptr<leo::SkeletonModel> pSke = nullptr;
 std::atomic<bool> renderAble = false;
 std::atomic<bool> renderThreadRun = true;
 
@@ -256,6 +259,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	pMesh.reset(nullptr);
 	pTerrain.reset(nullptr);
 	pSky.reset(nullptr);
+	pSke.reset(nullptr);
 	leo::global::Destroy();
 #ifdef DEBUG
 	leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
@@ -270,8 +274,8 @@ void BuildRes()
 
 	using leo::float3;
 
-	auto Eye = float3(0.f,1.f,5.f);
-	auto At = float3(0.f,2.f,9.f);
+	auto Eye = float3(0.f,0.f,-5.f);
+	auto At = float3(0.f,0.f,0.f);
 	auto Up = float3(0.f,1.f, 0.f);
 
 	pCamera->LookAt(Eye, At, Up);
@@ -322,6 +326,11 @@ void BuildRes()
 	pTerrain = std::make_unique < leo::Terrain<3,64,6> >(leo::DeviceMgr().GetDevice(), L"Resource\\Test.Terrain");
 
 	pSky = std::make_unique<leo::Sky>(leo::DeviceMgr().GetDevice(), L"Resource\\sunsetcube1024.dds");
+
+	pSke = std::make_unique<leo::SkeletonModel>();
+	pSke->LoadFromFile(L"Resource\\soldier.l3d", leo::DeviceMgr().GetDevice());
+	pSke->Scale(0.05f);
+	pSke->Pitch(leo::LM_PI);
 	//leo::DeviceMgr().GetDeviceContext()->RSSetState(leo::RenderStates().GetRasterizerState(L"WireframeRS"));
 }
 
@@ -363,6 +372,7 @@ void Render()
 
 		pSky->Render(devicecontext, *pCamera);
 
+		pSke->Render(devicecontext,*pCamera);
 		//pTerrain->Render(devicecontext, *pCamera);
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);

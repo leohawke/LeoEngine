@@ -458,7 +458,7 @@ namespace leo
 		return lhs.min(rhs);
 	}
 
-	struct lalignas(16) float4x4{
+	struct lalignas(16) float4x4 : public GeneralAllocatedObject{
 		float4 r[4];
 
 		float& operator()(uint8 row, uint8 col){

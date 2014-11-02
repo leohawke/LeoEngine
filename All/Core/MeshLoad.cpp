@@ -223,7 +223,7 @@ namespace leo
 		if (!numJoints)
 			return;
 
-		SkeletonHeader ske_header{ numJoints, numAnimations, false };
+		SkeletonHeader ske_header{ numJoints, numAnimations, true };
 		{
 			fout->Write(fileoffset, &ske_header, sizeof(ske_header));
 			fileoffset += sizeof(ske_header);
@@ -295,6 +295,8 @@ namespace leo
 				if (!alloc){
 					clip.size = numFrames;
 					clip.timedata = std::make_unique<float[]>(clip.size);
+					
+					alloc = true;
 				}
 				jointSamples.data = std::make_unique<SeqSQT[]>(clip.size);
 
