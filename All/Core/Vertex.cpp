@@ -9,9 +9,9 @@ namespace leo
 		extern const D3D11_INPUT_ELEMENT_DESC Basic[3]
 			=
 		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, sizeof(float3), D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, sizeof(float3) + sizeof(float3), D3D11_INPUT_PER_VERTEX_DATA, 0 }
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,loffsetof(Vertex::Basic,pos), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,loffsetof(Vertex::Basic,normal), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, loffsetof(Vertex::Basic,tex), D3D11_INPUT_PER_VERTEX_DATA, 0 }
 		};
 
 		extern const D3D11_INPUT_ELEMENT_DESC BasicV[3]
@@ -25,8 +25,10 @@ namespace leo
 		extern const D3D11_INPUT_ELEMENT_DESC NormalMap[4]
 			=
 		{
-			Basic[0], Basic[1], Basic[2],
-			{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, sizeof(Vertex::Basic), D3D11_INPUT_PER_VERTEX_DATA, 0 }
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, loffsetof(Vertex::NormalMap, pos), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, loffsetof(Vertex::NormalMap, normal), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, loffsetof(Vertex::NormalMap, tex), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, loffsetof(Vertex::NormalMap, tangent), D3D11_INPUT_PER_VERTEX_DATA, 0 }
 		};
 
 		extern const D3D11_INPUT_ELEMENT_DESC NormalMapV[4]
@@ -54,11 +56,9 @@ namespace leo
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, sizeof(float3), D3D11_INPUT_PER_VERTEX_DATA, 0 }
 		};
 
-		extern const D3D11_INPUT_ELEMENT_DESC Skinned[5] =
+		extern const D3D11_INPUT_ELEMENT_DESC Skinned[6] =
 		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, loffsetof(Vertex::Skinned, mNormal), D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, loffsetof(Vertex::Skinned, mTexCoord), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			NormalMap[0], NormalMap[1], NormalMap[2], NormalMap[3],
 			{ "JOINTINDICES", 0, DXGI_FORMAT_R32_UINT, 1, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "JOINTWEIGHTS", 0, DXGI_FORMAT_R32G32B32_FLOAT,1, sizeof(std::uint32_t),
 			 D3D11_INPUT_PER_VERTEX_DATA,0}

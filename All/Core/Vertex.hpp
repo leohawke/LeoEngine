@@ -153,7 +153,7 @@ namespace leo
 
 		extern const D3D11_INPUT_ELEMENT_DESC PostEffect[2];
 
-		extern const D3D11_INPUT_ELEMENT_DESC Skinned[5];
+		extern const D3D11_INPUT_ELEMENT_DESC Skinned[6];
 	}
 
 	namespace helper
