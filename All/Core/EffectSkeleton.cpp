@@ -172,7 +172,7 @@ namespace leo{
 		void SkinMatrix(std::unique_ptr<float4x4[]>& globalmatrix, std::uint32_t numJoint){
 			mNumJoint = numJoint;
 			for (auto i = 0u; i != numJoint; ++i){
-				mVertexShaderConstantBufferPerSkin.SkinMatrix[i] =convert(load(globalmatrix[i]));
+				mVertexShaderConstantBufferPerSkin.SkinMatrix[i] = XMMatrixTranspose(convert(load(globalmatrix[i])));
 			}
 		}
 	private:

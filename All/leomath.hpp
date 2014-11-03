@@ -281,9 +281,9 @@ namespace leo
 	{
 		float4 q;
 		float cos_i, sin_i, cos_j, sin_j, cos_k, sin_k;
-		sin_i = sincosd(&cos_i, eulerangle.x / 2.f);
-		sin_j = sincosd(&cos_j, eulerangle.y / 2.f);
-		sin_k = sincosd(&cos_k, eulerangle.z / 2.f);
+		sin_i = sincosr(&cos_i, eulerangle.x / 2.f);
+		sin_j = sincosr(&cos_j, eulerangle.y / 2.f);
+		sin_k = sincosr(&cos_k, eulerangle.z / 2.f);
 		q.x = static_cast<float>(sin_i*cos_j*cos_k + cos_i*sin_i*sin_k);
 		q.y = static_cast<float>(cos_i*sin_j*cos_k - sin_i*cos_j*sin_k);
 		q.z = static_cast<float>(cos_i*cos_j*sin_k - sin_i*sin_j*cos_k);
@@ -294,9 +294,9 @@ namespace leo
 	inline float3 QuaternionToEulerAngle(const float4& quaternion)
 	{
 		float3 q;
-		q.x = ::atan2(2 * (quaternion.w*quaternion.x + quaternion.y*quaternion.z), (1 - 2 * (quaternion.y*quaternion.y + quaternion.x*quaternion.x))) * LM_DPR;
-		q.y = asin(2 * (quaternion.w*quaternion.y - quaternion.z*quaternion.x))* LM_DPR;
-		q.z = ::atan2(2 * (quaternion.w*quaternion.z + quaternion.x*quaternion.y), (1 - 2 * (quaternion.z*quaternion.z + quaternion.y*quaternion.y)))* LM_DPR;
+		q.x = ::atan2(2 * (quaternion.w*quaternion.x + quaternion.y*quaternion.z), (1 - 2 * (quaternion.y*quaternion.y + quaternion.x*quaternion.x))) ;
+		q.y = asin(2 * (quaternion.w*quaternion.y - quaternion.z*quaternion.x));
+		q.z = ::atan2(2 * (quaternion.w*quaternion.z + quaternion.x*quaternion.y), (1 - 2 * (quaternion.z*quaternion.z + quaternion.y*quaternion.y)));
 		return q;
 	}
 

@@ -146,6 +146,9 @@
     <ClCompile Include="..\All\Core\SkeletonModel.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\Core\EffectSkeleton.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\All\IndePlatform\algorithm.hpp">

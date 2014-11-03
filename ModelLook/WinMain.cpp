@@ -17,6 +17,7 @@
 #include <Core\Sky.hpp>
 #include <Core\SkeletonModel.hpp>
 #include <Core\MeshLoad.hpp>
+#include <Core\EffectSkeleton.hpp>
 #include <COM.hpp>
 
 #include <TextureMgr.h>
@@ -302,6 +303,7 @@ void BuildRes()
 
 	leo::EffectNormalLine::GetInstance(leo::DeviceMgr().GetDevice());
 	leo::EffectSky::GetInstance(leo::DeviceMgr().GetDevice());
+	leo::EffectSkeleton::GetInstance(leo::DeviceMgr().GetDevice())->Light(dirlight);
 	//leo::EffectLine::GetInstance(leo::DeviceMgr().GetDevice());
 	//leo::Axis::GetInstance(leo::DeviceMgr().GetDevice());
 
@@ -371,7 +373,7 @@ void Render()
 		
 
 		pSky->Render(devicecontext, *pCamera);
-
+		pSke->Update();
 		pSke->Render(devicecontext,*pCamera);
 		//pTerrain->Render(devicecontext, *pCamera);
 

@@ -170,7 +170,7 @@ namespace leo{
 		XMMATRIX world = convert(mMesh.operator std::array<__m128, 4U>());
 		mEffect->WorldMatrix(world);
 		mEffect->WorldViewProjMatrix(world*camera.ViewProj());
-		mEffect->SkinMatrix(mPose->mGlobalPoses, mSkeleton->mJointCount);
+		mEffect->SkinMatrix(mPose->mSkinMatrixs, mSkeleton->mJointCount);
 		mEffect->Apply(context);
 
 		for (auto it = mMesh.m_subsets.cbegin(); it != mMesh.m_subsets.cend(); ++it)
