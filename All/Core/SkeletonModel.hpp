@@ -38,6 +38,8 @@ namespace leo{
 		std::shared_ptr<Skeleton> mSkeleton;
 		//一个骨骼不止一个动画
 		std::map<std::size_t,Animation> mAnimations;
+
+		SkeletonPose* mPose = nullptr;
 	public:
 		~SkeletonModel(){
 			win::ReleaseCOM(mAnimationDataBUffer);

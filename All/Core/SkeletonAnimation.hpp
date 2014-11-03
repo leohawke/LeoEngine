@@ -52,7 +52,7 @@ namespace leo{
 			auto time = t*GetTotalTime();
 			auto f = 0u;
 			for(; f != mFCount - 1; ++f)
-				if ((time > mSamples[f].mTimePoint) && (time < mSamples[f + 1].mTimePoint))
+				if ((time >= mSamples[f].mTimePoint) && (time < mSamples[f + 1].mTimePoint))
 					break;
 			auto delta = mSamples[f + 1].mTimePoint - mSamples[f].mTimePoint;
 			auto frac = (time - mSamples[f].mTimePoint) / delta;
@@ -92,11 +92,7 @@ namespace leo{
 			mSpeed(rvalue.mSpeed){
 		}
 
-#ifdef DEBUG
-		~Animation(){
-			mSpeed = 0.f;
-		}
-#endif
+		Animation() = default;
 
 		Animation(AnimationClip&& clip, std::shared_ptr<Skeleton> skeleton)
 			:mClip(std::move(clip)){
@@ -147,15 +143,15 @@ namespace leo{
 				mSkePose.mLocalPoses[jointIndex] = Lerp(p1, p2, CalcFrameInterpolate(frame));
 			}
 
+			mSkePose.mGlobalPoses[0] = mSkePose.mLocalPoses[0].operator leo::float4x4();
 			//子节点在后面,只需找到父,即可相乘
-			for (auto jointIndex = 0u; jointIndex != mClip.mSkeleton->mJointCount; ++jointIndex){
+			for (auto jointIndex = 1u; jointIndex != mClip.mSkeleton->mJointCount; ++jointIndex){
 				auto & joint = mSkePose.mSkeleton->mJoints[jointIndex];
-				if (joint.mParent != 0xFFu){
-					save(mSkePose.mGlobalPoses[jointIndex] ,Multiply(load(mSkePose.mGlobalPoses[joint.mParent]),mSkePose.mLocalPoses[jointIndex].operator std::array<__m128, 4U>()));
-				}
-				save(mSkePose.mSkinMatrixs[jointIndex],Multiply(load(joint.mInvBindPose),load(mSkePose.mGlobalPoses[jointIndex])));
+				save(mSkePose.mGlobalPoses[jointIndex], Multiply(mSkePose.mLocalPoses[jointIndex].operator std::array<__m128, 4U>(),load(mSkePose.mGlobalPoses[joint.mParent])));
+				
 			}
-
+			for (auto jointIndex = 0u; jointIndex != mClip.mSkeleton->mJointCount; ++jointIndex)
+			save(mSkePose.mSkinMatrixs[jointIndex], Multiply(load(mSkePose.mSkeleton->mJoints[jointIndex].mInvBindPose), load(mSkePose.mGlobalPoses[jointIndex])));
 			return mSkePose;
 		}
 

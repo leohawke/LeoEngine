@@ -525,6 +525,9 @@
     <FxCompile Include="Shader\SkinVS.hlsl">
       <Filter>Shader\HLSL\Skin</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\SkinPS.hlsl">
+      <Filter>Shader\HLSL\Skin</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Gaussian_color.hlsl">

@@ -1,18 +1,31 @@
 #include "EffectSkeleton.hpp"
+#include "Vertex.hpp"
+#include "..\ShaderMgr.h"
+#include "..\RenderStates.hpp"
+#include <d3dcompiler.h>
+
+#include <atomic>
+#pragma comment(lib,"d3dcompiler.lib")
 namespace leo{
+
+	XMMATRIX static convert(const std::array<__m128, 4>& matrix){
+		return{ matrix[0], matrix[1], matrix[2], matrix[3] };
+	}
 
 	class EffectSkeletonDelegate :CONCRETE(EffectSkeleton), public Singleton<EffectSkeletonDelegate>
 	{
 	public:
 		EffectSkeletonDelegate(ID3D11Device* device)
-			:mVertexShaderConstantBufferPerFrame(device), mPixelShaderConstantBufferPerFrame(device), mPixelShaderConstantBufferPerPrimitive(device), mPixelShaderConstantBufferPerView(device)
+			:mVertexShaderConstantBufferPerFrame(device),mVertexShaderConstantBufferPerSkin(device),
+			 mPixelShaderConstantBufferPerFrame(device), mPixelShaderConstantBufferPerPrimitive(device),
+			 mPixelShaderConstantBufferPerView(device)
 		{
 			leo::ShaderMgr sm;
 			ID3D11InputLayout* layout;
-			mVertexShader = sm.CreateVertexShader(L"Shader\\NormalMapVS.cso", nullptr, InputLayoutDesc::NormalMap, 4, &layout);
+			mVertexShader = sm.CreateVertexShader(L"Shader\\SkinVS.cso", nullptr, InputLayoutDesc::Skinned,arrlen(InputLayoutDesc::Skinned), &layout);
 
 			device->CreateClassLinkage(&mPixelShaderClassLinkage);
-			auto blob = sm.CreateBlob(L"Shader\\NormalMapPS.cso");
+			auto blob = sm.CreateBlob(L"Shader\\SkinPS.cso");
 			mPixelShader = sm.CreatePixelShader(blob, mPixelShaderClassLinkage);
 
 			ID3D11ShaderReflection* pRefector = nullptr;
@@ -45,9 +58,14 @@ namespace leo{
 		{
 			context_wrapper pContext(context, L"normalmap");
 			mVertexShaderConstantBufferPerFrame.Update(context);
+			mVertexShaderConstantBufferPerSkin.Update(context);
 
+			ID3D11Buffer* mvscbs[] = {
+				mVertexShaderConstantBufferPerFrame.mBuffer,
+				mVertexShaderConstantBufferPerSkin.mBuffer
+			};
 			pContext.VSSetShader(mVertexShader, nullptr, 0);
-			pContext.VSSetConstantBuffers(0, 1, &mVertexShaderConstantBufferPerFrame.mBuffer);
+			pContext.VSSetConstantBuffers(0, 2, mvscbs);
 
 
 			mPixelShaderConstantBufferPerFrame.Update(context);
@@ -150,6 +168,14 @@ namespace leo{
 		{
 			return true;
 		}
+
+		void SkinMatrix(std::unique_ptr<float4x4[]>& globalmatrix, std::uint32_t numJoint){
+			mNumJoint = numJoint;
+			for (auto i = 0u; i != numJoint; ++i){
+				mVertexShaderConstantBufferPerSkin.SkinMatrix[i] =convert(load(globalmatrix[i]));
+			}
+		}
+	private:
 	private:
 		struct VScbPerFrame
 		{
@@ -160,6 +186,13 @@ namespace leo{
 			const static std::uint8_t slot = 0;
 		};
 		ShaderConstantBuffer<VScbPerFrame> mVertexShaderConstantBufferPerFrame;
+		struct VScbPerSkin
+		{
+			XMMATRIX SkinMatrix[96];
+		public:
+			const static std::uint8_t slot = 1;
+		};
+		ShaderConstantBuffer<VScbPerSkin> mVertexShaderConstantBufferPerSkin;
 		struct PScbPerFrame
 		{
 			DirectionLight gDirLight;
@@ -202,6 +235,8 @@ namespace leo{
 
 		ID3D11ShaderResourceView *mPixelShaderDiffuseSRV = nullptr;
 		ID3D11ShaderResourceView *mPixelShaderNormalMapSRV = nullptr;
+
+		std::uint32_t mNumJoint = 0;
 	};
 
 	const std::unique_ptr<EffectSkeleton>& EffectSkeleton::GetInstance(ID3D11Device* device)
@@ -312,7 +347,7 @@ namespace leo{
 	void EffectSkeleton::SkinMatrix(std::unique_ptr<float4x4[]>& globalmatrix, std::uint32_t numJoint){
 		lassume(dynamic_cast<EffectSkeletonDelegate *>(this));
 
-		return ((EffectSkeletonDelegate *)this)->SkinMatrix(matrix,numJoint
+		return ((EffectSkeletonDelegate *)this)->SkinMatrix(globalmatrix, numJoint
 			);
 	}
 }

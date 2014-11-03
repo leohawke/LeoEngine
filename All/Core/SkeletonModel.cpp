@@ -3,10 +3,10 @@
 #include "Mesh.hpp"
 #include "..\ShaderMgr.h"
 #include "SkeletonModel.hpp"
-
+#include "EffectSkeleton.hpp"
 #include "MeshLoad.hpp"
 #include "..\file.hpp"
-
+#include "Camera.hpp"
 namespace leo{
 
 	static Joint convert(const MeshFile::Joint& joint){
@@ -16,6 +16,7 @@ namespace leo{
 		result.mParent = joint.parent;
 		return result;
 	}
+
 
 	struct SkeletonVertexAnimationInfo{
 		uint32 mIndices;
@@ -151,28 +152,28 @@ namespace leo{
 	}
 
 	void SkeletonModel::Update(){
-		
+		mPose = &mAnimations.begin()->second.Update();
 	}
 
 	void SkeletonModel::Render(ID3D11DeviceContext* context, const Camera& camera){
 		context->IASetIndexBuffer(mMesh.m_indexbuff, DXGI_FORMAT_R32_UINT, 0);
 		static UINT strides[] = { sizeof(Mesh::vertex_type),sizeof(SkeletonVertexAnimationInfo) };
-		static UINT offsets[] = { 0 };
+		static UINT offsets[] = { 0,0 };
 		ID3D11Buffer* vbs[] = { mMesh.m_vertexbuff,mAnimationDataBUffer };
-		context->IASetVertexBuffers(0, 1, vbs, strides, offsets);
+		context->IASetVertexBuffers(0, 2, vbs, strides, offsets);
 		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		context->IASetInputLayout(ShaderMgr().CreateInputLayout(InputLayoutDesc::Skinned));
 
-		auto & mEffect = EffectNormalMap::GetInstance();
+		auto & mEffect = EffectSkeleton::GetInstance();
 
 
-		XMMATRIX world = convert(this->operator std::array<__m128, 4U>());
+		XMMATRIX world = convert(mMesh.operator std::array<__m128, 4U>());
 		mEffect->WorldMatrix(world);
 		mEffect->WorldViewProjMatrix(world*camera.ViewProj());
-
+		mEffect->SkinMatrix(mPose->mGlobalPoses, mSkeleton->mJointCount);
 		mEffect->Apply(context);
 
-		for (auto it = m_subsets.cbegin(); it != m_subsets.cend(); ++it)
+		for (auto it = mMesh.m_subsets.cbegin(); it != mMesh.m_subsets.cend(); ++it)
 		{
 			mEffect->Mat(it->m_mat, context);
 			mEffect->DiffuseSRV(it->m_texdiff);
@@ -187,7 +188,7 @@ namespace leo{
 			mLineEffect->World(world);
 			mLineEffect->ViewProj(camera.ViewProj());
 			mLineEffect->Apply(context);
-			for (auto it = m_subsets.cbegin(); it != m_subsets.cend(); ++it)
+			for (auto it = mMesh.m_subsets.cbegin(); it != mMesh.m_subsets.cend(); ++it)
 			{
 				context->DrawIndexed(it->m_indexcount, it->m_indexoffset, 0);
 			}

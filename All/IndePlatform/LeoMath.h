@@ -59,6 +59,8 @@ namespace leo
 	const float LM_1DIV2PI = 0.159154943f;
 	//radian per degree
 	const float LM_RPD = LM_PI / 180.0f;
+	//degree per radian
+	const float LM_DPR = 180.f / LM_PI;
 
 	const std::uint8_t zero = 0;
 	const std::uint8_t one = 1;
@@ -699,6 +701,11 @@ namespace leo
 	}
 }
 
+//constant
+namespace leo{
+	
+}
+
 //details
 namespace leo{
 	namespace details{
@@ -784,13 +791,14 @@ namespace leo{
 			const static auto _mzero = load(*reinterpret_cast<const float4 *>(zero));
 			return _mzero;
 		}
-
+		
 		inline __m128 SplatR0(){
 			const static float4	r0(1.0f, 0.0f, 0.0f, 0.0f);
 			const static auto _mr0 = load(r0);
 			return _mr0;
 		}
 
+		
 	}
 }
 
@@ -974,6 +982,16 @@ namespace leo{
 		return mResult;
 #else // _LM_VMX128_INTRINSICS_
 #endif // _LM_VMX128_INTRINSICS_
+	}
+
+	inline std::array<__m128, 4> I(){
+		const static float4	r1(1.0f, 0.0f, 0.0f, 0.0f);
+		const static float4	r2(1.0f, 0.0f, 0.0f, 0.0f);
+		const static float4	r3(1.0f, 0.0f, 0.0f, 0.0f);
+		const static auto mr1 = load(r1);
+		const static auto mr2 = load(r2);
+		const static auto mr3 = load(r3);
+		return { {details::SplatR0(), mr1, mr2, mr3} };
 	}
 
 	//1.Calculate an estimate for the reciprocal of the divisor (D): X0.

@@ -294,9 +294,9 @@ namespace leo
 	inline float3 QuaternionToEulerAngle(const float4& quaternion)
 	{
 		float3 q;
-		q.x = ::atan2(2 * (quaternion.w*quaternion.x + quaternion.y*quaternion.z), (1 - 2 * (quaternion.y*quaternion.y + quaternion.x*quaternion.x)));
-		q.y = asin(2 * (quaternion.w*quaternion.y - quaternion.z*quaternion.x));
-		q.z = ::atan2(2 * (quaternion.w*quaternion.z + quaternion.x*quaternion.y), (1 - 2 * (quaternion.z*quaternion.z + quaternion.y*quaternion.y)));
+		q.x = ::atan2(2 * (quaternion.w*quaternion.x + quaternion.y*quaternion.z), (1 - 2 * (quaternion.y*quaternion.y + quaternion.x*quaternion.x))) * LM_DPR;
+		q.y = asin(2 * (quaternion.w*quaternion.y - quaternion.z*quaternion.x))* LM_DPR;
+		q.z = ::atan2(2 * (quaternion.w*quaternion.z + quaternion.x*quaternion.y), (1 - 2 * (quaternion.z*quaternion.z + quaternion.y*quaternion.y)))* LM_DPR;
 		return q;
 	}
 
