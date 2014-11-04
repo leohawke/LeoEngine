@@ -95,14 +95,12 @@ namespace leo
 			float2 tex;
 		};
 
-		struct Skinned{
-			float3 mPos;
-			float3 mNormal;
-			float2 mTexCoord;
-			//关节索引
-			uint8 mJointIndices[4];
-			//关节权重
-			float3 mJointWeights;
+		struct SkeAdjInfo{
+			SkeAdjInfo(uint32 indices,const float3& weights)
+				:mIndices(indices), mWeights(weights)
+			{}
+			uint32 mIndices;
+			float3 mWeights;
 		};
 
 		template<typename T>

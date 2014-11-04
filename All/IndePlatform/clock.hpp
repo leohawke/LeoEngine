@@ -98,7 +98,7 @@ namespace leo
 			template<typename VARG = float, typename TIMEUNIT = std::chrono::seconds>
 			static void Update(const VARG& dt)
 			{
-				if (GetInstance().mPaused)
+				if (!GetInstance().mPaused)
 				{
 					auto dtScaleCycles = to_duration<VARG, TIMEUNIT>(GetInstance().mScale*dt);
 					GetInstance().mElapse += dtScaleCycles;

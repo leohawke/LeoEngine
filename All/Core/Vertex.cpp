@@ -59,8 +59,8 @@ namespace leo
 		extern const D3D11_INPUT_ELEMENT_DESC Skinned[6] =
 		{
 			NormalMap[0], NormalMap[1], NormalMap[2], NormalMap[3],
-			{ "JOINTINDICES", 0, DXGI_FORMAT_R32_UINT, 1, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "JOINTWEIGHTS", 0, DXGI_FORMAT_R32G32B32_FLOAT,1, sizeof(std::uint32_t),
+			{ "JOINTINDICES", 0, DXGI_FORMAT_R32_UINT, 1, loffsetof(Vertex::SkeAdjInfo,mIndices), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "JOINTWEIGHTS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, loffsetof(Vertex::SkeAdjInfo, mWeights),
 			 D3D11_INPUT_PER_VERTEX_DATA,0}
 		};
 	}

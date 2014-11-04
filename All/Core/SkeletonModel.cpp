@@ -18,13 +18,11 @@ namespace leo{
 	}
 
 
-	struct SkeletonVertexAnimationInfo{
-		uint32 mIndices;
-		float3 mWeights;
-		SkeletonVertexAnimationInfo(const MeshFile::SkeletonAdjInfo& info)
-			:mIndices(info.indices),mWeights(info.weights){
+	struct SkeletonVertexAdjInfo : public Vertex::SkeAdjInfo{
+		SkeletonVertexAdjInfo(const MeshFile::SkeletonAdjInfo& info)
+			:Vertex::SkeAdjInfo(info.indices,float3(info.weights)){
 		}
-		SkeletonVertexAnimationInfo& operator=(const MeshFile::SkeletonAdjInfo& info){
+		SkeletonVertexAdjInfo& operator=(const MeshFile::SkeletonAdjInfo& info){
 			mIndices = info.indices;
 			mWeights = info.weights;
 		}
@@ -69,8 +67,8 @@ namespace leo{
 
 			fileoffset += sizeof(MeshFile::SkeletonAdjInfo)*adjinfos.size();
 			try{
-				std::vector<SkeletonVertexAnimationInfo> animationdatas(adjinfos.begin(), adjinfos.end());
-				CD3D11_BUFFER_DESC aniVbdesc(sizeof(SkeletonVertexAnimationInfo)*animationdatas.size(), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
+				std::vector<SkeletonVertexAdjInfo> animationdatas(adjinfos.begin(), adjinfos.end());
+				CD3D11_BUFFER_DESC aniVbdesc(sizeof(SkeletonVertexAdjInfo)*animationdatas.size(), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
 				D3D11_SUBRESOURCE_DATA aniSubDesc;
 				aniSubDesc.pSysMem = animationdatas.data();
 				dxcall(device->CreateBuffer(&aniVbdesc, &aniSubDesc, &mAnimationDataBUffer));
@@ -122,7 +120,6 @@ namespace leo{
 				//为读入分配足够内存
 				for (auto j = 0u; j != ske_header.numjoint; ++j)
 					clip.data[j].data = std::make_unique<SeqSQT[]>(numframe);
-
 				//开始读入
 				for (auto j = 0u; j != ske_header.numjoint; ++j){
 					fin->Read(clip.data[j].data.get(), sizeof(SeqSQT)*numframe, fileoffset);
@@ -157,7 +154,7 @@ namespace leo{
 
 	void SkeletonModel::Render(ID3D11DeviceContext* context, const Camera& camera){
 		context->IASetIndexBuffer(mMesh.m_indexbuff, DXGI_FORMAT_R32_UINT, 0);
-		static UINT strides[] = { sizeof(Mesh::vertex_type),sizeof(SkeletonVertexAnimationInfo) };
+		static UINT strides[] = { sizeof(Mesh::vertex_type),sizeof(SkeletonVertexAdjInfo) };
 		static UINT offsets[] = { 0,0 };
 		ID3D11Buffer* vbs[] = { mMesh.m_vertexbuff,mAnimationDataBUffer };
 		context->IASetVertexBuffers(0, 2, vbs, strides, offsets);

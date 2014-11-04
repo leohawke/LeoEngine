@@ -14,9 +14,8 @@ namespace leo
 		http://www.cnblogs.com/wqj1212/archive/2010/11/21/1883033.html
 	*/
 	SQT::SQT(const SeqSQT& lvalue)
-		:s(lvalue.s), t(lvalue.t)
+		:s(lvalue.s), t(lvalue.t), q(lvalue.q)
 	{
-		q = EulerAngleToQuaternion(float3(lvalue.a));
 	}
 
 	SQT::SQT()
@@ -41,7 +40,7 @@ namespace leo
 	{
 		std::memcpy(&t, &lvalue.t, sizeof(float) * 3);
 		auto rvalue = QuaternionToEulerAngle(lvalue.q);
-		std::memcpy(&a,&rvalue,sizeof(float)*3);
+		std::memcpy(&q,&rvalue,sizeof(float)*4);
 	}
 
 	void SeqSQT::operator=(const SQT& lvalue)

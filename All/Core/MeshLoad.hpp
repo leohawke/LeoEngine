@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <string>
 #include <functional>
-
+#include "CoreObject.hpp"
 #include "..\leomath.hpp"
 namespace leo
 {

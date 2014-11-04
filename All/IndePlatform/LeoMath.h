@@ -985,9 +985,9 @@ namespace leo{
 	}
 
 	inline std::array<__m128, 4> I(){
-		const static float4	r1(1.0f, 0.0f, 0.0f, 0.0f);
-		const static float4	r2(1.0f, 0.0f, 0.0f, 0.0f);
-		const static float4	r3(1.0f, 0.0f, 0.0f, 0.0f);
+		const static float4	r1(0.0f, 1.0f, 0.0f, 0.0f);
+		const static float4	r2(0.0f, 0.0f, 1.0f, 0.0f);
+		const static float4	r3(0.0f, 0.0f, 0.0f, 1.0f);
 		const static auto mr1 = load(r1);
 		const static auto mr2 = load(r2);
 		const static auto mr3 = load(r3);

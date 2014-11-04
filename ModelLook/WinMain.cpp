@@ -332,8 +332,7 @@ void BuildRes()
 	pSke = std::make_unique<leo::SkeletonModel>();
 	pSke->LoadFromFile(L"Resource\\soldier.l3d", leo::DeviceMgr().GetDevice());
 	pSke->Scale(0.05f);
-	pSke->Pitch(leo::LM_PI);
-	//leo::DeviceMgr().GetDeviceContext()->RSSetState(leo::RenderStates().GetRasterizerState(L"WireframeRS"));
+	leo::DeviceMgr().GetDeviceContext()->RSSetState(leo::RenderStates().GetRasterizerState(L"WireframeRS"));
 }
 
 
@@ -357,7 +356,7 @@ void Render()
 			pCamera->Strafe(+0.05f);
 
 		pCamera->UpdateViewMatrix();
-
+		leo::clock::GameClock::Update(1/60.f);
 		leo::RenderSync::GetInstance()->Sync();
 
 		auto devicecontext = dm.GetDeviceContext();

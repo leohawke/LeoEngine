@@ -47,7 +47,7 @@ namespace leo
 	动画采样数 ----------------std::uint32_t
 	动画采样时间点 ------------float [动画采样数]
 	关节0信息:
-	采样1	 -----------------SeqSqt;
+	采样1	 -----------------Sqt;
 	.....
 	采样n	 -----------------
 	关节i信息
@@ -272,8 +272,6 @@ namespace leo
 			clip.data = std::make_unique<JointAnimaSample[]>(numJoints);
 		
 
-		float4 q;
-		float3 a;
 		fin >> ignore;// AnimationClips header text
 		std::string clipName;
 		std::wstring wclipName;
@@ -305,9 +303,7 @@ namespace leo
 					fin >> ignore >> clip.timedata[f];
 					fin >> ignore >> sampleInfo.t[0] >> sampleInfo.t[1] >> sampleInfo.t[2];
 					fin >> ignore >> sampleInfo.s >> sampleInfo.s >> sampleInfo.s;
-					fin >> ignore >> q.x >> q.y >> q.z >> q.w;
-					a = QuaternionToEulerAngle(q);
-					sampleInfo.a[0] = a.x; sampleInfo.a[1] = a.y; sampleInfo.a[2] = a.z;
+					fin >> ignore >> sampleInfo.q[0] >> sampleInfo.q[1] >> sampleInfo.q[2] >> sampleInfo.q[3];
 				}
 				fin >> ignore;
 			}

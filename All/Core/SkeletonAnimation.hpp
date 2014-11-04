@@ -151,7 +151,8 @@ namespace leo{
 				
 			}
 			for (auto jointIndex = 0u; jointIndex != mClip.mSkeleton->mJointCount; ++jointIndex)
-			save(mSkePose.mSkinMatrixs[jointIndex], Multiply(load(mSkePose.mSkeleton->mJoints[jointIndex].mInvBindPose), load(mSkePose.mGlobalPoses[jointIndex])));
+				save(mSkePose.mSkinMatrixs[jointIndex], Multiply(load(mSkePose.mSkeleton->mJoints[jointIndex].mInvBindPose), load(mSkePose.mGlobalPoses[jointIndex])));
+				//save(mSkePose.mSkinMatrixs[jointIndex], I());
 			return mSkePose;
 		}
 

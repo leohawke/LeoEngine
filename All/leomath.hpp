@@ -361,7 +361,7 @@ namespace leo
 		SeqSQT();
 		SeqSQT(const SQT& lvalue);
 		void operator=(const SQT& lvalue);
-		float a[3];//Å·À­½Ç
+		float q[4];
 		float t[3];
 		float s;
 	};
