@@ -16,8 +16,8 @@ SamplerState LinearRepeat :register(s0);
 
 float4 main(PixelIn pin) : SV_TARGET
 {
-	float4 texColor = TexDiffuse.Sample(LinearRepeat, pin.Tex);
-	clip(texColor.a - 0.1f);
+	float4 texColor = float4(1.f, 1.f, 1.f, 1.f);
+	texColor = TexDiffuse.Sample(LinearRepeat, pin.Tex);
 
 	//lerp can unnormalize
 	pin.NormalW = normalize(pin.NormalW);

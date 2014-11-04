@@ -537,7 +537,7 @@ namespace leo
 	private:
 		struct VScbPerCamera
 		{
-			pack_type<float3> gEyePos;
+			float3 gEyePos;
 			XMMATRIX gViewProj;
 		public:
 			static const std::uint8_t slot = 0;

@@ -297,7 +297,7 @@ void BuildRes()
 	dirlight.ambient = leo::float4(1.f, 1.f, 1.f, 1.f);
 	dirlight.diffuse = leo::float4(1.f, 1.f, 1.f, 1.f);
 	dirlight.specular = leo::float4(1.f, 1.f, 1.f, 32.f);
-	dirlight.dir = leo::float4(0.0f, 1.0f, 5.0f, 0.f);
+	dirlight.dir = leo::float4(-0.5773f, -0.57735f,0.57735f, 0.f);
 
 	pEffect->Light(dirlight);
 
@@ -332,7 +332,15 @@ void BuildRes()
 	pSke = std::make_unique<leo::SkeletonModel>();
 	pSke->LoadFromFile(L"Resource\\soldier.l3d", leo::DeviceMgr().GetDevice());
 	pSke->Scale(0.05f);
-	leo::DeviceMgr().GetDeviceContext()->RSSetState(leo::RenderStates().GetRasterizerState(L"WireframeRS"));
+	leo::XMMATRIX modelRot = leo::XMMatrixRotationY(leo::LM_PI);
+	leo::float4 quaternion;
+	save(quaternion,leo::XMQuaternionRotationMatrix(modelRot));
+	leo::float3 eulerangle = leo::QuaternionToEulerAngle(quaternion);
+	//pSke->Rotation(quaternion);
+	//pSke->Roll(eulerangle.x);
+	//pSke->Pitch(eulerangle.y);
+	//pSke->Yaw(eulerangle.z);
+	//leo::DeviceMgr().GetDeviceContext()->RSSetState(leo::RenderStates().GetRasterizerState(L"WireframeRS"));
 }
 
 
@@ -356,7 +364,8 @@ void Render()
 			pCamera->Strafe(+0.05f);
 
 		pCamera->UpdateViewMatrix();
-		leo::clock::GameClock::Update(1/60.f);
+		leo::clock::GameClock::Update(leo::clock::ProgramClock::GetElapse());
+		leo::clock::ProgramClock::Reset();
 		leo::RenderSync::GetInstance()->Sync();
 
 		auto devicecontext = dm.GetDeviceContext();
