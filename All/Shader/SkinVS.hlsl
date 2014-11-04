@@ -5,6 +5,10 @@ cbuffer cbChangerEveryFrame : register(b0)
 	matrix gWorldViewProj;
 }
 
+cbuffer SkinMatrix : register(b1){
+	matrix gSkinMatrix[96];
+}
+
 struct VertexIn
 {
 	float3 PosL     : POSITION;
@@ -24,9 +28,7 @@ struct VertexOut
 	float2 Tex      : TEXCOORD;
 };
 
-cbuffer SkinMatrix : register(b1){
-	matrix gSkinMatrix[96];
-}
+
 
 uint4 CalcIndices(uint indices){
 	return uint4((indices & 0xff000000) >> 24,
@@ -41,23 +43,23 @@ uint4 CalcIndices(uint indices){
 VertexOut main(VertexIn vin)
 {
 	VertexOut vout;
-	float4 weights = float4(vin.mWeights, 1.f - (vin.mWeights.x + vin.mWeights.y, +vin.mWeights.z));
-		uint4 indices = uint4(CalcIndices(vin.mJointIndices));
+	float weights[4];
+	weights[0] = vin.mWeights.x;
+	weights[1] = vin.mWeights.y;
+	weights[2] = vin.mWeights.z;
+	weights[3] = 1.f - weights[0] - weights[1] - weights[2];
+		uint4 indices = CalcIndices(vin.mJointIndices);
 
 		float3 posL = float3(0.f, 0.f, 0.f);
 		float3 normalL = float3(0.0f, 0.0f, 0.0f);
 		float3 tangentL = float3(0.0f, 0.0f, 0.0f);
-#if 1
+		[unroll]
 		for (int i = 0; i < 4; ++i){
-		posL += weights[i] * mul(float4(vin.PosL, 1.f), gSkinMatrix[indices[i]]).xyz;
-		normalL += weights[i] * mul(vin.NormalL, (float3x3)gSkinMatrix[indices[i]]);
-		tangentL += weights[i] * mul(vin.TangentL, (float3x3)gSkinMatrix[indices[i]]);
+			posL += weights[i] * mul(float4(vin.PosL, 1.f), gSkinMatrix[indices[i]]).xyz;
+			normalL += weights[i] * mul(vin.NormalL, (float3x3)gSkinMatrix[indices[i]]);
+			tangentL += weights[i] * mul(vin.TangentL, (float3x3)gSkinMatrix[indices[i]]);
 		}
-#else
-		posL = vin.PosL;
-	normalL = vin.NormalL;
-	tangentL = vin.TangentL;
-#endif
+
 	// Transform to world space space.
 	vout.PosW = mul(float4(posL, 1.0f), gWorld).xyz;
 	vout.NormalW = mul(normalL, (float3x3)gWorldInvTranspose);

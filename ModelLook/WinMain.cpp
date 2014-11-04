@@ -332,7 +332,7 @@ void BuildRes()
 	pSke = std::make_unique<leo::SkeletonModel>();
 	pSke->LoadFromFile(L"Resource\\soldier.l3d", leo::DeviceMgr().GetDevice());
 	pSke->Scale(0.05f);
-	//leo::DeviceMgr().GetDeviceContext()->RSSetState(leo::RenderStates().GetRasterizerState(L"WireframeRS"));
+	leo::DeviceMgr().GetDeviceContext()->RSSetState(leo::RenderStates().GetRasterizerState(L"WireframeRS"));
 }
 
 
