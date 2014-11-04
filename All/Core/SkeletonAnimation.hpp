@@ -147,12 +147,20 @@ namespace leo{
 			//子节点在后面,只需找到父,即可相乘
 			for (auto jointIndex = 1u; jointIndex != mClip.mSkeleton->mJointCount; ++jointIndex){
 				auto & joint = mSkePose.mSkeleton->mJoints[jointIndex];
-				save(mSkePose.mGlobalPoses[jointIndex], Multiply(mSkePose.mLocalPoses[jointIndex].operator std::array<__m128, 4U>(),load(mSkePose.mGlobalPoses[joint.mParent])));
-				
+				auto parentToRoot = load(mSkePose.mGlobalPoses[joint.mParent]);
+				auto toParent = mSkePose.mLocalPoses[jointIndex].operator std::array<__m128, 4U>();
+				float4x4 toRoot;
+				save(toRoot, Multiply(toParent,parentToRoot));
+				mSkePose.mGlobalPoses[jointIndex] = toRoot;
 			}
-			for (auto jointIndex = 0u; jointIndex != mClip.mSkeleton->mJointCount; ++jointIndex)
-				save(mSkePose.mSkinMatrixs[jointIndex], Multiply(load(mSkePose.mSkeleton->mJoints[jointIndex].mInvBindPose), load(mSkePose.mGlobalPoses[jointIndex])));
+			for (auto jointIndex = 0u; jointIndex != mClip.mSkeleton->mJointCount; ++jointIndex){
+				auto invBindPose = load(mSkePose.mSkeleton->mJoints[jointIndex].mInvBindPose);
+				auto toRoot = load(mSkePose.mGlobalPoses[jointIndex]);
+				float4x4 skin;
+				save(skin, Multiply(invBindPose, toRoot));
+				mSkePose.mSkinMatrixs[jointIndex] = skin;
 				//save(mSkePose.mSkinMatrixs[jointIndex], I());
+			}
 			return mSkePose;
 		}
 

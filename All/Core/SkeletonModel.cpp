@@ -36,7 +36,7 @@ namespace leo{
 				dst[f].mJointsPose[j] = src[j].data[f];
 			}
 	}
-
+	//Todo,加入debug信息,Log文件
 	void SkeletonModel::LoadFromFile(const std::wstring& filename, ID3D11Device* device){
 		mMesh.Load(filename, device);
 
