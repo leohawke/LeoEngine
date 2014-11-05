@@ -43,11 +43,15 @@ uint4 CalcIndices(uint indices){
 VertexOut main(VertexIn vin)
 {
 	VertexOut vout;
+#if 0
 	float weights[4];
 	weights[0] = vin.mWeights.x;
 	weights[1] = vin.mWeights.y;
 	weights[2] = vin.mWeights.z;
 	weights[3] = 1.f - weights[0] - weights[1] - weights[2];
+#else
+	float4 weights = float4(vin.mWeights, 1.f - vin.mWeights.x - vin.mWeights.y - vin.mWeights.z);
+#endif
 		uint4 indices = CalcIndices(vin.mJointIndices);
 
 		float3 posL = float3(0.f, 0.f, 0.f);
