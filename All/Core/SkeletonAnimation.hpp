@@ -149,16 +149,12 @@ namespace leo{
 				auto & joint = mSkePose.mSkeleton->mJoints[jointIndex];
 				auto parentToRoot = load(mSkePose.mGlobalPoses[joint.mParent]);
 				auto toParent = mSkePose.mLocalPoses[jointIndex].operator std::array<__m128, 4U>();
-				float4x4 toRoot;
-				save(toRoot, Multiply(toParent,parentToRoot));
-				mSkePose.mGlobalPoses[jointIndex] = toRoot;
+				save(mSkePose.mGlobalPoses[jointIndex], Multiply(toParent, parentToRoot));
 			}
 			for (auto jointIndex = 0u; jointIndex != mClip.mSkeleton->mJointCount; ++jointIndex){
 				auto invBindPose = load(mSkePose.mSkeleton->mJoints[jointIndex].mInvBindPose);
 				auto toRoot = load(mSkePose.mGlobalPoses[jointIndex]);
-				float4x4 skin;
-				save(skin, Multiply(invBindPose, toRoot));
-				mSkePose.mSkinMatrixs[jointIndex] = skin;
+				save(mSkePose.mSkinMatrixs[jointIndex], Multiply(invBindPose, toRoot));
 				//save(mSkePose.mSkinMatrixs[jointIndex], I());
 			}
 			return mSkePose;
