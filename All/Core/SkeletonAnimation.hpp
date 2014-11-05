@@ -17,7 +17,7 @@
 #ifndef Core_SkeletonAnimation_Hpp
 #define Core_SkeletonAnimation_Hpp
 
-#include "Skeleton.hpp"
+#include "Skeleton.h"
 #include "..\IndePlatform\clock.hpp"
 namespace leo{
 	struct AnimationSample{

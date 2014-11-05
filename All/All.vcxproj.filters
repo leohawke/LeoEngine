@@ -446,13 +446,16 @@
     <ClInclude Include="Core\SkeletonAnimation.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Skeleton.hpp">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="Core\SkeletonModel.hpp">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\EffectSkeleton.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Skeleton.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Skeleton.hpp">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

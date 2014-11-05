@@ -162,11 +162,12 @@
     <ClInclude Include="Core\GaussBlur.hpp" />
     <ClInclude Include="Core\Geometry.hpp" />
     <ClInclude Include="Core\EffectLine.hpp" />
-    <ClInclude Include="Core\Skeleton.hpp" />
+    <ClInclude Include="Core\Skeleton.h" />
     <ClInclude Include="Core\Mesh.hpp" />
     <ClInclude Include="Core\MeshLoad.hpp" />
     <ClInclude Include="Core\CoreObject.hpp" />
     <ClInclude Include="Core\RenderSync.hpp" />
+    <ClInclude Include="Core\Skeleton.hpp" />
     <ClInclude Include="Core\SkeletonAnimation.hpp" />
     <ClInclude Include="Core\SkeletonModel.hpp" />
     <ClInclude Include="Core\Sky.hpp" />

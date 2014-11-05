@@ -19,7 +19,7 @@
 namespace leo
 {
 
-	class SQTObject :public GeneralAllocatedObject,public SQT
+	class SQTObject :public SQT,public GeneralAllocatedObject
 	{
 	public:
 		SQTObject() = default;
@@ -71,6 +71,7 @@ namespace leo
 			Rotation(EulerAngleToQuaternion(float3(0.f, 0.f,z)));
 		}
 	};
+
 
 }
 

@@ -326,10 +326,11 @@ namespace leo
 	class AllocPolicy
 	{
 	private:
+		ALLOC _impl;
 	public:
 		inline void * allocate(std::size_t count, const char * file = nullptr, int line = 0, const char* func = 0)
 		{
-			auto p = ALLOC::allocate(count);
+			auto p = _impl.allocate(count);
 #if defined LEO_MEMORY_TRACKER
 			if (file)
 			{
@@ -358,7 +359,7 @@ namespace leo
 			}
 			__memory_track_dealloc_record(p, 1);
 #endif
-			ALLOC::deallocate(reinterpret_cast<typename ALLOC::pointer>(p), 0);
+			_impl.deallocate(reinterpret_cast<typename ALLOC::pointer>(p), 0);
 		}
 		inline void * aligned_alloc(std::size_t count, std::uint8_t alignsize, const char * file = nullptr, int line = 0, const char* func = 0)
 		{
@@ -368,7 +369,7 @@ namespace leo
 			assert(!(alignsize &(alignsize - 1)));
 
 			count += alignsize;
-			std::uintptr_t rawAddress = (std::uintptr_t)(ALLOC::allocate(count));
+			std::uintptr_t rawAddress = (std::uintptr_t)(_impl.allocate(count));
 
 			std::uint8_t missalign = alignsize - (rawAddress&(alignsize - 1));
 			std::uintptr_t alignAddress = rawAddress + missalign;
@@ -392,7 +393,7 @@ namespace leo
 		{
 			std::uint8_t adjust = *(reinterpret_cast<std::uint8_t*>(p)-1);
 			std::uintptr_t rawAddress = (std::uintptr_t)p - adjust;
-			ALLOC::deallocate((std::uint8_t*)rawAddress, size);
+			_impl.deallocate((std::uint8_t*)rawAddress, size);
 #if defined LEO_MEMORY_TRACKER
 			if (file)
 			{
@@ -433,34 +434,13 @@ namespace leo
 	};
 
 	//本质上的分配器.使用标准分配器(uint8_t)
-	namespace __leo
+	namespace details
 	{
 		using base_alloc = ::leo::aligned_alloc < std::uint8_t, 16 > ;
 	}
 	template<MemoryCategory cate>
-	class CateAlloc
-	{
-		static __leo::base_alloc alloc;
-	public:
-		using pointer = typename __leo::base_alloc::pointer;
-	public:
-		static pointer allocate(const size_t n){
-			return alloc.allocate(n);
-		}
-
-		static void deallocate(pointer const p, const size_t n){
-			return alloc.deallocate(p,n);
-		}
+	class CateAlloc : public details::base_alloc{
 	};
-
-	__leo::base_alloc CateAlloc<MemoryCategory::MEMCATEGORY_GENERAL>::alloc;
-	__leo::base_alloc CateAlloc<MemoryCategory::MEMCATEGORY_GEOMETRY>::alloc;
-	__leo::base_alloc CateAlloc<MemoryCategory::MEMCATEGORY_ANIMATION>::alloc;
-	__leo::base_alloc CateAlloc<MemoryCategory::MEMCATEGORY_SCENE_CONTROL>::alloc;
-	__leo::base_alloc CateAlloc<MemoryCategory::MEMCATEGORY_SCENE_OBJECTS>::alloc;
-	__leo::base_alloc CateAlloc<MemoryCategory::MEMCATEGORY_RESOURCE>::alloc;
-	__leo::base_alloc CateAlloc<MemoryCategory::MEMCATEGORY_SCRIPTING>::alloc;
-	__leo::base_alloc CateAlloc<MemoryCategory::MEMCATEGORY_RENDERSYS>::alloc;
 
 	typedef AllocPolicy<CateAlloc<MemoryCategory::MEMCATEGORY_GENERAL>> GeneralAllocPolicy;
 	typedef AllocPolicy<CateAlloc<MemoryCategory::MEMCATEGORY_GEOMETRY>> GeometryAllocPolicy;
@@ -480,10 +460,10 @@ namespace leo
 	public:
 		explicit AllocatedObject()
 		{ }
-
+#if 1
 		virtual ~AllocatedObject()
 		{ }
-
+#endif
 		/// operator new, with debug line info
 		void* operator new(size_t sz, const char* file, int line, const char* func)
 		{
