@@ -458,6 +458,9 @@
     <ClInclude Include="Core\Skeleton.hpp">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Core\MeshData.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">

@@ -19,6 +19,9 @@
 #include<memory>
 
 #include "..\IndePlatform\LeoMath.h"
+#include "..\IndePlatform\ldef.h"
+struct ID3D11DeviceContext;
+
 namespace leo{
 	//骨骼数据(顶点信息,材质信息,动画信息)
 	struct SkeletonData;
@@ -29,6 +32,8 @@ namespace leo{
 	//未实现
 	class SkeletonGroup;
 
+	class Camera;
+
 	class SkeletonInstance{
 		//共享的骨骼数据
 		std::shared_ptr<SkeletonData> mSkeData;
@@ -38,6 +43,23 @@ namespace leo{
 		float mNorT;
 		//蒙皮矩阵
 		std::unique_ptr<float4x4[]> mSkinMatrix;
+	public:
+		SkeletonInstance(const std::shared_ptr<SkeletonData>& skeData);
+		~SkeletonInstance();
+
+		bool SwitchAnimation(const std::wstring& aniName);
+		bool SwitchAnimation(const wchar_t* aniName);
+
+		void Update();
+		void Render(ID3D11DeviceContext* context, const Camera& camera);
+	};
+
+	struct SkeletonData{
+		//从文件载入<参数:文件名>
+		static std::shared_ptr<SkeletonData> Load(const std::wstring& fileName);
+		static std::shared_ptr<SkeletonData> Load(const wchar_t* fileName);
+		//从内存载入,未实现
+		static std::shared_ptr<SkeletonData> Load(const std::unique_ptr<stdex::byte[]>& data, std::size_t dataSize);
 	};
 }
 
