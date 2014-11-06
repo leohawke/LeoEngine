@@ -48,7 +48,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MULTI_THREAD;PLATFORM_WIN32;DEBUG;LEO_MEMORY_TRACKER;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
@@ -78,41 +78,13 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\All\IndePlatform\Abstract.hpp" />
-    <ClInclude Include="..\All\IndePlatform\algorithm.hpp" />
-    <ClInclude Include="..\All\IndePlatform\any.h" />
-    <ClInclude Include="..\All\IndePlatform\any_iterator.hpp" />
-    <ClInclude Include="..\All\IndePlatform\BaseMacro.h" />
-    <ClInclude Include="..\All\IndePlatform\bitseg.hpp" />
-    <ClInclude Include="..\All\IndePlatform\clock.hpp" />
-    <ClInclude Include="..\All\IndePlatform\container.hpp" />
-    <ClInclude Include="..\All\IndePlatform\EndianSwap.hpp" />
-    <ClInclude Include="..\All\IndePlatform\functional.hpp" />
-    <ClInclude Include="..\All\IndePlatform\iterator.hpp" />
-    <ClInclude Include="..\All\IndePlatform\ldef.h" />
-    <ClInclude Include="..\All\IndePlatform\leoint.hpp" />
-    <ClInclude Include="..\All\IndePlatform\memory.hpp" />
-    <ClInclude Include="..\All\IndePlatform\path.hpp" />
-    <ClInclude Include="..\All\IndePlatform\platform.h" />
-    <ClInclude Include="..\All\IndePlatform\raii.hpp" />
-    <ClInclude Include="..\All\IndePlatform\Singleton.hpp" />
-    <ClInclude Include="..\All\IndePlatform\string.hpp" />
-    <ClInclude Include="..\All\IndePlatform\ThreadSync.hpp" />
-    <ClInclude Include="..\All\IndePlatform\tuple.hpp" />
-    <ClInclude Include="..\All\IndePlatform\type_op.hpp" />
-    <ClInclude Include="..\All\IndePlatform\utility.hpp" />
-    <ClInclude Include="..\All\IndePlatform\variadic.hpp" />
     <ClInclude Include="scheme.h" />
     <ClInclude Include="Sexp\Sexp.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\All\IndePlatform\any.cpp" />
     <ClCompile Include="..\All\IndePlatform\memory.cpp" />
-    <ClCompile Include="..\All\IndePlatform\raii.cpp" />
-    <ClCompile Include="..\All\IndePlatform\Singleton.cpp" />
-    <ClCompile Include="..\All\IndePlatform\string.cpp" />
     <ClCompile Include="..\All\IndePlatform\ThreadSync.cpp" />
-    <ClCompile Include="..\All\IndePlatform\type_info.cpp" />
     <ClCompile Include="scheme.cpp" />
     <ClCompile Include="Sexp\Sexp.cpp" />
     <ClCompile Include="Sexp_Test.cpp" />

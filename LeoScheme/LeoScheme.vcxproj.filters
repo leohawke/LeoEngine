@@ -16,9 +16,6 @@
     <Filter Include="IndePlatform">
       <UniqueIdentifier>{e7a4110b-5c6e-4629-a28f-3df6d9821674}</UniqueIdentifier>
     </Filter>
-    <Filter Include="IndePlatform\BaseHead">
-      <UniqueIdentifier>{c2ab2399-ba5e-4fc6-9e53-e5592ffcfaa5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="IndePlatform\WinSource">
       <UniqueIdentifier>{71fa62ee-d751-4dd5-b403-fee5a4ea1b7d}</UniqueIdentifier>
     </Filter>
@@ -33,78 +30,6 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\All\IndePlatform\Abstract.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\algorithm.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\any.h">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\any_iterator.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\BaseMacro.h">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\bitseg.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\clock.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\container.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\EndianSwap.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\functional.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\iterator.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\ldef.h">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\leoint.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\memory.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\path.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\platform.h">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\raii.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\Singleton.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\string.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\ThreadSync.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\tuple.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\type_op.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\utility.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\IndePlatform\variadic.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
     <ClInclude Include="Sexp\Sexp.hpp">
       <Filter>Sexp</Filter>
     </ClInclude>
@@ -120,18 +45,6 @@
       <Filter>IndePlatform\BaseSource</Filter>
     </ClCompile>
     <ClCompile Include="..\All\IndePlatform\memory.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\IndePlatform\raii.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\IndePlatform\Singleton.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\IndePlatform\string.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\IndePlatform\type_info.cpp">
       <Filter>IndePlatform\BaseSource</Filter>
     </ClCompile>
     <ClCompile Include="Sexp\Sexp.cpp">

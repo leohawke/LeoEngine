@@ -16,7 +16,7 @@ namespace leo
 
 		using scheme_list = std::shared_ptr < scheme_pair > ;
 
-		extern scheme_list schme_nil;
+		extern scheme_list scheme_nil;
 
 		scheme_list make_copy(sexp::sexp_list sexp_list);
 
@@ -55,7 +55,7 @@ namespace leo
 			}
 
 			template<typename T>
-			bool can_cast()
+			bool can_cast() const
 			{
 				if (typeid(T) == typeid(sexp_bool))
 					return mAtomType == atom_t::atom_bool;
@@ -71,12 +71,18 @@ namespace leo
 			}
 
 			template<typename T>
+			const T& cast() const
+			{
+				return *any_cast<const T*>(&mValue);
+			}
+
+			template<typename T>
 			T& cast()
 			{
 				return *any_cast<T*>(&mValue);
 			}
 
-			bool no_word()
+			bool no_word() const
 			{
 				return mType != atom_t::atom_word;
 			}
@@ -111,6 +117,18 @@ namespace leo
 				mType = any_t::any_list;
 				return *this;
 			}
+
+			scheme_atom cast_atom() const
+			{
+				assert(mType == any_t::any_atom);
+				return any_cast<const scheme_atom>(mValue);
+			}
+
+			scheme_list cast_list() const
+			{
+				assert(mType == any_t::any_list);
+				return any_cast<const scheme_list>(mValue);
+			}
 		};
 
 		struct scheme_pair
@@ -124,8 +142,63 @@ namespace leo
 			return leo::make_shared<scheme_pair>();
 		}
 
-		scheme_value eval(scheme_value& exp, scheme_list& env);
-		void apply(scheme_list& procedure, scheme_list& arguments);
+		scheme_value eval(const scheme_value& exp,scheme_list& env);
+		scheme_value apply(const scheme_list& procedure, const scheme_list& arguments);
+		scheme_value read();
+		void write(const scheme_value& exp);
+		inline scheme_value car(const scheme_list& list){
+			return list->mCar;
+		}
+
+		inline scheme_value car(const scheme_value& list){
+			assert(list.mType == scheme_value::any_t::any_list);
+			return list.cast_list()->mCar;
+		}
+
+		inline scheme_value cdr(const scheme_list& list){
+			return list->mCdr;
+		}
+
+		inline scheme_value cdr(const scheme_value& list){
+			assert(list.mType == scheme_value::any_t::any_list);
+			return list.cast_list()->mCdr;
+		}
+
+		template<typename T>
+		inline scheme_value cadr(const T& list){
+			static_assert(std::is_same<T, scheme_value>::value || std::is_same<T, scheme_list>::value, "T is scheme_value or scheme_list");
+			auto tail = cdr(list);
+			return car(tail);
+		}
+
+		template<typename T>
+		inline scheme_value caddr(const T& list){
+			static_assert(std::is_same<T, scheme_value>::value || std::is_same<T, scheme_list>::value, "T is scheme_value or scheme_list");
+			auto tail = cdr(list);
+			tail = cdr(tail);
+			return car(tail);
+		}
+
+		template<typename T>
+		inline scheme_value cdddr(const T& list){
+			static_assert(std::is_same<T, scheme_value>::value || std::is_same<T, scheme_list>::value, "T is scheme_value or scheme_list");
+			return cdr(cdr(cdr(list)));
+		}
+
+
+		template<typename T>
+		inline scheme_value cadddr(const T& list){
+			static_assert(std::is_same<T, scheme_value>::value || std::is_same<T, scheme_list>::value, "T is scheme_value or scheme_list");
+			return car(cdddr(list));
+		}
+
+		inline bool null(const scheme_value& exp){
+			return exp.cast_list() == scheme_nil;
+		}
+
+		inline bool null(const scheme_list& list){
+			return list == scheme_nil;
+		}
 	}
 }
 
