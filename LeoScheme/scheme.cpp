@@ -7,6 +7,10 @@ namespace leo
 	{
 		extern scheme_list scheme_nil = nullptr;
 
+		bool is_list(const scheme_value& value){
+			return true;
+		}
+
 		scheme_list make_copy(sexp::sexp_list sexp_list)
 		{
 			if (!sexp_list)
@@ -214,7 +218,7 @@ namespace leo
 		scheme_list list_of_values(const scheme_value& operands, scheme_list& env){
 			return scheme_nil;
 		}
-
+#if 0
 		bool primitive_procedure(const scheme_list& procedure);
 
 		scheme_value apply_primitive_procedure(const scheme_list& procedure, const scheme_list& arguments);
@@ -228,16 +232,16 @@ namespace leo
 		scheme_list procedure_environment(const scheme_list& procedure);
 
 		scheme_list extend_environment(const scheme_list& parameters, const scheme_list& arguments, scheme_list& env);
-
+#endif
 		scheme_value apply(const scheme_list& procedure, const scheme_list& arguments){
+#if 0
 			if (primitive_procedure(procedure))
 				return apply_primitive_procedure(procedure, arguments);
 			else if (compound_procedure(procedure))
 				return eval_sequence(procedure_body(procedure), extend_environment(procedure_parameters(procedure), arguments, procedure_environment(procedure)));
 			error("Unknown procedure type -- APPLY", procedure);
+#endif
 			return scheme_value(scheme_nil);
 		}
-
-		
 	}
 }

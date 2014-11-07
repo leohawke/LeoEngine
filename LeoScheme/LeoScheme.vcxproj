@@ -84,8 +84,8 @@
   <ItemGroup>
     <ClCompile Include="..\All\IndePlatform\any.cpp" />
     <ClCompile Include="..\All\IndePlatform\memory.cpp" />
-    <ClCompile Include="..\All\IndePlatform\ThreadSync.cpp" />
     <ClCompile Include="scheme.cpp" />
+    <ClCompile Include="SchemeIO.cpp" />
     <ClCompile Include="Sexp\Sexp.cpp" />
     <ClCompile Include="Sexp_Test.cpp" />
   </ItemGroup>

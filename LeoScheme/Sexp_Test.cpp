@@ -27,7 +27,7 @@ int main()
 	auto consoleout = CreateFileW(L"CONOUT$", GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 	auto stdhandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
-	auto tokens = sexp::lexicalanalysis("(if 1 (if #t 2 4) 3)");
+	auto tokens = sexp::lexicalanalysis("(if 0 (if #t 2))");
 	auto parse_sexp = sexp::parse(tokens);
 
 	auto parse_schem = make_copy(parse_sexp);

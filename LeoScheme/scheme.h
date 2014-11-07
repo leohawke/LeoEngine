@@ -11,7 +11,7 @@ namespace leo
 		using scheme_int = sexp::sexp_int;
 		using scheme_real = sexp::sexp_real;
 		using scheme_string = sexp::sexp_string;
-
+		using sexp::to_string;
 		struct scheme_pair;
 
 		using scheme_list = std::shared_ptr < scheme_pair > ;
@@ -27,7 +27,7 @@ namespace leo
 			atom_t mType;
 
 			scheme_atom(const scheme_bool& b)
-				:mValue(b),mType(atom_t::atom_bool)
+				:mValue(b), mType(atom_t::atom_bool)
 			{}
 
 			scheme_atom(const scheme_char& c)
@@ -45,7 +45,7 @@ namespace leo
 			scheme_atom(const scheme_string& s, atom_t t)
 				:mValue(s), mType(t)
 			{
-				assert(t == atom_t::atom_word || t == atom_t:: atom_string);
+				assert(t == atom_t::atom_word || t == atom_t::atom_string);
 			}
 
 			scheme_atom(const sexp::sexp_value& sexp_value)
@@ -66,7 +66,7 @@ namespace leo
 				if (typeid(T) == typeid(sexp_real))
 					return mAtomType == atom_t::atom_real;
 				if (typeid(T) == typeid(sexp_string))
-					return( mAtomType == atom_t::atom_string ||  mAtomType == atom_t::atom_word);
+					return(mAtomType == atom_t::atom_string || mAtomType == atom_t::atom_word);
 				return false;
 			}
 
@@ -129,6 +129,16 @@ namespace leo
 				assert(mType == any_t::any_list);
 				return any_cast<const scheme_list>(mValue);
 			}
+
+			template<typename T>
+			bool can_cast() const
+			{
+				if (typeid(T) == typeid(scheme_atom))
+					return mType == any_t::any_atom;
+				if (typeid(T) == typeid(scheme_list))
+					return mType == any_t::any_list;
+				return false;
+			}
 		};
 
 		struct scheme_pair
@@ -142,10 +152,13 @@ namespace leo
 			return leo::make_shared<scheme_pair>();
 		}
 
-		scheme_value eval(const scheme_value& exp,scheme_list& env);
+		scheme_value eval(const scheme_value& exp, scheme_list& env);
 		scheme_value apply(const scheme_list& procedure, const scheme_list& arguments);
+
 		scheme_value read();
 		void write(const scheme_value& exp);
+
+
 		inline scheme_value car(const scheme_list& list){
 			return list->mCar;
 		}
@@ -198,6 +211,13 @@ namespace leo
 
 		inline bool null(const scheme_list& list){
 			return list == scheme_nil;
+		}
+
+		bool is_list(const scheme_value& value);
+
+		namespace ops{
+			scheme_string print(const scheme_list & list);
+			scheme_string print(const scheme_value & value);
 		}
 	}
 }

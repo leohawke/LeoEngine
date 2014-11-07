@@ -5,13 +5,6 @@
 #include <strstream>
 #include <sstream>
 
-template<typename type>
-static leo::scheme::sexp::sexp_string ToString(const type& t)
-{
-	std::stringstream steam;
-	steam << t;
-	return steam.str();
-}
 
 namespace leo
 {
@@ -19,7 +12,7 @@ namespace leo
 	{
 		namespace sexp
 		{
-			sexp_string restore_escape_string(sexp_string& str)
+			sexp_string restore_escape_string(const sexp_string& str)
 			{
 				sexp_string result;
 				for (std::size_t i = 0; i != str.size(); ++i)
@@ -55,7 +48,7 @@ namespace leo
 				}
 				return str;
 			}
-			sexp_string store_escape_string(sexp_string& str)
+			sexp_string store_escape_string(const sexp_string& str)
 			{
 				sexp_string result;
 				for (std::size_t i = 0; i != str.size(); ++i)
@@ -300,13 +293,13 @@ namespace leo
 					};
 					auto print_int = [&](leo::any& any)
 					{
-						auto string = ToString(any_cast<std::int64_t>(any));
+						auto string = to_string(any_cast<std::int64_t>(any));
 						for (auto c : string)
 							setchar(c);
 					};
 					auto print_real = [&](leo::any& any)
 					{
-						auto string = ToString(any_cast<std::double_t>(any));
+						auto string = to_string(any_cast<std::double_t>(any));
 						for (auto c : string)
 							setchar(c);
 					};

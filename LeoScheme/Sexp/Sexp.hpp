@@ -20,6 +20,7 @@
 
 #include <IndePlatform\any.h>
 #include <IndePlatform\memory.hpp>
+#include <string>
 #include <queue>
 
 namespace leo
@@ -33,7 +34,7 @@ namespace leo
 			using sexp_int = std::int64_t;
 			using sexp_real = std::double_t;
 			using sexp_string = std::string;
-			
+			using std::to_string;
 			struct sexp;
 			using sexp_list = std::shared_ptr < sexp > ;
 			using const_sexp_list = std::shared_ptr < const sexp > ;
@@ -230,8 +231,8 @@ namespace leo
 				{}
 			};
 
-			sexp_string restore_escape_string(sexp_string& str);
-			sexp_string store_escape_string(sexp_string& str);
+			sexp_string restore_escape_string(const sexp_string& str);
+			sexp_string store_escape_string(const sexp_string& str);
 
 			token::list lexicalanalysis(const sexp_char * str, std::size_t len);
 

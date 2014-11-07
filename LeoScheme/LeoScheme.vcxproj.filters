@@ -38,9 +38,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\All\IndePlatform\ThreadSync.cpp">
-      <Filter>IndePlatform\WinSource</Filter>
-    </ClCompile>
     <ClCompile Include="..\All\IndePlatform\any.cpp">
       <Filter>IndePlatform\BaseSource</Filter>
     </ClCompile>
@@ -54,6 +51,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="scheme.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SchemeIO.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
