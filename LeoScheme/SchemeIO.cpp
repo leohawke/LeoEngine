@@ -189,5 +189,9 @@ namespace leo
 				}
 			}
 		}
+
+		scheme_string scheme_atom::to_word() const{
+			return ops::print(*this);
+		}
 	}
 }

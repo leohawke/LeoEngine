@@ -86,6 +86,13 @@ namespace leo
 			{
 				return mType != atom_t::atom_word;
 			}
+
+			bool word() const
+			{
+				return mType == atom_t::atom_word;
+			}
+
+			scheme_string to_word() const;
 		};
 
 		struct scheme_value
@@ -177,6 +184,26 @@ namespace leo
 			return list.cast_list()->mCdr;
 		}
 
+		inline scheme_list cons(const scheme_value& car, const scheme_value& cdr){
+			return make_shared<scheme_pair>(car, cdr);
+		}
+
+		inline scheme_list list(const scheme_value& car)
+		{
+			return cons(car,scheme_nil);
+		}
+
+		inline scheme_list list()
+		{
+			return scheme_nil;
+		}
+
+		template<typename... Value>
+		inline scheme_list list(const scheme_value& head, Value&... tail)
+		{
+			return cons(head,list(tail...));
+		}
+
 		template<typename T>
 		inline scheme_value cadr(const T& list){
 			static_assert(std::is_same<T, scheme_value>::value || std::is_same<T, scheme_list>::value, "T is scheme_value or scheme_list");
@@ -193,16 +220,33 @@ namespace leo
 		}
 
 		template<typename T>
+		inline scheme_value cddr(const T& list){
+			static_assert(std::is_same<T, scheme_value>::value || std::is_same<T, scheme_list>::value, "T is scheme_value or scheme_list");
+			return cdr(cdr(list));
+		}
+
+		template<typename T>
+		inline scheme_value cdadr(const T& list){
+			static_assert(std::is_same<T, scheme_value>::value || std::is_same<T, scheme_list>::value, "T is scheme_value or scheme_list");
+			return cdr(car(cdr(list)));
+		}
+
+		template<typename T>
 		inline scheme_value cdddr(const T& list){
 			static_assert(std::is_same<T, scheme_value>::value || std::is_same<T, scheme_list>::value, "T is scheme_value or scheme_list");
 			return cdr(cdr(cdr(list)));
 		}
 
-
 		template<typename T>
 		inline scheme_value cadddr(const T& list){
 			static_assert(std::is_same<T, scheme_value>::value || std::is_same<T, scheme_list>::value, "T is scheme_value or scheme_list");
 			return car(cdddr(list));
+		}
+
+		template<typename T>
+		inline scheme_value caadr(const T& list){
+			static_assert(std::is_same<T, scheme_value>::value || std::is_same<T, scheme_list>::value, "T is scheme_value or scheme_list");
+			return car(car(cdr(list)));
 		}
 
 		inline bool null(const scheme_value& exp){
@@ -214,6 +258,8 @@ namespace leo
 		}
 
 		bool is_list(const scheme_value& value);
+		bool pair(const scheme_value& value);
+		bool symbol(const scheme_value& exp);
 
 		namespace ops{
 			scheme_string print(const scheme_list & list);
