@@ -125,16 +125,28 @@ namespace leo
 				return *this;
 			}
 
-			scheme_atom cast_atom() const
+			const scheme_atom& cast_atom() const
 			{
 				assert(mType == any_t::any_atom);
-				return any_cast<const scheme_atom>(mValue);
+				return *any_cast<const scheme_atom*>(&mValue);
 			}
 
-			scheme_list cast_list() const
+			const scheme_list& cast_list() const
 			{
 				assert(mType == any_t::any_list);
-				return any_cast<const scheme_list>(mValue);
+				return *any_cast<const scheme_list*>(&mValue);
+			}
+
+			scheme_atom& cast_atom()
+			{
+				assert(mType == any_t::any_atom);
+				return *any_cast<scheme_atom*>(&mValue);
+			}
+
+			scheme_list& cast_list()
+			{
+				assert(mType == any_t::any_list);
+				return *any_cast<scheme_list*>(&mValue);
 			}
 
 			template<typename T>
@@ -249,6 +261,14 @@ namespace leo
 			return car(car(cdr(list)));
 		}
 
+		void set_car(scheme_value& pair, const scheme_value& car){
+			pair.cast_list()->mCar = car;
+		}
+
+		void set_cdr(scheme_value& pair, const scheme_value& cdr){
+			pair.cast_list()->mCdr = cdr;
+		}
+
 		inline bool null(const scheme_value& exp){
 			return exp.cast_list() == scheme_nil;
 		}
@@ -260,6 +280,14 @@ namespace leo
 		bool is_list(const scheme_value& value);
 		bool pair(const scheme_value& value);
 		bool symbol(const scheme_value& exp);
+
+		inline scheme_int length(const scheme_value& exp){
+			assert(exp.can_cast<scheme_list>());
+			if (exp.cast_list() == scheme_nil)
+				return 0;
+			else
+				return 1 + length(cdr(exp));
+		}
 
 		namespace ops{
 			scheme_string print(const scheme_list & list);

@@ -28,7 +28,7 @@ namespace leo
 		extern scheme_list scheme_nil = nullptr;
 	}
 
-	//运行时所需辅助函数
+	//运行时所需辅助函数<环境操作,错误处理>
 	namespace scheme{
 		//error-impl
 		scheme_string error_list(const scheme_list& exp)
@@ -52,20 +52,55 @@ namespace leo
 		{
 			throw std::runtime_error(msg + error_list(lists...));
 		}
+
+		bool true_exp(const scheme_value& exp){
+			if (exp.mType == scheme_value::any_t::any_list)
+				return exp.cast_list() != scheme_nil;
+			else
+				switch (exp.cast_atom().mType)
+			{
+				case scheme_atom::atom_t::atom_bool:
+					return exp.cast_atom().cast<scheme_bool>();
+				case scheme_atom::atom_t::atom_char:
+					return exp.cast_atom().cast<scheme_char>();
+				case scheme_atom::atom_t::atom_int:
+					return exp.cast_atom().cast<scheme_int>();
+				case scheme_atom::atom_t::atom_real:
+					return exp.cast_atom().cast<scheme_real>();
+				case scheme_atom::atom_t::atom_word:
+				case scheme_atom::atom_t::atom_string:
+					return exp.cast_atom().cast<scheme_string>() != "false";
+			}
+			return false;
+		}
+
+		//no-impl
+		//修改变量var在环境env里的约束,使得该变量现在约束到值value,如果这一变量没有约束就发出一个错误信号
+		void set_variable_value(const scheme_value& var, const scheme_value& value, scheme_list& env);
+
+		//no-impl
+		//在环境env的第一个框架里加入一个新约束,它关联起变量var和值value
+		void define_variable(const scheme_value& var, const scheme_value& value, scheme_list& env);
+
+		//返回一个新环境,这个环境中包含了一个新的框架,其中所位于表variables的符号约束到表values里队友的元素,而其外围环境是环境base_env
+		scheme_list extend_environment(const scheme_value& variables, const scheme_value& values, scheme_list& base_env);
+
+		//error-impl
+		//返回符号var在环境env里的约束值,如果这一变量没有约束发出一个错误信号
+		scheme_value lookup_variable_value(const scheme_value& var, scheme_list& env);
 	}
 
 	//求值函数声明
 	namespace scheme{
-		//error-impl
-		scheme_value lookup_variable_value(const scheme_value& exp, scheme_list& env);
-		//error-impl
+		
+		//impl
 		scheme_value eval_assignment(const scheme_value& exp, scheme_list& env);
-		//error-impl
+		//impl
 		scheme_value eval_definition(const scheme_value& exp, scheme_list& env);
 		//impl
 		scheme_value eval_if(const scheme_value& exp, scheme_list& env);
-		//no-impl
-		scheme_value eval_sequence(const scheme_value& exp, scheme_list& env);
+		//impl
+		scheme_value eval_sequence(const scheme_value& exps, scheme_list& env);
 	}
 
 	//判断函数声明及定义
@@ -119,15 +154,17 @@ namespace leo
 		}
 
 		//no-impl
-		bool quoted(const scheme_list& exp);
+		bool quoted(const scheme_value& exp);
 
-		bool lambda(const scheme_list& exp){
+		bool lambda(const scheme_value& exp){
 			tagged_list(exp, "lambda");
 		}
+
+		bool begin(const scheme_value& exp){
+			tagged_list(exp, "begin");
+		}
 		//no-impl
-		bool begin(const scheme_list& exp);
-		//no-impl
-		bool cond(const scheme_list& exp);
+		bool cond(const scheme_value& exp);
 
 		bool assignment(const scheme_value& exp){
 			tagged_list(exp, "set!");
@@ -148,11 +185,22 @@ namespace leo
 		bool no_operands(const scheme_value& exp){
 			return null(exp);
 		}
+
+		bool last_exp(const scheme_value& exp){
+			return null(cdr(exp));
+		}
+
+		bool compound_procedure(const scheme_list& procedure){
+			return tagged_list(procedure, "procedure");
+		}
+
+		//no-impl
+		bool primitive_procedure(const scheme_list& procedure);
 	}
 
 	//选择和构造函数函数声明及定义
 	namespace scheme{
-		scheme_list list_of_values(const scheme_value& operands, scheme_list& env);
+		scheme_value list_of_values(const scheme_value& operands, scheme_list& env);
 
 		scheme_value oper(const scheme_value& exp){
 			return car(exp);
@@ -223,6 +271,56 @@ namespace leo
 			const static scheme_value if_word{ scheme_atom("if", scheme_atom::atom_t::atom_word) };
 			return list(if_word, predicate, consequent, alternative);
 		}
+
+		scheme_value make_procedure(const scheme_value& parameters, const scheme_value& body){
+			const static scheme_value procedure_word{ scheme_atom("procedure", scheme_atom::atom_t::atom_word) };
+			return list(procedure_word, parameters, body);
+		}
+
+		scheme_value begin_actions(const scheme_value& exp){
+			return cdr(exp);
+		}
+
+		scheme_value first_exp(const scheme_value& seq){
+			return car(seq);
+		}
+
+		scheme_value rest_exps(const scheme_value& seq){
+			return cdr(seq);
+		}
+
+		scheme_value list_of_values(const scheme_value& exps, scheme_list& env){
+			if (no_operands(exps))
+				return scheme_nil;
+			else
+				cons(eval(first_operand(exps), env), list_of_values(rest_operands(exps), env));
+		}
+
+		scheme_value procedure_body(const scheme_value& procedure){
+			return caddr(procedure);
+		}
+
+		scheme_value procedure_parameters(const scheme_value& procedure){
+			return cadr(procedure);
+		}
+
+		scheme_list procedure_environment(const scheme_value& procedure){
+			return cadddr(procedure).cast_list();
+		}
+
+		scheme_value make_begin(const scheme_value& seq){
+			const static scheme_value begin_word{ scheme_atom("begin", scheme_atom::atom_t::atom_word) };
+			return cons(begin_word,seq);
+		}
+
+		scheme_value sequence_exp(const scheme_value& seq){
+			if (null(seq))
+				return seq;
+			else if (last_exp(seq))
+				return first_exp(seq);
+			else
+				make_begin(seq);
+		}
 	}
 
 	
@@ -230,14 +328,9 @@ namespace leo
 	//eval,apply定义
 	namespace scheme
 	{
-		scheme_value apply(const scheme_value& procedure,const scheme_list& arguments){
-			return apply(procedure.cast_list(), arguments);
+		scheme_value apply(const scheme_value& procedure, const scheme_value& arguments){
+			return apply(procedure.cast_list(), arguments.cast_list());
 		}
-
-		
-
-
-		
 
 		scheme_value eval(const scheme_value& exp,scheme_list& env)
 		{
@@ -251,71 +344,19 @@ namespace leo
 				return eval_definition(exp, env);
 			if (ifexp(exp))
 				return eval_if(exp, env);
+			if (lambda(exp))
+				return make_procedure(lambda_parameters(exp), lambda_body(exp));
+			if (begin(exp))
+				return eval_sequence(begin_actions(exp), env);
 			if (application(exp))
 				return apply(eval(oper(exp), env), list_of_values(operands(exp), env));
+			else
+				error("Unknown expression type --EVAL",exp);
 			return scheme_nil;
 		}
 
-
-		scheme_value lookup_variable_value(const scheme_value& exp, scheme_list& env)
-		{
-			return scheme_value(scheme_atom(static_cast<scheme_int>(0)));
-		}
-
-		scheme_value eval_assignment(const scheme_value& exp, scheme_list& env){
-			return scheme_value(scheme_nil);
-		}
-
-
-		scheme_value eval_definition(const scheme_value& exp, scheme_list& env){
-			return scheme_value(scheme_nil);
-		}
-
-
-		bool true_exp(const scheme_value& exp){
-			if (exp.mType == scheme_value::any_t::any_list)
-				return exp.cast_list() != scheme_nil;
-			else
-				switch (exp.cast_atom().mType)
-				{
-				case scheme_atom::atom_t::atom_bool:
-					return exp.cast_atom().cast<scheme_bool>();
-				case scheme_atom::atom_t::atom_char:
-					return exp.cast_atom().cast<scheme_char>();
-				case scheme_atom::atom_t::atom_int:
-					return exp.cast_atom().cast<scheme_int>();
-				case scheme_atom::atom_t::atom_real:
-					return exp.cast_atom().cast<scheme_real>();
-				case scheme_atom::atom_t::atom_word:
-				case scheme_atom::atom_t::atom_string:
-					return exp.cast_atom().cast<scheme_string>() != "false";
-				}
-			return false;
-		}
-
-
-		scheme_value eval_if(const scheme_value& exp, scheme_list& env){
-			if (true_exp(eval(if_predicate(exp), env)))
-				return eval(if_consequent(exp), env);
-			else
-				return eval(if_alternative(exp), env);
-		}
-
-		
-
-		bool primitive_procedure(const scheme_list& procedure);
-
 		scheme_value apply_primitive_procedure(const scheme_list& procedure, const scheme_list& arguments);
-
-		bool compound_procedure(const scheme_list& procedure);
-
-		scheme_value procedure_body(const scheme_list& procedure);
 		
-		scheme_list procedure_parameters(const scheme_list& procedure);
-
-		scheme_list procedure_environment(const scheme_list& procedure);
-
-		scheme_list extend_environment(const scheme_list& parameters, const scheme_list& arguments, scheme_list& env);
 
 		scheme_value apply(const scheme_list& procedure, const scheme_list& arguments){
 
@@ -330,11 +371,82 @@ namespace leo
 
 	//求值函数定义
 	namespace scheme{
-		scheme_list list_of_values(const scheme_value& exps, scheme_list& env){
-			if (no_operands(exps))
-				return scheme_nil;
+		scheme_value eval_sequence(const scheme_value& exps, scheme_list& env){
+			if (last_exp(exps))
+				return eval(first_exp(exps), env);
+			else{
+				eval(first_exp(exps), env);
+				return eval_sequence(rest_exps(exps), env);
+			}
+		}
+
+		scheme_value lookup_variable_value(const scheme_value& exp, scheme_list& env)
+		{
+			return scheme_value(scheme_atom(static_cast<scheme_int>(0)));
+		}
+
+		scheme_value eval_assignment(const scheme_value& exp, scheme_list& env){
+			set_variable_value(
+				assignment_variable(exp),
+				eval(assignment_value(exp), env),
+				env);
+			return scheme_value(scheme_nil);
+		}
+
+		scheme_value eval_definition(const scheme_value& exp, scheme_list& env){
+			define_variable(
+				definition_variable(exp),
+				eval(definition_value(exp), env),
+				env);
+			return scheme_value(scheme_nil);
+		}
+
+		scheme_value eval_if(const scheme_value& exp, scheme_list& env){
+			if (true_exp(eval(if_predicate(exp), env)))
+				return eval(if_consequent(exp), env);
 			else
-				cons(eval(first_operand(exps), env), list_of_values(rest_operands(exps), env));
+				return eval(if_alternative(exp), env);
+		}
+	}
+
+	//运行时所需辅助函数<环境操作,错误处理>定义
+	namespace scheme{
+		scheme_list enclosing_environment(scheme_list& env){
+			return cdr(env).cast_list();
+		}
+
+		scheme_value first_frame(scheme_list& env){
+			return car(env);
+		}
+
+		scheme_list the_empty_envirnoment(){
+			return make_scheme_list();
+		}
+
+		scheme_value make_frame(const scheme_value& variables, const scheme_value& values){
+			return cons(variables, values);
+		}
+
+		scheme_value frame_variables(const scheme_value& frame){
+			return car(frame);
+		}
+
+		scheme_value frame_values(const scheme_value& frame){
+			return cdr(frame);
+		}
+
+		void add_binding_to_frame(const scheme_value& var, const scheme_value& val, scheme_value& frame){
+			set_car(frame, cons(var, car(frame)));
+			set_cdr(frame, cons(val, cdr(frame)));
+		}
+
+		scheme_list extend_environment(const scheme_value& vars, const scheme_value& vals, scheme_list& base_env){
+			if (length(vars) == length(vals))
+				return cons(make_frame(vars, vals), base_env);
+			else
+				error("length(vars) != length (vals)", vars, vals);
+			return scheme_nil;
+			
 		}
 	}
 }
