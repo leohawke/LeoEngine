@@ -95,6 +95,26 @@ namespace leo
 			scheme_string to_word() const;
 		};
 
+		bool operator==(const scheme_atom& lhs, const scheme_atom& rhs){
+			if (lhs.mType == rhs.mType){
+				switch (lhs.mType)
+				{
+				case scheme_atom::atom_t::atom_bool:
+					return lhs.cast<scheme_bool>() == rhs.cast<scheme_bool>();
+				case scheme_atom::atom_t::atom_char:
+					return lhs.cast<scheme_char>() == rhs.cast<scheme_char>();
+				case scheme_atom::atom_t::atom_int:
+					return lhs.cast<scheme_int>() == rhs.cast<scheme_int>();
+				case scheme_atom::atom_t::atom_real:
+					return lhs.cast<scheme_real>() == rhs.cast<scheme_real>();
+				case scheme_atom::atom_t::atom_string:
+				case scheme_atom::atom_t::atom_word:
+					return lhs.cast<scheme_string>() == rhs.cast<scheme_string>();
+				}
+			}
+			return false;
+		}
+
 		struct scheme_value
 		{
 			using any_t = sexp::sexp_value::any_t;
@@ -160,6 +180,15 @@ namespace leo
 			}
 		};
 
+		bool operator==(const scheme_value& lhs, const scheme_value& rhs){
+			if (lhs.can_cast<scheme_list>() && rhs.can_cast<scheme_list>())
+				return lhs.cast_list() == rhs.cast_list();
+			else if ((lhs.can_cast<scheme_list>() && rhs.can_cast<scheme_list>()))
+				return lhs.cast_atom() == rhs.cast_atom();
+			else
+				return false;
+		}
+
 		struct scheme_pair
 		{
 			scheme_value mCar;
@@ -177,21 +206,22 @@ namespace leo
 		scheme_value read();
 		void write(const scheme_value& exp);
 
-
-		inline scheme_value car(const scheme_list& list){
-			return list->mCar;
-		}
-
-		inline scheme_value car(const scheme_value& list){
+		inline const scheme_value& car(const scheme_value& list){
 			assert(list.mType == scheme_value::any_t::any_list);
 			return list.cast_list()->mCar;
 		}
 
-		inline scheme_value cdr(const scheme_list& list){
-			return list->mCdr;
+		inline scheme_value& car(scheme_value& list){
+			assert(list.mType == scheme_value::any_t::any_list);
+			return list.cast_list()->mCar;
 		}
 
-		inline scheme_value cdr(const scheme_value& list){
+		inline const scheme_value& cdr(const scheme_value& list){
+			assert(list.mType == scheme_value::any_t::any_list);
+			return list.cast_list()->mCdr;
+		}
+
+		inline scheme_value& cdr(scheme_value& list){
 			assert(list.mType == scheme_value::any_t::any_list);
 			return list.cast_list()->mCdr;
 		}
@@ -216,48 +246,59 @@ namespace leo
 			return cons(head,list(tail...));
 		}
 
-		template<typename T>
-		inline scheme_value cadr(const T& list){
-			static_assert(std::is_same<T, scheme_value>::value || std::is_same<T, scheme_list>::value, "T is scheme_value or scheme_list");
-			auto tail = cdr(list);
-			return car(tail);
+		inline const scheme_value& cadr(const scheme_value& list){
+			return car(cdr(list));
 		}
 
-		template<typename T>
-		inline scheme_value caddr(const T& list){
-			static_assert(std::is_same<T, scheme_value>::value || std::is_same<T, scheme_list>::value, "T is scheme_value or scheme_list");
-			auto tail = cdr(list);
-			tail = cdr(tail);
-			return car(tail);
+		inline scheme_value& cadr(scheme_value& list){
+			return car(cdr(list));
 		}
 
-		template<typename T>
-		inline scheme_value cddr(const T& list){
-			static_assert(std::is_same<T, scheme_value>::value || std::is_same<T, scheme_list>::value, "T is scheme_value or scheme_list");
+		inline const scheme_value& caddr(const scheme_value& list){
+			return car(cdr(cdr(list)));
+		}
+
+		inline scheme_value& caddr(scheme_value& list){
+			return car(cdr(cdr(list)));
+		}
+
+		inline const scheme_value& cddr(const scheme_value& list){
 			return cdr(cdr(list));
 		}
 
-		template<typename T>
-		inline scheme_value cdadr(const T& list){
-			static_assert(std::is_same<T, scheme_value>::value || std::is_same<T, scheme_list>::value, "T is scheme_value or scheme_list");
+		inline scheme_value& cddr(scheme_value& list){
+			return cdr(cdr(list));
+		}
+
+		inline const scheme_value& cdadr(const scheme_value& list){
 			return cdr(car(cdr(list)));
 		}
 
-		template<typename T>
-		inline scheme_value cdddr(const T& list){
-			static_assert(std::is_same<T, scheme_value>::value || std::is_same<T, scheme_list>::value, "T is scheme_value or scheme_list");
+		inline scheme_value& cdadr(scheme_value& list){
+			return cdr(car(cdr(list)));
+		}
+
+		inline const scheme_value&  cdddr(const scheme_value& list){
 			return cdr(cdr(cdr(list)));
 		}
 
-		template<typename T>
-		inline scheme_value cadddr(const T& list){
-			static_assert(std::is_same<T, scheme_value>::value || std::is_same<T, scheme_list>::value, "T is scheme_value or scheme_list");
+		inline scheme_value&  cdddr(scheme_value& list){
+			return cdr(cdr(cdr(list)));
+		}
+
+		inline const scheme_value& cadddr(const scheme_value& list){
 			return car(cdddr(list));
 		}
 
-		template<typename T>
-		inline scheme_value caadr(const T& list){
-			static_assert(std::is_same<T, scheme_value>::value || std::is_same<T, scheme_list>::value, "T is scheme_value or scheme_list");
+		inline scheme_value& cadddr(scheme_value& list){
+			return car(cdddr(list));
+		}
+
+		inline  const scheme_value& caadr(const scheme_value& list){
+			return car(car(cdr(list)));
+		}
+
+		inline  scheme_value& caadr(scheme_value& list){
 			return car(car(cdr(list)));
 		}
 

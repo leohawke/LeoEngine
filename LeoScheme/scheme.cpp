@@ -1,6 +1,7 @@
 #include "scheme.h"
 #include <exception>
 #include <stdexcept>
+#include <functional>
 namespace leo
 {
 	//与SEXP有关函数
@@ -74,18 +75,15 @@ namespace leo
 			return false;
 		}
 
-		//no-impl
 		//修改变量var在环境env里的约束,使得该变量现在约束到值value,如果这一变量没有约束就发出一个错误信号
 		void set_variable_value(const scheme_value& var, const scheme_value& value, scheme_list& env);
 
-		//no-impl
 		//在环境env的第一个框架里加入一个新约束,它关联起变量var和值value
 		void define_variable(const scheme_value& var, const scheme_value& value, scheme_list& env);
 
 		//返回一个新环境,这个环境中包含了一个新的框架,其中所位于表variables的符号约束到表values里队友的元素,而其外围环境是环境base_env
 		scheme_list extend_environment(const scheme_value& variables, const scheme_value& values, scheme_list& base_env);
 
-		//error-impl
 		//返回符号var在环境env里的约束值,如果这一变量没有约束发出一个错误信号
 		scheme_value lookup_variable_value(const scheme_value& var, scheme_list& env);
 	}
@@ -380,10 +378,7 @@ namespace leo
 			}
 		}
 
-		scheme_value lookup_variable_value(const scheme_value& exp, scheme_list& env)
-		{
-			return scheme_value(scheme_atom(static_cast<scheme_int>(0)));
-		}
+		
 
 		scheme_value eval_assignment(const scheme_value& exp, scheme_list& env){
 			set_variable_value(
@@ -411,16 +406,16 @@ namespace leo
 
 	//运行时所需辅助函数<环境操作,错误处理>定义
 	namespace scheme{
-		scheme_list enclosing_environment(scheme_list& env){
-			return cdr(env).cast_list();
+		scheme_list& enclosing_environment(scheme_list& env){
+			return env->mCdr.cast_list();
 		}
 
-		scheme_value first_frame(scheme_list& env){
-			return car(env);
+		scheme_value& first_frame(scheme_list& env){
+			return env->mCar;
 		}
 
 		scheme_list the_empty_envirnoment(){
-			return make_scheme_list();
+			return scheme_nil;
 		}
 
 		scheme_value make_frame(const scheme_value& variables, const scheme_value& values){
@@ -431,7 +426,11 @@ namespace leo
 			return car(frame);
 		}
 
-		scheme_value frame_values(const scheme_value& frame){
+		const scheme_value& frame_values(const scheme_value& frame){
+			return cdr(frame);
+		}
+
+		scheme_value& frame_values(scheme_value& frame){
 			return cdr(frame);
 		}
 
@@ -448,5 +447,68 @@ namespace leo
 			return scheme_nil;
 			
 		}
+
+		scheme_value  lookup_env_loop(const scheme_value& var, scheme_list& env, const scheme_value& vars = {}, const scheme_value& vals = {});
+		scheme_value  lookup_scan(const scheme_value& var, scheme_list& env, const scheme_value& vars, const scheme_value& vals);
+
+		scheme_value lookup_variable_value(const scheme_value& var, scheme_list& env)
+		{
+			return lookup_env_loop(var, env);
+		}
+
+		scheme_value lookup_scan(const scheme_value& var, scheme_list& env, const scheme_value& vars, const scheme_value& vals){
+			if (null(vars))
+				return lookup_env_loop(var, enclosing_environment(env), vars, vals);
+			else if (var == car(vars))
+				car(vals);
+			else
+				lookup_scan(var, env, cdr(vars), cdr(vals));
+		}
+
+		scheme_value  lookup_env_loop(const scheme_value& var, scheme_list& env, const scheme_value& vars, const scheme_value& vals){
+			if (env == the_empty_envirnoment())
+				error("Unbiund variable",var);
+			else{
+				auto frame = first_frame(env);
+				return lookup_scan(var,env,frame_variables(frame), frame_values(frame));
+			}
+			return scheme_nil;
+		}
+
+		//maybe error
+		void set_env_loop(const scheme_value& var, const scheme_value& val, scheme_list& env, const scheme_value& vars = {}, scheme_value& vals = {});
+		void set_scan(const scheme_value& var, const scheme_value& val, scheme_list& env, const scheme_value& vars, scheme_value& vals);
+
+		void set_variable_value(const scheme_value& var, const scheme_value& val, scheme_list& env){
+			return set_env_loop(var, val, env);
+		}
+
+		void set_env_loop(const scheme_value& var, const scheme_value& val, scheme_list& env, const scheme_value& vars,scheme_value& vals){
+			if (env == the_empty_envirnoment())
+				error("Unbiund variable", var);
+			else{
+				auto& frame = first_frame(env);
+				set_scan(var, val, env, frame_variables(frame), frame_values(frame));
+			}
+		}
+
+		void set_scan(const scheme_value& var, const scheme_value& val, scheme_list& env, const scheme_value& vars,scheme_value& vals){
+			if (null(vars))
+				set_env_loop(var, val, enclosing_environment(env), vars, vals);
+			else if (var == car(vars))
+				set_car(vals, val);
+			else
+				set_scan(var, val, env, cdr(vars), cdr(vals));
+		}
+
+
+		void define_scan(const scheme_value& var, const scheme_value& val, scheme_list& env, const scheme_value& vars, scheme_value& vals){
+
+		}
+
+		void define_variable(const scheme_value& var, const scheme_value& value, scheme_list& env){
+
+		}
+
 	}
 }
