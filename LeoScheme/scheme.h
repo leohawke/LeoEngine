@@ -57,16 +57,16 @@ namespace leo
 			template<typename T>
 			bool can_cast() const
 			{
-				if (typeid(T) == typeid(sexp_bool))
-					return mAtomType == atom_t::atom_bool;
-				if (typeid(T) == typeid(sexp_char))
-					return mAtomType == atom_t::atom_char;
-				if (typeid(T) == typeid(sexp_int))
-					return mAtomType == atom_t::atom_int;
-				if (typeid(T) == typeid(sexp_real))
-					return mAtomType == atom_t::atom_real;
-				if (typeid(T) == typeid(sexp_string))
-					return(mAtomType == atom_t::atom_string || mAtomType == atom_t::atom_word);
+				if (typeid(T) == typeid(scheme_bool))
+					return mType == atom_t::atom_bool;
+				if (typeid(T) == typeid(scheme_char))
+					return mType == atom_t::atom_char;
+				if (typeid(T) == typeid(scheme_int))
+					return mType == atom_t::atom_int;
+				if (typeid(T) == typeid(scheme_real))
+					return mType == atom_t::atom_real;
+				if (typeid(T) == typeid(scheme_string))
+					return(mType == atom_t::atom_string || mType == atom_t::atom_word);
 				return false;
 			}
 
@@ -95,7 +95,7 @@ namespace leo
 			scheme_string to_word() const;
 		};
 
-		bool operator==(const scheme_atom& lhs, const scheme_atom& rhs){
+		inline bool operator==(const scheme_atom& lhs, const scheme_atom& rhs){
 			if (lhs.mType == rhs.mType){
 				switch (lhs.mType)
 				{
@@ -180,10 +180,10 @@ namespace leo
 			}
 		};
 
-		bool operator==(const scheme_value& lhs, const scheme_value& rhs){
+		inline bool operator==(const scheme_value& lhs, const scheme_value& rhs){
 			if (lhs.can_cast<scheme_list>() && rhs.can_cast<scheme_list>())
 				return lhs.cast_list() == rhs.cast_list();
-			else if ((lhs.can_cast<scheme_list>() && rhs.can_cast<scheme_list>()))
+			else if ((lhs.can_cast<scheme_atom>() && rhs.can_cast<scheme_atom>()))
 				return lhs.cast_atom() == rhs.cast_atom();
 			else
 				return false;
@@ -193,6 +193,12 @@ namespace leo
 		{
 			scheme_value mCar;
 			scheme_value mCdr;
+
+			scheme_pair(const scheme_value& car, const scheme_value& cdr)
+				:mCar(car), mCdr(cdr){
+			}
+
+			scheme_pair() = default;
 		};
 
 		inline scheme_list make_scheme_list()
@@ -227,7 +233,7 @@ namespace leo
 		}
 
 		inline scheme_list cons(const scheme_value& car, const scheme_value& cdr){
-			return make_shared<scheme_pair>(car, cdr);
+			return make_shared<scheme_pair>( car, cdr );
 		}
 
 		inline scheme_list list(const scheme_value& car)
@@ -302,11 +308,11 @@ namespace leo
 			return car(car(cdr(list)));
 		}
 
-		void set_car(scheme_value& pair, const scheme_value& car){
+		inline void set_car(scheme_value& pair, const scheme_value& car){
 			pair.cast_list()->mCar = car;
 		}
 
-		void set_cdr(scheme_value& pair, const scheme_value& cdr){
+		inline void set_cdr(scheme_value& pair, const scheme_value& cdr){
 			pair.cast_list()->mCdr = cdr;
 		}
 
@@ -329,6 +335,8 @@ namespace leo
 			else
 				return 1 + length(cdr(exp));
 		}
+
+		scheme_list setup_environment();
 
 		namespace ops{
 			scheme_string print(const scheme_list & list);

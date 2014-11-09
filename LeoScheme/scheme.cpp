@@ -2,6 +2,12 @@
 #include <exception>
 #include <stdexcept>
 #include <functional>
+#include <map>
+
+#ifdef LB_IMPL_MSCPP
+#pragma warning(push)
+#pragma warning(disable:4800)
+#endif
 namespace leo
 {
 	//与SEXP有关函数
@@ -27,14 +33,18 @@ namespace leo
 	//全局变量
 	namespace scheme{
 		extern scheme_list scheme_nil = nullptr;
+
+		using primitive_proc_type = std::function < scheme_value(const scheme_list& args) > ;
+
+		static std::map<scheme_string, primitive_proc_type> primitive_procs_table;
 	}
 
 	//运行时所需辅助函数<环境操作,错误处理>
 	namespace scheme{
 		//error-impl
-		scheme_string error_list(const scheme_list& exp)
+		scheme_string error_list(const scheme_value& exp)
 		{
-			return scheme_string("()");
+			return ops::print(exp);
 		}
 
 		scheme_string error_list()
@@ -43,7 +53,7 @@ namespace leo
 		}
 
 		template<typename... Lists>
-		scheme_string error_list(const scheme_list& exp, Lists&... lists)
+		scheme_string error_list(const scheme_value& exp, Lists&... lists)
 		{
 			return error_list(exp) + error_list(lists...);
 		}
@@ -90,7 +100,7 @@ namespace leo
 
 	//求值函数声明
 	namespace scheme{
-		
+
 		//impl
 		scheme_value eval_assignment(const scheme_value& exp, scheme_list& env);
 		//impl
@@ -108,7 +118,7 @@ namespace leo
 				return false;
 			auto list = value.cast_list();
 #if 0
-			
+
 			if (list == scheme_nil)
 				return false;
 			else
@@ -139,6 +149,14 @@ namespace leo
 				return false;
 		}
 
+		bool number(const scheme_value& exp){
+			return exp.can_cast<scheme_atom>() && (exp.cast_atom().can_cast<scheme_int>() || exp.cast_atom().can_cast<scheme_real>());
+		}
+
+		bool number(const scheme_atom& atom){
+			return atom.can_cast<scheme_int>() || atom.can_cast<scheme_real>();
+		}
+
 		bool self_evaluating(const scheme_value& exp){
 			return exp.can_cast<scheme_atom>() && exp.cast_atom().no_word();
 		}
@@ -155,25 +173,25 @@ namespace leo
 		bool quoted(const scheme_value& exp);
 
 		bool lambda(const scheme_value& exp){
-			tagged_list(exp, "lambda");
+			return tagged_list(exp, "lambda");
 		}
 
 		bool begin(const scheme_value& exp){
-			tagged_list(exp, "begin");
+			return tagged_list(exp, "begin");
 		}
 		//no-impl
 		bool cond(const scheme_value& exp);
 
 		bool assignment(const scheme_value& exp){
-			tagged_list(exp, "set!");
+			return tagged_list(exp, "set!");
 		}
 
 		bool definition(const scheme_value& exp){
-			tagged_list(exp, "define");
+			return tagged_list(exp, "define");
 		}
 
 		bool ifexp(const scheme_value& exp){
-			tagged_list(exp, "if");
+			return tagged_list(exp, "if");
 		}
 
 		bool application(const scheme_value& exp){
@@ -192,8 +210,9 @@ namespace leo
 			return tagged_list(procedure, "procedure");
 		}
 
-		//no-impl
-		bool primitive_procedure(const scheme_list& procedure);
+		bool primitive_procedure(const scheme_list& procedure){
+			return tagged_list(procedure, "primitive");
+		}
 	}
 
 	//选择和构造函数函数声明及定义
@@ -232,7 +251,7 @@ namespace leo
 		}
 
 		scheme_value make_lambda(const scheme_value& parameters, const scheme_value& body){
-			const static scheme_value lambda_word{ scheme_atom("lambda",scheme_atom::atom_t::atom_word) };
+			const static scheme_value lambda_word{ scheme_atom("lambda", scheme_atom::atom_t::atom_word) };
 			return cons(lambda_word, cons(parameters, body));
 		}
 
@@ -245,7 +264,7 @@ namespace leo
 
 		scheme_value definition_value(const scheme_value& exp){
 			if (symbol(cadr(exp)))
-				return cadddr(exp);
+				return caddr(exp);
 			else
 				return make_lambda(cdadr(exp), cddr(exp));
 		}
@@ -270,9 +289,9 @@ namespace leo
 			return list(if_word, predicate, consequent, alternative);
 		}
 
-		scheme_value make_procedure(const scheme_value& parameters, const scheme_value& body){
+		scheme_value make_procedure(const scheme_value& parameters, const scheme_value& body,scheme_list& env){
 			const static scheme_value procedure_word{ scheme_atom("procedure", scheme_atom::atom_t::atom_word) };
-			return list(procedure_word, parameters, body);
+			return list(procedure_word, parameters, body,env);
 		}
 
 		scheme_value begin_actions(const scheme_value& exp){
@@ -291,7 +310,7 @@ namespace leo
 			if (no_operands(exps))
 				return scheme_nil;
 			else
-				cons(eval(first_operand(exps), env), list_of_values(rest_operands(exps), env));
+				return cons(eval(first_operand(exps), env), list_of_values(rest_operands(exps), env));
 		}
 
 		scheme_value procedure_body(const scheme_value& procedure){
@@ -308,7 +327,7 @@ namespace leo
 
 		scheme_value make_begin(const scheme_value& seq){
 			const static scheme_value begin_word{ scheme_atom("begin", scheme_atom::atom_t::atom_word) };
-			return cons(begin_word,seq);
+			return cons(begin_word, seq);
 		}
 
 		scheme_value sequence_exp(const scheme_value& seq){
@@ -317,11 +336,11 @@ namespace leo
 			else if (last_exp(seq))
 				return first_exp(seq);
 			else
-				make_begin(seq);
+				return make_begin(seq);
 		}
 	}
 
-	
+
 
 	//eval,apply定义
 	namespace scheme
@@ -330,7 +349,7 @@ namespace leo
 			return apply(procedure.cast_list(), arguments.cast_list());
 		}
 
-		scheme_value eval(const scheme_value& exp,scheme_list& env)
+		scheme_value eval(const scheme_value& exp, scheme_list& env)
 		{
 			if (self_evaluating(exp))
 				return exp;
@@ -343,18 +362,25 @@ namespace leo
 			if (ifexp(exp))
 				return eval_if(exp, env);
 			if (lambda(exp))
-				return make_procedure(lambda_parameters(exp), lambda_body(exp));
+				return make_procedure(lambda_parameters(exp), lambda_body(exp),env);
 			if (begin(exp))
 				return eval_sequence(begin_actions(exp), env);
 			if (application(exp))
 				return apply(eval(oper(exp), env), list_of_values(operands(exp), env));
 			else
-				error("Unknown expression type --EVAL",exp);
+				error("Unknown expression type --EVAL", exp);
 			return scheme_nil;
 		}
 
-		scheme_value apply_primitive_procedure(const scheme_list& procedure, const scheme_list& arguments);
-		
+		primitive_proc_type primitive_impl(const scheme_list& procedure){
+			DebugPrintf("底层函数被调用\n");
+			return primitive_procs_table[car(procedure->mCdr).cast_atom().cast<scheme_string>()];
+		}
+
+		scheme_value apply_primitive_procedure(const scheme_list& procedure, const scheme_list& arguments){
+			return primitive_impl(procedure)(arguments);
+		}
+
 
 		scheme_value apply(const scheme_list& procedure, const scheme_list& arguments){
 
@@ -378,7 +404,7 @@ namespace leo
 			}
 		}
 
-		
+
 
 		scheme_value eval_assignment(const scheme_value& exp, scheme_list& env){
 			set_variable_value(
@@ -422,7 +448,11 @@ namespace leo
 			return cons(variables, values);
 		}
 
-		scheme_value frame_variables(const scheme_value& frame){
+		const scheme_value& frame_variables(const scheme_value& frame){
+			return car(frame);
+		}
+
+		scheme_value& frame_variables(scheme_value& frame){
 			return car(frame);
 		}
 
@@ -435,17 +465,19 @@ namespace leo
 		}
 
 		void add_binding_to_frame(const scheme_value& var, const scheme_value& val, scheme_value& frame){
+			//scheme_value(cons(val, cdr(frame)));
 			set_car(frame, cons(var, car(frame)));
 			set_cdr(frame, cons(val, cdr(frame)));
+			var.can_cast<scheme_atom>();
 		}
 
 		scheme_list extend_environment(const scheme_value& vars, const scheme_value& vals, scheme_list& base_env){
 			if (length(vars) == length(vals))
 				return cons(make_frame(vars, vals), base_env);
 			else
-				error("length(vars) != length (vals)", vars, vals);
+				error("错误: 参数数量不匹配", vars, vals);
 			return scheme_nil;
-			
+
 		}
 
 		scheme_value  lookup_env_loop(const scheme_value& var, scheme_list& env, const scheme_value& vars = {}, const scheme_value& vals = {});
@@ -453,6 +485,10 @@ namespace leo
 
 		scheme_value lookup_variable_value(const scheme_value& var, scheme_list& env)
 		{
+#ifdef DEBUG
+			auto var_name = ops::print(var);
+			DebugPrintf("查找变量 %s 的值\n",var_name.c_str());
+#endif
 			return lookup_env_loop(var, env);
 		}
 
@@ -460,30 +496,34 @@ namespace leo
 			if (null(vars))
 				return lookup_env_loop(var, enclosing_environment(env), vars, vals);
 			else if (var == car(vars))
-				car(vals);
+				return car(vals);
 			else
-				lookup_scan(var, env, cdr(vars), cdr(vals));
+				return lookup_scan(var, env, cdr(vars), cdr(vals));
 		}
 
 		scheme_value  lookup_env_loop(const scheme_value& var, scheme_list& env, const scheme_value& vars, const scheme_value& vals){
 			if (env == the_empty_envirnoment())
-				error("Unbiund variable",var);
+				error("Unbiund variable", var);
 			else{
-				auto frame = first_frame(env);
-				return lookup_scan(var,env,frame_variables(frame), frame_values(frame));
+				auto frame = first_frame(env); 
+				return lookup_scan(var, env, frame_variables(frame), frame_values(frame));
 			}
 			return scheme_nil;
 		}
 
-		//maybe error
-		void set_env_loop(const scheme_value& var, const scheme_value& val, scheme_list& env, const scheme_value& vars = {}, scheme_value& vals = {});
+		void set_env_loop(const scheme_value& var, const scheme_value& val, scheme_list& env, const scheme_value& vars, scheme_value& vals);
 		void set_scan(const scheme_value& var, const scheme_value& val, scheme_list& env, const scheme_value& vars, scheme_value& vals);
 
 		void set_variable_value(const scheme_value& var, const scheme_value& val, scheme_list& env){
-			return set_env_loop(var, val, env);
+#ifdef DEBUG
+			auto var_name = ops::print(var);
+			DebugPrintf("设置变量 %s 的值\n", var_name.c_str());
+#endif
+			static scheme_value place_hold;
+			return set_env_loop(var, val, env, var, place_hold);
 		}
 
-		void set_env_loop(const scheme_value& var, const scheme_value& val, scheme_list& env, const scheme_value& vars,scheme_value& vals){
+		void set_env_loop(const scheme_value& var, const scheme_value& val, scheme_list& env, const scheme_value& vars, scheme_value& vals){
 			if (env == the_empty_envirnoment())
 				error("Unbiund variable", var);
 			else{
@@ -492,7 +532,7 @@ namespace leo
 			}
 		}
 
-		void set_scan(const scheme_value& var, const scheme_value& val, scheme_list& env, const scheme_value& vars,scheme_value& vals){
+		void set_scan(const scheme_value& var, const scheme_value& val, scheme_list& env, const scheme_value& vars, scheme_value& vals){
 			if (null(vars))
 				set_env_loop(var, val, enclosing_environment(env), vars, vals);
 			else if (var == car(vars))
@@ -502,13 +542,106 @@ namespace leo
 		}
 
 
-		void define_scan(const scheme_value& var, const scheme_value& val, scheme_list& env, const scheme_value& vars, scheme_value& vals){
-
+		void define_scan(const scheme_value& var, const scheme_value& val, scheme_list& env, scheme_value& frame, const scheme_value& vars, scheme_value& vals){
+			if (null(vars))
+				add_binding_to_frame(var, val, frame);
+			else if (var == car(vars))
+				set_car(vals, val);
+			else
+				define_scan(var, val, env, frame, cdr(vars), cdr(vals));
 		}
 
-		void define_variable(const scheme_value& var, const scheme_value& value, scheme_list& env){
-
+		void define_variable(const scheme_value& var, const scheme_value& val, scheme_list& env){
+#ifdef DEBUG
+			auto var_name = ops::print(var);
+			DebugPrintf("定义新变量 %s \n", var_name.c_str());
+#endif
+			auto & frame = first_frame(env);
+			auto& vars = frame_variables(frame);
+			auto& vals = frame_values(frame);
+			define_scan(var, val, env, frame, frame_variables(frame), frame_values(frame));
 		}
 
+		std::pair<scheme_value, scheme_value> make_name_object(const scheme_string& funcname){
+			std::pair<scheme_value, scheme_value> result;
+			result.first = scheme_atom(funcname, scheme_atom::atom_t::atom_word);
+			result.second = list(scheme_atom(scheme_string("primitive"), scheme_atom::atom_t::atom_word), scheme_atom(funcname, scheme_atom::atom_t::atom_string));
+			return result;
+		}
+
+		scheme_value add(const scheme_list& args){
+			auto l = length(args);
+			if (l <= 1)
+				error("+ 参数不够");
+
+			scheme_real r_result;
+
+			bool i = true;
+			bool s = false;
+			scheme_string s_result;
+
+			auto first = args->mCar.cast_atom();
+			auto next = args->mCdr;
+
+			auto next_first = [&](){
+				first = next.cast_list()->mCar.cast_atom();
+				next = next.cast_list()->mCdr;
+			};
+
+			if (first.can_cast<scheme_string>()){
+				s = true;
+				s_result = first.cast<scheme_string>();
+			}
+			else{
+				if (first.can_cast<scheme_real>()){
+					r_result = first.cast<scheme_real>();
+					i = false;
+				}
+				else
+					r_result = static_cast<scheme_real>(first.cast<scheme_int>());
+			}
+
+			using atom_t = scheme_atom::atom_t;
+			for (auto j = 1u; j != l; ++j){
+				next_first();
+				if (s)
+					if (first.can_cast<scheme_string>())
+						s_result += first.cast<scheme_string>();
+					else
+						error("+ string the next parameter must be string", first);
+				else if (number(first)){
+					if (first.can_cast<scheme_real>()){
+						r_result += first.cast<scheme_real>();
+						i = false;
+					}
+					else
+						r_result += first.cast<scheme_int>();
+				}
+				else
+					error("+ real/int the next parameter must be real/int", first);
+			}
+
+			if (s)
+				return scheme_atom(s_result, atom_t::atom_string);
+			if (i)
+				return scheme_atom(static_cast<scheme_int>(r_result));
+			else
+				return scheme_atom(r_result);
+		}
+
+		scheme_list setup_environment(){
+			DebugPrintf("初始化环境...\n");
+			auto env = make_scheme_list();
+			auto addpair = make_name_object("+");
+			auto names = list(addpair.first);
+			auto objects = list(addpair.second);
+			primitive_procs_table["+"] = add;
+			DebugPrintf("加入+的实现...\n");
+			return extend_environment(names, objects, env);
+		}
 	}
 }
+
+#ifdef LB_IMPL_MSCPP
+#pragma warning(pop)
+#endif

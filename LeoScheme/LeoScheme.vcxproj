@@ -82,6 +82,7 @@
     <ClInclude Include="Sexp\Sexp.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\All\Debug.cpp" />
     <ClCompile Include="..\All\IndePlatform\any.cpp" />
     <ClCompile Include="..\All\IndePlatform\memory.cpp" />
     <ClCompile Include="scheme.cpp" />
