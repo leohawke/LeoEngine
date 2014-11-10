@@ -115,6 +115,8 @@ namespace leo
 			return false;
 		}
 
+		
+
 		struct scheme_value
 		{
 			using any_t = sexp::sexp_value::any_t;
@@ -327,6 +329,10 @@ namespace leo
 		bool is_list(const scheme_value& value);
 		bool pair(const scheme_value& value);
 		bool symbol(const scheme_value& exp);
+		bool tagged_list(const scheme_value& exp, const scheme_string& tag);
+		inline bool compound_procedure(const scheme_list& procedure){
+			return tagged_list(procedure, "procedure");
+		}
 
 		inline scheme_int length(const scheme_value& exp){
 			assert(exp.can_cast<scheme_list>());
@@ -337,6 +343,9 @@ namespace leo
 		}
 
 		scheme_list setup_environment();
+
+
+		
 
 		namespace ops{
 			scheme_string print(const scheme_list & list);
