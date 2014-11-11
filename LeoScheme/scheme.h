@@ -333,7 +333,13 @@ namespace leo
 		inline bool compound_procedure(const scheme_list& procedure){
 			return tagged_list(procedure, "procedure");
 		}
+		inline scheme_value procedure_body(const scheme_value& procedure){
+			return caddr(procedure);
+		}
 
+		inline scheme_value procedure_parameters(const scheme_value& procedure){
+			return cadr(procedure);
+		}
 		inline scheme_int length(const scheme_value& exp){
 			assert(exp.can_cast<scheme_list>());
 			if (exp.cast_list() == scheme_nil)

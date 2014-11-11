@@ -147,7 +147,7 @@ namespace leo
 
 		bool tagged_list(const scheme_value& exp, const scheme_string& tag){
 			if (pair(exp))
-				return car(exp).cast_atom().to_word() == tag;
+				return car(exp).can_cast<scheme_atom>() && car(exp).cast_atom().to_word() == tag;
 			else
 				return false;
 		}
@@ -322,13 +322,6 @@ namespace leo
 				return cons(eval(first_operand(exps), env), list_of_values(rest_operands(exps), env));
 		}
 
-		inline scheme_value procedure_body(const scheme_value& procedure){
-			return caddr(procedure);
-		}
-
-		inline scheme_value procedure_parameters(const scheme_value& procedure){
-			return cadr(procedure);
-		}
 
 		inline scheme_list procedure_environment(const scheme_value& procedure){
 			return cadddr(procedure).cast_list();
@@ -438,11 +431,12 @@ namespace leo
 		}
 
 		scheme_value eval_definition(const scheme_value& exp, scheme_list& env){
+			auto result = eval(definition_value(exp), env);
 			define_variable(
 				definition_variable(exp),
-				eval(definition_value(exp), env),
+				result,
 				env);
-			return scheme_value(scheme_nil);
+			return result;
 		}
 
 		scheme_value eval_if(const scheme_value& exp, scheme_list& env){

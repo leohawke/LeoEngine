@@ -122,6 +122,25 @@ namespace leo
 							str[pos++] = c;
 						};
 
+						if (list != scheme_nil && compound_procedure(list))
+						{
+							char pre_str[] = "(compouned-procedure (lambda ";
+							for (auto c : pre_str)
+								setchar(c);
+							--pos;
+							auto para_str = print(procedure_parameters(list));
+							for (auto c : para_str)
+								setchar(c);
+							auto body_str = print(procedure_body(list));
+							body_str[0] = ' ';
+							for (auto c : body_str)
+								setchar(c);
+							setchar(')');
+							str.resize(pos);
+							str.shrink_to_fit();
+							return str;
+						}
+
 						if (is_list(list)){
 							print_scheme_list(list, setchar);
 							str.resize(pos);
@@ -203,7 +222,7 @@ namespace leo
 		}
 
 
-		static scheme_value parse_word(const scheme_string& word)
+		static scheme_value parse_word(scheme_string& word)
 		{
 			if ((word[0] >= '0' && word[0] <= '9') || ((word[0] == '+' || word[0] == '-') && word.size() > 2 && (word[1] >= '0' && word[1] <= '9')))
 			{
@@ -229,23 +248,28 @@ namespace leo
 					}
 				}
 			}
-			else if (word[0] == '~')
+
+			if (word[0] == '~')
 			{
 				return scheme_atom(word[1]);
 			}
-			else if (word[0] == '#')
+
+			if (word[0] == '#')
 			{
 				if (word[1] == 't' || word[1] == 'T')
 					return scheme_atom(true);
 				else
 					return scheme_atom(false);
 			}
-			else if (word[0] == '\"')
+
+			if (word[0] != '\"')
 			{
-				return scheme_atom(word, scheme_atom::atom_t::atom_string);
+				return scheme_atom(word, scheme_atom::atom_t::atom_word);
 			}
 			else
 			{
+				word.erase(word.cbegin());
+				word.erase(--word.cend());
 				return scheme_atom(word, scheme_atom::atom_t::atom_string);
 			}
 		}
@@ -266,6 +290,7 @@ namespace leo
 					scanf("%c", &c);
 					input += c;
 				}
+				input.resize(input.size() - 1);
 				DebugPrintf("¶ÁÈë×Ö·û´®: %s\n", input.c_str());
 				return parse_word(input);
 			}
