@@ -1,7 +1,7 @@
+#include <IndePlatform\platform.h>
 #include "Sexp/sexp.hpp"
 #include "scheme.h"
 #include <debug.hpp>
-#include <windows.h>
 #include <array>
 #include <cassert>
 
@@ -24,19 +24,11 @@ std::shared_ptr<sexp::sexp> pack(sexp::sexp_char * tag, float v1, float v2, floa
 
 int main()
 {
-#if 0
+#if PLATFORM_WIN32
 
-	auto env = setup_environment();
-	auto exp = input_parse("(define double (lambda (x) (+ 3.2 x)))");
-	auto result = eval(exp, env);
-	exp = input_parse("(double 3)");
-
-	result = eval(exp,env);
-
-	auto string = ops::print(result);
-
-	printf("%s\n", string.c_str());
-	//auto sexp = pack("tag", 1.0112345f, 2.f, 3.f);
+	auto stdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	auto foreColor = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED;
+	SetConsoleTextAttribute(stdHandle, foreColor);
 #endif
 	auto scheme_env = setup_environment();
 	for (;;){

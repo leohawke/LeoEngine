@@ -275,7 +275,7 @@ namespace leo
 		}
 
 		scheme_value read(){
-			printf("\n;;;<=\n");
+			printf("\n;;;<=");
 			char c = ' ';
 
 			//跳过开始的所有空格
