@@ -442,8 +442,11 @@ namespace leo{
 				}
 			}
 			inline std::size_t hash(const wchar_t* str){
+#ifdef LB_IMPL_MSCPP
 				auto sid = std::_Hash_seq((unsigned char*)str, wcslen(str)*sizeof(wchar_t) / sizeof(char));
-
+#else
+				auto sid = std::_Fnv_hash_impl::hash((void*)str, wcslen(str)*sizeof(wchar_t) / sizeof(char));
+#endif
 				if (mMap.find(sid) == mMap.end())
 					mMap[sid] = _wcsdup(str);
 				return sid;

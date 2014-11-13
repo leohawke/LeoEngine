@@ -129,7 +129,7 @@
 
 //ÊôÐÔ
 #if LB_IMPL_GNUCPP >= 20500
-#define LBATTR(...) __attribute__((__VA_ARGS__))
+#define LB_ATTR(...) __attribute__((__VA_ARGS__))
 #else
 #define LB_ATTR(...)
 #endif

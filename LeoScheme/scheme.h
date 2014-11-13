@@ -146,6 +146,8 @@ namespace leo
 				:mValue(ptr),mType(any_t::any_ptr){
 			}
 
+
+
 			scheme_value& operator=(scheme_atom atom)
 			{
 				mValue = atom;
@@ -181,13 +183,13 @@ namespace leo
 			scheme_atom& cast_atom()
 			{
 				assert(mType == any_t::any_atom || mType == any_t::any_ptr);
-				return mType == any_t::any_ptr ? (*any_cast<scheme_value**>(&mValue))->cast_atom() : *any_cast<scheme_atom*>(&mValue);
+				return mType == any_t::any_ptr ? const_cast<scheme_value*>(*any_cast<scheme_value**>(&mValue))->cast_atom() : *any_cast<scheme_atom*>(&mValue);
 			}
 
 			scheme_list& cast_list()
 			{
 				assert(mType == any_t::any_list || mType == any_t::any_ptr);
-				return mType == any_t::any_ptr ? (*any_cast<scheme_value**>(&mValue))->cast_list() : *any_cast<scheme_list*>(&mValue);
+				return mType == any_t::any_ptr ? const_cast<scheme_value*>(*any_cast<const scheme_value*const*>(&mValue))->cast_list() : *any_cast<scheme_list*>(&mValue);
 			}
 
 			template<typename T>

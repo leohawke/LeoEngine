@@ -180,8 +180,6 @@ namespace leo
 		bool cond_else_clause(const scheme_value& clause){
 			return car(clause).can_cast<scheme_atom>() && car(clause).cast_atom().cast<scheme_string>() == "else";
 		}
-
-		bool change_procedure(const scheme_list& procedure);
 	}
 
 	//选择和构造函数函数声明及定义
@@ -357,11 +355,7 @@ namespace leo
 			if (cond(exp))
 				return eval_cond(exp, env);
 			if (application(exp)){
-				auto procedure = eval(oper(exp), env).cast_list();
-				if (!change_procedure(procedure))
-					return apply(procedure, list_of_values(operands(exp), env));
-				else
-					return apply_change(procedure, operands(exp).cast_list(), env);
+				return apply(eval(oper(exp), env), list_of_values(operands(exp), env));
 			}
 			else
 				error("Unknown expression type --EVAL", exp);
@@ -386,52 +380,6 @@ namespace leo
 				return eval_sequence(procedure_body(procedure), extend_environment(procedure_parameters(procedure), arguments, procedure_environment(procedure)));
 			error("Unknown procedure type -- APPLY ", procedure);
 			return scheme_value(scheme_nil);
-		}
-
-		scheme_value apply_change(const scheme_list& procedure, const scheme_list arguments, scheme_list& env){
-			auto procedure_name = car(procedure->mCdr).cast_atom().cast<scheme_string>();
-			static scheme_value value_nil = scheme_nil;
-			if (procedure_name == "set-car!"){
-				if (length(arguments) < 2)
-					error("set-car! 没有提供值");
-				
-				scheme_value& first = value_nil;
-				if (variable(first_operand(arguments)))
-					first = lookup_variable_value(first_operand(arguments), env);
-				else
-					first = eval(first_operand(arguments), env);
-				if (!pair(first))
-					error("set-car! 第一个参数应该是序对");
-				
-				auto rest = list_of_values(rest_operands(arguments), env);
-				if (length(rest) > 1)
-					error("set-car! 提供值过多");
-				auto second = car(rest);
-
-				set_car(first, second);
-
-				return scheme_nil;
-			}
-			if (procedure_name == "set-cdr!"){
-				if (length(arguments) < 2)
-					error("set-cdr! 没有提供值");
-				scheme_value& first = value_nil;
-				if (variable(first_operand(arguments)))
-					first = lookup_variable_value(first_operand(arguments), env);
-				else
-					first = eval(first_operand(arguments), env);
-				if (!pair(first))
-					error("set-cdr! 第一个参数应该是序对");
-				auto rest = list_of_values(rest_operands(arguments), env);
-				if (length(rest) > 1)
-					error("set-cdr! 提供值过多");
-				auto second = car(rest);
-
-				set_cdr(first, second);
-				return scheme_nil;
-			}
-			error("执行改变状态的函数出现未知错误,没有该函数");
-			return value_nil;
 		}
 	}
 
@@ -931,6 +879,43 @@ namespace leo
 			return first >= second;
 		}
 
+
+
+		scheme_value set_car_impl(const scheme_list& args){
+			if (length(args) < 2)
+				error("set-car! 没有提供值");
+
+			scheme_value& first = args->mCar;
+			if (!pair(first))
+				error("set-car! 第一个参数应该是序对");
+
+			
+			if (length(args) > 2)
+				error("set-car! 提供值过多");
+			auto second = args->mCdr.cast_list()->mCar;
+			auto first_string = ops::print(first);
+			auto b = first.can_cast<scheme_list>();
+			set_car(first, second);
+
+			return first;
+		}
+		scheme_value set_cdr_impl(const scheme_list& args){
+			if (length(args) < 2)
+				error("set-cdr! 没有提供值");
+
+			scheme_value& first = args->mCar;
+			if (!pair(first))
+				error("set-cdr! 第一个参数应该是序对");
+
+
+			if (length(args) > 2)
+				error("set-cdr! 提供值过多");
+			auto second = args->mCdr.cast_list()->mCar;
+
+			set_cdr(first, second);
+
+			return first;
+		}
 		scheme_value cons_impl(const scheme_list& args){
 			if (length(args) != 2)
 				error("cons参数应为两个", args);
@@ -986,6 +971,8 @@ namespace leo
 			objects = cons(list_pair.second, objects);
 			primitive_procs_table["cons"] = cons_impl;
 			primitive_procs_table["list"] = list_impl;
+			primitive_procs_table["set-car!"] = set_car_impl;
+			primitive_procs_table["set-cdr!"] = set_cdr_impl;
 			DebugPrintf("加入 set-car!,set-cdr!,cons,list..\n");
 			//数据操作函数定义
 
