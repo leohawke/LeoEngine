@@ -36,6 +36,9 @@
     <ClInclude Include="scheme.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="SchemeMath.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\All\IndePlatform\any.cpp">
@@ -57,6 +60,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\All\Debug.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SchemeMath.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,13 +1,11 @@
 #include "scheme.h"
+#include "SchemeMath.h"
 #include <exception>
 #include <stdexcept>
 #include <functional>
 #include <map>
 
-#ifdef LB_IMPL_MSCPP
-#pragma warning(push)
-#pragma warning(disable:4800)
-#endif
+
 namespace leo
 {
 	//与SEXP有关函数
@@ -34,7 +32,7 @@ namespace leo
 	namespace scheme{
 		extern scheme_list scheme_nil = nullptr;
 
-		static scheme_value value_nil = scheme_nil;
+		
 
 		using primitive_proc_type = std::function < scheme_value(const scheme_list& args) > ;
 
@@ -43,49 +41,10 @@ namespace leo
 
 	//运行时所需辅助函数<环境操作,错误处理>
 	namespace scheme{
-		//error-impl
-		scheme_string error_list(const scheme_value& exp)
-		{
-			return ops::print(exp);
-		}
 
-		scheme_string error_list()
-		{
-			return scheme_string();
-		}
+		
 
-		template<typename... Lists>
-		scheme_string error_list(const scheme_value& exp, Lists&... lists)
-		{
-			return error_list(exp) + error_list(lists...);
-		}
-
-		template<typename... Lists>
-		void error(const scheme_string& msg, Lists&... lists)
-		{
-			throw std::runtime_error(msg + error_list(lists...));
-		}
-
-		bool true_exp(const scheme_value& exp){
-			if (exp.mType == scheme_value::any_t::any_list)
-				return exp.cast_list() != scheme_nil;
-			else
-				switch (exp.cast_atom().mType)
-			{
-				case scheme_atom::atom_t::atom_bool:
-					return exp.cast_atom().cast<scheme_bool>();
-				case scheme_atom::atom_t::atom_char:
-					return exp.cast_atom().cast<scheme_char>();
-				case scheme_atom::atom_t::atom_int:
-					return exp.cast_atom().cast<scheme_int>();
-				case scheme_atom::atom_t::atom_real:
-					return exp.cast_atom().cast<scheme_real>();
-				case scheme_atom::atom_t::atom_word:
-				case scheme_atom::atom_t::atom_string:
-					return exp.cast_atom().cast<scheme_string>() != "false";
-			}
-			return false;
-		}
+		
 
 		//修改变量var在环境env里的约束,使得该变量现在约束到值value,如果这一变量没有约束就发出一个错误信号
 		void set_variable_value(const scheme_value& var, const scheme_value& value, scheme_list& env);
@@ -97,7 +56,7 @@ namespace leo
 		scheme_list extend_environment(const scheme_value& variables, const scheme_value& values, scheme_list& base_env);
 
 		//返回符号var在环境env里的约束值,如果这一变量没有约束发出一个错误信号
-		scheme_value& lookup_variable_value(const scheme_value& var, scheme_list& env);
+		scheme_value* lookup_variable_value(const scheme_value& var, scheme_list& env);
 	}
 
 	//求值函数声明
@@ -157,13 +116,7 @@ namespace leo
 				return false;
 		}
 
-		bool number(const scheme_value& exp){
-			return exp.can_cast<scheme_atom>() && (exp.cast_atom().can_cast<scheme_int>() || exp.cast_atom().can_cast<scheme_real>());
-		}
-
-		bool number(const scheme_atom& atom){
-			return atom.can_cast<scheme_int>() || atom.can_cast<scheme_real>();
-		}
+		
 
 		bool self_evaluating(const scheme_value& exp){
 			return exp.can_cast<scheme_atom>() && exp.cast_atom().no_word();
@@ -325,8 +278,23 @@ namespace leo
 		scheme_value list_of_values(const scheme_value& exps, scheme_list& env){
 			if (no_operands(exps))
 				return scheme_nil;
-			else
-				return cons(eval(first_operand(exps), env), list_of_values(rest_operands(exps), env));
+			else{
+				scheme_list p = make_scheme_list();
+				auto result = p;
+				scheme_value rest = exps;
+				for (;;){
+					p->mCar = eval(first_operand(rest), env);
+					rest = rest_operands(rest);
+					if (no_operands(rest)){
+						p->mCdr = scheme_nil;
+						return result;
+					}
+					else{
+						p->mCdr = make_scheme_list();
+						p = p->mCdr.cast_list();
+					}
+				}
+			}
 		}
 
 
@@ -391,7 +359,7 @@ namespace leo
 			if (application(exp)){
 				auto procedure = eval(oper(exp), env).cast_list();
 				if (!change_procedure(procedure))
-					return apply(eval(oper(exp), env), list_of_values(operands(exp), env));
+					return apply(procedure, list_of_values(operands(exp), env));
 				else
 					return apply_change(procedure, operands(exp).cast_list(), env);
 			}
@@ -422,29 +390,48 @@ namespace leo
 
 		scheme_value apply_change(const scheme_list& procedure, const scheme_list arguments, scheme_list& env){
 			auto procedure_name = car(procedure->mCdr).cast_atom().cast<scheme_string>();
+			static scheme_value value_nil = scheme_nil;
 			if (procedure_name == "set-car!"){
 				if (length(arguments) < 2)
 					error("set-car! 没有提供值");
-				auto& first =lookup_variable_value(first_operand(arguments),env);
-				auto rest = list_of_values(rest_operands(arguments),env);
+				
+				scheme_value& first = value_nil;
+				if (variable(first_operand(arguments)))
+					first = lookup_variable_value(first_operand(arguments), env);
+				else
+					first = eval(first_operand(arguments), env);
+				if (!pair(first))
+					error("set-car! 第一个参数应该是序对");
+				
+				auto rest = list_of_values(rest_operands(arguments), env);
 				if (length(rest) > 1)
 					error("set-car! 提供值过多");
 				auto second = car(rest);
 
 				set_car(first, second);
+
+				return scheme_nil;
 			}
 			if (procedure_name == "set-cdr!"){
 				if (length(arguments) < 2)
 					error("set-cdr! 没有提供值");
-				auto& first = lookup_variable_value(first_operand(arguments), env);
+				scheme_value& first = value_nil;
+				if (variable(first_operand(arguments)))
+					first = lookup_variable_value(first_operand(arguments), env);
+				else
+					first = eval(first_operand(arguments), env);
+				if (!pair(first))
+					error("set-cdr! 第一个参数应该是序对");
 				auto rest = list_of_values(rest_operands(arguments), env);
 				if (length(rest) > 1)
 					error("set-cdr! 提供值过多");
 				auto second = car(rest);
 
 				set_cdr(first, second);
+				return scheme_nil;
 			}
 			error("执行改变状态的函数出现未知错误,没有该函数");
+			return value_nil;
 		}
 	}
 
@@ -573,14 +560,14 @@ namespace leo
 		scheme_value&  lookup_env_loop(const scheme_value& var, scheme_list& env, const scheme_value& vars, scheme_value& vals);
 		scheme_value&  lookup_scan(const scheme_value& var, scheme_list& env, const scheme_value& vars, scheme_value& vals);
 
-		scheme_value& lookup_variable_value(const scheme_value& var, scheme_list& env)
+		scheme_value* lookup_variable_value(const scheme_value& var, scheme_list& env)
 		{
 #ifdef DEBUG
 			auto var_name = ops::print(var);
 			DebugPrintf("查找变量 %s 的值: \n",var_name.c_str());
 #endif
 			static scheme_value place_hold;
-			return lookup_env_loop(var, env,var,place_hold);
+			return &lookup_env_loop(var, env,var,place_hold);
 		}
 
 		scheme_value& lookup_scan(const scheme_value& var, scheme_list& env, const scheme_value& vars,scheme_value& vals){
@@ -593,12 +580,14 @@ namespace leo
 		}
 
 		scheme_value&  lookup_env_loop(const scheme_value& var, scheme_list& env, const scheme_value& vars, scheme_value& vals){
+			static scheme_value value_nil = scheme_nil;
 			if (env == the_empty_envirnoment())
 				error("Unbiund variable ", var);
 			else{
 				auto& frame = first_frame(env); 
 				return lookup_scan(var, env, frame_variables(frame), frame_values(frame));
 			}
+			error("未知错误,函数不应该执行到这里");
 			return value_nil;
 		}
 
@@ -661,6 +650,8 @@ namespace leo
 		}
 
 		bool change_procedure(const scheme_list& procedure){
+			if (!primitive_procedure(procedure))
+				return false;
 			auto procedure_name = car(procedure->mCdr).cast_atom().cast<scheme_string>();
 			if (procedure_name == "set-car!")
 				return true;
@@ -940,6 +931,18 @@ namespace leo
 			return first >= second;
 		}
 
+		scheme_value cons_impl(const scheme_list& args){
+			if (length(args) != 2)
+				error("cons参数应为两个", args);
+			auto & first = args->mCar.cast_atom();
+			auto & second = args->mCdr.cast_list()->mCar.cast_atom();
+			return cons(first, second);
+		}
+
+		scheme_value list_impl(const scheme_list& args){
+			return args;
+		}
+
 		scheme_list setup_environment(){
 			DebugPrintf("初始化环境...\n");
 			auto env = scheme_nil;
@@ -968,14 +971,42 @@ namespace leo
 			DebugPrintf("加入+,-,*,/的实现...\n");
 			DebugPrintf("加入=,<,>,<=,>=的实现...\n");
 			//注意,set-car!和set-cdr!是硬编码的
-			DebugPrintf("加入 set-car!,set-cdr!..\n");
+			auto set_car_pair = make_name_object("set-car!");
+			auto set_cdr_pair = make_name_object("set-cdr!");
+			names = cons(set_car_pair.first, names);
+			objects = cons(set_car_pair.second, objects);
+			names = cons(set_cdr_pair.first, names);
+			objects = cons(set_cdr_pair.second, objects);
+
+			auto cons_pair = make_name_object("cons");
+			auto list_pair = make_name_object("list");
+			names = cons(cons_pair.first, names);
+			objects = cons(cons_pair.second, objects);
+			names = cons(list_pair.first, names);
+			objects = cons(list_pair.second, objects);
+			primitive_procs_table["cons"] = cons_impl;
+			primitive_procs_table["list"] = list_impl;
+			DebugPrintf("加入 set-car!,set-cdr!,cons,list..\n");
 			//数据操作函数定义
 
+			auto and_pair = make_name_object("and");
+			auto or_pair = make_name_object("or");
+			auto not_pair = make_name_object("not");
+			auto abs_pair = make_name_object("abs");
+			names = cons(and_pair.first, names);
+			objects = cons(and_pair.second, objects);
+			names = cons(or_pair.first, names);
+			objects = cons(or_pair.second, objects);
+			names = cons(not_pair.first, names);
+			objects = cons(not_pair.second, objects);
+			names = cons(abs_pair.first, names);
+			objects = cons(abs_pair.second, objects);
+			primitive_procs_table["and"] = scheme_and;
+			primitive_procs_table["or"] = scheme_or;
+			primitive_procs_table["not"] = scheme_not;
+			primitive_procs_table["abs"] = scheme_abs;
 			return extend_environment(names, objects, env);
 		}
 	}
 }
 
-#ifdef LB_IMPL_MSCPP
-#pragma warning(pop)
-#endif

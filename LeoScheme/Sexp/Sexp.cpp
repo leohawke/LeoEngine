@@ -390,7 +390,7 @@ namespace leo
 
 			static void parse_word(const sexp_string& word, const sexp_list& dst)
 			{
-				if ((word[0] >= '0' && word[0] <= '9') || ((word[0] == '+' || word[0] == '-') && word.size() > 2 && (word[1] >= '0' && word[1] <= '9')))
+				if ((word[0] >= '0' && word[0] <= '9') || ((word[0] == '+' || word[0] == '-') && word.size() > 1 && (word[1] >= '0' && word[1] <= '9')))
 				{
 					if (word.size() > 1 && (word[word.size() - 1] == 'x' || word[word.size() - 1] == 'X'))
 					{

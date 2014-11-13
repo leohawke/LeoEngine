@@ -84,6 +84,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scheme.h" />
+    <ClInclude Include="SchemeMath.h" />
     <ClInclude Include="Sexp\Sexp.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -92,6 +93,7 @@
     <ClCompile Include="..\All\IndePlatform\memory.cpp" />
     <ClCompile Include="scheme.cpp" />
     <ClCompile Include="SchemeIO.cpp" />
+    <ClCompile Include="SchemeMath.cpp" />
     <ClCompile Include="Sexp\Sexp.cpp" />
     <ClCompile Include="Sexp_Test.cpp" />
   </ItemGroup>

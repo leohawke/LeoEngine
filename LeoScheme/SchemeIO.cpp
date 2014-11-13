@@ -162,13 +162,14 @@ namespace leo
 						while (!stack.empty())
 						{
 							data = stack.top();
+							stack.pop();
 							if (data == nullptr)
 								setchar('>');
 							else if (data == space)
 								setchar(' ');
 							else if (data->can_cast<scheme_list>())
 							{
-								stack.pop();
+								
 								auto list = data->cast_list();
 								if (is_list(list))
 									print_scheme_list(list, setchar);
@@ -183,7 +184,6 @@ namespace leo
 							}
 							else
 							{
-								stack.pop();
 								auto atom = data->cast_atom();
 								print_scheme_atom(atom, setchar);
 							}
@@ -224,7 +224,7 @@ namespace leo
 
 		static scheme_value parse_word(scheme_string& word)
 		{
-			if ((word[0] >= '0' && word[0] <= '9') || ((word[0] == '+' || word[0] == '-') && word.size() > 2 && (word[1] >= '0' && word[1] <= '9')))
+			if ((word[0] >= '0' && word[0] <= '9') || ((word[0] == '+' || word[0] == '-') && word.size() > 1 && (word[1] >= '0' && word[1] <= '9')))
 			{
 				if (word.size() > 1 && (word[word.size() - 1] == 'x' || word[word.size() - 1] == 'X'))
 				{

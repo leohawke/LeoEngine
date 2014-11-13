@@ -1,6 +1,10 @@
-#pragma once
+#ifndef LEO_SCHEME_H
+#define LEO_SCHEME_H
 #include "Sexp\Sexp.hpp"
-
+#ifdef LB_IMPL_MSCPP
+#pragma warning(push)
+#pragma warning(disable:4800)
+#endif
 namespace leo
 {
 	namespace scheme
@@ -119,7 +123,12 @@ namespace leo
 
 		struct scheme_value
 		{
-			using any_t = sexp::sexp_value::any_t;
+			enum class any_t {
+				any_list,
+				any_atom,
+				any_ptr,
+				any_cpp_temp
+			};
 			leo::any mValue = scheme_list();
 			any_t mType = any_t::any_list;
 
@@ -132,6 +141,10 @@ namespace leo
 			scheme_value(scheme_list list)
 				:mValue(list), mType(any_t::any_list)
 			{}
+
+			scheme_value(const scheme_value* ptr)
+				:mValue(ptr),mType(any_t::any_ptr){
+			}
 
 			scheme_value& operator=(scheme_atom atom)
 			{
@@ -147,38 +160,49 @@ namespace leo
 				return *this;
 			}
 
+			scheme_value& operator=(const scheme_value* ptr){
+				mValue = ptr;
+				mType = any_t::any_ptr;
+				return *this;
+			}
+
 			const scheme_atom& cast_atom() const
 			{
-				assert(mType == any_t::any_atom);
-				return *any_cast<const scheme_atom*>(&mValue);
+				assert(mType == any_t::any_atom || mType == any_t::any_ptr);
+				return mType == any_t::any_ptr ? (*any_cast<const scheme_value*const*>(&mValue))->cast_atom() : *any_cast<const scheme_atom*>(&mValue);
 			}
 
 			const scheme_list& cast_list() const
 			{
-				assert(mType == any_t::any_list);
-				return *any_cast<const scheme_list*>(&mValue);
+				assert(mType == any_t::any_list || mType == any_t::any_ptr);
+				return mType == any_t::any_ptr ? (*any_cast<const scheme_value*const*>(&mValue))->cast_list() : *any_cast<const scheme_list*>(&mValue);
 			}
 
 			scheme_atom& cast_atom()
 			{
-				assert(mType == any_t::any_atom);
-				return *any_cast<scheme_atom*>(&mValue);
+				assert(mType == any_t::any_atom || mType == any_t::any_ptr);
+				return mType == any_t::any_ptr ? (*any_cast<scheme_value**>(&mValue))->cast_atom() : *any_cast<scheme_atom*>(&mValue);
 			}
 
 			scheme_list& cast_list()
 			{
-				assert(mType == any_t::any_list);
-				return *any_cast<scheme_list*>(&mValue);
+				assert(mType == any_t::any_list || mType == any_t::any_ptr);
+				return mType == any_t::any_ptr ? (*any_cast<scheme_value**>(&mValue))->cast_list() : *any_cast<scheme_list*>(&mValue);
 			}
 
 			template<typename T>
-			bool can_cast() const
-			{
-				if (typeid(T) == typeid(scheme_atom))
-					return mType == any_t::any_atom;
-				if (typeid(T) == typeid(scheme_list))
-					return mType == any_t::any_list;
-				return false;
+			bool can_cast() const{
+				return true;
+			}
+
+			template<>
+			bool can_cast<scheme_atom>() const{
+				return mType == any_t::any_atom || (mType == any_t::any_ptr &&  any_cast<const scheme_value* const>(mValue)->can_cast<scheme_atom>());
+			}
+
+			template<>
+			bool can_cast<scheme_list>() const{
+				return mType == any_t::any_list || (mType == any_t::any_ptr &&  any_cast<const scheme_value* const>(mValue)->can_cast<scheme_list>());
 			}
 		};
 
@@ -342,10 +366,15 @@ namespace leo
 		}
 		inline scheme_int length(const scheme_value& exp){
 			assert(exp.can_cast<scheme_list>());
-			if (exp.cast_list() == scheme_nil)
-				return 0;
-			else
-				return 1 + length(cdr(exp));
+
+			auto l = 0u;
+			auto rest = exp;
+			for (; rest.cast_list() != scheme_nil;){
+				++l;
+				rest = cdr(rest);
+			}
+
+			return l;
 		}
 
 		scheme_list setup_environment();
@@ -357,6 +386,63 @@ namespace leo
 			scheme_string print(const scheme_list & list);
 			scheme_string print(const scheme_value & value);
 		}
+
+
+		inline scheme_string error_list(const scheme_value& exp)
+		{
+			return ops::print(exp);
+		}
+
+		inline scheme_string error_list()
+		{
+			return scheme_string();
+		}
+
+		template<typename... Lists>
+		inline scheme_string error_list(const scheme_value& exp, Lists&... lists)
+		{
+			return error_list(exp) + error_list(lists...);
+		}
+
+		template<typename... Lists>
+		inline void error(const scheme_string& msg, Lists&... lists)
+		{
+			throw std::runtime_error(msg + error_list(lists...));
+		}
+
+		inline bool true_exp(const scheme_value& exp){
+			if (exp.mType == scheme_value::any_t::any_list)
+				return exp.cast_list() != scheme_nil;
+			else
+				switch (exp.cast_atom().mType)
+			{
+				case scheme_atom::atom_t::atom_bool:
+					return exp.cast_atom().cast<scheme_bool>();
+				case scheme_atom::atom_t::atom_char:
+					return exp.cast_atom().cast<scheme_char>();
+				case scheme_atom::atom_t::atom_int:
+					return exp.cast_atom().cast<scheme_int>();
+				case scheme_atom::atom_t::atom_real:
+					return exp.cast_atom().cast<scheme_real>();
+				case scheme_atom::atom_t::atom_word:
+				case scheme_atom::atom_t::atom_string:
+					return exp.cast_atom().cast<scheme_string>() != "false";
+			}
+			return false;
+		}
+
+		inline bool number(const scheme_value& exp){
+			return exp.can_cast<scheme_atom>() && (exp.cast_atom().can_cast<scheme_int>() || exp.cast_atom().can_cast<scheme_real>());
+		}
+
+		inline bool number(const scheme_atom& atom){
+			return atom.can_cast<scheme_int>() || atom.can_cast<scheme_real>();
+		}
 	}
 }
 
+#ifdef LB_IMPL_MSCPP
+#pragma warning(pop)
+#endif
+
+#endif
