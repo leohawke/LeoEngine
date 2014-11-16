@@ -106,6 +106,7 @@
     <ClCompile Include="Core\Mesh.cpp" />
     <ClCompile Include="Core\MeshLoad.cpp" />
     <ClCompile Include="Core\RenderSync.cpp" />
+    <ClCompile Include="Core\Skeleton.cpp" />
     <ClCompile Include="Core\SkeletonModel.cpp" />
     <ClCompile Include="Core\Sky.cpp" />
     <ClCompile Include="Core\Terrain.cpp" />
@@ -162,6 +163,8 @@
     <ClInclude Include="Core\GaussBlur.hpp" />
     <ClInclude Include="Core\Geometry.hpp" />
     <ClInclude Include="Core\EffectLine.hpp" />
+    <ClInclude Include="Core\Lod.h" />
+    <ClInclude Include="Core\Material.h" />
     <ClInclude Include="Core\MeshData.hpp" />
     <ClInclude Include="Core\Skeleton.h" />
     <ClInclude Include="Core\Mesh.hpp" />

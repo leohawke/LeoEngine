@@ -521,6 +521,74 @@ namespace leo
 		}
 	};
 
+
+	template<typename AllocPolice>
+	class DataAllocatedObject
+	{
+	private:
+		static AllocPolice impl;
+	public:
+		explicit DataAllocatedObject()
+		{ }
+
+		/// operator new, with debug line info
+		void* operator new(size_t sz, const char* file, int line, const char* func)
+		{
+			return impl.allocate(sz, file, line, func);
+		}
+
+			void* operator new(size_t sz)
+		{
+			return impl.allocate(sz);
+		}
+
+			/// placement operator new
+			void* operator new(size_t sz, void* ptr)
+		{
+			(void)sz;
+			return ptr;
+		}
+
+			/// array operator new, with debug line info
+			void* operator new[](size_t sz, const char* file, int line, const char* func)
+		{
+			return impl.allocate(sz, file, line, func);
+		}
+
+			void* operator new[](size_t sz)
+		{
+			return impl.allocate(sz);
+		}
+
+			void operator delete(void* ptr)
+		{
+			impl.deallocate(ptr);
+		}
+
+		// Corresponding operator for placement delete (second param same as the first)
+		void operator delete(void* ptr, void*)
+		{
+			impl.deallocate(ptr);
+		}
+
+		// only called if there is an exception in corresponding 'new'
+		void operator delete(void* ptr, const char* file, int line, const char* func)
+		{
+			impl.deallocate(ptr, file, line, func);
+		}
+
+		void operator delete[](void* ptr)
+		{
+			impl.deallocate(ptr);
+		}
+
+			void operator delete[](void* ptr, const char*, int, const char*)
+		{
+			impl.deallocate(ptr);
+		}
+	};
+	
+
 	typedef AllocatedObject<GeneralAllocPolicy> GeneralAllocatedObject;
 	typedef AllocatedObject<GeometryAllocPolicy> GeometryAllocatedObject;
 	typedef AllocatedObject<AnimationAllocPolicy> AnimationAllocatedObject;
@@ -583,6 +651,23 @@ namespace leo
 
 namespace leo
 {
+	//内存块
+	struct MemoryChunk{
+		std::unique_ptr<stdex::byte[]> mData;
+		std::size_t mSize;
+
+		std::size_t Read(void *pBuffer, std::size_t uBytesToRead, std::uint64_t u64Offset) const{
+			assert(u64Offset + uBytesToRead <= mSize);
+			std::memcpy(pBuffer, &mData[u64Offset], uBytesToRead);
+			return uBytesToRead;
+		}
+		void Write(std::uint64_t u64Offset, const void *pBuffer, std::size_t uBytesToWrite){
+			assert(u64Offset + uBytesToWrite <= mSize);
+			std::memcpy(&mData[u64Offset], pBuffer, uBytesToWrite);
+		}
+	};
+
+
 	//接口类,从class_interface继承的
 	class alloc :public std::allocator<std::uint8_t>//, leo::class_interface
 	{

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "leomath.hpp"
-
+#include "Core\Material.h"
 namespace leo
 {
 	struct DirectionLight
@@ -32,12 +32,5 @@ namespace leo
 		float4 direction;//w : spot
 
 		float4 att;//ignore w
-	};
-
-	struct Material
-	{
-		float4 ambient;
-		float4 diffuse;
-		float4 specular; // w = SpecPower
 	};
 }

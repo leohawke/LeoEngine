@@ -222,6 +222,9 @@
     <ClCompile Include="Core\EffectSkeleton.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Skeleton.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.hpp">
@@ -268,9 +271,6 @@
     </ClInclude>
     <ClInclude Include="Mgr.hpp">
       <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="LightHelper.h">
-      <Filter>Shader</Filter>
     </ClInclude>
     <ClInclude Include="LightBuffer.h">
       <Filter>Shader</Filter>
@@ -459,6 +459,15 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\MeshData.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Lod.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="LightHelper.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Material.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

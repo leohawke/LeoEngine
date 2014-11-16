@@ -35,10 +35,10 @@ namespace leo
 		};
 		struct MeshVertex
 		{
-			DirectX::XMFLOAT3 pos;
-			DirectX::XMFLOAT3 normal;
-			DirectX::XMFLOAT2 tex;
-			DirectX::XMFLOAT3 tangent;
+			storge::float3  pos;
+			storge::float3 normal;
+			storge::float2 tex;
+			storge::float3 tangent;
 		};
 
 		struct SkeletonHeader{

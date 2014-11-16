@@ -20,7 +20,7 @@ namespace leo{
 
 	struct SkeletonVertexAdjInfo : public Vertex::SkeAdjInfo{
 		SkeletonVertexAdjInfo(const MeshFile::SkeletonAdjInfo& info)
-			:Vertex::SkeAdjInfo(info.indices,float3(info.weights)){
+			:Vertex::SkeAdjInfo(info.indices, float3(info.weights)){
 		}
 		SkeletonVertexAdjInfo& operator=(const MeshFile::SkeletonAdjInfo& info){
 			mIndices = info.indices;
