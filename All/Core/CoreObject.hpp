@@ -18,8 +18,8 @@
 #include "..\IndePlatform\memory.hpp"
 namespace leo
 {
-
-	class SQTObject :public SQT,public GeneralAllocatedObject
+	typedef  DataAllocatedObject<GeneralAllocPolicy> SQTAllocated;
+	class SQTObject :public SQT, public SQTAllocated
 	{
 	public:
 		SQTObject() = default;

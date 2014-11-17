@@ -36,8 +36,10 @@ namespace leo{
 		{
 			subsets[i].mTexSRV = texmgr.LoadTextureSRV(materials[i].diffusefile);
 			subsets[i].mNormalSRV = texmgr.LoadTextureSRV(materials[i].normalmapfile);
-			subsets[i].mLodIndices[0].mCount = filesubsets[i].indexcount;
-			subsets[i].mLodIndices[0].mOffset = filesubsets[i].indexoffset;
+			for (auto & lodIndice : subsets[i].mLodIndices){
+				lodIndice.mCount = filesubsets[i].indexcount;
+				lodIndice.mOffset = filesubsets[i].indexoffset;
+			}
 			BZero(subsets[i].mMat);
 			std::memcpy(&subsets[i].mMat.ambient, &materials[i].ambient, sizeof(XMFLOAT3));
 			std::memcpy(&subsets[i].mMat.diffuse, &materials[i].diffuse, sizeof(XMFLOAT3));

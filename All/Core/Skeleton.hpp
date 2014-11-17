@@ -27,7 +27,6 @@
 #include <vector>
 #include<map>
 
-struct ID3D11DeviceContext;
 struct ID3D11Buffer;
 struct ID3D11ShaderResourceView;
 namespace leo{
@@ -42,7 +41,7 @@ namespace leo{
 
 	class Camera;
 
-	class SkeletonInstance{
+	class SkeletonInstance : public SQTObject{
 		//共享的骨骼数据
 		std::shared_ptr<SkeletonData> mSkeData;
 		//动画索引(名字hash后的值)
@@ -52,7 +51,7 @@ namespace leo{
 		//每个动画的播放速率
 		std::map<std::size_t, float> mSpeedPerAni;
 		//蒙皮矩阵
-		std::unique_ptr<float4x4[]> mSkinMatrix;
+		std::unique_ptr<float4x4[]> mSkinMatrixs;
 	public:
 		SkeletonInstance(const std::shared_ptr<SkeletonData>& skeData);
 		~SkeletonInstance();
@@ -61,7 +60,7 @@ namespace leo{
 		bool SwitchAnimation(const wchar_t* aniName);
 
 		void Update();
-		void Render(ID3D11DeviceContext* context, const Camera& camera);
+		void Render(const Camera& camera);
 	};
 
 	struct AnimationSample;
@@ -140,6 +139,12 @@ namespace leo{
 		std::uint8_t mFCount;
 		std::unique_ptr<AnimationSample[]> mSamples;
 		bool mLoop;
+
+		//单位,秒
+		float GetTotalTime() const;
+
+		//单位,帧
+		float CalcFrame(float t) const;
 	};
 }
 
