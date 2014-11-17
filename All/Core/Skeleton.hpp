@@ -68,26 +68,29 @@ namespace leo{
 	struct AnimationClip;
 
 	struct SkeletonData{
+		~SkeletonData();
+
 		//能使用的最大LOD索引,最低的细节
 		const static std::uint8_t MinLodLevel = 3;
 
 		//从文件载入<参数:文件名>
-		static std::shared_ptr<SkeletonData> Load(const std::wstring& fileName){
-			return SkeletonData::Load(fileName.c_str());
+		static std::shared_ptr<SkeletonData> Load(const std::wstring& fileName);
+		
+		static std::shared_ptr<SkeletonData> Load(const wchar_t* fileName){
+			return SkeletonData::Load(std::wstring(fileName));
 		}
-		static std::shared_ptr<SkeletonData> Load(const wchar_t* fileName);
 		//从内存载入,未实现
 		static std::shared_ptr<SkeletonData> Load(const MemoryChunk& memory);
 
 		//Mesh begin
-		ID3D11Buffer* mVertexBuffer;
+		ID3D11Buffer* mVertexBuffer = nullptr;
 		//IndicesBuffer,Not IndiceBuffers
-		ID3D11Buffer* mIndicesBuffer;
+		ID3D11Buffer* mIndicesBuffer = nullptr;
 		struct SubSet{
 			LodIndex mLodIndices[MinLodLevel + 1];
 			Material mMat;
-			ID3D11ShaderResourceView* mTexSRV;
-			ID3D11ShaderResourceView* mNormalSRV;
+			ID3D11ShaderResourceView* mTexSRV = nullptr;
+			ID3D11ShaderResourceView* mNormalSRV = nullptr;
 		};
 		std::vector<SubSet> mSubSets;
 		using vertex = Vertex::NormalMap;
@@ -95,18 +98,37 @@ namespace leo{
 		//Mesh end
 
 		//Skeleton begin
-		struct Joint{
+		typedef DataAllocatedObject<GeneralAllocPolicy> JointAllocated;
+		struct Joint : public JointAllocated{
+			//绑定姿势的逆变换
+			float4x4 mInvBindPose;
+			//字符串散列标识符
+			std::size_t mNameSid = 0;
+			//父节点的下标,侵入式设计->Skeleton存放所有Joint
+			std::uint8_t mParent;
 
+			const wchar_t* GetName() const{
+				return unhash(mNameSid);
+			}
+
+			void SetName(const wchar_t* str){
+				mNameSid = hash(str);
+			}
 		};
 
 		struct Skeleton{
-
-		};
+			std::unique_ptr<Joint[]> mJoints;
+			//关节数目
+			std::uint8_t mJointCount;
+		} mSkeleton;
 
 		using JointPose = SQTObject;
+
+		ID3D11Buffer* mAnimationDataBUffer = nullptr;
 		//Skeleton end
 
 		std::map<std::size_t, AnimationClip> mAnimations;
+		std::vector<std::size_t> mAnimaNames;
 	};
 
 	struct AnimationSample{

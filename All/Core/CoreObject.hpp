@@ -29,6 +29,7 @@ namespace leo
 		{}
 		~SQTObject() = default;
 
+		using SQT::operator=;
 	public:
 		void inline Scale(float s)
 		{

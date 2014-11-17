@@ -106,7 +106,8 @@
     <ClCompile Include="Core\Mesh.cpp" />
     <ClCompile Include="Core\MeshLoad.cpp" />
     <ClCompile Include="Core\RenderSync.cpp" />
-    <ClCompile Include="Core\Skeleton.cpp" />
+    <ClCompile Include="Core\SkeletonData.cpp" />
+    <ClCompile Include="Core\SkeletonInstance.cpp" />
     <ClCompile Include="Core\SkeletonModel.cpp" />
     <ClCompile Include="Core\Sky.cpp" />
     <ClCompile Include="Core\Terrain.cpp" />

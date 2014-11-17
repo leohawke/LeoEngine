@@ -222,7 +222,10 @@
     <ClCompile Include="Core\EffectSkeleton.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Skeleton.cpp">
+    <ClCompile Include="Core\SkeletonInstance.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\SkeletonData.cpp">
       <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
