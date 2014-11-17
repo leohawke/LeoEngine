@@ -56,6 +56,9 @@ namespace leo{
 		SkeletonInstance(const std::shared_ptr<SkeletonData>& skeData);
 		~SkeletonInstance();
 
+		SkeletonInstance() = default;
+		SkeletonInstance& operator=(const std::shared_ptr<SkeletonData>& skeData);
+
 		bool SwitchAnimation(const std::wstring& aniName);
 		bool SwitchAnimation(const wchar_t* aniName);
 

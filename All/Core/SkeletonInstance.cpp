@@ -42,12 +42,21 @@ namespace leo{
 		mAniIndex = mSkeData->mAnimations.begin()->first;
 		for (auto & a : mSkeData->mAnimaNames)
 			mSpeedPerAni[a] = 1.f;
-		mSkinMatrix = leo::make_unique<float4x4[]>(mSkeData->mSkeleton.mJointCount);
+		mSkinMatrixs = leo::make_unique<float4x4[]>(mSkeData->mSkeleton.mJointCount);
 	}
 	SkeletonInstance::~SkeletonInstance(){
 
 	}
 
+
+	SkeletonInstance& SkeletonInstance::operator=(const std::shared_ptr<SkeletonData>& skeData){
+		mSkeData = skeData;
+		mNorT = (0.f);
+		mAniIndex = mSkeData->mAnimations.begin()->first;
+		for (auto & a : mSkeData->mAnimaNames)
+			mSpeedPerAni[a] = 1.f;
+		mSkinMatrixs = leo::make_unique<float4x4[]>(mSkeData->mSkeleton.mJointCount);
+	}
 
 	bool SkeletonInstance::SwitchAnimation(const std::wstring& aniName){
 		return SwitchAnimation(aniName.c_str());
