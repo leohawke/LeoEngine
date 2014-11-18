@@ -15,7 +15,7 @@
 #include <Core\EffectLine.hpp>
 #include <Core\Terrain.hpp>
 #include <Core\Sky.hpp>
-#include <Core\SkeletonModel.hpp>
+#include <Core\Skeleton.hpp>
 #include <Core\MeshLoad.hpp>
 #include <Core\EffectSkeleton.hpp>
 #include <COM.hpp>
@@ -45,7 +45,7 @@ std::unique_ptr<leo::Mesh> pMesh = nullptr;
 std::unique_ptr<leo::Camera> pCamera = nullptr;
 std::unique_ptr<leo::Terrain<3,64,6>> pTerrain = nullptr;
 std::unique_ptr<leo::Sky> pSky = nullptr;
-std::unique_ptr<leo::SkeletonModel> pSke = nullptr;
+std::unique_ptr<leo::SkeletonInstance[]> pSkeInstances = nullptr;
 std::atomic<bool> renderAble = false;
 std::atomic<bool> renderThreadRun = true;
 
@@ -329,13 +329,21 @@ void BuildRes()
 
 	pSky = std::make_unique<leo::Sky>(leo::DeviceMgr().GetDevice(), L"Resource\\sunsetcube1024.dds");
 
-	pSke = std::make_unique<leo::SkeletonModel>();
-	pSke->LoadFromFile(L"Resource\\soldier.l3d", leo::DeviceMgr().GetDevice());
-	pSke->Scale(0.05f);
-	leo::XMMATRIX modelRot = leo::XMMatrixRotationY(leo::LM_PI);
-	leo::float4 quaternion;
-	save(quaternion,leo::XMQuaternionRotationMatrix(modelRot));
-	leo::float3 eulerangle = leo::QuaternionToEulerAngle(quaternion);
+	pSkeInstances = leo::make_unique<leo::SkeletonInstance[]>(3);
+
+	auto skeData = leo::SkeletonData::Load(L"Resource\\soldier.l3d");
+	pSkeInstances[0] = skeData;
+	pSkeInstances[1] = skeData;
+	pSkeInstances[2] = skeData;
+
+	pSkeInstances[0].Scale(0.05f);
+	pSkeInstances[1].Scale(0.05f);
+	pSkeInstances[2].Scale(0.05f);
+
+	//leo::XMMATRIX modelRot = leo::XMMatrixRotationY(leo::LM_PI);
+	//leo::float4 quaternion;
+	//save(quaternion,leo::XMQuaternionRotationMatrix(modelRot));
+	//leo::float3 eulerangle = leo::QuaternionToEulerAngle(quaternion);
 	//pSke->Rotation(quaternion);
 	//pSke->Roll(eulerangle.x);
 	//pSke->Pitch(eulerangle.y);

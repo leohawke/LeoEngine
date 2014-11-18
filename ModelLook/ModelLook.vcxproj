@@ -174,7 +174,6 @@
     <ClCompile Include="..\All\Core\Mesh.cpp" />
     <ClCompile Include="..\All\Core\MeshLoad.cpp" />
     <ClCompile Include="..\All\Core\RenderSync.cpp" />
-    <ClCompile Include="..\All\Core\SkeletonModel.cpp" />
     <ClCompile Include="..\All\Core\Sky.cpp" />
     <ClCompile Include="..\All\Core\Terrain.cpp" />
     <ClCompile Include="..\All\Core\Vertex.cpp" />

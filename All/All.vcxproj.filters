@@ -228,6 +228,9 @@
     <ClCompile Include="Core\SkeletonData.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\EngineConfig.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.hpp">
@@ -471,6 +474,12 @@
       <Filter>Shader</Filter>
     </ClInclude>
     <ClInclude Include="Core\Material.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\EngineConfig.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\FileSearch.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

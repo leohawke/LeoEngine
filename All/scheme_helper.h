@@ -77,7 +77,7 @@ namespace leo
 
 	SQT expack_SQT(std::shared_ptr<scheme::sexp::sexp> sexp)
 	{
-		SeqSQT temp;
+		SQT temp;
 		temp.s = expack_float(sexp,S("s"));
 		temp.t = expack_float3(sexp, S("t"));
 		temp.q = expack_float3(sexp,S("q"));
@@ -103,5 +103,13 @@ namespace leo
 		std::vector<scheme::sexp::char_s> buffer(static_cast<std::size_t>(size / sizeof(scheme::sexp::char_s)*sizeof(char)) + 1, scheme::sexp::char_s());
 		fin.read(reinterpret_cast<char*>(&buffer[0]), size);
 		return scheme::sexp::parse(&buffer[0]);
+	}
+
+	template<typename string_type,typename value_type>
+	std::shared_ptr<scheme::sexp::sexp> pack_key_value(const string_type& key, const value_type& value){
+		static_assert(
+			std::is_same<scheme::sexp::char_s, std::remove_cv<std::remove_all_extents<string_type>::type>::type>::value ||
+			std::is_same<string_type, scheme::sexp::string_s>::value, "unsupport type");
+		return nullptr;
 	}
 }

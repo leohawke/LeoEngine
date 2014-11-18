@@ -101,6 +101,7 @@
     <ClCompile Include="Core\EffectLine.cpp" />
     <ClCompile Include="Core\EffectSkeleton.cpp" />
     <ClCompile Include="Core\EffectTerrain.cpp" />
+    <ClCompile Include="Core\EngineConfig.cpp" />
     <ClCompile Include="Core\GaussBlur.cpp" />
     <ClCompile Include="Core\Geometry.cpp" />
     <ClCompile Include="Core\Mesh.cpp" />
@@ -161,6 +162,8 @@
     <ClInclude Include="Core\Camera.hpp" />
     <ClInclude Include="Core\effect.h" />
     <ClInclude Include="Core\EffectSkeleton.hpp" />
+    <ClInclude Include="Core\EngineConfig.h" />
+    <ClInclude Include="Core\FileSearch.h" />
     <ClInclude Include="Core\GaussBlur.hpp" />
     <ClInclude Include="Core\Geometry.hpp" />
     <ClInclude Include="Core\EffectLine.hpp" />
