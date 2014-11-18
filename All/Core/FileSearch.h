@@ -14,11 +14,17 @@
 #ifndef Core_FielSearch_H
 #define Core_FielSearch_H
 
+#include <vector>
+#include <string>
+
 namespace leo{
 	class FileSearch{
-		static void PushSearchDir();
+	public:
+		//the Dir must be begin with ./ end by /
+		static void PushSearchDir(const std::wstring& dir);
 		static void ClearSearchDirs();
 		static const std::vector<std::wstring>& SearchDirectors();
+		static std::wstring Search(const std::wstring& filename);
 	};
 }
 

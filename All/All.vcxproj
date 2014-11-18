@@ -102,6 +102,7 @@
     <ClCompile Include="Core\EffectSkeleton.cpp" />
     <ClCompile Include="Core\EffectTerrain.cpp" />
     <ClCompile Include="Core\EngineConfig.cpp" />
+    <ClCompile Include="Core\FileSearch.cpp" />
     <ClCompile Include="Core\GaussBlur.cpp" />
     <ClCompile Include="Core\Geometry.cpp" />
     <ClCompile Include="Core\Mesh.cpp" />

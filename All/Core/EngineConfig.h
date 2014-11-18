@@ -22,6 +22,7 @@
 
 namespace leo{
 	class EngineConfig{
+	public:
 		static void Read(const std::wstring& configScheme = L"config.scheme");
 		static void Write(const std::wstring& configScheme = L"config.scheme");
 

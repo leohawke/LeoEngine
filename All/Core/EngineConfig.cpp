@@ -22,7 +22,7 @@ namespace leo{
 		while (dirs_iter)
 		{
 			auto dir_sexp = leo::scheme::sexp::find_sexp(L"dir", dirs_iter);
-			dir_sexp->next->value;
+			FileSearch::PushSearchDir(dir_sexp->next->value);
 			dirs_iter = dirs_iter->next;
 		}
 	}
@@ -57,7 +57,8 @@ namespace leo{
 		auto config_string = scheme::sexp::print_sexp(config_sexp);
 
 		std::ofstream fout(configScheme);
-		fout.write("  ", 2);
+		const char BOM[] = { 0xFF, 0XFE };
+		fout.write(BOM, 2);
 		auto size = config_string.size()*sizeof(scheme::sexp::char_s)*sizeof(char);
 		fout.write((char*)configScheme.c_str(), size);
 	}
@@ -66,6 +67,7 @@ namespace leo{
 		return global::globalClientSize;
 	}
 	const std::vector<std::wstring>& EngineConfig::SearchDirectors(){
+		return FileSearch::SearchDirectors();
 
 	}
 }

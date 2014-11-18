@@ -231,6 +231,9 @@
     <ClCompile Include="Core\EngineConfig.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\FileSearch.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.hpp">
