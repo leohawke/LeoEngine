@@ -651,6 +651,10 @@ namespace leo
 
 namespace leo
 {
+#ifdef LB_IMPL_MSCPP
+#pragma warning(push)
+#pragma warning(disable:4244)
+#endif
 	//内存块
 	struct MemoryChunk{
 		std::unique_ptr<stdex::byte[]> mData;
@@ -666,7 +670,9 @@ namespace leo
 			std::memcpy(&mData[u64Offset], pBuffer, uBytesToWrite);
 		}
 	};
-
+#ifdef LB_IMPL_MSCPP
+#pragma warning(pop)
+#endif
 
 	//接口类,从class_interface继承的
 	class alloc :public std::allocator<std::uint8_t>//, leo::class_interface

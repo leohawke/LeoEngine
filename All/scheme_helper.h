@@ -110,6 +110,8 @@ namespace leo
 		static_assert(
 			std::is_same<scheme::sexp::char_s, std::remove_cv<std::remove_all_extents<string_type>::type>::type>::value ||
 			std::is_same<string_type, scheme::sexp::string_s>::value, "unsupport type");
-		return nullptr;
+		auto result = scheme::sexp::make_sexp_atom(key, scheme::sexp::sexp::atom_string);
+		result->next = scheme::sexp::make_sexp_atom(scheme::sexp::ToString(value), scheme::sexp::sexp::atom_string);
+		return result;
 	}
 }

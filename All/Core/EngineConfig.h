@@ -25,8 +25,8 @@ namespace leo{
 		static void Read(const std::wstring& configScheme = L"config.scheme");
 		static void Write(const std::wstring& configScheme = L"config.scheme");
 
-		static std::pair<uint16, uint16> ClientSize();
-		static std::vector<std::wstring> SearchDirectory();
+		static const std::pair<uint16, uint16>& ClientSize();
+		static const std::vector<std::wstring>& SearchDirectors();
 	};
 }
 
