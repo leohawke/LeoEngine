@@ -26,7 +26,9 @@ namespace leo
 
 	void SQT::operator=(const SeqSQT& lvalue)
 	{
-		SQT::SQT(lvalue);
+		s = lvalue.s;
+		q = lvalue.q;
+		t = lvalue.t;
 	}
 
 	SeqSQT::SeqSQT()

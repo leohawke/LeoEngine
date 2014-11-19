@@ -29,7 +29,19 @@ namespace leo
 		{}
 		~SQTObject() = default;
 
-		using SQT::operator=;
+		SQTObject& operator=(const SeqSQT& seq){
+			q = seq.q;
+			t = seq.t;
+			s = seq.s;
+			return *this;
+		}
+
+		SQTObject& operator=(const SQT& sqt){
+			q = sqt.q;
+			t = sqt.t;
+			s = sqt.s;
+			return *this;
+		}
 	public:
 		void inline Scale(float s)
 		{
