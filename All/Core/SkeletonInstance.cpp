@@ -13,9 +13,6 @@
 #include "Skeleton.hpp"
 
 
-
-
-
 namespace leo{
 	float AnimationClip::GetTotalTime() const {
 			return mSamples[mFCount].mTimePoint;
@@ -149,7 +146,7 @@ namespace leo{
 		for (auto it = mSkeData->mSubSets.cbegin(); it != mSkeData->mSubSets.cend(); ++it)
 		{
 			mEffect->Mat(it->mMat, context);
-			mEffect->DiffuseSRV(it->mTexSRV);
+			mEffect->DiffuseSRV(it->mTexSRV,context);
 			mEffect->NormalMapSRV(it->mNormalSRV, context);
 			context->DrawIndexed(it->mLodIndices[0].mCount, it->mLodIndices[0].mOffset, 0);
 		}

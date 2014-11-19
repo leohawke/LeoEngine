@@ -22,8 +22,8 @@ namespace leo{
 		for (auto & dir : mDirs){
 			auto findHandle = FindFirstFileW((dir + filename).c_str(), &findData);
 			if (findHandle != INVALID_HANDLE_VALUE){
-				CloseHandle(findHandle);
-				return std::wstring(findData.cFileName);
+				FindClose(findHandle);
+				return dir+findData.cFileName;
 			}
 		}
 		return filename;

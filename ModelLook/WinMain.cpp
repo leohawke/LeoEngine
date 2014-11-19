@@ -395,10 +395,10 @@ void Render()
 		pSky->Render(devicecontext, *pCamera);
 		pSkeInstances[0].Update();
 		pSkeInstances[0].Render(*pCamera);
-		pSkeInstances[1].Update();
-		pSkeInstances[1].Render(*pCamera);
-		pSkeInstances[2].Update();
-		pSkeInstances[2].Render(*pCamera);
+		//pSkeInstances[1].Update();
+		//pSkeInstances[1].Render(*pCamera);
+		//pSkeInstances[2].Update();
+		//pSkeInstances[2].Render(*pCamera);
 		//pTerrain->Render(devicecontext, *pCamera);
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
