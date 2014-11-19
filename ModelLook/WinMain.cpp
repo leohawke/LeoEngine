@@ -18,6 +18,7 @@
 #include <Core\Skeleton.hpp>
 #include <Core\MeshLoad.hpp>
 #include <Core\EffectSkeleton.hpp>
+#include <Core\\EngineConfig.h>
 #include <COM.hpp>
 
 #include <TextureMgr.h>
@@ -100,10 +101,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+
+	leo::EngineConfig::Read();
+	leo::EngineConfig::Write();
 	leo::DeviceMgr DeviceMgr;
 	leo::OutputWindow win;
 
-	auto clientSize = std::make_pair<leo::uint16,leo::uint16>(800, 600);
+	auto clientSize = leo::EngineConfig::ClientSize();
 	if (!win.Create(GetModuleHandle(nullptr), clientSize, L"Model LooK", 
 		WS_BORDER | WS_SIZEBOX,0,
 		MAKEINTRESOURCE(IDI_ICON1)))
@@ -260,7 +264,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	pMesh.reset(nullptr);
 	pTerrain.reset(nullptr);
 	pSky.reset(nullptr);
-	pSke.reset(nullptr);
+	pSkeInstances.reset(nullptr);
 	leo::global::Destroy();
 #ifdef DEBUG
 	leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
@@ -389,8 +393,12 @@ void Render()
 		
 
 		pSky->Render(devicecontext, *pCamera);
-		pSke->Update();
-		pSke->Render(devicecontext,*pCamera);
+		pSkeInstances[0].Update();
+		pSkeInstances[0].Render(*pCamera);
+		pSkeInstances[1].Update();
+		pSkeInstances[1].Render(*pCamera);
+		pSkeInstances[2].Update();
+		pSkeInstances[2].Render(*pCamera);
 		//pTerrain->Render(devicecontext, *pCamera);
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);

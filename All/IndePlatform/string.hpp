@@ -233,6 +233,13 @@ namespace leo
 		{
 			return std::to_string(unsigned(val));
 		}
+
+		inline std::string
+			to_string(const std::string& str)
+		{
+			return str;
+		}
+
 		inline std::string
 			to_string(unsigned short val)
 		{
@@ -282,5 +289,8 @@ namespace leo
 {
 	std::wstring towstring(const char* c_str, std::size_t len);
 	std::wstring towstring(const std::string& string);
+
+	std::string tostring(const wchar_t* c_str, std::size_t len);
+	std::string tostring(const std::wstring& string);
 }
 #endif

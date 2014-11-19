@@ -1,4 +1,11 @@
 #include "sexp.hpp"
+
+#define		Sprintf std::sprintf
+#define     Sscanf  std::sscanf
+#define     S(x) x
+#define		Strtof std::strtof
+#define		Strtol std::strtol
+
 #include <fstream>
 #include "leomath.hpp"
 namespace leo
@@ -7,72 +14,54 @@ namespace leo
 	template<typename string_type>
 	float3 expack_float3(std::shared_ptr<scheme::sexp::sexp> sexp, const string_type& name)
 	{
-		static_assert(
-			std::is_same<scheme::sexp::char_s, std::remove_cv<std::remove_all_extents<string_type>::type>::type>::value ||
-			std::is_same<string_type, scheme::sexp::string_s>::value, "unsupport type");
 
-		sexp = scheme::sexp::find_sexp(name, sexp);
+		sexp = scheme::sexp::ops::find_sexp(name, sexp);
 		float3 result;
-		auto f = sexp->next;
-		result.x = Strtof(f->value.c_str(), 0);
-		f = f->next;
-		result.y = Strtof(f->value.c_str(), 0);
-		f = f->next;
-		result.z = Strtof(f->value.c_str(), 0);
+		auto f = sexp->mNext;
+		result.x =static_cast<float>(f->mValue.cast_atom<scheme::sexp::sexp_real>());
+		f = f->mNext;
+		result.y = static_cast<float>(f->mValue.cast_atom<scheme::sexp::sexp_real>());
+		f = f->mNext;
+		result.z = static_cast<float>(f->mValue.cast_atom<scheme::sexp::sexp_real>());
 		return result;
 	}
 
 	template<typename string_type>
 	float3 expack_float2(std::shared_ptr<scheme::sexp::sexp> sexp, const string_type& name)
 	{
-		static_assert(
-			std::is_same<scheme::sexp::char_s, std::remove_cv<std::remove_all_extents<string_type>::type>::type>::value ||
-			std::is_same<string_type, scheme::sexp::string_s>::value, "unsupport type");
-		sexp = scheme::sexp::find_sexp(name, sexp);
+		sexp = scheme::sexp::ops::find_sexp(name, sexp);
 		float2 result;
-		auto f = sexp->next;
-		result.x = Strtof(f->value.c_str(), 0);
-		f = f->next;
-		result.y = Strtof(f->value.c_str(), 0);
+		auto f = sexp->mNext;
+		result.x = static_cast<float>(f->mValue.cast_atom<scheme::sexp::sexp_real>());
+		f = f->mNext;
+		result.y = static_cast<float>(f->mValue.cast_atom<scheme::sexp::sexp_real>());
 		return result;
 	}
 
 	template<typename string_type>
 	float expack_float(std::shared_ptr<scheme::sexp::sexp> sexp, const string_type& name)
 	{
-		static_assert(
-		std::is_same<scheme::sexp::char_s, std::remove_cv<std::remove_all_extents<string_type>::type>::type>::value ||
-			std::is_same<string_type,scheme::sexp::string_s>::value,"unsupport type");
-		sexp = scheme::sexp::find_sexp(name, sexp);
+		sexp = scheme::sexp::ops::find_sexp(name, sexp);
 		float result;
-		auto f = sexp->next;
-		result = Strtof(f->value.c_str(), 0);
+		auto f = sexp->mNext;
+		result = static_cast<float>(f->mValue.cast_atom<scheme::sexp::sexp_real>());
 		return result;
 	}
 
 	template<typename string_type>
 	long expack_long(std::shared_ptr<scheme::sexp::sexp> sexp, const string_type& name)
 	{
-		static_assert(
-			std::is_same<scheme::sexp::char_s, std::remove_cv<std::remove_all_extents<string_type>::type>::type>::value ||
-			std::is_same<string_type, scheme::sexp::string_s>::value, "unsupport type");
-		sexp = scheme::sexp::find_sexp(name, sexp);
+		sexp = scheme::sexp::ops::find_sexp(name, sexp);
 		long result;
-		auto f = sexp->next;
-		result = Strtol(f->value.c_str(), 0,10);
+		auto f = sexp->mNext;
+		result = static_cast<long>(f->mValue.cast_atom<scheme::sexp::sexp_int>());
 		return result;
 	}
 
-	scheme::sexp::string_s expack_string(std::shared_ptr<scheme::sexp::sexp> sexp, const scheme::sexp::string_s& name)
+	scheme::sexp::sexp_string expack_string(std::shared_ptr<scheme::sexp::sexp> sexp, const scheme::sexp::sexp_string& name)
 	{
-		sexp = scheme::sexp::find_sexp(name, sexp);
-		return sexp->next->value;
-	}
-
-	const scheme::sexp::char_s * expack_string(std::shared_ptr<scheme::sexp::sexp> sexp, const scheme::sexp::char_s * name)
-	{
-		sexp = scheme::sexp::find_sexp(name, sexp);
-		return sexp->next->value.c_str();
+		sexp = scheme::sexp::ops::find_sexp(name, sexp);
+		return sexp->mNext->mValue.cast_atom<scheme::sexp::sexp_string>();
 	}
 
 	SQT expack_SQT(std::shared_ptr<scheme::sexp::sexp> sexp)
@@ -88,9 +77,6 @@ namespace leo
 	template<typename string_type>
 	std::shared_ptr<scheme::sexp::sexp> parse_file(const string_type& name)
 	{
-		static_assert(
-			std::is_same<scheme::sexp::char_s, std::remove_cv<std::remove_all_extents<string_type>::type>::type>::value ||
-			std::is_same<string_type, scheme::sexp::string_s>::value, "unsupport type");
 
 		std::basic_ifstream<char> fin(name);
 
@@ -98,20 +84,27 @@ namespace leo
 			throw std::runtime_error("打开文件失败");
 
 		fin.seekg(0,std::ios_base::end);
-		auto size = fin.tellg().seekpos()*sizeof(scheme::sexp::char_s) / sizeof(char);
-		fin.seekg(2, std::ios_base::beg);
-		std::vector<scheme::sexp::char_s> buffer(static_cast<std::size_t>(size / sizeof(scheme::sexp::char_s)*sizeof(char)) + 1, scheme::sexp::char_s());
+		auto size = static_cast<std::size_t>(fin.tellg().seekpos());
+		fin.seekg(3, std::ios_base::beg);
+		std::vector<char> buffer((size + 1), char());
 		fin.read(reinterpret_cast<char*>(&buffer[0]), size);
-		return scheme::sexp::parse(&buffer[0]);
+		auto tokens =scheme::sexp::lexicalanalysis(&buffer[0], size);
+		return scheme::sexp::parse(tokens);
+	}
+
+	inline scheme::sexp::sexp_list make_sexp(const uint16 & value)
+	{
+		return leo::make_shared<scheme::sexp::sexp>(static_cast<scheme::sexp::sexp_int>(value));
 	}
 
 	template<typename string_type,typename value_type>
 	std::shared_ptr<scheme::sexp::sexp> pack_key_value(const string_type& key, const value_type& value){
-		static_assert(
-			std::is_same<scheme::sexp::char_s, std::remove_cv<std::remove_all_extents<string_type>::type>::type>::value ||
-			std::is_same<string_type, scheme::sexp::string_s>::value, "unsupport type");
-		auto result = scheme::sexp::make_sexp_atom(key, scheme::sexp::sexp::atom_string);
-		result->next = scheme::sexp::make_sexp_atom(scheme::sexp::ToString(value), scheme::sexp::sexp::atom_string);
+		auto result = scheme::sexp::make_sexp_word(key);
+		
+		using scheme::sexp::make_sexp;
+		using leo::make_sexp;
+
+		result->mNext = make_sexp(value);
 		return result;
 	}
 }

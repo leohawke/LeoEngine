@@ -336,9 +336,12 @@ namespace leo
 							if (stack.empty())
 								break;
 
-							stack.top() = stack.top()->mNext.get();
+							data = stack.top() = stack.top()->mNext.get();
 							if (data)
-								setchar(' ');
+								setchar('\n');
+							if (data)
+								for (auto i = depth; i != 0;--i)
+									setchar('\t');
 						}
 						else if (data->mValue.can_cast<sexp_list>())
 						{

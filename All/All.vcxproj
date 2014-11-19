@@ -225,7 +225,6 @@
     <ClInclude Include="LightHelper.h" />
     <ClInclude Include="Notation.hpp" />
     <ClInclude Include="RenderStates.hpp" />
-    <ClInclude Include="scheme_helper.h" />
     <ClInclude Include="d3dx11.hpp" />
     <ClInclude Include="debug.hpp" />
     <ClInclude Include="declara.hpp" />

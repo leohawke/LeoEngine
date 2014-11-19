@@ -68,8 +68,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)All;$(IncludePath);;$(SolutionDir)DirectXTex</IncludePath>
-    <ReferencePath>$(VC_ReferencesPath_x86);$(SolutionDir)All;;$(SolutionDir)DirectXTex</ReferencePath>
+    <IncludePath>$(SolutionDir)LeoScheme\Sexp;E:\program\All\All\;$(SolutionDir)DirectXTex;$(IncludePath)</IncludePath>
+    <ReferencePath>$(SolutionDir)LeoScheme\;$(SolutionDir)DirectXTex;$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -78,6 +78,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>E:\program\Scheme\Sexp;$(IncludePath)</IncludePath>
+    <ReferencePath>E:\program\Scheme;$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -161,6 +163,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\All\Core\BillBoard.cpp" />
     <ClCompile Include="..\All\Core\effect.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -170,10 +173,14 @@
     <ClCompile Include="..\All\Core\EffectLine.cpp" />
     <ClCompile Include="..\All\Core\EffectSkeleton.cpp" />
     <ClCompile Include="..\All\Core\EffectTerrain.cpp" />
+    <ClCompile Include="..\All\Core\EngineConfig.cpp" />
+    <ClCompile Include="..\All\Core\FileSearch.cpp" />
     <ClCompile Include="..\All\Core\Geometry.cpp" />
     <ClCompile Include="..\All\Core\Mesh.cpp" />
     <ClCompile Include="..\All\Core\MeshLoad.cpp" />
     <ClCompile Include="..\All\Core\RenderSync.cpp" />
+    <ClCompile Include="..\All\Core\SkeletonData.cpp" />
+    <ClCompile Include="..\All\Core\SkeletonInstance.cpp" />
     <ClCompile Include="..\All\Core\Sky.cpp" />
     <ClCompile Include="..\All\Core\Terrain.cpp" />
     <ClCompile Include="..\All\Core\Vertex.cpp" />
@@ -187,6 +194,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_X86_=1;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\All\File.cpp" />
+    <ClCompile Include="..\All\IndePlatform\any.cpp" />
     <ClCompile Include="..\All\IndePlatform\memory.cpp" />
     <ClCompile Include="..\All\IndePlatform\raii.cpp" />
     <ClCompile Include="..\All\IndePlatform\Singleton.cpp" />
@@ -202,6 +210,7 @@
     <ClCompile Include="..\All\TextureMgr.cpp" />
     <ClCompile Include="..\All\timer.cpp" />
     <ClCompile Include="..\All\window.cpp" />
+    <ClCompile Include="..\LeoScheme\Sexp\Sexp.cpp" />
     <ClCompile Include="Axis.cpp" />
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
@@ -237,6 +246,22 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <CustomBuild Include="..\All\config.scheme">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy /Y  %(FullPath) $(OutDir)%(RelativeDir)%(Filename)%(Extension)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy /Y  %(FullPath) $(OutDir)%(RelativeDir)%(Filename)%(Extension)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy /Y  %(FullPath) $(OutDir)%(RelativeDir)%(Filename)%(Extension)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy /Y  %(FullPath) $(OutDir)%(RelativeDir)%(Filename)%(Extension)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">复制 %(Filename)%(Extension) 到 $(OutDir)%(RelativeDir)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">复制 %(Filename)%(Extension) 到 $(OutDir)%(RelativeDir)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">复制 %(Filename)%(Extension) 到 $(OutDir)%(RelativeDir)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">复制 %(Filename)%(Extension) 到 $(OutDir)%(RelativeDir)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)copy.log</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)copy.log</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)copy.log</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)copy.log</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </CustomBuild>
     <None Include="..\All\Shader\LightBuffer.hlsli" />
     <None Include="..\All\Shader\LightHelper.hlsli" />
   </ItemGroup>

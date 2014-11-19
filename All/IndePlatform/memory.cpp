@@ -14,7 +14,7 @@ namespace leo
 	ScriptingAllocPolicy ScriptingAllocatedObject::impl;
 	RenderSysAllocPolicy RenderSysAllocatedObject::impl;
 
-
+	GeneralAllocPolicy DataAllocatedObject<GeneralAllocPolicy>::impl;
 	struct __memroy_track_struct
 	{
 		void *p;

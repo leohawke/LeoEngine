@@ -45,6 +45,9 @@
     <Filter Include="Shader\HLSL\Line">
       <UniqueIdentifier>{cbbf3604-f506-406b-86a5-602df3aa4d7c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sexp">
+      <UniqueIdentifier>{c6e1c770-4f87-4bc7-966d-72398c0428b2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -144,6 +147,27 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\All\Core\EffectSkeleton.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\Core\BillBoard.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\Core\FileSearch.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\Core\EngineConfig.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\IndePlatform\any.cpp">
+      <Filter>IndePlatform\BaseSource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\Core\SkeletonInstance.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\Core\SkeletonData.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LeoScheme\Sexp\Sexp.cpp">
       <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
@@ -280,5 +304,10 @@
     <Image Include="ModelLook.ico">
       <Filter>资源文件</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\All\config.scheme">
+      <Filter>WinMain</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

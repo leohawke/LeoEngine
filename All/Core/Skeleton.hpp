@@ -139,9 +139,16 @@ namespace leo{
 	};
 
 	struct AnimationClip{
-		std::uint8_t mFCount;
+		std::uint8_t mFCount = 0;
 		std::unique_ptr<AnimationSample[]> mSamples;
-		bool mLoop;
+		bool mLoop = true;
+
+		AnimationClip() = default;
+
+		AnimationClip(AnimationClip&& rvalue)
+			:mFCount(rvalue.mFCount), mSamples(std::move(rvalue.mSamples)), mLoop(rvalue.mLoop){
+
+		}
 
 		//µ•Œª,√Î
 		float GetTotalTime() const;

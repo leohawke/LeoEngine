@@ -56,6 +56,7 @@ namespace leo{
 		for (auto & a : mSkeData->mAnimaNames)
 			mSpeedPerAni[a] = 1.f;
 		mSkinMatrixs = leo::make_unique<float4x4[]>(mSkeData->mSkeleton.mJointCount);
+		return *this;
 	}
 
 	bool SkeletonInstance::SwitchAnimation(const std::wstring& aniName){

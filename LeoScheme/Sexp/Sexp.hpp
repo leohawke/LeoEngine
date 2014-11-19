@@ -283,6 +283,21 @@ namespace leo
 				return leo::make_shared<sexp>(value, sexp_value::atom_string);
 			}
 
+			inline sexp_list make_sexp(const char *& value){
+				return leo::make_shared<sexp>(sexp_string(value), sexp_value::atom_string);
+			}
+
+			template<std::size_t size>
+			inline sexp_list make_sexp(const char (&value)[size]){
+				return leo::make_shared<sexp>(sexp_string(value), sexp_value::atom_string);
+			}
+
+			template<std::size_t size>
+			inline sexp_list make_sexp_word(const char(&value)[size]){
+				return leo::make_shared<sexp>(sexp_string(value), sexp_value::atom_word);
+			}
+
+
 			inline sexp_list make_sexp(std::nullptr_t)
 			{
 				return leo::make_shared<sexp>(sexp_list());

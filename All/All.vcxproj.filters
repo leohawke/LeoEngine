@@ -305,9 +305,6 @@
     <ClInclude Include="D3DX11\D3DX11tex.h">
       <Filter>D3DX11</Filter>
     </ClInclude>
-    <ClInclude Include="scheme_helper.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Core\MeshLoad.hpp">
       <Filter>Core</Filter>
     </ClInclude>

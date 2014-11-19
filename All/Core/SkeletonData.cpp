@@ -10,6 +10,7 @@
 #include "..\exception.hpp"
 #include "..\DeviceMgr.h"
 #include "MeshLoad.hpp"
+#include "FileSearch.h"
 namespace leo{
 
 	SkeletonData::~SkeletonData(){
@@ -34,8 +35,8 @@ namespace leo{
 		leo::TextureMgr texmgr;
 		for (UINT i = 0; i < size; ++i)
 		{
-			subsets[i].mTexSRV = texmgr.LoadTextureSRV(materials[i].diffusefile);
-			subsets[i].mNormalSRV = texmgr.LoadTextureSRV(materials[i].normalmapfile);
+			subsets[i].mTexSRV = texmgr.LoadTextureSRV(FileSearch::Search(materials[i].diffusefile));
+			subsets[i].mNormalSRV = texmgr.LoadTextureSRV(FileSearch::Search(materials[i].normalmapfile));
 			for (auto & lodIndice : subsets[i].mLodIndices){
 				lodIndice.mCount = filesubsets[i].indexcount;
 				lodIndice.mOffset = filesubsets[i].indexoffset;
@@ -136,10 +137,10 @@ namespace leo{
 	std::shared_ptr<SkeletonData> SkeletonData::Load(const std::wstring& fileName){
 		auto fin = win::File::Open(fileName, win::File::TO_READ);
 		MemoryChunk memory{
-			leo::make_unique<stdex::byte[]>(min.GetSize()),
-			min.GetSize()
+			leo::make_unique<stdex::byte[]>(static_cast<std::size_t>(fin->GetSize())),
+			static_cast<std::size_t>(fin->GetSize())
 		};
-		min.Read(memory.mData.get(), min.GetSize(), 0);
+		fin->Read(memory.mData.get(), static_cast<std::size_t>(fin->GetSize()), 0);
 		return SkeletonData::Load(memory);
 	}
 	//从内存载入,未实现
@@ -175,7 +176,7 @@ namespace leo{
 			min.Read(&ske_header, sizeof(ske_header), offset);
 			offset += sizeof(ske_header);
 
-			if (ske_header.loop == 0xffu && ske_header.numanima == 0xffffffffu && ske_header.numjoint == 0xffffffffu){
+			if (ske_header.numanima == 0xffffffffu && ske_header.numjoint == 0xffffffffu){
 				ReadLodIndices(min, offset, out->mSubSets, indices);
 
 				min.Read(&ske_header, sizeof(ske_header), offset);
@@ -264,12 +265,14 @@ namespace leo{
 				out->mAnimaNames.push_back(sid);
 				out->mAnimations.emplace(sid, std::move(mClip));
 			}
+
+			return out;
 		}
 		catch (leo::win::dx_exception & e)
 		{
 			OutputDebugStringA(e.what());
-			return false;
 		}
+		return nullptr;
 	}
 
 }
