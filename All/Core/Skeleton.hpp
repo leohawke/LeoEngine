@@ -20,6 +20,7 @@
 #include "..\IndePlatform\LeoMath.h"
 #include "..\IndePlatform\ldef.h"
 #include "..\IndePlatform\memory.hpp"
+#include "..\IndePlatform\clock.hpp"
 #include "Lod.h"
 #include "Material.h"
 #include "Vertex.hpp"
@@ -41,30 +42,6 @@ namespace leo{
 
 	class Camera;
 
-	class SkeletonInstance : public SQTObject{
-		//共享的骨骼数据
-		std::shared_ptr<SkeletonData> mSkeData;
-		//动画索引(名字hash后的值)
-		std::size_t  mAniIndex;
-		//标准时间点(range[0.f,1.f])
-		float mNorT;
-		//每个动画的播放速率
-		std::map<std::size_t, float> mSpeedPerAni;
-		//蒙皮矩阵
-		std::unique_ptr<float4x4[]> mSkinMatrixs;
-	public:
-		SkeletonInstance(const std::shared_ptr<SkeletonData>& skeData);
-		~SkeletonInstance();
-
-		SkeletonInstance() = default;
-		SkeletonInstance& operator=(const std::shared_ptr<SkeletonData>& skeData);
-
-		bool SwitchAnimation(const std::wstring& aniName);
-		bool SwitchAnimation(const wchar_t* aniName);
-
-		void Update();
-		void Render(const Camera& camera);
-	};
 
 	struct AnimationSample;
 	struct AnimationClip;
@@ -77,7 +54,7 @@ namespace leo{
 
 		//从文件载入<参数:文件名>
 		static std::shared_ptr<SkeletonData> Load(const std::wstring& fileName);
-		
+
 		static std::shared_ptr<SkeletonData> Load(const wchar_t* fileName){
 			return SkeletonData::Load(std::wstring(fileName));
 		}
@@ -156,6 +133,41 @@ namespace leo{
 		//单位,帧
 		float CalcFrame(float t) const;
 	};
+
+	class SkeletonInstance : public SQTObject{
+		//共享的骨骼数据
+		std::shared_ptr<SkeletonData> mSkeData;
+		//动画索引(名字hash后的值)
+		std::size_t  mAniIndex;
+		//标准时间点(range[0.f,1.f])
+		float mNorT;
+		float mElapsed = clock::GameClock::Now<>();
+		//每个动画的播放速率
+		std::map<std::size_t, float> mSpeedPerAni;
+		//蒙皮矩阵
+		std::unique_ptr<float4x4[]> mSkinMatrixs;
+		std::unique_ptr<SkeletonData::JointPose[]> mLocalPoses;
+		std::unique_ptr<float4x4[]> mGlobalPoses;
+	public:
+		SkeletonInstance(const std::shared_ptr<SkeletonData>& skeData);
+		~SkeletonInstance();
+
+		SkeletonInstance() = default;
+		SkeletonInstance& operator=(const std::shared_ptr<SkeletonData>& skeData);
+
+		bool SwitchAnimation(const wchar_t* aniName);
+
+		void SetCurrentAniSpeed(float speed){
+			mSpeedPerAni[mAniIndex] = speed;
+ 		}
+
+		std::vector<const wchar_t*> GetAniNames() const;
+
+		void Update();
+		void Render(const Camera& camera);
+	};
+
+	
 }
 
 #endif

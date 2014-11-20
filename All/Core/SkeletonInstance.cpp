@@ -1,6 +1,6 @@
 #include "..\IndePlatform\platform.h"
 #include "..\IndePlatform\utility.hpp"
-#include "..\IndePlatform\clock.hpp"
+
 
 #include "EffectSkeleton.hpp"
 #include "Geometry.hpp"
@@ -53,12 +53,13 @@ namespace leo{
 		for (auto & a : mSkeData->mAnimaNames)
 			mSpeedPerAni[a] = 1.f;
 		mSkinMatrixs = leo::make_unique<float4x4[]>(mSkeData->mSkeleton.mJointCount);
+
+		mLocalPoses = leo::make_unique<SkeletonData::JointPose[]>(mSkeData->mSkeleton.mJointCount);
+		mGlobalPoses = leo::make_unique<float4x4[]>(mSkeData->mSkeleton.mJointCount);
 		return *this;
 	}
 
-	bool SkeletonInstance::SwitchAnimation(const std::wstring& aniName){
-		return SwitchAnimation(aniName.c_str());
-	}
+	
 	bool SkeletonInstance::SwitchAnimation(const wchar_t* aniName){
 		auto Index = hash(aniName);
 		if (std::find(mSkeData->mAnimaNames.begin(), mSkeData->mAnimaNames.end(), Index) == mSkeData->mAnimaNames.end())
@@ -66,6 +67,13 @@ namespace leo{
 		mAniIndex = Index;
 		return true;
 	}
+
+	std::vector<const wchar_t*> SkeletonInstance::GetAniNames() const {
+		std::vector<const wchar_t*> aniNames(mSkeData->mAnimaNames.size());
+		std::transform(mSkeData->mAnimaNames.cbegin(), mSkeData->mAnimaNames.cend(), aniNames.begin(), [](std::size_t sid){return unhash(sid); });
+		return aniNames;
+	}
+
 
 	//do many thing
 	void SkeletonInstance::Update(){
@@ -75,12 +83,11 @@ namespace leo{
 				mNorT = 0.f;
 			else
 				return ;
-		static auto mElapsed = clock::GameClock::Now<>();
 		auto cElapsed = clock::GameClock::Now<>();
 		auto ElapsedT = (cElapsed - mElapsed) / mClip.GetTotalTime();
 		mElapsed = cElapsed;
 
-		mNorT += ElapsedT;
+		mNorT += (ElapsedT*mSpeedPerAni[mAniIndex]);
 		clamp(0.f, 1.f, mNorT);
 
 		auto  CalcFrameIndex = [&](float frame){
@@ -101,7 +108,6 @@ namespace leo{
 		auto frame = mClip.CalcFrame(mNorT);
 		auto Indices = CalcFrameIndex(frame);
 
-		auto mLocalPoses = leo::make_unique<SkeletonData::JointPose[]>(mSkeData->mSkeleton.mJointCount);
 
 		for (auto jointIndex = 0u; jointIndex != mSkeData->mSkeleton.mJointCount; ++jointIndex){
 			auto & p1 = mClip.mSamples[Indices.first].mJointsPose[jointIndex];
@@ -110,7 +116,6 @@ namespace leo{
 			mLocalPoses[jointIndex] = Lerp(p1, p2, CalcFrameInterpolate(frame));
 		}
 
-		auto mGlobalPoses = leo::make_unique<float4x4[]>(mSkeData->mSkeleton.mJointCount);
 		mGlobalPoses[0] = mLocalPoses[0].operator leo::float4x4();
 		//子节点在后面,只需找到父,即可相乘
 		for (auto jointIndex = 1u; jointIndex != mSkeData->mSkeleton.mJointCount; ++jointIndex){

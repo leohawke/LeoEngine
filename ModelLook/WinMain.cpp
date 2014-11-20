@@ -66,6 +66,7 @@ void DeviceEvent()
 
 
 void Render();
+void Update();
 
 void BuildRes();
 
@@ -241,7 +242,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 #endif
 
 	std::thread renderThread(Render);
-
+	std::thread updateThread(Update);
 	while (true)
 	{
 		::MSG msg{ nullptr, 0, 0, 0, 0, { 0, 0 } };
@@ -259,8 +260,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 			::WaitMessage();
 	}
 	renderThreadRun = false;
+	updateThread.join();
 	renderThread.join();
-
+	
 
 	pMesh.reset(nullptr);
 	pTerrain.reset(nullptr);
@@ -346,6 +348,13 @@ void BuildRes()
 	pSkeInstances[1].Scale(0.05f);
 	pSkeInstances[2].Scale(0.05f);
 
+	pSkeInstances[0].Translation(float3(1.f,2.f,3.f));
+	pSkeInstances[1].Translation(float3(3.f, 2.f, 1.f));
+	pSkeInstances[2].Translation(float3(-5.f,1.f,5.f));
+
+	pSkeInstances[0].SetCurrentAniSpeed(0.25f);
+	pSkeInstances[1].SetCurrentAniSpeed(0.5f);
+	pSkeInstances[2].SetCurrentAniSpeed(0.75f);
 	//leo::XMMATRIX modelRot = leo::XMMatrixRotationY(leo::LM_PI);
 	//leo::float4 quaternion;
 	//save(quaternion,leo::XMQuaternionRotationMatrix(modelRot));
@@ -357,15 +366,9 @@ void BuildRes()
 	//leo::DeviceMgr().GetDeviceContext()->RSSetState(leo::RenderStates().GetRasterizerState(L"WireframeRS"));
 }
 
-
-void Render()
-{
-	event.Wait();
-
+void Update(){
 	while (renderThreadRun)
 	{
-		leo::DeviceMgr dm;
-
 		if (GetAsyncKeyState('W') & 0X8000)
 			pCamera->Walk(+0.05f);
 
@@ -379,8 +382,27 @@ void Render()
 			pCamera->Strafe(+0.05f);
 
 		pCamera->UpdateViewMatrix();
+
+
 		leo::clock::GameClock::Update(leo::clock::ProgramClock::GetElapse());
 		leo::clock::ProgramClock::Reset();
+
+		pSkeInstances[0].Update();
+		pSkeInstances[1].Update();
+		pSkeInstances[2].Update();
+	}
+}
+
+
+void Render()
+{
+	event.Wait();
+
+	while (renderThreadRun)
+	{
+		leo::DeviceMgr dm;
+
+		
 		leo::RenderSync::GetInstance()->Sync();
 
 		auto devicecontext = dm.GetDeviceContext();
@@ -396,8 +418,12 @@ void Render()
 		
 
 		pSky->Render(devicecontext, *pCamera);
-		pSkeInstances[0].Update();
 		pSkeInstances[0].Render(*pCamera);
+
+		pSkeInstances[1].Render(*pCamera);
+
+		pSkeInstances[2].Render(*pCamera);
+
 		//pSkeInstances[1].Update();
 		//pSkeInstances[1].Render(*pCamera);
 		//pSkeInstances[2].Update();
