@@ -29,13 +29,13 @@ namespace leo
 		extern ID3D11Debug* globalD3DDebug = nullptr;
 #endif
 		//share by DeviceMgr and Window
-		std::pair<leo::uint16, leo::uint16> globalClientSize;
+		extern std::pair<leo::uint16, leo::uint16> globalClientSize = {};
 
-		float globalAspect;
+		extern float globalAspect = 1.66f;
 		//WindowMgr
-		win::HWND globalHwnd;
+		extern win::HWND globalHwnd = static_cast<win::HWND>(INVALID_HANDLE_VALUE);
 		//
-		win::KeysState globalKeysState;
+		extern win::KeysState globalKeysState = {};
 		void Init()
 		{}
 		void Destroy()

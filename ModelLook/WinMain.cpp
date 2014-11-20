@@ -261,10 +261,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	renderThreadRun = false;
 	renderThread.join();
 
+
 	pMesh.reset(nullptr);
 	pTerrain.reset(nullptr);
 	pSky.reset(nullptr);
 	pSkeInstances.reset(nullptr);
+
 	leo::global::Destroy();
 #ifdef DEBUG
 	leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
@@ -359,6 +361,7 @@ void BuildRes()
 void Render()
 {
 	event.Wait();
+
 	while (renderThreadRun)
 	{
 		leo::DeviceMgr dm;

@@ -17,10 +17,6 @@ namespace leo{
 		leo::win::ReleaseCOM(mVertexBuffer);
 		leo::win::ReleaseCOM(mIndicesBuffer);
 		leo::win::ReleaseCOM(mAnimationDataBUffer);
-		for (auto & s : mSubSets){
-			leo::win::ReleaseCOM(s.mNormalSRV);
-			leo::win::ReleaseCOM(s.mTexSRV);
-		}
 	}
 
 	static void ReadSubSets(const MemoryChunk& min, std::uint64_t& offset, std::vector<SkeletonData::SubSet>&subsets, ID3D11Device* device)
