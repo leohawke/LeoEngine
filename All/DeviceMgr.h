@@ -95,14 +95,14 @@ namespace leo
 		const decltype(global::globalDXGISizeSet) & QuerySize();
 		bool CreateDevice(bool fullscreen, const size_type& size);
 		void DestroyDevice();
-		DefGetter(const lnoexcept(), ID3D11Device*, Device, global::globalD3DDevice);
-		DefGetter(const lnoexcept(), ID3D11DeviceContext*, DeviceContext, global::globalD3DContext);
-		DefGetter(const lnoexcept(), IDXGISwapChain*, SwapChain, global::globalDXGISwapChain);
-		DefGetter(const lnoexcept(), ID3D11Texture2D*, DepthStencilTexture, global::globalD3DDepthTexture);
-		DefGetter(const lnoexcept(), ID3D11DepthStencilView*, DepthStencilView, global::globalD3DDepthStencilView);
-		DefGetter(const lnoexcept(), ID3D11RenderTargetView*, RenderTargetView, global::globalD3DRenderTargetView);
-		DefGetter(const lnoexcept(), ID3D11Texture2D*, RenderTargetTexture2D, global::globalD3DRenderTargetTexture2D);
-		DefGetter(const lnoexcept(), float, Aspect, global::globalAspect);
-		DefGetter(const lnoexcept(), size_type, ClientSize, global::globalClientSize);
+		DefGetter(const lnothrow, ID3D11Device*, Device, global::globalD3DDevice);
+		DefGetter(const lnothrow, ID3D11DeviceContext*, DeviceContext, global::globalD3DContext);
+		DefGetter(const lnothrow, IDXGISwapChain*, SwapChain, global::globalDXGISwapChain);
+		DefGetter(const lnothrow, ID3D11Texture2D*, DepthStencilTexture, global::globalD3DDepthTexture);
+		DefGetter(const lnothrow, ID3D11DepthStencilView*, DepthStencilView, global::globalD3DDepthStencilView);
+		DefGetter(const lnothrow, ID3D11RenderTargetView*, RenderTargetView, global::globalD3DRenderTargetView);
+		DefGetter(const lnothrow, ID3D11Texture2D*, RenderTargetTexture2D, global::globalD3DRenderTargetTexture2D);
+		DefGetter(const lnothrow, float, Aspect, global::globalAspect);
+		DefGetter(const lnothrow, size_type, ClientSize, global::globalClientSize);
 	};
 }

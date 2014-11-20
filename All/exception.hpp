@@ -39,7 +39,7 @@ namespace leo
 		class host_exception : public logged_event
 		{
 		public:
-			host_exception(const std::string& = "unknown host exception", level_type = {}) _NOEXCEPT;
+			host_exception(const std::string& = "unknown host exception", level_type = {}) lnothrow;
 		};
 
 		class win32_exception : public host_exception
@@ -49,20 +49,20 @@ namespace leo
 		private:
 			error_code_type errcode;
 		public:
-			win32_exception(error_code_type, const std::string& = "win32 exception", level_type = {}) _NOEXCEPT;
+			win32_exception(error_code_type, const std::string& = "win32 exception", level_type = {}) lnothrow;
 
-			DefGetter(const _NOEXCEPT, error_code_type, Error_Code, errcode);
-			DefGetter(const _NOEXCEPT, std::string, Message, formatmessage(errcode));
+			DefGetter(const lnothrow, error_code_type, Error_Code, errcode);
+			DefGetter(const lnothrow, std::string, Message, formatmessage(errcode));
 
-			explicit DefCvt(const _NOEXCEPT, error_code_type, errcode);
+			explicit DefCvt(const lnothrow, error_code_type, errcode);
 
-			static std::string formatmessage(error_code_type) _NOEXCEPT;
+			static std::string formatmessage(error_code_type) lnothrow;
 		};
 
 		class dx_exception : public win32_exception
 		{
 		public:
-			dx_exception(error_code_type ec, const std::string& s = "COM(directx) exception", level_type l = {}) _NOEXCEPT
+			dx_exception(error_code_type ec, const std::string& s = "COM(directx) exception", level_type l = {}) lnothrow
 				: win32_exception(ec, s, l)
 			{}
 		};

@@ -321,94 +321,6 @@ namespace leo
 {
 	//模仿Orge
 
-	//hack从堆上分配内存行为
-	template<typename ALLOC>
-	class AllocPolicy
-	{
-	private:
-		ALLOC _impl;
-	public:
-		inline void * allocate(std::size_t count, const char * file = nullptr, int line = 0, const char* func = 0)
-		{
-			auto p = _impl.allocate(count);
-#if defined LEO_MEMORY_TRACKER
-			if (file)
-			{
-				//DebugPrintf("memory_alloc(address: %p size: %u(align: 1) where: %s file %d line %s function\n", p, count, 
-					//file, line, func);
-			}
-			else
-			{
-				//DebugPrintf("memory_alloc(address: %p size: %u(align: 1) where: unknown \n", p, count);
-			}
-			__memory_track_record_alloc(p, count, 1, file, line, func);
-#endif
-			return p;
-		}
-		inline void deallocate(void * p, const char * file = nullptr, int line = 0, const char* func = 0)
-		{
-#if defined LEO_MEMORY_TRACKER
-			if (file)
-			{
-				//DebugPrintf("memory_dealloc(address: %p (align: 1) where: %s file %d line %s function\n", p,
-					//file, line, func);
-			}
-			else
-			{
-				//DebugPrintf("memory_dealloc(address: %p (align: 1) where: unknown \n", p);
-			}
-			__memory_track_dealloc_record(p, 1);
-#endif
-			_impl.deallocate(reinterpret_cast<typename ALLOC::pointer>(p), 0);
-		}
-		inline void * aligned_alloc(std::size_t count, std::uint8_t alignsize, const char * file = nullptr, int line = 0, const char* func = 0)
-		{
-			//至少大于1
-			assert(alignsize > 1);
-			//为2^n
-			assert(!(alignsize &(alignsize - 1)));
-
-			count += alignsize;
-			std::uintptr_t rawAddress = (std::uintptr_t)(_impl.allocate(count));
-
-			std::uint8_t missalign = alignsize - (rawAddress&(alignsize - 1));
-			std::uintptr_t alignAddress = rawAddress + missalign;
-
-			std::uint8_t* storemissalign = (std::uint8_t*)(alignAddress)-1;
-			*storemissalign = missalign;
-#if defined LEO_MEMORY_TRACKER
-			if (file)
-			{
-				DebugPrintf("memory_alloc(address: %p size: %u(align: %d) where: %s file %d line %s function\n", alignAddress, count,alignsize,file, line, func);
-			}
-			else
-			{
-				DebugPrintf("memory_alloc(address: %p size: %u(align: %d) where: unknown \n", alignAddress, count,alignsize);
-			}
-			__memory_track_record_alloc(rawAddress, count, alignsize, file, line, func);
-#endif
-			return (void*)alignAddress;
-		}
-		inline void aligned_dealloc(void *p, std::uint8_t alignsize, std::size_t size = 0, const char * file = nullptr, int line = 0, const char* func = 0 /* const hint */)
-		{
-			std::uint8_t adjust = *(reinterpret_cast<std::uint8_t*>(p)-1);
-			std::uintptr_t rawAddress = (std::uintptr_t)p - adjust;
-			_impl.deallocate((std::uint8_t*)rawAddress, size);
-#if defined LEO_MEMORY_TRACKER
-			if (file)
-			{
-				DebugPrintf("memory_dealloc(address: %p (align: %d) where: %s file %d line %s function\n", p,alignsize,
-					file, line, func);
-			}
-			else
-			{
-				DebugPrintf("memory_dealloc(address: %p (align: %d) where: unknown \n", p, alignsize);
-			}
-			__memory_track_dealloc_record(p, alignsize);
-#endif
-		}
-	};
-
 	enum class MemoryCategory
 	{
 		/// General purpose
@@ -439,17 +351,16 @@ namespace leo
 		using base_alloc = ::leo::aligned_alloc < std::uint8_t, 16 > ;
 	}
 	template<MemoryCategory cate>
-	class CateAlloc : public details::base_alloc{
-	};
+	using CateAlloc = details::base_alloc;
 
-	typedef AllocPolicy<CateAlloc<MemoryCategory::MEMCATEGORY_GENERAL>> GeneralAllocPolicy;
-	typedef AllocPolicy<CateAlloc<MemoryCategory::MEMCATEGORY_GEOMETRY>> GeometryAllocPolicy;
-	typedef AllocPolicy<CateAlloc<MemoryCategory::MEMCATEGORY_ANIMATION>> AnimationAllocPolicy;
-	typedef AllocPolicy<CateAlloc<MemoryCategory::MEMCATEGORY_SCENE_CONTROL>> SceneCtlAllocPolicy;
-	typedef AllocPolicy<CateAlloc<MemoryCategory::MEMCATEGORY_SCENE_OBJECTS>> SceneObjAllocPolicy;
-	typedef AllocPolicy<CateAlloc<MemoryCategory::MEMCATEGORY_RESOURCE>> ResourceAllocPolicy;
-	typedef AllocPolicy<CateAlloc<MemoryCategory::MEMCATEGORY_SCRIPTING>> ScriptingAllocPolicy;
-	typedef AllocPolicy<CateAlloc<MemoryCategory::MEMCATEGORY_RENDERSYS>> RenderSysAllocPolicy;
+	typedef CateAlloc<MemoryCategory::MEMCATEGORY_GENERAL> GeneralAllocPolicy;
+	typedef CateAlloc<MemoryCategory::MEMCATEGORY_GEOMETRY> GeometryAllocPolicy;
+	typedef CateAlloc<MemoryCategory::MEMCATEGORY_ANIMATION> AnimationAllocPolicy;
+	typedef CateAlloc<MemoryCategory::MEMCATEGORY_SCENE_CONTROL> SceneCtlAllocPolicy;
+	typedef CateAlloc<MemoryCategory::MEMCATEGORY_SCENE_OBJECTS> SceneObjAllocPolicy;
+	typedef CateAlloc<MemoryCategory::MEMCATEGORY_RESOURCE> ResourceAllocPolicy;
+	typedef CateAlloc<MemoryCategory::MEMCATEGORY_SCRIPTING> ScriptingAllocPolicy;
+	typedef CateAlloc<MemoryCategory::MEMCATEGORY_RENDERSYS> RenderSysAllocPolicy;
 
 	
 	template<typename AllocPolice>
@@ -467,7 +378,7 @@ namespace leo
 		/// operator new, with debug line info
 		void* operator new(size_t sz, const char* file, int line, const char* func)
 		{
-			return impl.allocate(sz, file, line, func);
+			return impl.allocate(sz);//, file, line, func);
 		}
 
 		void* operator new(size_t sz)
@@ -485,7 +396,7 @@ namespace leo
 			/// array operator new, with debug line info
 		void* operator new[](size_t sz, const char* file, int line, const char* func)
 		{
-			return impl.allocate(sz, file, line, func);
+			return impl.allocate(sz);//, file, line, func);
 		}
 
 		void* operator new[](size_t sz)
@@ -495,29 +406,29 @@ namespace leo
 
 		void operator delete(void* ptr)
 		{
-			impl.deallocate(ptr);
+			impl.deallocate(typename AllocPolice::pointer(ptr),1);
 		}
 
 		// Corresponding operator for placement delete (second param same as the first)
 		void operator delete(void* ptr, void*)
 		{
-			impl.deallocate(ptr);
+			impl.deallocate(typename AllocPolice::pointer(ptr), 1);
 		}
 
 		// only called if there is an exception in corresponding 'new'
 		void operator delete(void* ptr, const char* file, int line, const char* func)
 		{
-			impl.deallocate(ptr, file, line, func);
+			impl.deallocate(typename AllocPolice::pointer(ptr), 1);// file, line, func);
 		}
 
 		void operator delete[](void* ptr)
 		{
-			impl.deallocate(ptr);
+			impl.deallocate(typename AllocPolice::pointer(ptr), 1);
 		}
 
 		void operator delete[](void* ptr, const char*, int, const char*)
 		{
-			impl.deallocate(ptr);
+			impl.deallocate(typename AllocPolice::pointer(ptr), 1);
 		}
 	};
 
@@ -534,7 +445,7 @@ namespace leo
 		/// operator new, with debug line info
 		void* operator new(size_t sz, const char* file, int line, const char* func)
 		{
-			return impl.allocate(sz, file, line, func);
+			return impl.allocate(sz);//, file, line, func);
 		}
 
 			void* operator new(size_t sz)
@@ -552,7 +463,7 @@ namespace leo
 			/// array operator new, with debug line info
 			void* operator new[](size_t sz, const char* file, int line, const char* func)
 		{
-			return impl.allocate(sz, file, line, func);
+			return impl.allocate(sz);//, file, line, func);
 		}
 
 			void* operator new[](size_t sz)
@@ -562,29 +473,29 @@ namespace leo
 
 			void operator delete(void* ptr)
 		{
-			impl.deallocate(ptr);
+			impl.deallocate(typename AllocPolice::pointer(ptr), 1);
 		}
 
 		// Corresponding operator for placement delete (second param same as the first)
 		void operator delete(void* ptr, void*)
 		{
-			impl.deallocate(ptr);
+			impl.deallocate(typename AllocPolice::pointer(ptr), 1);
 		}
 
 		// only called if there is an exception in corresponding 'new'
 		void operator delete(void* ptr, const char* file, int line, const char* func)
 		{
-			impl.deallocate(ptr, file, line, func);
+			impl.deallocate(typename AllocPolice::pointer(ptr), 1);// file, line, func);
 		}
 
 		void operator delete[](void* ptr)
 		{
-			impl.deallocate(ptr);
+			impl.deallocate(typename AllocPolice::pointer(ptr), 1);
 		}
 
 			void operator delete[](void* ptr, const char*, int, const char*)
 		{
-			impl.deallocate(ptr);
+			impl.deallocate(typename AllocPolice::pointer(ptr), 1);
 		}
 	};
 	

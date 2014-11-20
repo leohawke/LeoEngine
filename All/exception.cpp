@@ -32,11 +32,11 @@ namespace leo
 	namespace win
 	{
 		host_exception::host_exception(const std::string& s, level_type l)
-			:logged_event(s,l)
+			:logged_event(s,l) lnothrow
 		{}
 
 		win32_exception::win32_exception(error_code_type ec, const std::string& s, level_type l)
-			_NOEXCEPT
+			lnothrow
 			: host_exception([&]{
 			try
 			{
@@ -53,7 +53,7 @@ namespace leo
 		}
 
 		std::string
-			win32_exception::formatmessage(error_code_type ec) _NOEXCEPT
+			win32_exception::formatmessage(error_code_type ec) lnothrow
 		{
 			try
 			{

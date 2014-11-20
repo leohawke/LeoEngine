@@ -789,8 +789,8 @@ namespace leo{
 		}
 
 		inline __m128 SplatNegativeZero(){
-			const static lalignas(16) uint32 zero[4] = { 0x80000000, 0x80000000, 0x80000000, 0x80000000 };
-			const static auto _mzero = load(*reinterpret_cast<const float4 *>(zero));
+			const static lalignas(16) uint32 szero[4] = { 0x80000000, 0x80000000, 0x80000000, 0x80000000 };
+			const static auto _mzero = load(*reinterpret_cast<const float4 *>(szero));
 			return _mzero;
 		}
 		
@@ -839,20 +839,20 @@ namespace leo{
 	}
 
 	inline __m128 SplatOne(){
-		const static float4 one(1.f, 1.f, 1.f, 1.f);
-		const static auto _mone = load(one);
+		const static float4 sone(1.f, 1.f, 1.f, 1.f);
+		const static auto _mone = load(sone);
 		return _mone;
 	}
 
 	inline __m128 SplatZero(){
-		const static float4 zero(0.f, 0.f, 0.f, 0.f);
-		const static auto _mzero = load(zero);
+		const static float4 szero(0.f, 0.f, 0.f, 0.f);
+		const static auto _mzero = load(szero);
 		return _mzero;
 	}
 
 	inline __m128 SplatNegativeOne(){
-		const static float4 one(-1.f, -1.f, -1.f, -1.f);
-		const static auto _mone = load(one);
+		const static float4 sone(-1.f, -1.f, -1.f, -1.f);
+		const static auto _mone = load(sone);
 		return _mone;
 	}
 

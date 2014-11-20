@@ -114,8 +114,8 @@
 #undef LB_HAS_NOEXCEPT
 #define LB_HAS_NOEXCEPT \
 	(__has_feature(cxx_noexcept) || __has_extension(cxx_noexcept) || \
-		LB_IMPL_CPP >= 201103L || LB_IMPL_MSCPP >= 1900)
-#if !LB_HAS_NOEXCEPT && LB_IMPL_MSCPP != 1800
+		LB_IMPL_CPP >= 201103L || LB_IMPL_MSCPP >= 2000)
+#if !defined(LB_HAS_NOEXCEPT) && !defined(LB_IMPL_MSCPP)
 #error "compiler must support noexcept"
 #endif
 #undef LB_HAS_THREAD_LOCAL
