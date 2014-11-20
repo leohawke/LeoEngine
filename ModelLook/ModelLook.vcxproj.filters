@@ -254,6 +254,7 @@
     <ClInclude Include="Axis.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Rubbishmemory.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\All\Shader\LightBuffer.hlsli">

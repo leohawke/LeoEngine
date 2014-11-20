@@ -135,7 +135,7 @@ namespace leo
 	//make_unique函数
 	//使用new和指定参数构造指定类型的std::unique_ptr对象.
 	//ref http://herbsutter.com/gotw/_102/
-	ISO WG21 / N3797 20.7.2[memory.syn]
+	//ISO WG21 / N3797 20.7.2[memory.syn]
 	template<typename _type, typename... _tParams>
 	lconstfn limpl(enable_if_t<!is_array<_type>::value, std::unique_ptr<_type>>)
 		make_unique(_tParams&&... args)

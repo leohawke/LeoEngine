@@ -243,6 +243,7 @@
     <ClInclude Include="..\All\ShaderMgr.h" />
     <ClInclude Include="Axis.hpp" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Rubbishmemory.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\All\config.scheme">
