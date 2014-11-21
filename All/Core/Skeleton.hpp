@@ -77,7 +77,7 @@ namespace leo{
 		//Mesh end
 
 		//Skeleton begin
-		typedef DataAllocatedObject<GeneralAllocPolicy> JointAllocated;
+		typedef DataAllocatedObject<MemoryCategory::MEMCATEGORY_SCENE_CONTROL> JointAllocated;
 		struct Joint : public JointAllocated{
 			//绑定姿势的逆变换
 			float4x4 mInvBindPose;

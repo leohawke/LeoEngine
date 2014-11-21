@@ -124,6 +124,7 @@
     </ClCompile>
     <ClCompile Include="File.cpp" />
     <ClCompile Include="IndePlatform\any.cpp" />
+    <ClCompile Include="IndePlatform\BugTest.cpp" />
     <ClCompile Include="IndePlatform\leoMathTest.cpp" />
     <ClCompile Include="IndePlatform\memory.cpp" />
     <ClCompile Include="IndePlatform\raii.cpp" />

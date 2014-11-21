@@ -234,6 +234,9 @@
     <ClCompile Include="Core\FileSearch.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="IndePlatform\BugTest.cpp">
+      <Filter>IndePlatform\WinSource</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.hpp">

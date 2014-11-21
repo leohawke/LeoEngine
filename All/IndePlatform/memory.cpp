@@ -1,14 +1,12 @@
-#include "platform.h"
+ï»¿#include "platform.h"
 
 #include "memory.hpp"
 #include <set>
 
 namespace leo
 {
-	GeneralAllocPolicy GeneralAllocatedObject::impl;
 
 
-	GeneralAllocPolicy DataAllocatedObject<GeneralAllocPolicy>::impl;
 	struct __memroy_track_struct
 	{
 		void *p;
@@ -28,7 +26,7 @@ namespace leo
 		{
 			if (!sets.empty())
 			{
-				MessageBoxW(nullptr, L"ÄÚ´æĞ¹Â¶!", L"ÔËĞĞ´íÎó:", MB_OK);
+				MessageBoxW(nullptr, L"å†…å­˜æ³„éœ²!", L"è¿è¡Œé”™è¯¯:", MB_OK);
 				std::abort();
 			}
 		}
@@ -43,7 +41,7 @@ namespace leo
 			auto pos = sets.find(s);
 			if (pos == sets.cend())
 			{
-				MessageBoxW(nullptr, L"ÊÍ·ÅÍ¬Ò»¿éÄÚ´æ¶à´Î!", L"ÔËĞĞ´íÎó:", MB_ERR_INVALID_CHARS);
+				MessageBoxW(nullptr, L"é‡Šæ”¾åŒä¸€å—å†…å­˜å¤šæ¬¡!", L"è¿è¡Œé”™è¯¯:", MB_ERR_INVALID_CHARS);
 				std::abort();
 			}
 			sets.erase(pos);

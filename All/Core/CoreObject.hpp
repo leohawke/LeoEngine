@@ -18,8 +18,7 @@
 #include "..\IndePlatform\memory.hpp"
 namespace leo
 {
-	typedef  DataAllocatedObject<GeneralAllocPolicy> SQTAllocated;
-	class SQTObject :public SQT, public SQTAllocated
+	class SQTObject :public SQT, public GeneralAllocatedObject
 	{
 	public:
 		SQTObject() = default;
@@ -43,9 +42,9 @@ namespace leo
 			return *this;
 		}
 	public:
-		void inline Scale(float s)
+		void inline Scale(float S)
 		{
-			this->s *= s;
+			this->s *= S;
 		}
 
 		void inline Rotation(const float4& quaternion)

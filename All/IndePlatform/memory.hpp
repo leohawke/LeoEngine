@@ -7,8 +7,7 @@
 #include <memory>// smart ptr
 #include <cstdlib>
 #include <cstring>
-#include "type_op.hpp"
-
+#include "leoint.hpp"
 //存储和智能指针特性
 namespace leo
 {
@@ -231,6 +230,12 @@ namespace leo
 			new (pv)value_type(t);
 		}
 
+		template<typename... ARGS>
+		void construct(pointer const p, ARGS... args) const {
+			void * const pv = static_cast<void*>(p);
+			new (pv)value_type(args...);
+		}
+
 		void destroy(pointer const p) const;
 
 		//无状态分配器
@@ -345,29 +350,11 @@ namespace leo
 		MEMCATEGORY_COUNT = 8
 	};
 
-	//本质上的分配器.使用标准分配器(uint8_t)
-	namespace details
-	{
-		using base_alloc = ::leo::aligned_alloc < std::uint8_t, 16 > ;
-	}
+
 	template<MemoryCategory cate>
-	using CateAlloc = details::base_alloc;
-
-	typedef CateAlloc<MemoryCategory::MEMCATEGORY_GENERAL> GeneralAllocPolicy;
-	typedef CateAlloc<MemoryCategory::MEMCATEGORY_GEOMETRY> GeometryAllocPolicy;
-	typedef CateAlloc<MemoryCategory::MEMCATEGORY_ANIMATION> AnimationAllocPolicy;
-	typedef CateAlloc<MemoryCategory::MEMCATEGORY_SCENE_CONTROL> SceneCtlAllocPolicy;
-	typedef CateAlloc<MemoryCategory::MEMCATEGORY_SCENE_OBJECTS> SceneObjAllocPolicy;
-	typedef CateAlloc<MemoryCategory::MEMCATEGORY_RESOURCE> ResourceAllocPolicy;
-	typedef CateAlloc<MemoryCategory::MEMCATEGORY_SCRIPTING> ScriptingAllocPolicy;
-	typedef CateAlloc<MemoryCategory::MEMCATEGORY_RENDERSYS> RenderSysAllocPolicy;
-
-	
-	template<typename AllocPolice>
 	class AllocatedObject
 	{
 	private:
-		static AllocPolice impl;
 	public:
 		explicit AllocatedObject()
 		{ }
@@ -375,17 +362,14 @@ namespace leo
 		virtual ~AllocatedObject()
 		{ }
 #endif
-		/// operator new, with debug line info
-		void* operator new(size_t sz, const char* file, int line, const char* func)
-		{
-			return impl.allocate(sz);//, file, line, func);
-		}
-
 		void* operator new(size_t sz)
 		{
-			return impl.allocate(sz);
+			return aligned_alloc<uint8,16>().allocate(sz);
 		}
-
+		void operator delete(void* ptr)
+		{
+			aligned_alloc<uint8, 16>().deallocate(typename aligned_alloc<uint8, 16>::pointer(ptr), 1);
+		}
 			/// placement operator new
 		void* operator new(size_t sz, void* ptr)
 		{
@@ -393,121 +377,74 @@ namespace leo
 			return ptr;
 		}
 
-			/// array operator new, with debug line info
-		void* operator new[](size_t sz, const char* file, int line, const char* func)
+		void operator delete(void* ptr, void*)
 		{
-			return impl.allocate(sz);//, file, line, func);
+			//aligned_alloc<uint8, 16>().deallocate(typename aligned_alloc<uint8, 16>::pointer(ptr), 1);
 		}
 
 		void* operator new[](size_t sz)
 		{
-			return impl.allocate(sz);
+			return aligned_alloc<uint8, 16>().allocate(sz);
 		}
-
-		void operator delete(void* ptr)
-		{
-			impl.deallocate(typename AllocPolice::pointer(ptr),1);
-		}
-
-		// Corresponding operator for placement delete (second param same as the first)
-		void operator delete(void* ptr, void*)
-		{
-			impl.deallocate(typename AllocPolice::pointer(ptr), 1);
-		}
-
-		// only called if there is an exception in corresponding 'new'
-		void operator delete(void* ptr, const char* file, int line, const char* func)
-		{
-			impl.deallocate(typename AllocPolice::pointer(ptr), 1);// file, line, func);
-		}
-
 		void operator delete[](void* ptr)
 		{
-			impl.deallocate(typename AllocPolice::pointer(ptr), 1);
-		}
-
-		void operator delete[](void* ptr, const char*, int, const char*)
-		{
-			impl.deallocate(typename AllocPolice::pointer(ptr), 1);
+			aligned_alloc<uint8, 16>().deallocate(typename aligned_alloc<uint8, 16>::pointer(ptr), 1);
 		}
 	};
 
 
-	template<typename AllocPolice>
+	template<MemoryCategory cate>
 	class DataAllocatedObject
 	{
 	private:
-		static AllocPolice impl;
 	public:
 		explicit DataAllocatedObject()
 		{ }
 
-		/// operator new, with debug line info
-		void* operator new(size_t sz, const char* file, int line, const char* func)
-		{
-			return impl.allocate(sz);//, file, line, func);
-		}
+#if 1
+		virtual ~DataAllocatedObject()
+		{ }
+#endif
 
-			void* operator new(size_t sz)
+		void* operator new(size_t sz)
 		{
-			return impl.allocate(sz);
+			return aligned_alloc<uint8,16>().allocate(sz);
 		}
-
-			/// placement operator new
-			void* operator new(size_t sz, void* ptr)
+			void operator delete(void* ptr)
+		{
+			aligned_alloc<uint8, 16>().deallocate(typename aligned_alloc<uint8, 16>::pointer(ptr), 1);
+		}
+		/// placement operator new
+		void* operator new(size_t sz, void* ptr)
 		{
 			(void)sz;
 			return ptr;
 		}
 
-			/// array operator new, with debug line info
-			void* operator new[](size_t sz, const char* file, int line, const char* func)
+			void operator delete(void* ptr, void*)
 		{
-			return impl.allocate(sz);//, file, line, func);
+			//aligned_alloc<uint8, 16>().deallocate(typename aligned_alloc<uint8, 16>::pointer(ptr), 1);
 		}
 
-			void* operator new[](size_t sz)
+		void* operator new[](size_t sz)
 		{
-			return impl.allocate(sz);
+			return aligned_alloc<uint8, 16>().allocate(sz);
 		}
-
-			void operator delete(void* ptr)
+			void operator delete[](void* ptr)
 		{
-			impl.deallocate(typename AllocPolice::pointer(ptr), 1);
-		}
-
-		// Corresponding operator for placement delete (second param same as the first)
-		void operator delete(void* ptr, void*)
-		{
-			impl.deallocate(typename AllocPolice::pointer(ptr), 1);
-		}
-
-		// only called if there is an exception in corresponding 'new'
-		void operator delete(void* ptr, const char* file, int line, const char* func)
-		{
-			impl.deallocate(typename AllocPolice::pointer(ptr), 1);// file, line, func);
-		}
-
-		void operator delete[](void* ptr)
-		{
-			impl.deallocate(typename AllocPolice::pointer(ptr), 1);
-		}
-
-			void operator delete[](void* ptr, const char*, int, const char*)
-		{
-			impl.deallocate(typename AllocPolice::pointer(ptr), 1);
+			aligned_alloc<uint8, 16>().deallocate(typename aligned_alloc<uint8, 16>::pointer(ptr), 1);
 		}
 	};
 	
 
-	typedef AllocatedObject<GeneralAllocPolicy> GeneralAllocatedObject;
-	typedef AllocatedObject<GeometryAllocPolicy> GeometryAllocatedObject;
-	typedef AllocatedObject<AnimationAllocPolicy> AnimationAllocatedObject;
-	typedef AllocatedObject<SceneCtlAllocPolicy> SceneCtlAllocatedObject;
-	typedef AllocatedObject<SceneObjAllocPolicy> SceneObjAllocatedObject;
-	typedef AllocatedObject<ResourceAllocPolicy> ResourceAllocatedObject;
-	typedef AllocatedObject<ScriptingAllocPolicy> ScriptingAllocatedObject;
-	typedef AllocatedObject<RenderSysAllocPolicy> RenderSysAllocatedObject;
+	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_GENERAL> GeneralAllocatedObject;
+	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_GEOMETRY> GeometryAllocatedObject;
+	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_ANIMATION> AnimationAllocatedObject;
+	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_SCENE_CONTROL> SceneCtlAllocatedObject;
+	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_SCENE_OBJECTS> SceneObjAllocatedObject;
+	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_RESOURCE> ResourceAllocatedObject;
+	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_SCRIPTING> ScriptingAllocatedObject;
+	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_RENDERSYS> RenderSysAllocatedObject;
 
 	typedef ScriptingAllocatedObject    AbstractNodeAlloc;
 	typedef AnimationAllocatedObject    AnimableAlloc;
@@ -688,15 +625,5 @@ namespace leo
 	{
 		memset(dst, 0);
 	}
-}
-
-
-namespace oo
-{
-	class object
-	{
-	public:
-		virtual ~object() = default;
-	};
 }
 #endif

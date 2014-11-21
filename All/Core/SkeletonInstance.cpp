@@ -40,9 +40,13 @@ namespace leo{
 		for (auto & a : mSkeData->mAnimaNames)
 			mSpeedPerAni[a] = 1.f;
 		mSkinMatrixs = leo::make_unique<float4x4[]>(mSkeData->mSkeleton.mJointCount);
+
+		mLocalPoses = leo::make_unique<SkeletonData::JointPose[]>(mSkeData->mSkeleton.mJointCount);
+		mGlobalPoses = leo::make_unique<float4x4[]>(mSkeData->mSkeleton.mJointCount);
 	}
 	SkeletonInstance::~SkeletonInstance(){
-
+		mSkinMatrixs.reset(nullptr);
+		mSkinMatrixs = nullptr;
 	}
 
 

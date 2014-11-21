@@ -44,7 +44,7 @@
 leo::Event event;
 std::unique_ptr<leo::Mesh> pMesh = nullptr;
 std::unique_ptr<leo::Camera> pCamera = nullptr;
-std::unique_ptr<leo::Terrain<3,64,6>> pTerrain = nullptr;
+leo::Terrain<3,64,6>* pTerrain = nullptr;
 std::unique_ptr<leo::Sky> pSky = nullptr;
 std::unique_ptr<leo::SkeletonInstance[]> pSkeInstances = nullptr;
 std::atomic<bool> renderAble = false;
@@ -263,9 +263,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	updateThread.join();
 	renderThread.join();
 	
-
+	leo::aligned_alloc<leo::Terrain<3, 64, 6>, 16> alloc;
+	alloc.destroy(pTerrain);
+	alloc.deallocate(pTerrain, 1);
 	pMesh.reset(nullptr);
-	pTerrain.reset(nullptr);
+	//pTerrain.reset(nullptr);
 	pSky.reset(nullptr);
 	pSkeInstances.reset(nullptr);
 
@@ -333,7 +335,9 @@ void BuildRes()
 		auto & pFile = leo::win::File::Open(L"Resource\\Test.Terrain", leo::win::File::TO_WRITE);
 		pFile->Write(0, &mTerrainFileHeader, sizeof(mTerrainFileHeader));
 	}
-	pTerrain = std::make_unique < leo::Terrain<3,64,6> >(leo::DeviceMgr().GetDevice(), L"Resource\\Test.Terrain");
+	leo::aligned_alloc<leo::Terrain<3, 64, 6>, 16> alloc;
+	pTerrain = alloc.allocate(1);
+	alloc.construct(pTerrain, leo::DeviceMgr().GetDevice(), L"Resource\\Test.Terrain");
 
 	pSky = std::make_unique<leo::Sky>(leo::DeviceMgr().GetDevice(), L"Resource\\sunsetcube1024.dds");
 

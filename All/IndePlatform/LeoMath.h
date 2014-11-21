@@ -460,7 +460,7 @@ namespace leo
 		return lhs.min(rhs);
 	}
 
-	typedef DataAllocatedObject<GeneralAllocPolicy> float4x4Allocated;
+	typedef DataAllocatedObject<MemoryCategory::MEMCATEGORY_SCENE_CONTROL> float4x4Allocated;
 
 	struct lalignas(16) float4x4 : public float4x4Allocated{
 		float4 r[4];
