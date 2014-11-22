@@ -2,7 +2,10 @@
 #define _CRTDBG_MAP_ALLOC
 #include	<stdlib.h>
 #include	<crtdbg.h>
+#include "leomath.h"
 #include "Tree.hpp"
+#include "..\Core\Camera.hpp"
+#include "..\leomath.hpp"
 #include <iostream>
 #if 0
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
@@ -26,6 +29,14 @@ int main()
 	mQuad.Erase(3);
 	mQuad.Erase(4);
 	mQuad.Erase(1);
+	using namespace leo;
+
+	auto clip_func = [](const float4& rect,const Camera& camera) {
+
+			XMVECTOR vv[3];
+
+			return bool(camera.Contains(vv[0], vv[1], vv[2]));
+	};
 	mQuad.Iterator([](const int& i, std::ostream& cout){cout << i << ' '; },std::make_tuple(std::ref(std::cout)), [](const leo::float4&, bool result){return result; },std::make_tuple(true));
 	return 0;
 }

@@ -289,9 +289,11 @@ namespace leo{
 			};
 		};
 
+
 		template<class Fr>
-		struct clip_function<Fr, false> : clip_function < decltype(&Fr::operator()) >
+		struct clip_function<Fr, false> : clip_function<decltype(&Fr::operator())>
 		{};
+
 
 		template<typename F,typename FP,typename T,std::size_t... I>
 		auto apply_impl(const F&f, const FP&  fp, const T& t, index_sequence<I...>)
@@ -313,9 +315,19 @@ namespace leo{
 			mNodeAlloc.construct(mRootNode, rect);
 		}
 
+		QuadTree() = default;
+
+		
+
 		~QuadTree()
 		{
 			NodeDelete(mRootNode);
+		}
+
+		void Reset(const float4& rect){
+			NodeDelete(mRootNode);
+			mRootNode = mNodeAlloc.allocate(1);
+			mNodeAlloc.construct(mRootNode, rect);
 		}
 
 		void Insert(const value_type& value, const float2& pos)
@@ -351,11 +363,14 @@ namespace leo{
 			}
 		}
 
+		//
 		template<typename F1,typename F2,typename... Opt1,typename... Opt2>
-		typename std::enable_if<value_function<typename std::remove_reference<F1>::type>::value && 
-								clip_function<typename std::remove_reference<F2>::type>::value>
+		typename std::enable_if<
+			value_function<typename std::remove_reference<F1>::type>::value && 
+			clip_function<typename std::remove_reference<F2>::type>::value>
 								::type Iterator(const F1& value_func, const std::tuple<Opt1...>& args1, const F2& clip_func, const std::tuple<Opt2...>& args2)
 		{
+			static_assert(clip_function<typename std::remove_reference<F2>::type>::value, "fuck");
 			std::stack<Node*> mNodeStack;
 
 			mNodeStack.push(mRootNode);

@@ -23,6 +23,7 @@
 #include "..\IndePlatform\leoint.hpp"
 #include "..\IndePlatform\LeoMath.h"
 #include "..\IndePlatform\memory.hpp"
+#include "..\IndePlatform\Tree.hpp"
 #include "Camera.hpp"
 #include "..\exception.hpp"
 #include "..\DeviceMgr.h"
@@ -66,14 +67,17 @@ namespace leo
 			mHorChunkNum = mTerrainFileHeader.mHorChunkNum;
 			mVerChunkNum = mTerrainFileHeader.mVerChunkNum;
 			mChunkSize = mTerrainFileHeader.mChunkSize;
-			mChunkVector.resize(mHorChunkNum*mVerChunkNum);
+
+			mChunksQuadTree.Reset(float4(0.f, 0.f,
+				mHorChunkNum*mChunkSize,
+				mVerChunkNum*mChunkSize));
+
 			for (auto slotX = 0; slotX != mHorChunkNum; ++slotX)
 			{
 				for (auto slotY = 0; slotY != mVerChunkNum; ++slotY)
 				{
-					auto chunkIndex = slotY*mHorChunkNum + slotX;
-					mChunkVector[chunkIndex].mSlotX = slotX;
-					mChunkVector[chunkIndex].mSlotY = slotY;
+					float2 worldoffset{ (mHorChunkNum - 1)*mChunkSize / -2.f + slotX*mChunkSize, +(mVerChunkNum - 1)*mChunkSize / 2 - slotY*mChunkSize };
+					mChunksQuadTree.Insert(Chunk(slotX, slotY), worldoffset);
 				}
 			}
 			//Create VertexBuffer
@@ -86,10 +90,10 @@ namespace leo
 				for (auto slotX = 0; slotX <= MAXEDGE; ++slotX)
 				{
 					auto x = beginX + slotX*delta;
-					mVertexs[slotY*(MAXEDGE+1) + slotX] = half2(x, y);
+					mVertexs[slotY*(MAXEDGE + 1) + slotX] = half2(x, y);
 				}
 			}
-			try{
+			try {
 				CD3D11_BUFFER_DESC vbDesc(sizeof(Vertex)*mVertexs.size(), D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_IMMUTABLE);
 				D3D11_SUBRESOURCE_DATA vbDataDesc = { vbDataDesc.pSysMem = mVertexs.data(), 0, 0 };
 
@@ -98,7 +102,7 @@ namespace leo
 			Catch_DX_Exception
 
 				//Create IndexBuffer
-			std::vector<std::uint32_t> mIndexs {};
+				std::vector<std::uint32_t> mIndexs{};
 			std::size_t mIndexCount = 0;
 			std::size_t mLodCount = MAXEDGE*MAXEDGE * 6;
 			std::size_t mCrackCount = MAXEDGE / 2 * 3 * 4;
@@ -111,14 +115,14 @@ namespace leo
 				mCrackCount >>= 1;
 			}
 			mIndexs.reserve(mIndexCount);
-			for (auto slotLod = 0; slotLod != MAXLOD + 1; ++slotLod){
+			for (auto slotLod = 0; slotLod != MAXLOD + 1; ++slotLod) {
 				auto powdelta = static_cast<std::uint16_t>(std::pow(2, slotLod));
 
 				mIndexInfo[slotLod].mOffset = mIndexs.size();
-				for (auto slotY = 0; slotY < MAXEDGE;){
+				for (auto slotY = 0; slotY < MAXEDGE;) {
 					for (auto slotX = 0; slotX < MAXEDGE;)
 					{
-						auto baseIndex = static_cast<std::uint16_t>(slotY*(MAXEDGE+1) + slotX);
+						auto baseIndex = static_cast<std::uint16_t>(slotY*(MAXEDGE + 1) + slotX);
 						auto xdelta = powdelta;
 						//if (slotX + xdelta > MAXEDGE)
 							//xdelta -= (slotX + xdelta+1 - MAXEDGE);
@@ -139,7 +143,7 @@ namespace leo
 					slotY += powdelta;
 				}
 				mIndexInfo[slotLod].mCount = mIndexs.size() - mIndexInfo[slotLod].mOffset;
-#if 0
+#if 1
 				mIndexInfo[slotLod].mCrackOffset[(uint8)DIRECTION_2D_TYPE::DIRECTION_LEFT] = mIndexs.size();
 				if (slotLod != MAXLOD)
 				{
@@ -162,7 +166,7 @@ namespace leo
 				{
 					for (auto slotY = 0; slotY < MAXEDGE;)
 					{
-						auto baseIndex = slotY* (MAXEDGE + 1)+MAXEDGE;
+						auto baseIndex = slotY* (MAXEDGE + 1) + MAXEDGE;
 						mIndexs.emplace_back(baseIndex);
 						slotY += powdelta;
 						baseIndex = slotY* (MAXEDGE + 1) + MAXEDGE;
@@ -196,7 +200,7 @@ namespace leo
 				{
 					for (auto slotX = 0; slotX < MAXEDGE;)
 					{
-						auto baseIndex =MAXEDGE*(MAXEDGE+1) + slotX;
+						auto baseIndex = MAXEDGE*(MAXEDGE + 1) + slotX;
 						mIndexs.emplace_back(baseIndex);
 						slotX += powdelta;
 						baseIndex = MAXEDGE*(MAXEDGE + 1) + slotX;
@@ -210,14 +214,14 @@ namespace leo
 #endif
 			}
 			//assert(mIndexCount == mIndexs.size());
-			try{
+			try {
 				CD3D11_BUFFER_DESC ibDesc(sizeof(std::uint32_t)*mIndexs.size(), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
 				D3D11_SUBRESOURCE_DATA ibDataDesc = { mIndexs.data(), 0, 0 };
 
 				dxcall(device->CreateBuffer(&ibDesc, &ibDataDesc, &mCommonIndexBuffer));
 			}
 			Catch_DX_Exception
-			leo::TextureMgr tm;
+				leo::TextureMgr tm;
 			mHeightMap = tm.LoadTextureSRV(mTerrainFileHeader.mHeightMap);
 
 			mWeightMap = tm.LoadTextureSRV(L"Resource\\weight.jpg");
@@ -239,9 +243,9 @@ namespace leo
 	public:
 		void Render(ID3D11DeviceContext* context, const Camera& camera)
 		{
-			auto topleft = load(float3(-(mHorChunkNum)*mChunkSize / 2, 0, +(mVerChunkNum)*mChunkSize / 2));
-			auto topright = load(float3(-(mHorChunkNum - 2)*mChunkSize / 2, 0, +(mVerChunkNum)*mChunkSize / 2));
-			auto buttomleft = load(float3(-(mHorChunkNum)*mChunkSize / 2, 0, +(mVerChunkNum - 2)*mChunkSize / 2));
+			auto topleft = load(float3((mHorChunkNum)*mChunkSize / -2.f, 0, +(mVerChunkNum)*mChunkSize / 2));
+			auto topright = load(float3((mHorChunkNum - 2)*mChunkSize / -2.f, 0, +(mVerChunkNum)*mChunkSize / 2));
+			auto buttomleft = load(float3((mHorChunkNum)*mChunkSize / -2.f, 0, +(mVerChunkNum - 2)*mChunkSize / 2));
 
 			context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			UINT strides[] = { sizeof(Terrain::Vertex) };
@@ -258,102 +262,52 @@ namespace leo
 			mEffect->MatArrayMap(mMatArrayMap);
 			mEffect->Apply(context);
 
-			mNeedDrawChunk.clear();
+			mNeedDrawChunks.clear();
 
 			DetermineDrawChunk(float4(0, 0, mHorChunkNum*mChunkSize, mVerChunkNum*mChunkSize), camera);
 
-			for (auto chunk : mNeedDrawChunk){
+			for (auto chunk : mNeedDrawChunks) {
 				auto slotX = chunk->mSlotX;
 				auto slotY = chunk->mSlotY;
-				auto offset = load(float4(slotX*mChunkSize, 0,slotY*-mChunkSize, 1.f));
+				auto offset = load(float4(slotX*mChunkSize, 0, slotY*-mChunkSize, 1.f));
 				auto chunkIndex = slotY*mHorChunkNum + slotX;
 
-				auto lodlevel = mChunkVector[slotY*mHorChunkNum + slotX].mLodLevel = DetermineLod(topleft + offset, topright + offset, camera.View(), camera.Proj());
+				auto lodlevel = chunk->mLodLevel = DetermineLod(topleft + offset, topright + offset, camera.View(), camera.Proj());
 
-				float2 worldoffset(-(mHorChunkNum-1)*mChunkSize / 2 + slotX*mChunkSize, +(mVerChunkNum-1)*mChunkSize / 2-slotY*mChunkSize);
+				float2 worldoffset((mHorChunkNum - 1)*mChunkSize / -2.f + slotX*mChunkSize, +(mVerChunkNum - 1)*mChunkSize / 2 - slotY*mChunkSize);
 				mEffect->WorldOffset(worldoffset, context);
 
 				context->DrawIndexed(mIndexInfo[lodlevel].mCount, mIndexInfo[lodlevel].mOffset, 0);
 			}
 
-#if 0
-			for (auto slotX = 0; slotX != mHorChunkNum; ++slotX)
+
+			for (auto chunk : mNeedDrawChunks)
 			{
-				for (auto slotY = 0; slotY != mVerChunkNum; ++slotY)
+				auto slotX = chunk->mSlotX;
+				auto slotY = chunk->mSlotY;
+				//auto offset = load(float3(slotX*mChunkSize, 0, -slotY*mChunkSize));
+				auto offset = load(float4(1.f*slotX*mChunkSize, 0,-1.f*slotY*mChunkSize, 1.f));
+				float2 worldoffset((mHorChunkNum - 1)*mChunkSize / -2.f + slotX*mChunkSize, +(mVerChunkNum - 1)*mChunkSize / 2 - slotY*mChunkSize);
+				mEffect->WorldOffset(worldoffset, context);
+
+				if (slotX > 0)//Left
 				{
-					//auto offset = load(float3(slotX*mChunkSize, 0, -slotY*mChunkSize));
-					auto offset = load(float4(slotX*mChunkSize, 0, -slotY*mChunkSize,1.f));
-					auto chunkIndex = slotY*mHorChunkNum + slotX;
-					//see calc topleft,topright,...
-
-					if (camera.Contains( XMVector3Transform(topleft + offset, camera.View()), XMVector3Transform(topright + offset, camera.View()), XMVector3Transform(buttomleft + offset, camera.View())))
-					{
-						mChunkVector[chunkIndex].mVisiable = true;
-						auto lodlevel = mChunkVector[slotY*mHorChunkNum + slotX].mLodLevel = DetermineLod(topleft + offset, topright + offset, camera.View(), camera.Proj());
-
-						float2 worldoffset(-(mHorChunkNum-1)*mChunkSize / 2 + slotX*mChunkSize, +(mVerChunkNum-1)*mChunkSize / 2-slotY*mChunkSize);
-						mEffect->WorldOffset(worldoffset, context);
-
-#ifdef DEBUG
-						static std::array<float4, 256> mLodColor;
-						static bool has_call = false;
-						
-						auto init_lod_color = [&]()
-						{
-							mLodColor[0] = float4(1.f, 0.f, 0.f, 1.f);
-							mLodColor[1] = float4(0.f, 1.f, 0.f, 1.f);
-							mLodColor[2] = float4(0.f, 0.f, 1.f, 1.f);
-							mLodColor[3] = float4(1.f, 1.f, 0.f, 1.f);
-							mLodColor[4] = float4(1.f, 1.f, 1.f, 1.f);
-						};
-						leo::call_once(has_call, init_lod_color);
-
-
-						mEffect->LodColor(mLodColor[lodlevel], context);
-#endif
-
-						context->DrawIndexed(mIndexInfo[lodlevel].mCount, mIndexInfo[lodlevel].mOffset, 0);
-					}
-					else
-						mChunkVector[chunkIndex].mVisiable = true;
+					DrawCrack(*chunk, Chunk(slotX - 1, slotY), DIRECTION_2D_TYPE::DIRECTION_LEFT, context);
+				}
+				if (slotX < mHorChunkNum - 1)//Right
+				{
+					DrawCrack(*chunk, Chunk(slotX + 1, slotY), DIRECTION_2D_TYPE::DIRECTION_RIGHT, context);
+				}
+				if (slotY > 0)//Top
+				{
+					DrawCrack(*chunk, Chunk(slotX, slotY - 1), DIRECTION_2D_TYPE::DIRECTION_TOP, context);
+				}
+				if (slotY < mVerChunkNum - 1)//Bottom
+				{
+					DrawCrack(*chunk, Chunk(slotX, slotY + 1), DIRECTION_2D_TYPE::DIRECTION_BOTTOM, context);
 				}
 			}
-			for (auto slotX = 0; slotX != mHorChunkNum; ++slotX)
-			{
-				for (auto slotY = 0; slotY != mVerChunkNum; ++slotY)
-				{
-					auto chunkIndex = slotY*mHorChunkNum + slotX;
-					if (mChunkVector[chunkIndex].mVisiable){
-						//auto offset = load(float3(slotX*mChunkSize, 0, -slotY*mChunkSize));
-						auto offset = load(float4(slotX*mChunkSize, 0, -slotY*mChunkSize, 1.f));
-						auto chunkIndex = slotY*mHorChunkNum + slotX;
-						float2 worldoffset(-(mHorChunkNum - 1)*mChunkSize / 2 + slotX*mChunkSize, +(mVerChunkNum - 1)*mChunkSize / 2 - slotY*mChunkSize);
-						mEffect->WorldOffset(worldoffset, context);
 
-						if (slotX > 0)//Left
-						{
-							auto nNeighbourIndex = chunkIndex - 1;
-							DrawCrack(mChunkVector[chunkIndex], nNeighbourIndex, DIRECTION_2D_TYPE::DIRECTION_LEFT, context);
-						}
-						if (slotX < mHorChunkNum - 1)//Right
-						{
-							auto nNeighbourIndex = chunkIndex + 1;
-							DrawCrack(mChunkVector[chunkIndex], nNeighbourIndex, DIRECTION_2D_TYPE::DIRECTION_RIGHT, context);
-						}
-						if (slotY > 0)//Top
-						{
-							auto nNeighbourIndex = chunkIndex - mHorChunkNum;
-							DrawCrack(mChunkVector[chunkIndex], nNeighbourIndex, DIRECTION_2D_TYPE::DIRECTION_TOP, context);
-						}
-						if (slotY < mVerChunkNum - 1)//Bottom
-						{
-							auto nNeighbourIndex = chunkIndex + mHorChunkNum;
-							DrawCrack(mChunkVector[chunkIndex], nNeighbourIndex, DIRECTION_2D_TYPE::DIRECTION_BOTTOM,context);
-						}
-					}
-				}
-			}
-#endif
 		}
 	private:
 		struct Vertex
@@ -377,19 +331,25 @@ namespace leo
 			{}
 			Chunk()
 			{}
+
+			Chunk(std::uint32_t slotX, std::uint32_t slotY)
+				:mSlotX(slotX), mSlotY(slotY) {
+			}
 			std::uint8_t mLodLevel = MAXLOD / 2;
-			bool mVisiable = false;
 
 			//自索引,用户绘制Crack
 			std::uint32_t mSlotX;
 			std::uint32_t mSlotY;
-		};
-		std::array<Vertex, (MAXEDGE+1)*(MAXEDGE+1)> mVertexs;
 
-		std::vector<Chunk> mChunkVector;
+			bool operator==(const Chunk& chunk) const{
+				return mSlotX == chunk.mSlotX && mSlotY == chunk.mSlotY;
+			}
+		};
+		std::array<Vertex, (MAXEDGE + 1)*(MAXEDGE + 1)> mVertexs;
+
 		float mChunkSize;
-		std::uint16_t mHorChunkNum;
-		std::uint16_t mVerChunkNum;
+		std::uint32_t mHorChunkNum;
+		std::uint32_t mVerChunkNum;
 
 		ID3D11ShaderResourceView* mHeightMap;
 
@@ -407,9 +367,10 @@ namespace leo
 		};
 		std::array<Index, MAXLOD + 1> mIndexInfo;
 
-		std::pair<uint16,uint16> mScreenSize;
+		std::pair<uint16, uint16> mScreenSize;
 
-		std::vector<Chunk*> mNeedDrawChunk;
+		QuadTree<Chunk> mChunksQuadTree;
+		std::vector<Chunk*> mNeedDrawChunks;
 	private:
 #if 0
 		uint8 ClipToScreenSpaceLod(XMVECTOR clip0, XMVECTOR clip1)
@@ -429,15 +390,15 @@ namespace leo
 				return p.x >= -1.f && p.x <= 1.f && p.y >= -1.f && p.y <= 1.f;
 			};
 
-			
+
 			if (in_ndc(p0) && in_ndc(p1))
 			{
 				goto allin;
 			}
-			if (in_ndc(p0)){
+			if (in_ndc(p0)) {
 				p1.x = 1.f;
 			}
-			else if (in_ndc(p1)){
+			else if (in_ndc(p1)) {
 				p0.x = -1.f;
 			}
 			else
@@ -449,19 +410,19 @@ namespace leo
 			DebugPrintf("%d %d\n", x, y);
 			assert(p0.x <= p1.x);
 
-			allin:
+		allin:
 			auto gScreenSize = load(float4(mScreenSize, 1.f, 1.f));
 			clip0 *= gScreenSize;
 			clip1 *= gScreenSize;
 
 			float d = XMVectorGetX(XMVector2Length(clip0 - clip1)) / MINEDGEPIXEL;
-			
+
 			//d /= 2;
 			uint8 Lod = 0;
 
-			for (; Lod < MAXLOD;++Lod)
+			for (; Lod < MAXLOD; ++Lod)
 			{
-				if (d >((MAXEDGE >> Lod) - (MAXEDGE >> (Lod+2))))
+				if (d > ((MAXEDGE >> Lod) - (MAXEDGE >> (Lod + 2))))
 					break;
 			}
 
@@ -486,7 +447,7 @@ namespace leo
 			return uint8(ilod);
 		}
 
-		uint8 DetermineLod(XMVECTOR p0, XMVECTOR p1, CXMMATRIX view,CXMMATRIX proj)
+		uint8 DetermineLod(XMVECTOR p0, XMVECTOR p1, CXMMATRIX view, CXMMATRIX proj)
 		{
 			auto vp0 = XMVector4Transform(p0, view);
 			auto vp1 = XMVector4Transform(p1, view);
@@ -500,92 +461,44 @@ namespace leo
 			return cameralod;
 		}
 
-		void DrawCrack(const Chunk& chunkInfo, std::size_t neigbourIndex, DIRECTION_2D_TYPE direct,ID3D11DeviceContext* context)
+		void DrawCrack(const Chunk& chunkInfo, const Chunk& neigbourChunk, DIRECTION_2D_TYPE direct, ID3D11DeviceContext* context)
 		{
-			if (mChunkVector[neigbourIndex].mVisiable && mChunkVector[neigbourIndex].mLodLevel > chunkInfo.mLodLevel)
-			{
-				context->DrawIndexed(mIndexInfo[chunkInfo.mLodLevel].mCrackOffset[(uint8)direct], mIndexInfo[chunkInfo.mLodLevel].mCrackCount[(uint8)direct],0);
+			if (std::find_if(mNeedDrawChunks.cbegin(), mNeedDrawChunks.cend(), [&neigbourChunk](const Chunk* chunk) {
+				return *chunk == neigbourChunk;
 			}
+				) != mNeedDrawChunks.cend())
+				if (neigbourChunk.mLodLevel > chunkInfo.mLodLevel)
+
+					context->DrawIndexed(mIndexInfo[chunkInfo.mLodLevel].mCrackOffset[(uint8)direct], mIndexInfo[chunkInfo.mLodLevel].mCrackCount[(uint8)direct], 0);
 		}
 
 		void DetermineDrawChunk(const float4& rect, const Camera& camera)
 		{
-
-			if (std::abs(rect.z - mChunkSize) <= 0.1f){
-				auto slotX = (int)((rect.x - mChunkSize / 2) / mChunkSize)+mHorChunkNum/2;
-				auto slotY = (int)((mVerChunkNum*mChunkSize / 2 - (rect.y + mChunkSize / 2)) / mChunkSize);
-				mNeedDrawChunk.push_back(&mChunkVector[slotY*mHorChunkNum + slotX]);
-				return;
-			}
-
-			float3 v[3];
-			v[0] = float3(rect.x - rect.z / 2, 0, rect.y + rect.w / 2);
-			v[1] = float3(rect.x + rect.z / 2, 0, rect.y + rect.w / 2);
-			v[2] = float3(rect.x - rect.z / 2, 0, rect.y - rect.w / 2);
-
-			XMVECTOR vv[3] = {
-				XMVector3TransformCoord(load(v[0]), camera.View()),
-				XMVector3TransformCoord(load(v[1]), camera.View()),
-				XMVector3TransformCoord(load(v[2]), camera.View())
+			static auto value_function = [](const Chunk& chunk, std::vector<Chunk*>& mNeedDrawChunks) {
+				mNeedDrawChunks.push_back(const_cast<Chunk*>(&chunk));
 			};
+			static auto clip_function = [](const float4& rect, const Camera& camera) {
+				float3 v[3];
+				v[0] = float3(rect.x - rect.z / 2, 0, rect.y + rect.w / 2);
+				v[1] = float3(rect.x + rect.z / 2, 0, rect.y + rect.w / 2);
+				v[2] = float3(rect.x - rect.z / 2, 0, rect.y - rect.w / 2);
 
-			if (camera.Contains(vv[0], vv[1], vv[2])){
-				//top
-				v[1] = float3(v[0].x + rect.z / 2, 0, v[0].z);
-				v[2] = float3(v[0].x, 0, v[0].z-rect.w/2);
-				auto leftv0 = v[2];
-				vv[1] = XMVector3TransformCoord(load(v[1]), camera.View());
-				vv[2] = XMVector3TransformCoord(load(v[2]), camera.View());
-				float4 childrect;
-				childrect.z = rect.z / 2;
-				childrect.w = rect.w / 2;
-				if (camera.Contains(vv[0], vv[1], vv[2])){
-					childrect.x = rect.x - rect.z / 4;
-					childrect.y = rect.y + rect.w / 4;
-					DetermineDrawChunk(childrect, camera);
-				}
+				XMVECTOR vv[3] = {
+					XMVector3TransformCoord(load(v[0]), camera.View()),
+					XMVector3TransformCoord(load(v[1]), camera.View()),
+					XMVector3TransformCoord(load(v[2]), camera.View())
+				};
 
-				//right
-				v[0] = v[1];
-				v[1] = float3(v[0].x + rect.z / 2, 0, v[0].z);
-				v[2] = float3(v[0].x, 0, v[0].z - rect.w / 2);
-				vv[0] = XMVector3TransformCoord(load(v[0]), camera.View());
-				vv[1] = XMVector3TransformCoord(load(v[1]), camera.View());
-				vv[2] = XMVector3TransformCoord(load(v[2]), camera.View());
-				if (camera.Contains(vv[0], vv[1], vv[2])){
-					childrect.x = rect.x + rect.z / 4;
-					childrect.y = rect.y + rect.w / 4;
-					DetermineDrawChunk(childrect, camera);
-				}
-
-				//left
-				v[0] = leftv0;
-				v[1] = float3(v[0].x + rect.z / 2, 0, v[0].z);
-				v[2] = float3(v[0].x, 0, v[0].z - rect.w / 2);
-				vv[0] = XMVector3TransformCoord(load(v[0]), camera.View());
-				vv[1] = XMVector3TransformCoord(load(v[1]), camera.View());
-				vv[2] = XMVector3TransformCoord(load(v[2]), camera.View());
-				if (camera.Contains(vv[0], vv[1], vv[2])){
-					childrect.x = rect.x - rect.z / 4;
-					childrect.y = rect.y - rect.w / 4;
-					DetermineDrawChunk(childrect, camera);
-				}
-
-				//down
-				v[0] = v[1];
-				v[1] = float3(v[0].x + rect.z / 2, 0, v[0].z);
-				v[2] = float3(v[0].x, 0, v[0].z - rect.w / 2);
-				vv[0] = XMVector3TransformCoord(load(v[0]), camera.View());
-				vv[1] = XMVector3TransformCoord(load(v[1]), camera.View());
-				vv[2] = XMVector3TransformCoord(load(v[2]), camera.View());
-				if (camera.Contains(vv[0], vv[1], vv[2])){
-					childrect.x = rect.x + rect.z / 4;
-					childrect.y = rect.y - rect.w / 4;
-					DetermineDrawChunk(childrect, camera);
-				}
-			}
+				return camera.Contains(vv[0], vv[1], vv[2]) != ContainmentType::DISJOINT;
+			};
+			static auto value_param = std::make_tuple(std::ref(mNeedDrawChunks));
+			mChunksQuadTree.Iterator(
+				value_function,
+				value_param,
+				clip_function,
+				std::make_tuple(std::cref(camera))
+				);
 		}
 	};
 }
-
 #endif

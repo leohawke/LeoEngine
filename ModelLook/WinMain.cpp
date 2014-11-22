@@ -285,7 +285,7 @@ void BuildRes()
 
 	using leo::float3;
 
-	auto Eye = float3(0.f,0.f,-5.f);
+	auto Eye = float3(0.f,5.f,-5.f);
 	auto At = float3(0.f,0.f,0.f);
 	auto Up = float3(0.f,1.f, 0.f);
 
@@ -327,8 +327,8 @@ void BuildRes()
 	}mTerrainFileHeader;
 
 	mTerrainFileHeader.mChunkSize = 8;
-	mTerrainFileHeader.mHorChunkNum = 32;
-	mTerrainFileHeader.mVerChunkNum = 32;
+	mTerrainFileHeader.mHorChunkNum = 4;
+	mTerrainFileHeader.mVerChunkNum = 4;
 	wcscpy(mTerrainFileHeader.mHeightMap, L"Resource\\GaussianNoise256.jpg");
 
 	{
@@ -432,7 +432,7 @@ void Render()
 		//pSkeInstances[1].Render(*pCamera);
 		//pSkeInstances[2].Update();
 		//pSkeInstances[2].Render(*pCamera);
-		//pTerrain->Render(devicecontext, *pCamera);
+		pTerrain->Render(devicecontext, *pCamera);
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 
