@@ -1,5 +1,5 @@
 #include "effect.h"
-
+#include "CoreObject.hpp"
 namespace leo{
 	class EffectSkeleton :public Effect, ABSTRACT{
 	public:
@@ -9,7 +9,7 @@ namespace leo{
 		void WorldViewProjMatrix(CXMMATRIX matrix, ID3D11DeviceContext* context = nullptr);
 		void EyePos(const float3& pos, ID3D11DeviceContext* context = nullptr);
 
-		void SkinMatrix(std::unique_ptr<float4x4[]>& globalmatrix, std::uint32_t numJoint);
+		void SkinMatrix(float4x4Object * globalmatrix, std::uint32_t numJoint);
 		void Light(const DirectionLight& dl, ID3D11DeviceContext* context = nullptr);
 		void Light(const PointLight& pl, ID3D11DeviceContext* context = nullptr);
 		void Light(const SpotLight& sl, ID3D11DeviceContext* context = nullptr);

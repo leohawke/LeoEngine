@@ -391,50 +391,6 @@ namespace leo
 			aligned_alloc<uint8, 16>().deallocate(typename aligned_alloc<uint8, 16>::pointer(ptr), 1);
 		}
 	};
-
-
-	template<MemoryCategory cate>
-	class DataAllocatedObject
-	{
-	private:
-	public:
-		explicit DataAllocatedObject()
-		{ }
-
-#if 1
-		virtual ~DataAllocatedObject()
-		{ }
-#endif
-
-		void* operator new(size_t sz)
-		{
-			return aligned_alloc<uint8,16>().allocate(sz);
-		}
-			void operator delete(void* ptr)
-		{
-			aligned_alloc<uint8, 16>().deallocate(typename aligned_alloc<uint8, 16>::pointer(ptr), 1);
-		}
-		/// placement operator new
-		void* operator new(size_t sz, void* ptr)
-		{
-			(void)sz;
-			return ptr;
-		}
-
-			void operator delete(void* ptr, void*)
-		{
-			//aligned_alloc<uint8, 16>().deallocate(typename aligned_alloc<uint8, 16>::pointer(ptr), 1);
-		}
-
-		void* operator new[](size_t sz)
-		{
-			return aligned_alloc<uint8, 16>().allocate(sz);
-		}
-			void operator delete[](void* ptr)
-		{
-			aligned_alloc<uint8, 16>().deallocate(typename aligned_alloc<uint8, 16>::pointer(ptr), 1);
-		}
-	};
 	
 
 	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_GENERAL> GeneralAllocatedObject;

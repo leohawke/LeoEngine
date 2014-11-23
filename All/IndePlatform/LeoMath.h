@@ -460,9 +460,7 @@ namespace leo
 		return lhs.min(rhs);
 	}
 
-	typedef DataAllocatedObject<MemoryCategory::MEMCATEGORY_SCENE_CONTROL> float4x4Allocated;
-
-	struct lalignas(16) float4x4 : public float4x4Allocated{
+	struct lalignas(16) float4x4{
 		float4 r[4];
 
 		float& operator()(uint8 row, uint8 col){
@@ -623,6 +621,7 @@ namespace leo
 #endif
 	}
 
+	
 	inline std::array<__m128, 4> load(const float4x4& data){
 		return std::array < __m128, 4 >
 		{

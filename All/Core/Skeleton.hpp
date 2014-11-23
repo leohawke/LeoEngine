@@ -77,8 +77,7 @@ namespace leo{
 		//Mesh end
 
 		//Skeleton begin
-		typedef DataAllocatedObject<MemoryCategory::MEMCATEGORY_SCENE_CONTROL> JointAllocated;
-		struct Joint : public JointAllocated{
+		struct Joint : public GeneralAllocatedObject{
 			//绑定姿势的逆变换
 			float4x4 mInvBindPose;
 			//字符串散列标识符
@@ -145,9 +144,9 @@ namespace leo{
 		//每个动画的播放速率
 		std::map<std::size_t, float> mSpeedPerAni;
 		//蒙皮矩阵
-		std::unique_ptr<float4x4[]> mSkinMatrixs;
+		std::unique_ptr<float4x4Object[]> mSkinMatrixs;
 		std::unique_ptr<SkeletonData::JointPose[]> mLocalPoses;
-		std::unique_ptr<float4x4[]> mGlobalPoses;
+		std::unique_ptr<float4x4Object[]> mGlobalPoses;
 	public:
 		SkeletonInstance(const std::shared_ptr<SkeletonData>& skeData);
 		~SkeletonInstance();

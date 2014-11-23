@@ -39,14 +39,12 @@ namespace leo{
 		mAniIndex = mSkeData->mAnimations.begin()->first;
 		for (auto & a : mSkeData->mAnimaNames)
 			mSpeedPerAni[a] = 1.f;
-		mSkinMatrixs = leo::make_unique<float4x4[]>(mSkeData->mSkeleton.mJointCount);
+		mSkinMatrixs = leo::make_unique<float4x4Object[]>(mSkeData->mSkeleton.mJointCount);
 
 		mLocalPoses = leo::make_unique<SkeletonData::JointPose[]>(mSkeData->mSkeleton.mJointCount);
-		mGlobalPoses = leo::make_unique<float4x4[]>(mSkeData->mSkeleton.mJointCount);
+		mGlobalPoses = leo::make_unique<float4x4Object[]>(mSkeData->mSkeleton.mJointCount);
 	}
 	SkeletonInstance::~SkeletonInstance(){
-		mSkinMatrixs.reset(nullptr);
-		mSkinMatrixs = nullptr;
 	}
 
 
@@ -56,10 +54,10 @@ namespace leo{
 		mAniIndex = mSkeData->mAnimations.begin()->first;
 		for (auto & a : mSkeData->mAnimaNames)
 			mSpeedPerAni[a] = 1.f;
-		mSkinMatrixs = leo::make_unique<float4x4[]>(mSkeData->mSkeleton.mJointCount);
+		mSkinMatrixs = leo::make_unique<float4x4Object[]>(mSkeData->mSkeleton.mJointCount);
 
 		mLocalPoses = leo::make_unique<SkeletonData::JointPose[]>(mSkeData->mSkeleton.mJointCount);
-		mGlobalPoses = leo::make_unique<float4x4[]>(mSkeData->mSkeleton.mJointCount);
+		mGlobalPoses = leo::make_unique<float4x4Object[]>(mSkeData->mSkeleton.mJointCount);
 		return *this;
 	}
 
@@ -124,13 +122,13 @@ namespace leo{
 		//子节点在后面,只需找到父,即可相乘
 		for (auto jointIndex = 1u; jointIndex != mSkeData->mSkeleton.mJointCount; ++jointIndex){
 			auto & joint = mSkeData->mSkeleton.mJoints[jointIndex];
-			auto parentToRoot = load(mGlobalPoses[joint.mParent]);
+			auto parentToRoot = load(static_cast<const float4x4&>(mGlobalPoses[joint.mParent]));
 			auto toParent = mLocalPoses[jointIndex].operator std::array<__m128, 4U>();
 			save(mGlobalPoses[jointIndex], Multiply(toParent, parentToRoot));
 		}
 		for (auto jointIndex = 0u; jointIndex != mSkeData->mSkeleton.mJointCount; ++jointIndex){
 			auto invBindPose = load(mSkeData->mSkeleton.mJoints[jointIndex].mInvBindPose);
-			auto toRoot = load(mGlobalPoses[jointIndex]);
+			auto toRoot = load(static_cast<const float4x4&>(mGlobalPoses[jointIndex]));
 			save(mSkinMatrixs[jointIndex], Multiply(invBindPose, toRoot));
 		}
 	}
@@ -149,7 +147,7 @@ namespace leo{
 		XMMATRIX world = convert(operator std::array<__m128, 4U>());
 		mEffect->WorldMatrix(world);
 		mEffect->WorldViewProjMatrix(world*camera.ViewProj());
-		mEffect->SkinMatrix(mSkinMatrixs,mSkeData->mSkeleton.mJointCount);
+		mEffect->SkinMatrix(mSkinMatrixs.get(),mSkeData->mSkeleton.mJointCount);
 		mEffect->Apply(context);
 
 		for (auto it = mSkeData->mSubSets.cbegin(); it != mSkeData->mSubSets.cend(); ++it)

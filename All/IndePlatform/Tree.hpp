@@ -84,20 +84,20 @@ namespace leo{
 			switch (dire)
 			{ 
 			case 0:
-				result.x = rect.x + result.z / 4;
-				result.y = rect.y + result.w / 4;
+				result.x = rect.x + rect.z / 4;
+				result.y = rect.y + rect.w / 4;
 				break;
 			case 1:
-				result.x = rect.x + result.z / 4;
-				result.y = rect.y - result.w / 4;
+				result.x = rect.x + rect.z / 4;
+				result.y = rect.y - rect.w / 4;
 				break;
 			case 2:
-				result.x = rect.x - result.z / 4;
-				result.y = rect.y + result.w / 4;
+				result.x = rect.x - rect.z / 4;
+				result.y = rect.y + rect.w / 4;
 				break;
 			case 3:
-				result.x = rect.x - result.z / 4;
-				result.y = rect.y - result.w / 4;
+				result.x = rect.x - rect.z / 4;
+				result.y = rect.y - rect.w / 4;
 				break;
 			}
 			return result;
@@ -381,6 +381,7 @@ namespace leo{
 
 				if (!apply(clip_func,node->mRect,args2))
 					continue;
+
 
 				for (auto & leafvalue : node->mLeafValues){
 					if (leafvalue.first != nullptr)

@@ -169,10 +169,10 @@ namespace leo{
 			return true;
 		}
 
-		void SkinMatrix(std::unique_ptr<float4x4[]>& globalmatrix, std::uint32_t numJoint){
+		void SkinMatrix(float4x4Object * globalmatrix , std::uint32_t numJoint){
 			mNumJoint = numJoint;
 			for (auto i = 0u; i != numJoint; ++i){
-				mVertexShaderConstantBufferPerSkin.SkinMatrix[i] = XMMatrixTranspose(convert(load(globalmatrix[i])));
+				mVertexShaderConstantBufferPerSkin.SkinMatrix[i] = XMMatrixTranspose(convert(load(static_cast<const float4x4&>(globalmatrix[i]))));
 			}
 		}
 	private:
@@ -344,7 +344,7 @@ namespace leo{
 			);
 	}
 
-	void EffectSkeleton::SkinMatrix(std::unique_ptr<float4x4[]>& globalmatrix, std::uint32_t numJoint){
+	void EffectSkeleton::SkinMatrix(float4x4Object* globalmatrix, std::uint32_t numJoint){
 		lassume(dynamic_cast<EffectSkeletonDelegate *>(this));
 
 		return ((EffectSkeletonDelegate *)this)->SkinMatrix(globalmatrix, numJoint

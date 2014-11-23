@@ -84,7 +84,15 @@ namespace leo
 		}
 	};
 
+	class float4x4Object : public float4x4, public GeneralAllocatedObject {
+	public:
+		float4x4Object() = default;
 
+		float4x4Object(const float4x4& matrix)
+			:float4x4(matrix)
+		{}
+		~float4x4Object() = default;
+	};
 }
 
 #endif
