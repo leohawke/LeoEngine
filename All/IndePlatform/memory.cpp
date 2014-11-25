@@ -6,6 +6,17 @@
 namespace leo
 {
 
+	GeneralAllocPolicy GeneralAllocatedObject::impl;
+	GeometryAllocPolicy GeometryAllocatedObject::impl;
+	AnimationAllocPolicy AnimationAllocatedObject::impl;
+	SceneCtlAllocPolicy SceneCtlAllocatedObject::impl;
+	SceneObjAllocPolicy SceneObjAllocatedObject::impl;
+	ResourceAllocPolicy ResourceAllocatedObject::impl;
+	ScriptingAllocPolicy ScriptingAllocatedObject::impl;
+	RenderSysAllocPolicy RenderSysAllocatedObject::impl;
+
+	GeneralAllocPolicy DataAllocatedObject<GeneralAllocPolicy>::impl;
+
 
 	struct __memroy_track_struct
 	{

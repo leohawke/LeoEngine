@@ -18,8 +18,7 @@
 #include "..\IndePlatform\memory.hpp"
 namespace leo
 {
-	class SQTObject :public SQT, public GeneralAllocatedObject
-	{
+	class SQTObject :public SQT, public DataAllocatedObject<GeneralAllocPolicy>{
 	public:
 		SQTObject() = default;
 
@@ -84,7 +83,7 @@ namespace leo
 		}
 	};
 
-	class float4x4Object : public float4x4, public GeneralAllocatedObject {
+	class float4x4Object : public float4x4, public DataAllocatedObject<GeneralAllocPolicy> {
 	public:
 		float4x4Object() = default;
 

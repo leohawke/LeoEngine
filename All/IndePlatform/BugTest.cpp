@@ -1,4 +1,6 @@
+
 #define lalignas(_n) _declspec(align(_n))
+//#define lalignas(_n) alignas(_n)
 #include <memory>
 #include <stdexcept>
 #include <cstdint>
@@ -178,7 +180,7 @@ namespace leo
 	};
 
 
-	template<MemoryCategory cate>
+	template<typename T,MemoryCategory cate>
 	class AllocatedObject
 	{
 	private:
@@ -195,7 +197,7 @@ namespace leo
 		}
 			void operator delete(void* ptr)
 		{
-			aligned_alloc<uint8, 16>().deallocate(typename aligned_alloc<uint8, 16>::pointer(ptr), 1);
+			aligned_alloc<T, 16>().deallocate(typename aligned_alloc<T, 16>::pointer(ptr), 1);
 		}
 		/// placement operator new
 		void* operator new(size_t sz, void* ptr)
@@ -211,67 +213,18 @@ namespace leo
 
 		void* operator new[](size_t sz)
 		{
-			return aligned_alloc<uint8, 16>().allocate(sz);
+			return aligned_alloc<T, 16>().allocate(sz);
 		}
-			void operator delete[](void* ptr)
+		void operator delete[](void* ptr)
 		{
-			aligned_alloc<uint8, 16>().deallocate(typename aligned_alloc<uint8, 16>::pointer(ptr), 1);
+			aligned_alloc<T, 16>().deallocate(typename aligned_alloc<T, 16>::pointer(ptr), 1);
 		}
 	};
 
 
-	template<MemoryCategory cate>
-	class DataAllocatedObject
-	{
-	private:
-	public:
-		explicit DataAllocatedObject()
-		{ }
 
-#if 1
-		virtual ~DataAllocatedObject()
-		{ }
-#endif
-
-		void* operator new(size_t sz)
-		{
-			return aligned_alloc<uint8, 16>().allocate(sz);
-		}
-			void operator delete(void* ptr)
-		{
-			aligned_alloc<uint8, 16>().deallocate(typename aligned_alloc<uint8, 16>::pointer(ptr), 1);
-		}
-		/// placement operator new
-		void* operator new(size_t sz, void* ptr)
-		{
-			(void)sz;
-			return ptr;
-		}
-
-			void operator delete(void* ptr, void*)
-		{
-			//aligned_alloc<uint8, 16>().deallocate(typename aligned_alloc<uint8, 16>::pointer(ptr), 1);
-		}
-
-		void* operator new[](size_t sz)
-		{
-			return aligned_alloc<uint8, 16>().allocate(sz);
-		}
-			void operator delete[](void* ptr)
-		{
-			aligned_alloc<uint8, 16>().deallocate(typename aligned_alloc<uint8, 16>::pointer(ptr), 1);
-		}
-	};
-
-
-	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_GENERAL> GeneralAllocatedObject;
-	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_GEOMETRY> GeometryAllocatedObject;
-	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_ANIMATION> AnimationAllocatedObject;
-	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_SCENE_CONTROL> SceneCtlAllocatedObject;
-	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_SCENE_OBJECTS> SceneObjAllocatedObject;
-	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_RESOURCE> ResourceAllocatedObject;
-	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_SCRIPTING> ScriptingAllocatedObject;
-	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_RENDERSYS> RenderSysAllocatedObject;
+	template<typename T>
+	using  GeneralAllocatedObject =  AllocatedObject<T,MemoryCategory::MEMCATEGORY_GENERAL>;
 
 }
 
@@ -296,8 +249,7 @@ struct lalignas(16) float4
 	{}
 };
 
-typedef DataAllocatedObject<MemoryCategory::MEMCATEGORY_SCENE_CONTROL> float4x4Allocated;
-struct lalignas(16) float4x4 : public float4x4Allocated{
+struct lalignas(16) float4x4 {
 	float4 r[4];
 
 
@@ -308,22 +260,24 @@ struct SQT {
 	float4 y;
 };
 
-class SQTObject :public SQT, public GeneralAllocatedObject
+class SQTObject :public SQT, public GeneralAllocatedObject<SQT>
 {
 };
 
 
 class SkeletonInstance : public SQTObject {
 
-	std::unique_ptr<float4x4[]> mSkinMatrixs;
+	std::unique_ptr<float4x4> mSkinMatrixs;
 
 public:
 	SkeletonInstance() {
-		mSkinMatrixs = make_unique<float4x4[]>(58);
+		mSkinMatrixs = make_unique<float4x4>();
 	}
 };
 
 int main() {
-	auto pSke = make_unique<SkeletonInstance[]>(3);
-	pSke.reset(nullptr);
+	auto p = aligned_alloc<float4x4, 16>().allocate(1);
+	auto parray = new float4x4[1];
+	aligned_alloc<float4x4, 16>().deallocate(p, 1);
+	delete[] parray;
 }

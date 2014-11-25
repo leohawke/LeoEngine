@@ -326,6 +326,30 @@ namespace leo
 {
 	//模仿Orge
 
+	//hack从堆上分配内存行为
+	template<typename ALLOC>
+	class AllocPolicy
+	{
+	private:
+		ALLOC _impl;
+	public:
+		inline void * allocate(std::size_t count, const char * file = nullptr, int line = 0, const char* func = 0)
+		{
+			auto p = _impl.allocate(count);
+#if defined LEO_MEMORY_TRACKER
+			__memory_track_record_alloc(p, count, 1, file, line, func);
+#endif
+			return p;
+		}
+		inline void deallocate(void * p, const char * file = nullptr, int line = 0, const char* func = 0)
+		{
+#if defined LEO_MEMORY_TRACKER
+			__memory_track_dealloc_record(p, 1);
+#endif
+			_impl.deallocate(p, 0);
+		}
+	};
+
 	enum class MemoryCategory
 	{
 		/// General purpose
@@ -350,11 +374,83 @@ namespace leo
 		MEMCATEGORY_COUNT = 8
 	};
 
+	template<MemoryCategory cate, int AlignSize>
+	class CateAlloc{
+	public:
+		using value_type = stdex::byte;
 
-	template<MemoryCategory cate>
+		std::size_t max_size() const {
+			return (static_cast<std::size_t>(-1)) / sizeof(value_type);
+		}
+
+		//Todo : loop allocate
+		// The following will be different for each allocator.
+		void* allocate(const size_t n)
+		{
+			// The return value of allocate(0) is unspecified.
+			// aligned_alloc returns NULL in order to avoid depending
+			// on malloc(0)'s implementation-defined behavior
+			// (the implementation can define malloc(0) to return NULL,
+			// in which case the bad_alloc check below would fire).
+			// All allocators can return NULL in this case.
+			if (n == 0)
+			{
+				return nullptr;
+			}
+
+			// All allocators should contain an integer overflow check.
+			// The Standardization Committee recommends that std::length_error
+			// be thrown in case of integer overflow.
+			if (n > max_size())
+			{
+				throw std::length_error("aligned_alloc<T>::allocate() - Integer overflow.");
+			}
+
+			// aligned_alloc wraps allocator<T>.allocate().
+
+			auto size = n *sizeof(value_type) + AlignSize;
+			std::uintptr_t rawAddress = reinterpret_cast<std::uintptr_t>(::new(size));
+			DebugPrintf(L"CateAlloc.allocate:Address: %p,Size: %u,Alignesize: %u\n", rawAddress, size, AlignSize);
+
+			std::uint8_t missalign = AlignSize - (rawAddress&(AlignSize - 1));
+			std::uintptr_t alignAddress = rawAddress + missalign;
+
+			std::uint8_t* storemissalign = (std::uint8_t*)(alignAddress) - 1;
+			*storemissalign = missalign;
+
+			auto pv = reinterpret_cast<pointer>(alignAddress);
+			// Allocators should throw std::bad_alloc in the case of memory allocation failure.
+			if (!pv)
+			{
+				throw std::bad_alloc();
+			}
+			return pv;
+		}
+
+		void deallocate(void* const p, const size_t n)
+		{
+			std::uint8_t adjust = *reinterpret_cast<std::uint8_t*>((std::uintptr_t)p - 1);
+			std::uint8_t* rawAddress = reinterpret_cast<std::uint8_t*>((std::uintptr_t)p - adjust);
+			DebugPrintf(L"CateAlloc.deallocate Adddress: %p,Alignesize: %u\n", rawAddress, AlignSize);
+			::delete(rawAddress);
+		}
+	};
+
+	typedef AllocPolicy<CateAlloc<MemoryCategory::MEMCATEGORY_GENERAL,16>> GeneralAllocPolicy;
+	typedef AllocPolicy<CateAlloc<MemoryCategory::MEMCATEGORY_GEOMETRY,16>> GeometryAllocPolicy;
+	typedef AllocPolicy<CateAlloc<MemoryCategory::MEMCATEGORY_ANIMATION, 16>> AnimationAllocPolicy;
+	typedef AllocPolicy<CateAlloc<MemoryCategory::MEMCATEGORY_SCENE_CONTROL, 16>> SceneCtlAllocPolicy;
+	typedef AllocPolicy<CateAlloc<MemoryCategory::MEMCATEGORY_SCENE_OBJECTS, 16>> SceneObjAllocPolicy;
+	typedef AllocPolicy<CateAlloc<MemoryCategory::MEMCATEGORY_RESOURCE, 16>> ResourceAllocPolicy;
+	typedef AllocPolicy<CateAlloc<MemoryCategory::MEMCATEGORY_SCRIPTING, 16>> ScriptingAllocPolicy;
+	typedef AllocPolicy<CateAlloc<MemoryCategory::MEMCATEGORY_RENDERSYS, 16>> RenderSysAllocPolicy;
+
+
+	template<typename AllocPolice>
 	class AllocatedObject
 	{
 	private:
+		static AllocPolice impl;
 	public:
 		explicit AllocatedObject()
 		{ }
@@ -362,45 +458,139 @@ namespace leo
 		virtual ~AllocatedObject()
 		{ }
 #endif
-		void* operator new(size_t sz)
+		/// operator new, with debug line info
+		void* operator new(size_t sz, const char* file, int line, const char* func)
 		{
-			return aligned_alloc<uint8,16>().allocate(sz);
+			return impl.allocate(sz, file, line, func);
 		}
-		void operator delete(void* ptr)
+
+			void* operator new(size_t sz)
 		{
-			aligned_alloc<uint8, 16>().deallocate(typename aligned_alloc<uint8, 16>::pointer(ptr), 1);
+			return impl.allocate(sz);
 		}
+
 			/// placement operator new
-		void* operator new(size_t sz, void* ptr)
+			void* operator new(size_t sz, void* ptr)
 		{
 			(void)sz;
 			return ptr;
 		}
 
+			/// array operator new, with debug line info
+			void* operator new[](size_t sz, const char* file, int line, const char* func)
+		{
+			return impl.allocate(sz, file, line, func);
+		}
+
+			void* operator new[](size_t sz)
+		{
+			return impl.allocate(sz);
+		}
+
+			void operator delete(void* ptr)
+		{
+			impl.deallocate(ptr);
+		}
+
+		// Corresponding operator for placement delete (second param same as the first)
 		void operator delete(void* ptr, void*)
 		{
-			//aligned_alloc<uint8, 16>().deallocate(typename aligned_alloc<uint8, 16>::pointer(ptr), 1);
+			impl.deallocate(ptr);
 		}
 
-		void* operator new[](size_t sz)
+		// only called if there is an exception in corresponding 'new'
+		void operator delete(void* ptr, const char* file, int line, const char* func)
 		{
-			return aligned_alloc<uint8, 16>().allocate(sz);
+			impl.deallocate(ptr, file, line, func);
 		}
+
 		void operator delete[](void* ptr)
 		{
-			aligned_alloc<uint8, 16>().deallocate(typename aligned_alloc<uint8, 16>::pointer(ptr), 1);
+			impl.deallocate(ptr);
+		}
+
+			void operator delete[](void* ptr, const char*, int, const char*)
+		{
+			impl.deallocate(ptr);
 		}
 	};
-	
 
-	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_GENERAL> GeneralAllocatedObject;
-	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_GEOMETRY> GeometryAllocatedObject;
-	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_ANIMATION> AnimationAllocatedObject;
-	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_SCENE_CONTROL> SceneCtlAllocatedObject;
-	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_SCENE_OBJECTS> SceneObjAllocatedObject;
-	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_RESOURCE> ResourceAllocatedObject;
-	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_SCRIPTING> ScriptingAllocatedObject;
-	typedef AllocatedObject<MemoryCategory::MEMCATEGORY_RENDERSYS> RenderSysAllocatedObject;
+
+	template<typename AllocPolice>
+	class DataAllocatedObject
+	{
+	private:
+		static AllocPolice impl;
+	public:
+		explicit DataAllocatedObject()
+		{ }
+
+		/// operator new, with debug line info
+		void* operator new(size_t sz, const char* file, int line, const char* func)
+		{
+			return impl.allocate(sz, file, line, func);
+		}
+
+			void* operator new(size_t sz)
+		{
+			return impl.allocate(sz);
+		}
+
+			/// placement operator new
+			void* operator new(size_t sz, void* ptr)
+		{
+			(void)sz;
+			return ptr;
+		}
+
+			/// array operator new, with debug line info
+			void* operator new[](size_t sz, const char* file, int line, const char* func)
+		{
+			return impl.allocate(sz, file, line, func);
+		}
+
+			void* operator new[](size_t sz)
+		{
+			return impl.allocate(sz);
+		}
+
+			void operator delete(void* ptr)
+		{
+			impl.deallocate(ptr);
+		}
+
+		// Corresponding operator for placement delete (second param same as the first)
+		void operator delete(void* ptr, void*)
+		{
+			impl.deallocate(ptr);
+		}
+
+		// only called if there is an exception in corresponding 'new'
+		void operator delete(void* ptr, const char* file, int line, const char* func)
+		{
+			impl.deallocate(ptr, file, line, func);
+		}
+
+		void operator delete[](void* ptr)
+		{
+			impl.deallocate(ptr);
+		}
+
+			void operator delete[](void* ptr, const char*, int, const char*)
+		{
+			impl.deallocate(ptr);
+		}
+	};
+
+
+	typedef AllocatedObject<GeneralAllocPolicy> GeneralAllocatedObject;
+	typedef AllocatedObject<GeometryAllocPolicy> GeometryAllocatedObject;
+	typedef AllocatedObject<AnimationAllocPolicy> AnimationAllocatedObject;
+	typedef AllocatedObject<SceneCtlAllocPolicy> SceneCtlAllocatedObject;
+	typedef AllocatedObject<SceneObjAllocPolicy> SceneObjAllocatedObject;
+	typedef AllocatedObject<ResourceAllocPolicy> ResourceAllocatedObject;
+	typedef AllocatedObject<ScriptingAllocPolicy> ScriptingAllocatedObject;
+	typedef AllocatedObject<RenderSysAllocPolicy> RenderSysAllocatedObject;
 
 	typedef ScriptingAllocatedObject    AbstractNodeAlloc;
 	typedef AnimationAllocatedObject    AnimableAlloc;
@@ -451,7 +641,6 @@ namespace leo
 	typedef GeneralAllocatedObject      FileSystemLayerAlloc;
 	typedef GeneralAllocatedObject      StereoDriverAlloc;
 }
-
 
 namespace leo
 {
