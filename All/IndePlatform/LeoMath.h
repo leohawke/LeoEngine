@@ -218,6 +218,13 @@ namespace leo
 	}
 }
 
+
+namespace leo {
+	inline float Lerp(float a, float b, float t) {
+		return a*(1 - t) + b*t;
+	}
+}
+
 //Data Structure And Control Function
 namespace leo
 {

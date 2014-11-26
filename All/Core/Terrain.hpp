@@ -292,19 +292,42 @@ namespace leo
 			//初始化一些东西
 			static auto mScreenSize = DeviceMgr().GetClientSize();
 			static auto mAveChunkNum = static_cast<uint32>((mScreenSize.first*mScreenSize.second) / (MINEDGEPIXEL*3.f*MAXEDGE*MAXEDGE))+3u;
-			std::map < std::pair<uint32, uint32>, std::vector<float>> mMap;
-
+			static std::map < std::pair<uint32, uint32>, std::vector<float>> mMap;
+			static auto mSizePerEDGE = 1.f*mChunkSize / MAXEDGE;
 			auto base = Offset(0, 0);
 			auto slotX = static_cast<uint32>((xz.x - base.x)/mChunkSize);
-			auto slotY = static_cast<uint32>((xz.y - base.y) / -mChunkSize);
-			//由xz算出=>std::pair<uint32, uint32>,寻找之
-			auto which_chunk = [&xz,this](){
-				(mHorChunkNum - 1)*mChunkSize / -2.f
-				return std::pair<uint32, uint32>{ 0,0 };
-			};
-			auto chunk = which_chunk();
+			auto slotY = static_cast<uint32>((base.y - xz.y) /mChunkSize);
+			auto chunk = std::make_pair(slotX,slotY);
 			if (mMap.find(chunk) != mMap.cend()) {
-				//插值高度值
+				auto offset = Offset(slotX, slotY);
+				std::pair<uint32, uint32> mSamples[4];
+				//暂时忽略有可能出现的数值错误,比如位于一个Chunk的边
+				mSamples[0].first = static_cast<uint32>((xz.x - offset.x) / mChunkSize) * MAXEDGE);
+				mSamples[0].second = static_cast<uint32>((offset.y - xz.y) / mChunkSize)*MAXEDGE);
+
+				mSamples[1].first = mSamples[0].first + 1;
+				mSamples[1].second = mSamples[0].second;
+
+				mSamples[2].first = mSamples[0].first;
+				mSamples[2].second = mSamples[0].second + 1;
+
+				mSamples[3].first = mSamples[0].first+1;
+				mSamples[3].second = mSamples[0].second + 1;
+
+				//水平和竖直上的插值
+				auto xt =((xz.x - offset.x) - mSamples[0].first*mSizePerEDGE)/mSizePerEDGE;
+				auto yt = ((offset.y-xz.y) - mSamples[0].second*mSizePerEDGE) / mSizePerEDGE;
+
+				return Lerp(
+					Lerp(
+						mMap[chunk][mSamples[0].second*MAXEDGE+mSamples[0].first], 
+						mMap[chunk][mSamples[1].second*MAXEDGE + mSamples[1].first],
+						xt),
+						Lerp(
+						mMap[chunk][mSamples[2].second*MAXEDGE + mSamples[2].first],
+						mMap[chunk][mSamples[3].second*MAXEDGE + mSamples[3].first],
+						xt),
+					yt);
 			}
 			else {
 				if (mMap.size() > mAveChunkNum)
