@@ -76,8 +76,7 @@ namespace leo
 			{
 				for (auto slotY = 0; slotY != mVerChunkNum; ++slotY)
 				{
-					float2 worldoffset{ (mHorChunkNum - 1)*mChunkSize / -2.f + slotX*mChunkSize, +(mVerChunkNum - 1)*mChunkSize / 2 - slotY*mChunkSize };
-					mChunksQuadTree.Insert(Chunk(slotX, slotY), worldoffset);
+					mChunksQuadTree.Insert(Chunk(slotX, slotY), Offset(slotX,slotY));
 				}
 			}
 			//Create VertexBuffer
@@ -143,7 +142,6 @@ namespace leo
 					slotY += powdelta;
 				}
 				mIndexInfo[slotLod].mCount = mIndexs.size() - mIndexInfo[slotLod].mOffset;
-#if 1
 				mIndexInfo[slotLod].mCrackOffset[(uint8)DIRECTION_2D_TYPE::DIRECTION_LEFT] = mIndexs.size();
 				if (slotLod != MAXLOD)
 				{
@@ -211,9 +209,7 @@ namespace leo
 					}
 				}
 				mIndexInfo[slotLod].mCrackCount[(uint8)DIRECTION_2D_TYPE::DIRECTION_BOTTOM] = mIndexs.size() - mIndexInfo[slotLod].mCrackOffset[(uint8)DIRECTION_2D_TYPE::DIRECTION_BOTTOM];
-#endif
 			}
-			//assert(mIndexCount == mIndexs.size());
 			try {
 				CD3D11_BUFFER_DESC ibDesc(sizeof(std::uint32_t)*mIndexs.size(), D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_IMMUTABLE);
 				D3D11_SUBRESOURCE_DATA ibDataDesc = { mIndexs.data(), 0, 0 };
@@ -221,7 +217,7 @@ namespace leo
 				dxcall(device->CreateBuffer(&ibDesc, &ibDataDesc, &mCommonIndexBuffer));
 			}
 			Catch_DX_Exception
-				leo::TextureMgr tm;
+			leo::TextureMgr tm;
 			mHeightMap = tm.LoadTextureSRV(mTerrainFileHeader.mHeightMap);
 
 			mWeightMap = tm.LoadTextureSRV(L"Resource\\weight.jpg");
@@ -243,10 +239,6 @@ namespace leo
 	public:
 		void Render(ID3D11DeviceContext* context, const Camera& camera)
 		{
-			auto topleft = load(float3((mHorChunkNum)*mChunkSize / -2.f, 0, +(mVerChunkNum)*mChunkSize / 2));
-			auto topright = load(float3((mHorChunkNum - 2)*mChunkSize / -2.f, 0, +(mVerChunkNum)*mChunkSize / 2));
-			auto buttomleft = load(float3((mHorChunkNum)*mChunkSize / -2.f, 0, +(mVerChunkNum - 2)*mChunkSize / 2));
-
 			context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			UINT strides[] = { sizeof(Terrain::Vertex) };
 			UINT offsets[] = { 0 };
@@ -270,25 +262,12 @@ namespace leo
 				auto slotX = chunk->mSlotX;
 				auto slotY = chunk->mSlotY;
 				auto offset = load(float4(slotX*mChunkSize, 0, slotY*-mChunkSize, 1.f));
-				auto chunkIndex = slotY*mHorChunkNum + slotX;
 
 				auto lodlevel = chunk->mLodLevel = DetermineLod(topleft + offset, topright + offset, camera.View(), camera.Proj());
 
-				float2 worldoffset((mHorChunkNum - 1)*mChunkSize / -2.f + slotX*mChunkSize, +(mVerChunkNum - 1)*mChunkSize / 2 - slotY*mChunkSize);
-				mEffect->WorldOffset(worldoffset, context);
+				mEffect->WorldOffset(Offset(slotX,slotY), context);
 
 				context->DrawIndexed(mIndexInfo[lodlevel].mCount, mIndexInfo[lodlevel].mOffset, 0);
-			}
-
-
-			for (auto chunk : mNeedDrawChunks)
-			{
-				auto slotX = chunk->mSlotX;
-				auto slotY = chunk->mSlotY;
-				//auto offset = load(float3(slotX*mChunkSize, 0, -slotY*mChunkSize));
-				auto offset = load(float4(1.f*slotX*mChunkSize, 0,-1.f*slotY*mChunkSize, 1.f));
-				float2 worldoffset((mHorChunkNum - 1)*mChunkSize / -2.f + slotX*mChunkSize, +(mVerChunkNum - 1)*mChunkSize / 2 - slotY*mChunkSize);
-				mEffect->WorldOffset(worldoffset, context);
 
 				if (slotX > 0)//Left
 				{
@@ -307,7 +286,31 @@ namespace leo
 					DrawCrack(*chunk, Chunk(slotX, slotY + 1), DIRECTION_2D_TYPE::DIRECTION_BOTTOM, context);
 				}
 			}
+		}
 
+		float GetHeight(const float2& xz) const{
+			//初始化一些东西
+			static auto mScreenSize = DeviceMgr().GetClientSize();
+			static auto mAveChunkNum = static_cast<uint32>((mScreenSize.first*mScreenSize.second) / (MINEDGEPIXEL*3.f*MAXEDGE*MAXEDGE))+3u;
+			std::map < std::pair<uint32, uint32>, std::vector<float>> mMap;
+
+			auto base = Offset(0, 0);
+			auto slotX = static_cast<uint32>((xz.x - base.x)/mChunkSize);
+			auto slotY = static_cast<uint32>((xz.y - base.y) / -mChunkSize);
+			//由xz算出=>std::pair<uint32, uint32>,寻找之
+			auto which_chunk = [&xz,this](){
+				(mHorChunkNum - 1)*mChunkSize / -2.f
+				return std::pair<uint32, uint32>{ 0,0 };
+			};
+			auto chunk = which_chunk();
+			if (mMap.find(chunk) != mMap.cend()) {
+				//插值高度值
+			}
+			else {
+				if (mMap.size() > mAveChunkNum)
+					mMap.erase(mMap.begin());
+				//流输出插入
+			}
 		}
 	private:
 		struct Vertex
@@ -371,6 +374,8 @@ namespace leo
 
 		QuadTree<Chunk> mChunksQuadTree;
 		std::vector<Chunk*> mNeedDrawChunks;
+
+		std::vector<float3, aligned_alloc<float3, 16>> mVersInfo;
 	private:
 #if 0
 		uint8 ClipToScreenSpaceLod(XMVECTOR clip0, XMVECTOR clip1)
@@ -498,6 +503,10 @@ namespace leo
 				clip_function,
 				std::make_tuple(std::cref(camera))
 				);
+		}
+
+		float2 Offset(uint32 slotX, uint32 slotY) {
+			return float2((mHorChunkNum - 1)*mChunkSize / -2.f + slotX*mChunkSize, +(mVerChunkNum - 1)*mChunkSize / 2 - slotY*mChunkSize);
 		}
 	};
 }
