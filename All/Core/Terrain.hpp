@@ -97,6 +97,12 @@ namespace leo
 				D3D11_SUBRESOURCE_DATA vbDataDesc = { vbDataDesc.pSysMem = mVertexs.data(), 0, 0 };
 
 				dxcall(device->CreateBuffer(&vbDesc, &vbDataDesc, &mCommonVertexBuffer));
+
+				CD3D11_BUFFER_DESC sovbDesc(sizeof(float)*(MAXEDGE + 1)*(MAXEDGE + 1), D3D11_BIND_STREAM_OUTPUT, D3D11_USAGE_STAGING);
+				dxcall(device->CreateBuffer(&sovbDesc, nullptr, &mSOTargetBuffer));
+
+				CD3D11_BUFFER_DESC readvbDesc(sizeof(float)*(MAXEDGE + 1)*(MAXEDGE + 1), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_READ);
+				dxcall(device->CreateBuffer(&readvbDesc, nullptr, &mReadBuffer));
 			}
 			Catch_DX_Exception
 
@@ -320,12 +326,12 @@ namespace leo
 
 				return Lerp(
 					Lerp(
-						mMap[chunk][mSamples[0].second*MAXEDGE+mSamples[0].first], 
-						mMap[chunk][mSamples[1].second*MAXEDGE + mSamples[1].first],
+						mMap[chunk][mSamples[0].second*(MAXEDGE+1)+mSamples[0].first], 
+						mMap[chunk][mSamples[1].second*(MAXEDGE + 1) + mSamples[1].first],
 						xt),
 						Lerp(
-						mMap[chunk][mSamples[2].second*MAXEDGE + mSamples[2].first],
-						mMap[chunk][mSamples[3].second*MAXEDGE + mSamples[3].first],
+						mMap[chunk][mSamples[2].second*(MAXEDGE + 1) + mSamples[2].first],
+						mMap[chunk][mSamples[3].second*(MAXEDGE + 1) + mSamples[3].first],
 						xt),
 					yt);
 			}
@@ -381,9 +387,11 @@ namespace leo
 
 		ID3D11ShaderResourceView* mWeightMap;
 		ID3D11ShaderResourceView* mMatArrayMap;
-		ID3D11Buffer* mCommonVertexBuffer;
-		ID3D11Buffer* mCommonIndexBuffer;
+		ID3D11Buffer* mCommonVertexBuffer = nullptr;
+		ID3D11Buffer* mCommonIndexBuffer = nullptr;
 
+		ID3D11Buffer* mSOTargetBuffer = nullptr;
+		ID3D11Buffer* mReadBuffer = nullptr;
 		struct Index
 		{
 			std::uint32_t mOffset;
