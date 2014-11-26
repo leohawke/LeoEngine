@@ -409,7 +409,7 @@ namespace leo
 			// aligned_alloc wraps allocator<T>.allocate().
 
 			auto size = n *sizeof(value_type) + AlignSize;
-			std::uintptr_t rawAddress = reinterpret_cast<std::uintptr_t>(::new(size));
+			std::uintptr_t rawAddress = reinterpret_cast<std::uintptr_t>(::operator new(size));
 			DebugPrintf(L"CateAlloc.allocate:Address: %p,Size: %u,Alignesize: %u\n", rawAddress, size, AlignSize);
 
 			std::uint8_t missalign = AlignSize - (rawAddress&(AlignSize - 1));
@@ -418,7 +418,7 @@ namespace leo
 			std::uint8_t* storemissalign = (std::uint8_t*)(alignAddress) - 1;
 			*storemissalign = missalign;
 
-			auto pv = reinterpret_cast<pointer>(alignAddress);
+			auto pv = reinterpret_cast<void*>(alignAddress);
 			// Allocators should throw std::bad_alloc in the case of memory allocation failure.
 			if (!pv)
 			{
