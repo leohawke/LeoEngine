@@ -140,6 +140,7 @@ namespace leo{
 		std::size_t  mAniIndex;
 		//标准时间点(range[0.f,1.f])
 		float mNorT;
+		bool mPlayAni;
 		float mElapsed = clock::GameClock::Now<>();
 		//每个动画的播放速率
 		std::map<std::size_t, float> mSpeedPerAni;
@@ -160,10 +161,15 @@ namespace leo{
 			mSpeedPerAni[mAniIndex] = speed;
  		}
 
+		void BeginCurrentAni();
+		void EndCurrentAni();
+
 		std::vector<const wchar_t*> GetAniNames() const;
 
 		void Update();
 		void Render(const Camera& camera);
+	private:
+		void ReCurrAniBindPose();
 	};
 
 	

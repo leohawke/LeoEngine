@@ -35,7 +35,7 @@ namespace leo{
 	}
 
 	SkeletonInstance::SkeletonInstance(const std::shared_ptr<SkeletonData>& skeData)
-		:mSkeData(skeData),mNorT(0.f) {
+		:mSkeData(skeData),mNorT(0.f),mPlayAni(false) {
 		mAniIndex = mSkeData->mAnimations.begin()->first;
 		for (auto & a : mSkeData->mAnimaNames)
 			mSpeedPerAni[a] = 1.f;
@@ -43,12 +43,14 @@ namespace leo{
 
 		mLocalPoses = leo::make_unique<SkeletonData::JointPose[]>(mSkeData->mSkeleton.mJointCount);
 		mGlobalPoses = leo::make_unique<float4x4Object[]>(mSkeData->mSkeleton.mJointCount);
+		ReCurrAniBindPose();
 	}
 	SkeletonInstance::~SkeletonInstance(){
 	}
 
 
 	SkeletonInstance& SkeletonInstance::operator=(const std::shared_ptr<SkeletonData>& skeData){
+		mPlayAni = false;
 		mSkeData = skeData;
 		mNorT = (0.f);
 		mAniIndex = mSkeData->mAnimations.begin()->first;
@@ -58,6 +60,7 @@ namespace leo{
 
 		mLocalPoses = leo::make_unique<SkeletonData::JointPose[]>(mSkeData->mSkeleton.mJointCount);
 		mGlobalPoses = leo::make_unique<float4x4Object[]>(mSkeData->mSkeleton.mJointCount);
+		ReCurrAniBindPose();
 		return *this;
 	}
 
@@ -77,8 +80,27 @@ namespace leo{
 	}
 
 
+	void SkeletonInstance::BeginCurrentAni() {
+		mPlayAni = true;
+	}
+	void SkeletonInstance::EndCurrentAni() {
+		mPlayAni = false;
+		ReCurrAniBindPose();
+	}
+
+	void SkeletonInstance::ReCurrAniBindPose() {
+		mNorT = 0.f;
+		mElapsed = clock::GameClock::Now<>();
+		bool mPrePlayeState = true;
+		std::swap(mPrePlayeState, mPlayAni);
+		Update();
+		std::swap(mPrePlayeState, mPlayAni);
+	}
+
 	//do many thing
 	void SkeletonInstance::Update(){
+		if (!mPlayAni)
+			return;
 		auto & mClip = mSkeData->mAnimations[mAniIndex];
 		if (mNorT == 1.f)
 			if (mClip.mLoop)

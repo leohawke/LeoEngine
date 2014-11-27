@@ -81,6 +81,10 @@ namespace leo
 		{
 			Rotation(EulerAngleToQuaternion(float3(0.f, 0.f,z)));
 		}
+
+		inline const float3&  Pos() const {
+			return t;
+		}
 	};
 
 	class float4x4Object : public float4x4, public DataAllocatedObject<GeneralAllocPolicy> {

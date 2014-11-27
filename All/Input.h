@@ -62,6 +62,45 @@ namespace leo
 			//return GetAsyncKeyState(key) & 0x8000;
 		}
 
+
+		class KeyDown {
+			std::uint8_t m_key;
+			std::function<void()> m_callback;
+		public:
+			KeyDown(std::uint8_t key, const std::function<void()>& callback)
+				:m_key(key), m_callback(callback) {
+
+			}
+
+			void Update()
+			{
+				if(KeyFallingEdge(m_key))
+				{
+					std::thread t(m_callback);
+					t.detach();
+				}
+			}
+		};
+
+		class KeyUp {
+			std::uint8_t m_key;
+			std::function<void()> m_callback;
+		public:
+			KeyUp(std::uint8_t key, const std::function<void()>& callback)
+				:m_key(key), m_callback(callback) {
+
+			}
+
+			void Update()
+			{
+				if (KeyRisingEdge(m_key))
+				{
+					std::thread t(m_callback);
+					t.detach();
+				}
+			}
+		};
+
 		//快速击打某按键(持续)
 		class KeyTapDetector : public KeyAction
 		{

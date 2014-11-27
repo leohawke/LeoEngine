@@ -25,6 +25,7 @@
 #include <ShaderMgr.h>
 #include <RenderStates.hpp>
 #include <exception.hpp>
+#include <Input.h>
 
 
 #include "Axis.hpp"
@@ -285,7 +286,7 @@ void BuildRes()
 
 	using leo::float3;
 
-	auto Eye = float3(0.f,5.f,-5.f);
+	auto Eye = float3(0.f,10.f,-10.f);
 	auto At = float3(0.f,0.f,0.f);
 	auto Up = float3(0.f,1.f, 0.f);
 
@@ -349,7 +350,7 @@ void BuildRes()
 	pSkeInstances[1] = skeData;
 	pSkeInstances[2] = skeData;
 
-	pSkeInstances[0].Scale(0.05f);
+	pSkeInstances[0].Scale(0.1f);
 	pSkeInstances[1].Scale(0.05f);
 	pSkeInstances[2].Scale(0.05f);
 
@@ -357,9 +358,6 @@ void BuildRes()
 	pSkeInstances[1].Translation(float3(3.f, 2.f, 1.f));
 	pSkeInstances[2].Translation(float3(-5.f,1.f,5.f));
 
-	pSkeInstances[0].SetCurrentAniSpeed(0.25f);
-	pSkeInstances[1].SetCurrentAniSpeed(0.5f);
-	pSkeInstances[2].SetCurrentAniSpeed(0.75f);
 
 
 	//leo::XMMATRIX modelRot = leo::XMMatrixRotationY(leo::LM_PI);
@@ -376,17 +374,19 @@ void BuildRes()
 void Update(){
 	while (renderThreadRun)
 	{
-		if (GetAsyncKeyState('W') & 0X8000)
-			pCamera->Walk(+0.05f);
+		auto mBegin = leo::clock::now();
+
+		if (GetAsyncKeyState('W') & 0X8000) 
+			pSkeInstances[0].Translation(leo::float3(+0.05f, 0.f, 0.f));
 
 		if (GetAsyncKeyState('S') & 0X8000)
-			pCamera->Walk(-0.05f);
+			pSkeInstances[0].Translation(leo::float3(-0.05f, 0.f, 0.f));
 
 		if (GetAsyncKeyState('A') & 0X8000)
-			pCamera->Strafe(-0.05f);
+			pSkeInstances[0].Translation(leo::float3(+0.f, 0.f, +0.05f));
 
 		if (GetAsyncKeyState('D') & 0X8000)
-			pCamera->Strafe(+0.05f);
+			pSkeInstances[0].Translation(leo::float3(+0.00f, 0.f, -0.05f));
 
 		pCamera->UpdateViewMatrix();
 
@@ -397,6 +397,24 @@ void Update(){
 		pSkeInstances[0].Update();
 		pSkeInstances[1].Update();
 		pSkeInstances[2].Update();
+
+		static const auto begin_call_back = [&]() {
+			pSkeInstances[0].BeginCurrentAni();
+		};
+
+		static const auto end_call_back = [&]() {
+			pSkeInstances[0].EndCurrentAni();
+		};
+
+		static leo::win::KeyDown mBeignEvent('W', begin_call_back);
+		static leo::win::KeyUp mEndEvent('W', end_call_back);
+
+		mBeignEvent.Update();
+		mEndEvent.Update();
+
+		auto mRunTime =leo::clock::duration_to<>(leo::clock::now()-mBegin);
+		if (mRunTime < 1 / 30.f)
+			std::this_thread::sleep_for(leo::clock::to_duration<>(1 / 30.f - mRunTime));
 	}
 }
 
@@ -424,20 +442,21 @@ void Render()
 
 		
 
-		pSky->Render(devicecontext, *pCamera);
+		//pSky->Render(devicecontext, *pCamera);
+
+		auto& pos = pSkeInstances[0].Pos();
+		auto y = pTerrain->GetHeight(leo::float2(pos.x, pos.z)) - pos.y;
+		//pSkeInstances[0].Translation(leo::float3(0.f,y, 0.f));
+
 		pSkeInstances[0].Render(*pCamera);
 
-		pSkeInstances[1].Render(*pCamera);
-
-		pSkeInstances[2].Render(*pCamera);
-
-		//pSkeInstances[1].Update();
 		//pSkeInstances[1].Render(*pCamera);
-		//pSkeInstances[2].Update();
-		//pSkeInstances[2].Render(*pCamera);
-		pTerrain->Render(devicecontext, *pCamera);
 
-		pTerrain->GetHeight(leo::float2(0.f, 0.f));
+		//pSkeInstances[2].Render(*pCamera);
+
+
+		//pTerrain->Render(devicecontext, *pCamera);
+
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 

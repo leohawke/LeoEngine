@@ -234,6 +234,8 @@ namespace leo
 		{
 			leo::win::ReleaseCOM(mCommonVertexBuffer);
 			leo::win::ReleaseCOM(mCommonIndexBuffer);
+			leo::win::ReleaseCOM(mSOTargetBuffer);
+			leo::win::ReleaseCOM(mReadBuffer);
 		}
 #ifdef LB_IMPL_MSCPP
 		static_assert(leo::constexprmath::pow<2, MAXLOD>::value < MAXEDGE, "The n LOD's edgevertex is 2 times (n+1) LOD's edgevertex");
