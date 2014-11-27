@@ -237,6 +237,9 @@
     <ClCompile Include="IndePlatform\BugTest.cpp">
       <Filter>IndePlatform\WinSource</Filter>
     </ClCompile>
+    <ClCompile Include="Core\EffectTerrainSO.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.hpp">
@@ -485,6 +488,9 @@
     <ClInclude Include="Core\FileSearch.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Core\EffectTerrainSO.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">
@@ -557,6 +563,12 @@
     </FxCompile>
     <FxCompile Include="Shader\SkinPS.hlsl">
       <Filter>Shader\HLSL\Skin</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\TerrainSOVS.hlsl">
+      <Filter>Shader\HLSL\Terrain</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\TerrainSOGS.hlsl">
+      <Filter>Shader\HLSL\Terrain</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

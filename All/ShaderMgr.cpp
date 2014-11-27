@@ -139,6 +139,32 @@ namespace leo
 		return shader;
 	}
 	
+	ID3D11GeometryShader* ShaderMgr::CreateGeometryShaderWithSO(const ShaderBlob& blob, const D3D11_SO_DECLARATION_ENTRY * pSODecl, UINT NumEntries, const UINT* pBufferStrides, UINT NumStrides, UINT RasterizedSteam, ID3D11ClassLinkage* linkage) {
+		ID3D11GeometryShader* shader = 0;
+
+		auto sid = blob.GetBufferSid();
+		// Does it already exist?
+		if (mShaders.find(sid) != mShaders.end())
+		{
+			auto & shaderelem = mShaders[sid];
+			shader = shaderelem.geometry_shader;
+			if (shaderelem.type != D3D11_SHADER_TYPE::D3D11_GEOMETRY_SHADER)
+				Raise_Error_Exception(ERROR_INVALID_PARAMETER, "内存里的值错误");
+		}
+		else
+		{
+			auto size = blob.GetBufferSize();
+			auto pointer = blob.GetBufferPointer();
+			global::globalD3DDevice->CreateGeometryShaderWithStreamOutput(pointer, size,pSODecl,NumEntries,pBufferStrides,NumStrides,RasterizedSteam,linkage, &shader);
+			Shader shaderelem;
+			shaderelem.geometry_shader = shader;
+			shaderelem.type = D3D11_SHADER_TYPE::D3D11_GEOMETRY_SHADER;
+			mShaders[sid] = shaderelem;
+		}
+		return shader;
+	}
+
+
 	ID3D11HullShader*	ShaderMgr::CreateHullShader(const ShaderBlob& blob, ID3D11ClassLinkage* linkage)
 	{
 		ID3D11HullShader* shader = 0;

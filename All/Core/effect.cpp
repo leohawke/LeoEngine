@@ -966,7 +966,7 @@ namespace leo
 		context->OMSetDepthStencilState(pDepthStencilState, StencilRef);
 	}
 
-	inline void STDMETHODCALLTYPE context_wrapper::SOSetTargets(
+		void STDMETHODCALLTYPE context_wrapper::SOSetTargets(
 		/* [annotation] */
 		_In_range_(0, D3D11_SO_BUFFER_SLOT_COUNT)  UINT NumBuffers,
 		/* [annotation] */

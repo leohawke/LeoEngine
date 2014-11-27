@@ -301,6 +301,7 @@ void BuildRes()
 
 	auto& pEffect =  leo::EffectNormalMap::GetInstance(leo::DeviceMgr().GetDevice());
 	leo::EffectTerrain::GetInstance(leo::DeviceMgr().GetDevice());
+	leo::EffectTerrainSO::GetInstance(leo::DeviceMgr().GetDevice());
 	
 
 	leo::DirectionLight dirlight;
@@ -359,6 +360,8 @@ void BuildRes()
 	pSkeInstances[0].SetCurrentAniSpeed(0.25f);
 	pSkeInstances[1].SetCurrentAniSpeed(0.5f);
 	pSkeInstances[2].SetCurrentAniSpeed(0.75f);
+
+
 	//leo::XMMATRIX modelRot = leo::XMMatrixRotationY(leo::LM_PI);
 	//leo::float4 quaternion;
 	//save(quaternion,leo::XMQuaternionRotationMatrix(modelRot));
@@ -433,6 +436,8 @@ void Render()
 		//pSkeInstances[2].Update();
 		//pSkeInstances[2].Render(*pCamera);
 		pTerrain->Render(devicecontext, *pCamera);
+
+		pTerrain->GetHeight(leo::float2(0.f, 0.f));
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 

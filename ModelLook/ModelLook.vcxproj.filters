@@ -167,6 +167,9 @@
     <ClCompile Include="..\LeoScheme\Sexp\Sexp.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\Core\EffectTerrainSO.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\All\IndePlatform\algorithm.hpp">

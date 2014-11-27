@@ -173,6 +173,7 @@
     <ClCompile Include="..\All\Core\EffectLine.cpp" />
     <ClCompile Include="..\All\Core\EffectSkeleton.cpp" />
     <ClCompile Include="..\All\Core\EffectTerrain.cpp" />
+    <ClCompile Include="..\All\Core\EffectTerrainSO.cpp" />
     <ClCompile Include="..\All\Core\EngineConfig.cpp" />
     <ClCompile Include="..\All\Core\FileSearch.cpp" />
     <ClCompile Include="..\All\Core\Geometry.cpp" />

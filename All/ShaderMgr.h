@@ -67,6 +67,9 @@ namespace leo
 
 		ID3D11PixelShader*	CreatePixelShader(const ShaderBlob& blob, ID3D11ClassLinkage* linkage = nullptr);
 		ID3D11GeometryShader* CreateGeometryShader(const ShaderBlob& blob, ID3D11ClassLinkage* linkage = nullptr);
+
+		ID3D11GeometryShader* CreateGeometryShaderWithSO(const ShaderBlob& blob, const D3D11_SO_DECLARATION_ENTRY * pSODecl, UINT NumEntries, const UINT* pBufferStrides, UINT NumStrides, UINT RasterizedSteam, ID3D11ClassLinkage* linkage = nullptr);
+		
 		ID3D11HullShader*	CreateHullShader(const ShaderBlob& blob, ID3D11ClassLinkage* linkage = nullptr);
 		ID3D11DomainShader* CreateDomainShader(const ShaderBlob& blob, ID3D11ClassLinkage* linkage = nullptr);
 		ID3D11ComputeShader* CreateComputeShader(const ShaderBlob& blob, ID3D11ClassLinkage* linkage = nullptr);

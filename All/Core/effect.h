@@ -338,7 +338,7 @@ namespace leo
 			/* [annotation] */
 			_In_  UINT StencilRef);
 
-		inline void STDMETHODCALLTYPE SOSetTargets(
+		void STDMETHODCALLTYPE SOSetTargets(
 			/* [annotation] */
 			_In_range_(0, D3D11_SO_BUFFER_SLOT_COUNT)  UINT NumBuffers,
 			/* [annotation] */

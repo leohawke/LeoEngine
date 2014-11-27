@@ -30,6 +30,7 @@
 #include "..\TextureMgr.h"
 #include "..\ShaderMgr.h"
 #include "EffectTerrain.hpp"
+#include "EffectTerrainSO.hpp"
 #include "..\file.hpp"
 #include <vector>
 
@@ -98,10 +99,10 @@ namespace leo
 
 				dxcall(device->CreateBuffer(&vbDesc, &vbDataDesc, &mCommonVertexBuffer));
 
-				CD3D11_BUFFER_DESC sovbDesc(sizeof(float)*(MAXEDGE + 1)*(MAXEDGE + 1), D3D11_BIND_STREAM_OUTPUT, D3D11_USAGE_STAGING);
+				CD3D11_BUFFER_DESC sovbDesc(8*(MAXEDGE + 1)*(MAXEDGE + 1), D3D11_BIND_STREAM_OUTPUT, D3D11_USAGE_DEFAULT);
 				dxcall(device->CreateBuffer(&sovbDesc, nullptr, &mSOTargetBuffer));
 
-				CD3D11_BUFFER_DESC readvbDesc(sizeof(float)*(MAXEDGE + 1)*(MAXEDGE + 1), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_READ);
+				CD3D11_BUFFER_DESC readvbDesc(8*(MAXEDGE + 1)*(MAXEDGE + 1),0, D3D11_USAGE_STAGING, D3D11_CPU_ACCESS_READ);
 				dxcall(device->CreateBuffer(&readvbDesc, nullptr, &mReadBuffer));
 			}
 			Catch_DX_Exception
@@ -245,6 +246,7 @@ namespace leo
 	public:
 		void Render(ID3D11DeviceContext* context, const Camera& camera)
 		{
+
 			context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			UINT strides[] = { sizeof(Terrain::Vertex) };
 			UINT offsets[] = { 0 };
@@ -268,6 +270,10 @@ namespace leo
 				auto slotX = chunk->mSlotX;
 				auto slotY = chunk->mSlotY;
 				auto offset = load(float4(slotX*mChunkSize, 0, slotY*-mChunkSize, 1.f));
+
+				auto topleft = load(float3((mHorChunkNum)*mChunkSize / -2.f, 0, +(mVerChunkNum)*mChunkSize / 2));
+				auto topright = load(float3((mHorChunkNum - 2)*mChunkSize / -2.f, 0, +(mVerChunkNum)*mChunkSize / 2));
+				auto buttomleft = load(float3((mHorChunkNum)*mChunkSize / -2.f, 0, +(mVerChunkNum - 2)*mChunkSize / 2));
 
 				auto lodlevel = chunk->mLodLevel = DetermineLod(topleft + offset, topright + offset, camera.View(), camera.Proj());
 
@@ -294,6 +300,9 @@ namespace leo
 			}
 		}
 
+		
+
+
 		float GetHeight(const float2& xz) const{
 			//初始化一些东西
 			static auto mScreenSize = DeviceMgr().GetClientSize();
@@ -301,47 +310,110 @@ namespace leo
 			static std::map < std::pair<uint32, uint32>, std::vector<float>> mMap;
 			static auto mSizePerEDGE = 1.f*mChunkSize / MAXEDGE;
 			auto base = Offset(0, 0);
+			base.x -= (mChunkSize / 2.f);
+			base.y += (mChunkSize / 2.f);
 			auto slotX = static_cast<uint32>((xz.x - base.x)/mChunkSize);
 			auto slotY = static_cast<uint32>((base.y - xz.y) /mChunkSize);
 			auto chunk = std::make_pair(slotX,slotY);
-			if (mMap.find(chunk) != mMap.cend()) {
-				auto offset = Offset(slotX, slotY);
-				std::pair<uint32, uint32> mSamples[4];
-				//暂时忽略有可能出现的数值错误,比如位于一个Chunk的边
-				mSamples[0].first = static_cast<uint32>((xz.x - offset.x) / mChunkSize) * MAXEDGE);
-				mSamples[0].second = static_cast<uint32>((offset.y - xz.y) / mChunkSize)*MAXEDGE);
-
-				mSamples[1].first = mSamples[0].first + 1;
-				mSamples[1].second = mSamples[0].second;
-
-				mSamples[2].first = mSamples[0].first;
-				mSamples[2].second = mSamples[0].second + 1;
-
-				mSamples[3].first = mSamples[0].first+1;
-				mSamples[3].second = mSamples[0].second + 1;
-
-				//水平和竖直上的插值
-				auto xt =((xz.x - offset.x) - mSamples[0].first*mSizePerEDGE)/mSizePerEDGE;
-				auto yt = ((offset.y-xz.y) - mSamples[0].second*mSizePerEDGE) / mSizePerEDGE;
-
-				return Lerp(
-					Lerp(
-						mMap[chunk][mSamples[0].second*(MAXEDGE+1)+mSamples[0].first], 
-						mMap[chunk][mSamples[1].second*(MAXEDGE + 1) + mSamples[1].first],
-						xt),
-						Lerp(
-						mMap[chunk][mSamples[2].second*(MAXEDGE + 1) + mSamples[2].first],
-						mMap[chunk][mSamples[3].second*(MAXEDGE + 1) + mSamples[3].first],
-						xt),
-					yt);
-			}
-			else {
+			if (mMap.find(chunk) == mMap.cend()) {
 				if (mMap.size() > mAveChunkNum)
 					mMap.erase(mMap.begin());
-				//流输出插入
+				//流输出
+				auto context = DeviceMgr().GetDeviceContext();
+				context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+				UINT strides[] = { sizeof(Terrain::Vertex) };
+				UINT offsets[] = { 0 };
+				context->IASetVertexBuffers(0, 1, &mCommonVertexBuffer, strides, offsets);
+				context->IASetInputLayout(ShaderMgr().CreateInputLayout(InputLayoutDesc::Terrain));
+
+				auto & mEffect = EffectTerrainSO::GetInstance();
+				mEffect->HeightMap(mHeightMap);
+				mEffect->UVScale(float2(1.f / mHorChunkNum / mChunkSize, 1.f / mVerChunkNum / mChunkSize));
+				mEffect->WorldOffset(Offset(slotX, slotY));
+				static UINT pOffsets[1] = { 0 };
+				mEffect->SetSOTargets(1, &mSOTargetBuffer, pOffsets);
+
+
+				mEffect->Apply(context);
+
+				context->Draw((MAXEDGE + 1)*(MAXEDGE + 1), 0);
+
+				//拷贝
+				context->CopyResource(mReadBuffer, mSOTargetBuffer);
+				//映射,读取
+				std::vector<SOOutput> mHeights;
+				D3D11_MAPPED_SUBRESOURCE mapSubRes;
+				try {
+					dxcall(context->Map(mReadBuffer, 0, D3D11_MAP_READ, 0, &mapSubRes));
+					std::transform(
+						(SOOutput*)mapSubRes.pData,
+						((SOOutput*)mapSubRes.pData) + (MAXEDGE + 1)*(MAXEDGE + 1),
+						std::back_insert_iterator<std::vector<SOOutput>>(mHeights),
+						[](const SOOutput& data)
+					{
+						return data;
+					}
+					);
+					context->Unmap(mReadBuffer, 0);
+				}
+				Catch_DX_Exception
+				std::sort(mHeights.begin(), mHeights.end());
+				std::vector<float> mY;
+				std::transform(mHeights.begin(),mHeights.end(),std::back_insert_iterator<std::vector<float>>(mY),
+					[](const SOOutput& data) {
+					return data.H;
+				});
+				mMap.emplace(chunk,std::move(mY));
 			}
+			
+			auto offset = Offset(slotX, slotY);
+			offset.x -= (mChunkSize / 2.f);
+			offset.y += (mChunkSize / 2.f);
+			std::pair<uint32, uint32> mSamples[4];
+			//暂时忽略有可能出现的数值错误,比如位于一个Chunk的边
+			mSamples[0].first = static_cast<uint32>(((xz.x - offset.x) / mChunkSize) * MAXEDGE);
+			mSamples[0].second = static_cast<uint32>(((offset.y - xz.y) / mChunkSize)*MAXEDGE);
+
+			mSamples[1].first = mSamples[0].first + 1;
+			mSamples[1].second = mSamples[0].second;
+
+			mSamples[2].first = mSamples[0].first;
+			mSamples[2].second = mSamples[0].second + 1;
+
+			mSamples[3].first = mSamples[0].first + 1;
+			mSamples[3].second = mSamples[0].second + 1;
+
+			//水平和竖直上的插值
+			auto xt = ((xz.x - offset.x) - mSamples[0].first*mSizePerEDGE) / mSizePerEDGE;
+			auto yt = ((offset.y - xz.y) - mSamples[0].second*mSizePerEDGE) / mSizePerEDGE;
+
+			return Lerp(
+				Lerp(
+				mMap[chunk][mSamples[0].second*(MAXEDGE + 1) + mSamples[0].first],
+				mMap[chunk][mSamples[1].second*(MAXEDGE + 1) + mSamples[1].first],
+				xt),
+				Lerp(
+				mMap[chunk][mSamples[2].second*(MAXEDGE + 1) + mSamples[2].first],
+				mMap[chunk][mSamples[3].second*(MAXEDGE + 1) + mSamples[3].first],
+				xt),
+				yt);
 		}
 	private:
+		struct SOOutput {
+			union
+			{
+				struct {
+					float H;
+					uint32 Id;
+				};
+				uint64 data;
+			};
+
+			bool operator<(const SOOutput& rhs) {
+				return Id < rhs.Id;
+			}
+		};
+
 		struct Vertex
 		{
 			Vertex()
@@ -536,7 +608,7 @@ namespace leo
 				);
 		}
 
-		float2 Offset(uint32 slotX, uint32 slotY) {
+		float2 Offset(uint32 slotX, uint32 slotY) const{
 			return float2((mHorChunkNum - 1)*mChunkSize / -2.f + slotX*mChunkSize, +(mVerChunkNum - 1)*mChunkSize / 2 - slotY*mChunkSize);
 		}
 	};
