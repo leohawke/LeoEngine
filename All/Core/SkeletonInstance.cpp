@@ -89,12 +89,26 @@ namespace leo{
 	}
 
 	void SkeletonInstance::ReCurrAniBindPose() {
+		auto & mClip = mSkeData->mAnimations[mAniIndex];
+		for (auto jointIndex = 0u; jointIndex != mSkeData->mSkeleton.mJointCount; ++jointIndex) {
+			mLocalPoses[jointIndex] = mClip.mSamples[0].mJointsPose[jointIndex];
+		}
+
+		mGlobalPoses[0] = mLocalPoses[0].operator leo::float4x4();
+		//子节点在后面,只需找到父,即可相乘
+		for (auto jointIndex = 1u; jointIndex != mSkeData->mSkeleton.mJointCount; ++jointIndex) {
+			auto & joint = mSkeData->mSkeleton.mJoints[jointIndex];
+			auto parentToRoot = load(static_cast<const float4x4&>(mGlobalPoses[joint.mParent]));
+			auto toParent = mLocalPoses[jointIndex].operator std::array<__m128, 4U>();
+			save(mGlobalPoses[jointIndex], Multiply(toParent, parentToRoot));
+		}
+		for (auto jointIndex = 0u; jointIndex != mSkeData->mSkeleton.mJointCount; ++jointIndex) {
+			auto invBindPose = load(mSkeData->mSkeleton.mJoints[jointIndex].mInvBindPose);
+			auto toRoot = load(static_cast<const float4x4&>(mGlobalPoses[jointIndex]));
+			save(mSkinMatrixs[jointIndex], Multiply(invBindPose, toRoot));
+		}
+
 		mNorT = 0.f;
-		mElapsed = clock::GameClock::Now<>();
-		bool mPrePlayeState = true;
-		std::swap(mPrePlayeState, mPlayAni);
-		Update();
-		std::swap(mPrePlayeState, mPlayAni);
 	}
 
 	//do many thing

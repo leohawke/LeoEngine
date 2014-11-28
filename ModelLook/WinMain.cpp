@@ -378,16 +378,16 @@ void Update(){
 		auto mBegin = leo::clock::now();
 
 		if (GetAsyncKeyState('W') & 0X8000) 
-			pSkeInstances[0].Translation(leo::float3(+0.05f, 0.f, 0.f));
+			pSkeInstances[0].Translation(leo::float3(0.f, 0.f, -0.05f));
 
 		if (GetAsyncKeyState('S') & 0X8000)
-			pSkeInstances[0].Translation(leo::float3(-0.05f, 0.f, 0.f));
+			pSkeInstances[0].Translation(leo::float3(0.0f, 0.f, +0.05f));
 
 		if (GetAsyncKeyState('A') & 0X8000)
-			pSkeInstances[0].Translation(leo::float3(+0.f, 0.f, +0.05f));
+			pSkeInstances[0].Translation(leo::float3(+0.05f, 0.f, 0.f));
 
 		if (GetAsyncKeyState('D') & 0X8000)
-			pSkeInstances[0].Translation(leo::float3(+0.00f, 0.f, -0.05f));
+			pSkeInstances[0].Translation(leo::float3(-0.05f, 0.f, 0.f));
 
 		pCamera->UpdateViewMatrix();
 
@@ -396,8 +396,8 @@ void Update(){
 		leo::clock::ProgramClock::Reset();
 
 		pSkeInstances[0].Update();
-		pSkeInstances[1].Update();
-		pSkeInstances[2].Update();
+		//pSkeInstances[1].Update();
+		//pSkeInstances[2].Update();
 
 		static const auto begin_call_back = [&]() {
 			pSkeInstances[0].BeginCurrentAni();
@@ -443,11 +443,12 @@ void Render()
 
 		
 
-		//pSky->Render(devicecontext, *pCamera);
+		pSky->Render(devicecontext, *pCamera);
+		pTerrain->Render(devicecontext, *pCamera);
 
 		auto& pos = pSkeInstances[0].Pos();
 		auto y = pTerrain->GetHeight(leo::float2(pos.x, pos.z)) - pos.y;
-		//pSkeInstances[0].Translation(leo::float3(0.f,y, 0.f));
+		pSkeInstances[0].Translation(leo::float3(0.f,y, 0.f));
 
 		pSkeInstances[0].Render(*pCamera);
 
@@ -456,13 +457,12 @@ void Render()
 		//pSkeInstances[2].Render(*pCamera);
 
 
-		//pTerrain->Render(devicecontext, *pCamera);
+		
 
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 
 		leo::RenderSync::GetInstance()->Present();
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(0));
 	}
 }
