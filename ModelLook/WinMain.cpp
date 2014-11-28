@@ -259,6 +259,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 		}
 		else
 			::WaitMessage();
+		leo::win::KeysState::GetInstance()->Update();
 	}
 	renderThreadRun = false;
 	updateThread.join();
@@ -409,8 +410,8 @@ void Update(){
 		static leo::win::KeyDown mBeignEvent('W', begin_call_back);
 		static leo::win::KeyUp mEndEvent('W', end_call_back);
 
-		mBeignEvent.Update();
-		mEndEvent.Update();
+
+		
 
 		auto mRunTime =leo::clock::duration_to<>(leo::clock::now()-mBegin);
 		if (mRunTime < 1 / 30.f)

@@ -1,13 +1,7 @@
 #include "IndePlatform\platform.h"
 #include "Mgr.hpp"
-#include "Input.h"
-#include <fstream>
 
 
-#include "COM.hpp"
-#include "DirectXTex.h"
-#include "file.hpp"
-#include "exception.hpp"
 
 namespace leo
 {
@@ -34,8 +28,7 @@ namespace leo
 		extern float globalAspect = 1.66f;
 		//WindowMgr
 		extern win::HWND globalHwnd = static_cast<win::HWND>(INVALID_HANDLE_VALUE);
-		//
-		extern win::KeysState globalKeysState = {};
+		
 		void Init()
 		{}
 		void Destroy()

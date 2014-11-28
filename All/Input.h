@@ -63,7 +63,7 @@ namespace leo
 		}
 
 
-		class KeyDown {
+		class KeyDown : public KeyAction {
 			std::uint8_t m_key;
 			std::function<void()> m_callback;
 		public:
@@ -82,7 +82,7 @@ namespace leo
 			}
 		};
 
-		class KeyUp {
+		class KeyUp : public KeyAction {
 			std::uint8_t m_key;
 			std::function<void()> m_callback;
 		public:

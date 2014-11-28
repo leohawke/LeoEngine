@@ -3,8 +3,15 @@
 
 namespace leo
 {
+	namespace global
+	{
+		extern win::KeysState globalKeysState = {};
+	}
+
 	namespace win
 	{
+		//
+		
 		static std::set<KeyAction*> Register;
 
 		KeyAction::KeyAction()
@@ -51,12 +58,7 @@ namespace leo
 			{
 				ka->Update();
 			}
-			//static unsigned long count = 0;
-			//if (m_currstates['T'] & fallingedge_mask)
-			//{
-			//count++;
-			//DebugPrintf(L"T的下降沿 %u\n", count);
-			//}
+
 			//if (m_currstates['T'] & risingedge_mask)
 			//DebugPrintf(L"T的上升沿 %u\n", count);
 			//DebugPrintf(L"更新计数 %u\n", count);
