@@ -19,7 +19,7 @@
 #include "leoint.hpp"
 #include "LeoMath.h"
 
-namespace leo{
+namespace leo {
 
 	enum class FRUSTUM_PLANE_TYPE : std::uint8_t
 	{
@@ -50,10 +50,16 @@ namespace leo{
 		PERSPECTIVE
 	};
 
-	enum class CONTAINMENT_TYPE : std::uint8_t{
+	enum class CONTAINMENT_TYPE : std::uint8_t {
 		DISJOINT = 0,
 		INTERSECTS = 1,
 		CONTAINS = 2,
+	};
+
+	enum PLANE_INTERSECTION_Type : std::uint8_t {
+		FRONT = 0,
+		INTERSECTING = 1,
+		BACK = 2,
 	};
 
 
@@ -65,34 +71,124 @@ namespace leo{
 
 	struct Ray;
 
-	struct lalignas(16) Triangle{
+	struct lalignas(16) LB_API Triangle {
+		using vector = __m128;
+
 		float3 p[3];
 		Triangle() = default;
-		Triangle(const float3& p0, const float3& p1, const float3& p2){
+		Triangle(const float3& p0, const float3& p1, const float3& p2) {
 			p[0] = p0;
 			p[1] = p1;
 			p[2] = p2;
 		}
 
 
+		CONTAINMENT_TYPE    __fastcall     Contains(vector Point) const;
+		CONTAINMENT_TYPE    __fastcall     Contains(const Triangle& Tri) const;
+
+
+		bool Intersects(const Sphere& sh) const;
+		bool Intersects(const Box& box) const;
+		bool Intersects(const OrientedBox& box) const;
+		bool Intersects(const Frustum& fr) const;
+		bool __fastcall	Intersects(const Triangle& Tri) const;
+		PLANE_INTERSECTION_Type    __fastcall    Intersects(vector Plane) const;
 		std::pair<bool, float> Intersects(const Ray& sphere) const;
 	};
 
-		
-	struct lalignas(16) Sphere{
+	struct lalignas(16) LB_API Sphere {
+		using vector = __m128;
+
 		float4 mCenterRadius;
-		inline float3 GetCenter() const{
+		inline float3 GetCenter() const {
 			return float3(mCenterRadius);
 		}
-		inline float GetRadius() const{
+		inline float GetRadius() const {
 			return mCenterRadius.w;
 		}
 
-		Sphere(const float3& center,float radius)
-			:mCenterRadius(center,radius)
+		Sphere(const float3& center, float radius)
+			:mCenterRadius(center, radius)
 		{}
 
+
+		CONTAINMENT_TYPE    __fastcall     Contains(vector Point) const;
+		CONTAINMENT_TYPE    __fastcall     Contains(const Triangle& Tri) const;
+
+
+		bool Intersects(const Sphere& sh) const;
+		bool Intersects(const Box& box) const;
+		bool Intersects(const OrientedBox& box) const;
+		bool Intersects(const Frustum& fr) const;
+		bool __fastcall	Intersects(const Triangle& Tri) const;
+		PLANE_INTERSECTION_Type    __fastcall    Intersects(vector Plane) const;
 		std::pair<bool, float> Intersects(const Ray& sphere) const;
+	};
+
+	struct lalignas(16) LB_API Frustum {
+		static const size_t CORNER_COUNT = 8;
+
+		float3 mOrigin;            // Origin of the frustum (and projection).
+		float3 mOrientation;       // Quaternion representing rotation.
+
+		float mRightSlope;           // Positive X slope (X/Z).
+		float mLeftSlope;            // Negative X slope.
+		float mTopSlope;             // Positive Y slope (Y/Z).
+		float mBottomSlope;          // Negative Y slope.
+		float mNear, mFar;            // Z of the near plane and far plane.
+
+		// Creators
+		Frustum() = default;
+		Frustum(const float3& Origin, const float4& Orientation,
+			float RightSlope, float LeftSlope, float TopSlope, float BottomSlope,
+			float Near, float Far)
+			:mOrigin(Origin), mOrientation(Orientation), mRightSlope(RightSlope), mLeftSlope(LeftSlope),
+			mTopSlope(TopSlope), mBottomSlope(BottomSlope), mNear(Near), mFar(Far)
+		{
+		}
+		Frustum(const Frustum& fr) = default;
+
+		using vector = __m128;
+		using matrix = std::array<vector, 4>;
+
+		explicit Frustum(matrix Projection)
+		{
+			operator=(Projection);
+		}
+
+		Frustum&  __fastcall  operator=(matrix Projection);
+
+		Frustum&  __fastcall Transform(matrix M) const;
+		Frustum&  __fastcall Transform(float Scale, vector Rotation, vector Translation);
+
+		//void GetCorners(float3* Corners) const;
+		// Gets the 8 corners of the frustum
+
+		CONTAINMENT_TYPE    __fastcall     Contains(vector Point) const;
+		CONTAINMENT_TYPE    __fastcall     Contains(const Triangle& Tri) const;
+		CONTAINMENT_TYPE Contains(const Sphere& sp) const;
+		CONTAINMENT_TYPE Contains(const Box& box) const;
+		CONTAINMENT_TYPE Contains(const OrientedBox& box) const;
+		//CONTAINMENT_TYPE Contains(const Frustum& fr) const;
+		// Frustum-Frustum test
+
+		bool Intersects(const Sphere& sh) const;
+		bool Intersects(const Box& box) const;
+		bool Intersects(const OrientedBox& box) const;
+		//bool Intersects(const Frustum& fr) const;
+		bool __fastcall	Intersects(const Triangle& Tri) const;
+		PLANE_INTERSECTION_Type    __fastcall    Intersects(vector Plane) const;
+		std::pair<bool,float>    __fastcall     Intersects(const Ray& ray) const;
+
+		CONTAINMENT_TYPE     __fastcall     ContainedBy(vector Plane0, vector Plane1, vector Plane2,
+			const vector& Plane3, const vector& Plane4, const vector& Plane5) const;
+		// Test frustum against six planes (see Frustum::GetPlanes)
+
+		//void GetPlanes(vector* NearPlane, vector* FarPlane, vector* RightPlane,
+			//vector* LeftPlane, vector* TopPlane, vector* BottomPlane) const;
+		// Create 6 Planes representation of Frustum
+
+		
 	};
 }
 

@@ -156,9 +156,6 @@
     <ClCompile Include="Core\BillBoard.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Geometry.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="windowstest.cpp">
       <Filter>Test</Filter>
     </ClCompile>
@@ -239,6 +236,9 @@
     </ClCompile>
     <ClCompile Include="Core\EffectTerrainSO.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="IndePlatform\Geometry.cpp">
+      <Filter>IndePlatform\BaseSource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -490,6 +490,12 @@
     </ClInclude>
     <ClInclude Include="Core\EffectTerrainSO.hpp">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="IndePlatform\Geometry_impl.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
+    </ClInclude>
+    <ClInclude Include="IndePlatform\leo_math_impl.hpp">
+      <Filter>IndePlatform\BaseHead</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

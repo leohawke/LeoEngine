@@ -86,7 +86,7 @@ namespace leo
 		}
 	}
 
-	inline float acosr(float r){
+	inline float acosr(float r) {
 		float asm_one = 1.f;
 		float asm_half_pi = LM_HALFPI;
 		__asm {
@@ -103,7 +103,7 @@ namespace leo
 		} // returns r0
 	}
 
-	inline float asinr(float r){
+	inline float asinr(float r) {
 		const float asm_one = 1.f;
 		__asm {
 			fld r // r0 = r
@@ -117,7 +117,7 @@ namespace leo
 		} // returns r0
 	}
 
-	inline float atanr(float r){
+	inline float atanr(float r) {
 		__asm {
 			fld r // r0 = r
 				fld1 // {{ r0 = atan( r0 )
@@ -125,22 +125,22 @@ namespace leo
 		} // returns r0
 	}
 
-	inline float sinr(float r){
-		__asm{
+	inline float sinr(float r) {
+		__asm {
 			fld r // r0 = r
 				fsin // r0 = sinf(r0)
 		}//return r0
 	}
 
-	inline float cosr(float r){
-		__asm{
+	inline float cosr(float r) {
+		__asm {
 			fld r// r0 =r
 				fcos// r0 = cosf(r0)
 		}//returns r0
 	}
 
-	inline float tanr(float r){
-		__asm{
+	inline float tanr(float r) {
+		__asm {
 			fld r
 				fptan
 		}
@@ -148,14 +148,14 @@ namespace leo
 
 	inline float sqrt(float f)
 	{
-		__asm{
+		__asm {
 			fld f
 				fsqrt
 		}
 	}
 
-	inline float rsqrt(float f){
-		__asm{
+	inline float rsqrt(float f) {
+		__asm {
 			fld1
 				fld f
 				fsqrt
@@ -163,27 +163,27 @@ namespace leo
 		}
 	}
 #else
-	inline float acosr(float r){
+	inline float acosr(float r) {
 		return std::acos(r);
 	}
 
-	inline float asinr(float r){
+	inline float asinr(float r) {
 		return std::asin(r);
 	}
 
-	inline float atanr(float r){
+	inline float atanr(float r) {
 		return std::atan(r);
 	}
 
-	inline float sinr(float r){
+	inline float sinr(float r) {
 		return std::sin(r);
 	}
 
-	inline float cosr(float r){
+	inline float cosr(float r) {
 		return std::cos(r);
 	}
 
-	inline float tanr(float r){
+	inline float tanr(float r) {
 		return std::tan(r);
 	}
 
@@ -192,11 +192,11 @@ namespace leo
 		return std::sqrt(r);
 	}
 
-	inline float rsqrt(float f){
-		return 1.f/sqrt(f);
+	inline float rsqrt(float f) {
+		return 1.f / sqrt(f);
 	}
 
-	inlien float sincosr(float *pcos, float rad){
+	inlien float sincosr(float *pcos, float rad) {
 		*pcos = cosr(rad);
 		return sinr(rad);
 	}
@@ -239,11 +239,11 @@ namespace leo
 
 	struct lalignas(16) float2
 	{
-		union{
-			struct{
+		union {
+			struct {
 				float x, y;
 			};
-			struct{
+			struct {
 				float u, v;
 			};
 			float data[2];
@@ -262,7 +262,7 @@ namespace leo
 			std::memcpy(this, &src, sizeof(float2));
 		}
 
-			template<typename T>
+		template<typename T>
 		float2& operator=(const T& src) lnothrow
 		{
 			static_assert(sizeof(T) >= sizeof(float2), "Need More Data");
@@ -270,19 +270,19 @@ namespace leo
 			return *this;
 		}
 
-			template<typename T>
+		template<typename T>
 		T* operator&() lnothrow
 		{
 			static_assert(sizeof(float2) >= sizeof(T), "Data Don't Enough");
 			return reinterpret_cast<T*>(this);
 		}
 
-			float2 max(const float2& rhs)  const lnothrow
+		float2 max(const float2& rhs)  const lnothrow
 		{
 			return float2(leo::max(x, rhs.x), leo::max(y, rhs.y));
 		}
 
-			float2 min(const float2& rhs) const lnothrow
+		float2 min(const float2& rhs) const lnothrow
 		{
 			return float2(leo::min(x, rhs.x), leo::min(y, rhs.y));
 		}
@@ -299,11 +299,11 @@ namespace leo
 
 	struct lalignas(16) float3
 	{
-		union{
-			struct{
+		union {
+			struct {
 				float x, y, z;
 			};
-			struct{
+			struct {
 				float u, v, w;
 			};
 			float data[3];
@@ -325,18 +325,18 @@ namespace leo
 		{
 		}
 
-		explicit float3(const float* src) lnothrow{
+		explicit float3(const float* src) lnothrow {
 			std::memcpy(&x, src, sizeof(float) * 3);
 		}
 
 		template<typename T>
 		explicit float3(const T& src) lnothrow
 		{
-			static_assert(sizeof(T) >= sizeof(float)*3, "Need More Data");
+			static_assert(sizeof(T) >= sizeof(float) * 3, "Need More Data");
 			std::memcpy(this, &src, sizeof(float) * 3);
 		}
 
-			template<typename T>
+		template<typename T>
 		float3& operator=(const T& src) lnothrow
 		{
 			static_assert(sizeof(T) >= sizeof(float) * 3, "Need More Data");
@@ -344,18 +344,18 @@ namespace leo
 			return *this;
 		}
 
-			template<typename T>
+		template<typename T>
 		T* operator &() lnothrow
 		{
 			static_assert(sizeof(float) * 3 >= sizeof(T), "Data Don't Enough");
 			return reinterpret_cast<T*>(this);
 		}
-			float3 max(const float3& rhs)  const lnothrow
+		float3 max(const float3& rhs)  const lnothrow
 		{
 			return float3(leo::max(x, rhs.x), leo::max(y, rhs.y), leo::max(z, rhs.z));
 		}
 
-			float3 min(const float3& rhs) const lnothrow
+		float3 min(const float3& rhs) const lnothrow
 		{
 			return float3(leo::min(x, rhs.x), leo::min(y, rhs.y), leo::min(z, rhs.z));
 		}
@@ -372,8 +372,8 @@ namespace leo
 
 	struct lalignas(16) float4
 	{
-		union{
-			struct{
+		union {
+			struct {
 				float x, y, z, w;
 			};
 			float data[4];
@@ -420,7 +420,7 @@ namespace leo
 			: x(XY.first), y(XY.second), z(Z), w(W)
 		{}
 
-		explicit float4(const float* src) lnothrow{
+		explicit float4(const float* src) lnothrow {
 			std::memcpy(&x, src, sizeof(float) * 4);
 		}
 
@@ -431,7 +431,7 @@ namespace leo
 			std::memcpy(this, &src, sizeof(float4));
 		}
 
-			template<typename T>
+		template<typename T>
 		float4& operator=(const T& src) lnothrow
 		{
 			static_assert(sizeof(T) >= sizeof(float4), "Need More Data");
@@ -441,18 +441,18 @@ namespace leo
 
 
 
-			template<typename T>
+		template<typename T>
 		T* operator &() lnothrow
 		{
 			static_assert(sizeof(float4) >= sizeof(T), "Data Don't Enough");
 			return reinterpret_cast<T*>(this);
 		}
-			float4 max(const float4& rhs)  const lnothrow
+		float4 max(const float4& rhs)  const lnothrow
 		{
 			return float4(leo::max(x, rhs.x), leo::max(y, rhs.y), leo::max(z, rhs.z), leo::max(w, rhs.w));
 		}
 
-			float4 min(const float4& rhs) const lnothrow
+		float4 min(const float4& rhs) const lnothrow
 		{
 			return float4(leo::min(x, rhs.x), leo::min(y, rhs.y), leo::min(z, rhs.z), leo::min(w, rhs.w));
 		}
@@ -467,19 +467,19 @@ namespace leo
 		return lhs.min(rhs);
 	}
 
-	struct lalignas(16) float4x4{
+	struct lalignas(16) float4x4 {
 		float4 r[4];
 
-		float& operator()(uint8 row, uint8 col){
+		float& operator()(uint8 row, uint8 col) {
 			return r[row].data[col];
 		}
 
-		float operator()(uint8 row, uint8 col) const{
+		float operator()(uint8 row, uint8 col) const {
 			return r[row].data[col];
 		}
 
 
-		explicit float4x4(const float* t){
+		explicit float4x4(const float* t) {
 			std::memcpy(r, t, sizeof(r));
 		}
 
@@ -514,17 +514,17 @@ namespace leo
 			*this = half(f);
 		}
 
-			half& operator=(int16 i) lnothrow
+		half& operator=(int16 i) lnothrow
 		{
 			*this = half(i);
 		}
 
-			explicit operator float() const lnothrow
+		explicit operator float() const lnothrow
 		{
 			return details::half_to_float(data);
 		}
 
-			explicit operator int16() const lnothrow
+		explicit operator int16() const lnothrow
 		{
 			return static_cast<int16>(details::half_to_float(data));
 		}
@@ -532,11 +532,11 @@ namespace leo
 
 	struct lalignas(4) half2
 	{
-		union{
-			struct{
+		union {
+			struct {
 				uint16 x, y;
 			};
-			struct{
+			struct {
 				uint16 u, v;
 			};
 			uint16 data[2];
@@ -552,11 +552,11 @@ namespace leo
 
 	struct half3
 	{
-		union{
-			struct{
+		union {
+			struct {
 				uint16 x, y, z;
 			};
-			struct{
+			struct {
 				uint16 u, v, w;
 			};
 			uint16 data[2];
@@ -569,8 +569,8 @@ namespace leo
 
 	struct lalignas(8) half4
 	{
-		union{
-			struct{
+		union {
+			struct {
 				uint16 x, y, z, w;
 			};
 			uint16 data[4];
@@ -591,7 +591,7 @@ namespace leo
 	__m128 inline load<float2>(const float2& data)
 	{
 #ifdef LM_ARM_NEON_INTRINSICS
-		float32x2_t x = vld1_f32_ex( reinterpret_cast<const float*>(pSource), 64 );
+		float32x2_t x = vld1_f32_ex(reinterpret_cast<const float*>(pSource), 64);
 		float32x2_t zero = vdup_n_f32(0);
 		return vcombine_f32(x, zero);
 #elif defined(LM_SSE_INTRINSICS)
@@ -605,7 +605,7 @@ namespace leo
 	{
 
 #ifdef LM_ARM_NEON_INTRINSICS
-		float32x4_t V = vld1q_f32_ex( reinterpret_cast<const float*>(&data), 128 );
+		float32x4_t V = vld1q_f32_ex(reinterpret_cast<const float*>(&data), 128);
 		return vsetq_lane_f32(0, V, 3);
 #elif defined(LM_SSE_INTRINSICS)
 		union
@@ -628,11 +628,11 @@ namespace leo
 #endif
 	}
 
-	
-	inline std::array<__m128, 4> load(const float4x4& data){
+
+	inline std::array<__m128, 4> load(const float4x4& data) {
 		return std::array < __m128, 4 >
 		{
-			{load(data.r[0]), load(data.r[1]), load(data.r[2]), load(data.r[3])}
+			{load(data[0]), load(data[1]), load(data[2]), load(data[3])}
 		};
 	}
 
@@ -658,7 +658,7 @@ namespace leo
 	{
 #if defined(LM_ARM_NEON_INTRINSICS)
 		float32x2_t VL = vget_low_f32(vector);
-		vst1_f32_ex( reinterpret_cast<float*>(&data), VL, 64 );
+		vst1_f32_ex(reinterpret_cast<float*>(&data), VL, 64);
 		vst1q_lane_f32(reinterpret_cast<float*>(&data) + 2, vector, 2);
 #elif defined(LM_SSE_INTRINSICS)
 		__m128 T = _mm_shuffle_ps(vector, vector, _MM_SHUFFLE(2, 2, 2, 2));
@@ -671,14 +671,14 @@ namespace leo
 	void  inline save<float4>(float4& data, __m128 vector)
 	{
 #if defined(LM_ARM_NEON_INTRINSICS)
-		vst1q_f32_ex( reinterpret_cast<float*>(&data),vector, 128 );
+		vst1q_f32_ex(reinterpret_cast<float*>(&data), vector, 128);
 #elif defined(LM_SSE_INTRINSICS)
 		_mm_store_ps(&data.x, vector);
 #endif
 	}
 
 	template<>
-	void inline save<float>(float& data, __m128 vector){
+	void inline save<float>(float& data, __m128 vector) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		vst1q_lane_f32(pDestination, vector, 0);
 #elif defined(LM_SSE_INTRINSICS)
@@ -687,17 +687,17 @@ namespace leo
 #endif // _LM_VMX128_INTRINSICS_
 	}
 
-	void inline save(float4x4& data, const std::array<__m128, 4>& M){
+	void inline save(float4x4& data, const std::array<__m128, 4>& M) {
 #if defined(LM_SSE_INTRINSICS)
-		_mm_store_ps(&data.r[0].x, M[0]);
-		_mm_store_ps(&data.r[1].x, M[1]);
-		_mm_store_ps(&data.r[2].x, M[2]);
-		_mm_store_ps(&data.r[3].x, M[3]);
+		_mm_store_ps(&data[0].x, M[0]);
+		_mm_store_ps(&data[1].x, M[1]);
+		_mm_store_ps(&data[2].x, M[2]);
+		_mm_store_ps(&data[3].x, M[3]);
 #else // _LM_VMX128_INTRINSICS_
 #endif // _LM_VMX128_INTRINSICS_
 	}
 
-	inline __m128 Select(__m128 V1, __m128 V2, __m128 Control){
+	inline __m128 Select(__m128 V1, __m128 V2, __m128 Control) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vbslq_f32(Control, V2, V1);
 #elif defined(LM_SSE_INTRINSICS)
@@ -710,56 +710,56 @@ namespace leo
 }
 
 //constant
-namespace leo{
-	
+namespace leo {
+
 }
 
 //details
-namespace leo{
-	namespace details{
-		inline __m128 SplatEpsilon(){
+namespace leo {
+	namespace details {
+		inline __m128 SplatEpsilon() {
 			const static float4 eps(1.0e-4f, 1.0e-4f, 1.0e-4f, 1.0e-4f);
 			const static auto _meps = load(eps);
 			return _meps;
 		}
 
-		inline __m128 SplatRayEpsilon(){
+		inline __m128 SplatRayEpsilon() {
 			const static float4 eps(1.0e-20f, 1.0e-20f, 1.0e-20f, 1.0e-20f);
 			const static auto _meps = load(eps);
 			return _meps;
 		}
 
-		inline __m128 SplatNegRayEpsilon(){
+		inline __m128 SplatNegRayEpsilon() {
 			const static float4 eps(-1.0e-20f, -1.0e-20f, -1.0e-20f, -1.0e-20f);
 			const static auto _meps = load(eps);
 			return _meps;
 		}
 
 		template<uint8 D = 3>
-		inline bool IsUnit(__m128 V){
+		inline bool IsUnit(__m128 V) {
 			auto Difference = Subtract(Length<>(V), SplatOne());
 			return Less<>(Abs(Difference), SplatEpsilon());
 		}
 
-		inline __m128 SplatInfinity(){
+		inline __m128 SplatInfinity() {
 			const static lalignas(16) uint32 infinity[4] = { 0x7F800000, 0x7F800000, 0x7F800000, 0x7F800000 };
 			const static auto _minfinity = load(*reinterpret_cast<const float4 *>(infinity));
 			return _minfinity;
 		}
 
-		inline __m128 SplatQNaN(){
+		inline __m128 SplatQNaN() {
 			const static lalignas(16) uint32 qnan[4] = { 0x7FC00000, 0x7FC00000, 0x7FC00000, 0x7FC00000 };
 			const static auto _mqnan = load(*reinterpret_cast<const float4 *>(qnan));
 			return _mqnan;
 		}
 
-		inline __m128 SplatMask3(){
+		inline __m128 SplatMask3() {
 			const static lalignas(16) uint32 mask3[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000 };
 			const static auto _mmask3 = load(*reinterpret_cast<const float4 *>(mask3));
 			return _mmask3;
 		}
 
-		inline __m128 SplatTrueInt(){
+		inline __m128 SplatTrueInt() {
 #if defined(LM_ARM_NEON_INTRINSICS)
 			return vdupq_n_s32(-1);
 #elif defined(LM_SSE_INTRINSICS)
@@ -769,13 +769,13 @@ namespace leo{
 #endif // _LM_VMX128_INTRINSICS_
 		}
 
-		inline __m128 SplatAbsMask(){
+		inline __m128 SplatAbsMask() {
 			const static lalignas(16) uint32 absmask[4] = { 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF };
 			const static auto _mabsmask = load(*reinterpret_cast<const float4 *>(absmask));
 			return _mabsmask;
 		}
 
-		inline __m128 IsInfinite(__m128 V){
+		inline __m128 IsInfinite(__m128 V) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 			// Mask off the sign bit
 			uint32x4_t vTemp = vandq_u32(V, g_XMAbsMask);
@@ -794,25 +794,25 @@ namespace leo{
 #endif // _XM_VMX128_INTRINSICS_
 		}
 
-		inline __m128 SplatNegativeZero(){
+		inline __m128 SplatNegativeZero() {
 			const static lalignas(16) uint32 szero[4] = { 0x80000000, 0x80000000, 0x80000000, 0x80000000 };
 			const static auto _mzero = load(*reinterpret_cast<const float4 *>(szero));
 			return _mzero;
 		}
-		
-		inline __m128 SplatR0(){
+
+		inline __m128 SplatR0() {
 			const static float4	r0(1.0f, 0.0f, 0.0f, 0.0f);
 			const static auto _mr0 = load(r0);
 			return _mr0;
 		}
 
-		
+
 	}
 }
 
 //__m128,std::arrry<__m128,4> operator def
-namespace leo{
-	inline __m128 SplatZ(__m128 v){
+namespace leo {
+	inline __m128 SplatZ(__m128 v) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vdupq_lane_f32(vget_high_f32(v), 0);
 #elif defined(LM_SSE_INTRINSICS)
@@ -820,7 +820,7 @@ namespace leo{
 #endif
 	}
 
-	inline __m128 SplatY(__m128 v){
+	inline __m128 SplatY(__m128 v) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vdupq_lane_f32(vget_low_f32(v), 1);
 #elif defined(LM_SSE_INTRINSICS)
@@ -828,7 +828,7 @@ namespace leo{
 #endif
 	}
 
-	inline __m128 SplatX(__m128 v){
+	inline __m128 SplatX(__m128 v) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vdupq_lane_f32(vget_low_f32(v), 0);
 #elif defined(LM_SSE_INTRINSICS)
@@ -836,57 +836,57 @@ namespace leo{
 #endif
 	}
 
-	inline __m128 SplatW(__m128 v){
+	inline __m128 SplatW(__m128 v) {
 #if defined(LM_ARM_NEON_INTRINSICS)
-		return vdupq_lane_f32(vget_high_f32(v),1);
+		return vdupq_lane_f32(vget_high_f32(v), 1);
 #elif defined(LM_SSE_INTRINSICS)
 		return LM_PERMUTE_PS(v, _MM_SHUFFLE(3, 3, 3, 3));
 #endif
 	}
 
-	inline __m128 SplatOne(){
+	inline __m128 SplatOne() {
 		const static float4 sone(1.f, 1.f, 1.f, 1.f);
 		const static auto _mone = load(sone);
 		return _mone;
 	}
 
-	inline __m128 SplatZero(){
+	inline __m128 SplatZero() {
 		const static float4 szero(0.f, 0.f, 0.f, 0.f);
 		const static auto _mzero = load(szero);
 		return _mzero;
 	}
 
-	inline __m128 SplatNegativeOne(){
+	inline __m128 SplatNegativeOne() {
 		const static float4 sone(-1.f, -1.f, -1.f, -1.f);
 		const static auto _mone = load(sone);
 		return _mone;
 	}
 
-	inline __m128 SplatHalfPi(){
+	inline __m128 SplatHalfPi() {
 		const static float4 halfpi(LM_HALFPI, LM_HALFPI, LM_HALFPI, LM_HALFPI);
 		const static auto _mone = load(halfpi);
 		return _mone;
 	}
 
-	inline __m128 SplatPi(){
+	inline __m128 SplatPi() {
 		const static float4 pi(LM_PI, LM_PI, LM_PI, LM_PI);
 		const static auto _mpi = load(pi);
 		return _mpi;
 	}
 
-	inline __m128 SplatTwoPi(){
+	inline __m128 SplatTwoPi() {
 		const static float4 twopi(LM_TWOPI, LM_TWOPI, LM_TWOPI, LM_TWOPI);
 		const static auto _mtwo = load(twopi);
 		return _mtwo;
 	}
 
-	inline __m128 SplatReciprocalTwoPi(){
+	inline __m128 SplatReciprocalTwoPi() {
 		const static float4 rtwopi(LM_1DIV2PI, LM_1DIV2PI, LM_1DIV2PI, LM_1DIV2PI);
 		const static auto _mrtwopi = load(rtwopi);
 		return _mrtwopi;
 	}
 
-	inline __m128 Splat(float value){
+	inline __m128 Splat(float value) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vld1q_dup_f32(&value);
 #elif defined(LM_SSE_INTRINSICS)
@@ -895,31 +895,31 @@ namespace leo{
 #endif // _LM_VMX128_INTRINSICS_
 	}
 
-	inline __m128 Subtract(__m128 sl, __m128 sr){
+	inline __m128 Subtract(__m128 sl, __m128 sr) {
 #if defined(LM_ARM_NEON_INTRINSICS)
-		return vsubq_f32(sl,sr);
+		return vsubq_f32(sl, sr);
 #elif defined(LM_SSE_INTRINSICS)
 		return _mm_sub_ps(sl, sr);
 #endif
 	}
 
-	inline __m128 Add(__m128 al, __m128 ar){
+	inline __m128 Add(__m128 al, __m128 ar) {
 #if defined(LM_ARM_NEON_INTRINSICS)
-		return vaddq_f32(al,ar);
+		return vaddq_f32(al, ar);
 #elif defined(LM_SSE_INTRINSICS)
 		return _mm_add_ps(al, ar);
 #endif
 	}
 
-	inline __m128 MultiplyAdd(__m128 ml, __m128 mr, __m128 ar){
+	inline __m128 MultiplyAdd(__m128 ml, __m128 mr, __m128 ar) {
 #if defined(LM_ARM_NEON_INTRINSICS)
-		return vmlaq_f32(ar,ml,mr);
+		return vmlaq_f32(ar, ml, mr);
 #elif defined(LM_SSE_INTRINSICS)
 		return _mm_add_ps(_mm_mul_ps(ml, mr), ar);
 #endif
 	}
 
-	inline __m128 Multiply(__m128 ml, __m128 mr){
+	inline __m128 __fastcall Multiply(__m128 ml, __m128 mr) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vmulq_f32(ml, mr);
 #elif defined(LM_SSE_INTRINSICS)
@@ -927,7 +927,7 @@ namespace leo{
 #endif
 	}
 
-	inline std::array<__m128, 4> Multiply(const std::array<__m128, 4>& M1, const std::array<__m128, 4>& M2){
+	inline std::array<__m128, 4> Multiply(const std::array<__m128, 4>& M1, const std::array<__m128, 4>& M2) {
 #if defined(LM_SSE_INTRINSICS)
 		std::array<__m128, 4> mResult;
 		// Use vW to hold the original row
@@ -992,14 +992,14 @@ namespace leo{
 #endif // _LM_VMX128_INTRINSICS_
 	}
 
-	inline std::array<__m128, 4> I(){
+	inline std::array<__m128, 4> I() {
 		const static float4	r1(0.0f, 1.0f, 0.0f, 0.0f);
 		const static float4	r2(0.0f, 0.0f, 1.0f, 0.0f);
 		const static float4	r3(0.0f, 0.0f, 0.0f, 1.0f);
 		const static auto mr1 = load(r1);
 		const static auto mr2 = load(r2);
 		const static auto mr3 = load(r3);
-		return { {details::SplatR0(), mr1, mr2, mr3} };
+		return{ {details::SplatR0(), mr1, mr2, mr3} };
 	}
 
 	//1.Calculate an estimate for the reciprocal of the divisor (D): X0.
@@ -1008,7 +1008,7 @@ namespace leo{
 	// find the reciprocal of D, it is necessary to find a function f(X) which has a zero at X=1/D
 	//f(x) = 1/X - D 
 	//see href : http://en.wikipedia.org/wiki/Division_algorithm
-	inline __m128 Divide(__m128 dl, __m128 dr){
+	inline __m128 Divide(__m128 dl, __m128 dr) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		// 2 iterations of Newton-Raphson refinement of reciprocal
 		float32x4_t Reciprocal = vrecpeq_f32(dr);
@@ -1023,7 +1023,7 @@ namespace leo{
 	}
 
 	template<uint8 D = 3>
-	inline __m128 TransformCoord(__m128 v, const std::array<__m128, 4>& m){
+	inline __m128 TransformCoord(__m128 v, const std::array<__m128, 4>& m) {
 #if defined(LM_SSE_INTRINSICS) || defined(LM_ARM_NEON_INTRINSICS)
 		auto z = SplatZ(v);
 		auto y = SplatY(v);
@@ -1040,7 +1040,7 @@ namespace leo{
 	}
 
 	template<>
-	inline __m128 TransformCoord<2>(__m128 v, const std::array<__m128, 4>& m){
+	inline __m128 TransformCoord<2>(__m128 v, const std::array<__m128, 4>& m) {
 #if defined(LM_SSE_INTRINSICS) || defined(LM_ARM_NEON_INTRINSICS)
 		auto y = SplatY(v);
 		auto x = SplatX(v);
@@ -1055,7 +1055,7 @@ namespace leo{
 	}
 
 	template<uint8 D = 3>
-	inline __m128 TransformNormal(__m128 v, const std::array<__m128, 4>& m){
+	inline __m128 TransformNormal(__m128 v, const std::array<__m128, 4>& m) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		float32x2_t VL = vget_low_f32(v);
 		auto vResult = LM_VMULQ_LANE_F32(m[0], VL, 0); // X
@@ -1076,7 +1076,7 @@ namespace leo{
 	}
 
 	template<>
-	inline __m128 TransformNormal<2>(__m128 v, const std::array<__m128, 4>& m){
+	inline __m128 TransformNormal<2>(__m128 v, const std::array<__m128, 4>& m) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		float32x2_t VL = vget_low_f32(v);
 		float32x4_t Result = LM_VMULQ_LANE_F32(m[1], VL, 1); // Y
@@ -1092,14 +1092,14 @@ namespace leo{
 #endif // _LM_VMX128_INTRINSICS_
 	}
 
-	inline __m128 Transform(__m128 v, const std::array<__m128, 4>& m){
-#if defined(_LM_ARM_NEON_INTRINSICS)
+	inline __m128 Transform(__m128 v, const std::array<__m128, 4>& m) {
+#if defined(LM_ARM_NEON_INTRINSICS)
 		float32x2_t VL = vget_low_f32(v);
 		LMVECTOR vResult = LM_VMULQ_LANE_F32(m[0], VL, 0); // X
-		vResult = LM_VMLAQ_LANE_F32(vResult,m[1], VL, 1); // Y
+		vResult = LM_VMLAQ_LANE_F32(vResult, m[1], VL, 1); // Y
 		float32x2_t VH = vget_high_f32(v);
 		vResult = LM_VMLAQ_LANE_F32(vResult, m[2], VH, 0); // Z
-		return LM_VMLAQ_LANE_F32(vResult,m[3], VH, 1); // W
+		return LM_VMLAQ_LANE_F32(vResult, m[3], VH, 1); // W
 #elif defined(LM_SSE_INTRINSICS)
 		// Splat x,y,z and w
 		auto vTempX = LM_PERMUTE_PS(v, _MM_SHUFFLE(0, 0, 0, 0));
@@ -1120,8 +1120,260 @@ namespace leo{
 #endif // _LM_VMX128_INTRINSICS_
 	}
 
+
+	inline std::array<__m128, 4> Transpose(const std::array<__m128, 4>& M) {
+#if defined(LM_ARM_NEON_INTRINSICS)
+		float32x4x2_t P0 = vzipq_f32(M.r[0], M.r[2]);
+		float32x4x2_t P1 = vzipq_f32(M.r[1], M.r[3]);
+
+		float32x4x2_t T0 = vzipq_f32(P0.val[0], P1.val[0]);
+		float32x4x2_t T1 = vzipq_f32(P0.val[1], P1.val[1]);
+
+		XMMATRIX mResult;
+		mResult.r[0] = T0.val[0];
+		mResult.r[1] = T0.val[1];
+		mResult.r[2] = T1.val[0];
+		mResult.r[3] = T1.val[1];
+		return mResult;
+#elif defined(LM_SSE_INTRINSICS)
+		// x.x,x.y,y.x,y.y
+		__m128 vTemp1 = _mm_shuffle_ps(M[0], M[1], _MM_SHUFFLE(1, 0, 1, 0));
+		// x.z,x.w,y.z,y.w
+		__m128 vTemp3 = _mm_shuffle_ps(M[0], M[1], _MM_SHUFFLE(3, 2, 3, 2));
+		// z.x,z.y,w.x,w.y
+		__m128 vTemp2 = _mm_shuffle_ps(M[2], M[3], _MM_SHUFFLE(1, 0, 1, 0));
+		// z.z,z.w,w.z,w.w
+		__m128 vTemp4 = _mm_shuffle_ps(M[2], M[3], _MM_SHUFFLE(3, 2, 3, 2));
+		
+		std::array<__m128, 4> mResult;
+
+		// x.x,y.x,z.x,w.x
+		mResult[0] = _mm_shuffle_ps(vTemp1, vTemp2, _MM_SHUFFLE(2, 0, 2, 0));
+		// x.y,y.y,z.y,w.y
+		mResult[1] = _mm_shuffle_ps(vTemp1, vTemp2, _MM_SHUFFLE(3, 1, 3, 1));
+		// x.z,y.z,z.z,w.z
+		mResult[2] = _mm_shuffle_ps(vTemp3, vTemp4, _MM_SHUFFLE(2, 0, 2, 0));
+		// x.w,y.w,z.w,w.w
+		mResult[3] = _mm_shuffle_ps(vTemp3, vTemp4, _MM_SHUFFLE(3, 1, 3, 1));
+		return mResult;
+#else // LM_VMX128_INTRINSICS_
+#endif // LM_VMX128_INTRINSICS_
+	}
+
+	inline std::array<__m128, 4> Inverse(__m128& Determinant, const std::array<__m128, 4>& m) {
+#if defined(_LM_ARM_NEON_INTRINSICS)
+
+		__m128 MT = __m128Transpose(M);
+
+		__m128 V0[4], V1[4];
+		V0[0] = __m128Swizzle<XM_SWIZZLE_X, XM_SWIZZLE_X, XM_SWIZZLE_Y, XM_SWIZZLE_Y>(MT[2]);
+		V1[0] = __m128Swizzle<XM_SWIZZLE_Z, XM_SWIZZLE_W, XM_SWIZZLE_Z, XM_SWIZZLE_W>(MT[3]);
+		V0[1] = __m128Swizzle<XM_SWIZZLE_X, XM_SWIZZLE_X, XM_SWIZZLE_Y, XM_SWIZZLE_Y>(MT[0]);
+		V1[1] = __m128Swizzle<XM_SWIZZLE_Z, XM_SWIZZLE_W, XM_SWIZZLE_Z, XM_SWIZZLE_W>(MT[1]);
+		V0[2] = __m128Permute<XM_PERMUTE_0X, XM_PERMUTE_0Z, XM_PERMUTE_1X, XM_PERMUTE_1Z>(MT[2], MT[0]);
+		V1[2] = __m128Permute<XM_PERMUTE_0Y, XM_PERMUTE_0W, XM_PERMUTE_1Y, XM_PERMUTE_1W>(MT[3], MT[1]);
+
+		__m128 D0 = __m128Multiply(V0[0], V1[0]);
+		__m128 D1 = __m128Multiply(V0[1], V1[1]);
+		__m128 D2 = __m128Multiply(V0[2], V1[2]);
+
+		V0[0] = __m128Swizzle<XM_SWIZZLE_Z, XM_SWIZZLE_W, XM_SWIZZLE_Z, XM_SWIZZLE_W>(MT[2]);
+		V1[0] = __m128Swizzle<XM_SWIZZLE_X, XM_SWIZZLE_X, XM_SWIZZLE_Y, XM_SWIZZLE_Y>(MT[3]);
+		V0[1] = __m128Swizzle<XM_SWIZZLE_Z, XM_SWIZZLE_W, XM_SWIZZLE_Z, XM_SWIZZLE_W>(MT[0]);
+		V1[1] = __m128Swizzle<XM_SWIZZLE_X, XM_SWIZZLE_X, XM_SWIZZLE_Y, XM_SWIZZLE_Y>(MT[1]);
+		V0[2] = __m128Permute<XM_PERMUTE_0Y, XM_PERMUTE_0W, XM_PERMUTE_1Y, XM_PERMUTE_1W>(MT[2], MT[0]);
+		V1[2] = __m128Permute<XM_PERMUTE_0X, XM_PERMUTE_0Z, XM_PERMUTE_1X, XM_PERMUTE_1Z>(MT[3], MT[1]);
+
+		D0 = __m128NegativeMultiplySubtract(V0[0], V1[0], D0);
+		D1 = __m128NegativeMultiplySubtract(V0[1], V1[1], D1);
+		D2 = __m128NegativeMultiplySubtract(V0[2], V1[2], D2);
+
+		V0[0] = __m128Swizzle<XM_SWIZZLE_Y, XM_SWIZZLE_Z, XM_SWIZZLE_X, XM_SWIZZLE_Y>(MT[1]);
+		V1[0] = __m128Permute<XM_PERMUTE_1Y, XM_PERMUTE_0Y, XM_PERMUTE_0W, XM_PERMUTE_0X>(D0, D2);
+		V0[1] = __m128Swizzle<XM_SWIZZLE_Z, XM_SWIZZLE_X, XM_SWIZZLE_Y, XM_SWIZZLE_X>(MT[0]);
+		V1[1] = __m128Permute<XM_PERMUTE_0W, XM_PERMUTE_1Y, XM_PERMUTE_0Y, XM_PERMUTE_0Z>(D0, D2);
+		V0[2] = __m128Swizzle<XM_SWIZZLE_Y, XM_SWIZZLE_Z, XM_SWIZZLE_X, XM_SWIZZLE_Y>(MT[3]);
+		V1[2] = __m128Permute<XM_PERMUTE_1W, XM_PERMUTE_0Y, XM_PERMUTE_0W, XM_PERMUTE_0X>(D1, D2);
+		V0[3] = __m128Swizzle<XM_SWIZZLE_Z, XM_SWIZZLE_X, XM_SWIZZLE_Y, XM_SWIZZLE_X>(MT[2]);
+		V1[3] = __m128Permute<XM_PERMUTE_0W, XM_PERMUTE_1W, XM_PERMUTE_0Y, XM_PERMUTE_0Z>(D1, D2);
+
+		__m128 C0 = __m128Multiply(V0[0], V1[0]);
+		__m128 C2 = __m128Multiply(V0[1], V1[1]);
+		__m128 C4 = __m128Multiply(V0[2], V1[2]);
+		__m128 C6 = __m128Multiply(V0[3], V1[3]);
+
+		V0[0] = __m128Swizzle<XM_SWIZZLE_Z, XM_SWIZZLE_W, XM_SWIZZLE_Y, XM_SWIZZLE_Z>(MT[1]);
+		V1[0] = __m128Permute<XM_PERMUTE_0W, XM_PERMUTE_0X, XM_PERMUTE_0Y, XM_PERMUTE_1X>(D0, D2);
+		V0[1] = __m128Swizzle<XM_SWIZZLE_W, XM_SWIZZLE_Z, XM_SWIZZLE_W, XM_SWIZZLE_Y>(MT[0]);
+		V1[1] = __m128Permute<XM_PERMUTE_0Z, XM_PERMUTE_0Y, XM_PERMUTE_1X, XM_PERMUTE_0X>(D0, D2);
+		V0[2] = __m128Swizzle<XM_SWIZZLE_Z, XM_SWIZZLE_W, XM_SWIZZLE_Y, XM_SWIZZLE_Z>(MT[3]);
+		V1[2] = __m128Permute<XM_PERMUTE_0W, XM_PERMUTE_0X, XM_PERMUTE_0Y, XM_PERMUTE_1Z>(D1, D2);
+		V0[3] = __m128Swizzle<XM_SWIZZLE_W, XM_SWIZZLE_Z, XM_SWIZZLE_W, XM_SWIZZLE_Y>(MT[2]);
+		V1[3] = __m128Permute<XM_PERMUTE_0Z, XM_PERMUTE_0Y, XM_PERMUTE_1Z, XM_PERMUTE_0X>(D1, D2);
+
+		C0 = __m128NegativeMultiplySubtract(V0[0], V1[0], C0);
+		C2 = __m128NegativeMultiplySubtract(V0[1], V1[1], C2);
+		C4 = __m128NegativeMultiplySubtract(V0[2], V1[2], C4);
+		C6 = __m128NegativeMultiplySubtract(V0[3], V1[3], C6);
+
+		V0[0] = __m128Swizzle<XM_SWIZZLE_W, XM_SWIZZLE_X, XM_SWIZZLE_W, XM_SWIZZLE_X>(MT[1]);
+		V1[0] = __m128Permute<XM_PERMUTE_0Z, XM_PERMUTE_1Y, XM_PERMUTE_1X, XM_PERMUTE_0Z>(D0, D2);
+		V0[1] = __m128Swizzle<XM_SWIZZLE_Y, XM_SWIZZLE_W, XM_SWIZZLE_X, XM_SWIZZLE_Z>(MT[0]);
+		V1[1] = __m128Permute<XM_PERMUTE_1Y, XM_PERMUTE_0X, XM_PERMUTE_0W, XM_PERMUTE_1X>(D0, D2);
+		V0[2] = __m128Swizzle<XM_SWIZZLE_W, XM_SWIZZLE_X, XM_SWIZZLE_W, XM_SWIZZLE_X>(MT[3]);
+		V1[2] = __m128Permute<XM_PERMUTE_0Z, XM_PERMUTE_1W, XM_PERMUTE_1Z, XM_PERMUTE_0Z>(D1, D2);
+		V0[3] = __m128Swizzle<XM_SWIZZLE_Y, XM_SWIZZLE_W, XM_SWIZZLE_X, XM_SWIZZLE_Z>(MT[2]);
+		V1[3] = __m128Permute<XM_PERMUTE_1W, XM_PERMUTE_0X, XM_PERMUTE_0W, XM_PERMUTE_1Z>(D1, D2);
+
+		__m128 C1 = __m128NegativeMultiplySubtract(V0[0], V1[0], C0);
+		C0 = __m128MultiplyAdd(V0[0], V1[0], C0);
+		__m128 C3 = __m128MultiplyAdd(V0[1], V1[1], C2);
+		C2 = __m128NegativeMultiplySubtract(V0[1], V1[1], C2);
+		__m128 C5 = __m128NegativeMultiplySubtract(V0[2], V1[2], C4);
+		C4 = __m128MultiplyAdd(V0[2], V1[2], C4);
+		__m128 C7 = __m128MultiplyAdd(V0[3], V1[3], C6);
+		C6 = __m128NegativeMultiplySubtract(V0[3], V1[3], C6);
+
+		__m128 R;
+		R[0] = __m128Select(C0, C1, g_XMSelect0101.v);
+		R[1] = __m128Select(C2, C3, g_XMSelect0101.v);
+		R[2] = __m128Select(C4, C5, g_XMSelect0101.v);
+		R[3] = __m128Select(C6, C7, g_XMSelect0101.v);
+
+		__m128 Determinant = __m1284Dot(R[0], MT[0]);
+
+		if (pDeterminant != nullptr)
+			*pDeterminant = Determinant;
+
+		__m128 Reciprocal = __m128Reciprocal(Determinant);
+
+		__m128 Result;
+		Result[0] = __m128Multiply(R[0], Reciprocal);
+		Result[1] = __m128Multiply(R[1], Reciprocal);
+		Result[2] = __m128Multiply(R[2], Reciprocal);
+		Result[3] = __m128Multiply(R[3], Reciprocal);
+		return Result;
+
+#elif defined(LM_SSE_INTRINSICS)
+		std::array<__m128, 4> MT = Transpose(m);
+		__m128 V00 = LM_PERMUTE_PS(MT[2], _MM_SHUFFLE(1, 1, 0, 0));
+		__m128 V10 = LM_PERMUTE_PS(MT[3], _MM_SHUFFLE(3, 2, 3, 2));
+		__m128 V01 = LM_PERMUTE_PS(MT[0], _MM_SHUFFLE(1, 1, 0, 0));
+		__m128 V11 = LM_PERMUTE_PS(MT[1], _MM_SHUFFLE(3, 2, 3, 2));
+		__m128 V02 = _mm_shuffle_ps(MT[2], MT[0], _MM_SHUFFLE(2, 0, 2, 0));
+		__m128 V12 = _mm_shuffle_ps(MT[3], MT[1], _MM_SHUFFLE(3, 1, 3, 1));
+
+		__m128 D0 = _mm_mul_ps(V00, V10);
+		__m128 D1 = _mm_mul_ps(V01, V11);
+		__m128 D2 = _mm_mul_ps(V02, V12);
+
+		V00 = LM_PERMUTE_PS(MT[2], _MM_SHUFFLE(3, 2, 3, 2));
+		V10 = LM_PERMUTE_PS(MT[3], _MM_SHUFFLE(1, 1, 0, 0));
+		V01 = LM_PERMUTE_PS(MT[0], _MM_SHUFFLE(3, 2, 3, 2));
+		V11 = LM_PERMUTE_PS(MT[1], _MM_SHUFFLE(1, 1, 0, 0));
+		V02 = _mm_shuffle_ps(MT[2], MT[0], _MM_SHUFFLE(3, 1, 3, 1));
+		V12 = _mm_shuffle_ps(MT[3], MT[1], _MM_SHUFFLE(2, 0, 2, 0));
+
+		V00 = _mm_mul_ps(V00, V10);
+		V01 = _mm_mul_ps(V01, V11);
+		V02 = _mm_mul_ps(V02, V12);
+		D0 = _mm_sub_ps(D0, V00);
+		D1 = _mm_sub_ps(D1, V01);
+		D2 = _mm_sub_ps(D2, V02);
+		// V11 = D0Y,D0W,D2Y,D2Y
+		V11 = _mm_shuffle_ps(D0, D2, _MM_SHUFFLE(1, 1, 3, 1));
+		V00 = LM_PERMUTE_PS(MT[1], _MM_SHUFFLE(1, 0, 2, 1));
+		V10 = _mm_shuffle_ps(V11, D0, _MM_SHUFFLE(0, 3, 0, 2));
+		V01 = LM_PERMUTE_PS(MT[0], _MM_SHUFFLE(0, 1, 0, 2));
+		V11 = _mm_shuffle_ps(V11, D0, _MM_SHUFFLE(2, 1, 2, 1));
+		// V13 = D1Y,D1W,D2W,D2W
+		__m128 V13 = _mm_shuffle_ps(D1, D2, _MM_SHUFFLE(3, 3, 3, 1));
+		V02 = LM_PERMUTE_PS(MT[3], _MM_SHUFFLE(1, 0, 2, 1));
+		V12 = _mm_shuffle_ps(V13, D1, _MM_SHUFFLE(0, 3, 0, 2));
+		__m128 V03 = LM_PERMUTE_PS(MT[2], _MM_SHUFFLE(0, 1, 0, 2));
+		V13 = _mm_shuffle_ps(V13, D1, _MM_SHUFFLE(2, 1, 2, 1));
+
+		__m128 C0 = _mm_mul_ps(V00, V10);
+		__m128 C2 = _mm_mul_ps(V01, V11);
+		__m128 C4 = _mm_mul_ps(V02, V12);
+		__m128 C6 = _mm_mul_ps(V03, V13);
+
+		// V11 = D0X,D0Y,D2X,D2X
+		V11 = _mm_shuffle_ps(D0, D2, _MM_SHUFFLE(0, 0, 1, 0));
+		V00 = LM_PERMUTE_PS(MT[1], _MM_SHUFFLE(2, 1, 3, 2));
+		V10 = _mm_shuffle_ps(D0, V11, _MM_SHUFFLE(2, 1, 0, 3));
+		V01 = LM_PERMUTE_PS(MT[0], _MM_SHUFFLE(1, 3, 2, 3));
+		V11 = _mm_shuffle_ps(D0, V11, _MM_SHUFFLE(0, 2, 1, 2));
+		// V13 = D1X,D1Y,D2Z,D2Z
+		V13 = _mm_shuffle_ps(D1, D2, _MM_SHUFFLE(2, 2, 1, 0));
+		V02 = LM_PERMUTE_PS(MT[3], _MM_SHUFFLE(2, 1, 3, 2));
+		V12 = _mm_shuffle_ps(D1, V13, _MM_SHUFFLE(2, 1, 0, 3));
+		V03 = LM_PERMUTE_PS(MT[2], _MM_SHUFFLE(1, 3, 2, 3));
+		V13 = _mm_shuffle_ps(D1, V13, _MM_SHUFFLE(0, 2, 1, 2));
+
+		V00 = _mm_mul_ps(V00, V10);
+		V01 = _mm_mul_ps(V01, V11);
+		V02 = _mm_mul_ps(V02, V12);
+		V03 = _mm_mul_ps(V03, V13);
+		C0 = _mm_sub_ps(C0, V00);
+		C2 = _mm_sub_ps(C2, V01);
+		C4 = _mm_sub_ps(C4, V02);
+		C6 = _mm_sub_ps(C6, V03);
+
+		V00 = LM_PERMUTE_PS(MT[1], _MM_SHUFFLE(0, 3, 0, 3));
+		// V10 = D0Z,D0Z,D2X,D2Y
+		V10 = _mm_shuffle_ps(D0, D2, _MM_SHUFFLE(1, 0, 2, 2));
+		V10 = LM_PERMUTE_PS(V10, _MM_SHUFFLE(0, 2, 3, 0));
+		V01 = LM_PERMUTE_PS(MT[0], _MM_SHUFFLE(2, 0, 3, 1));
+		// V11 = D0X,D0W,D2X,D2Y
+		V11 = _mm_shuffle_ps(D0, D2, _MM_SHUFFLE(1, 0, 3, 0));
+		V11 = LM_PERMUTE_PS(V11, _MM_SHUFFLE(2, 1, 0, 3));
+		V02 = LM_PERMUTE_PS(MT[3], _MM_SHUFFLE(0, 3, 0, 3));
+		// V12 = D1Z,D1Z,D2Z,D2W
+		V12 = _mm_shuffle_ps(D1, D2, _MM_SHUFFLE(3, 2, 2, 2));
+		V12 = LM_PERMUTE_PS(V12, _MM_SHUFFLE(0, 2, 3, 0));
+		V03 = LM_PERMUTE_PS(MT[2], _MM_SHUFFLE(2, 0, 3, 1));
+		// V13 = D1X,D1W,D2Z,D2W
+		V13 = _mm_shuffle_ps(D1, D2, _MM_SHUFFLE(3, 2, 3, 0));
+		V13 = LM_PERMUTE_PS(V13, _MM_SHUFFLE(2, 1, 0, 3));
+
+		V00 = _mm_mul_ps(V00, V10);
+		V01 = _mm_mul_ps(V01, V11);
+		V02 = _mm_mul_ps(V02, V12);
+		V03 = _mm_mul_ps(V03, V13);
+		__m128 C1 = _mm_sub_ps(C0, V00);
+		C0 = _mm_add_ps(C0, V00);
+		__m128 C3 = _mm_add_ps(C2, V01);
+		C2 = _mm_sub_ps(C2, V01);
+		__m128 C5 = _mm_sub_ps(C4, V02);
+		C4 = _mm_add_ps(C4, V02);
+		__m128 C7 = _mm_add_ps(C6, V03);
+		C6 = _mm_sub_ps(C6, V03);
+
+		C0 = _mm_shuffle_ps(C0, C1, _MM_SHUFFLE(3, 1, 2, 0));
+		C2 = _mm_shuffle_ps(C2, C3, _MM_SHUFFLE(3, 1, 2, 0));
+		C4 = _mm_shuffle_ps(C4, C5, _MM_SHUFFLE(3, 1, 2, 0));
+		C6 = _mm_shuffle_ps(C6, C7, _MM_SHUFFLE(3, 1, 2, 0));
+		C0 = LM_PERMUTE_PS(C0, _MM_SHUFFLE(3, 1, 2, 0));
+		C2 = LM_PERMUTE_PS(C2, _MM_SHUFFLE(3, 1, 2, 0));
+		C4 = LM_PERMUTE_PS(C4, _MM_SHUFFLE(3, 1, 2, 0));
+		C6 = LM_PERMUTE_PS(C6, _MM_SHUFFLE(3, 1, 2, 0));
+		// Get the determinate
+		__m128 vTemp = Dot<4>(C0, MT[0]);
+		Determinant = vTemp;
+		vTemp = _mm_div_ps(g_XMOne, vTemp);
+		std::array<__m128, 4> mResult;
+		mResult[0] = _mm_mul_ps(C0, vTemp);
+		mResult[1] = _mm_mul_ps(C2, vTemp);
+		mResult[2] = _mm_mul_ps(C4, vTemp);
+		mResult[3] = _mm_mul_ps(C6, vTemp);
+		return mResult;
+#else // LM_VMX128_INTRINSICS_
+#endif // LM_VMX128_INTRINSICS_
+	}
+
 	template<uint8 D = 3>
-	inline __m128 Normalize(__m128 V){
+	inline __m128 Normalize(__m128 V) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		// Dot3
 		float32x4_t vTemp = vmulq_f32(V, V);
@@ -1174,7 +1426,7 @@ namespace leo{
 	}
 
 	template<>
-	inline __m128 Normalize<2>(__m128 V){
+	inline __m128 Normalize<2>(__m128 V) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		float32x2_t VL = vget_low_f32(V);
 		// Dot2
@@ -1224,7 +1476,7 @@ namespace leo{
 	}
 
 	template<uint8 D = 3>
-	inline __m128 Length(__m128 V){
+	inline __m128 Length(__m128 V) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		// Dot3
 		float32x4_t vTemp = vmulq_f32(V, V);
@@ -1268,7 +1520,7 @@ namespace leo{
 
 
 
-	inline __m128 Abs(__m128 V){
+	inline __m128 Abs(__m128 V) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vabsq_f32(V);
 #elif defined(LM_SSE_INTRINSICS)
@@ -1281,7 +1533,7 @@ namespace leo{
 	}
 
 	template<uint8 D = 3>
-	inline __m128 Cross(__m128 V1, __m128 V2){
+	inline __m128 Cross(__m128 V1, __m128 V2) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		float32x2_t v1xy = vget_low_f32(V1);
 		float32x2_t v2xy = vget_low_f32(V2);
@@ -1318,7 +1570,7 @@ namespace leo{
 	}
 
 	template<uint8 D = 3>
-	inline __m128 Dot(__m128 V1, __m128 V2){
+	inline __m128 Dot(__m128 V1, __m128 V2) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		float32x4_t vTemp = vmulq_f32(V1, V2);
 		float32x2_t v1 = vget_low_f32(vTemp);
@@ -1345,15 +1597,15 @@ namespace leo{
 	}
 
 	template<>
-	inline __m128 Dot<4>(__m128 V1, __m128 V2){
+	inline __m128 Dot<4>(__m128 V1, __m128 V2) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		float32x4_t vTemp = vmulq_f32(V1, V2);
 		float32x2_t v1 = vget_low_f32(vTemp);
 		float32x2_t v2 = vget_high_f32(vTemp);
-		v1 = vpadd_f32( v1, v1 );
-		v2 = vpadd_f32( v2, v2 );
-		v1 = vadd_f32( v1, v2 );
-		return vcombine_f32( v1, v1 );
+		v1 = vpadd_f32(v1, v1);
+		v2 = vpadd_f32(v2, v2);
+		v1 = vadd_f32(v1, v2);
+		return vcombine_f32(v1, v1);
 #elif defined(LM_SSE_INTRINSICS)
 		auto vTemp2 = V2;
 		auto vTemp = _mm_mul_ps(V1, vTemp2);
@@ -1366,7 +1618,7 @@ namespace leo{
 #endif // _XM_VMX128_INTRINSICS_
 	}
 
-	inline __m128 Sqrt(__m128 V){
+	inline __m128 Sqrt(__m128 V) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		// 3 iterations of Newton-Raphson refinment of sqrt
 		float32x4_t S0 = vrsqrteq_f32(V);
@@ -1391,7 +1643,7 @@ namespace leo{
 #endif // _LM_VMX128_INTRINSICS_
 	}
 
-	inline __m128 Round(__m128 V){
+	inline __m128 Round(__m128 V) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		static const autoI32 magic = { 0x4B000000, 0x4B000000, 0x4B000000, 0x4B000000 };
 		uint32x4_t sign = vandq_u32(V, g_XMNegativeZero);
@@ -1410,15 +1662,19 @@ namespace leo{
 #endif // _XM_VMX128_INTRINSICS_
 	}
 
-	inline __m128 Lerp(__m128 V1, __m128 V2, __m128 T){
+	inline __m128 Lerp(__m128 V1, __m128 V2, __m128 T) {
 		return MultiplyAdd(V1, Subtract(SplatOne(), T), Multiply(V2, T));
+	}
+
+	inline __m128 Reciprocal(__m128 v) {
+		return Divide(SplatOne(), v);
 	}
 }
 
 //__m128 logic operator def
-namespace leo{
+namespace leo {
 	template<uint8 D = 4>
-	inline bool Less(__m128 lhs, __m128 rhs){
+	inline bool Less(__m128 lhs, __m128 rhs) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		uint32x4_t vResult = vcltq_f32(V1, V2);
 		int8x8x2_t vTemp = vzip_u8(vget_low_u8(vResult), vget_high_u8(vResult));
@@ -1432,7 +1688,7 @@ namespace leo{
 	}
 
 	template<uint8 D = 3>
-	inline bool GreaterOrEqual(__m128 V1, __m128 V2){
+	inline bool GreaterOrEqual(__m128 V1, __m128 V2) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		uint32x4_t vResult = vcgeq_f32(V1, V2);
 		int8x8x2_t vTemp = vzip_u8(vget_low_u8(vResult), vget_high_u8(vResult));
@@ -1446,12 +1702,12 @@ namespace leo{
 	}
 
 	template<uint8 D = 3>
-	inline bool LessOrEqual(__m128 V1, __m128 V2){
+	inline bool LessOrEqual(__m128 V1, __m128 V2) {
 #if defined(LM_ARM_NEON_INTRINSICS)
-		int32x4_t vResult = vcleq_f32( V1, V2 );
+		int32x4_t vResult = vcleq_f32(V1, V2);
 		int8x8x2_t vTemp = vzip_u8(vget_low_u8(vResult), vget_high_u8(vResult));
 		vTemp = vzip_u16(vTemp.val[0], vTemp.val[1]);
-		return ( (vget_lane_u32(vTemp.val[1], 1) & 0xFFFFFFU) == 0xFFFFFFU );
+		return ((vget_lane_u32(vTemp.val[1], 1) & 0xFFFFFFU) == 0xFFFFFFU);
 #elif defined(LM_SSE_INTRINSICS)
 		auto vTemp = _mm_cmple_ps(V1, V2);
 		return (((_mm_movemask_ps(vTemp) & 7) == 7) != 0);
@@ -1459,7 +1715,7 @@ namespace leo{
 #endif
 	}
 
-	inline __m128 LessOrEqualExt(__m128 lhs, __m128 rhs){
+	inline __m128 LessOrEqualExt(__m128 lhs, __m128 rhs) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vcleq_f32(lhs, rhs);
 #elif defined(LM_SSE_INTRINSICS)
@@ -1468,7 +1724,7 @@ namespace leo{
 #endif // _LMVMX128_INTRINSICS_
 	}
 
-	inline __m128 LessExt(__m128 lhs, __m128 rhs){
+	inline __m128 LessExt(__m128 lhs, __m128 rhs) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vcltq_f32(lhs, rhs);
 #elif defined(LM_SSE_INTRINSICS)
@@ -1477,16 +1733,16 @@ namespace leo{
 #endif // LM_VMX128_INTRINSICS_
 	}
 
-	inline __m128 EqualExt(__m128 V1, __m128 V2){
+	inline __m128 EqualExt(__m128 V1, __m128 V2) {
 #if defined(LM_ARM_NEON_INTRINSICS)
-		return vceqq_f32( V1, V2 );
+		return vceqq_f32(V1, V2);
 #elif defined(LM_SSE_INTRINSICS)
 		return _mm_cmpeq_ps(V1, V2);
 #else // _XM_VMX128_INTRINSICS_
 #endif // _XM_VMX128_INTRINSICS_
 	}
 
-	inline __m128 AndInt(__m128 lhs, __m128 rhs){
+	inline __m128 AndInt(__m128 lhs, __m128 rhs) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vandq_u32(lhs, rhs);
 #elif defined(LM_SSE_INTRINSICS)
@@ -1494,7 +1750,7 @@ namespace leo{
 #endif
 	}
 
-	inline __m128 OrInt(__m128 lhs, __m128 rhs){
+	inline __m128 OrInt(__m128 lhs, __m128 rhs) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vorrq_u32(lhs, rhs);
 #elif defined(LM_SSE_INTRINSICS)
@@ -1506,12 +1762,12 @@ namespace leo{
 
 
 	template<uint8 D = 4>
-	inline bool EqualInt(__m128 V1, __m128 V2){
+	inline bool EqualInt(__m128 V1, __m128 V2) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		uint32x4_t vResult = vceqq_u32(V1, V2);
 		int8x8x2_t vTemp = vzip_u8(vget_low_u8(vResult), vget_high_u8(vResult));
 		vTemp = vzip_u16(vTemp.val[0], vTemp.val[1]);
-		return ( vget_lane_u32(vTemp.val[1], 1) == 0xFFFFFFFFU );
+		return (vget_lane_u32(vTemp.val[1], 1) == 0xFFFFFFFFU);
 #elif defined(LM_SSE_INTRINSICS)
 		__m128i vTemp = _mm_cmpeq_epi32(_mm_castps_si128(V1), _mm_castps_si128(V2));
 		return ((_mm_movemask_ps(_mm_castsi128_ps(vTemp)) == 0xf) != 0);
@@ -1519,7 +1775,7 @@ namespace leo{
 #endif
 	}
 
-	inline __m128 EqualIntExt(__m128 V1, __m128 V2){
+	inline __m128 EqualIntExt(__m128 V1, __m128 V2) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vceqq_u32(V1, V2);
 #elif defined(LM_SSE_INTRINSICS)
@@ -1530,7 +1786,7 @@ namespace leo{
 	}
 
 	template<uint8 D = 4>
-	inline bool NotEqualInt(__m128 V1, __m128 V2){
+	inline bool NotEqualInt(__m128 V1, __m128 V2) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		uint32x4_t vResult = vceqq_u32(V1, V2);
 		int8x8x2_t vTemp = vzip_u8(vget_low_u8(vResult), vget_high_u8(vResult));
@@ -1543,7 +1799,7 @@ namespace leo{
 #endif
 	}
 
-	inline __m128 GreaterExt(__m128 V1, __m128 V2){
+	inline __m128 GreaterExt(__m128 V1, __m128 V2) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vcgtq_f32(V1, V2);
 #elif defined(LM_SSE_INTRINSICS)
@@ -1554,23 +1810,23 @@ namespace leo{
 }
 
 //____m128,std::arrry<__m128,4> operator override
-namespace leo{
+namespace leo {
 #if 0
-	inline __m128 operator-(__m128 lhs, __m128 rhs){
+	inline __m128 operator-(__m128 lhs, __m128 rhs) {
 		return Subtract(lhs, rhs);
 	}
 #endif
 }
 
 //__m128 Trigonometry Function
-namespace leo{
-	inline __m128 modangle(__m128 Angles){
+namespace leo {
+	inline __m128 modangle(__m128 Angles) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		// Modulo the range of the given angles such that -XM_PI <= Angles < XM_PI
 		auto vResult = vmulq_f32(Angles, SplatReciprocalTwoPi());
 		// Use the inline function due to complexity for rounding
-		vResult = XMVectorRound(vResult);
-		return vmlsq_f32( Angles, vResult, SplatTwoPi() );
+		vResult = __m128Round(vResult);
+		return vmlsq_f32(Angles, vResult, SplatTwoPi());
 #elif defined(LM_SSE_INTRINSICS)
 		// Modulo the range of the given angles such that -XM_PI <= Angles < XM_PI
 		auto vResult = _mm_mul_ps(Angles, SplatReciprocalTwoPi());
@@ -1583,10 +1839,10 @@ namespace leo{
 #endif // _XM_VMX128_INTRINSICS_
 	}
 
-	inline __m128 atan(__m128 V){
+	inline __m128 atan(__m128 V) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		float32x4_t absV = vabsq_f32(V);
-		float32x4_t invV = XMVectorReciprocal(V);
+		float32x4_t invV = __m128Reciprocal(V);
 		uint32x4_t comp = vcgtq_f32(V, SplatOne());
 		uint32x4_t sign = vbslq_f32(comp, SplatOne(), SplatNegativeOne);
 		comp = vcleq_f32(absV, SplatOne());
@@ -1692,7 +1948,7 @@ namespace leo{
 #endif // _XM_VMX128_INTRINSICS_
 	}
 
-	inline __m128 atan2(__m128 Y, __m128 X){
+	inline __m128 atan2(__m128 Y, __m128 X) {
 		// Return the inverse tangent of Y / X in the range of -Pi to Pi with the following exceptions:
 
 		//     Y == 0 and X is Negative         -> Pi with the sign of Y
@@ -1746,10 +2002,10 @@ namespace leo{
 		return Select(Result, R2, ATanResultValid);
 	}
 
-	inline __m128 sin(__m128 V){
+	inline __m128 sin(__m128 V) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		// Force the value within the bounds of pi
-		auto x = XMVectorModAngles(V);
+		auto x = __m128ModAngles(V);
 
 		// Map in [-pi/2,pi/2] with sin(y) = sin(x).
 		uint32x4_t sign = vandq_u32(x, SplatNegativeZero());
@@ -1825,12 +2081,12 @@ namespace leo{
 }
 
 //quaternionslerp
-namespace leo{
-	inline __m128 QuaternionDot(__m128 Q0, __m128 Q1){
+namespace leo {
+	inline __m128 QuaternionDot(__m128 Q0, __m128 Q1) {
 		return Dot<4>(Q0, Q1);
 	}
 
-	inline __m128 QuaternionSlerp(__m128 Q0, __m128 Q1, __m128 T){
+	inline __m128 QuaternionSlerp(__m128 Q0, __m128 Q1, __m128 T) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 
 		const autoF32 OneMinusEpsilon = { 1.0f - 0.00001f, 1.0f - 0.00001f, 1.0f - 0.00001f, 1.0f - 0.00001f };
@@ -1920,7 +2176,7 @@ namespace leo{
 #endif // _XM_VMX128_INTRINSICS_
 	}
 
-	inline __m128 QuaternionSlerp(__m128 Q0, __m128 Q1, float t){
+	inline __m128 QuaternionSlerp(__m128 Q0, __m128 Q1, float t) {
 		return QuaternionSlerp(Q0, Q1, Splat(t));
 	}
 

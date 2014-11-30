@@ -105,7 +105,6 @@
     <ClCompile Include="Core\EngineConfig.cpp" />
     <ClCompile Include="Core\FileSearch.cpp" />
     <ClCompile Include="Core\GaussBlur.cpp" />
-    <ClCompile Include="Core\Geometry.cpp" />
     <ClCompile Include="Core\Mesh.cpp" />
     <ClCompile Include="Core\MeshLoad.cpp" />
     <ClCompile Include="Core\RenderSync.cpp" />
@@ -126,6 +125,7 @@
     <ClCompile Include="File.cpp" />
     <ClCompile Include="IndePlatform\any.cpp" />
     <ClCompile Include="IndePlatform\BugTest.cpp" />
+    <ClCompile Include="IndePlatform\Geometry.cpp" />
     <ClCompile Include="IndePlatform\leoMathTest.cpp" />
     <ClCompile Include="IndePlatform\memory.cpp" />
     <ClCompile Include="IndePlatform\raii.cpp" />
@@ -204,11 +204,13 @@
     <ClInclude Include="IndePlatform\EndianSwap.hpp" />
     <ClInclude Include="IndePlatform\functional.hpp" />
     <ClInclude Include="IndePlatform\Geometry.hpp" />
+    <ClInclude Include="IndePlatform\Geometry_impl.hpp" />
     <ClInclude Include="IndePlatform\iterator.hpp" />
     <ClInclude Include="IndePlatform\ldef.h" />
     <ClInclude Include="IndePlatform\leoint.hpp" />
     <ClInclude Include="IndePlatform\LeoMath.h" />
     <ClInclude Include="IndePlatform\leo_math_convert_impl.h" />
+    <ClInclude Include="IndePlatform\leo_math_impl.hpp" />
     <ClInclude Include="IndePlatform\memory.hpp" />
     <ClInclude Include="IndePlatform\path.hpp" />
     <ClInclude Include="IndePlatform\platform.h" />
