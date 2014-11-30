@@ -11,7 +11,7 @@ struct PixelIn
 	float2 Tex : TEXCOORD;
 };
 
-Texture2D<float3> gAlphaTexture : register(t0);
+Texture2D<float4> gAlphaTexture : register(t0);
 Texture2DArray gMatTexture :  register(t1);
 SamplerState RepeatLinear:register(s0)
 {
@@ -22,10 +22,19 @@ SamplerState RepeatLinear:register(s0)
 
 float4 main(PixelIn pin) : SV_TARGET
 {
-	float3 weight = gAlphaTexture.Sample(RepeatLinear, pin.Tex).xyz;
-	weight = normalize(weight);
-		float4 color = weight.x *gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 0.f));
-		color += weight.y*gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 1.f));
-	color += weight.z*gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 2.f));
+	float4 weight = gAlphaTexture.Sample(RepeatLinear, pin.Tex);
+	float4 color = gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 0.f));
+	float4 c0 = gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 1.f));
+	float4 c1 = gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 2.f));
+	float4 c2 = gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 3.f));
+	float4 c3 = gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 4.f));
+
+	color = lerp(color,c0,weight.r);
+	color = lerp(color, c1, weight.g);
+	color = lerp(color, c2, weight.b);
+	color = lerp(color, c3, weight.a);
+#ifdef DEBUG
+	return color*0.5f + gColor*0.5f;
+#endif
 	return color;
 }

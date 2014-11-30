@@ -214,4 +214,7 @@ namespace leo
 		float3 mUp;
 		float3 mLook;
 	};
+
+	//跟随相机
+	//绑定SQTObject,并进行消息派发
 }

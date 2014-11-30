@@ -471,12 +471,13 @@
     <Text Include="Core\接口说明.txt" />
     <CustomBuild Include="Resource\build_config.txt">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">xcopy /s /Y %(RootDir)%(Directory)*.* $(OutDir)%(RelativeDir)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy /Y %(RootDir)%(Directory) $(OutDir)%(RelativeDir)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">xcopy /s /Y %(RootDir)%(Directory)*.* $(OutDir)%(RelativeDir)</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">复制 %(RootDir)%(Directory) 到 $(OutDir)%(RelativeDir)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">复制 %(RootDir)%(Directory) 到 $(OutDir)%(RelativeDir)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)\copy.log</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)\copy.log</Outputs>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
     <Text Include="一个渲染对象需求.txt" />
     <Text Include="宏说明.txt" />

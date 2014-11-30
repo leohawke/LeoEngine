@@ -227,8 +227,13 @@ namespace leo
 			leo::TextureMgr tm;
 			mHeightMap = tm.LoadTextureSRV(mTerrainFileHeader.mHeightMap);
 
-			mWeightMap = tm.LoadTextureSRV(L"Resource\\weight.jpg");
-			mMatArrayMap = tm.LoadTexture2DArraySRV(std::array<const wchar_t*, 3>({ L"Resource\\Grass.jpg", L"Resource\\Soil.jpg", L"Resource\\Snow.jpg" }));
+			mWeightMap = tm.LoadTextureSRV(L"Resource/blend.dds");
+			mMatArrayMap = tm.LoadTexture2DArraySRV(std::array<const wchar_t*, 5>({
+				L"Resource/grass.dds", 
+				L"Resource/darkdirt.dds", 
+				L"Resource/stone.dds",
+				L"Resource/lightdirt.dds",
+				L"Resource/snow.dds"}));
 		}
 		~Terrain()
 		{
@@ -280,7 +285,22 @@ namespace leo
 				auto lodlevel = chunk->mLodLevel = DetermineLod(topleft + offset, topright + offset, camera.View(), camera.Proj());
 
 				mEffect->WorldOffset(Offset(slotX,slotY), context);
+#ifdef DEBUG
+				static std::array<float4, 256> mLodColor;
+				static bool has_call = false;
 
+				auto init_lod_color = [&]()
+				{
+					mLodColor[0] = float4(1.f, 0.f, 0.f, 1.f);
+					mLodColor[1] = float4(0.f, 1.f, 0.f, 1.f);
+					mLodColor[2] = float4(0.f, 0.f, 1.f, 1.f);
+					mLodColor[3] = float4(1.f, 1.f, 0.f, 1.f);
+					mLodColor[4] = float4(1.f, 1.f, 1.f, 1.f);
+				};
+				leo::call_once(has_call, init_lod_color);
+
+				mEffect->LodColor(mLodColor[lodlevel], context);
+#endif
 				context->DrawIndexed(mIndexInfo[lodlevel].mCount, mIndexInfo[lodlevel].mOffset, 0);
 
 				if (slotX > 0)//Left
