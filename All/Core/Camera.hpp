@@ -217,4 +217,30 @@ namespace leo
 
 	//跟随相机
 	//绑定SQTObject,并进行消息派发
+	class FollowCamera : public ViewFrustum, public GeneralAllocatedObject {
+	public:
+		FollowCamera(const std::reference_wrapper<SQTObject> followObject);
+		~FollowCamera();
+	public:
+		//W/S
+		void Walk(float d);
+		//A/D
+		void Strafe(float d);
+		//Space
+
+		void UpdateViewMatrix();
+
+		void SetFrustum(float fov, float aspect, float nearf, float farf)
+		{
+			ViewFrustum::SetFrustum(fov, aspect, nearf, farf);
+		}
+		void SetFrustum(PROJECTION_TYPE projtype)
+		{
+			ViewFrustum::SetFrustum(projtype);
+		}
+
+		void Yaw(float angle);
+		void Pitch(float angle);
+		void Roll(float angle);
+	};
 }
