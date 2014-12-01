@@ -738,7 +738,7 @@ namespace leo
 #endif // _LM_VMX128_INTRINSICS_
 	}
 
-	
+
 }
 
 //constant
@@ -863,7 +863,7 @@ namespace leo {
 			return _mr0;
 		}
 
-		
+
 
 		inline __m128 SplatSelect1110() {
 			const static vectori32 _mSelect1110 = { LM_SELECT_1, LM_SELECT_1, LM_SELECT_1, LM_SELECT_0 };
@@ -1883,6 +1883,15 @@ namespace leo {
 #else // LM_VMX128_INTRINSICS_
 #endif // LM_VMX128_INTRINSICS_
 	}
+
+	inline __m128 min(__m128 V1, __m128 V2) {
+#if defined(LM_ARM_NEON_INTRINSICS)
+		return vminq_f32(V1, V2);
+#elif defined(LM_SSE_INTRINSICS)
+		return _mm_min_ps(V1, V2);
+#else // LM_VMX128_INTRINSICS_
+#endif // LM_VMX128_INTRINSICS_
+	}
 }
 
 
@@ -2531,7 +2540,7 @@ namespace leo {
 		__m128 A = Select(details::SplatSelect1110(), V, details::SplatSelect1110());
 		__m128 Result = QuaternionMultiply(RotationQuaternion, A);
 		__m128 Q = QuaternionConjugate(RotationQuaternion);
-		return QuaternionMultiply(Result, Q);		
+		return QuaternionMultiply(Result, Q);
 	}
 
 }
@@ -2540,26 +2549,26 @@ namespace leo {
 namespace leo {
 	__m128 PlaneNormalize(__m128 P) {
 #if defined(LM_ARM_NEON_INTRINSICS)
-__m128 vLength = __m1283ReciprocalLength(P);
-return __m128Multiply(P, vLength);
+		__m128 vLength = __m1283ReciprocalLength(P);
+		return __m128Multiply(P, vLength);
 #elif defined(LM_SSE_INTRINSICS)
-// Perform the dot product on x,y and z only
-__m128 vLengthSq = _mm_mul_ps(P, P);
-__m128 vTemp = LM_PERMUTE_PS(vLengthSq, _MM_SHUFFLE(2, 1, 2, 1));
-vLengthSq = _mm_add_ss(vLengthSq, vTemp);
-vTemp = LM_PERMUTE_PS(vTemp, _MM_SHUFFLE(1, 1, 1, 1));
-vLengthSq = _mm_add_ss(vLengthSq, vTemp);
-vLengthSq = LM_PERMUTE_PS(vLengthSq, _MM_SHUFFLE(0, 0, 0, 0));
-// Prepare for the division
-__m128 vResult = _mm_sqrt_ps(vLengthSq);
-// Failsafe on zero (Or epsilon) length planes
-// If the length is infinity, set the elements to zero
-vLengthSq = _mm_cmpneq_ps(vLengthSq, g_XMInfinity);
-// Reciprocal mul to perform the normalization
-vResult = _mm_div_ps(P, vResult);
-// Any that are infinity, set to zero
-vResult = _mm_and_ps(vResult, vLengthSq);
-return vResult;
+		// Perform the dot product on x,y and z only
+		__m128 vLengthSq = _mm_mul_ps(P, P);
+		__m128 vTemp = LM_PERMUTE_PS(vLengthSq, _MM_SHUFFLE(2, 1, 2, 1));
+		vLengthSq = _mm_add_ss(vLengthSq, vTemp);
+		vTemp = LM_PERMUTE_PS(vTemp, _MM_SHUFFLE(1, 1, 1, 1));
+		vLengthSq = _mm_add_ss(vLengthSq, vTemp);
+		vLengthSq = LM_PERMUTE_PS(vLengthSq, _MM_SHUFFLE(0, 0, 0, 0));
+		// Prepare for the division
+		__m128 vResult = _mm_sqrt_ps(vLengthSq);
+		// Failsafe on zero (Or epsilon) length planes
+		// If the length is infinity, set the elements to zero
+		vLengthSq = _mm_cmpneq_ps(vLengthSq, g_XMInfinity);
+		// Reciprocal mul to perform the normalization
+		vResult = _mm_div_ps(P, vResult);
+		// Any that are infinity, set to zero
+		vResult = _mm_and_ps(vResult, vLengthSq);
+		return vResult;
 #else // _XM_VMX128_INTRINSICS_
 #endif // _XM_VMX128_INTRINSICS_
 	}
@@ -2793,7 +2802,7 @@ namespace leo
 #if defined(LM_SSE_INTRINSICS)
 		__m128 Control = SelectControl(Select0 & 1, Select1 & 1, Select2 & 1, Select3 & 1);
 #if 1
-		return Select(VD, RotateLeft(VS,VSLeftRotateElements), Control);
+		return Select(VD, RotateLeft(VS, VSLeftRotateElements), Control);
 #endif
 #endif
 	}

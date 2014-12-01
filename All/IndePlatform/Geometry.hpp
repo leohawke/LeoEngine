@@ -56,11 +56,12 @@ namespace leo {
 		CONTAINS = 2,
 	};
 
-	enum PLANE_INTERSECTION_Type : std::uint8_t {
+	enum PLANE_INTERSECTION_TYPE : std::uint8_t {
 		FRONT = 0,
 		INTERSECTING = 1,
 		BACK = 2,
 	};
+
 
 
 	struct Triangle;
@@ -93,7 +94,7 @@ namespace leo {
 		bool Intersects(const OrientedBox& box) const;
 		bool Intersects(const Frustum& fr) const;
 		bool LM_VECTOR_CALL	Intersects(const Triangle& Tri) const;
-		PLANE_INTERSECTION_Type    LM_VECTOR_CALL    Intersects(vector Plane) const;
+		PLANE_INTERSECTION_TYPE    LM_VECTOR_CALL    Intersects(vector Plane) const;
 		std::pair<bool, float> Intersects(const Ray& sphere) const;
 	};
 
@@ -122,7 +123,7 @@ namespace leo {
 		bool Intersects(const OrientedBox& box) const;
 		bool Intersects(const Frustum& fr) const;
 		bool LM_VECTOR_CALL	Intersects(const Triangle& Tri) const;
-		PLANE_INTERSECTION_Type    LM_VECTOR_CALL    Intersects(vector Plane) const;
+		PLANE_INTERSECTION_TYPE    LM_VECTOR_CALL    Intersects(vector Plane) const;
 		std::pair<bool, float> Intersects(const Ray& sphere) const;
 	};
 
@@ -180,7 +181,7 @@ namespace leo {
 		bool Intersects(const OrientedBox& box) const;
 		//bool Intersects(const Frustum& fr) const;
 		bool LM_VECTOR_CALL	Intersects(const Triangle& Tri) const;
-		PLANE_INTERSECTION_Type    LM_VECTOR_CALL    Intersects(vector Plane) const;
+		PLANE_INTERSECTION_TYPE    LM_VECTOR_CALL    Intersects(vector Plane) const;
 		std::pair<bool,float>    LM_VECTOR_CALL     Intersects(const Ray& ray) const;
 
 		CONTAINMENT_TYPE     LM_VECTOR_CALL     ContainedBy(vector Plane0, vector Plane1, vector Plane2,
