@@ -24,9 +24,9 @@
 #include "leomath.h"
 
 namespace leo {
-	
 
-	inline __m128 LM_VECTOR_CALL operator*(__m128 lhs, __m128 rhs)  {
+
+	inline __m128 LM_VECTOR_CALL operator*(__m128 lhs, __m128 rhs) {
 		return Multiply(lhs, rhs);
 	}
 
@@ -36,6 +36,19 @@ namespace leo {
 
 	inline __m128 LM_VECTOR_CALL operator+(__m128 lhs, __m128 rhs) {
 		return Add(lhs, rhs);
+	}
+
+	inline __m128 LM_VECTOR_CALL operator-(__m128 lhs) {
+#if defined(LM_ARM_NEON_INTRINSICS)
+		return vnegq_f32(V);
+#elif defined(LM_SSE_INTRINSICS)
+		__m128 Z;
+
+		Z = _mm_setzero_ps();
+
+		return _mm_sub_ps(Z, lhs);
+#else // LM_VMX128_INTRINSICS_
+#endif // LM_VMX128_INTRINSICS
 	}
 
 	inline float GetX(__m128 v) {
@@ -83,17 +96,12 @@ namespace leo {
 			return Less(Abs(Difference), UintQuaternionEpsilon);
 		}
 
-		inline __m128 SplatR3() {
-			const static float4	r3(0.0f, 0.0f, 0.0f, 1.0f);
-			const static auto _mr1 = load(r3);
-			return _mr1;
-		}
 
 	}
 
 	__m128 LM_VECTOR_CALL PlaneTransform(__m128 P, __m128 Q, __m128 O) {
 		__m128 vNormal = Rotate<>(P, Q);
-		__m128 vD =SplatW(P) - Dot<>(vNormal, O);
+		__m128 vD = SplatW(P) - Dot<>(vNormal, O);
 
 		return Insert<0, 0, 0, 0, 1>(vNormal, vD);
 	}
@@ -104,7 +112,7 @@ namespace leo {
 		CONTAINS = 2,
 	};
 
-	template<typename T,uint8 slot>
+	template<typename T, uint8 slot>
 	struct sse_param_type {
 		using type = const T&;
 	};
@@ -128,7 +136,7 @@ namespace leo {
 	//pass in - register for ARM, Xbox 360, and x64
 	struct sse_param_type<T, 4> {
 #if defined(ARCH_AMD64) || defined(ARCH_XENON) ||defined(ARCH_ARM)
-		using type = T; 
+		using type = T;
 #else
 		using type = const T&;
 #endif
@@ -219,7 +227,7 @@ namespace leo {
 			AllInside = AndInt(AllInside, Inside);
 
 			// If the triangle is outside any plane it is outside.
-			if (EqualInt(AnyOutside,details::SplatTrueInt()))
+			if (EqualInt(AnyOutside, details::SplatTrueInt()))
 				return CONTAINMENT_TYPE::DISJOINT;
 
 			// If the triangle is inside all planes it is inside.
@@ -229,6 +237,61 @@ namespace leo {
 			// The triangle is not inside all planes or outside a plane, it may intersect.
 			return CONTAINMENT_TYPE::DISJOINT;
 		}
+	}
+
+	void inline FastIntersectSpherePlane(__m128 Center,  __m128 Radius,  __m128 Plane,
+		__m128& Outside,  __m128& Inside) {
+		__m128 Dist = Dot<4>(Center, Plane);
+
+		// Outside the plane?
+		Outside = GreaterExt(Dist, Radius);
+
+		// Fully inside the plane?
+		Inside = LessExt(Dist, -Radius);
+	}
+
+	void inline FastIntersectAxisAlignedBoxPlane(__m128 Center,__m128 Extents, __m128 Plane,
+			__m128& Outside, __m128& Inside) {
+		// Compute the distance to the center of the box.
+		__m128 Dist = Dot<4>(Center, Plane);
+
+		// Project the axes of the box onto the normal of the plane.  Half the
+		// length of the projection (sometime called the "radius") is equal to
+		// h(u) * abs(n dot b(u))) + h(v) * abs(n dot b(v)) + h(w) * abs(n dot b(w))
+		// where h(i) are extents of the box, n is the plane normal, and b(i) are the 
+		// axes of the box. In this case b(i) = [(1,0,0), (0,1,0), (0,0,1)].
+		__m128 Radius = Dot<>(Extents, Abs(Plane));
+
+		// Outside the plane?
+		Outside = GreaterExt(Dist, Radius);
+
+		// Fully inside the plane?
+		Inside = LessExt(Dist, -Radius);
+	}
+
+	void inline FastIntersectOrientedBoxPlane(__m128 Center, __m128 Extents, __m128 Axis0,
+		sse_param_type_t<__m128, 4> Axis1,
+		sse_param_type_t<__m128, 5> Axis2,
+		sse_param_type_t<__m128, 6> Plane,
+		__m128& Outside, __m128& Inside) {
+		// Compute the distance to the center of the box.
+		__m128 Dist =Dot<4>(Center, Plane);
+
+		// Project the axes of the box onto the normal of the plane.  Half the
+		// length of the projection (sometime called the "radius") is equal to
+		// h(u) * abs(n dot b(u))) + h(v) * abs(n dot b(v)) + h(w) * abs(n dot b(w))
+		// where h(i) are extents of the box, n is the plane normal, and b(i) are the 
+		// axes of the box.
+		__m128 Radius = Dot<3>(Plane, Axis0);
+		Radius = Insert<0, 0, 1, 0, 0>(Radius, Dot<>(Plane, Axis1));
+		Radius = Insert<0, 0, 0, 1, 0>(Radius, Dot<>(Plane, Axis2));
+		Radius = Dot<>(Extents, Abs(Radius));
+
+		// Outside the plane?
+		Outside = GreaterExt(Dist, Radius);
+
+		// Fully inside the plane?
+		Inside = LessExt(Dist, -Radius);
 	}
 }
 

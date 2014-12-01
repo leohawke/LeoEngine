@@ -863,7 +863,11 @@ namespace leo {
 			return _mr0;
 		}
 
-
+		inline __m128 SplatR3() {
+			const static float4	r3(0.0f, 0.0f, 0.0f, 1.0f);
+			const static auto _mr3 = load(r3);
+			return _mr3;
+		}
 
 		inline __m128 SplatSelect1110() {
 			const static vectori32 _mSelect1110 = { LM_SELECT_1, LM_SELECT_1, LM_SELECT_1, LM_SELECT_0 };
@@ -1735,7 +1739,86 @@ namespace leo {
 #endif // LM_VMX128_INTRINSICS_
 	}
 
+	inline std::array<__m128, 4>  Matrix(__m128 Quaternion) {
+#if defined(_LM_ARM_NEON_INTRINSICS)
 
+		static const XMVECTORF32 Constant1110 = { 1.0f, 1.0f, 1.0f, 0.0f };
+
+		XMVECTOR Q0 = XMVectorAdd(Quaternion, Quaternion);
+		XMVECTOR Q1 = XMVectorMultiply(Quaternion, Q0);
+
+		XMVECTOR V0 = XMVectorPermute<XM_PERMUTE_0Y, XM_PERMUTE_0X, XM_PERMUTE_0X, XM_PERMUTE_1W>(Q1, Constant1110.v);
+		XMVECTOR V1 = XMVectorPermute<XM_PERMUTE_0Z, XM_PERMUTE_0Z, XM_PERMUTE_0Y, XM_PERMUTE_1W>(Q1, Constant1110.v);
+		XMVECTOR R0 = XMVectorSubtract(Constant1110, V0);
+		R0 = XMVectorSubtract(R0, V1);
+
+		V0 = XMVectorSwizzle<XM_SWIZZLE_X, XM_SWIZZLE_X, XM_SWIZZLE_Y, XM_SWIZZLE_W>(Quaternion);
+		V1 = XMVectorSwizzle<XM_SWIZZLE_Z, XM_SWIZZLE_Y, XM_SWIZZLE_Z, XM_SWIZZLE_W>(Q0);
+		V0 = XMVectorMultiply(V0, V1);
+
+		V1 = XMVectorSplatW(Quaternion);
+		XMVECTOR V2 = XMVectorSwizzle<XM_SWIZZLE_Y, XM_SWIZZLE_Z, XM_SWIZZLE_X, XM_SWIZZLE_W>(Q0);
+		V1 = XMVectorMultiply(V1, V2);
+
+		XMVECTOR R1 = XMVectorAdd(V0, V1);
+		XMVECTOR R2 = XMVectorSubtract(V0, V1);
+
+		V0 = XMVectorPermute<XM_PERMUTE_0Y, XM_PERMUTE_1X, XM_PERMUTE_1Y, XM_PERMUTE_0Z>(R1, R2);
+		V1 = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_1Z, XM_PERMUTE_0X, XM_PERMUTE_1Z>(R1, R2);
+
+		XMMATRIX M;
+		M.r[0] = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_1X, XM_PERMUTE_1Y, XM_PERMUTE_0W>(R0, V0);
+		M.r[1] = XMVectorPermute<XM_PERMUTE_1Z, XM_PERMUTE_0Y, XM_PERMUTE_1W, XM_PERMUTE_0W>(R0, V0);
+		M.r[2] = XMVectorPermute<XM_PERMUTE_1X, XM_PERMUTE_1Y, XM_PERMUTE_0Z, XM_PERMUTE_0W>(R0, V1);
+		M.r[3] = g_XMIdentityR3.v;
+		return M;
+
+#elif defined(LM_SSE_INTRINSICS)
+		static const vectorf32  Constant1110 = { 1.0f, 1.0f, 1.0f, 0.0f };
+
+		__m128 Q0 = _mm_add_ps(Quaternion, Quaternion);
+		__m128 Q1 = _mm_mul_ps(Quaternion, Q0);
+
+		__m128 V0 = LM_PERMUTE_PS(Q1, _MM_SHUFFLE(3, 0, 0, 1));
+		V0 = _mm_and_ps(V0, details::SplatMask3());
+		__m128 V1 = LM_PERMUTE_PS(Q1, _MM_SHUFFLE(3, 1, 2, 2));
+		V1 = _mm_and_ps(V1, details::SplatMask3());
+		__m128 R0 = _mm_sub_ps(Constant1110, V0);
+		R0 = _mm_sub_ps(R0, V1);
+
+		V0 = LM_PERMUTE_PS(Quaternion, _MM_SHUFFLE(3, 1, 0, 0));
+		V1 = LM_PERMUTE_PS(Q0, _MM_SHUFFLE(3, 2, 1, 2));
+		V0 = _mm_mul_ps(V0, V1);
+
+		V1 = LM_PERMUTE_PS(Quaternion, _MM_SHUFFLE(3, 3, 3, 3));
+		__m128 V2 = LM_PERMUTE_PS(Q0, _MM_SHUFFLE(3, 0, 2, 1));
+		V1 = _mm_mul_ps(V1, V2);
+
+		__m128 R1 = _mm_add_ps(V0, V1);
+		__m128 R2 = _mm_sub_ps(V0, V1);
+
+		V0 = _mm_shuffle_ps(R1, R2, _MM_SHUFFLE(1, 0, 2, 1));
+		V0 = LM_PERMUTE_PS(V0, _MM_SHUFFLE(1, 3, 2, 0));
+		V1 = _mm_shuffle_ps(R1, R2, _MM_SHUFFLE(2, 2, 0, 0));
+		V1 = LM_PERMUTE_PS(V1, _MM_SHUFFLE(2, 0, 2, 0));
+
+		Q1 = _mm_shuffle_ps(R0, V0, _MM_SHUFFLE(1, 0, 3, 0));
+		Q1 = LM_PERMUTE_PS(Q1, _MM_SHUFFLE(1, 3, 2, 0));
+
+		std::array<__m128, 4>  M;
+		M[0] = Q1;
+
+		Q1 = _mm_shuffle_ps(R0, V0, _MM_SHUFFLE(3, 2, 3, 1));
+		Q1 = LM_PERMUTE_PS(Q1, _MM_SHUFFLE(1, 3, 0, 2));
+		M[1] = Q1;
+
+		Q1 = _mm_shuffle_ps(V1, R0, _MM_SHUFFLE(3, 2, 1, 0));
+		M[2] = Q1;
+		M[3] = details::SplatR3();
+		return M;
+#else // LM_VMX128_INTRINSICS_
+#endif // LM_VMX128_INTRINSICS_
+	}
 }
 
 //__m128 logic operator def

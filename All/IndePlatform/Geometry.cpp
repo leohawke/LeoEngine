@@ -8,6 +8,10 @@
 
 namespace leo {
 
+	CONTAINMENT_TYPE  Triangle::ContainedBy(const Frustum& Fru) const {
+		return Fru.Contains(*this);
+	}
+
 
 	std::pair<bool, float> Sphere::Intersects(const Ray& ray) const {
 		const auto Direction = load(ray.mDir);
@@ -53,6 +57,245 @@ namespace leo {
 		}
 
 		return{ false, 0.f };
+	}
+
+	CONTAINMENT_TYPE  Sphere::ContainedBy(const Frustum& Fru) const {
+		// Load origin and orientation.
+		vector vOrigin = load(Fru.mOrigin);
+		vector vOrientation = load(Fru.mOrientation);
+
+		// Create 6 planes (do it inline to encourage use of registers)
+		__m128 Plane0 = set(0.0f, 0.0f, -1.0f, Fru.mNear);
+		Plane0 = PlaneTransform(Plane0, vOrientation, vOrigin);
+		Plane0 = PlaneNormalize(Plane0);
+
+		__m128 Plane1 = set(0.0f, 0.0f, 1.0f, -Fru.mFar);
+		Plane1 = PlaneTransform(Plane1, vOrientation, vOrigin);
+		Plane1 = PlaneNormalize(Plane1);
+
+		__m128 Plane2 = set(1.0f, 0.0f, -Fru.mRightSlope, 0.0f);
+		Plane2 = PlaneTransform(Plane2, vOrientation, vOrigin);
+		Plane2 = PlaneNormalize(Plane2);
+
+		__m128 Plane3 = set(-1.0f, 0.0f, Fru.mLeftSlope, 0.0f);
+		Plane3 = PlaneTransform(Plane3, vOrientation, vOrigin);
+		Plane3 = PlaneNormalize(Plane3);
+
+		__m128 Plane4 = set(0.0f, 1.0f, -Fru.mTopSlope, 0.0f);
+		Plane4 = PlaneTransform(Plane4, vOrientation, vOrigin);
+		Plane4 = PlaneNormalize(Plane4);
+
+		__m128 Plane5 = set(0.0f, -1.0f, Fru.mBottomSlope, 0.0f);
+		Plane5 = PlaneTransform(Plane5, vOrientation, vOrigin);
+		Plane5 = PlaneNormalize(Plane5);
+
+
+		// Load the sphere.
+		__m128 vCenter = load(GetCenter());
+		__m128 vRadius = Splat(GetRadius());
+
+		// Set w of the center to one so we can dot4 with a plane.
+		vCenter = Insert<0, 0, 0, 0, 1>(vCenter,SplatOne());
+
+		__m128 Outside, Inside;
+
+		// Test against each plane.
+		FastIntersectSpherePlane(vCenter, vRadius, Plane0, Outside, Inside);
+
+		__m128 AnyOutside = Outside;
+		__m128 AllInside = Inside;
+
+		FastIntersectSpherePlane(vCenter, vRadius, Plane1, Outside, Inside);
+		AnyOutside = OrInt(AnyOutside, Outside);
+		AllInside = AndInt(AllInside, Inside);
+
+		FastIntersectSpherePlane(vCenter, vRadius, Plane2, Outside, Inside);
+		AnyOutside = OrInt(AnyOutside, Outside);
+		AllInside = AndInt(AllInside, Inside);
+
+		FastIntersectSpherePlane(vCenter, vRadius, Plane3, Outside, Inside);
+		AnyOutside = OrInt(AnyOutside, Outside);
+		AllInside = AndInt(AllInside, Inside);
+
+		FastIntersectSpherePlane(vCenter, vRadius, Plane4, Outside, Inside);
+		AnyOutside = OrInt(AnyOutside, Outside);
+		AllInside = AndInt(AllInside, Inside);
+
+		FastIntersectSpherePlane(vCenter, vRadius, Plane5, Outside, Inside);
+		AnyOutside = OrInt(AnyOutside, Outside);
+		AllInside = AndInt(AllInside, Inside);
+
+		// If the sphere is outside any plane it is outside.
+		if (EqualInt(AnyOutside, details::SplatTrueInt()))
+			return CONTAINMENT_TYPE::DISJOINT;
+
+		// If the sphere is inside all planes it is inside.
+		if (EqualInt(AllInside, details::SplatTrueInt()))
+			return CONTAINMENT_TYPE::CONTAINS;
+
+		// The sphere is not inside all planes or outside a plane, it may intersect.
+		return CONTAINMENT_TYPE::INTERSECTS;
+	}
+
+	CONTAINMENT_TYPE  Box::ContainedBy(const Frustum& Fru) const {
+		// Load origin and orientation.
+		vector vOrigin = load(Fru.mOrigin);
+		vector vOrientation = load(Fru.mOrientation);
+
+		// Create 6 planes (do it inline to encourage use of registers)
+		__m128 Plane0 = set(0.0f, 0.0f, -1.0f, Fru.mNear);
+		Plane0 = PlaneTransform(Plane0, vOrientation, vOrigin);
+		Plane0 = PlaneNormalize(Plane0);
+
+		__m128 Plane1 = set(0.0f, 0.0f, 1.0f, -Fru.mFar);
+		Plane1 = PlaneTransform(Plane1, vOrientation, vOrigin);
+		Plane1 = PlaneNormalize(Plane1);
+
+		__m128 Plane2 = set(1.0f, 0.0f, -Fru.mRightSlope, 0.0f);
+		Plane2 = PlaneTransform(Plane2, vOrientation, vOrigin);
+		Plane2 = PlaneNormalize(Plane2);
+
+		__m128 Plane3 = set(-1.0f, 0.0f, Fru.mLeftSlope, 0.0f);
+		Plane3 = PlaneTransform(Plane3, vOrientation, vOrigin);
+		Plane3 = PlaneNormalize(Plane3);
+
+		__m128 Plane4 = set(0.0f, 1.0f, -Fru.mTopSlope, 0.0f);
+		Plane4 = PlaneTransform(Plane4, vOrientation, vOrigin);
+		Plane4 = PlaneNormalize(Plane4);
+
+		__m128 Plane5 = set(0.0f, -1.0f, Fru.mBottomSlope, 0.0f);
+		Plane5 = PlaneTransform(Plane5, vOrientation, vOrigin);
+		Plane5 = PlaneNormalize(Plane5);
+
+		// Load the box.
+		__m128 vCenter = load(mCenter);
+		__m128 vExtents = load(mExtents);
+
+		// Set w of the center to one so we can dot4 with a plane.
+		vCenter = Insert<0, 0, 0, 0, 1>(vCenter, SplatOne());
+
+		__m128 Outside, Inside;
+
+		// Test against each plane.
+		FastIntersectAxisAlignedBoxPlane(vCenter, vExtents, Plane0, Outside, Inside);
+
+		__m128 AnyOutside = Outside;
+		__m128 AllInside = Inside;
+
+		FastIntersectAxisAlignedBoxPlane(vCenter, vExtents, Plane1, Outside, Inside);
+		AnyOutside = OrInt(AnyOutside, Outside);
+		AllInside = AndInt(AllInside, Inside);
+
+		FastIntersectAxisAlignedBoxPlane(vCenter, vExtents, Plane2, Outside, Inside);
+		AnyOutside = OrInt(AnyOutside, Outside);
+		AllInside = AndInt(AllInside, Inside);
+
+		FastIntersectAxisAlignedBoxPlane(vCenter, vExtents, Plane3, Outside, Inside);
+		AnyOutside = OrInt(AnyOutside, Outside);
+		AllInside = AndInt(AllInside, Inside);
+
+		FastIntersectAxisAlignedBoxPlane(vCenter, vExtents, Plane4, Outside, Inside);
+		AnyOutside = OrInt(AnyOutside, Outside);
+		AllInside = AndInt(AllInside, Inside);
+
+		FastIntersectAxisAlignedBoxPlane(vCenter, vExtents, Plane5, Outside, Inside);
+		AnyOutside = OrInt(AnyOutside, Outside);
+		AllInside = AndInt(AllInside, Inside);
+
+		// If the box is outside any plane it is outside.
+		if (EqualInt(AnyOutside, details::SplatTrueInt()))
+			return CONTAINMENT_TYPE::DISJOINT;
+
+		// If the box is inside all planes it is inside.
+		if (EqualInt(AllInside, details::SplatTrueInt()))
+			return CONTAINMENT_TYPE::CONTAINS;
+
+		// The box is not inside all planes or outside a plane, it may intersect.
+		return CONTAINMENT_TYPE::INTERSECTS;
+	}
+
+	CONTAINMENT_TYPE  OrientedBox::ContainedBy(const Frustum& Fru) const {
+		// Load origin and orientation.
+		vector vOrigin = load(Fru.mOrigin);
+		vector vOrientation = load(Fru.mOrientation);
+
+		// Create 6 planes (do it inline to encourage use of registers)
+		__m128 Plane0 = set(0.0f, 0.0f, -1.0f, Fru.mNear);
+		Plane0 = PlaneTransform(Plane0, vOrientation, vOrigin);
+		Plane0 = PlaneNormalize(Plane0);
+
+		__m128 Plane1 = set(0.0f, 0.0f, 1.0f, -Fru.mFar);
+		Plane1 = PlaneTransform(Plane1, vOrientation, vOrigin);
+		Plane1 = PlaneNormalize(Plane1);
+
+		__m128 Plane2 = set(1.0f, 0.0f, -Fru.mRightSlope, 0.0f);
+		Plane2 = PlaneTransform(Plane2, vOrientation, vOrigin);
+		Plane2 = PlaneNormalize(Plane2);
+
+		__m128 Plane3 = set(-1.0f, 0.0f, Fru.mLeftSlope, 0.0f);
+		Plane3 = PlaneTransform(Plane3, vOrientation, vOrigin);
+		Plane3 = PlaneNormalize(Plane3);
+
+		__m128 Plane4 = set(0.0f, 1.0f, -Fru.mTopSlope, 0.0f);
+		Plane4 = PlaneTransform(Plane4, vOrientation, vOrigin);
+		Plane4 = PlaneNormalize(Plane4);
+
+		__m128 Plane5 = set(0.0f, -1.0f, Fru.mBottomSlope, 0.0f);
+		Plane5 = PlaneTransform(Plane5, vOrientation, vOrigin);
+		Plane5 = PlaneNormalize(Plane5);
+
+
+		// Load the box.
+		__m128 vCenter = load(mCenter);
+		__m128 vExtents = load(mExtents);
+		__m128 BoxOrientation = load(mOrientation);
+
+		assert(details::QuaternionIsUnit(BoxOrientation));
+
+		// Set w of the center to one so we can dot4 with a plane.
+		vCenter =Insert<0, 0, 0, 0, 1>(vCenter,SplatOne());
+
+		// Build the 3x3 rotation matrix that defines the box axes.
+		matrix R = Matrix(BoxOrientation);
+
+		__m128 Outside, Inside;
+
+		// Test against each plane.
+		FastIntersectOrientedBoxPlane(vCenter, vExtents, R[0], R[1], R[2], Plane0, Outside, Inside);
+
+		__m128 AnyOutside = Outside;
+		__m128 AllInside = Inside;
+
+		FastIntersectOrientedBoxPlane(vCenter, vExtents, R[0], R[1], R[2], Plane1, Outside, Inside);
+		AnyOutside =OrInt(AnyOutside, Outside);
+		AllInside =AndInt(AllInside, Inside);
+
+		FastIntersectOrientedBoxPlane(vCenter, vExtents, R[0], R[1], R[2], Plane2, Outside, Inside);
+		AnyOutside =OrInt(AnyOutside, Outside);
+		AllInside =AndInt(AllInside, Inside);
+
+		FastIntersectOrientedBoxPlane(vCenter, vExtents, R[0], R[1], R[2], Plane3, Outside, Inside);
+		AnyOutside =OrInt(AnyOutside, Outside);
+		AllInside =AndInt(AllInside, Inside);
+
+		FastIntersectOrientedBoxPlane(vCenter, vExtents, R[0], R[1], R[2], Plane4, Outside, Inside);
+		AnyOutside =OrInt(AnyOutside, Outside);
+		AllInside =AndInt(AllInside, Inside);
+
+		FastIntersectOrientedBoxPlane(vCenter, vExtents, R[0], R[1], R[2], Plane5, Outside, Inside);
+		AnyOutside =OrInt(AnyOutside, Outside);
+		AllInside =AndInt(AllInside, Inside);
+
+		// If the OrientedBox is outside any plane it is outside.
+		if (EqualInt(AnyOutside, details::SplatTrueInt()))
+			return CONTAINMENT_TYPE::DISJOINT;
+
+		// If the OrientedBox is inside all planes it is inside.
+		if (EqualInt(AllInside, details::SplatTrueInt()))
+			return CONTAINMENT_TYPE::CONTAINS;
+
+		// The OrientedBox is not inside all planes or outside a plane, it may intersect.
+		return CONTAINMENT_TYPE::INTERSECTS;
 	}
 
 	std::pair<bool, float> Triangle::Intersects(const Ray& ray) const {
@@ -333,13 +576,13 @@ namespace leo {
 		return TriangleTests::ContainedBy(load(Tri.p[0]), load(Tri.p[0]), load(Tri.p[0]), NearPlane, FarPlane, RightPlane, LeftPlane, TopPlane, BottomPlane);
 	}
 	CONTAINMENT_TYPE Frustum::Contains(const Sphere& sp) const {
-
+		return sp.ContainedBy(*this);
 	}
 	CONTAINMENT_TYPE Frustum::Contains(const Box& box) const {
-
+		return box.ContainedBy(*this);
 	}
 	CONTAINMENT_TYPE Frustum::Contains(const OrientedBox& box) const {
-
+		return box.ContainedBy(*this);
 	}
 	//CONTAINMENT_TYPE Contains(const Frustum& fr) const;
 	// Frustum-Frustum test
@@ -366,8 +609,8 @@ namespace leo {
 
 	}
 
-	CONTAINMENT_TYPE     LM_VECTOR_CALL     Frustum::ContainedBy(vector Plane0, vector Plane1, vector Plane2,
-		const vector& Plane3, const vector& Plane4, const vector& Plane5) const {
-
-	}
+	//CONTAINMENT_TYPE     LM_VECTOR_CALL     Frustum::ContainedBy(vector Plane0, vector Plane1, vector Plane2,
+	//	const vector& Plane3, const vector& Plane4, const vector& Plane5) const {
+	//
+	//}
 }

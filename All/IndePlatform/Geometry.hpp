@@ -96,6 +96,8 @@ namespace leo {
 		bool LM_VECTOR_CALL	Intersects(const Triangle& Tri) const;
 		PLANE_INTERSECTION_TYPE    LM_VECTOR_CALL    Intersects(vector Plane) const;
 		std::pair<bool, float> Intersects(const Ray& sphere) const;
+
+		CONTAINMENT_TYPE  ContainedBy(const Frustum&) const;
 	};
 
 	struct lalignas(16) LB_API Sphere {
@@ -125,6 +127,52 @@ namespace leo {
 		bool LM_VECTOR_CALL	Intersects(const Triangle& Tri) const;
 		PLANE_INTERSECTION_TYPE    LM_VECTOR_CALL    Intersects(vector Plane) const;
 		std::pair<bool, float> Intersects(const Ray& sphere) const;
+
+		CONTAINMENT_TYPE  ContainedBy(const Frustum&) const;
+	};
+
+	struct lalignas(16) LB_API Box {
+		using vector = __m128;
+
+		//static const size_t CORNER_COUNT = 8;
+
+		float3 mCenter;            // Center of the box.
+		float3 mExtents;           // Distance from the center to each side.
+
+		CONTAINMENT_TYPE    LM_VECTOR_CALL     Contains(vector Point) const;
+		CONTAINMENT_TYPE    LM_VECTOR_CALL     Contains(const Triangle& Tri) const;
+
+
+		bool Intersects(const Sphere& sh) const;
+		bool Intersects(const Box& box) const;
+		bool Intersects(const OrientedBox& box) const;
+		bool Intersects(const Frustum& fr) const;
+		bool LM_VECTOR_CALL	Intersects(const Triangle& Tri) const;
+		PLANE_INTERSECTION_TYPE    LM_VECTOR_CALL    Intersects(vector Plane) const;
+		std::pair<bool, float> Intersects(const Ray& sphere) const;
+
+		CONTAINMENT_TYPE  ContainedBy(const Frustum&) const;
+	};
+
+	struct lalignas(16) LB_API OrientedBox : public Box {
+		float4 mOrientation;
+
+		using vector = __m128;
+		using matrix = std::array<vector, 4>;
+
+		CONTAINMENT_TYPE    LM_VECTOR_CALL     Contains(vector Point) const;
+		CONTAINMENT_TYPE    LM_VECTOR_CALL     Contains(const Triangle& Tri) const;
+
+
+		bool Intersects(const Sphere& sh) const;
+		bool Intersects(const Box& box) const;
+		bool Intersects(const OrientedBox& box) const;
+		bool Intersects(const Frustum& fr) const;
+		bool LM_VECTOR_CALL	Intersects(const Triangle& Tri) const;
+		PLANE_INTERSECTION_TYPE    LM_VECTOR_CALL    Intersects(vector Plane) const;
+		std::pair<bool, float> Intersects(const Ray& sphere) const;
+
+		CONTAINMENT_TYPE  ContainedBy(const Frustum&) const;
 	};
 
 	struct lalignas(16) LB_API Frustum {
@@ -132,7 +180,7 @@ namespace leo {
 
 		//WorldSpace
 		float3 mOrigin;            // Origin of the frustum (and projection).
-		//WorldSpace
+		//LocalSpace->WorldSpace
 		float3 mOrientation;       // Quaternion representing rotation.
 
 		float mRightSlope;           // Positive X slope (X/Z).
