@@ -91,6 +91,13 @@ namespace leo {
 
 	}
 
+	__m128 LM_VECTOR_CALL PlaneTransform(__m128 P, __m128 Q, __m128 O) {
+		__m128 vNormal = Rotate<>(P, Q);
+		__m128 vD =SplatW(P) - Dot<>(vNormal, O);
+
+		return Insert<0, 0, 0, 0, 1>(vNormal, vD);
+	}
+
 }
 
 #endif

@@ -2437,9 +2437,9 @@ namespace leo {
 
 	inline __m128 QuaternionMultiply(__m128 Q1, __m128 Q2) {
 #if defined(LM_ARM_NEON_INTRINSICS)
-		static const XMVECTORF32 ControlWZYX = { 1.0f,-1.0f, 1.0f,-1.0f };
-		static const XMVECTORF32 ControlZWXY = { 1.0f, 1.0f,-1.0f,-1.0f };
-		static const XMVECTORF32 ControlYXWZ = { -1.0f, 1.0f, 1.0f,-1.0f };
+		static const __m128F32 ControlWZYX = { 1.0f,-1.0f, 1.0f,-1.0f };
+		static const __m128F32 ControlZWXY = { 1.0f, 1.0f,-1.0f,-1.0f };
+		static const __m128F32 ControlYXWZ = { -1.0f, 1.0f, 1.0f,-1.0f };
 
 		float32x2_t Q2L = vget_low_f32(Q2);
 		float32x2_t Q2H = vget_high_f32(Q2);
@@ -2447,7 +2447,7 @@ namespace leo {
 		float32x4_t Q2X = vdupq_lane_f32(Q2L, 0);
 		float32x4_t Q2Y = vdupq_lane_f32(Q2L, 1);
 		float32x4_t Q2Z = vdupq_lane_f32(Q2H, 0);
-		XMVECTOR vResult = XM_VMULQ_LANE_F32(Q1, Q2H, 1);
+		__m128 vResult = XM_VMULQ_LANE_F32(Q1, Q2H, 1);
 
 		// Mul by Q1WZYX
 		float32x4_t vTemp = vrev64q_f32(Q1);
@@ -2509,7 +2509,7 @@ namespace leo {
 
 	inline __m128 QuaternionConjugate(__m128 Q) {
 #if defined(LM_ARM_NEON_INTRINSICS)
-		static const XMVECTORF32 NegativeOne3 = { -1.0f,-1.0f,-1.0f,1.0f };
+		static const __m128F32 NegativeOne3 = { -1.0f,-1.0f,-1.0f,1.0f };
 		return vmulq_f32(Q, NegativeOne3.v);
 #elif defined(LM_SSE_INTRINSICS)
 		static const vectorf32 NegativeOne3 = { -1.0f,-1.0f,-1.0f,1.0f };
@@ -2535,6 +2535,36 @@ namespace leo {
 	}
 
 }
+
+//Plane Function
+namespace leo {
+	__m128 PlaneNormalize(__m128 P) {
+#if defined(LM_ARM_NEON_INTRINSICS)
+__m128 vLength = __m1283ReciprocalLength(P);
+return __m128Multiply(P, vLength);
+#elif defined(LM_SSE_INTRINSICS)
+// Perform the dot product on x,y and z only
+__m128 vLengthSq = _mm_mul_ps(P, P);
+__m128 vTemp = LM_PERMUTE_PS(vLengthSq, _MM_SHUFFLE(2, 1, 2, 1));
+vLengthSq = _mm_add_ss(vLengthSq, vTemp);
+vTemp = LM_PERMUTE_PS(vTemp, _MM_SHUFFLE(1, 1, 1, 1));
+vLengthSq = _mm_add_ss(vLengthSq, vTemp);
+vLengthSq = LM_PERMUTE_PS(vLengthSq, _MM_SHUFFLE(0, 0, 0, 0));
+// Prepare for the division
+__m128 vResult = _mm_sqrt_ps(vLengthSq);
+// Failsafe on zero (Or epsilon) length planes
+// If the length is infinity, set the elements to zero
+vLengthSq = _mm_cmpneq_ps(vLengthSq, g_XMInfinity);
+// Reciprocal mul to perform the normalization
+vResult = _mm_div_ps(P, vResult);
+// Any that are infinity, set to zero
+vResult = _mm_and_ps(vResult, vLengthSq);
+return vResult;
+#else // _XM_VMX128_INTRINSICS_
+#endif // _XM_VMX128_INTRINSICS_
+	}
+}
+
 
 //Other Function
 namespace leo
