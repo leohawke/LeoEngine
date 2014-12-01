@@ -26,10 +26,6 @@
 #include "ray.hpp"
 
 
-namespace leo {
-	
-}
-
 
 #endif
 

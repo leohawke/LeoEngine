@@ -83,16 +83,17 @@ namespace leo {
 		}
 
 
-		CONTAINMENT_TYPE    __fastcall     Contains(vector Point) const;
-		CONTAINMENT_TYPE    __fastcall     Contains(const Triangle& Tri) const;
+
+		CONTAINMENT_TYPE    LM_VECTOR_CALL     Contains(vector Point) const;
+		CONTAINMENT_TYPE    LM_VECTOR_CALL     Contains(const Triangle& Tri) const;
 
 
 		bool Intersects(const Sphere& sh) const;
 		bool Intersects(const Box& box) const;
 		bool Intersects(const OrientedBox& box) const;
 		bool Intersects(const Frustum& fr) const;
-		bool __fastcall	Intersects(const Triangle& Tri) const;
-		PLANE_INTERSECTION_Type    __fastcall    Intersects(vector Plane) const;
+		bool LM_VECTOR_CALL	Intersects(const Triangle& Tri) const;
+		PLANE_INTERSECTION_Type    LM_VECTOR_CALL    Intersects(vector Plane) const;
 		std::pair<bool, float> Intersects(const Ray& sphere) const;
 	};
 
@@ -112,23 +113,25 @@ namespace leo {
 		{}
 
 
-		CONTAINMENT_TYPE    __fastcall     Contains(vector Point) const;
-		CONTAINMENT_TYPE    __fastcall     Contains(const Triangle& Tri) const;
+		CONTAINMENT_TYPE    LM_VECTOR_CALL     Contains(vector Point) const;
+		CONTAINMENT_TYPE    LM_VECTOR_CALL     Contains(const Triangle& Tri) const;
 
 
 		bool Intersects(const Sphere& sh) const;
 		bool Intersects(const Box& box) const;
 		bool Intersects(const OrientedBox& box) const;
 		bool Intersects(const Frustum& fr) const;
-		bool __fastcall	Intersects(const Triangle& Tri) const;
-		PLANE_INTERSECTION_Type    __fastcall    Intersects(vector Plane) const;
+		bool LM_VECTOR_CALL	Intersects(const Triangle& Tri) const;
+		PLANE_INTERSECTION_Type    LM_VECTOR_CALL    Intersects(vector Plane) const;
 		std::pair<bool, float> Intersects(const Ray& sphere) const;
 	};
 
 	struct lalignas(16) LB_API Frustum {
 		static const size_t CORNER_COUNT = 8;
 
+		//WorldSpace
 		float3 mOrigin;            // Origin of the frustum (and projection).
+		//WorldSpace
 		float3 mOrientation;       // Quaternion representing rotation.
 
 		float mRightSlope;           // Positive X slope (X/Z).
@@ -151,21 +154,21 @@ namespace leo {
 		using vector = __m128;
 		using matrix = std::array<vector, 4>;
 
-		explicit Frustum(matrix Projection)
+		explicit Frustum(const matrix& Projection)
 		{
 			operator=(Projection);
 		}
 
-		Frustum&  __fastcall  operator=(matrix Projection);
+		Frustum&  LM_VECTOR_CALL  operator=(matrix Projection);
 
-		Frustum&  __fastcall Transform(matrix M) const;
-		Frustum&  __fastcall Transform(float Scale, vector Rotation, vector Translation);
+		Frustum&  LM_VECTOR_CALL Transform(matrix M);
+		Frustum&  LM_VECTOR_CALL Transform(float Scale, vector Rotation, vector Translation);
 
 		//void GetCorners(float3* Corners) const;
 		// Gets the 8 corners of the frustum
 
-		CONTAINMENT_TYPE    __fastcall     Contains(vector Point) const;
-		CONTAINMENT_TYPE    __fastcall     Contains(const Triangle& Tri) const;
+		CONTAINMENT_TYPE    LM_VECTOR_CALL     Contains(vector Point) const;
+		CONTAINMENT_TYPE    LM_VECTOR_CALL     Contains(const Triangle& Tri) const;
 		CONTAINMENT_TYPE Contains(const Sphere& sp) const;
 		CONTAINMENT_TYPE Contains(const Box& box) const;
 		CONTAINMENT_TYPE Contains(const OrientedBox& box) const;
@@ -176,11 +179,11 @@ namespace leo {
 		bool Intersects(const Box& box) const;
 		bool Intersects(const OrientedBox& box) const;
 		//bool Intersects(const Frustum& fr) const;
-		bool __fastcall	Intersects(const Triangle& Tri) const;
-		PLANE_INTERSECTION_Type    __fastcall    Intersects(vector Plane) const;
-		std::pair<bool,float>    __fastcall     Intersects(const Ray& ray) const;
+		bool LM_VECTOR_CALL	Intersects(const Triangle& Tri) const;
+		PLANE_INTERSECTION_Type    LM_VECTOR_CALL    Intersects(vector Plane) const;
+		std::pair<bool,float>    LM_VECTOR_CALL     Intersects(const Ray& ray) const;
 
-		CONTAINMENT_TYPE     __fastcall     ContainedBy(vector Plane0, vector Plane1, vector Plane2,
+		CONTAINMENT_TYPE     LM_VECTOR_CALL     ContainedBy(vector Plane0, vector Plane1, vector Plane2,
 			const vector& Plane3, const vector& Plane4, const vector& Plane5) const;
 		// Test frustum against six planes (see Frustum::GetPlanes)
 

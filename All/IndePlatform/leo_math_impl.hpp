@@ -24,18 +24,18 @@
 #include "leomath.h"
 
 namespace leo {
-	struct lalignas(16) vectorf32 {
-		union
-		{
-			float f[4];
-			__m128 v;
-		};
+	
 
-		inline operator __m128() const { return v; }
-	};
-
-	inline __m128 __fastcall operator*(__m128 lhs, __m128 rhs)  {
+	inline __m128 LM_VECTOR_CALL operator*(__m128 lhs, __m128 rhs)  {
 		return Multiply(lhs, rhs);
+	}
+
+	inline __m128 LM_VECTOR_CALL operator-(__m128 lhs, __m128 rhs) {
+		return Subtract(lhs, rhs);
+	}
+
+	inline __m128 LM_VECTOR_CALL operator+(__m128 lhs, __m128 rhs) {
+		return Add(lhs, rhs);
 	}
 
 	inline float GetX(__m128 v) {
@@ -73,6 +73,24 @@ namespace leo {
 #else // LM_VMX128_INTRINSICS_
 #endif // LM_VMX128_INTRINSICS_
 	}
+
+	namespace details {
+		inline bool QuaternionIsUnit(__m128 Q)
+		{
+			static const vectorf32 UintQuaternionEpsilon = { 1.0e-4f, 1.0e-4f, 1.0e-4f, 1.0e-4f };
+
+			__m128 Difference = Length<4>(Q) - SplatOne();
+			return Less(Abs(Difference), UintQuaternionEpsilon);
+		}
+
+		inline __m128 SplatR3() {
+			const static float4	r3(0.0f, 0.0f, 0.0f, 1.0f);
+			const static auto _mr1 = load(r3);
+			return _mr1;
+		}
+
+	}
+
 }
 
 #endif
