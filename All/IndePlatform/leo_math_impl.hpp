@@ -96,7 +96,20 @@ namespace leo {
 			return Less(Abs(Difference), UintQuaternionEpsilon);
 		}
 
+		inline __m128 LM_VECTOR_CALL SplatFalseInt() {
+#if defined(LM_ARM_NEON_INTRINSICS)
+			return vdupq_n_u32(0);
+#elif defined(LM_SSE_INTRINSICS)
+			return _mm_setzero_ps();
+#else // LM_VMX128_INTRINSICS_
+#endif // LM_VMX128_INTRINSICS_
+		}
 
+		template<uint8 D = 3>
+		inline bool AnyTrue(__m128 V) {
+			__m128 C = Swizzle(V, LM_SWIZZLE_X, LM_SWIZZLE_Y, LM_SWIZZLE_Z, LM_SWIZZLE_X);
+			return ComparisonAnyTrue(EqualIntR<>(C, SplatTrueInt()));
+		}
 	}
 
 	__m128 LM_VECTOR_CALL PlaneTransform(__m128 P, __m128 Q, __m128 O) {
@@ -292,6 +305,25 @@ namespace leo {
 
 		// Fully inside the plane?
 		Inside = LessExt(Dist, -Radius);
+	}
+
+	inline __m128 PointOnLineSegmentNearestPoint(__m128 S1, __m128 S2, __m128 P) {
+		__m128 Dir = S2 - S1;
+		__m128 Projection = (Dot<>(P, Dir) - Dot<>(S1, Dir));
+		__m128 LengthSq = Dot<>(Dir, Dir);
+
+		__m128 t = Projection * Reciprocal(LengthSq);
+		__m128 Point = S1 + t * Dir;
+
+		// t < 0
+		__m128 SelectS1 = LessExt(Projection, SplatZero());
+		Point = Select(Point, S1, SelectS1);
+
+		// t > 1
+		__m128 SelectS2 =GreaterExt(Projection, LengthSq);
+		Point = Select(Point, S2, SelectS2);
+
+		return Point;
 	}
 }
 

@@ -1925,6 +1925,41 @@ namespace leo {
 #endif
 	}
 
+	template<uint8 D = 4>
+	inline uint32_t EqualIntR(__m128 V1, __m128 V2) {
+#if defined(LM_ARM_NEON_INTRINSICS)
+		uint32x4_t vResult = vceqq_u32(V1, V2);
+		int8x8x2_t vTemp = vzip_u8(vget_low_u8(vResult), vget_high_u8(vResult));
+		vTemp = vzip_u16(vTemp.val[0], vTemp.val[1]);
+		uint32_t r = vget_lane_u32(vTemp.val[1], 1);
+
+		uint32_t CR = 0;
+		if (r == 0xFFFFFFFFU)
+		{
+			CR = XM_CRMASK_CR6TRUE;
+	}
+		else if (!r)
+		{
+			CR = XM_CRMASK_CR6FALSE;
+		}
+		return CR;
+#elif defined(LM_SSE_INTRINSICS)
+		__m128i vTemp = _mm_cmpeq_epi32(_mm_castps_si128(V1), _mm_castps_si128(V2));
+		int iTest = _mm_movemask_ps(_mm_castsi128_ps(vTemp));
+		uint32_t CR = 0;
+		if (iTest == 0xf)     // All equal?
+		{
+			CR = LM_CRMASK_CR6TRUE;
+		}
+		else if (iTest == 0)  // All not equal?
+		{
+			CR = LM_CRMASK_CR6FALSE;
+		}
+		return CR;
+#else
+#endif
+	}
+
 	inline __m128 EqualIntExt(__m128 V1, __m128 V2) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vceqq_u32(V1, V2);
@@ -1975,6 +2010,13 @@ namespace leo {
 #else // LM_VMX128_INTRINSICS_
 #endif // LM_VMX128_INTRINSICS_
 	}
+
+	const uint32_t LM_CRMASK_CR6 = 0x000000F0;
+	const uint32_t LM_CRMASK_CR6TRUE = 0x00000080;
+	const uint32_t LM_CRMASK_CR6FALSE = 0x00000020;
+	const uint32_t LM_CRMASK_CR6BOUNDS = LM_CRMASK_CR6FALSE;
+
+	inline bool ComparisonAnyTrue(uint32_t CR) { return (((CR)& LM_CRMASK_CR6FALSE) != LM_CRMASK_CR6FALSE); }
 }
 
 
@@ -2800,6 +2842,10 @@ namespace leo
 #endif
 	}
 
+	const uint32_t LM_SWIZZLE_X = 0;
+	const uint32_t LM_SWIZZLE_Y = 1;
+	const uint32_t LM_SWIZZLE_Z = 2;
+	const uint32_t LM_SWIZZLE_W = 3;
 
 	inline __m128 LM_VECTOR_CALL Swizzle
 		(

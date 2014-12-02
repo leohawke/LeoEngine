@@ -134,7 +134,7 @@ namespace leo {
 	struct lalignas(16) LB_API Box {
 		using vector = __m128;
 
-		//static const size_t CORNER_COUNT = 8;
+		static const size_t CORNER_COUNT = 8;
 
 		float3 mCenter;            // Center of the box.
 		float3 mExtents;           // Distance from the center to each side.
@@ -159,6 +159,11 @@ namespace leo {
 
 		using vector = __m128;
 		using matrix = std::array<vector, 4>;
+
+		explicit OrientedBox(const Box& box)
+			:Box(box),mOrientation(0.f,0.f,0.f,1.f)
+		{}
+
 
 		CONTAINMENT_TYPE    LM_VECTOR_CALL     Contains(vector Point) const;
 		CONTAINMENT_TYPE    LM_VECTOR_CALL     Contains(const Triangle& Tri) const;

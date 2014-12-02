@@ -588,13 +588,362 @@ namespace leo {
 	// Frustum-Frustum test
 
 	bool Frustum::Intersects(const Sphere& sh) const {
+		auto Zero = SplatZero();
 
+		// Build frustum planes.
+		vector Planes[6];
+		Planes[0] = set(0.0f, 0.0f, -1.0f, mNear);
+		Planes[1] = set(0.0f, 0.0f, 1.0f, -mFar);
+		Planes[2] = set(1.0f, 0.0f, -mRightSlope, 0.0f);
+		Planes[3] = set(-1.0f, 0.0f, mLeftSlope, 0.0f);
+		Planes[4] = set(0.0f, 1.0f, -mTopSlope, 0.0f);
+		Planes[5] = set(0.0f, -1.0f, mBottomSlope, 0.0f);
+
+		// Load origin and orientation.
+		vector vOrigin = load(mOrigin);
+		vector vOrientation = load(mOrientation);
+
+		assert(details::QuaternionIsUnit(vOrientation));
+
+		// Load the sphere.
+		__m128 vCenter = load(sh.GetCenter());
+		__m128 vRadius = Splat(sh.GetRadius());
+
+		// Transform the center of the sphere into the local space of frustum.
+		vCenter = InverseRotate<>(vCenter - vOrigin, vOrientation);
+
+		// Set w of the center to one so we can dot4 with the plane.
+		vCenter = Insert<0, 0, 0, 0, 1>(vCenter, SplatOne());
+
+		// Check against each plane of the frustum.
+		__m128 Outside = details::SplatFalseInt();
+		__m128 InsideAll =details::SplatTrueInt();
+		__m128 CenterInsideAll = details::SplatTrueInt();
+
+		__m128 Dist[6];
+
+		for (size_t i = 0; i < 6; ++i)
+		{
+			Dist[i] = Dot<4>(vCenter, Planes[i]);
+
+			// Outside the plane?
+			Outside = OrInt(Outside, GreaterExt(Dist[i], vRadius));
+
+			// Fully inside the plane?
+			InsideAll = AndInt(InsideAll, LessOrEqualExt(Dist[i], -vRadius));
+
+			// Check if the center is inside the plane.
+			CenterInsideAll = AndInt(CenterInsideAll, LessOrEqualExt(Dist[i], Zero));
+		}
+
+		// If the sphere is outside any of the planes it is outside. 
+		if (EqualInt(Outside, details::SplatTrueInt()))
+			return false;
+
+		// If the sphere is inside all planes it is fully inside.
+		if (EqualInt(InsideAll, details::SplatTrueInt()))
+			return true;
+
+		// If the center of the sphere is inside all planes and the sphere intersects 
+		// one or more planes then it must intersect.
+		if (EqualInt(CenterInsideAll, details::SplatTrueInt()))
+			return true;
+
+		// The sphere may be outside the frustum or intersecting the frustum.
+		// Find the nearest feature (face, edge, or corner) on the frustum 
+		// to the sphere.
+
+		// The faces adjacent to each face are:
+		static const size_t adjacent_faces[6][4] =
+		{
+			{ 2, 3, 4, 5 },    // 0
+			{ 2, 3, 4, 5 },    // 1
+			{ 0, 1, 4, 5 },    // 2
+			{ 0, 1, 4, 5 },    // 3
+			{ 0, 1, 2, 3 },    // 4
+			{ 0, 1, 2, 3 }
+		};  // 5
+
+		__m128 Intersects = details::SplatFalseInt();
+
+		// Check to see if the nearest feature is one of the planes.
+		for (size_t i = 0; i < 6; ++i)
+		{
+			// Find the nearest point on the plane to the center of the sphere.
+			__m128 Point = vCenter - (Planes[i] * Dist[i]);
+
+			// Set w of the point to one.
+			Point = Insert<0, 0, 0, 0, 1>(Point, SplatOne());
+
+			// If the point is inside the face (inside the adjacent planes) then
+			// this plane is the nearest feature.
+			__m128 InsideFace = details::SplatTrueInt();
+
+			for (size_t j = 0; j < 4; j++)
+			{
+				size_t plane_index = adjacent_faces[i][j];
+
+				InsideFace = AndInt(InsideFace,
+					LessOrEqualExt(Dot<4>(Point, Planes[plane_index]), Zero));
+			}
+
+			// Since we have already checked distance from the plane we know that the
+			// sphere must intersect if this plane is the nearest feature.
+			Intersects = OrInt(Intersects,
+				AndInt(GreaterExt(Dist[i], Zero), InsideFace));
+		}
+
+		if (EqualInt(Intersects, details::SplatTrueInt()))
+			return true;
+
+		// Build the corners of the frustum.
+		__m128 vRightTop = set(mRightSlope, mTopSlope, 1.0f, 0.0f);
+		__m128 vRightBottom = set(mRightSlope, mBottomSlope, 1.0f, 0.0f);
+		__m128 vLeftTop = set(mLeftSlope, mTopSlope, 1.0f, 0.0f);
+		__m128 vLeftBottom = set(mLeftSlope, mBottomSlope, 1.0f, 0.0f);
+		__m128 vNear = Splat(mNear);
+		__m128 vFar = Splat(mFar);
+
+		__m128 Corners[CORNER_COUNT];
+		Corners[0] = vRightTop * vNear;
+		Corners[1] = vRightBottom * vNear;
+		Corners[2] = vLeftTop * vNear;
+		Corners[3] = vLeftBottom * vNear;
+		Corners[4] = vRightTop * vFar;
+		Corners[5] = vRightBottom * vFar;
+		Corners[6] = vLeftTop * vFar;
+		Corners[7] = vLeftBottom * vFar;
+
+		// The Edges are:
+		static const size_t edges[12][2] =
+		{
+			{ 0, 1 },{ 2, 3 },{ 0, 2 },{ 1, 3 },    // Near plane
+			{ 4, 5 },{ 6, 7 },{ 4, 6 },{ 5, 7 },    // Far plane
+			{ 0, 4 },{ 1, 5 },{ 2, 6 },{ 3, 7 },
+		}; // Near to far
+
+		__m128 RadiusSq = vRadius * vRadius;
+
+		// Check to see if the nearest feature is one of the edges (or corners).
+		for (size_t i = 0; i < 12; ++i)
+		{
+			size_t ei0 = edges[i][0];
+			size_t ei1 = edges[i][1];
+
+			// Find the nearest point on the edge to the center of the sphere.
+			// The corners of the frustum are included as the endpoints of the edges.
+			__m128 Point = PointOnLineSegmentNearestPoint(Corners[ei0], Corners[ei1], vCenter);
+
+			__m128 Delta = vCenter - Point;
+
+			__m128 DistSq = Dot(Delta, Delta);
+
+			// If the distance to the center of the sphere to the point is less than 
+			// the radius of the sphere then it must intersect.
+			Intersects = OrInt(Intersects, LessOrEqualExt(DistSq, RadiusSq));
+		}
+
+		if (EqualInt(Intersects,details::SplatTrueInt()))
+			return true;
+
+		// The sphere must be outside the frustum.
+		return false;
 	}
 	bool Frustum::Intersects(const Box& box) const {
-
+		// Make the axis aligned box oriented and do an OBB vs frustum test.
+		OrientedBox obox{ box };
+		Intersects(obox);
 	}
 	bool Frustum::Intersects(const OrientedBox& box) const {
+		static const vectori32 SelectY =
+		{
+			LM_SELECT_0,LM_SELECT_1, LM_SELECT_0, LM_SELECT_0
+		};
+		static const vectori32 SelectZ =
+		{
+			LM_SELECT_0, LM_SELECT_0, LM_SELECT_1, LM_SELECT_0
+		};
 
+		auto Zero = SplatZero();
+
+		// Build frustum planes.
+		vector Planes[6];
+		Planes[0] = set(0.0f, 0.0f, -1.0f, mNear);
+		Planes[1] = set(0.0f, 0.0f, 1.0f, -mFar);
+		Planes[2] = set(1.0f, 0.0f, -mRightSlope, 0.0f);
+		Planes[3] = set(-1.0f, 0.0f, mLeftSlope, 0.0f);
+		Planes[4] = set(0.0f, 1.0f, -mTopSlope, 0.0f);
+		Planes[5] = set(0.0f, -1.0f, mBottomSlope, 0.0f);
+
+		// Load origin and orientation.
+		vector vOrigin = load(mOrigin);
+		vector FrustumOrientation = load(mOrientation);
+
+		assert(details::QuaternionIsUnit(FrustumOrientation));
+
+		// Load the box.
+		vector Center = load(box.mCenter);
+		vector Extents = load(box.mExtents);
+		vector BoxOrientation = load(box.mOrientation);
+
+		assert(details::QuaternionIsUnit(BoxOrientation));
+
+		// Transform the oriented box into the space of the frustum in order to 
+		// minimize the number of transforms we have to do.
+		Center =InverseRotate<>(Center - vOrigin, FrustumOrientation);
+		BoxOrientation = QuaternionMultiply(BoxOrientation, QuaternionConjugate(FrustumOrientation));
+
+		// Set w of the center to one so we can dot4 with the plane.
+		Center = Insert<0, 0, 0, 0, 1>(Center, SplatOne());
+
+		// Build the 3x3 rotation matrix that defines the box axes.
+		matrix R = Matrix(BoxOrientation);
+
+		// Check against each plane of the frustum.
+		__m128 Outside = details::SplatFalseInt();
+		__m128 InsideAll = details::SplatTrueInt();
+		__m128 CenterInsideAll = details::SplatTrueInt();
+
+		for (size_t i = 0; i < 6; ++i)
+		{
+			// Compute the distance to the center of the box.
+			__m128 Dist = Dot<4>(Center, Planes[i]);
+
+			// Project the axes of the box onto the normal of the plane.  Half the
+			// length of the projection (sometime called the "radius") is equal to
+			// h(u) * abs(n dot b(u))) + h(v) * abs(n dot b(v)) + h(w) * abs(n dot b(w))
+			// where h(i) are extents of the box, n is the plane normal, and b(i) are the 
+			// axes of the box.
+			__m128 Radius = Dot<>(Planes[i], R[0]);
+			Radius = Select(Radius, Dot<>(Planes[i], R[1]), SelectY);
+			Radius = Select(Radius, Dot<>(Planes[i], R[2]), SelectZ);
+			Radius = Dot<>(Extents, Abs(Radius));
+
+			// Outside the plane?
+			Outside = OrInt(Outside, GreaterExt(Dist, Radius));
+
+			// Fully inside the plane?
+			InsideAll = AndInt(InsideAll, LessOrEqualExt(Dist, -Radius));
+
+			// Check if the center is inside the plane.
+			CenterInsideAll = AndInt(CenterInsideAll, LessOrEqualExt(Dist, Zero));
+		}
+
+		// If the sphere is outside any of the planes it is outside. 
+		if (EqualInt(Outside, details::SplatTrueInt()))
+			return false;
+
+		// If the sphere is inside all planes it is fully inside.
+		if (EqualInt(InsideAll, details::SplatTrueInt()))
+			return true;
+
+		// If the center of the sphere is inside all planes and the sphere intersects 
+		// one or more planes then it must intersect.
+		if (EqualInt(CenterInsideAll, details::SplatTrueInt()))
+			return true;
+
+		// Build the corners of the frustum.
+		__m128 vRightTop = set(mRightSlope, mTopSlope, 1.0f, 0.0f);
+		__m128 vRightBottom = set(mRightSlope, mBottomSlope, 1.0f, 0.0f);
+		__m128 vLeftTop = set(mLeftSlope, mTopSlope, 1.0f, 0.0f);
+		__m128 vLeftBottom = set(mLeftSlope, mBottomSlope, 1.0f, 0.0f);
+		__m128 vNear = Splat(mNear);
+		__m128 vFar = Splat(mFar);
+
+		__m128 Corners[CORNER_COUNT];
+		Corners[0] = vRightTop * vNear;
+		Corners[1] = vRightBottom * vNear;
+		Corners[2] = vLeftTop * vNear;
+		Corners[3] = vLeftBottom * vNear;
+		Corners[4] = vRightTop * vFar;
+		Corners[5] = vRightBottom * vFar;
+		Corners[6] = vLeftTop * vFar;
+		Corners[7] = vLeftBottom * vFar;
+
+		// Test against box axes (3)
+		{
+			// Find the min/max values of the projection of the frustum onto each axis.
+			__m128 FrustumMin, FrustumMax;
+
+			FrustumMin = Dot<>(Corners[0], R[0]);
+			FrustumMin = Select(FrustumMin, Dot<>(Corners[0], R[1]), SelectY);
+			FrustumMin = Select(FrustumMin, Dot<>(Corners[0], R[2]), SelectZ);
+			FrustumMax = FrustumMin;
+
+			for (size_t i = 1; i < OrientedBox::CORNER_COUNT; ++i)
+			{
+				__m128 Temp = Dot<>(Corners[i], R[0]);
+				Temp = Select(Temp, Dot<>(Corners[i], R[1]), SelectY);
+				Temp = Select(Temp, Dot<>(Corners[i], R[2]), SelectZ);
+
+				FrustumMin = min(FrustumMin, Temp);
+				FrustumMax = max(FrustumMax, Temp);
+			}
+
+			// Project the center of the box onto the axes.
+			__m128 BoxDist = Dot<>(Center, R[0]);
+			BoxDist = Select(BoxDist, Dot<>(Center, R[1]), SelectY);
+			BoxDist = Select(BoxDist, Dot<>(Center, R[2]), SelectZ);
+
+			// The projection of the box onto the axis is just its Center and Extents.
+			// if (min > box_max || max < box_min) reject;
+			__m128 Result = OrInt(GreaterExt(FrustumMin, BoxDist + Extents),
+				LessExt(FrustumMax, BoxDist - Extents));
+
+			if (details::AnyTrue<>(Result))
+				return false;
+		}
+
+
+		// Test against edge/edge axes (3*6).
+		__m128 FrustumEdgeAxis[6];
+
+		FrustumEdgeAxis[0] = vRightTop;
+		FrustumEdgeAxis[1] = vRightBottom;
+		FrustumEdgeAxis[2] = vLeftTop;
+		FrustumEdgeAxis[3] = vLeftBottom;
+		FrustumEdgeAxis[4] = vRightTop - vLeftTop;
+		FrustumEdgeAxis[5] = vLeftBottom - vLeftTop;
+
+		for (size_t i = 0; i < 3; ++i)
+		{
+			for (size_t j = 0; j < 6; j++)
+			{
+				// Compute the axis we are going to test.
+				__m128 Axis = Cross<>(R[i], FrustumEdgeAxis[j]);
+
+				// Find the min/max values of the projection of the frustum onto the axis.
+				__m128 FrustumMin, FrustumMax;
+
+				FrustumMin = FrustumMax = Dot<>(Axis, Corners[0]);
+
+				for (size_t k = 1; k < CORNER_COUNT; k++)
+				{
+					__m128 Temp = Dot<>(Axis, Corners[k]);
+					FrustumMin = min(FrustumMin, Temp);
+					FrustumMax = max(FrustumMax, Temp);
+				}
+
+				// Project the center of the box onto the axis.
+				__m128 Dist = Dot<>(Center, Axis);
+
+				// Project the axes of the box onto the axis to find the "radius" of the box.
+				__m128 Radius = Dot<>(Axis, R[0]);
+				Radius = Select(Radius, Dot<>(Axis, R[1]), SelectY);
+				Radius = Select(Radius, Dot<>(Axis, R[2]), SelectZ);
+				Radius = Dot<>(Extents, Abs(Radius));
+
+				// if (center > max + radius || center < min - radius) reject;
+				Outside = OrInt(Outside, GreaterExt(Dist, FrustumMax + Radius));
+				Outside = OrInt(Outside, LessExt(Dist, FrustumMin - Radius));
+			}
+		}
+
+		if (EqualInt(Outside,details::SplatTrueInt()))
+			return false;
+
+		// If we did not find a separating plane then the box must intersect the frustum.
+		return true;
 	}
 
 	//bool Frustum::Intersects(const Frustum& fr) const {}
