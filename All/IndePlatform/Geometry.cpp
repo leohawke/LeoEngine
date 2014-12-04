@@ -4,7 +4,7 @@
 #include "Geometry.hpp"
 #include "Geometry_impl.hpp"
 
-
+#include <float.h>
 
 namespace leo {
 
@@ -573,7 +573,7 @@ namespace leo {
 		BottomPlane = PlaneTransform(BottomPlane, vOrientation, vOrigin);
 		BottomPlane = PlaneNormalize(BottomPlane);
 
-		return TriangleTests::ContainedBy(load(Tri.p[0]), load(Tri.p[0]), load(Tri.p[0]), NearPlane, FarPlane, RightPlane, LeftPlane, TopPlane, BottomPlane);
+		return CONTAINMENT_TYPE(TriangleTests::ContainedBy(load(Tri.p[0]), load(Tri.p[0]), load(Tri.p[0]), NearPlane, FarPlane, RightPlane, LeftPlane, TopPlane, BottomPlane));
 	}
 	CONTAINMENT_TYPE Frustum::Contains(const Sphere& sp) const {
 		return sp.ContainedBy(*this);
@@ -752,7 +752,7 @@ namespace leo {
 	bool Frustum::Intersects(const Box& box) const {
 		// Make the axis aligned box oriented and do an OBB vs frustum test.
 		OrientedBox obox{ box };
-		Intersects(obox);
+		return Intersects(obox);
 	}
 	bool Frustum::Intersects(const OrientedBox& box) const {
 		static const vectori32 SelectY =
@@ -948,14 +948,296 @@ namespace leo {
 
 	//bool Frustum::Intersects(const Frustum& fr) const {}
 
-	bool LM_VECTOR_CALL	Frustum::Intersects(const Triangle& Tri) const {
+	bool Frustum::Intersects(const Triangle& Tri) const {
+		// Build frustum planes.
+		vector Planes[6];
+		Planes[0] = set(0.0f, 0.0f, -1.0f, mNear);
+		Planes[1] = set(0.0f, 0.0f, 1.0f, -mFar);
+		Planes[2] = set(1.0f, 0.0f, -mRightSlope, 0.0f);
+		Planes[3] = set(-1.0f, 0.0f, mLeftSlope, 0.0f);
+		Planes[4] = set(0.0f, 1.0f, -mTopSlope, 0.0f);
+		Planes[5] = set(0.0f, -1.0f, mBottomSlope, 0.0f);
 
+		// Load origin and orientation.
+		vector vOrigin = load(mOrigin);
+		vector vOrientation = load(mOrientation);
+
+		assert(details::QuaternionIsUnit(vOrientation));
+
+		auto V0 = load(Tri.p[0]);
+		auto V1 = load(Tri.p[1]);
+		auto V2 = load(Tri.p[2]);
+
+		// Transform triangle into the local space of frustum.
+		vector TV0 = InverseRotate<>(V0 - vOrigin, vOrientation);
+		vector TV1 = InverseRotate<>(V1 - vOrigin, vOrientation);
+		vector TV2 = InverseRotate<>(V2 - vOrigin, vOrientation);
+
+		// Test each vertex of the triangle against the frustum planes.
+		vector Outside = details::SplatFalseInt();
+		vector InsideAll = details::SplatTrueInt();
+
+		for (size_t i = 0; i < 6; ++i)
+		{
+			vector Dist0 = Dot<>(TV0, Planes[i]);
+			vector Dist1 = Dot<>(TV1, Planes[i]);
+			vector Dist2 = Dot<>(TV2, Planes[i]);
+
+			vector MinDist = min(Dist0, Dist1);
+			MinDist = min(MinDist, Dist2);
+			vector MaxDist = max(Dist0, Dist1);
+			MaxDist = max(MaxDist, Dist2);
+
+			vector PlaneDist = SplatW(Planes[i]);
+
+			// Outside the plane?
+			Outside = OrInt(Outside, GreaterExt(MinDist, PlaneDist));
+
+			// Fully inside the plane?
+			InsideAll = AndInt(InsideAll, LessOrEqualExt(MaxDist, PlaneDist));
+		}
+
+		// If the triangle is outside any of the planes it is outside. 
+		if (EqualInt(Outside, details::SplatTrueInt()))
+			return false;
+
+		// If the triangle is inside all planes it is fully inside.
+		if (EqualInt(InsideAll, details::SplatTrueInt()))
+			return true;
+
+		// Build the corners of the frustum.
+		__m128 vRightTop = set(mRightSlope, mTopSlope, 1.0f, 0.0f);
+		__m128 vRightBottom = set(mRightSlope, mBottomSlope, 1.0f, 0.0f);
+		__m128 vLeftTop = set(mLeftSlope, mTopSlope, 1.0f, 0.0f);
+		__m128 vLeftBottom = set(mLeftSlope, mBottomSlope, 1.0f, 0.0f);
+		__m128 vNear = Splat(mNear);
+		__m128 vFar = Splat(mFar);
+
+		vector Corners[CORNER_COUNT];
+		Corners[0] = vRightTop * vNear;
+		Corners[1] = vRightBottom * vNear;
+		Corners[2] = vLeftTop * vNear;
+		Corners[3] = vLeftBottom * vNear;
+		Corners[4] = vRightTop * vFar;
+		Corners[5] = vRightBottom * vFar;
+		Corners[6] = vLeftTop * vFar;
+		Corners[7] = vLeftBottom * vFar;
+
+		// Test the plane of the triangle.
+		vector Normal = Cross<>(V1 - V0, V2 - V0);
+		vector Dist = Dot<>(Normal, V0);
+
+		vector MinDist, MaxDist;
+		MinDist = MaxDist = Dot<>(Corners[0], Normal);
+		for (size_t i = 1; i < CORNER_COUNT; ++i)
+		{
+			vector Temp = Dot<>(Corners[i], Normal);
+			MinDist = min(MinDist, Temp);
+			MaxDist = max(MaxDist, Temp);
+		}
+
+		Outside = OrInt(GreaterExt(MinDist, Dist), LessExt(MaxDist, Dist));
+		if (EqualInt(Outside, details::SplatTrueInt()))
+			return false;
+
+		// Check the edge/edge axes (3*6).
+		vector TriangleEdgeAxis[3];
+		TriangleEdgeAxis[0] = V1 - V0;
+		TriangleEdgeAxis[1] = V2 - V1;
+		TriangleEdgeAxis[2] = V0 - V2;
+
+		vector FrustumEdgeAxis[6];
+		FrustumEdgeAxis[0] = vRightTop;
+		FrustumEdgeAxis[1] = vRightBottom;
+		FrustumEdgeAxis[2] = vLeftTop;
+		FrustumEdgeAxis[3] = vLeftBottom;
+		FrustumEdgeAxis[4] = vRightTop - vLeftTop;
+		FrustumEdgeAxis[5] = vLeftBottom - vLeftTop;
+
+		for (size_t i = 0; i < 3; ++i)
+		{
+			for (size_t j = 0; j < 6; j++)
+			{
+				// Compute the axis we are going to test.
+				vector Axis = Cross<>(TriangleEdgeAxis[i], FrustumEdgeAxis[j]);
+
+				// Find the min/max of the projection of the triangle onto the axis.
+				vector MinA, MaxA;
+
+				vector Dist0 = Dot<>(V0, Axis);
+				vector Dist1 = Dot<>(V1, Axis);
+				vector Dist2 = Dot<>(V2, Axis);
+
+				MinA = min(Dist0, Dist1);
+				MinA = min(MinA, Dist2);
+				MaxA = max(Dist0, Dist1);
+				MaxA = max(MaxA, Dist2);
+
+				// Find the min/max of the projection of the frustum onto the axis.
+				vector MinB, MaxB;
+
+				MinB = MaxB = Dot<>(Axis, Corners[0]);
+
+				for (size_t k = 1; k < CORNER_COUNT; k++)
+				{
+					vector Temp = Dot<>(Axis, Corners[k]);
+					MinB = min(MinB, Temp);
+					MaxB = max(MaxB, Temp);
+				}
+
+				// if (MinA > MaxB || MinB > MaxA) reject;
+				Outside = OrInt(Outside, GreaterExt(MinA, MaxB));
+				Outside = OrInt(Outside, GreaterExt(MinB, MaxA));
+			}
+		}
+
+		if (EqualInt(Outside, details::SplatTrueInt()))
+			return false;
+
+		// If we did not find a separating plane then the triangle must intersect the frustum.
+		return true;
 	}
 	PLANE_INTERSECTION_TYPE    LM_VECTOR_CALL    Frustum::Intersects(vector Plane) const {
+		assert(details::PlaneIsUnit(Plane));
 
+		// Load origin and orientation of the frustum.
+		vector vOrigin = load(mOrigin);
+		vector vOrientation = load(mOrientation);
+
+		assert(details::QuaternionIsUnit(vOrientation));
+
+		// Set w of the origin to one so we can dot4 with a plane.
+		vOrigin = Insert<0, 0, 0, 0, 1>(vOrigin, SplatOne());
+
+		// Build the corners of the frustum.
+		__m128 vRightTop = set(mRightSlope, mTopSlope, 1.0f, 0.0f);
+		__m128 vRightBottom = set(mRightSlope, mBottomSlope, 1.0f, 0.0f);
+		__m128 vLeftTop = set(mLeftSlope, mTopSlope, 1.0f, 0.0f);
+		__m128 vLeftBottom = set(mLeftSlope, mBottomSlope, 1.0f, 0.0f);
+		__m128 vNear = Splat(mNear);
+		__m128 vFar = Splat(mFar);
+
+		vRightTop = Rotate<>(vRightTop, vOrientation);
+		vRightBottom = Rotate<>(vRightBottom, vOrientation);
+		vLeftTop = Rotate<>(vLeftTop, vOrientation);
+		vLeftBottom = Rotate<>(vLeftBottom, vOrientation);
+
+
+		__m128 Corners[CORNER_COUNT];
+		Corners[0] = vOrigin+ vRightTop * vNear;
+		Corners[1] = vOrigin+vRightBottom * vNear;
+		Corners[2] = vOrigin+vLeftTop * vNear;
+		Corners[3] = vOrigin+vLeftBottom * vNear;
+		Corners[4] = vOrigin+vRightTop * vFar;
+		Corners[5] = vOrigin+vRightBottom * vFar;
+		Corners[6] = vOrigin+vLeftTop * vFar;
+		Corners[7] = vOrigin+vLeftBottom * vFar;
+
+		
+		__m128 Outside, Inside;
+		FastIntersectFrustumPlane(Corners[0], Corners[1], Corners[2], Corners[3],
+			Corners[4], Corners[5], Corners[6], Corners[7],
+			Plane, Outside, Inside);
+
+		// If the frustum is outside any plane it is outside.
+		if (EqualInt(Outside, details::SplatTrueInt()))
+			return PLANE_INTERSECTION_TYPE::FRONT;
+
+		// If the frustum is inside all planes it is inside.
+		if (EqualInt(Inside, details::SplatTrueInt()))
+			return PLANE_INTERSECTION_TYPE::BACK;
+
+		// The frustum is not inside all planes or outside a plane it intersects.
+		return PLANE_INTERSECTION_TYPE::INTERSECTING;
 	}
-	std::pair<bool, float>    LM_VECTOR_CALL     Frustum::Intersects(const Ray& ray) const {
+	std::pair<bool, float>   Frustum::Intersects(const Ray& ray) const {
+		auto rayOrigin = load(ray.mOrigin);
+		auto Direction = load(ray.mDir);
+		// If ray starts inside the frustum, return a distance of 0 for the hit
+		if (Contains(rayOrigin) == CONTAINMENT_TYPE::CONTAINS)
+		{
+			return std::make_pair(true, 0.f);
+		}
 
+		// Build frustum planes.
+		vector Planes[6];
+		Planes[0] = set(0.0f, 0.0f, -1.0f, mNear);
+		Planes[1] = set(0.0f, 0.0f, 1.0f, -mFar);
+		Planes[2] = set(1.0f, 0.0f, -mRightSlope, 0.0f);
+		Planes[3] = set(-1.0f, 0.0f, mLeftSlope, 0.0f);
+		Planes[4] = set(0.0f, 1.0f, -mTopSlope, 0.0f);
+		Planes[5] = set(0.0f, -1.0f, mBottomSlope, 0.0f);
+
+		// Load origin and orientation of the frustum.
+		vector frOrigin = load(mOrigin);
+		vector frOrientation = load(mOrientation);
+
+		// This algorithm based on "Fast Ray-Convex Polyhedron Intersectin," in James Arvo, ed., Graphics Gems II pp. 247-250
+		float tnear = -FLT_MAX;
+		float tfar = FLT_MAX;
+
+		for (size_t i = 0; i < 6; ++i)
+		{
+			vector Plane = PlaneTransform(Planes[i], frOrientation, frOrigin);
+			Plane = PlaneNormalize(Plane);
+
+			vector AxisDotOrigin = PlaneDotCoord(Plane, rayOrigin);
+			vector AxisDotDirection = Dot<>(Plane, Direction);
+
+			if (LessOrEqual<>(Abs(AxisDotDirection),details::SplatRayEpsilon()))
+			{
+				// Ray is parallel to plane - check if ray origin is inside plane's
+				if (Greater<>(AxisDotOrigin, SplatZero()))
+				{
+					// Ray origin is outside half-space.
+					return std::make_pair(false, 0.f);
+				}
+			}
+			else
+			{
+				// Ray not parallel - get distance to plane.
+				float vd = GetX(AxisDotDirection);
+				float vn = GetX(AxisDotOrigin);
+				float t = -vn / vd;
+				if (vd < 0.0f)
+				{
+					// Front face - T is a near point.
+					if (t > tfar)
+					{
+						return std::make_pair(false, 0.f);
+					}
+					if (t > tnear)
+					{
+						// Hit near face.
+						tnear = t;
+					}
+				}
+				else
+				{
+					// back face - T is far point.
+					if (t < tnear)
+					{
+						return std::make_pair(false, 0.f);
+					}
+					if (t < tfar)
+					{
+						// Hit far face.
+						tfar = t;
+					}
+				}
+			}
+		}
+
+		// Survived all tests.
+		// Note: if ray originates on polyhedron, may want to change 0.0f to some
+		// epsilon to avoid intersecting the originating face.
+		float distance = (tnear >= 0.0f) ? tnear : tfar;
+		if (distance >= 0.0f)
+		{
+			return std::make_pair(true,distance);
+		}
+
+		return std::make_pair(false, 0.f);
 	}
 
 	//CONTAINMENT_TYPE     LM_VECTOR_CALL     Frustum::ContainedBy(vector Plane0, vector Plane1, vector Plane2,

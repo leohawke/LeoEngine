@@ -47,13 +47,7 @@ namespace leo
 	class OrientedBox;
 	class Frustum;
 
-	namespace def
-	{
-		const float frustum_near = 0.25f;
-		const float frustum_far = 1024.0f;
-		const float frustum_fov = 75.f / 180.f*LM_PI;
-		const float frustum_aspect = 16.f / 9.f;
-	}
+	
 
 
 	inline DirectX::XMMATRIX convert(const std::array<__m128, 4>& matrix){
@@ -924,20 +918,7 @@ namespace leo
 
 	class ViewFrustum : public Frustum
 	{
-	public:
-		~ViewFrustum() = default;
-		ViewFrustum(const ViewFrustum& lvaue) = default;
-		ViewFrustum(const float3& origin = float3(0.0f, 0.0f, 0.f), const float4& orientation = float4(0.0f, 0.0f, 0.0f, 1.0f), float fov = def::frustum_fov,
-			float aspect = def::frustum_aspect, PROJECTION_TYPE projtype = PROJECTION_TYPE::PERSPECTIVE,
-			float nearf = def::frustum_near, float farf = def::frustum_far)
-			:mProjType(projtype), mAspect(aspect), mFov(fov)
-		{
-			memcpy(Orientation, orientation);
-			memcpy(Origin, origin);
-			Near = nearf;
-			Far = farf;
-			_update();
-		}
+	
 	private:
 		void _update()
 		{

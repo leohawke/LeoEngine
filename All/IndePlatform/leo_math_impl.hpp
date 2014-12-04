@@ -23,22 +23,24 @@
 
 #include "leomath.h"
 
+
+
 namespace leo {
 
-
-	inline __m128 LM_VECTOR_CALL operator*(__m128 lhs, __m128 rhs) {
-		return Multiply(lhs, rhs);
+#ifdef LB_IMPL_MSCPP
+	inline __m128  operator * (__m128 lhs, __m128 rhs) {
+		return leo::Multiply(lhs, rhs);
 	}
 
-	inline __m128 LM_VECTOR_CALL operator-(__m128 lhs, __m128 rhs) {
-		return Subtract(lhs, rhs);
+	inline __m128  operator - (__m128 lhs, __m128 rhs) {
+		return leo::Subtract(lhs, rhs);
 	}
 
-	inline __m128 LM_VECTOR_CALL operator+(__m128 lhs, __m128 rhs) {
-		return Add(lhs, rhs);
+	inline __m128  operator + (__m128 lhs, __m128 rhs) {
+		return leo::Add(lhs, rhs);
 	}
 
-	inline __m128 LM_VECTOR_CALL operator-(__m128 lhs) {
+	inline __m128  operator - (__m128 lhs) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vnegq_f32(V);
 #elif defined(LM_SSE_INTRINSICS)
@@ -50,6 +52,8 @@ namespace leo {
 #else // LM_VMX128_INTRINSICS_
 #endif // LM_VMX128_INTRINSICS
 	}
+#endif
+	
 
 	inline float GetX(__m128 v) {
 #if defined(LM_ARM_NEON_INTRINSICS)
@@ -110,6 +114,14 @@ namespace leo {
 			__m128 C = Swizzle(V, LM_SWIZZLE_X, LM_SWIZZLE_Y, LM_SWIZZLE_Z, LM_SWIZZLE_X);
 			return ComparisonAnyTrue(EqualIntR<>(C, SplatTrueInt()));
 		}
+
+		const static vectorf32 g_UnitPlaneEpsilon = { 1.0e-4f, 1.0e-4f, 1.0e-4f, 1.0e-4f };
+
+		inline bool PlaneIsUnit(__m128 Plane)
+		{
+			__m128 Difference = Length<>(Plane)-SplatOne();
+			return Less(Abs(Difference), g_UnitPlaneEpsilon);
+		}
 	}
 
 	__m128 LM_VECTOR_CALL PlaneTransform(__m128 P, __m128 Q, __m128 O) {
@@ -119,11 +131,7 @@ namespace leo {
 		return Insert<0, 0, 0, 0, 1>(vNormal, vD);
 	}
 
-	enum class CONTAINMENT_TYPE : std::uint8_t {
-		DISJOINT = 0,
-		INTERSECTS = 1,
-		CONTAINS = 2,
-	};
+
 
 	template<typename T, uint8 slot>
 	struct sse_param_type {
@@ -174,7 +182,7 @@ namespace leo {
 	};
 
 	template<typename T, uint8 slot>
-	using sse_param_type_t = sse_param_type<T, slot>::type;
+	using sse_param_type_t =typename sse_param_type<T, slot>::type;
 
 	namespace TriangleTests {
 
@@ -199,7 +207,7 @@ namespace leo {
 			Inside = LessExt(MaxDist, Zero);
 		}
 
-		inline CONTAINMENT_TYPE LM_VECTOR_CALL ContainedBy(__m128 V0, __m128 V1, __m128 V2,
+		inline uint8_t LM_VECTOR_CALL ContainedBy(__m128 V0, __m128 V1, __m128 V2,
 			sse_param_type_t<__m128, 4> Plane0, sse_param_type_t<__m128, 5> Plane1, sse_param_type_t<__m128, 6> Plane2,
 			const __m128& Plane3, const __m128& Plane4, const __m128& Plane5)
 		{
@@ -241,18 +249,18 @@ namespace leo {
 
 			// If the triangle is outside any plane it is outside.
 			if (EqualInt(AnyOutside, details::SplatTrueInt()))
-				return CONTAINMENT_TYPE::DISJOINT;
+				return 0;
 
 			// If the triangle is inside all planes it is inside.
 			if (EqualInt(AllInside, details::SplatTrueInt()))
-				return CONTAINMENT_TYPE::DISJOINT;
+				return 2;
 
 			// The triangle is not inside all planes or outside a plane, it may intersect.
-			return CONTAINMENT_TYPE::DISJOINT;
+			return 1;
 		}
 	}
 
-	void inline FastIntersectSpherePlane(__m128 Center,  __m128 Radius,  __m128 Plane,
+	void inline LM_VECTOR_CALL FastIntersectSpherePlane(__m128 Center,  __m128 Radius,  __m128 Plane,
 		__m128& Outside,  __m128& Inside) {
 		__m128 Dist = Dot<4>(Center, Plane);
 
@@ -263,7 +271,7 @@ namespace leo {
 		Inside = LessExt(Dist, -Radius);
 	}
 
-	void inline FastIntersectAxisAlignedBoxPlane(__m128 Center,__m128 Extents, __m128 Plane,
+	void inline LM_VECTOR_CALL FastIntersectAxisAlignedBoxPlane(__m128 Center,__m128 Extents, __m128 Plane,
 			__m128& Outside, __m128& Inside) {
 		// Compute the distance to the center of the box.
 		__m128 Dist = Dot<4>(Center, Plane);
@@ -282,7 +290,7 @@ namespace leo {
 		Inside = LessExt(Dist, -Radius);
 	}
 
-	void inline FastIntersectOrientedBoxPlane(__m128 Center, __m128 Extents, __m128 Axis0,
+	void inline LM_VECTOR_CALL FastIntersectOrientedBoxPlane(__m128 Center, __m128 Extents, __m128 Axis0,
 		sse_param_type_t<__m128, 4> Axis1,
 		sse_param_type_t<__m128, 5> Axis2,
 		sse_param_type_t<__m128, 6> Plane,
@@ -307,7 +315,7 @@ namespace leo {
 		Inside = LessExt(Dist, -Radius);
 	}
 
-	inline __m128 PointOnLineSegmentNearestPoint(__m128 S1, __m128 S2, __m128 P) {
+	inline __m128 LM_VECTOR_CALL PointOnLineSegmentNearestPoint(__m128 S1, __m128 S2, __m128 P) {
 		__m128 Dir = S2 - S1;
 		__m128 Projection = (Dot<>(P, Dir) - Dot<>(S1, Dir));
 		__m128 LengthSq = Dot<>(Dir, Dir);
@@ -324,6 +332,57 @@ namespace leo {
 		Point = Select(Point, S2, SelectS2);
 
 		return Point;
+	}
+
+	inline void LM_VECTOR_CALL FastIntersectFrustumPlane(__m128 Point0, __m128 Point1, __m128 Point2,
+		sse_param_type_t<__m128, 4>  Point3,
+		sse_param_type_t<__m128, 5> Point4,
+		sse_param_type_t<__m128, 6> Point5, 
+		const __m128& Point6, 
+		const __m128& Point7,
+		const __m128& Plane, 
+		__m128& Outside, __m128& Inside)
+	{
+		// Find the min/max projection of the frustum onto the plane normal.
+		__m128 Min, Max, Dist;
+
+		Min = Max = Dot<>(Plane, Point0);
+
+		Dist = Dot<>(Plane, Point1);
+		Min = min(Min, Dist);
+		Max = max(Max, Dist);
+
+		Dist = Dot<>(Plane, Point2);
+		Min = min(Min, Dist);
+		Max = max(Max, Dist);
+
+		Dist = Dot<>(Plane, Point3);
+		Min = min(Min, Dist);
+		Max = max(Max, Dist);
+
+		Dist = Dot<>(Plane, Point4);
+		Min = min(Min, Dist);
+		Max = max(Max, Dist);
+
+		Dist = Dot<>(Plane, Point5);
+		Min = min(Min, Dist);
+		Max = max(Max, Dist);
+
+		Dist = Dot<>(Plane, Point6);
+		Min = min(Min, Dist);
+		Max = max(Max, Dist);
+
+		Dist = Dot<>(Plane, Point7);
+		Min = min(Min, Dist);
+		Max = max(Max, Dist);
+
+		__m128 PlaneDist = -SplatW(Plane);
+
+		// Outside the plane?
+		Outside = GreaterExt(Min, PlaneDist);
+
+		// Fully inside the plane?
+		Inside = LessExt(Max, PlaneDist);
 	}
 }
 

@@ -44,11 +44,7 @@ namespace leo {
 		DIRECTIONS_3DS = 6
 	};
 
-	enum class PROJECTION_TYPE : std::uint8_t
-	{
-		ORTHOGRAPHIC,
-		PERSPECTIVE
-	};
+	
 
 	enum class CONTAINMENT_TYPE : std::uint8_t {
 		DISJOINT = 0,
@@ -56,7 +52,7 @@ namespace leo {
 		CONTAINS = 2,
 	};
 
-	enum PLANE_INTERSECTION_TYPE : std::uint8_t {
+	enum class PLANE_INTERSECTION_TYPE : std::uint8_t {
 		FRONT = 0,
 		INTERSECTING = 1,
 		BACK = 2,
@@ -184,9 +180,9 @@ namespace leo {
 		static const size_t CORNER_COUNT = 8;
 
 		//WorldSpace
-		float3 mOrigin;            // Origin of the frustum (and projection).
+		float3 mOrigin = float3(0.f,0.f,0.f);            // Origin of the frustum (and projection).
 		//LocalSpace->WorldSpace
-		float3 mOrientation;       // Quaternion representing rotation.
+		float4 mOrientation = float4(0.f,0.f,0.f,1.f);       // Quaternion representing rotation.
 
 		float mRightSlope;           // Positive X slope (X/Z).
 		float mLeftSlope;            // Negative X slope.
@@ -203,6 +199,9 @@ namespace leo {
 			mTopSlope(TopSlope), mBottomSlope(BottomSlope), mNear(Near), mFar(Far)
 		{
 		}
+		Frustum(const float3& Origin, const float4& Orientation, float Near, float Far)
+			:mOrigin(Origin),mOrientation(Orientation),mNear(Near),mFar(Far)
+		{}
 		Frustum(const Frustum& fr) = default;
 
 		using vector = __m128;
@@ -233,12 +232,12 @@ namespace leo {
 		bool Intersects(const Box& box) const;
 		bool Intersects(const OrientedBox& box) const;
 		//bool Intersects(const Frustum& fr) const;
-		bool LM_VECTOR_CALL	Intersects(const Triangle& Tri) const;
+		bool 	Intersects(const Triangle& Tri) const;
 		PLANE_INTERSECTION_TYPE    LM_VECTOR_CALL    Intersects(vector Plane) const;
-		std::pair<bool,float>    LM_VECTOR_CALL     Intersects(const Ray& ray) const;
+		std::pair<bool,float> Intersects(const Ray& ray) const;
 
-		CONTAINMENT_TYPE     LM_VECTOR_CALL     ContainedBy(vector Plane0, vector Plane1, vector Plane2,
-			const vector& Plane3, const vector& Plane4, const vector& Plane5) const;
+		//CONTAINMENT_TYPE     LM_VECTOR_CALL     ContainedBy(vector Plane0, vector Plane1, vector Plane2,
+			//const vector& Plane3, const vector& Plane4, const vector& Plane5) const;
 		// Test frustum against six planes (see Frustum::GetPlanes)
 
 		//void GetPlanes(vector* NearPlane, vector* FarPlane, vector* RightPlane,
