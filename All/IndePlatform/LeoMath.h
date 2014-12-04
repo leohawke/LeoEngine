@@ -863,11 +863,25 @@ namespace leo {
 #else // _LM_VMX128_INTRINSICS_
 #endif // _LM_VMX128_INTRINSICS_
 	}
+
+	template<uint8 D = 3>
+	inline bool Equal(__m128 V1, __m128 V2) {
+#if defined(LM_ARM_NEON_INTRINSICS)
+		uint32x4_t vResult = vceqq_f32(V1, V2);
+		int8x8x2_t vTemp = vzip_u8(vget_low_u8(vResult), vget_high_u8(vResult));
+		vTemp = vzip_u16(vTemp.val[0], vTemp.val[1]);
+		return ((vget_lane_u32(vTemp.val[1], 1) & 0xFFFFFFU) == 0xFFFFFFU);
+#elif defined(LM_SSE_INTRINSICS)
+		__m128 vTemp = _mm_cmpeq_ps(V1, V2);
+		return (((_mm_movemask_ps(vTemp) & 7) == 7) != 0);
+#else
+#endif
+	}
 }
 
 //impl details
 namespace leo {
-	
+
 
 
 	namespace details {
@@ -929,7 +943,29 @@ namespace leo {
 			return _mabsmask;
 		}
 
-		inline __m128 IsInfinite(__m128 V) {
+		template<uint8 D = 3>
+		inline bool IsInfinite(__m128 V) {
+#if defined(LM_ARM_NEON_INTRINSICS)
+			// Mask off the sign bit
+			uint32x4_t vTempInf = vandq_u32(V, g_XMAbsMask);
+			// Compare to infinity
+			vTempInf = vceqq_f32(vTempInf, g_XMInfinity);
+			// If any are infinity, the signs are true.
+			int8x8x2_t vTemp = vzip_u8(vget_low_u8(vTempInf), vget_high_u8(vTempInf));
+			vTemp = vzip_u16(vTemp.val[0], vTemp.val[1]);
+			return ((vget_lane_u32(vTemp.val[1], 1) & 0xFFFFFFU) != 0);
+#elif defined(LM_SSE_INTRINSICS)
+			// Mask off the sign bit
+			__m128 vTemp = _mm_and_ps(V, SplatAbsMask());
+			// Compare to infinity
+			vTemp = _mm_cmpeq_ps(vTemp, SplatInfinity());
+			// If x,y or z are infinity, the signs are true.
+			return ((_mm_movemask_ps(vTemp) & 7) != 0);
+#else // LM_VMX128_INTRINSICS_
+#endif // LM_VMX128_INTRINSICS_
+		}
+
+		inline __m128 IsInfiniteExt(__m128 V) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 			// Mask off the sign bit
 			uint32x4_t vTemp = vandq_u32(V, g_XMAbsMask);
@@ -1008,7 +1044,7 @@ namespace leo {
 #endif
 	}
 
-	
+
 
 	inline __m128 SplatNegativeOne() {
 		const static float4 sone(-1.f, -1.f, -1.f, -1.f);
@@ -1374,7 +1410,7 @@ namespace leo {
 #endif // _LM_VMX128_INTRINSICS_
 	}
 
-	
+
 
 
 
@@ -1850,6 +1886,95 @@ namespace leo {
 #else // LM_VMX128_INTRINSICS_
 #endif // LM_VMX128_INTRINSICS_
 	}
+
+
+	inline std::array<__m128, 4> RotationNormal(__m128 NormalAxis, float Angle) {
+#if defined(_LM_ARM_NEON_INTRINSICS)
+		float    fSinAngle;
+		float    fCosAngle;
+		XMScalarSinCos(&fSinAngle, &fCosAngle, Angle);
+
+		__m128 A = XMVectorSet(fSinAngle, fCosAngle, 1.0f - fCosAngle, 0.0f);
+
+		__m128 C2 = XMVectorSplatZ(A);
+		__m128 C1 = XMVectorSplatY(A);
+		__m128 C0 = XMVectorSplatX(A);
+
+		__m128 N0 = XMVectorSwizzle<XM_SWIZZLE_Y, XM_SWIZZLE_Z, XM_SWIZZLE_X, XM_SWIZZLE_W>(NormalAxis);
+		__m128 N1 = XMVectorSwizzle<XM_SWIZZLE_Z, XM_SWIZZLE_X, XM_SWIZZLE_Y, XM_SWIZZLE_W>(NormalAxis);
+
+		__m128 V0 = XMVectorMultiply(C2, N0);
+		V0 = XMVectorMultiply(V0, N1);
+
+		__m128 R0 = XMVectorMultiply(C2, NormalAxis);
+		R0 = XMVectorMultiplyAdd(R0, NormalAxis, C1);
+
+		__m128 R1 = XMVectorMultiplyAdd(C0, NormalAxis, V0);
+		__m128 R2 = XMVectorNegativeMultiplySubtract(C0, NormalAxis, V0);
+
+		V0 = XMVectorSelect(A, R0, g_XMSelect1110.v);
+		__m128 V1 = XMVectorPermute<XM_PERMUTE_0Z, XM_PERMUTE_1Y, XM_PERMUTE_1Z, XM_PERMUTE_0X>(R1, R2);
+		__m128 V2 = XMVectorPermute<XM_PERMUTE_0Y, XM_PERMUTE_1X, XM_PERMUTE_0Y, XM_PERMUTE_1X>(R1, R2);
+
+		XMMATRIX M;
+		M.r[0] = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_1X, XM_PERMUTE_1Y, XM_PERMUTE_0W>(V0, V1);
+		M.r[1] = XMVectorPermute<XM_PERMUTE_1Z, XM_PERMUTE_0Y, XM_PERMUTE_1W, XM_PERMUTE_0W>(V0, V1);
+		M.r[2] = XMVectorPermute<XM_PERMUTE_1X, XM_PERMUTE_1Y, XM_PERMUTE_0Z, XM_PERMUTE_0W>(V0, V2);
+		M.r[3] = g_XMIdentityR3.v;
+		return M;
+#elif defined(LM_SSE_INTRINSICS)
+		float    fCosAngle;
+		float    fSinAngle = sincosr(&fCosAngle, Angle);
+
+		__m128 C2 = _mm_set_ps1(1.0f - fCosAngle);
+		__m128 C1 = _mm_set_ps1(fCosAngle);
+		__m128 C0 = _mm_set_ps1(fSinAngle);
+
+		__m128 N0 = LM_PERMUTE_PS(NormalAxis, _MM_SHUFFLE(3, 0, 2, 1));
+		__m128 N1 = LM_PERMUTE_PS(NormalAxis, _MM_SHUFFLE(3, 1, 0, 2));
+
+		__m128 V0 = _mm_mul_ps(C2, N0);
+		V0 = _mm_mul_ps(V0, N1);
+
+		__m128 R0 = _mm_mul_ps(C2, NormalAxis);
+		R0 = _mm_mul_ps(R0, NormalAxis);
+		R0 = _mm_add_ps(R0, C1);
+
+		__m128 R1 = _mm_mul_ps(C0, NormalAxis);
+		R1 = _mm_add_ps(R1, V0);
+		__m128 R2 = _mm_mul_ps(C0, NormalAxis);
+		R2 = _mm_sub_ps(V0, R2);
+
+		V0 = _mm_and_ps(R0, details::SplatMask3());
+		__m128 V1 = _mm_shuffle_ps(R1, R2, _MM_SHUFFLE(2, 1, 2, 0));
+		V1 = LM_PERMUTE_PS(V1, _MM_SHUFFLE(0, 3, 2, 1));
+		__m128 V2 = _mm_shuffle_ps(R1, R2, _MM_SHUFFLE(0, 0, 1, 1));
+		V2 = LM_PERMUTE_PS(V2, _MM_SHUFFLE(2, 0, 2, 0));
+
+		R2 = _mm_shuffle_ps(V0, V1, _MM_SHUFFLE(1, 0, 3, 0));
+		R2 = LM_PERMUTE_PS(R2, _MM_SHUFFLE(1, 3, 2, 0));
+
+		std::array<__m128, 4> M;
+		M[0] = R2;
+
+		R2 = _mm_shuffle_ps(V0, V1, _MM_SHUFFLE(3, 2, 3, 1));
+		R2 = LM_PERMUTE_PS(R2, _MM_SHUFFLE(1, 3, 0, 2));
+		M[1] = R2;
+
+		V2 = _mm_shuffle_ps(V2, V0, _MM_SHUFFLE(3, 2, 1, 0));
+		M[2] = V2;
+		M[3] = details::SplatR3();
+		return M;
+#endif                                                              
+	}
+
+	inline std::array<__m128, 4> RotationAxis(__m128 Axis, float Angle) {
+		assert(!Equal<>(Axis, SplatZero()));
+		assert(!details::IsInfinite<>(Axis));
+
+		__m128 Normal = Normalize<>(Axis);
+		return RotationNormal(Normal, Angle);
+	}
 }
 
 //__m128 logic operator def
@@ -1975,7 +2100,7 @@ namespace leo {
 		if (r == 0xFFFFFFFFU)
 		{
 			CR = XM_CRMASK_CR6TRUE;
-	}
+		}
 		else if (!r)
 		{
 			CR = XM_CRMASK_CR6FALSE;
@@ -2049,7 +2174,7 @@ namespace leo {
 #endif // LM_VMX128_INTRINSICS_
 	}
 
-	
+
 
 	inline bool ComparisonAnyTrue(uint32_t CR) { return (((CR)& LM_CRMASK_CR6FALSE) != LM_CRMASK_CR6FALSE); }
 }
@@ -2212,8 +2337,8 @@ namespace leo {
 		auto XEqualsZero = EqualExt(X, Zero);
 		auto XIsPositive = AndInt(X, details::SplatNegativeZero());
 		XIsPositive = EqualIntExt(XIsPositive, Zero);
-		auto YEqualsInfinity = details::IsInfinite(Y);
-		auto XEqualsInfinity = details::IsInfinite(X);
+		auto YEqualsInfinity = details::IsInfiniteExt(Y);
+		auto XEqualsInfinity = details::IsInfiniteExt(X);
 
 		auto YSign = AndInt(Y, details::SplatNegativeZero());
 		Pi = OrInt(Pi, YSign);
@@ -2703,6 +2828,7 @@ namespace leo {
 		return QuaternionMultiply(Result, Q);
 	}
 
+
 }
 
 //Plane Function
@@ -2723,7 +2849,7 @@ namespace leo {
 		__m128 vResult = _mm_sqrt_ps(vLengthSq);
 		// Failsafe on zero (Or epsilon) length planes
 		// If the length is infinity, set the elements to zero
-		vLengthSq = _mm_cmpneq_ps(vLengthSq,details::SplatInfinity());
+		vLengthSq = _mm_cmpneq_ps(vLengthSq, details::SplatInfinity());
 		// Reciprocal mul to perform the normalization
 		vResult = _mm_div_ps(P, vResult);
 		// Any that are infinity, set to zero

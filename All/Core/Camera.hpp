@@ -253,6 +253,18 @@ namespace leo
 			Update();
 		}
 
+		Camera& Rotate(float3 Axis,float angle)
+		{
+			// Rotate the basis vectors about the world y-axis.
+
+			auto R = RotationAxis(load(Axis),angle);
+
+			save(mRight, TransformNormal<>(load(mRight), R));
+			save(mUp, TransformNormal<>(load(mUp), R));
+			save(mLook, TransformNormal<>(load(mLook), R));
+			return *this;
+		}
+
 		virtual Camera& Walk(float d) = 0;
 		virtual Camera& Strafe(float d) = 0;
 		virtual Camera& Yaw(float angle) = 0;
@@ -287,103 +299,28 @@ namespace leo
 
 		Camera& Yaw(float angle)
 		{
-			XMMATRIX R = XMMatrixRotationAxis(load(mUp), angle);
-			save(mUp, XMVector3TransformNormal(load(mRight), R));
-			save(mLook, XMVector3TransformNormal(load(mLook), R));
+			auto R = RotationAxis(load(mUp), angle);
+			save(mUp, TransformNormal<>(load(mRight), R));
+			save(mLook, TransformNormal<>(load(mLook), R));
 			return *this;
 		}
 
 		//RBUTTON UP/DOWN
 		Camera& Pitch(float angle)
 		{
-			XMMATRIX R = XMMatrixRotationAxis(load(mRight), angle);
-			save(mUp, XMVector3TransformNormal(load(mUp), R));
-			save(mLook, XMVector3TransformNormal(load(mLook), R));
+			auto R = RotationAxis(load(mRight), angle);
+			save(mUp, TransformNormal<>(load(mUp), R));
+			save(mLook, TransformNormal<>(load(mLook), R));
 			return *this;
 		}
 		//MIDDBUTTON UP/DOWN
 		Camera& Roll(float angle)
 		{
-			XMMATRIX R = XMMatrixRotationAxis(load(mLook), angle);
-			save(mUp, XMVector3TransformNormal(load(mUp), R));
-			save(mLook, XMVector3TransformNormal(load(mRight), R));
+			auto R = RotationAxis(load(mLook), angle);
+			save(mUp, TransformNormal<>(load(mUp), R));
+			save(mLook, TransformNormal<>(load(mRight), R));
 			return *this;
 		}
-		//RBUTTON LEFT/RIGHT
-		Camera& RotateY(float angle)
-		{
-			// Rotate the basis vectors about the world y-axis.
-
-			XMMATRIX R = XMMatrixRotationY(angle);
-
-			save(mRight, XMVector3TransformNormal(load(mRight), R));
-			save(mUp, XMVector3TransformNormal(load(mUp), R));
-			save(mLook, XMVector3TransformNormal(load(mLook), R));
-			return *this;
-		}
-		
-
-
-
-	public:
-		inline ContainmentType Contains(FXMVECTOR V0, FXMVECTOR V1, FXMVECTOR V2) const
-		{
-			// Create 6 planes (do it inline to encourage use of registers)
-			XMVECTOR NearPlane = XMVectorSet(0.0f, 0.0f, -1.0f, Near-0.1f);
-			
-
-			XMVECTOR FarPlane = XMVectorSet(0.0f, 0.0f, 1.0f, -Far-0.1f);
-			
-
-			XMVECTOR RightPlane = XMVectorSet(1.0f, 0.0f, -RightSlope-0.1f, 0.0f);
-			
-
-			XMVECTOR LeftPlane = XMVectorSet(-1.0f, 0.0f, LeftSlope-0.1f, 0.0f);
-			
-
-			XMVECTOR TopPlane = XMVectorSet(0.0f, 1.0f, -TopSlope-0.1f, 0.0f);
-			
-
-			XMVECTOR BottomPlane = XMVectorSet(0.0f, -1.0f, BottomSlope-0.1f, 0.0f);
-			
-
-			return TriangleTests::ContainedBy(V0, V1, V2, NearPlane, FarPlane, RightPlane, LeftPlane, TopPlane, BottomPlane);
-		}
-
-		inline ContainmentType Contains(FXMVECTOR V0) const
-		{
-			auto mView = View();
-
-			XMVECTOR Planes[6];
-			Planes[0] = XMVectorSet(0.0f, 0.0f, -1.0f, Near);
-			Planes[1] = XMVectorSet(0.0f, 0.0f, 1.0f, -Far);
-			Planes[2] = XMVectorSet(1.0f, 0.0f, -RightSlope, 0.0f);
-			Planes[3] = XMVectorSet(-1.0f, 0.0f, LeftSlope, 0.0f);
-			Planes[4] = XMVectorSet(0.0f, 1.0f, -TopSlope, 0.0f);
-			Planes[5] = XMVectorSet(0.0f, -1.0f, BottomSlope, 0.0f);
-
-			// Transform point into local space of frustum.
-			XMVECTOR TPoint = V0;
-
-			// Set w to one.
-			TPoint = XMVectorInsert<0, 0, 0, 0, 1>(TPoint, XMVectorSplatOne());
-
-			XMVECTOR Zero = XMVectorZero();
-			XMVECTOR Outside = Zero;
-
-			// Test point against each plane of the frustum.
-			for (size_t i = 0; i < 6; ++i)
-			{
-				XMVECTOR Dot = XMVector4Dot(TPoint, Planes[i]);
-				Outside = XMVectorOrInt(Outside, XMVectorGreater(Dot, Zero));
-			}
-
-			return XMVector4NotEqualInt(Outside, XMVectorTrueInt()) ? CONTAINS : DISJOINT;
-		}
-	private:
-		float3 mRight;
-		float3 mUp;
-		float3 mLook;
 	};
 
 	//¸úËæÏà»ú
