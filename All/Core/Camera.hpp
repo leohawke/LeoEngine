@@ -366,16 +366,19 @@ namespace leo
 		}
 		
 		Camera& Yaw(float angle) {
-			mFollowObject.get().Rotation(mUp, angle);
-			Rotation(mUp, angle);
+			auto q = EulerAngleToQuaternion(float3(0.f, 0.f,angle));
+			mFollowObject.get().Rotation(q);
+			Rotation(q);
 		}
 		Camera& Pitch(float angle) {
-			mFollowObject.get().Rotation(mRight, angle);
-			Rotation(mRight, angle);
+			auto q = EulerAngleToQuaternion(float3(0.f, angle,0.f));
+			mFollowObject.get().Rotation(q);
+			Rotation(q);
 		}
 		Camera& Roll(float angle) {
-			mFollowObject.get().Rotation(mLook, angle);
-			Rotation(mLook, angle);
+			auto q = EulerAngleToQuaternion(float3(angle, 0.f, 0.f));
+			mFollowObject.get().Rotation(q);
+			Rotation(q);
 		}
 		
 
