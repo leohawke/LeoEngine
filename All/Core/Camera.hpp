@@ -70,17 +70,19 @@ namespace leo
 			Update();
 		}
 
-		float4x4 Proj() const {
+		const float4x4& Proj() const {
 			return mMatrix;
 		}
 
-		DefGetter(lnothrow, PROJECTION_TYPE&, Type, mProjType);
+		DefGetter(lnothrow const,const PROJECTION_TYPE&, Type, mProjType);
 
-		DefGetter(lnothrow, float&, Fov, mFov);
+		DefGetter(lnothrow const, const float&, Fov, mFov);
 
-		DefGetter(lnothrow, float&, Aspect, mAspect);
+		DefGetter(lnothrow const, const float&, Aspect, mAspect);
 
-		DefGetter(lnothrow, float&, NearHeight, mNearHeight);
+		DefGetter(lnothrow const, const float&, NearHeight, mNearHeight);
+
+		DefGetter(lnothrow const, const float3&, Origin, mOrigin);
 	private:
 		void Update()
 		{
@@ -161,9 +163,13 @@ namespace leo
 		void Update()
 		{
 			//正交维持
-			mLook = Normalize(mLook);
-			mUp = Normalize(Cross(mLook, mRight));
-			mRight = Cross(mUp, mLook);
+			auto vLook = Normalize<>(load(mLook));
+			save(mLook,vLook);
+			auto vRight = load(mRight);
+			auto vUp = Normalize<>(Cross<>(vLook, vRight));
+			save(mUp, vUp);
+			vRight = Cross<>(vUp, vLook);
+			save(mRight, vRight);
 
 			auto x = -Dot(mOrigin, mRight);
 			auto y = -Dot(mOrigin, mUp);
@@ -190,6 +196,13 @@ namespace leo
 			mMatrix(3, 3) = 1.0f;
 
 			mOrientation = MatrixToQuaternion(mMatrix);
+
+			save(ImplViewProj(), Multiply(load(mMatrix), load(Proj())));
+		}
+
+		float4x4& ImplViewProj() const{
+			static float4x4 mViewProj;
+			return mViewProj;
 		}
 	protected:
 		using CameraFrustum::mOrigin;
@@ -209,6 +222,9 @@ namespace leo
 		using CameraFrustum::GetFov;
 		using CameraFrustum::GetAspect;
 		using CameraFrustum::GetNearHeight;
+		using CameraFrustum::GetOrigin;
+		using CameraFrustum::Intersects;
+		using CameraFrustum::Contains;
 
 		//don't update proj matrix
 		Camera& SetFrustum(float fov, float aspect, float nearf, float farf)
@@ -221,9 +237,13 @@ namespace leo
 			CameraFrustum::SetFrustum(projtype);
 		}
 
-		float4x4 View() const
+		const float4x4& View() const
 		{
 			return mMatrix;
+		}
+
+		const float4x4& ViewProj() const {
+			return ImplViewProj();
 		}
 
 		void UpdateViewMatrix() {
@@ -252,7 +272,7 @@ namespace leo
 			Update();
 		}
 
-		Camera& Rotation(float3 Axis, float angle)
+		Camera& Rotation(const float3& Axis, float angle)
 		{
 			// Rotate the basis vectors about the world y-axis.
 
@@ -338,7 +358,7 @@ namespace leo
 
 	//跟随相机
 	//绑定SQTObject,并进行消息派发
-	class FollowCamera : public Camera {
+	class LB_API FollowCamera : public Camera {
 	public:
 		struct camera_dir {};
 

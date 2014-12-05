@@ -58,7 +58,7 @@ namespace leo
 			auto Q = Matrix(load(q));
 			save(q, Quaternion(Multiply(Q, R)));
 		}
-		void inline Rotation(float3 Axis, float angle) {
+		void inline Rotation(const float3& Axis, float angle) {
 			auto R = RotationAxis(load(Axis),angle);
 			auto Q = Matrix(load(q));
 			save(q, Quaternion(Multiply(Q, R)));

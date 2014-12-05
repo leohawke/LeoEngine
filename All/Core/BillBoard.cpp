@@ -58,7 +58,7 @@ namespace leo
 	{
 		auto center = load(mData.mCenterW);
 		auto result = camera.Contains(center);
-		if (!camera.Contains(center))
+		if (camera.Contains(center) != CONTAINMENT_TYPE::DISJOINT)
 			return;
 		//¸üÐÂVB
 		D3D11_MAPPED_SUBRESOURCE mapSubRes;

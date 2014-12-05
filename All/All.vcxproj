@@ -169,7 +169,6 @@
     <ClInclude Include="Core\EngineConfig.h" />
     <ClInclude Include="Core\FileSearch.h" />
     <ClInclude Include="Core\GaussBlur.hpp" />
-    <ClInclude Include="Core\Geometry.hpp" />
     <ClInclude Include="Core\EffectLine.hpp" />
     <ClInclude Include="Core\Lod.h" />
     <ClInclude Include="Core\Material.h" />

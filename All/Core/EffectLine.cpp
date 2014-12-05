@@ -3,6 +3,7 @@
 #include "..\ShaderMgr.h"
 namespace leo
 {
+	using matrix = std::array<__m128, 4>;
 	class EffectLineDelegate : CONCRETE(EffectLine), public leo::Singleton < EffectLineDelegate >
 	{
 	public:
@@ -29,9 +30,9 @@ namespace leo
 			pContext.PSSetConstantBuffers(0, 1, &mPixelConstantBufferPerColor.mBuffer);
 		}
 
-		void ViewProj(CXMMATRIX matrix, ID3D11DeviceContext* context)
+		void ViewProj(const float4x4& matrix, ID3D11DeviceContext* context)
 		{
-			mVertexConstantBufferPerCamera.gViewProj = XMMatrixTranspose(matrix);
+			mVertexConstantBufferPerCamera.gViewProj = Transpose(load(matrix));
 			if (context)
 				mVertexConstantBufferPerCamera.Update(context);
 		}
@@ -45,7 +46,7 @@ namespace leo
 	public:
 		struct VScbPerCamera
 		{
-			XMMATRIX gViewProj;
+			matrix gViewProj;
 		public:
 			static const std::uint8_t slot = 0;
 		};
@@ -70,7 +71,7 @@ namespace leo
 			);
 	}
 
-	void EffectLine::ViewProj(CXMMATRIX matrix, ID3D11DeviceContext* context)
+	void EffectLine::ViewProj(const float4x4& matrix, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectLineDelegate*>(this));
 

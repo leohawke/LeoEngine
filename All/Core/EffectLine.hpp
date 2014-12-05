@@ -27,7 +27,7 @@ namespace leo
 	public:
 		void Apply(ID3D11DeviceContext* context);
 
-		void ViewProj(CXMMATRIX matrix, ID3D11DeviceContext* context = nullptr);
+		void ViewProj(const float4x4& matrix, ID3D11DeviceContext* context = nullptr);
 
 		void Color(const float4& color, ID3D11DeviceContext* context = nullptr);
 

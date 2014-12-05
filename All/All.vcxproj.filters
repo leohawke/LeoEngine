@@ -314,9 +314,6 @@
     <ClInclude Include="Core\MeshLoad.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Geometry.hpp">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="Core\BillBoard.hpp">
       <Filter>Core</Filter>
     </ClInclude>

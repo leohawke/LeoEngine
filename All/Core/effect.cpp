@@ -9,6 +9,9 @@
 #pragma comment(lib,"d3dcompiler.lib")
 namespace leo
 {
+	using vector = __m128;
+	using matrix = std::array < __m128, 4 >;
+
 	class EffectConfig::Delegate
 	{
 	public:
@@ -137,17 +140,17 @@ namespace leo
 			pContext.PSSetSamplers(0, 1, &mPixelShaderSampleState);
 		}
 
-		void WorldMatrix(CXMMATRIX matrix, ID3D11DeviceContext* context)
+		void WorldMatrix(const float4x4& matrix, ID3D11DeviceContext* context)
 		{
-			XMVECTOR pDet;
-			mVertexShaderConstantBufferPerFrame.worldinvtranspose =XMMatrixInverse(&pDet,matrix);
-			mVertexShaderConstantBufferPerFrame.world = XMMatrixTranspose(matrix);
+			vector pDet;
+			mVertexShaderConstantBufferPerFrame.worldinvtranspose =Inverse(pDet,load(matrix));
+			mVertexShaderConstantBufferPerFrame.world = Transpose(load(matrix));
 			if (context)
 				mVertexShaderConstantBufferPerFrame.Update(context);
 		}
-		void WorldViewProjMatrix(CXMMATRIX matrix, ID3D11DeviceContext* context)
+		void WorldViewProjMatrix(const float4x4& matrix, ID3D11DeviceContext* context)
 		{
-			mVertexShaderConstantBufferPerFrame.worldviewproj = XMMatrixTranspose(matrix);
+			mVertexShaderConstantBufferPerFrame.worldviewproj = Transpose(load(matrix));
 			if (context)
 				mVertexShaderConstantBufferPerFrame.Update(context);
 		}
@@ -218,9 +221,9 @@ namespace leo
 	private:
 		struct VScbPerFrame
 		{
-			XMMATRIX world;
-			XMMATRIX worldinvtranspose;
-			XMMATRIX worldviewproj;
+			matrix world;
+			matrix worldinvtranspose;
+			matrix worldviewproj;
 		public:
 			const static std::uint8_t slot = 0;
 		};
@@ -284,7 +287,7 @@ namespace leo
 			);
 	}
 
-	void EffectNormalMap::WorldMatrix(CXMMATRIX matrix, ID3D11DeviceContext* context)
+	void EffectNormalMap::WorldMatrix(const float4x4& matrix, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
 
@@ -293,7 +296,7 @@ namespace leo
 			);
 	}
 	
-	void EffectNormalMap::WorldViewProjMatrix(CXMMATRIX matrix, ID3D11DeviceContext* context)
+	void EffectNormalMap::WorldViewProjMatrix(const float4x4& matrix, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
 
@@ -413,9 +416,9 @@ namespace leo
 				mGeometryConstantBufferPerCamera.Update(context);
 		}
 
-		void ViewProj(CXMMATRIX matrix, ID3D11DeviceContext* context)
+		void ViewProj(const float4x4& matrix, ID3D11DeviceContext* context)
 		{
-			mGeometryConstantBufferPerCamera.gViewProj = XMMatrixTranspose(matrix);
+			mGeometryConstantBufferPerCamera.gViewProj = Transpose(load(matrix));
 			if (context)
 				mGeometryConstantBufferPerCamera.Update(context);
 		}
@@ -429,7 +432,7 @@ namespace leo
 		struct GScbPerCamera
 		{
 			pack_type<float3> gEyePos;
-			XMMATRIX gViewProj;
+			matrix gViewProj;
 		public:
 			static const std::uint8_t slot = 0;
 		};
@@ -467,7 +470,7 @@ namespace leo
 			);
 	}
 
-	void EffectSprite::ViewProj(CXMMATRIX matrix, ID3D11DeviceContext* context)
+	void EffectSprite::ViewProj(const float4x4& matrix, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectSpriteDelegate*>(this));
 
@@ -523,9 +526,9 @@ namespace leo
 				mVertexConstantBufferPerCamera.Update(context);
 		}
 
-		void ViewProj(CXMMATRIX matrix, ID3D11DeviceContext* context)
+		void ViewProj(const float4x4& matrix, ID3D11DeviceContext* context)
 		{
-			mVertexConstantBufferPerCamera.gViewProj = XMMatrixTranspose(matrix);
+			mVertexConstantBufferPerCamera.gViewProj = Transpose(load(matrix));
 			if (context)
 				mVertexConstantBufferPerCamera.Update(context);
 		}
@@ -538,7 +541,7 @@ namespace leo
 		struct VScbPerCamera
 		{
 			float3 gEyePos;
-			XMMATRIX gViewProj;
+			matrix gViewProj;
 		public:
 			static const std::uint8_t slot = 0;
 		};
@@ -576,7 +579,7 @@ namespace leo
 			);
 	}
 
-	void EffectSky::ViewProj(CXMMATRIX matrix, ID3D11DeviceContext* context)
+	void EffectSky::ViewProj(const float4x4& matrix, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectSkyDelegate*>(this));
 
@@ -746,12 +749,12 @@ namespace leo
 	public:
 		struct VScbPerModel
 		{
-			XMMATRIX World;
-			XMMATRIX WorldInvTranspose;
+			matrix World;
+			matrix WorldInvTranspose;
 		};
 		struct GScbPerCamera
 		{
-			XMMATRIX gViewProj;
+			matrix gViewProj;
 		};
 		struct PScbPerSet
 		{
@@ -786,17 +789,17 @@ namespace leo
 			context->GSSetConstantBuffers(0, 1, &mGeometryConstantBufferPerCamera.mBuffer);
 		}
 
-		void ViewProj(CXMMATRIX matrix, ID3D11DeviceContext* context )
+		void ViewProj(const float4x4& matrix, ID3D11DeviceContext* context )
 		{
-			mGeometryConstantBufferPerCamera.gViewProj = XMMatrixTranspose(matrix);
+			mGeometryConstantBufferPerCamera.gViewProj = Transpose(load(matrix));
 			if (context)
 				mGeometryConstantBufferPerCamera.Update(context);
 		}
-		void World(CXMMATRIX matrix, ID3D11DeviceContext* context)
+		void World(const float4x4& matrix, ID3D11DeviceContext* context)
 		{
-			mVertexConstantBufferPerModel.World = XMMatrixTranspose(matrix);
-			XMVECTOR pDet;
-			mVertexConstantBufferPerModel.WorldInvTranspose = XMMatrixInverse(&pDet, matrix);
+			mVertexConstantBufferPerModel.World = Transpose(load(matrix));
+			vector pDet;
+			mVertexConstantBufferPerModel.WorldInvTranspose = Inverse(pDet,load(matrix));
 			if (context)
 				mVertexConstantBufferPerModel.Update(context);
 		}
@@ -825,7 +828,7 @@ namespace leo
 			);
 	}
 
-	void EffectNormalLine::ViewProj(CXMMATRIX matrix, ID3D11DeviceContext* context)
+	void EffectNormalLine::ViewProj(const float4x4& matrix, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectNormalLineDelegate*>(this));
 
@@ -833,7 +836,7 @@ namespace leo
 			matrix,context
 			);
 	}
-	void EffectNormalLine::World(CXMMATRIX matrix, ID3D11DeviceContext* context)
+	void EffectNormalLine::World(const float4x4& matrix, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectNormalLineDelegate*>(this));
 
