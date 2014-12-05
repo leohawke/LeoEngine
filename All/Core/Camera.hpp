@@ -44,7 +44,7 @@ namespace leo
 		CameraFrustum(const float3& origin = float3(0.0f, 0.0f, 0.f), const float4& orientation = float4(0.0f, 0.0f, 0.0f, 1.0f), float fov = default_param::frustum_fov,
 			float aspect = default_param::frustum_aspect, PROJECTION_TYPE projtype = PROJECTION_TYPE::PERSPECTIVE,
 			float nearf = default_param::frustum_near, float farf = default_param::frustum_far)
-			:Frustum(origin,orientation,nearf,farf),mProjType(projtype), mAspect(aspect), mFov(fov)
+			:Frustum(origin, orientation, nearf, farf), mProjType(projtype), mAspect(aspect), mFov(fov)
 		{
 			Update();
 		}
@@ -158,12 +158,6 @@ namespace leo
 	class LB_API Camera : private CameraFrustum, public GeneralAllocatedObject
 	{
 	private:
-		float4x4 mMatrix;
-
-		float3 mRight = float3(1.f,0.f,0.f);
-		float3 mUp = float3(0.f,1.f,0.f);
-		float3 mLook = float3(0.f, 0.f, 1.f);
-
 		void Update()
 		{
 			//正交维持
@@ -199,9 +193,14 @@ namespace leo
 		}
 	protected:
 		using CameraFrustum::mOrigin;
+		float4x4 mMatrix;
+
+		float3 mRight = float3(1.f, 0.f, 0.f);
+		float3 mUp = float3(0.f, 1.f, 0.f);
+		float3 mLook = float3(0.f, 0.f, 1.f);
 	public:
 		Camera()
-		:CameraFrustum(){
+			:CameraFrustum() {
 			Update();
 		}
 		~Camera() = default;
@@ -253,12 +252,27 @@ namespace leo
 			Update();
 		}
 
-		Camera& Rotate(float3 Axis,float angle)
+		Camera& Rotation(float3 Axis, float angle)
 		{
 			// Rotate the basis vectors about the world y-axis.
 
-			auto R = RotationAxis(load(Axis),angle);
+			auto R = RotationAxis(load(Axis), angle);
 
+			save(mRight, TransformNormal<>(load(mRight), R));
+			save(mUp, TransformNormal<>(load(mUp), R));
+			save(mLook, TransformNormal<>(load(mLook), R));
+			return *this;
+		}
+		Camera& Rotation(const float4& quaternion) {
+			auto R = Matrix(load(quaternion));
+			save(mRight, TransformNormal<>(load(mRight), R));
+			save(mUp, TransformNormal<>(load(mUp), R));
+			save(mLook, TransformNormal<>(load(mLook), R));
+			return *this;
+		}
+		//\params matrix3x3
+		Camera& Rotation(const float4x4& matrix) {
+			auto R = load(matrix);
 			save(mRight, TransformNormal<>(load(mRight), R));
 			save(mUp, TransformNormal<>(load(mUp), R));
 			save(mLook, TransformNormal<>(load(mLook), R));
@@ -284,13 +298,13 @@ namespace leo
 			UpdateViewMatrix();
 		}
 
-		//W/S
+
 		Camera& Walk(float d)
 		{
 			mOrigin = MultiplyAdd(d, mLook, mOrigin);
 			return *this;
 		}
-		//A/D
+
 		Camera& Strafe(float d)
 		{
 			mOrigin = MultiplyAdd(d, mRight, mOrigin);
@@ -305,7 +319,6 @@ namespace leo
 			return *this;
 		}
 
-		//RBUTTON UP/DOWN
 		Camera& Pitch(float angle)
 		{
 			auto R = RotationAxis(load(mRight), angle);
@@ -313,7 +326,7 @@ namespace leo
 			save(mLook, TransformNormal<>(load(mLook), R));
 			return *this;
 		}
-		//MIDDBUTTON UP/DOWN
+
 		Camera& Roll(float angle)
 		{
 			auto R = RotationAxis(load(mLook), angle);
@@ -325,31 +338,84 @@ namespace leo
 
 	//跟随相机
 	//绑定SQTObject,并进行消息派发
-	class FollowCamera : public Camera{
+	class FollowCamera : public Camera {
 	public:
-		FollowCamera(const std::reference_wrapper<SQTObject> followObject);
-		~FollowCamera();
-	public:
-		//W/S
-		void Walk(float d);
-		//A/D
-		void Strafe(float d);
-		//Space
+		struct camera_dir {};
 
-		void UpdateViewMatrix();
-
-		void SetFrustum(float fov, float aspect, float nearf, float farf)
-		{
-			ViewFrustum::SetFrustum(fov, aspect, nearf, farf);
+		explicit FollowCamera(const std::reference_wrapper<SQTObject>& followObject)
+			:mFollowObject(followObject) {
 		}
-		void SetFrustum(PROJECTION_TYPE projtype)
-		{
-			ViewFrustum::SetFrustum(projtype);
+		~FollowCamera() = default;
+
+		Camera& ChangeObject(const std::reference_wrapper<SQTObject>& followObject) {
+			mFollowObject = followObject;
 		}
 
-		void Yaw(float angle);
-		void Pitch(float angle);
-		void Roll(float angle);
+		Camera& Walk(float d) {
+			auto offset = float3(0.f, 0.f, d);
+			mFollowObject.get().Translation(offset);
+			mOrigin = Add(offset, mOrigin);
+			return *this;
+		}
+		
+		Camera& Strafe(float d) {
+			auto offset = float3(d, 0.f, 0.f);
+			mFollowObject.get().Translation(offset);
+			mOrigin = Add(offset, mOrigin);
+			return *this;
+		}
+		
+		Camera& Yaw(float angle) {
+			mFollowObject.get().Rotation(mUp, angle);
+			Rotation(mUp, angle);
+		}
+		Camera& Pitch(float angle) {
+			mFollowObject.get().Rotation(mRight, angle);
+			Rotation(mRight, angle);
+		}
+		Camera& Roll(float angle) {
+			mFollowObject.get().Rotation(mLook, angle);
+			Rotation(mLook, angle);
+		}
+		
+
+		//前后行走
+		//\param camera_dir :摄像机mLook方向
+		Camera& Walk(float d, camera_dir) {
+			float3 offset;
+			save(offset, Multiply(load(mLook), Splat(d)));
+			mFollowObject.get().Translation(offset);
+			mOrigin = Add(offset, mOrigin);
+			return *this;
+		}
+		//左右行走
+		//\param camera_dir :摄像机mRight方向
+		Camera& Strafe(float d, camera_dir)
+		{
+			float3 offset;
+			save(offset, Multiply(load(mRight), Splat(d)));
+			mFollowObject.get().Translation(offset);
+			mOrigin = Add(offset, mOrigin);
+			return *this;
+		}
+
+		//\param camera_dir :摄像机mUp方向
+		Camera& Yaw(float angle, camera_dir) {
+			mFollowObject.get().Rotation(mUp, angle);
+			Rotation(mUp, angle);
+		}
+		//\param camera_dir :摄像机mRight方向
+		Camera& Pitch(float angle, camera_dir) {
+			mFollowObject.get().Rotation(mRight, angle);
+			Rotation(mRight, angle);
+		}
+		//\param camera_dir :摄像机mLook方向
+		Camera& Roll(float angle, camera_dir) {
+			mFollowObject.get().Rotation(mLook, angle);
+			Rotation(mLook, angle);
+		}
+	private:
+		std::reference_wrapper<SQTObject> mFollowObject;
 	};
 }
 

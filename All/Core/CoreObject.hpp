@@ -14,6 +14,7 @@
 ////////////////////////////////////////////////////////////////////////////
 #ifndef Core_CoreObject_HPP
 #define Core_CoreObject_HPP
+#include "..\IndePlatform\LeoMath.h"
 #include "..\leomath.hpp"
 #include "..\IndePlatform\memory.hpp"
 namespace leo
@@ -51,6 +52,16 @@ namespace leo
 			auto o = XMMatrixRotationQuaternion(load(q));
 			auto n = XMMatrixRotationQuaternion(load(quaternion));
 			save(q, XMQuaternionRotationMatrix(o*n));
+		}
+		void inline Rotation(const float4x4& matrix) {
+			auto R = load(matrix);
+			auto Q = Matrix(load(q));
+			save(q, Quaternion(Multiply(Q, R)));
+		}
+		void inline Rotation(float3 Axis, float angle) {
+			auto R = RotationAxis(load(Axis),angle);
+			auto Q = Matrix(load(q));
+			save(q, Quaternion(Multiply(Q, R)));
 		}
 
 		void inline Translation(const float3& offset)
