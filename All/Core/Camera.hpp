@@ -18,6 +18,7 @@
 #define Core_camera_h
 
 #include "..\IndePlatform\Geometry.hpp"
+#include "CoreObject.hpp"
 namespace leo
 {
 
@@ -29,11 +30,7 @@ namespace leo
 		const float frustum_aspect = 16.f / 9.f;
 	}
 
-	enum class PROJECTION_TYPE : std::uint8_t
-	{
-		ORTHOGRAPHIC,
-		PERSPECTIVE
-	};
+
 
 	class LB_API CameraFrustum : public Frustum {
 	public:
@@ -293,7 +290,7 @@ namespace leo
 			save(mLook, vLook);
 			auto vRight = Normalize<3>(Cross<3>(load(up), vLook));
 			save(mRight,vRight);
-			save(mUp,Cross<3>(vLook, vRight);
+			save(mUp,Cross<3>(vLook, vRight));
 			Update();
 		}
 
@@ -346,13 +343,13 @@ namespace leo
 
 		Camera& Walk(float d)
 		{
-			mOrigin = MultiplyAdd(d, mLook, mOrigin);
+			save(mOrigin,MultiplyAdd(Splat(d), load(mLook), load(mOrigin)));
 			return *this;
 		}
 
 		Camera& Strafe(float d)
 		{
-			mOrigin = MultiplyAdd(d, mRight, mOrigin);
+			save(mOrigin, MultiplyAdd(Splat(d), load(mRight), load(mOrigin)));
 			return *this;
 		}
 
@@ -399,14 +396,14 @@ namespace leo
 		Camera& Walk(float d) {
 			auto offset = float3(0.f, 0.f, d);
 			mFollowObject.get().Translation(offset);
-			mOrigin = Add(offset, mOrigin);
+			save(mOrigin,Add(load(offset), load(mOrigin)));
 			return *this;
 		}
 		
 		Camera& Strafe(float d) {
 			auto offset = float3(d, 0.f, 0.f);
 			mFollowObject.get().Translation(offset);
-			mOrigin = Add(offset, mOrigin);
+			save(mOrigin, Add(load(offset), load(mOrigin)));
 			return *this;
 		}
 		
@@ -433,7 +430,7 @@ namespace leo
 			float3 offset;
 			save(offset, Multiply(load(mLook), Splat(d)));
 			mFollowObject.get().Translation(offset);
-			mOrigin = Add(offset, mOrigin);
+			save(mOrigin, Add(load(offset), load(mOrigin)));
 			return *this;
 		}
 		//×óÓÒÐÐ×ß
@@ -443,7 +440,7 @@ namespace leo
 			float3 offset;
 			save(offset, Multiply(load(mRight), Splat(d)));
 			mFollowObject.get().Translation(offset);
-			mOrigin = Add(offset, mOrigin);
+			save(mOrigin, Add(load(offset), load(mOrigin)));
 			return *this;
 		}
 

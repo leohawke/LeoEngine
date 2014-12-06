@@ -95,6 +95,7 @@
   <ItemGroup>
     <ClCompile Include="..\DirectXTex\ScreenGrab\ScreenGrab.cpp" />
     <ClCompile Include="Core\BillBoard.cpp" />
+    <ClCompile Include="Core\CoreObject.cpp" />
     <ClCompile Include="Core\effect.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>

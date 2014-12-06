@@ -10,7 +10,6 @@
 #include <Core\Mesh.hpp>
 #include <Core\Effect.h>
 #include <Core\Camera.hpp>
-#include <Core\Geometry.hpp>
 #include <Core\RenderSync.hpp>
 #include <Core\EffectLine.hpp>
 #include <Core\Terrain.hpp>
@@ -295,11 +294,11 @@ void BuildRes()
 
 	event.Wait();
 
-	pCamera->SetFrustum(leo::def::frustum_fov, leo::DeviceMgr().GetAspect(), leo::def::frustum_near, leo::def::frustum_far);
+	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 	pCamera->SetFrustum(leo::PROJECTION_TYPE::PERSPECTIVE);
 
 	auto proj = pCamera->Proj();
-	auto testproj = leo::XMMatrixPerspectiveFovLH(leo::def::frustum_fov, leo::DeviceMgr().GetAspect(), leo::def::frustum_near, leo::def::frustum_far);
+
 
 	auto& pEffect =  leo::EffectNormalMap::GetInstance(leo::DeviceMgr().GetDevice());
 	leo::EffectTerrain::GetInstance(leo::DeviceMgr().GetDevice());

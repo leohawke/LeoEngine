@@ -277,28 +277,7 @@ namespace leo
 		return q;
 	}
 
-	inline float4 EulerAngleToQuaternion(const float3& eulerangle)
-	{
-		float4 q;
-		float cos_i, sin_i, cos_j, sin_j, cos_k, sin_k;
-		sin_i = sincosr(&cos_i, eulerangle.x / 2.f);
-		sin_j = sincosr(&cos_j, eulerangle.y / 2.f);
-		sin_k = sincosr(&cos_k, eulerangle.z / 2.f);
-		q.x = static_cast<float>(sin_i*cos_j*cos_k + cos_i*sin_i*sin_k);
-		q.y = static_cast<float>(cos_i*sin_j*cos_k - sin_i*cos_j*sin_k);
-		q.z = static_cast<float>(cos_i*cos_j*sin_k - sin_i*sin_j*cos_k);
-		q.w = static_cast<float>(cos_i*cos_j*cos_k + sin_i*sin_j*sin_k);
-		return q;
-	}
-
-	inline float3 QuaternionToEulerAngle(const float4& quaternion)
-	{
-		float3 q;
-		q.x = ::atan2(2 * (quaternion.w*quaternion.x + quaternion.y*quaternion.z), (1 - 2 * (quaternion.y*quaternion.y + quaternion.x*quaternion.x))) ;
-		q.y = asin(2 * (quaternion.w*quaternion.y - quaternion.z*quaternion.x));
-		q.z = ::atan2(2 * (quaternion.w*quaternion.z + quaternion.x*quaternion.y), (1 - 2 * (quaternion.z*quaternion.z + quaternion.y*quaternion.y)));
-		return q;
-	}
+	
 
 	inline float3 CartesianToBarycentric(float x, float y, const float2& pos1, const float2& pos2, const float2& pos3)
 	{
@@ -353,59 +332,7 @@ namespace leo
 		return rsum >= minr && rsum <= maxr;
 	}
 
-	struct SQT;
-
-	//file struct
-	struct SeqSQT
-	{
-		SeqSQT();
-		SeqSQT(const SQT& lvalue);
-		void operator=(const SQT& lvalue);
-		float q[4];
-		float t[3];
-		float s;
-	};
-
-	//memory struct
-	//增加插值函数
-	struct SQT
-	{
-		SQT();
-		SQT(const SeqSQT& lvalue);
-		void operator=(const SeqSQT& lvalue);
-
-		operator float4x4() const;
-		operator std::array<__m128, 4>() const{
-			return load(operator float4x4());
-		}
-		float4 q;
-		float3 t;
-		float s;
-
-		SQT(const float4& Q, const float3& T, float S)
-			:q(Q), t(T), s(S){
-		}
-
-		
-	};
-
-	inline SQT Lerp(const SQT& t1, const SQT& t2, float w){
-		auto s = t1.s*(1.f - w) + t2.s *w;
-
-		auto T = Splat(w);
-		
-		auto t1T = load(t1.t);
-		auto t2T = load(t2.t);
-		float3 t;
-		save(t, Lerp(t1T, t2T, T));
-		
-		auto t1Q = load(t1.q);
-		auto t2Q = load(t2.q);
-		float4 q;
-		save(q, QuaternionSlerp(t1Q, t2Q, T));
-
-		return SQT{ q, t, s };
-	}
+	
 
 }
 

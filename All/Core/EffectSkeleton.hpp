@@ -5,8 +5,8 @@ namespace leo{
 	public:
 		void Apply(ID3D11DeviceContext* context);
 
-		void WorldMatrix(CXMMATRIX matrix, ID3D11DeviceContext* context = nullptr);
-		void WorldViewProjMatrix(CXMMATRIX matrix, ID3D11DeviceContext* context = nullptr);
+		void WorldMatrix(const float4x4& matrix, ID3D11DeviceContext* context = nullptr);
+		void WorldViewProjMatrix(const float4x4& matrix, ID3D11DeviceContext* context = nullptr);
 		void EyePos(const float3& pos, ID3D11DeviceContext* context = nullptr);
 
 		void SkinMatrix(float4x4Object * globalmatrix, std::uint32_t numJoint);

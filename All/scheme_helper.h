@@ -7,7 +7,7 @@
 #define		Strtol std::strtol
 
 #include <fstream>
-#include "leomath.hpp"
+#include "Core\CoreObject.hpp"
 namespace leo
 {
 

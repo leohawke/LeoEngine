@@ -3,7 +3,7 @@
 
 
 #include "EffectSkeleton.hpp"
-#include "Geometry.hpp"
+
 #include "Camera.hpp"
 
 #include "..\d3dx11.hpp"

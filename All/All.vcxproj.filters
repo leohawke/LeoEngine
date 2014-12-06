@@ -240,6 +240,9 @@
     <ClCompile Include="IndePlatform\Geometry.cpp">
       <Filter>IndePlatform\BaseSource</Filter>
     </ClCompile>
+    <ClCompile Include="Core\CoreObject.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.hpp">

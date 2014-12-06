@@ -8,9 +8,8 @@
 #pragma comment(lib,"d3dcompiler.lib")
 namespace leo{
 
-	XMMATRIX static convert(const std::array<__m128, 4>& matrix){
-		return{ matrix[0], matrix[1], matrix[2], matrix[3] };
-	}
+	using vector = __m128;
+	using matrix = std::array<vector, 4>;
 
 	class EffectSkeletonDelegate :CONCRETE(EffectSkeleton), public Singleton<EffectSkeletonDelegate>
 	{
@@ -90,17 +89,17 @@ namespace leo{
 			pContext.PSSetSamplers(0, 1, &mPixelShaderSampleState);
 		}
 
-		void WorldMatrix(CXMMATRIX matrix, ID3D11DeviceContext* context)
+		void WorldMatrix(const float4x4& matrix, ID3D11DeviceContext* context)
 		{
-			XMVECTOR pDet;
-			mVertexShaderConstantBufferPerFrame.worldinvtranspose = XMMatrixInverse(&pDet, matrix);
-			mVertexShaderConstantBufferPerFrame.world = XMMatrixTranspose(matrix);
+			vector pDet;
+			mVertexShaderConstantBufferPerFrame.worldinvtranspose = Inverse(pDet, load(matrix));
+			mVertexShaderConstantBufferPerFrame.world = Transpose(load(matrix));
 			if (context)
 				mVertexShaderConstantBufferPerFrame.Update(context);
 		}
-		void WorldViewProjMatrix(CXMMATRIX matrix, ID3D11DeviceContext* context)
+		void WorldViewProjMatrix(const float4x4&  matrix, ID3D11DeviceContext* context)
 		{
-			mVertexShaderConstantBufferPerFrame.worldviewproj = XMMatrixTranspose(matrix);
+			mVertexShaderConstantBufferPerFrame.worldviewproj = Transpose(load(matrix));
 			if (context)
 				mVertexShaderConstantBufferPerFrame.Update(context);
 		}
@@ -172,23 +171,23 @@ namespace leo{
 		void SkinMatrix(float4x4Object * globalmatrix , std::uint32_t numJoint){
 			mNumJoint = numJoint;
 			for (auto i = 0u; i != numJoint; ++i){
-				mVertexShaderConstantBufferPerSkin.SkinMatrix[i] = XMMatrixTranspose(convert(load(static_cast<const float4x4&>(globalmatrix[i]))));
+				mVertexShaderConstantBufferPerSkin.SkinMatrix[i] = Transpose(load(static_cast<const float4x4&>(globalmatrix[i])));
 			}
 		}
 	private:
 	private:
 		struct VScbPerFrame
 		{
-			XMMATRIX world;
-			XMMATRIX worldinvtranspose;
-			XMMATRIX worldviewproj;
+			matrix world;
+			matrix worldinvtranspose;
+			matrix worldviewproj;
 		public:
 			const static std::uint8_t slot = 0;
 		};
 		ShaderConstantBuffer<VScbPerFrame> mVertexShaderConstantBufferPerFrame;
 		struct VScbPerSkin
 		{
-			XMMATRIX SkinMatrix[96];
+			matrix SkinMatrix[96];
 		public:
 			const static std::uint8_t slot = 1;
 		};
@@ -254,7 +253,7 @@ namespace leo{
 			);
 	}
 
-	void EffectSkeleton::WorldMatrix(CXMMATRIX matrix, ID3D11DeviceContext* context)
+	void EffectSkeleton::WorldMatrix(const float4x4& matrix, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectSkeletonDelegate *>(this));
 
@@ -263,7 +262,7 @@ namespace leo{
 			);
 	}
 
-	void EffectSkeleton::WorldViewProjMatrix(CXMMATRIX matrix, ID3D11DeviceContext* context)
+	void EffectSkeleton::WorldViewProjMatrix(const float4x4& matrix, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectSkeletonDelegate *>(this));
 

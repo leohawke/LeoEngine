@@ -44,7 +44,11 @@ namespace leo {
 		DIRECTIONS_3DS = 6
 	};
 
-	
+	enum class PROJECTION_TYPE : std::uint8_t
+	{
+		ORTHOGRAPHIC,
+		PERSPECTIVE
+	};
 
 	enum class CONTAINMENT_TYPE : std::uint8_t {
 		DISJOINT = 0,
