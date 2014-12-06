@@ -53,9 +53,6 @@
     <ClCompile Include="WinMain.cpp">
       <Filter>WinMain</Filter>
     </ClCompile>
-    <ClCompile Include="..\All\Core\Geometry.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="..\All\Core\Mesh.cpp">
       <Filter>Core</Filter>
     </ClCompile>

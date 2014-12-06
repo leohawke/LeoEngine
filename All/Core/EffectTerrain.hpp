@@ -23,7 +23,7 @@ namespace leo
 	public:
 		void Apply(ID3D11DeviceContext* context);
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow;
-		void ViewProjMatrix(CXMMATRIX matrix, ID3D11DeviceContext* context = nullptr);
+		void ViewProjMatrix(const float4x4& matrix, ID3D11DeviceContext* context = nullptr);
 		void WorldOffset(const float2& offset, ID3D11DeviceContext* context = nullptr);
 		void UVScale(const float2& offset, ID3D11DeviceContext* context = nullptr);
 		void HeightMap(ID3D11ShaderResourceView* srv, ID3D11DeviceContext* context = nullptr);

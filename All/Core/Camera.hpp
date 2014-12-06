@@ -171,31 +171,54 @@ namespace leo
 			vRight = Cross<>(vUp, vLook);
 			save(mRight, vRight);
 
-			auto x = -Dot(mOrigin, mRight);
-			auto y = -Dot(mOrigin, mUp);
-			auto z = -Dot(mOrigin, mLook);
+			auto vOrigin = load(mOrigin);
 
+			auto vX = Dot<3>(vOrigin, vRight);
+			auto vY = Dot<3>(vOrigin, vUp);
+			auto vZ = Dot<3>(vOrigin, vLook);
+#ifdef LM_SSE_INTRINSICS
+			auto vT = _mm_shuffle_ps(vX, vY, _MM_SHUFFLE(3, 3, 3, 3));
+			vT = _mm_shuffle_ps(vT, vT, _MM_SHUFFLE(3,1,0,0));
+			vT = _mm_shuffle_ps(vT, vZ, _MM_SHUFFLE(3, 2, 3, 3));
+			vT = _mm_sub_ps(_mm_setzero_ps(),vT);
+			save(mMatrix[3], vT);
+			mMatrix(3, 3) = 1.f;
+#endif
 			mMatrix(0, 0) = mRight.x;
 			mMatrix(1, 0) = mRight.y;
 			mMatrix(2, 0) = mRight.z;
-			mMatrix(3, 0) = x;
 
 			mMatrix(0, 1) = mUp.x;
 			mMatrix(1, 1) = mUp.y;
 			mMatrix(2, 1) = mUp.z;
-			mMatrix(3, 1) = y;
 
 			mMatrix(0, 2) = mLook.x;
 			mMatrix(1, 2) = mLook.y;
 			mMatrix(2, 2) = mLook.z;
-			mMatrix(3, 2) = z;
 
 			mMatrix(0, 3) = 0.0f;
 			mMatrix(1, 3) = 0.0f;
 			mMatrix(2, 3) = 0.0f;
-			mMatrix(3, 3) = 1.0f;
 
-			mOrientation = MatrixToQuaternion(mMatrix);
+			float4x4 ViewToWorld;
+			ViewToWorld(0, 0) = mRight.x;
+			ViewToWorld(0, 1) = mRight.y;
+			ViewToWorld(0, 2) = mRight.z;
+			ViewToWorld(0, 3) = 0.0f;
+
+			ViewToWorld(1, 0) = mUp.x;
+			ViewToWorld(1, 1) = mUp.y;
+			ViewToWorld(1, 2) = mUp.z;
+			ViewToWorld(1, 3) = 0.0f;
+
+			ViewToWorld(2, 0) = mLook.x;
+			ViewToWorld(2, 1) = mLook.y;
+			ViewToWorld(2, 2) = mLook.z;
+			ViewToWorld(2, 3) = 0.0f;
+
+			ViewToWorld[3] = float4(0.f, 0.f, 0.f, 1.f);
+
+			save(mOrientation,Quaternion(load(ViewToWorld)));
 
 			save(ImplViewProj(), Multiply(load(mMatrix), load(Proj())));
 		}
@@ -266,9 +289,11 @@ namespace leo
 		void LookAt(const float3& pos, const float3& target, const float3& up)
 		{
 			mOrigin = pos;
-			mLook = Normalize(Subtract(target, pos));
-			mRight = Normalize(Cross(up, mLook));
-			mUp = Cross(mLook, mRight);
+			auto vLook = Normalize<3>(Subtract(load(target), load(pos)));
+			save(mLook, vLook);
+			auto vRight = Normalize<3>(Cross<3>(load(up), vLook));
+			save(mRight,vRight);
+			save(mUp,Cross<3>(vLook, vRight);
 			Update();
 		}
 

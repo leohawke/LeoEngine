@@ -176,7 +176,6 @@
     <ClCompile Include="..\All\Core\EffectTerrainSO.cpp" />
     <ClCompile Include="..\All\Core\EngineConfig.cpp" />
     <ClCompile Include="..\All\Core\FileSearch.cpp" />
-    <ClCompile Include="..\All\Core\Geometry.cpp" />
     <ClCompile Include="..\All\Core\Mesh.cpp" />
     <ClCompile Include="..\All\Core\MeshLoad.cpp" />
     <ClCompile Include="..\All\Core\RenderSync.cpp" />

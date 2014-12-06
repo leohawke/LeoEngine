@@ -4,6 +4,9 @@
 #include "Terrain.hpp"
 namespace leo
 {
+	using vector = __m128;
+	using matrix = std::array<vector, 4>;
+
 	class EffectTerrainDelegate :CONCRETE(EffectTerrain), public Singleton<EffectTerrainDelegate>
 	{
 	public:
@@ -45,9 +48,9 @@ namespace leo
 		{
 			return true;
 		}
-		void ViewProjMatrix(CXMMATRIX matrix, ID3D11DeviceContext* context )
+		void ViewProjMatrix(const float4x4& matrix, ID3D11DeviceContext* context )
 		{
-			mVSCBPerMatrix.gViwProj =XMMatrixTranspose(matrix);
+			mVSCBPerMatrix.gViwProj =Transpose(load(matrix));
 			if (context)
 				mVSCBPerMatrix.Update(context);
 		}
@@ -98,7 +101,7 @@ namespace leo
 	private:
 		struct vsCBMatrix
 		{
-			XMMATRIX gViwProj;
+			matrix gViwProj;
 			float4 gOffsetUVScale;
 			const static std::uint8_t slot = 0;
 		};
@@ -130,7 +133,7 @@ namespace leo
 			context
 			);
 	}
-	void EffectTerrain::ViewProjMatrix(CXMMATRIX matrix, ID3D11DeviceContext * context)
+	void EffectTerrain::ViewProjMatrix(const float4x4& matrix, ID3D11DeviceContext * context)
 	{
 		lassume(dynamic_cast<EffectTerrainDelegate *>(this));
 
