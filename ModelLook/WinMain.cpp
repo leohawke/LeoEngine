@@ -349,8 +349,8 @@ void BuildRes()
 	}mTerrainFileHeader;
 
 	mTerrainFileHeader.mChunkSize = 24;
-	mTerrainFileHeader.mHorChunkNum = 12;
-	mTerrainFileHeader.mVerChunkNum = 12;
+	mTerrainFileHeader.mHorChunkNum = 5;
+	mTerrainFileHeader.mVerChunkNum = 16;
 	wcscpy(mTerrainFileHeader.mHeightMap, L"Resource\\GaussianNoise256.jpg");
 
 	{

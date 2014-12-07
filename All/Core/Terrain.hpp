@@ -621,6 +621,14 @@ namespace leo
 				clip_function,
 				std::make_tuple(std::cref(camera))
 				);
+
+			std::vector<Chunk *> secondNeedDrawChunks;
+			for (auto chunk : mNeedDrawChunks) {
+				auto offset = Offset(chunk->mSlotX, chunk->mSlotY);
+				if (camera.Contains(set(offset.x, 0.f, offset.y, 1.f)) != CONTAINMENT_TYPE::DISJOINT)
+					secondNeedDrawChunks.push_back(chunk);
+			}
+			std::swap(secondNeedDrawChunks,mNeedDrawChunks);
 		}
 
 		float2 Offset(uint32 slotX, uint32 slotY) const{
