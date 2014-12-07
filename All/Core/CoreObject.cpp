@@ -52,7 +52,8 @@ namespace leo
 
 	SQT::operator float4x4() const
 	{
-		auto result = QuaternionToMatrix(q);
+		float4x4 result;
+		save(result,Matrix(load(q)));
 
 		result(0, 0) *= s;
 		result(1, 1) *= s;

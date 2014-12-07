@@ -82,6 +82,10 @@ namespace leo {
 			p[1] = p1;
 			p[2] = p2;
 		}
+		Triangle(const float3(&P)[3])
+		{
+				std::memcpy(p, P, sizeof(P));
+		}
 
 
 

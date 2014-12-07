@@ -282,7 +282,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 void BuildRes()
 {
-	pCamera = std::make_unique<leo::Camera>();
+	pCamera = std::make_unique<leo::UVNCamera>();
 
 	using leo::float3;
 
@@ -290,12 +290,24 @@ void BuildRes()
 	auto At = float3(0.f,0.f,0.f);
 	auto Up = float3(0.f,1.f, 0.f);
 
+	
+
+
 	pCamera->LookAt(Eye, At, Up);
 
 	event.Wait();
 
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 	pCamera->SetFrustum(leo::PROJECTION_TYPE::PERSPECTIVE);
+
+	
+
+	auto orientation =load(pCamera->GetOrientation());
+
+	auto fMatrix = leo::Matrix(orientation);
+	auto fOrientation = leo::Quaternion(fMatrix);
+	auto sMatrix = leo::Matrix(fOrientation);
+
 
 	auto proj = pCamera->Proj();
 

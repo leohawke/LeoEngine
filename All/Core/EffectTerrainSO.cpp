@@ -1,7 +1,7 @@
 #include "EffectTerrainSO.hpp"
 #include "..\ShaderMgr.h"
 #include "..\RenderStates.hpp"
-#include "Terrain.hpp"
+#include "Vertex.hpp"
 namespace leo
 {
 	class EffectTerrainSODelegate :CONCRETE(EffectTerrainSO), public Singleton<EffectTerrainSODelegate>

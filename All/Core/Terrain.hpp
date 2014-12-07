@@ -25,6 +25,7 @@
 #include "..\IndePlatform\memory.hpp"
 #include "..\IndePlatform\Tree.hpp"
 #include "Camera.hpp"
+#include "Vertex.hpp"
 #include "..\exception.hpp"
 #include "..\DeviceMgr.h"
 #include "..\TextureMgr.h"
@@ -37,10 +38,7 @@
 
 namespace leo
 {
-	namespace InputLayoutDesc
-	{
-		extern const D3D11_INPUT_ELEMENT_DESC Terrain[1];
-	}
+	
 	template<std::uint8_t MAXLOD = 4, std::uint16_t MAXEDGE = 256, std::uint8_t MINEDGEPIXEL = 6>
 	//static_assert(pow(2,MAXLOD) <= MAXEDGE)
 	class Terrain : public LodAlloc
@@ -271,7 +269,7 @@ namespace leo
 
 			mNeedDrawChunks.clear();
 
-			DetermineDrawChunk(float4(0, 0, mHorChunkNum*mChunkSize, mVerChunkNum*mChunkSize), camera);
+			DetermineDrawChunk(camera);
 
 			for (auto chunk : mNeedDrawChunks) {
 				auto slotX = chunk->mSlotX;
@@ -282,7 +280,7 @@ namespace leo
 				auto topright = load(float3((mHorChunkNum - 2)*mChunkSize / -2.f, 0, +(mVerChunkNum)*mChunkSize / 2));
 				auto buttomleft = load(float3((mHorChunkNum)*mChunkSize / -2.f, 0, +(mVerChunkNum - 2)*mChunkSize / 2));
 
-				auto lodlevel = chunk->mLodLevel = DetermineLod(topleft + offset, topright + offset, camera.View(), camera.Proj());
+				auto lodlevel = chunk->mLodLevel = DetermineLod(Add( topleft , offset),Add( topright ,offset), load(camera.View()),load(camera.Proj()));
 
 				mEffect->WorldOffset(Offset(slotX,slotY), context);
 #ifdef DEBUG
@@ -564,10 +562,10 @@ namespace leo
 			return ClipToScreenSpaceLod(p0, p1);
 		}
 #endif
-		uint8 DistanceToCameraLod(XMVECTOR p0, XMVECTOR p1)
+		uint8 LM_VECTOR_CALL DistanceToCameraLod(__m128 p0, __m128 p1)
 		{
-			auto center = XMVectorDivide(XMVectorAdd(p0, p1), XMVectorReplicate(2.f));
-			auto distance = XMVectorGetX(XMVector3Length(center));
+			auto center = Divide(Add(p0, p1), Splat(2.f));
+			auto distance = _mm_cvtss_f32(Length<3>(center));
 			auto lod = distance / mChunkSize;
 			auto ilod = int(lod - 0.5f);
 			if (ilod < 0)
@@ -577,10 +575,10 @@ namespace leo
 			return uint8(ilod);
 		}
 
-		uint8 DetermineLod(XMVECTOR p0, XMVECTOR p1, CXMMATRIX view, CXMMATRIX proj)
+		uint8 LM_VECTOR_CALL DetermineLod(__m128 p0, __m128 p1,const std::array<__m128,4>& view, const std::array<__m128, 4>& proj)
 		{
-			auto vp0 = XMVector4Transform(p0, view);
-			auto vp1 = XMVector4Transform(p1, view);
+			auto vp0 = Transform(p0, view);
+			auto vp1 = Transform(p1, view);
 			auto cameralod = DistanceToCameraLod(vp0, vp1);
 
 			//auto pp0 = XMVector4Transform(vp0, proj);
@@ -602,7 +600,7 @@ namespace leo
 					context->DrawIndexed(mIndexInfo[chunkInfo.mLodLevel].mCrackOffset[(uint8)direct], mIndexInfo[chunkInfo.mLodLevel].mCrackCount[(uint8)direct], 0);
 		}
 
-		void DetermineDrawChunk(const float4& rect, const Camera& camera)
+		void DetermineDrawChunk(const Camera& camera)
 		{
 			static auto value_function = [](const Chunk& chunk, std::vector<Chunk*>& mNeedDrawChunks) {
 				mNeedDrawChunks.push_back(const_cast<Chunk*>(&chunk));
@@ -613,14 +611,33 @@ namespace leo
 				v[1] = float3(rect.x + rect.z / 2, 0, rect.y + rect.w / 2);
 				v[2] = float3(rect.x - rect.z / 2, 0, rect.y - rect.w / 2);
 
-				XMVECTOR vv[3] = {
-					XMVector3TransformCoord(load(v[0]), camera.View()),
-					XMVector3TransformCoord(load(v[1]), camera.View()),
-					XMVector3TransformCoord(load(v[2]), camera.View())
-				};
+				auto result = camera.Intersects(Triangle(v));
 
-				return camera.Contains(vv[0], vv[1], vv[2]) != ContainmentType::DISJOINT;
+				DebugPrintf("0: %f %f 1: %f %f 2: %f %f=>",v[0].x, v[0].z, v[1].x, v[1].z, v[2].x, v[2].z);
+#if 0
+				switch (result)
+				{
+				case leo::CONTAINMENT_TYPE::DISJOINT:
+					DebugPrintf("DISJOINT\n");
+					break;
+				case leo::CONTAINMENT_TYPE::INTERSECTS:
+					DebugPrintf("INTERSECTS\n");
+					break;
+				case leo::CONTAINMENT_TYPE::CONTAINS:
+					DebugPrintf("CONTAINS\n");
+					break;
+				default:
+					break;
+				}
+#else
+				if (result)
+					DebugPrintf("INTERSECTS\n");
+				else
+					DebugPrintf("DISJOINT\n");
+#endif
+				return result;
 			};
+
 			static auto value_param = std::make_tuple(std::ref(mNeedDrawChunks));
 			mChunksQuadTree.Iterator(
 				value_function,

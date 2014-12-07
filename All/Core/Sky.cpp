@@ -66,12 +66,13 @@ namespace leo
 		context->IASetInputLayout(ShaderMgr().CreateInputLayout(InputLayoutDesc::Sky));
 
 		auto & mEffect = EffectSky::GetInstance();
-		float3 pos;
-		memcpy(pos, camera.GetOrigin());
-		auto world = XMMatrixTranslation(pos.x, pos.y, pos.z);
+		float4 pos{camera.GetOrigin(),1.f};
+		auto world = I();
+		world[3] = load(pos);
 		
-		mEffect->EyePos(pos);
-		mEffect->ViewProj(world*camera.ViewProj());
+
+		mEffect->EyePos(camera.GetOrigin());
+		mEffect->ViewProj(Multiply(world,load(camera.ViewProj())));
 		
 		context->PSSetShaderResources(0, 1, &mCubeMapSRV);
 		mEffect->Apply(context);

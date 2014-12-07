@@ -164,6 +164,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\All\Core\BillBoard.cpp" />
+    <ClCompile Include="..\All\Core\CoreObject.cpp" />
     <ClCompile Include="..\All\Core\effect.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -195,6 +196,7 @@
     </ClCompile>
     <ClCompile Include="..\All\File.cpp" />
     <ClCompile Include="..\All\IndePlatform\any.cpp" />
+    <ClCompile Include="..\All\IndePlatform\Geometry.cpp" />
     <ClCompile Include="..\All\IndePlatform\memory.cpp" />
     <ClCompile Include="..\All\IndePlatform\raii.cpp" />
     <ClCompile Include="..\All\IndePlatform\Singleton.cpp" />

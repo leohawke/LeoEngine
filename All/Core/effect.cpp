@@ -140,17 +140,17 @@ namespace leo
 			pContext.PSSetSamplers(0, 1, &mPixelShaderSampleState);
 		}
 
-		void WorldMatrix(const float4x4& matrix, ID3D11DeviceContext* context)
+		void LM_VECTOR_CALL WorldMatrix(matrix Matrix, ID3D11DeviceContext* context)
 		{
 			vector pDet;
-			mVertexShaderConstantBufferPerFrame.worldinvtranspose =Inverse(pDet,load(matrix));
-			mVertexShaderConstantBufferPerFrame.world = Transpose(load(matrix));
+			mVertexShaderConstantBufferPerFrame.worldinvtranspose =Inverse(pDet,Matrix);
+			mVertexShaderConstantBufferPerFrame.world = Transpose(Matrix);
 			if (context)
 				mVertexShaderConstantBufferPerFrame.Update(context);
 		}
-		void WorldViewProjMatrix(const float4x4& matrix, ID3D11DeviceContext* context)
+		void  LM_VECTOR_CALL WorldViewProjMatrix(matrix Matrix, ID3D11DeviceContext* context)
 		{
-			mVertexShaderConstantBufferPerFrame.worldviewproj = Transpose(load(matrix));
+			mVertexShaderConstantBufferPerFrame.worldviewproj = Transpose(Matrix);
 			if (context)
 				mVertexShaderConstantBufferPerFrame.Update(context);
 		}
@@ -292,7 +292,7 @@ namespace leo
 		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
 
 		return ((EffectNormalMapDelegate *)this)->WorldMatrix(
-			matrix,context
+			load(matrix),context
 			);
 	}
 	
@@ -301,10 +301,29 @@ namespace leo
 		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
 
 		return ((EffectNormalMapDelegate *)this)->WorldViewProjMatrix(
-			matrix,context
+			load(matrix),context
 			);
 	}
 	
+
+	void LM_VECTOR_CALL EffectNormalMap::WorldMatrix(matrix Matrix, ID3D11DeviceContext* context)
+	{
+		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
+
+		return ((EffectNormalMapDelegate *)this)->WorldMatrix(
+			Matrix, context
+			);
+	}
+
+	void LM_VECTOR_CALL EffectNormalMap::WorldViewProjMatrix(matrix Matrix, ID3D11DeviceContext* context)
+	{
+		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
+
+		return ((EffectNormalMapDelegate *)this)->WorldViewProjMatrix(
+			Matrix, context
+			);
+	}
+
 	void EffectNormalMap::EyePos(const float3& pos, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
@@ -526,9 +545,9 @@ namespace leo
 				mVertexConstantBufferPerCamera.Update(context);
 		}
 
-		void ViewProj(const float4x4& matrix, ID3D11DeviceContext* context)
+		void LM_VECTOR_CALL ViewProj(matrix Matrix, ID3D11DeviceContext* context)
 		{
-			mVertexConstantBufferPerCamera.gViewProj = Transpose(load(matrix));
+			mVertexConstantBufferPerCamera.gViewProj = Transpose(Matrix);
 			if (context)
 				mVertexConstantBufferPerCamera.Update(context);
 		}
@@ -584,9 +603,19 @@ namespace leo
 		lassume(dynamic_cast<EffectSkyDelegate*>(this));
 
 		return ((EffectSkyDelegate*)this)->ViewProj(
-			matrix, context
+			load(matrix), context
 			);
 	}
+
+	void LM_VECTOR_CALL EffectSky::ViewProj(matrix Matrix, ID3D11DeviceContext* context)
+	{
+		lassume(dynamic_cast<EffectSkyDelegate*>(this));
+
+		return ((EffectSkyDelegate*)this)->ViewProj(
+			Matrix, context
+			);
+	}
+
 
 	bool EffectSky::SetLevel(EffectConfig::EffectLevel l) lnothrow
 	{
@@ -789,17 +818,17 @@ namespace leo
 			context->GSSetConstantBuffers(0, 1, &mGeometryConstantBufferPerCamera.mBuffer);
 		}
 
-		void ViewProj(const float4x4& matrix, ID3D11DeviceContext* context )
+		void LM_VECTOR_CALL ViewProj(matrix Matrix, ID3D11DeviceContext* context )
 		{
-			mGeometryConstantBufferPerCamera.gViewProj = Transpose(load(matrix));
+			mGeometryConstantBufferPerCamera.gViewProj = Transpose(Matrix);
 			if (context)
 				mGeometryConstantBufferPerCamera.Update(context);
 		}
-		void World(const float4x4& matrix, ID3D11DeviceContext* context)
+		void LM_VECTOR_CALL World(matrix Matrix, ID3D11DeviceContext* context)
 		{
-			mVertexConstantBufferPerModel.World = Transpose(load(matrix));
+			mVertexConstantBufferPerModel.World = Transpose(Matrix);
 			vector pDet;
-			mVertexConstantBufferPerModel.WorldInvTranspose = Inverse(pDet,load(matrix));
+			mVertexConstantBufferPerModel.WorldInvTranspose = Inverse(pDet, Matrix);
 			if (context)
 				mVertexConstantBufferPerModel.Update(context);
 		}
@@ -833,7 +862,7 @@ namespace leo
 		lassume(dynamic_cast<EffectNormalLineDelegate*>(this));
 
 		return ((EffectNormalLineDelegate*)this)->ViewProj(
-			matrix,context
+			load(matrix),context
 			);
 	}
 	void EffectNormalLine::World(const float4x4& matrix, ID3D11DeviceContext* context)
@@ -841,9 +870,27 @@ namespace leo
 		lassume(dynamic_cast<EffectNormalLineDelegate*>(this));
 
 		return ((EffectNormalLineDelegate*)this)->World(
-			matrix,context
+			load(matrix),context
 			);
 	}
+
+	void LM_VECTOR_CALL EffectNormalLine::ViewProj(matrix Matrix, ID3D11DeviceContext* context)
+	{
+		lassume(dynamic_cast<EffectNormalLineDelegate*>(this));
+
+		return ((EffectNormalLineDelegate*)this)->ViewProj(
+			Matrix, context
+			);
+	}
+	void LM_VECTOR_CALL EffectNormalLine::World(matrix Matrix, ID3D11DeviceContext* context)
+	{
+		lassume(dynamic_cast<EffectNormalLineDelegate*>(this));
+
+		return ((EffectNormalLineDelegate*)this)->World(
+			Matrix, context
+			);
+	}
+
 	void EffectNormalLine::Color(const float4& color, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectNormalLineDelegate*>(this));

@@ -59,6 +59,7 @@ namespace leo
 			mFar = farf;
 			mFov = fov;
 			mAspect = aspect;
+			return *this;
 		}
 		//update matrix
 		void SetFrustum(PROJECTION_TYPE projtype)
@@ -80,6 +81,8 @@ namespace leo
 		DefGetter(lnothrow const, const float&, NearHeight, mNearHeight);
 
 		DefGetter(lnothrow const, const float3&, Origin, mOrigin);
+
+		DefGetter(lnothrow const, const float4&, Orientation, mOrientation);
 	private:
 		void Update()
 		{
@@ -197,25 +200,13 @@ namespace leo
 			mMatrix(1, 3) = 0.0f;
 			mMatrix(2, 3) = 0.0f;
 
-			float4x4 ViewToWorld;
-			ViewToWorld(0, 0) = mRight.x;
-			ViewToWorld(0, 1) = mRight.y;
-			ViewToWorld(0, 2) = mRight.z;
-			ViewToWorld(0, 3) = 0.0f;
+			auto ViewToWolrd = mMatrix;
+			ViewToWolrd[3] = float4(0.f, 0.f, 0.f, 1.f);
+			//__m128 pDet;
 
-			ViewToWorld(1, 0) = mUp.x;
-			ViewToWorld(1, 1) = mUp.y;
-			ViewToWorld(1, 2) = mUp.z;
-			ViewToWorld(1, 3) = 0.0f;
+			save(mOrientation,Quaternion(load(ViewToWolrd)));
 
-			ViewToWorld(2, 0) = mLook.x;
-			ViewToWorld(2, 1) = mLook.y;
-			ViewToWorld(2, 2) = mLook.z;
-			ViewToWorld(2, 3) = 0.0f;
-
-			ViewToWorld[3] = float4(0.f, 0.f, 0.f, 1.f);
-
-			save(mOrientation,Quaternion(load(ViewToWorld)));
+			//save(mOrientation,Quaternion(load(ViewToWorld)));
 
 			save(ImplViewProj(), Multiply(load(mMatrix), load(Proj())));
 		}
@@ -243,6 +234,7 @@ namespace leo
 		using CameraFrustum::GetAspect;
 		using CameraFrustum::GetNearHeight;
 		using CameraFrustum::GetOrigin;
+		using CameraFrustum::GetOrientation;
 		using CameraFrustum::Intersects;
 		using CameraFrustum::Contains;
 
@@ -250,6 +242,7 @@ namespace leo
 		Camera& SetFrustum(float fov, float aspect, float nearf, float farf)
 		{
 			CameraFrustum::SetFrustum(fov, aspect, nearf, farf);
+			return *this;
 		}
 		//update proj matrix
 		void SetFrustum(PROJECTION_TYPE projtype)

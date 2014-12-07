@@ -109,6 +109,10 @@ namespace leo
 
 		void WorldMatrix(const float4x4& matrix, ID3D11DeviceContext* context = nullptr);
 		void WorldViewProjMatrix(const float4x4& matrix, ID3D11DeviceContext* context = nullptr);
+
+		void LM_VECTOR_CALL WorldMatrix(std::array<__m128,4> matrix, ID3D11DeviceContext* context = nullptr);
+		void  LM_VECTOR_CALL WorldViewProjMatrix(std::array<__m128, 4>  matrix, ID3D11DeviceContext* context = nullptr);
+
 		void EyePos(const float3& pos, ID3D11DeviceContext* context = nullptr);
 
 		void Light(const DirectionLight& dl, ID3D11DeviceContext* context = nullptr);
@@ -149,6 +153,7 @@ namespace leo
 		void EyePos(const float3& pos, ID3D11DeviceContext* context = nullptr);
 
 		void ViewProj(const float4x4& matrix, ID3D11DeviceContext* context = nullptr);
+		void LM_VECTOR_CALL ViewProj(std::array<__m128,4> matrix, ID3D11DeviceContext* context = nullptr);
 
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow;
 
@@ -197,6 +202,10 @@ namespace leo
 
 		void ViewProj(const float4x4& matrix, ID3D11DeviceContext* context = nullptr);
 		void World(const float4x4& matrix, ID3D11DeviceContext* context = nullptr);
+
+		void LM_VECTOR_CALL ViewProj(std::array<__m128,4> matrix, ID3D11DeviceContext* context = nullptr);
+		void LM_VECTOR_CALL World(std::array<__m128, 4> matrix, ID3D11DeviceContext* context = nullptr);
+
 		void Color(const float4& color, ID3D11DeviceContext* context = nullptr);
 
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow

@@ -180,9 +180,10 @@ namespace leo{
 
 		auto & mEffect = EffectSkeleton::GetInstance();
 
-		XMMATRIX world = convert(operator std::array<__m128, 4U>());
+		auto world =SQT::operator std::array<__m128, 4U>();
+		auto viewproj = load(camera.ViewProj());
 		mEffect->WorldMatrix(world);
-		mEffect->WorldViewProjMatrix(world*camera.ViewProj());
+		mEffect->WorldViewProjMatrix(Multiply(world,viewproj));
 		mEffect->SkinMatrix(mSkinMatrixs.get(),mSkeData->mSkeleton.mJointCount);
 		mEffect->Apply(context);
 

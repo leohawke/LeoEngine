@@ -89,17 +89,17 @@ namespace leo{
 			pContext.PSSetSamplers(0, 1, &mPixelShaderSampleState);
 		}
 
-		void WorldMatrix(const float4x4& matrix, ID3D11DeviceContext* context)
+		void  LM_VECTOR_CALL WorldMatrix(matrix Matrix, ID3D11DeviceContext* context)
 		{
 			vector pDet;
-			mVertexShaderConstantBufferPerFrame.worldinvtranspose = Inverse(pDet, load(matrix));
-			mVertexShaderConstantBufferPerFrame.world = Transpose(load(matrix));
+			mVertexShaderConstantBufferPerFrame.worldinvtranspose = Inverse(pDet, Matrix);
+			mVertexShaderConstantBufferPerFrame.world = Transpose(Matrix);
 			if (context)
 				mVertexShaderConstantBufferPerFrame.Update(context);
 		}
-		void WorldViewProjMatrix(const float4x4&  matrix, ID3D11DeviceContext* context)
+		void LM_VECTOR_CALL WorldViewProjMatrix(matrix Matrix, ID3D11DeviceContext* context)
 		{
-			mVertexShaderConstantBufferPerFrame.worldviewproj = Transpose(load(matrix));
+			mVertexShaderConstantBufferPerFrame.worldviewproj = Transpose(Matrix);
 			if (context)
 				mVertexShaderConstantBufferPerFrame.Update(context);
 		}
@@ -258,7 +258,16 @@ namespace leo{
 		lassume(dynamic_cast<EffectSkeletonDelegate *>(this));
 
 		return ((EffectSkeletonDelegate *)this)->WorldMatrix(
-			matrix, context
+			load(matrix), context
+			);
+	}
+
+	void LM_VECTOR_CALL EffectSkeleton::WorldMatrix(matrix Matrix, ID3D11DeviceContext* context)
+	{
+		lassume(dynamic_cast<EffectSkeletonDelegate *>(this));
+
+		return ((EffectSkeletonDelegate *)this)->WorldMatrix(
+			Matrix, context
 			);
 	}
 
@@ -267,7 +276,16 @@ namespace leo{
 		lassume(dynamic_cast<EffectSkeletonDelegate *>(this));
 
 		return ((EffectSkeletonDelegate *)this)->WorldViewProjMatrix(
-			matrix, context
+			load(matrix), context
+			);
+	}
+
+	void LM_VECTOR_CALL EffectSkeleton::WorldViewProjMatrix(matrix Matrix, ID3D11DeviceContext* context)
+	{
+		lassume(dynamic_cast<EffectSkeletonDelegate *>(this));
+
+		return ((EffectSkeletonDelegate *)this)->WorldViewProjMatrix(
+			Matrix, context
 			);
 	}
 
