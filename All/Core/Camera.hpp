@@ -30,8 +30,6 @@ namespace leo
 		const float frustum_aspect = 16.f / 9.f;
 	}
 
-
-
 	class LB_API CameraFrustum : public Frustum {
 	public:
 		CameraFrustum(const CameraFrustum& lvaue) = default;
@@ -199,14 +197,6 @@ namespace leo
 			mMatrix(0, 3) = 0.0f;
 			mMatrix(1, 3) = 0.0f;
 			mMatrix(2, 3) = 0.0f;
-
-			auto ViewToWolrd = mMatrix;
-			ViewToWolrd[3] = float4(0.f, 0.f, 0.f, 1.f);
-			//__m128 pDet;
-
-			save(mOrientation,Quaternion(load(ViewToWolrd)));
-
-			//save(mOrientation,Quaternion(load(ViewToWorld)));
 
 			save(ImplViewProj(), Multiply(load(mMatrix), load(Proj())));
 		}
