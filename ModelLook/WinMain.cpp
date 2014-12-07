@@ -280,6 +280,28 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	return 0;
 }
 
+inline void QuaternionToMatrix(const leo::float4& quaternion,leo::float4x4& matrix)
+{
+	auto x2 = quaternion.x*quaternion.x, y2 = quaternion.y*quaternion.y, z2 = quaternion.z*quaternion.z;
+	auto xy = quaternion.x*quaternion.y, wz = quaternion.w*quaternion.z, wx = quaternion.w*quaternion.x;
+	auto xz = quaternion.x*quaternion.z, yz = quaternion.y*quaternion.z, yw = quaternion.y*quaternion.w;
+
+	matrix(0, 0) = 1 - 2 * (y2 + z2);	matrix(0, 1) = 2 * (xy + wz);	matrix(0, 2) = 2 * (xz - yw);
+	matrix(1, 0) = 2 * (xy - wz);		matrix(1, 1) = 1 - 2 * (x2 + z2); matrix(1, 2) = 2 * (yz + wx);
+	matrix(2, 0) = 2 * (xz + yw);		matrix(2, 1) = 2 * (yz - wx);	matrix(2, 2) = 1 - 2 * (x2 + y2);
+}
+
+inline leo::float4x4 QuaternionToMatrix(const leo::float4 & quaternion)
+{
+	leo::float4x4 matrix;
+	::QuaternionToMatrix(quaternion, matrix);
+	matrix(0, 3) = 0; matrix(1, 3) = 0; matrix(2, 3) = 0;
+	matrix(3, 0) = 0; matrix(3, 1) = 0; matrix(3, 2) = 0;
+	matrix(3, 3) = 1;
+	return matrix;
+}
+
+
 void BuildRes()
 {
 	pCamera = std::make_unique<leo::UVNCamera>();
@@ -290,9 +312,6 @@ void BuildRes()
 	auto At = float3(0.f,0.f,0.f);
 	auto Up = float3(0.f,1.f, 0.f);
 
-	
-
-
 	pCamera->LookAt(Eye, At, Up);
 
 	event.Wait();
@@ -301,17 +320,6 @@ void BuildRes()
 	pCamera->SetFrustum(leo::PROJECTION_TYPE::PERSPECTIVE);
 
 	
-
-	auto orientation =load(pCamera->GetOrientation());
-
-	auto fMatrix = leo::Matrix(orientation);
-	auto fOrientation = leo::Quaternion(fMatrix);
-	auto sMatrix = leo::Matrix(fOrientation);
-
-
-	auto proj = pCamera->Proj();
-
-
 	auto& pEffect =  leo::EffectNormalMap::GetInstance(leo::DeviceMgr().GetDevice());
 	leo::EffectTerrain::GetInstance(leo::DeviceMgr().GetDevice());
 	leo::EffectTerrainSO::GetInstance(leo::DeviceMgr().GetDevice());

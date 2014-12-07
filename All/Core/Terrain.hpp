@@ -611,31 +611,7 @@ namespace leo
 				v[1] = float3(rect.x + rect.z / 2, 0, rect.y + rect.w / 2);
 				v[2] = float3(rect.x - rect.z / 2, 0, rect.y - rect.w / 2);
 
-				auto result = camera.Intersects(Triangle(v));
-
-				DebugPrintf("0: %f %f 1: %f %f 2: %f %f=>",v[0].x, v[0].z, v[1].x, v[1].z, v[2].x, v[2].z);
-#if 0
-				switch (result)
-				{
-				case leo::CONTAINMENT_TYPE::DISJOINT:
-					DebugPrintf("DISJOINT\n");
-					break;
-				case leo::CONTAINMENT_TYPE::INTERSECTS:
-					DebugPrintf("INTERSECTS\n");
-					break;
-				case leo::CONTAINMENT_TYPE::CONTAINS:
-					DebugPrintf("CONTAINS\n");
-					break;
-				default:
-					break;
-				}
-#else
-				if (result)
-					DebugPrintf("INTERSECTS\n");
-				else
-					DebugPrintf("DISJOINT\n");
-#endif
-				return result;
+				return camera.Contains(Triangle(v)) != leo::CONTAINMENT_TYPE::DISJOINT;
 			};
 
 			static auto value_param = std::make_tuple(std::ref(mNeedDrawChunks));

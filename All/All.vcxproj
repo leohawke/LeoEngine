@@ -235,7 +235,6 @@
     <ClInclude Include="declara.hpp" />
     <ClInclude Include="exception.hpp" />
     <ClInclude Include="file.hpp" />
-    <ClInclude Include="leomath.hpp" />
     <ClInclude Include="raii.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Mgr.hpp" />

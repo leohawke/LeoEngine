@@ -98,9 +98,6 @@
     <ClCompile Include="..\All\Input.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\All\leomath.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="..\All\Mgr.cpp">
       <Filter>源文件</Filter>
     </ClCompile>

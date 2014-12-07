@@ -204,7 +204,6 @@
     <ClCompile Include="..\All\IndePlatform\ThreadSync.cpp" />
     <ClCompile Include="..\All\IndePlatform\type_info.cpp" />
     <ClCompile Include="..\All\Input.cpp" />
-    <ClCompile Include="..\All\leomath.cpp" />
     <ClCompile Include="..\All\Mgr.cpp" />
     <ClCompile Include="..\All\RenderStates.cpp" />
     <ClCompile Include="..\All\ShaderMgr.cpp" />

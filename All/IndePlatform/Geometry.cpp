@@ -573,7 +573,7 @@ namespace leo {
 		BottomPlane = PlaneTransform(BottomPlane, vOrientation, vOrigin);
 		BottomPlane = PlaneNormalize(BottomPlane);
 
-		return CONTAINMENT_TYPE(TriangleTests::ContainedBy(load(Tri.p[0]), load(Tri.p[0]), load(Tri.p[0]), NearPlane, FarPlane, RightPlane, LeftPlane, TopPlane, BottomPlane));
+		return CONTAINMENT_TYPE(TriangleTests::ContainedBy(load(Tri.p[0]), load(Tri.p[1]), load(Tri.p[2]), NearPlane, FarPlane, RightPlane, LeftPlane, TopPlane, BottomPlane));
 	}
 	CONTAINMENT_TYPE Frustum::Contains(const Sphere& sp) const {
 		return sp.ContainedBy(*this);
@@ -951,8 +951,8 @@ namespace leo {
 	bool Frustum::Intersects(const Triangle& Tri) const {
 		// Build frustum planes.
 		vector Planes[6];
-		Planes[0] = set(0.0f, 0.0f, -1.0f, mNear);
-		Planes[1] = set(0.0f, 0.0f, 1.0f, -mFar);
+		Planes[0] = set(0.0f, 0.0f, -1.0f, -mNear);
+		Planes[1] = set(0.0f, 0.0f, 1.0f,mFar);
 		Planes[2] = set(1.0f, 0.0f, -mRightSlope, 0.0f);
 		Planes[3] = set(-1.0f, 0.0f, mLeftSlope, 0.0f);
 		Planes[4] = set(0.0f, 1.0f, -mTopSlope, 0.0f);

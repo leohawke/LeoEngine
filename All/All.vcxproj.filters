@@ -254,9 +254,6 @@
     <ClInclude Include="file.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="leomath.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="raii.hpp">
       <Filter>头文件</Filter>
     </ClInclude>

@@ -475,6 +475,34 @@ namespace leo
 		return lhs.min(rhs);
 	}
 
+	struct lalignas(16) float3x3 {
+		float3 r[3];
+
+		float& operator()(uint8 row, uint8 col) {
+			return r[row].data[col];
+		}
+
+		float operator()(uint8 row, uint8 col) const {
+			return r[row].data[col];
+		}
+
+		float3& operator[](uint8 row) {
+			return r[row];
+		}
+
+		const float3& operator[](uint8 row) const {
+			return r[row];
+		}
+
+		float3x3() = default;
+
+		float3x3(const float3& r0, const float3& r1, const float3& r2) {
+			r[0] = r0;
+			r[1] = r1;
+			r[2] = r2;
+		}
+	};
+
 	struct lalignas(16) float4x4 {
 		float4 r[4];
 
@@ -497,6 +525,13 @@ namespace leo
 
 		explicit float4x4(const float* t) {
 			std::memcpy(r, t, sizeof(r));
+		}
+
+		float4x4(const float3x3& m) {
+			r[0] = float4(m[0], 0.f);
+			r[1] = float4(m[1], 0.f);
+			r[2] = float4(m[2], 0.f);
+			r[3] = float4(0.f, 0.f,0.f,1.f);
 		}
 
 		float4x4() = default;
@@ -786,6 +821,51 @@ namespace leo {
 		// Splat the length squared
 		vLengthSq = LM_PERMUTE_PS(vLengthSq, _MM_SHUFFLE(0, 0, 0, 0));
 		// Get the length
+		vLengthSq = _mm_sqrt_ps(vLengthSq);
+		return vLengthSq;
+#else // _LM_VMX128_INTRINSICS_
+#endif // _LM_VMX128_INTRINSICS_
+	}
+
+	template<>
+	inline __m128 Length<4>(__m128 V) {
+#if defined(LM_ARM_NEON_INTRINSICS)
+		// Dot4
+		float32x4_t vTemp = vmulq_f32(V, V);
+		float32x2_t v1 = vget_low_f32(vTemp);
+		float32x2_t v2 = vget_high_f32(vTemp);
+		v1 = vpadd_f32(v1, v1);
+		v2 = vpadd_f32(v2, v2);
+		v1 = vadd_f32(v1, v2);
+		const float32x2_t zero = vdup_n_f32(0);
+		uint32x2_t VEqualsZero = vceq_f32(v1, zero);
+		// Sqrt
+		float32x2_t S0 = vrsqrte_f32(v1);
+		float32x2_t P0 = vmul_f32(v1, S0);
+		float32x2_t R0 = vrsqrts_f32(P0, S0);
+		float32x2_t S1 = vmul_f32(S0, R0);
+		float32x2_t P1 = vmul_f32(v1, S1);
+		float32x2_t R1 = vrsqrts_f32(P1, S1);
+		float32x2_t Result = vmul_f32(S1, R1);
+		Result = vmul_f32(v1, Result);
+		Result = vbsl_f32(VEqualsZero, zero, Result);
+		return vcombine_f32(Result, Result);
+#elif defined(LM_SSE_INTRINSICS)
+		// Perform the dot product on x,y,z and w
+		auto vLengthSq = _mm_mul_ps(V, V);
+		// vTemp has z and w
+		auto vTemp = LM_PERMUTE_PS(vLengthSq, _MM_SHUFFLE(3, 2, 3, 2));
+		// x+z, y+w
+		vLengthSq = _mm_add_ps(vLengthSq, vTemp);
+		// x+z,x+z,x+z,y+w
+		vLengthSq = LM_PERMUTE_PS(vLengthSq, _MM_SHUFFLE(1, 0, 0, 0));
+		// ??,??,y+w,y+w
+		vTemp = _mm_shuffle_ps(vTemp, vLengthSq, _MM_SHUFFLE(3, 3, 0, 0));
+		// ??,??,x+z+y+w,??
+		vLengthSq = _mm_add_ps(vLengthSq, vTemp);
+		// Splat the length
+		vLengthSq = LM_PERMUTE_PS(vLengthSq, _MM_SHUFFLE(2, 2, 2, 2));
+		// Prepare for the division
 		vLengthSq = _mm_sqrt_ps(vLengthSq);
 		return vLengthSq;
 #else // _LM_VMX128_INTRINSICS_

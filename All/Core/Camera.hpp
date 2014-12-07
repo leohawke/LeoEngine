@@ -158,6 +158,8 @@ namespace leo
 	class LB_API Camera : private CameraFrustum, public GeneralAllocatedObject
 	{
 	private:
+		
+
 		void Update()
 		{
 			//Õý½»Î¬³Ö
@@ -197,6 +199,9 @@ namespace leo
 			mMatrix(0, 3) = 0.0f;
 			mMatrix(1, 3) = 0.0f;
 			mMatrix(2, 3) = 0.0f;
+
+			float4x4 ViewToWorld(float3x3(mRight,mUp,mLook));
+			save(mOrientation, Quaternion(load(ViewToWorld)));
 
 			save(ImplViewProj(), Multiply(load(mMatrix), load(Proj())));
 		}
