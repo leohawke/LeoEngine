@@ -34,7 +34,7 @@ float4 main(PixelIn pin) : SV_TARGET
 	color = lerp(color, c2, weight.b);
 	color = lerp(color, c3, weight.a);
 #ifdef DEBUG
-	return color*0.5f + gColor*0.5f;
+	return color*0.75f + gColor*0.25f;
 #endif
 	return color;
 }

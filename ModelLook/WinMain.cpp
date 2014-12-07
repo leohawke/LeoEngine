@@ -348,9 +348,9 @@ void BuildRes()
 		wchar_t mHeightMap[leo::win::file::max_path];
 	}mTerrainFileHeader;
 
-	mTerrainFileHeader.mChunkSize = 8;
-	mTerrainFileHeader.mHorChunkNum = 24;
-	mTerrainFileHeader.mVerChunkNum = 24;
+	mTerrainFileHeader.mChunkSize = 24;
+	mTerrainFileHeader.mHorChunkNum = 12;
+	mTerrainFileHeader.mVerChunkNum = 12;
 	wcscpy(mTerrainFileHeader.mHeightMap, L"Resource\\GaussianNoise256.jpg");
 
 	{
