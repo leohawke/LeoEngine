@@ -20,6 +20,11 @@
 #include <vector>
 #include <string>
 
+enum D3D11_SHADER_TYPE;
+struct D3D11_RASTERIZER_DESC;
+struct D3D11_DEPTH_STENCIL_DESC;
+struct D3D11_BLEND_DESC;
+struct D3D11_SAMPLER_DESC;
 namespace leo{
 	class EngineConfig{
 	public:
@@ -28,6 +33,22 @@ namespace leo{
 
 		static const std::pair<uint16, uint16>& ClientSize();
 		static const std::vector<std::wstring>& SearchDirectors();
+
+		class ShaderConfig {
+		public:
+			static const std::vector<std::wstring>& GetAllShaderName();
+			static const std::wstring& GetShaderFileName(const std::wstring&, D3D11_SHADER_TYPE);
+
+			static const std::vector<std::wstring>& GetAllSampleStateName();
+			static const std::vector<std::wstring>& GetAllDepthStencilStateName();
+			static const std::vector<std::wstring>& GetAllRasterizerStateName();
+			static const std::vector<std::wstring>& GetAllBlendStateName();
+
+			static const D3D11_RASTERIZER_DESC& GetRasterizerState(const std::wstring&);
+			static const D3D11_DEPTH_STENCIL_DESC& GetDepthStencilState(const std::wstring&);
+			static const D3D11_BLEND_DESC& GetBlendState(const std::wstring&);
+			static const D3D11_SAMPLER_DESC& GetSampleState(const std::wstring&);
+		};
 	};
 }
 

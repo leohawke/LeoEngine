@@ -40,9 +40,9 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <EmbedManifest>false</EmbedManifest>
-    <IncludePath>E:\program\Scheme\Sexp;E:\program\All\All\D3DX11;$(SolutionDir)DirectXTex;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)LeoScheme\Sexp;;E:\program\All\All\D3DX11;$(SolutionDir)DirectXTex;$(IncludePath)</IncludePath>
     <LibraryPath>E:\program\All\All\D3DX11\Lib\x86;$(LibraryPath)</LibraryPath>
-    <ReferencePath>E:\program\Scheme;$(SolutionDir)DirectXTex;$(ReferencePath)</ReferencePath>
+    <ReferencePath>$(SolutionDir)LeoScheme\;;$(SolutionDir)DirectXTex;$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ReferencePath>E:\program\Scheme;$(SolutionDir)DirectXTex;$(ReferencePath)</ReferencePath>

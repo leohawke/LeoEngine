@@ -287,10 +287,10 @@ namespace leo
 
 namespace leo
 {
-	std::wstring towstring(const char* c_str, std::size_t len);
-	std::wstring towstring(const std::string& string);
+	std::wstring to_wstring(const char* c_str, std::size_t len);
+	std::wstring to_wstring(const std::string& string);
 
-	std::string tostring(const wchar_t* c_str, std::size_t len);
-	std::string tostring(const std::wstring& string);
+	std::string to_string(const wchar_t* c_str, std::size_t len);
+	std::string to_string(const std::wstring& string);
 }
 #endif

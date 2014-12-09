@@ -4,7 +4,7 @@
 namespace leo
 {
 #ifdef WIN32
-	std::wstring towstring(const char* c_str, std::size_t len)
+	std::wstring to_wstring(const char* c_str, std::size_t len)
 	{
 		const int w_Len(::MultiByteToWideChar(CP_ACP, 0, c_str, len, {}, 0));
 		std::wstring wstr(w_Len, wchar_t());
@@ -12,7 +12,7 @@ namespace leo
 		::MultiByteToWideChar(CP_ACP, 0, c_str, len, w_str, w_Len);
 		return wstr;
 	}
-	std::wstring towstring(const std::string& string)
+	std::wstring to_wstring(const std::string& string)
 	{
 		const int w_Len(::MultiByteToWideChar(CP_ACP, 0, string.c_str(), string.length(), {}, 0));
 		std::wstring wstr(w_Len, wchar_t());
@@ -21,7 +21,7 @@ namespace leo
 		return wstr;
 	}
 
-	std::string tostring(const wchar_t* c_str, std::size_t len){
+	std::string to_string(const wchar_t* c_str, std::size_t len){
 		char defaultChar = ' ';
 		BOOL defaultBool = FALSE;
 		const int w_Len(::WideCharToMultiByte(CP_ACP, 0, c_str, len, {}, 0,&defaultChar,&defaultBool));
@@ -30,7 +30,7 @@ namespace leo
 		::WideCharToMultiByte(CP_ACP, 0, c_str, len, w_str, w_Len, &defaultChar, &defaultBool);
 		return wstr;
 	}
-	std::string tostring(const std::wstring& string){
+	std::string to_string(const std::wstring& string){
 		char defaultChar = ' ';
 		BOOL defaultBool = FALSE;
 		const int w_Len(::WideCharToMultiByte(CP_ACP, 0,string.c_str(),string.length(), {}, 0, &defaultChar, &defaultBool));
