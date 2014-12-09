@@ -89,8 +89,8 @@ namespace leo
 			auto cotfov = static_cast<float>(cosfov / sinfov);
 			auto tanfov = static_cast<float>(sinfov / cosfov);
 			//for 正交投影计算
-			mNearHeight = 2 * mNear / cotfov;
-			auto width = mNearHeight*mAspect;
+			//mNearHeight = 2 * mNear / cotfov;
+			//auto width = mNearHeight*mAspect;
 			float fRange = mFar / (mFar - mNear);
 			switch (mProjType)
 			{
@@ -99,8 +99,8 @@ namespace leo
 				mMatrix(1, 1) = cotfov;
 				break;
 			case leo::PROJECTION_TYPE::ORTHOGRAPHIC:
-				mMatrix(0, 0) = 2.0f / width;
-				mMatrix(1, 1) = 2.0f / mNearHeight;
+				mMatrix(0, 0) = 2.0f / mOrWidth;
+				mMatrix(1, 1) = 2.0f / mOrHeight;
 				break;
 			default:
 				break;
@@ -148,8 +148,9 @@ namespace leo
 		///横纵比,默认 default_param::frustum_aspect
 		float mAspect = default_param::frustum_aspect;
 
-		/// 近裁剪面高度
-		float mNearHeight = 0;
+		/// 正交投影体高度和宽度
+		float mOrHeight = 0;
+		float mOrWidth = 0.f;
 
 		float4x4 mMatrix;
 	};
