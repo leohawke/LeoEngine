@@ -152,11 +152,11 @@ namespace leo
 				fin >> ignore >> meshmat.alphaclip;//alphaclip
 				fin >> ignore >> ignore;//effct
 				fin >> ignore >> diffuseMapName;
-				wstring = std::move(leo::towstring(diffuseMapName));
+				wstring = std::move(leo::to_wstring(diffuseMapName));
 				wstring.resize(260, L'\0');
 				wmemcpy(meshmat.diffusefile, wstring.c_str(), 260);//diffusefilename
 				fin >> ignore >> normalMapName;
-				wstring = std::move(leo::towstring(normalMapName));
+				wstring = std::move(leo::to_wstring(normalMapName));
 				wstring.resize(260, L'\0');
 				wmemcpy(meshmat.normalmapfile, wstring.c_str(), 260);//normalmapfilename
 				fout->Write(fileoffset, &meshmat, sizeof(meshmat));
@@ -287,7 +287,7 @@ namespace leo
 		{
 			fin >> ignore >> clipName;
 			fin >> ignore;
-			wclipName = towstring(clipName);
+			wclipName = to_wstring(clipName);
 			wclipName.resize(259);
 			std::wcscpy(clip.name, wclipName.c_str());
 

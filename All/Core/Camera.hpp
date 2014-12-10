@@ -76,7 +76,8 @@ namespace leo
 
 		DefGetter(lnothrow const, const float&, Aspect, mAspect);
 
-		DefGetter(lnothrow const, const float&, NearHeight, mNearHeight);
+		DefGetter(lnothrow const, const float&, OrHeight, mOrHeight);
+		DefGetter(lnothrow const, const float&, OrWidth, mOrWidth);
 
 		DefGetter(lnothrow const, const float3&, Origin, mOrigin);
 
@@ -228,7 +229,7 @@ namespace leo
 		using CameraFrustum::GetType;
 		using CameraFrustum::GetFov;
 		using CameraFrustum::GetAspect;
-		using CameraFrustum::GetNearHeight;
+		using CameraFrustum::GetOrHeight;
 		using CameraFrustum::GetOrigin;
 		using CameraFrustum::GetOrientation;
 		using CameraFrustum::Intersects;

@@ -3,6 +3,8 @@
 #include "..\RenderStates.hpp"
 #include "..\DeviceMgr.h"
 #include "Vertex.hpp"
+#include "FileSearch.h"
+#include "EngineConfig.h"
 #include <d3dcompiler.h>
 
 #include <atomic>
@@ -26,7 +28,7 @@ namespace leo
 			return true;
 		}
 
-			bool NormalLine() const lnothrow
+		bool NormalLine() const lnothrow
 		{
 			return mNormalLineOpen;
 		}
@@ -77,10 +79,11 @@ namespace leo
 		{
 			leo::ShaderMgr sm;
 			ID3D11InputLayout* layout;
-			mVertexShader = sm.CreateVertexShader(L"Shader\\NormalMapVS.cso", nullptr, InputLayoutDesc::NormalMap, 4, &layout);
+			mVertexShader = sm.CreateVertexShader(
+				FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"normalmap",D3D11_VERTEX_SHADER)), nullptr, InputLayoutDesc::NormalMap, 4, &layout);
 
 			device->CreateClassLinkage(&mPixelShaderClassLinkage);
-			auto blob = sm.CreateBlob(L"Shader\\NormalMapPS.cso");
+			auto blob = sm.CreateBlob(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"normalmap", D3D11_PIXEL_SHADER)));
 			mPixelShader = sm.CreatePixelShader(blob, mPixelShaderClassLinkage);
 
 			ID3D11ShaderReflection* pRefector = nullptr;
@@ -143,7 +146,7 @@ namespace leo
 		void LM_VECTOR_CALL WorldMatrix(matrix Matrix, ID3D11DeviceContext* context)
 		{
 			vector pDet;
-			mVertexShaderConstantBufferPerFrame.worldinvtranspose =Inverse(pDet,Matrix);
+			mVertexShaderConstantBufferPerFrame.worldinvtranspose = Inverse(pDet, Matrix);
 			mVertexShaderConstantBufferPerFrame.world = Transpose(Matrix);
 			if (context)
 				mVertexShaderConstantBufferPerFrame.Update(context);
@@ -194,7 +197,7 @@ namespace leo
 		{
 			mPixelShaderDiffuseSRV = diff;
 
-			if (context){
+			if (context) {
 				ID3D11ShaderResourceView* mpssrvs[] = {
 					mPixelShaderDiffuseSRV,
 					mPixelShaderNormalMapSRV
@@ -205,7 +208,7 @@ namespace leo
 		void NormalMapSRV(ID3D11ShaderResourceView * const nmap, ID3D11DeviceContext* context)
 		{
 			mPixelShaderNormalMapSRV = nmap;
-			if (context){
+			if (context) {
 				ID3D11ShaderResourceView* mpssrvs[] = {
 					mPixelShaderDiffuseSRV,
 					mPixelShaderNormalMapSRV
@@ -255,7 +258,7 @@ namespace leo
 		LightType mLightType = LightType::DirectionLight;
 
 		ID3D11ClassInstance* mLightInstances[3];
-		struct{
+		struct {
 			std::unique_ptr<ID3D11ClassInstance*[]> mInstances = nullptr;
 			std::uint8_t mNumofInstance = 0;
 		};
@@ -292,19 +295,19 @@ namespace leo
 		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
 
 		return ((EffectNormalMapDelegate *)this)->WorldMatrix(
-			load(matrix),context
+			load(matrix), context
 			);
 	}
-	
+
 	void EffectNormalMap::WorldViewProjMatrix(const float4x4& matrix, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
 
 		return ((EffectNormalMapDelegate *)this)->WorldViewProjMatrix(
-			load(matrix),context
+			load(matrix), context
 			);
 	}
-	
+
 
 	void LM_VECTOR_CALL EffectNormalMap::WorldMatrix(matrix Matrix, ID3D11DeviceContext* context)
 	{
@@ -329,25 +332,25 @@ namespace leo
 		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
 
 		return ((EffectNormalMapDelegate *)this)->EyePos(
-			pos,context
+			pos, context
 			);
 	}
-	
+
 	void EffectNormalMap::Light(const DirectionLight& dl, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
 
 		return ((EffectNormalMapDelegate *)this)->Light(
-			dl,context
+			dl, context
 			);
 	}
-	
+
 	void EffectNormalMap::Light(const PointLight& pl, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
 
 		return ((EffectNormalMapDelegate *)this)->Light(
-			pl,context
+			pl, context
 			);
 	}
 
@@ -356,25 +359,25 @@ namespace leo
 		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
 
 		return ((EffectNormalMapDelegate *)this)->Light(
-			sl,context
+			sl, context
 			);
 	}
-	
+
 	void EffectNormalMap::Mat(const Material& mat, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
 
 		return ((EffectNormalMapDelegate *)this)->Mat(
-			mat,context
+			mat, context
 			);
 	}
-	
+
 	void EffectNormalMap::DiffuseSRV(ID3D11ShaderResourceView * const diff, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
 
 		return ((EffectNormalMapDelegate *)this)->DiffuseSRV(
-			diff,context
+			diff, context
 			);
 	}
 
@@ -383,7 +386,7 @@ namespace leo
 		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
 
 		return ((EffectNormalMapDelegate *)this)->NormalMapSRV(
-			nmap,context
+			nmap, context
 			);
 	}
 
@@ -396,19 +399,19 @@ namespace leo
 			);
 	}
 #pragma endregion
-	
+
 #pragma region EffectSprite
 	class EffectSpriteDelegate :CONCRETE(EffectSprite), public Singleton<EffectSpriteDelegate>
 	{
 	public:
-		EffectSpriteDelegate(ID3D11Device* device) 
+		EffectSpriteDelegate(ID3D11Device* device)
 			:mGeometryConstantBufferPerCamera(device)
 		{
 			leo::ShaderMgr sm;
 			ID3D11InputLayout* layout;
-			mVertexShader = sm.CreateVertexShader(L"Shader\\BillBoardVS.cso", nullptr, InputLayoutDesc::BillBoard, 2, &layout);
-			mGeometryShader = sm.CreateGeometryShader(L"Shader\\BillBoardGS.cso");
-			mPixelShader = sm.CreatePixelShader(L"Shader\\BillBoardPS.cso");
+			mVertexShader = sm.CreateVertexShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"sprite", D3D11_VERTEX_SHADER)), nullptr, InputLayoutDesc::BillBoard, 2, &layout);
+			mGeometryShader = sm.CreateGeometryShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"sprite", D3D11_GEOMETRY_SHADER)));
+			mPixelShader = sm.CreatePixelShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"sprite", D3D11_PIXEL_SHADER)));
 
 			RenderStates rss;
 			mPixelShaderSampleState = rss.GetSamplerState(L"LinearRepeat");
@@ -428,7 +431,7 @@ namespace leo
 			pContext.PSSetSamplers(0, 1, &mPixelShaderSampleState);
 		}
 
-		void EyePos(const float3& pos, ID3D11DeviceContext* context )
+		void EyePos(const float3& pos, ID3D11DeviceContext* context)
 		{
 			memcpy(mGeometryConstantBufferPerCamera.gEyePos, pos);
 			if (context)
@@ -485,7 +488,7 @@ namespace leo
 		lassume(dynamic_cast<EffectSpriteDelegate*>(this));
 
 		return ((EffectSpriteDelegate*)this)->EyePos(
-			pos,context
+			pos, context
 			);
 	}
 
@@ -494,7 +497,7 @@ namespace leo
 		lassume(dynamic_cast<EffectSpriteDelegate*>(this));
 
 		return ((EffectSpriteDelegate*)this)->ViewProj(
-			matrix,context
+			matrix, context
 			);
 	}
 
@@ -512,13 +515,13 @@ namespace leo
 	class EffectSkyDelegate :CONCRETE(EffectSky), public Singleton<EffectSkyDelegate>
 	{
 	public:
-		EffectSkyDelegate(ID3D11Device* device) 
+		EffectSkyDelegate(ID3D11Device* device)
 			:mVertexConstantBufferPerCamera(device)
 		{
 			leo::ShaderMgr sm;
 			ID3D11InputLayout* layout;
-			mVertexShader = sm.CreateVertexShader(L"Shader\\SkyVS.cso", nullptr, InputLayoutDesc::Sky, 1, &layout);
-			mPixelShader = sm.CreatePixelShader(L"Shader\\SkyPS.cso");
+			mVertexShader = sm.CreateVertexShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"sky", D3D11_VERTEX_SHADER)), nullptr, InputLayoutDesc::Sky, 1, &layout);
+			mPixelShader = sm.CreatePixelShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"sky", D3D11_PIXEL_SHADER)));
 
 			RenderStates rss;
 			mPixelShaderSampleState = rss.GetSamplerState(L"LinearRepeat");
@@ -695,7 +698,7 @@ namespace leo
 	void EffectPack::SetPackSRV(ID3D11ShaderResourceView* srv)
 	{
 		lassume(dynamic_cast<EffectPackDelegate*>(this));
-		
+
 		return ((EffectPackDelegate*)this)->SetPackSRV(
 			srv
 			);
@@ -707,7 +710,7 @@ namespace leo
 		return mInstance;
 	}
 
-	class EffectUnPackDelegate :CONCRETE(EffectUnPack),public leo::Singleton<EffectUnPackDelegate>
+	class EffectUnPackDelegate :CONCRETE(EffectUnPack), public leo::Singleton<EffectUnPackDelegate>
 	{
 	public:
 		EffectUnPackDelegate(ID3D11Device* device)
@@ -761,7 +764,7 @@ namespace leo
 		lassume(dynamic_cast<EffectUnPackDelegate*>(this));
 
 		return ((EffectUnPackDelegate*)this)->SetUnpackSRV(
-			srv,context
+			srv, context
 			);
 	}
 
@@ -790,7 +793,7 @@ namespace leo
 			float4 gColor;
 		};
 	public:
-		EffectNormalLineDelegate(ID3D11Device* device, const float4& color) 
+		EffectNormalLineDelegate(ID3D11Device* device, const float4& color)
 			:mVertexConstantBufferPerModel(device), mGeometryConstantBufferPerCamera(device), mPixelConstantBufferPerSet(device)
 		{
 			leo::ShaderMgr sm;
@@ -818,7 +821,7 @@ namespace leo
 			context->GSSetConstantBuffers(0, 1, &mGeometryConstantBufferPerCamera.mBuffer);
 		}
 
-		void LM_VECTOR_CALL ViewProj(matrix Matrix, ID3D11DeviceContext* context )
+		void LM_VECTOR_CALL ViewProj(matrix Matrix, ID3D11DeviceContext* context)
 		{
 			mGeometryConstantBufferPerCamera.gViewProj = Transpose(Matrix);
 			if (context)
@@ -862,7 +865,7 @@ namespace leo
 		lassume(dynamic_cast<EffectNormalLineDelegate*>(this));
 
 		return ((EffectNormalLineDelegate*)this)->ViewProj(
-			load(matrix),context
+			load(matrix), context
 			);
 	}
 	void EffectNormalLine::World(const float4x4& matrix, ID3D11DeviceContext* context)
@@ -870,7 +873,7 @@ namespace leo
 		lassume(dynamic_cast<EffectNormalLineDelegate*>(this));
 
 		return ((EffectNormalLineDelegate*)this)->World(
-			load(matrix),context
+			load(matrix), context
 			);
 	}
 
@@ -896,7 +899,7 @@ namespace leo
 		lassume(dynamic_cast<EffectNormalLineDelegate*>(this));
 
 		return ((EffectNormalLineDelegate*)this)->Color(
-			color,context
+			color, context
 			);
 	}
 
@@ -1016,7 +1019,7 @@ namespace leo
 		context->OMSetDepthStencilState(pDepthStencilState, StencilRef);
 	}
 
-		void STDMETHODCALLTYPE context_wrapper::SOSetTargets(
+	void STDMETHODCALLTYPE context_wrapper::SOSetTargets(
 		/* [annotation] */
 		_In_range_(0, D3D11_SO_BUFFER_SLOT_COUNT)  UINT NumBuffers,
 		/* [annotation] */
@@ -1083,12 +1086,12 @@ namespace leo
 		{
 			std::uint8_t _count = 0;
 			for (std::uint8_t i = beg; i <= end; ++i)
-				if (and(i))
+				if (and (i))
 					++_count;
 			return _count;
 		};
 
-		if (and(state::omsetrendertargets))
+		if (and (state::omsetrendertargets))
 		{
 			auto numrt = count(state::omsetrendertargets, state::end_omsetrendertargets);
 			auto pRTV = reinterpret_cast<ID3D11RenderTargetView**>(&swap_states[0]->ptr[state::omsetrendertargets - 1].p);
@@ -1099,33 +1102,33 @@ namespace leo
 			leo::win::ReleaseCOM(pDSV);
 		}
 
-		if (and(state::rssetviewprots))
+		if (and (state::rssetviewprots))
 		{
 			auto numvp = count(state::rssetviewprots, state::end_rssetviewprots);
 			context->RSSetViewports(numvp, (&swap_states[0]->ptr[state::rssetviewprots - 1].v));
 		}
 
-		if (and(state::rssetscissorrects))
+		if (and (state::rssetscissorrects))
 		{
 			auto numsr = count(state::rssetscissorrects, state::end_rssetscissorrects);
 			context->RSSetScissorRects(numsr, (&swap_states[0]->ptr[state::rssetscissorrects - 1].r));
 		}
 
-		if (and(state::rssetstate))
+		if (and (state::rssetstate))
 			context->RSSetState(nullptr);
-		if (and(state::pssetshader))
+		if (and (state::pssetshader))
 			context->PSSetShader(nullptr, nullptr, 0);
-		if (and(state::hssetshader))
+		if (and (state::hssetshader))
 			context->HSSetShader(nullptr, nullptr, 0);
-		if (and(state::dssetshader))
+		if (and (state::dssetshader))
 			context->DSSetShader(nullptr, nullptr, 0);
-		if (and(state::gssetshader))
+		if (and (state::gssetshader))
 			context->GSSetShader(nullptr, nullptr, 0);
-		if (and(state::omsetblendstate))
+		if (and (state::omsetblendstate))
 			context->OMSetBlendState(nullptr, nullptr, 0);
-		if (and(state::sosettargets))
+		if (and (state::sosettargets))
 			context->SOSetTargets(0, nullptr, nullptr);
-		if (and(state::omsetdepthstencilstate))
+		if (and (state::omsetdepthstencilstate))
 		{
 #ifndef PROFILE
 			UINT StencilRef = swap_states[0]->ptr[state::stencil_ref - 1].n;
@@ -1145,8 +1148,8 @@ namespace leo
 		effect_name;
 #endif
 	}
-	
-	
 
-	
+
+
+
 }

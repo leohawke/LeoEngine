@@ -2,18 +2,7 @@
 
 #include "Mgr.hpp"
 #include "IndePlatform\leoint.hpp"
-#ifdef DEBUG
-#include <D3D11ShaderTracing.h>
-#else
-typedef enum D3D11_SHADER_TYPE : leo::uint8 { 
-	D3D11_VERTEX_SHADER = 1,
-	D3D11_HULL_SHADER = 2,
-	D3D11_DOMAIN_SHADER = 3,
-	D3D11_GEOMETRY_SHADER = 4,
-	D3D11_PIXEL_SHADER = 5,
-	D3D11_COMPUTE_SHADER = 6
-} D3D11_SHADER_TYPE;
-#endif
+
 namespace leo
 {
 	class ShaderMgr
@@ -41,6 +30,11 @@ namespace leo
 				:m_buffer(nullptr), m_size(0), m_sid(0)
 			{
 				Load(filename);
+			}
+			ShaderBlob(const std::wstring&  filename)
+				:m_buffer(nullptr), m_size(0), m_sid(0)
+			{
+				Load(filename.c_str());
 			}
 			void Load(const wchar_t* filename);
 		private:

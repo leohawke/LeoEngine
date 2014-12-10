@@ -104,6 +104,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
 	leo::EngineConfig::Read();
+	
+	leo::EngineConfig::ShaderConfig::GetAllBlendStateName();
 	leo::EngineConfig::Write();
 	leo::DeviceMgr DeviceMgr;
 	leo::OutputWindow win;

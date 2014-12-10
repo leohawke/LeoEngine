@@ -13,9 +13,7 @@
 #include "IndePlatform\leoint.hpp"
 #include "IndePlatform\utility.hpp"
 #include "d3dx11.hpp"
-#if defined DEBUG || defined _DEBUG
-#include <d3d11sdklayers.h> //for D3D11Debug
-#endif
+
 #include "window.hpp"
 #include "COM.hpp"
 namespace leo
