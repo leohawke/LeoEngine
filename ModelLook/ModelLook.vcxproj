@@ -249,19 +249,19 @@
   <ItemGroup>
     <CustomBuild Include="..\All\config.scheme">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy /Y  %(FullPath) $(OutDir)%(RelativeDir)%(Filename)%(Extension)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy /Y   $(SolutionDir)All\%(Filename)%(Extension)  $(OutDir)%(Filename)%(Extension)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy /Y  %(FullPath) $(OutDir)%(RelativeDir)%(Filename)%(Extension)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy /Y  %(FullPath) $(OutDir)%(RelativeDir)%(Filename)%(Extension)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy /Y   $(SolutionDir)All\%(Filename)%(Extension)  $(OutDir)%(Filename)%(Extension)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy /Y  %(FullPath) $(OutDir)%(RelativeDir)%(Filename)%(Extension)</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">复制 %(Filename)%(Extension) 到 $(OutDir)%(RelativeDir)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">复制 %(Filename)%(Extension) 到 $(OutDir)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">复制 %(Filename)%(Extension) 到 $(OutDir)%(RelativeDir)</Message>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">复制 %(Filename)%(Extension) 到 $(OutDir)%(RelativeDir)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">复制 %(Filename)%(Extension) 到 $(OutDir)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">复制 %(Filename)%(Extension) 到 $(OutDir)%(RelativeDir)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)copy.log</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)copy.log</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)copy.log</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)copy.log</Outputs>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
     <None Include="..\All\Shader\LightBuffer.hlsli" />

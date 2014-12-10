@@ -106,7 +106,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	leo::EngineConfig::Read();
 	
 	leo::EngineConfig::ShaderConfig::GetAllBlendStateName();
-	leo::EngineConfig::Write();
 	leo::DeviceMgr DeviceMgr;
 	leo::OutputWindow win;
 
@@ -279,6 +278,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
 #endif
 	leo::SingletonManger::GetInstance()->UnInstallAllSingleton();
+
+	leo::EngineConfig::Write();
+
 	return 0;
 }
 

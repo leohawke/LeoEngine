@@ -46,7 +46,7 @@
 			(shader (v TerrainVS.cso) (p TerrainPS.cso))
 		)
 		(effect	(name terrainso)
-			(shader (v TerrainSOVS.cso) (p TerrainSOGS.cso))
+			(shader (v TerrainSOVS.cso) (g TerrainSOGS.cso))
 		)
 	)
 )
