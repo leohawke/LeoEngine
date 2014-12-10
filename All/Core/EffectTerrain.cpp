@@ -2,6 +2,8 @@
 #include "..\ShaderMgr.h"
 #include "..\RenderStates.hpp"
 #include "Terrain.hpp"
+#include "FileSearch.h"
+#include "EngineConfig.h"
 namespace leo
 {
 	using vector = __m128;
@@ -18,8 +20,8 @@ namespace leo
 		{
 			leo::ShaderMgr SM;
 			ID3D11InputLayout* mLayout = nullptr;
-			mVS = SM.CreateVertexShader(L"Shader\\TerrainVS.cso", nullptr, InputLayoutDesc::Terrain, 1, &mLayout);
-			mPS = SM.CreatePixelShader(L"Shader\\TerrainPS.cso");
+			mVS = SM.CreateVertexShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"terrain", D3D11_VERTEX_SHADER)), nullptr, InputLayoutDesc::Terrain, 1, &mLayout);
+			mPS = SM.CreatePixelShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"terrain", D3D11_PIXEL_SHADER)));
 
 			leo::RenderStates SS;
 			mSS = SS.GetSamplerState(L"NearestRepeat");

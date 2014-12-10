@@ -1,6 +1,8 @@
 #include "EffectLine.hpp"
 #include "Vertex.hpp"
 #include "..\ShaderMgr.h"
+#include "FileSearch.h"
+#include "EngineConfig.h"
 namespace leo
 {
 	using matrix = std::array<__m128, 4>;
@@ -12,8 +14,8 @@ namespace leo
 		{
 			leo::ShaderMgr sm;
 			ID3D11InputLayout* layout;
-			mVertexShader = sm.CreateVertexShader(L"Shader\\LineVS.cso", nullptr, InputLayoutDesc::Sky, 1, &layout);
-			mPixelShader = sm.CreatePixelShader(L"Shader\\LinePS.cso");
+			mVertexShader = sm.CreateVertexShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"line", D3D11_VERTEX_SHADER)), nullptr, InputLayoutDesc::Sky, 1, &layout);
+			mPixelShader = sm.CreatePixelShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"line", D3D11_PIXEL_SHADER)));
 		}
 		~EffectLineDelegate()
 		{}

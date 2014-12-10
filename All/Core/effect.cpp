@@ -639,8 +639,8 @@ namespace leo
 		{
 			leo::ShaderMgr sm;
 			ID3D11InputLayout* layout;
-			mVertexShader = sm.CreateVertexShader(L"Shader\\PostCommonVS.cso", nullptr, InputLayoutDesc::PostEffect, 2, &layout);
-			mPixelShader = sm.CreatePixelShader(L"Shader\\PostPackPS.cso");
+			mVertexShader = sm.CreateVertexShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"pack", D3D11_VERTEX_SHADER)), nullptr, InputLayoutDesc::PostEffect, 2, &layout);
+			mPixelShader = sm.CreatePixelShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"pack", D3D11_PIXEL_SHADER)));
 
 			mSampler = leo::RenderStates().GetSamplerState(L"LinearRepeat");
 		}
@@ -798,9 +798,9 @@ namespace leo
 		{
 			leo::ShaderMgr sm;
 			ID3D11InputLayout* layout;
-			mVertexShader = sm.CreateVertexShader(L"Shader\\NormalLineVS.cso", nullptr, InputLayoutDesc::NormalMap, 4, &layout);
-			mGeometryShader = sm.CreateGeometryShader(L"Shader\\NormalLineGS.cso");
-			mPixelShader = sm.CreatePixelShader(L"Shader\\NormalLinePS.cso");
+			mVertexShader = sm.CreateVertexShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"normalline", D3D11_VERTEX_SHADER)), nullptr, InputLayoutDesc::NormalMap, 4, &layout);
+			mGeometryShader = sm.CreateGeometryShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"normalline", D3D11_GEOMETRY_SHADER)));
+			mPixelShader = sm.CreatePixelShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"normalline", D3D11_PIXEL_SHADER)));
 			mPixelConstantBufferPerSet.gColor = color;
 		}
 		~EffectNormalLineDelegate() = default;

@@ -1,5 +1,7 @@
 #include "EffectSkeleton.hpp"
 #include "Vertex.hpp"
+#include "EngineConfig.h"
+#include "FileSearch.h"
 #include "..\ShaderMgr.h"
 #include "..\RenderStates.hpp"
 #include <d3dcompiler.h>
@@ -21,10 +23,10 @@ namespace leo{
 		{
 			leo::ShaderMgr sm;
 			ID3D11InputLayout* layout;
-			mVertexShader = sm.CreateVertexShader(L"Shader\\SkinVS.cso", nullptr, InputLayoutDesc::Skinned,arrlen(InputLayoutDesc::Skinned), &layout);
+			mVertexShader = sm.CreateVertexShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"skeleton", D3D11_VERTEX_SHADER)), nullptr, InputLayoutDesc::Skinned,arrlen(InputLayoutDesc::Skinned), &layout);
 
 			device->CreateClassLinkage(&mPixelShaderClassLinkage);
-			auto blob = sm.CreateBlob(L"Shader\\SkinPS.cso");
+			auto blob = sm.CreateBlob(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"skeleton", D3D11_PIXEL_SHADER)));
 			mPixelShader = sm.CreatePixelShader(blob, mPixelShaderClassLinkage);
 
 			ID3D11ShaderReflection* pRefector = nullptr;

@@ -2,6 +2,8 @@
 #include "..\ShaderMgr.h"
 #include "..\RenderStates.hpp"
 #include "Vertex.hpp"
+#include "FileSearch.h"
+#include "EngineConfig.h"
 namespace leo
 {
 	class EffectTerrainSODelegate :CONCRETE(EffectTerrainSO), public Singleton<EffectTerrainSODelegate>
@@ -12,13 +14,13 @@ namespace leo
 		{
 			leo::ShaderMgr SM;
 			ID3D11InputLayout* mLayout = nullptr;
-			mVS = SM.CreateVertexShader(L"Shader\\TerrainSOVS.cso", nullptr, InputLayoutDesc::Terrain, 1, &mLayout);
+			mVS = SM.CreateVertexShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"terrainso", D3D11_VERTEX_SHADER)), nullptr, InputLayoutDesc::Terrain, 1, &mLayout);
 			D3D11_SO_DECLARATION_ENTRY pDecls[] = {
 				{0,"HEIGHT",0,0,1,0},
 				{0,"Id",0,0,1,0 }
 			};
 			UINT pBufferStides[] = { 8u };
-			mGS = SM.CreateGeometryShaderWithSO(L"Shader\\TerrainSOGS.cso",pDecls,2,pBufferStides,1,D3D11_SO_NO_RASTERIZED_STREAM);
+			mGS = SM.CreateGeometryShaderWithSO(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"terrainso", D3D11_GEOMETRY_SHADER)),pDecls,2,pBufferStides,1,D3D11_SO_NO_RASTERIZED_STREAM);
 
 			leo::RenderStates SS;
 			mSS = SS.GetSamplerState(L"NearestRepeat");
