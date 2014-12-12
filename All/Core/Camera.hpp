@@ -60,8 +60,10 @@ namespace leo
 			return *this;
 		}
 		//update matrix
-		void SetFrustum(PROJECTION_TYPE projtype)
+		void SetFrustum(PROJECTION_TYPE projtype,float orWidth, float orHeight)
 		{
+			mOrHeight = orHeight;
+			mOrWidth = orWidth;
 			mProjType = projtype;
 			Update();
 		}
@@ -216,6 +218,11 @@ namespace leo
 		using CameraFrustum::mOrigin;
 		float4x4 mMatrix;
 
+		void SetFrustum(PROJECTION_TYPE projtype, float orWidth=0, float orHeight=0)
+		{
+			CameraFrustum::SetFrustum(projtype, orWidth, orHeight);
+		}
+
 		float3 mRight = float3(1.f, 0.f, 0.f);
 		float3 mUp = float3(0.f, 1.f, 0.f);
 		float3 mLook = float3(0.f, 0.f, 1.f);
@@ -229,7 +236,6 @@ namespace leo
 		using CameraFrustum::GetType;
 		using CameraFrustum::GetFov;
 		using CameraFrustum::GetAspect;
-		using CameraFrustum::GetOrHeight;
 		using CameraFrustum::GetOrigin;
 		using CameraFrustum::GetOrientation;
 		using CameraFrustum::Intersects;
@@ -241,11 +247,7 @@ namespace leo
 			CameraFrustum::SetFrustum(fov, aspect, nearf, farf);
 			return *this;
 		}
-		//update proj matrix
-		void SetFrustum(PROJECTION_TYPE projtype)
-		{
-			CameraFrustum::SetFrustum(projtype);
-		}
+		
 
 		const float4x4& View() const
 		{
@@ -330,6 +332,13 @@ namespace leo
 			UpdateViewMatrix();
 		}
 
+		//update proj matrix
+		UVNCamera& SetFrustum(float fov, float aspect, float nearf, float farf)
+		{
+			Camera::SetFrustum(fov, aspect, nearf, farf);
+			Camera::SetFrustum(PROJECTION_TYPE::PERSPECTIVE);
+			return *this;
+		}
 
 		Camera& Walk(float d)
 		{
@@ -381,6 +390,15 @@ namespace leo
 
 		Camera& ChangeObject(const std::reference_wrapper<SQTObject>& followObject) {
 			mFollowObject = followObject;
+		}
+
+
+		//update proj matrix
+		FollowCamera& SetFrustum(float fov, float aspect, float nearf, float farf)
+		{
+			Camera::SetFrustum(fov, aspect, nearf, farf);
+			Camera::SetFrustum(PROJECTION_TYPE::PERSPECTIVE);
+			return *this;
 		}
 
 		Camera& Walk(float d) {
@@ -451,6 +469,53 @@ namespace leo
 		}
 	private:
 		std::reference_wrapper<SQTObject> mFollowObject;
+	};
+
+	class LB_API CastShaderCamera : public Camera {
+	private:
+		float4x4& ImplViewProjTex() const {
+			static  float4x4 mViewProjTex;
+			return mViewProjTex;
+		}
+	public:
+		Camera& Walk(float d) {
+		}
+		Camera& Strafe(float d) {
+		}
+		Camera& Yaw(float angle) {
+		}
+		Camera& Pitch(float angle) {
+		}
+		Camera& Roll(float angle) {
+		}
+
+		const float4x4& ViewProjTex() const {
+			return ImplViewProjTex();
+		}
+
+		//设置场景的包围体和光照向量
+		CastShaderCamera& SetSphereAndDir(const Sphere& sphere,const float3& dir) {
+			float3 pos;
+			save(pos, Multiply(Splat(-2.f*sphere.GetRadius()), load(dir)));
+			Camera::LookAt(sphere.GetCenter(), pos, float3(0.f, 1.f, 0.f));
+
+			float3 viewCenter;
+			save(viewCenter, TransformCoord<3>(load(sphere.GetCenter()), load(View())));
+
+			Camera::SetFrustum(LM_PI, 1.f, viewCenter.z - sphere.GetRadius(), viewCenter.z + sphere.GetRadius());
+			Camera::SetFrustum(PROJECTION_TYPE::ORTHOGRAPHIC, 2 * sphere.GetRadius(), 2 * sphere.GetRadius());
+
+			float t[] = {
+				0.5f,0.f,0.f,0.f,
+				0.f,-0.5f,0.f,0.f,
+				0.f,0.f,1.f,0.f,
+				0.5f,0.5f,0.f,1.f
+			};
+			float4x4 Tex{t};
+			save(ImplViewProjTex(), Multiply(load(ViewProj()), load(Tex)));
+			return *this;
+		}
+
 	};
 }
 

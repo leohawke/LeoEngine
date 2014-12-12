@@ -135,6 +135,14 @@ namespace leo
 		//ReflectRS
 		noCullDesc.FrontCounterClockwise = true;
 		p->CreateRasterizerState(L"ReflectRS", noCullDesc);
+
+		//Bias = DepthBias *r(24-bit r = 1/2^24) + SlopeScaledDepthBias*MaxDepthSlope
+		CD3D11_RASTERIZER_DESC ShadowMapRS(D3D11_DEFAULT);
+		ShadowMapRS.DepthBias = 100000;
+		//=>0.006
+		ShadowMapRS.DepthBiasClamp = 0.f;
+		ShadowMapRS.SlopeScaledDepthBias = 1.f;
+		p->CreateRasterizerState(L"ShadowMapRS", ShadowMapRS);
 	}
 
 	RenderStates::Delegate::~Delegate()

@@ -18,6 +18,7 @@
 #include <Core\MeshLoad.hpp>
 #include <Core\EffectSkeleton.hpp>
 #include <Core\\EngineConfig.h>
+#include <Core\ShadowMap.hpp>
 #include <COM.hpp>
 
 #include <TextureMgr.h>
@@ -43,7 +44,7 @@
 
 leo::Event event;
 std::unique_ptr<leo::Mesh> pMesh = nullptr;
-std::unique_ptr<leo::Camera> pCamera = nullptr;
+std::unique_ptr<leo::UVNCamera> pCamera = nullptr;
 leo::Terrain<3,64,6>* pTerrain = nullptr;
 std::unique_ptr<leo::Sky> pSky = nullptr;
 std::unique_ptr<leo::SkeletonInstance[]> pSkeInstances = nullptr;
@@ -321,7 +322,6 @@ void BuildRes()
 	event.Wait();
 
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
-	pCamera->SetFrustum(leo::PROJECTION_TYPE::PERSPECTIVE);
 
 	
 	auto& pEffect =  leo::EffectNormalMap::GetInstance(leo::DeviceMgr().GetDevice());
@@ -339,6 +339,7 @@ void BuildRes()
 
 	leo::EffectNormalLine::GetInstance(leo::DeviceMgr().GetDevice());
 	leo::EffectSky::GetInstance(leo::DeviceMgr().GetDevice());
+	leo::ShadowMap::GetInstance(leo::DeviceMgr().GetDevice(), std::make_pair(2048u,2048u));
 	leo::EffectSkeleton::GetInstance(leo::DeviceMgr().GetDevice())->Light(dirlight);
 	//leo::EffectLine::GetInstance(leo::DeviceMgr().GetDevice());
 	//leo::Axis::GetInstance(leo::DeviceMgr().GetDevice());
