@@ -58,6 +58,7 @@ namespace leo
 		}
 		//±ä¶¯
 		void Render(ID3D11DeviceContext* context,const leo::Camera&);
+		void CastShadow(ID3D11DeviceContext* context);
 	protected:
 
 		DefGetter(const _NOEXCEPT, ID3D11Buffer*, VertexBuffer, m_vertexbuff);

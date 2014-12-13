@@ -321,7 +321,10 @@ namespace leo
 		}
 
 		
-
+		void CastShadow(ID3D11DeviceContext* context) {
+			//Todo
+			//GS生成,绘制阴影
+		}
 
 		float GetHeight(const float2& xz) const{
 			//初始化一些东西

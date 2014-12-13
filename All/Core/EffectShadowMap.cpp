@@ -1,4 +1,8 @@
 #include "EffectShadowMap.hpp"
+#include "EngineConfig.h"
+#include "FileSearch.h"
+#include "..\ShaderMgr.h"
+#include "..\RenderStates.hpp"
 
 namespace leo {
 	using matrix = std::array<__m128, 4>;
@@ -6,35 +10,63 @@ namespace leo {
 	class EffectShadowMapDelegate :CONCRETE(EffectShadowMap), public Singleton<EffectShadowMapDelegate>
 	{
 	public:
-		EffectShadowMapDelegate(ID3D11Device*) {
+		EffectShadowMapDelegate(ID3D11Device* device)
+		:mVSCBPerLight(device), mVSCBPerModel(device) {
+			leo::ShaderMgr sm;
+			mVS = sm.CreateVertexShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"shadowmap", D3D11_VERTEX_SHADER)));
 
+			RenderStates rss;
+			mRS = rss.GetRasterizerState(L"ShadowMapRS");
 		}
 
 		~EffectShadowMapDelegate(){}
 
 		void Apply(ID3D11DeviceContext* context) {
+			mVSCBPerModel.Update(context);
+			mVSCBPerLight.Update(context);
 
+			ID3D11Buffer* mvscbs[] = {
+				mVSCBPerModel.mBuffer,
+				mVSCBPerLight.mBuffer
+			};
+
+			context->VSSetShader(mVS, nullptr, 0);
+			context->VSSetConstantBuffers(0, 1, mvscbs);
+			context->RSSetState(mRS);
 		}
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow {
 			return true;
 		}
 
-		void WorldMatrix(const float4x4& matrix, ID3D11DeviceContext* context = nullptr) {
-
+		void WorldMatrix(const float4x4& matrix, ID3D11DeviceContext* context ) {
+			mVSCBPerModel.mWolrd = Transpose(load(matrix));
+			if (context)
+				mVSCBPerModel.Update(context);
 		}
 
-		void ViewProjTexMatrix(const float4x4& matrix, ID3D11DeviceContext* context) {
-
+		void ViewProjMatrix(const float4x4& matrix, ID3D11DeviceContext* context) {
+			mVSCBPerLight.mViewProj = Transpose(load(matrix));
+			if (context)
+				mVSCBPerLight.Update(context);
 		}
 	private:
-		struct VScbPerFrame
+		struct VScbPerModel
 		{
-			matrix Wolrd;
-			matrix VPT;
+			matrix mWolrd;
 		public:
 			const static std::uint8_t slot = 0;
 		};
-		ShaderConstantBuffer<VScbPerFrame> mVertexShaderConstantBufferPerFrame;
+		struct VScbPerLight
+		{
+			matrix mViewProj;
+		public:
+			const static std::uint8_t slot = 1;
+		};
+		ShaderConstantBuffer<VScbPerModel> mVSCBPerModel;
+		ShaderConstantBuffer<VScbPerLight> mVSCBPerLight;
+
+		ID3D11VertexShader* mVS = nullptr;
+		ID3D11RasterizerState* mRS = nullptr;
 	};
 
 	void EffectShadowMap::Apply(ID3D11DeviceContext* context)
@@ -55,10 +87,10 @@ namespace leo {
 			);
 	}
 
-	void EffectShadowMap::ViewProjTexMatrix(const float4x4& matrix, ID3D11DeviceContext* context) {
+	void EffectShadowMap::ViewProjMatrix(const float4x4& matrix, ID3D11DeviceContext* context) {
 		lassume(dynamic_cast<EffectShadowMapDelegate *>(this));
 
-		return ((EffectShadowMapDelegate *)this)->ViewProjTexMatrix(
+		return ((EffectShadowMapDelegate *)this)->ViewProjMatrix(
 			matrix,
 			context
 			);
@@ -71,5 +103,10 @@ namespace leo {
 			matrix,
 			context
 			);
+	}
+
+	const std::unique_ptr<EffectShadowMap>& EffectShadowMap::GetInstance(ID3D11Device* device = nullptr) {
+		static auto mInstance = std::unique_ptr<EffectShadowMap>(new EffectShadowMapDelegate(device));
+		return mInstance;
 	}
 }

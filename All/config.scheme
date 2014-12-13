@@ -48,5 +48,8 @@
 		(effect	(name terrainso)
 			(shader (v TerrainSOVS.cso) (g TerrainSOGS.cso))
 		)
+		(effect	(name shadowmap)
+			(shader (v GenShadowMapVS.cso))
+		)
 	)
 )

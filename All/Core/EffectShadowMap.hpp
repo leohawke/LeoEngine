@@ -22,7 +22,7 @@ namespace leo {
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow;
 
 		void WorldMatrix(const float4x4& matrix,ID3D11DeviceContext* context = nullptr);
-		void ViewProjTexMatrix(const float4x4& matrix, ID3D11DeviceContext* context = nullptr);
+		void ViewProjMatrix(const float4x4& matrix, ID3D11DeviceContext* context = nullptr);
 		static const std::unique_ptr<EffectShadowMap>& GetInstance(ID3D11Device* device = nullptr);
 	};
 }

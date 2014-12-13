@@ -168,6 +168,7 @@ namespace leo{
 
 		void Update();
 		void Render(const Camera& camera);
+		void CastShadow();
 	private:
 		void ReCurrAniBindPose();
 	};

@@ -11,6 +11,7 @@
 #include "..\ShaderMgr.h"
 #include "..\RenderStates.hpp"
 #include "Camera.hpp"
+#include "EffectShadowMap.hpp"
 #include "Effect.h"
 
 namespace leo
@@ -157,5 +158,21 @@ namespace leo
 			}
 		}
 		
+	}
+
+	void Mesh::CastShadow(ID3D11DeviceContext* context) {
+		context->IASetIndexBuffer(m_indexbuff, DXGI_FORMAT_R32_UINT, 0);
+		static UINT strides[] = { sizeof(vertex_type) };
+		static UINT offsets[] = { 0 };
+		ID3D11Buffer* vbs[] = { m_vertexbuff };
+		context->IASetVertexBuffers(0, 1, vbs, strides, offsets);
+		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		context->IASetInputLayout(ShaderMgr().CreateInputLayout(InputLayoutDesc::NormalMap));
+
+		EffectShadowMap::GetInstance()->WorldMatrix(SQT::operator leo::float4x4(), context);
+		for (auto it = m_subsets.cbegin(); it != m_subsets.cend(); ++it)
+		{
+			context->DrawIndexed(it->m_indexcount, it->m_indexoffset, 0);
+		}
 	}
 }

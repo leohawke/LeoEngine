@@ -66,7 +66,7 @@ namespace leo {
 			context->OMSetRenderTargets(1, renderTargets, mDepthDSV);
 			context->ClearDepthStencilView(mDepthDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-			EffectShadowMap::GetInstance()->ViewProjTexMatrix(camera.ViewProjTex());
+			EffectShadowMap::GetInstance()->ViewProjMatrix(camera.ViewProj());
 			EffectShadowMap::GetInstance()->Apply(context);
 		}
 		void EndShadowMap(ID3D11DeviceContext* context) {
@@ -95,10 +95,10 @@ namespace leo {
 		return ((ShadowMapDelegate *)this)->GetDepthSRV(
 			);
 	}
-	void ShadowMap::BeginShadowMap(ID3D11DeviceContext* context) {
+	void ShadowMap::BeginShadowMap(ID3D11DeviceContext* context, const CastShadowCamera& camera) {
 		lassume(dynamic_cast<ShadowMapDelegate *>(this));
 
-		return ((ShadowMapDelegate *)this)->BeginShadowMap(context
+		return ((ShadowMapDelegate *)this)->BeginShadowMap(context,camera
 			);
 	}
 	void ShadowMap::EndShadowMap(ID3D11DeviceContext* context) {

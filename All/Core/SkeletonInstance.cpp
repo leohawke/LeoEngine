@@ -208,4 +208,9 @@ namespace leo{
 			}
 		}
 	}
+
+	void SkeletonInstance::CastShadow() {
+		//Todo :
+		//通过VS生成变换后的顶点,然后绘制
+	}
 }

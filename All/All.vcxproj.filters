@@ -94,6 +94,9 @@
     <Filter Include="Shader\HLSL\Skin">
       <UniqueIdentifier>{4b04bd29-c013-4ac2-a17c-b6e0b6b63a6d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader\HLSL\ShadowMapGen">
+      <UniqueIdentifier>{30510956-17f7-4411-ba18-809302bf2497}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Debug.cpp">
@@ -584,6 +587,12 @@
     </FxCompile>
     <FxCompile Include="Shader\TerrainSOGS.hlsl">
       <Filter>Shader\HLSL\Terrain</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\GenShadowMapVS.hlsl">
+      <Filter>Shader\HLSL\ShadowMapGen</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\GenMidGS.hlsl">
+      <Filter>Shader\HLSL\ShadowMapGen</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
