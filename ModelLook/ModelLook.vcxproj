@@ -180,6 +180,7 @@
     <ClCompile Include="..\All\Core\Mesh.cpp" />
     <ClCompile Include="..\All\Core\MeshLoad.cpp" />
     <ClCompile Include="..\All\Core\RenderSync.cpp" />
+    <ClCompile Include="..\All\Core\ShadowMap.cpp" />
     <ClCompile Include="..\All\Core\SkeletonData.cpp" />
     <ClCompile Include="..\All\Core\SkeletonInstance.cpp" />
     <ClCompile Include="..\All\Core\Sky.cpp" />

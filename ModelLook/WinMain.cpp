@@ -45,6 +45,7 @@
 leo::Event event;
 std::unique_ptr<leo::Mesh> pMesh = nullptr;
 std::unique_ptr<leo::UVNCamera> pCamera = nullptr;
+std::unique_ptr<leo::CastShadowCamera> pShaderCamera;
 leo::Terrain<3,64,6>* pTerrain = nullptr;
 std::unique_ptr<leo::Sky> pSky = nullptr;
 std::unique_ptr<leo::SkeletonInstance[]> pSkeInstances = nullptr;
@@ -384,6 +385,10 @@ void BuildRes()
 	pSkeInstances[2].Translation(float3(-5.f,1.f,5.f));
 
 
+	leo::Sphere mSphere{ leo::float3(0.0f, 0.0f, 0.0f),sqrtf(10.0f*10.0f + 15.0f*15.0f) };
+	float3 dir{ -0.5773f, -0.57735f,0.57735f };
+	pShaderCamera = std::make_unique<leo::CastShadowCamera>();
+	pShaderCamera->SetSphereAndDir(mSphere, dir);
 
 	//leo::XMMATRIX modelRot = leo::XMMatrixRotationY(leo::LM_PI);
 	//leo::float4 quaternion;

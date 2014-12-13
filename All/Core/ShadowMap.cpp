@@ -1,5 +1,7 @@
 #include "..\d3dx11.hpp"
+#include "Camera.hpp"
 #include "ShadowMap.hpp"
+#include "EffectShadowMap.hpp"
 #include "..\exception.hpp"
 namespace leo {
 	class ShadowMapDelegate :CONCRETE(ShadowMap), public Singleton<ShadowMapDelegate>
@@ -54,7 +56,7 @@ namespace leo {
 		ID3D11ShaderResourceView* GetDepthSRV() {
 			return mDepthSRV;
 		}
-		void BeginShadowMap(ID3D11DeviceContext* context) {
+		void BeginShadowMap(ID3D11DeviceContext* context, const CastShadowCamera& camera) {
 			UINT numVP = 1;
 			context->RSGetViewports(&numVP, &mPrevViewPort);
 			context->OMGetRenderTargets(1, &mPreRTV, &mPrevDSV);
@@ -63,6 +65,9 @@ namespace leo {
 			ID3D11RenderTargetView* renderTargets[1] = { nullptr };
 			context->OMSetRenderTargets(1, renderTargets, mDepthDSV);
 			context->ClearDepthStencilView(mDepthDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+			EffectShadowMap::GetInstance()->ViewProjTexMatrix(camera.ViewProjTex());
+			EffectShadowMap::GetInstance()->Apply(context);
 		}
 		void EndShadowMap(ID3D11DeviceContext* context) {
 			context->RSSetViewports(1, &mPrevViewPort);

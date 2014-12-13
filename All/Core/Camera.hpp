@@ -94,16 +94,24 @@ namespace leo
 			//for 正交投影计算
 			//mNearHeight = 2 * mNear / cotfov;
 			//auto width = mNearHeight*mAspect;
-			float fRange = mFar / (mFar - mNear);
+			float fRange;;
 			switch (mProjType)
 			{
 			case leo::PROJECTION_TYPE::PERSPECTIVE:
+				fRange = mFar / (mFar - mNear);
 				mMatrix(0, 0) = cotfov / mAspect;
 				mMatrix(1, 1) = cotfov;
+				mMatrix(3, 3) = 0.f;
+				mMatrix(2, 3) = 1.0f;
+				mMatrix(3, 2) = -fRange*mNear;
 				break;
 			case leo::PROJECTION_TYPE::ORTHOGRAPHIC:
+				fRange = 1.f / (mFar - mNear);
 				mMatrix(0, 0) = 2.0f / mOrWidth;
 				mMatrix(1, 1) = 2.0f / mOrHeight;
+				mMatrix(3, 3) = 1.0f;
+				mMatrix(2, 3) = 0.f;
+				mMatrix(3, 2) = fRange*mNear;
 				break;
 			default:
 				break;
@@ -120,12 +128,12 @@ namespace leo
 				mMatrix(2, 0) = 0.0f;
 				mMatrix(2, 1) = 0.0f;
 				mMatrix(2, 2) = fRange;
-				mMatrix(2, 3) = 1.0f;
+				
 
 				mMatrix(3, 0) = 0.0f;
 				mMatrix(3, 1) = 0.0f;
-				mMatrix(3, 2) = -fRange*mNear;
-				mMatrix(3, 3) = 0.0f;
+				
+				
 			}
 
 			mRightSlope = +tanfov*mAspect;
@@ -471,7 +479,7 @@ namespace leo
 		std::reference_wrapper<SQTObject> mFollowObject;
 	};
 
-	class LB_API CastShaderCamera : public Camera {
+	class LB_API CastShadowCamera : public Camera {
 	private:
 		float4x4& ImplViewProjTex() const {
 			static  float4x4 mViewProjTex;
@@ -479,14 +487,19 @@ namespace leo
 		}
 	public:
 		Camera& Walk(float d) {
+			return *this;
 		}
 		Camera& Strafe(float d) {
+			return *this;
 		}
 		Camera& Yaw(float angle) {
+			return *this;
 		}
 		Camera& Pitch(float angle) {
+			return *this;
 		}
 		Camera& Roll(float angle) {
+			return *this;
 		}
 
 		const float4x4& ViewProjTex() const {
@@ -494,10 +507,10 @@ namespace leo
 		}
 
 		//设置场景的包围体和光照向量
-		CastShaderCamera& SetSphereAndDir(const Sphere& sphere,const float3& dir) {
+		CastShadowCamera& SetSphereAndDir(const Sphere& sphere,const float3& dir) {
 			float3 pos;
 			save(pos, Multiply(Splat(-2.f*sphere.GetRadius()), load(dir)));
-			Camera::LookAt(sphere.GetCenter(), pos, float3(0.f, 1.f, 0.f));
+			Camera::LookAt( pos, sphere.GetCenter(), float3(0.f, 1.f, 0.f));
 
 			float3 viewCenter;
 			save(viewCenter, TransformCoord<3>(load(sphere.GetCenter()), load(View())));

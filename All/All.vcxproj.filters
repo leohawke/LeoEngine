@@ -246,6 +246,9 @@
     <ClCompile Include="Core\ShadowMap.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\EffectShadowMap.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.hpp">
@@ -498,6 +501,9 @@
       <Filter>IndePlatform\BaseHead</Filter>
     </ClInclude>
     <ClInclude Include="Core\ShadowMap.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\EffectShadowMap.hpp">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

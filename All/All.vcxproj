@@ -100,6 +100,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Core\EffectLine.cpp" />
+    <ClCompile Include="Core\EffectShadowMap.cpp" />
     <ClCompile Include="Core\EffectSkeleton.cpp" />
     <ClCompile Include="Core\EffectTerrain.cpp" />
     <ClCompile Include="Core\EffectTerrainSO.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="Core\BillBoard.hpp" />
     <ClInclude Include="Core\Camera.hpp" />
     <ClInclude Include="Core\effect.h" />
+    <ClInclude Include="Core\EffectShadowMap.hpp" />
     <ClInclude Include="Core\EffectSkeleton.hpp" />
     <ClInclude Include="Core\EffectTerrainSO.hpp" />
     <ClInclude Include="Core\EngineConfig.h" />

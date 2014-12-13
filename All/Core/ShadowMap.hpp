@@ -19,13 +19,14 @@
 struct ID3D11Device;
 struct ID3D11ShaderResourceView;
 struct ID3D11DeviceContext;
-namespace leo {
 
+namespace leo {
+	class CastShadowCamera;
 	//!\store scene depth
 	class LB_API ShadowMap : ABSTRACT {
 	public:
 		ID3D11ShaderResourceView* GetDepthSRV();
-		void BeginShadowMap(ID3D11DeviceContext*);
+		void BeginShadowMap(ID3D11DeviceContext*,const CastShadowCamera&);
 		void EndShadowMap(ID3D11DeviceContext*);
 
 		static ShadowMap& GetInstance(ID3D11Device* device, std::pair<uint16, uint16> resolution);
