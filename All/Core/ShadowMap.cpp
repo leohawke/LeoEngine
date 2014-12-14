@@ -2,6 +2,7 @@
 #include "Camera.hpp"
 #include "ShadowMap.hpp"
 #include "EffectShadowMap.hpp"
+#include "effect.h"
 #include "..\exception.hpp"
 namespace leo {
 	class ShadowMapDelegate :CONCRETE(ShadowMap), public Singleton<ShadowMapDelegate>
@@ -57,39 +58,31 @@ namespace leo {
 		~ShadowMapDelegate() {
 			leo::win::ReleaseCOM(mDepthDSV);
 			leo::win::ReleaseCOM(mDepthSRV);
-			leo::win::ReleaseCOM(mPreRTV);
-			leo::win::ReleaseCOM(mPrevDSV);
 		}
 
 		ID3D11ShaderResourceView* GetDepthSRV() {
 			return mDepthSRV;
 		}
-		void BeginShadowMap(ID3D11DeviceContext* context, const CastShadowCamera& camera) {
+		void BeginShadowMap(ID3D11DeviceContext* con, const CastShadowCamera& camera) {
+			context_wrapper context(con);
 			UINT numVP = 1;
-			context->RSGetViewports(&numVP, &mPrevViewPort);
-			context->OMGetRenderTargets(1, &mPreRTV, &mPrevDSV);
-
-			context->RSSetViewports(1, &mViewPort);
+			context.RSSetViewports(1, &mViewPort);
 			ID3D11RenderTargetView* renderTargets[1] = { nullptr };
-			context->OMSetRenderTargets(1, renderTargets, mDepthDSV);
+			context.OMSetRenderTargets(1, renderTargets, mDepthDSV);
+
 			context->ClearDepthStencilView(mDepthDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 			EffectShadowMap::GetInstance()->ViewProjMatrix(camera.ViewProj());
 			EffectShadowMap::GetInstance()->Apply(context);
 		}
-		void EndShadowMap(ID3D11DeviceContext* context) {
-			context->RSSetViewports(1, &mPrevViewPort);
-			context->OMSetRenderTargets(1, &mPreRTV, mPrevDSV);
+		void EndShadowMap(ID3D11DeviceContext* con) {
+			context_wrapper context(con);
 		}
 	private:
 		std::pair<uint16, uint16> mResloution;
 		ID3D11ShaderResourceView* mDepthSRV = nullptr;
 		ID3D11DepthStencilView* mDepthDSV = nullptr;
 		D3D11_VIEWPORT mViewPort;
-
-		D3D11_VIEWPORT mPrevViewPort;
-		ID3D11DepthStencilView* mPrevDSV = nullptr;
-		ID3D11RenderTargetView* mPreRTV = nullptr;
 	};
 
 	ShadowMap& ShadowMap::GetInstance(ID3D11Device* device, std::pair<uint16, uint16> resolution) {

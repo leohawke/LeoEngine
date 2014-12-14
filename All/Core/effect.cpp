@@ -658,9 +658,11 @@ namespace leo
 			pContext.PSSetSamplers(0, 1, &mSampler);
 		}
 
-		void SetPackSRV(ID3D11ShaderResourceView* srv)
+		void SetPackSRV(ID3D11ShaderResourceView* srv, ID3D11DeviceContext* context)
 		{
 			mPackSRV = srv;
+			if(context)
+				context->PSSetShaderResources(0, 1, &mPackSRV);
 		}
 
 		void SetDstRTV(ID3D11RenderTargetView* rtv)
@@ -695,12 +697,12 @@ namespace leo
 			);
 	}
 
-	void EffectPack::SetPackSRV(ID3D11ShaderResourceView* srv)
+	void EffectPack::SetPackSRV(ID3D11ShaderResourceView* srv, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectPackDelegate*>(this));
 
 		return ((EffectPackDelegate*)this)->SetPackSRV(
-			srv
+			srv,context
 			);
 	}
 

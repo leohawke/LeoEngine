@@ -335,16 +335,16 @@ void BuildRes()
 	pShaderCamera = std::make_unique<leo::CastShadowCamera>();
 	pShaderCamera->SetSphereAndDir(mSphere, dir);
 
-	//pTerrainMesh.reset(new leo::Mesh());
-	//pSphereMesh.reset(new leo::Mesh());
-	//pBoxMesh.reset(new leo::Mesh());
+	pTerrainMesh.reset(new leo::Mesh());
+	pSphereMesh.reset(new leo::Mesh());
+	pBoxMesh.reset(new leo::Mesh());
 
-	//pTerrainMesh->Load(L"Resource/Terrain.l3d", leo::DeviceMgr().GetDevice());
-	//pSphereMesh->Load(L"Resource/Sphere.l3d", leo::DeviceMgr().GetDevice());
-	//pBoxMesh->Load(L"Resource/Box.l3d", leo::DeviceMgr().GetDevice());
+	pTerrainMesh->Load(L"Resource/Terrain.l3d", leo::DeviceMgr().GetDevice());
+	pSphereMesh->Load(L"Resource/Sphere.l3d", leo::DeviceMgr().GetDevice());
+	pBoxMesh->Load(L"Resource/Box.l3d", leo::DeviceMgr().GetDevice());
 
-	//pTerrainMesh->Translation(leo::float3(0.f, -1.f, 0.f));
-	//pSphereMesh->Translation(leo::float3(1.f, 0.5f, 0.f));
+	pTerrainMesh->Translation(leo::float3(0.f, -1.f, 0.f));
+	pSphereMesh->Translation(leo::float3(1.f, 0.5f, 0.f));
 	auto& vertices = leo::helper::CreateFullscreenQuad();
 
 	D3D11_BUFFER_DESC vbDesc;
@@ -399,12 +399,12 @@ void Render()
 
 		//Build Shadow Map
 		leo::ShadowMap::GetInstance().BeginShadowMap(devicecontext,*pShaderCamera);
-		//if (renderAble)
-			//pModelMesh->CastShadow(devicecontext);
+		if (renderAble)
+			pModelMesh->CastShadow(devicecontext);
 
-		//pTerrainMesh->CastShadow(devicecontext);
-		//pBoxMesh->CastShadow(devicecontext);
-		//pSphereMesh->CastShadow(devicecontext);
+		pTerrainMesh->CastShadow(devicecontext);
+		pBoxMesh->CastShadow(devicecontext);
+		pSphereMesh->CastShadow(devicecontext);
 
 		leo::ShadowMap::GetInstance().EndShadowMap(devicecontext);
 
@@ -419,7 +419,10 @@ void Render()
 		devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 		devicecontext->Draw(4, 0);
 
+		pPackEffect->SetPackSRV(nullptr, devicecontext);
 
+		//×´Ì¬»ú»ØÖÃ
+		leo::context_wrapper context(devicecontext);
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 

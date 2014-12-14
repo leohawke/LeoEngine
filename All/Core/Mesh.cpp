@@ -51,7 +51,7 @@ namespace leo
 
 		for (std::size_t i = 0; i != size; ++i)
 		{
-			vertices[i] = _vertices[i];
+			vertices[i] = _vertices[i].operator leo::Vertex::NormalMap();
 		}
 
 		offset += buffersize;

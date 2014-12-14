@@ -55,9 +55,39 @@ namespace leo
 #else
 	namespace storge
 	{
-		using float2 = XMFLOAT2;
-		using float3 = XMFLOAT3;
-		using float4 = XMFLOAT4;
+		struct float3 {
+			float3(const leo::float3& mem) {
+				leo::memcpy(*this, mem);
+			}
+			float3(float _x, float _y, float _z)
+				:x(_x), y(_y), z(_z) {
+
+			}
+			float3() = default;
+			float x, y, z;
+		};
+		struct float2 {
+			float2(const leo::float2& mem) {
+				leo::memcpy(*this, mem);
+			}
+			float2(float _x, float _y)
+				:x(_x), y(_y) {
+
+			}
+			float2() = default;
+			float x, y;
+		};
+		struct float4 {
+			float4(const leo::float4& mem) {
+				leo::memcpy(*this, mem);
+			}
+			float4(float _x, float _y, float _z, float _w)
+							:x(_x), y(_y),z(_z),w(_w) {
+
+						}
+			float4() = default;
+			float x, y, z,w;
+		};
 		using float4x4 = XMFLOAT4X4;
 	};
 #endif

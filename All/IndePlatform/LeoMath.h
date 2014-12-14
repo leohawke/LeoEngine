@@ -266,15 +266,15 @@ namespace leo
 		template<typename T>
 		explicit float2(const T& src) lnothrow
 		{
-			static_assert(sizeof(T) >= sizeof(float2), "Need More Data");
-			std::memcpy(this, &src, sizeof(float2));
+			static_assert(sizeof(T) >= sizeof(float) * 2, "Need More Data");
+			std::memcpy(this, &src, sizeof(float) * 2);
 		}
 
 		template<typename T>
 		float2& operator=(const T& src) lnothrow
 		{
-			static_assert(sizeof(T) >= sizeof(float2), "Need More Data");
-			std::memcpy(this, &src, sizeof(float2));
+			static_assert(sizeof(T) >= sizeof(float) * 2, "Need More Data");
+			std::memcpy(this, &src, sizeof(float)*2);
 			return *this;
 		}
 

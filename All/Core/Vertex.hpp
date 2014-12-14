@@ -66,8 +66,9 @@ namespace leo
 				:pos(pos)
 			{}
 
-			template<typename OtherVertexType>
-			void operator=(const OtherVertexType& lvalue);
+			void operator=(const NormalMap& lvalue) {
+				memcpy(*this, lvalue);
+			}
 		};
 		struct NormalMapV
 		{

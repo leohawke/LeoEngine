@@ -172,7 +172,7 @@ namespace leo
 			return true;
 		}
 		
-		void SetPackSRV(ID3D11ShaderResourceView* srv);
+		void SetPackSRV(ID3D11ShaderResourceView* srv, ID3D11DeviceContext* context = nullptr);
 		void SetDstRTV(ID3D11RenderTargetView* rtv);
 	public:
 		static const std::unique_ptr<EffectPack>& GetInstance(ID3D11Device* device = nullptr);

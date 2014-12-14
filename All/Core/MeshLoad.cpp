@@ -68,19 +68,11 @@ namespace leo
 	struct Vertex::is_vertex<MeshFile::MeshVertex> : std::true_type
 	{};
 
-	template<>
-	void Vertex::NormalMap::operator=(const MeshFile::MeshVertex& lvalue)
-	{
-		memcpy(normal, lvalue.normal);
-		memcpy(pos, lvalue.pos);
-		memcpy(tex, lvalue.tex);
-		memcpy(tangent, lvalue.tangent);
-	}
 
 	template<>
-	inline XMFLOAT2 Subtract(const XMFLOAT2& lhs, const XMFLOAT2& rhs)
+	inline storge::float2 Subtract(const storge::float2& lhs, const storge::float2& rhs)
 	{
-		return XMFLOAT2(lhs.x - rhs.x, lhs.y - rhs.y);
+		return storge::float2(lhs.x - rhs.x, lhs.y - rhs.y);
 	}
 
 	static void saveclips(std::unique_ptr<win::File>& fout, std::uint64_t& fileoffset, const std::vector<MeshFile::AnimatClip>& clips, std::uint32_t numJoint)
@@ -489,15 +481,15 @@ namespace leo
 				duv[0] = Subtract(v[1].tex, v[0].tex);
 				duv[1] = Subtract(v[2].tex, v[0].tex);
 				auto inv = 1.f / (duv[0].x*duv[1].y - duv[0].y*duv[1].x);
-				XMFLOAT3 tangent = XMFLOAT3(0.f, 0.f, 0.f);
+				auto tangent = float3(0.f, 0.f, 0.f);
 				tangent.x = (duv[1].y*e[0].x - duv[0].y*e[1].x) / inv;
 				tangent.y = (duv[1].y*e[0].y - duv[0].y*e[1].y) / inv;
 				tangent.z = (duv[1].y*e[0].z - duv[0].y*e[1].z) / inv;
 
 
-				vertices[ind[0]].tangent = Add(vertices[ind[0]].tangent, tangent);
-				vertices[ind[1]].tangent = Add(vertices[ind[1]].tangent, tangent);
-				vertices[ind[2]].tangent = Add(vertices[ind[2]].tangent, tangent);
+				vertices[ind[0]].tangent = Add(float3(vertices[ind[0]].tangent), tangent);
+				vertices[ind[1]].tangent = Add(float3(vertices[ind[1]].tangent), tangent);
+				vertices[ind[2]].tangent = Add(float3(vertices[ind[2]].tangent), tangent);
 			}
 			for (auto &v : vertices)
 				v.tangent = Normalize(v.tangent);
@@ -563,8 +555,8 @@ namespace leo
 				float x = -halfWidht + j*dx;
 				float y = f(x, z);
 				BZero(vertices[i*n + j]);
-				vertices[i*n + j].pos = XMFLOAT3(x, y, z);
-				vertices[i*n + j].tex = XMFLOAT2(j*du, i*dv);
+				vertices[i*n + j].pos = float3(x, y, z);
+				vertices[i*n + j].tex = float2(j*du, i*dv);
 			}
 		}
 
@@ -632,8 +624,10 @@ namespace leo
 		fout->Write(offset, &meshsub, sizeof(MeshSubSet));
 		offset += sizeof(MeshSubSet);
 
-		fout->Write(offset, &meshData.Vertices[0], meshData.Vertices.size()*sizeof(MeshVertex));
-		offset += meshData.Vertices.size()*sizeof(MeshVertex);
+		std::vector<MeshVertex> vertices(meshData.Vertices.begin(), meshData.Vertices.end());
+
+		fout->Write(offset, &vertices[0], vertices.size()*sizeof(MeshVertex));
+		offset += vertices.size()*sizeof(MeshVertex);
 		fout->Write(offset, &meshData.Indices[0], meshData.Indices.size()*sizeof(std::uint32_t));
 	}
 
@@ -801,8 +795,8 @@ namespace leo
 			{
 				float x = -halfWidht + j*dx;
 				float y = (tilepoints[i*n + j].height - 0X2000 + (tilepoints[i*n + j].clifftype_celllayer & 0X0F - 2) * 0x0200) / 32.f;
-				vertices[i*n + j].pos = XMFLOAT3(x, y, z);
-				vertices[i*n + j].tex = XMFLOAT2(j*du, 1 - i*dv);
+				vertices[i*n + j].pos = float3(x, y, z);
+				vertices[i*n + j].tex = float2(j*du, 1 - i*dv);
 			}
 		}
 

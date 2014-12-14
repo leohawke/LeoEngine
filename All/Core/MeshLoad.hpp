@@ -36,6 +36,14 @@ namespace leo
 		};
 		struct MeshVertex
 		{
+			MeshVertex() = default;
+
+			MeshVertex(const Vertex::NormalMap& write)
+				:pos(write.pos),normal(write.normal),tex(write.tex),tangent(write.tangent){
+			}
+			operator Vertex::NormalMap() {
+				return Vertex::NormalMap{leo::float3(pos),leo::float3(normal),leo::float2(tex),leo::float3(tangent)};
+			}
 			storge::float3  pos;
 			storge::float3 normal;
 			storge::float2 tex;
