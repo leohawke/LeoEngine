@@ -4,6 +4,7 @@
 #include <string>
 #include <functional>
 #include "CoreObject.hpp"
+#include "Vertex.hpp"
 #include "..\leomath.hpp"
 namespace leo
 {
@@ -79,6 +80,7 @@ namespace leo
 
 		static void sdkmeshTol3d(const std::wstring& sdkmeshfilename, const std::wstring& l3dfilename);
 
+		static void meshdataTol3d(const helper::MeshData& meshData, const std::wstring& l3dfilename);
 
 		//1.........n
 		//.

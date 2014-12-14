@@ -10,6 +10,7 @@
 #include "..\TextureMgr.h"
 #include "..\ShaderMgr.h"
 #include "..\RenderStates.hpp"
+#include "FileSearch.h"
 #include "Camera.hpp"
 #include "EffectShadowMap.hpp"
 #include "Effect.h"
@@ -28,8 +29,8 @@ namespace leo
 		leo::TextureMgr texmgr;
 		for (UINT i = 0; i < size; ++i)
 		{
-			subsets[i].m_texdiff = texmgr.LoadTextureSRV(materials[i].diffusefile);
-			subsets[i].m_texnormalmap = texmgr.LoadTextureSRV(materials[i].normalmapfile);
+			subsets[i].m_texdiff = texmgr.LoadTextureSRV(FileSearch::Search(materials[i].diffusefile));
+			subsets[i].m_texnormalmap = texmgr.LoadTextureSRV(FileSearch::Search(materials[i].normalmapfile));
 			subsets[i].m_indexcount = filesubsets[i].indexcount;
 			subsets[i].m_indexoffset = filesubsets[i].indexoffset;
 			BZero(subsets[i].m_mat);
@@ -75,14 +76,8 @@ namespace leo
 			fin->Read(&l3d_header, sizeof(l3d_header), fileoffset);
 			fileoffset += sizeof(l3d_header);
 			m_subsets.resize(l3d_header.numsubset);
-			auto idx = filename.rfind(L'\\');
-			assert(idx != std::wstring::npos);
-			auto dir = filename.substr(0, idx + 1);
-			SetCurrentDirectory(dir.c_str());
+
 			ReadSubSets(fin, fileoffset, m_subsets, device);
-			SetCurrentDirectory(L"..\\");
-			dir.resize(260);
-			GetCurrentDirectory(260, &dir[0]);
 			std::vector<vertex_type> vertices(l3d_header.numvertice);
 			ReadVertices(fin, fileoffset, vertices);
 			std::vector<std::uint32_t> indices(l3d_header.numindex);

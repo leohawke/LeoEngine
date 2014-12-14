@@ -12,6 +12,7 @@
 #include <Core\Camera.hpp>
 #include <Core\RenderSync.hpp>
 #include <Core\EffectLine.hpp>
+#include <Core\EffectShadowMap.hpp>
 #include <Core\Terrain.hpp>
 #include <Core\Sky.hpp>
 #include <Core\Skeleton.hpp>
@@ -19,6 +20,7 @@
 #include <Core\EffectSkeleton.hpp>
 #include <Core\\EngineConfig.h>
 #include <Core\ShadowMap.hpp>
+#include <Core\Vertex.hpp>
 #include <COM.hpp>
 
 #include <TextureMgr.h>
@@ -43,18 +45,19 @@
 
 
 leo::Event event;
-std::unique_ptr<leo::Mesh> pMesh = nullptr;
+std::unique_ptr<leo::Mesh> pModelMesh = nullptr;
+std::unique_ptr<leo::Mesh> pTerrainMesh = nullptr;
+std::unique_ptr<leo::Mesh> pBoxMesh = nullptr;
+std::unique_ptr<leo::Mesh> pSphereMesh = nullptr;
 std::unique_ptr<leo::UVNCamera> pCamera = nullptr;
 std::unique_ptr<leo::CastShadowCamera> pShaderCamera;
-leo::Terrain<3,64,6>* pTerrain = nullptr;
-std::unique_ptr<leo::Sky> pSky = nullptr;
-std::unique_ptr<leo::SkeletonInstance[]> pSkeInstances = nullptr;
+
 std::atomic<bool> renderAble = false;
 std::atomic<bool> renderThreadRun = true;
 
 std::mutex mSizeMutex;
 
-
+ID3D11Buffer* mFillScreenVB = nullptr;
 
 
 void DeviceEvent()
@@ -165,8 +168,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 		{
 			leo::RenderSync::Block block;
 			renderAble = false;
-			pMesh.reset(new leo::Mesh());
-			if (pMesh->Load(GetOpenL3dFile(), leo::DeviceMgr().GetDevice()))
+			pModelMesh.reset(new leo::Mesh());
+			if (pModelMesh->Load(GetOpenL3dFile(), leo::DeviceMgr().GetDevice()))
 				renderAble = (true);
 		}
 			break;
@@ -267,14 +270,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	updateThread.join();
 	renderThread.join();
 	
-	leo::aligned_alloc<leo::Terrain<3, 64, 6>, 16> alloc;
-	alloc.destroy(pTerrain);
-	alloc.deallocate(pTerrain, 1);
-	pMesh.reset(nullptr);
-	//pTerrain.reset(nullptr);
-	pSky.reset(nullptr);
-	pSkeInstances.reset(nullptr);
-
+	pModelMesh.reset(nullptr);
+	pTerrainMesh.reset(nullptr);
+	pBoxMesh.reset(nullptr);
+	pSphereMesh.reset(nullptr);
+	leo::win::ReleaseCOM(mFillScreenVB);
 	leo::global::Destroy();
 #ifdef DEBUG
 	leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
@@ -286,30 +286,18 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	return 0;
 }
 
-inline void QuaternionToMatrix(const leo::float4& quaternion,leo::float4x4& matrix)
-{
-	auto x2 = quaternion.x*quaternion.x, y2 = quaternion.y*quaternion.y, z2 = quaternion.z*quaternion.z;
-	auto xy = quaternion.x*quaternion.y, wz = quaternion.w*quaternion.z, wx = quaternion.w*quaternion.x;
-	auto xz = quaternion.x*quaternion.z, yz = quaternion.y*quaternion.z, yw = quaternion.y*quaternion.w;
-
-	matrix(0, 0) = 1 - 2 * (y2 + z2);	matrix(0, 1) = 2 * (xy + wz);	matrix(0, 2) = 2 * (xz - yw);
-	matrix(1, 0) = 2 * (xy - wz);		matrix(1, 1) = 1 - 2 * (x2 + z2); matrix(1, 2) = 2 * (yz + wx);
-	matrix(2, 0) = 2 * (xz + yw);		matrix(2, 1) = 2 * (yz - wx);	matrix(2, 2) = 1 - 2 * (x2 + y2);
-}
-
-inline leo::float4x4 QuaternionToMatrix(const leo::float4 & quaternion)
-{
-	leo::float4x4 matrix;
-	::QuaternionToMatrix(quaternion, matrix);
-	matrix(0, 3) = 0; matrix(1, 3) = 0; matrix(2, 3) = 0;
-	matrix(3, 0) = 0; matrix(3, 1) = 0; matrix(3, 2) = 0;
-	matrix(3, 3) = 1;
-	return matrix;
-}
-
 
 void BuildRes()
 {
+
+	auto noise = [](float x, float z) {
+		return 0.f;
+	};
+
+	//leo::MeshFile::terrainTol3d(noise, std::make_pair(10u, 15u), std::make_pair(30u, 45u), L"Resource/Terrain.l3d");
+	//leo::MeshFile::meshdataTol3d(leo::helper::CreateBox(1.f, 1.f, 1.f), L"Resource/Box.l3d");
+	//leo::MeshFile::meshdataTol3d(leo::helper::CreateSphere(1.f, 32,32), L"Resource/Sphere.l3d");
+
 	pCamera = std::make_unique<leo::UVNCamera>();
 
 	using leo::float3;
@@ -325,10 +313,7 @@ void BuildRes()
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 
 	
-	auto& pEffect =  leo::EffectNormalMap::GetInstance(leo::DeviceMgr().GetDevice());
-	leo::EffectTerrain::GetInstance(leo::DeviceMgr().GetDevice());
-	leo::EffectTerrainSO::GetInstance(leo::DeviceMgr().GetDevice());
-	
+	auto& pEffect =  leo::EffectNormalMap::GetInstance(leo::DeviceMgr().GetDevice());	
 
 	leo::DirectionLight dirlight;
 	dirlight.ambient = leo::float4(1.f, 1.f, 1.f, 1.f);
@@ -339,50 +324,10 @@ void BuildRes()
 	pEffect->Light(dirlight);
 
 	leo::EffectNormalLine::GetInstance(leo::DeviceMgr().GetDevice());
-	leo::EffectSky::GetInstance(leo::DeviceMgr().GetDevice());
 	leo::ShadowMap::GetInstance(leo::DeviceMgr().GetDevice(), std::make_pair(2048u,2048u));
-	leo::EffectSkeleton::GetInstance(leo::DeviceMgr().GetDevice())->Light(dirlight);
-	//leo::EffectLine::GetInstance(leo::DeviceMgr().GetDevice());
-	//leo::Axis::GetInstance(leo::DeviceMgr().GetDevice());
+	leo::EffectPack::GetInstance(leo::DeviceMgr().GetDevice());
+	leo::EffectShadowMap::GetInstance(leo::DeviceMgr().GetDevice());
 
-
-	struct TerrainFileHeader
-	{
-		float mChunkSize;
-		std::uint32_t mHorChunkNum;
-		std::uint32_t mVerChunkNum;
-		wchar_t mHeightMap[leo::win::file::max_path];
-	}mTerrainFileHeader;
-
-	mTerrainFileHeader.mChunkSize = 24;
-	mTerrainFileHeader.mHorChunkNum = 5;
-	mTerrainFileHeader.mVerChunkNum = 16;
-	wcscpy(mTerrainFileHeader.mHeightMap, L"Resource\\GaussianNoise256.jpg");
-
-	{
-		auto & pFile = leo::win::File::Open(L"Resource\\Test.Terrain", leo::win::File::TO_WRITE);
-		pFile->Write(0, &mTerrainFileHeader, sizeof(mTerrainFileHeader));
-	}
-	leo::aligned_alloc<leo::Terrain<3, 64, 6>, 16> alloc;
-	pTerrain = alloc.allocate(1);
-	alloc.construct(pTerrain, leo::DeviceMgr().GetDevice(), L"Resource\\Test.Terrain");
-
-	pSky = std::make_unique<leo::Sky>(leo::DeviceMgr().GetDevice(), L"Resource\\sunsetcube1024.dds");
-
-	pSkeInstances = leo::make_unique<leo::SkeletonInstance[]>(3);
-
-	auto skeData = leo::SkeletonData::Load(L"Resource\\soldier.l3d");
-	pSkeInstances[0] = skeData;
-	pSkeInstances[1] = skeData;
-	pSkeInstances[2] = skeData;
-
-	pSkeInstances[0].Scale(0.1f);
-	pSkeInstances[1].Scale(0.05f);
-	pSkeInstances[2].Scale(0.05f);
-
-	pSkeInstances[0].Translation(float3(1.f,2.f,3.f));
-	pSkeInstances[1].Translation(float3(3.f, 2.f, 1.f));
-	pSkeInstances[2].Translation(float3(-5.f,1.f,5.f));
 
 
 	leo::Sphere mSphere{ leo::float3(0.0f, 0.0f, 0.0f),sqrtf(10.0f*10.0f + 15.0f*15.0f) };
@@ -390,57 +335,43 @@ void BuildRes()
 	pShaderCamera = std::make_unique<leo::CastShadowCamera>();
 	pShaderCamera->SetSphereAndDir(mSphere, dir);
 
-	//leo::XMMATRIX modelRot = leo::XMMatrixRotationY(leo::LM_PI);
-	//leo::float4 quaternion;
-	//save(quaternion,leo::XMQuaternionRotationMatrix(modelRot));
-	//leo::float3 eulerangle = leo::QuaternionToEulerAngle(quaternion);
-	//pSke->Rotation(quaternion);
-	//pSke->Roll(eulerangle.x);
-	//pSke->Pitch(eulerangle.y);
-	//pSke->Yaw(eulerangle.z);
-	//leo::DeviceMgr().GetDeviceContext()->RSSetState(leo::RenderStates().GetRasterizerState(L"WireframeRS"));
+	//pTerrainMesh.reset(new leo::Mesh());
+	//pSphereMesh.reset(new leo::Mesh());
+	//pBoxMesh.reset(new leo::Mesh());
+
+	//pTerrainMesh->Load(L"Resource/Terrain.l3d", leo::DeviceMgr().GetDevice());
+	//pSphereMesh->Load(L"Resource/Sphere.l3d", leo::DeviceMgr().GetDevice());
+	//pBoxMesh->Load(L"Resource/Box.l3d", leo::DeviceMgr().GetDevice());
+
+	//pTerrainMesh->Translation(leo::float3(0.f, -1.f, 0.f));
+	//pSphereMesh->Translation(leo::float3(1.f, 0.5f, 0.f));
+	auto& vertices = leo::helper::CreateFullscreenQuad();
+
+	D3D11_BUFFER_DESC vbDesc;
+	vbDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbDesc.ByteWidth = vertices.size() * sizeof(leo::Vertex::PostEffect);
+	vbDesc.CPUAccessFlags = 0;
+	vbDesc.MiscFlags = 0;
+	vbDesc.StructureByteStride = 0;
+	vbDesc.Usage = D3D11_USAGE_IMMUTABLE;
+
+	D3D11_SUBRESOURCE_DATA subData;
+	subData.pSysMem = vertices.data();
+
+	try {
+		leo::dxcall(leo::DeviceMgr().GetDevice()->CreateBuffer(&vbDesc, &subData, &mFillScreenVB));
+
+
+		leo::dx::DebugCOM(mFillScreenVB, "ShadowMap::Draw");
+	}
+	Catch_DX_Exception
+
 }
 
 void Update(){
 	while (renderThreadRun)
 	{
 		auto mBegin = leo::clock::now();
-
-		if (GetAsyncKeyState('W') & 0X8000) 
-			pSkeInstances[0].Translation(leo::float3(0.f, 0.f, -0.05f));
-
-		if (GetAsyncKeyState('S') & 0X8000)
-			pSkeInstances[0].Translation(leo::float3(0.0f, 0.f, +0.05f));
-
-		if (GetAsyncKeyState('A') & 0X8000)
-			pSkeInstances[0].Translation(leo::float3(+0.05f, 0.f, 0.f));
-
-		if (GetAsyncKeyState('D') & 0X8000)
-			pSkeInstances[0].Translation(leo::float3(-0.05f, 0.f, 0.f));
-
-		pCamera->UpdateViewMatrix();
-
-
-		leo::clock::GameClock::Update(leo::clock::ProgramClock::GetElapse());
-		leo::clock::ProgramClock::Reset();
-
-		pSkeInstances[0].Update();
-		//pSkeInstances[1].Update();
-		//pSkeInstances[2].Update();
-
-		static const auto begin_call_back = [&]() {
-			pSkeInstances[0].BeginCurrentAni();
-		};
-
-		static const auto end_call_back = [&]() {
-			pSkeInstances[0].EndCurrentAni();
-		};
-
-		static leo::win::KeyDown mBeignEvent('W', begin_call_back);
-		static leo::win::KeyUp mEndEvent('W', end_call_back);
-
-
-		
 
 		auto mRunTime =leo::clock::duration_to<>(leo::clock::now()-mBegin);
 		if (mRunTime < 1 / 30.f)
@@ -465,28 +396,29 @@ void Render()
 		devicecontext->ClearRenderTargetView(dm.GetRenderTargetView(), ClearColor);
 		devicecontext->ClearDepthStencilView(dm.GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0, 0);
 
-		if (renderAble)
-			pMesh->Render(devicecontext, *pCamera);
-		
-		//leo::Axis::GetInstance()->Render(devicecontext, *pCamera);
 
-		
+		//Build Shadow Map
+		leo::ShadowMap::GetInstance().BeginShadowMap(devicecontext,*pShaderCamera);
+		//if (renderAble)
+			//pModelMesh->CastShadow(devicecontext);
 
-		pSky->Render(devicecontext, *pCamera);
-		pTerrain->Render(devicecontext, *pCamera);
+		//pTerrainMesh->CastShadow(devicecontext);
+		//pBoxMesh->CastShadow(devicecontext);
+		//pSphereMesh->CastShadow(devicecontext);
 
-		auto& pos = pSkeInstances[0].Pos();
-		auto y = pTerrain->GetHeight(leo::float2(pos.x, pos.z)) - pos.y;
-		pSkeInstances[0].Translation(leo::float3(0.f,y, 0.f));
+		leo::ShadowMap::GetInstance().EndShadowMap(devicecontext);
 
-		pSkeInstances[0].Render(*pCamera);
+		auto& pPackEffect = leo::EffectPack::GetInstance();
+		pPackEffect->SetDstRTV(dm.GetRenderTargetView());
+		pPackEffect->SetPackSRV(leo::ShadowMap::GetInstance().GetDepthSRV());
+		pPackEffect->Apply(devicecontext);
+		devicecontext->IASetInputLayout(leo::ShaderMgr().CreateInputLayout(leo::InputLayoutDesc::PostEffect));
+		UINT strides[] = { sizeof(leo::Vertex::PostEffect) };
+		UINT offsets[] = { 0 };
+		devicecontext->IASetVertexBuffers(0, 1, &mFillScreenVB, strides, offsets);
+		devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+		devicecontext->Draw(4, 0);
 
-		//pSkeInstances[1].Render(*pCamera);
-
-		//pSkeInstances[2].Render(*pCamera);
-
-
-		
 
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);

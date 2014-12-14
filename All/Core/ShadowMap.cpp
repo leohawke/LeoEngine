@@ -20,8 +20,8 @@ namespace leo {
 			// the bits as DXGI_FORMAT_D24_UNORM_S8_UINT, whereas the SRV is going 
 			// to interpret the bits as DXGI_FORMAT_R24_UNORM_X8_TYPELESS. 
 			D3D11_TEXTURE2D_DESC texDesc; 
-			texDesc.Width = mViewPort.Width;
-			texDesc.Height = mViewPort.Height; 
+			texDesc.Width =static_cast<UINT>(mViewPort.Width);
+			texDesc.Height = static_cast<UINT>(mViewPort.Height);
 			texDesc.MipLevels = 1; 
 			texDesc.ArraySize = 1; 
 			texDesc.Format = DXGI_FORMAT_R24G8_TYPELESS; 
@@ -51,6 +51,14 @@ namespace leo {
 			}
 			Catch_DX_Exception
 
+		}
+
+
+		~ShadowMapDelegate() {
+			leo::win::ReleaseCOM(mDepthDSV);
+			leo::win::ReleaseCOM(mDepthSRV);
+			leo::win::ReleaseCOM(mPreRTV);
+			leo::win::ReleaseCOM(mPrevDSV);
 		}
 
 		ID3D11ShaderResourceView* GetDepthSRV() {

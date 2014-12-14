@@ -602,6 +602,41 @@ namespace leo
 		fout->Write(offset, &indices[0], indices.size()*sizeof(std::uint32_t));
 	}
 
+	void MeshFile::meshdataTol3d(const helper::MeshData& meshData, const std::wstring& l3dfilename) {
+		MeshFileHeader l3d_header;
+		l3d_header.numvertice = meshData.Vertices.size();
+		l3d_header.numindex = meshData.Indices.size();
+		l3d_header.numsubset = 1;
+
+		auto fout = win::File::OpenNoThrow(l3dfilename, win::File::TO_WRITE);
+
+		std::uint64_t offset = 0;
+		fout->Write(offset, &l3d_header, sizeof(MeshFileHeader));
+		offset += sizeof(MeshFileHeader);
+
+		MeshMaterial meshmat;
+		BZero(meshmat);
+		meshmat.ambient = XMFLOAT3(0.3f, 0.3f, 0.3f);
+		meshmat.diffuse = XMFLOAT3(0.4f, 0.6f, 0.4f);
+		meshmat.reflect = XMFLOAT3(0.2f, 0.4f, 0.2f);
+		meshmat.specular = XMFLOAT3(0.1f, 0.1f, 0.1f);
+		meshmat.specPow = 2;
+		std::memcpy(meshmat.normalmapfile, L"DefaultNormalMap.dds", sizeof(L"DefaultNormalMap.dds"));
+		std::memcpy(meshmat.diffusefile, L"DefaultDiffuse.dds", sizeof(L"DefaultDiffuse.dds"));
+		fout->Write(offset, &meshmat, sizeof(MeshMaterial));
+		offset += sizeof(MeshMaterial);
+
+		MeshSubSet meshsub;
+		meshsub.indexcount = l3d_header.numindex;
+		meshsub.indexoffset = 0;
+		fout->Write(offset, &meshsub, sizeof(MeshSubSet));
+		offset += sizeof(MeshSubSet);
+
+		fout->Write(offset, &meshData.Vertices[0], meshData.Vertices.size()*sizeof(MeshVertex));
+		offset += meshData.Vertices.size()*sizeof(MeshVertex);
+		fout->Write(offset, &meshData.Indices[0], meshData.Indices.size()*sizeof(std::uint32_t));
+	}
+
 	void MeshFile::w3eTol3d(const std::wstring& w3efilename, const std::wstring& l3dfilename)
 	{
 		//类型定义

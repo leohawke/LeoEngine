@@ -31,7 +31,7 @@ namespace leo {
 			};
 
 			context->VSSetShader(mVS, nullptr, 0);
-			context->VSSetConstantBuffers(0, 1, mvscbs);
+			context->VSSetConstantBuffers(0, 2, mvscbs);
 			context->RSSetState(mRS);
 		}
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow {
@@ -105,7 +105,7 @@ namespace leo {
 			);
 	}
 
-	const std::unique_ptr<EffectShadowMap>& EffectShadowMap::GetInstance(ID3D11Device* device = nullptr) {
+	const std::unique_ptr<EffectShadowMap>& EffectShadowMap::GetInstance(ID3D11Device* device) {
 		static auto mInstance = std::unique_ptr<EffectShadowMap>(new EffectShadowMapDelegate(device));
 		return mInstance;
 	}
