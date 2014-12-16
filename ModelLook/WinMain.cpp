@@ -51,6 +51,7 @@ std::unique_ptr<leo::Mesh> pBoxMesh = nullptr;
 std::unique_ptr<leo::Mesh> pSphereMesh = nullptr;
 std::unique_ptr<leo::UVNCamera> pCamera = nullptr;
 std::unique_ptr<leo::CastShadowCamera> pShaderCamera;
+std::unique_ptr<leo::Axis> pAxis = nullptr;
 
 std::atomic<bool> renderAble = false;
 std::atomic<bool> renderThreadRun = true;
@@ -291,28 +292,34 @@ void BuildRes()
 {
 
 	auto noise = [](float x, float z) {
-		return 0.f;
+		return 0.2f;
 	};
 
 	//leo::MeshFile::terrainTol3d(noise, std::make_pair(10u, 15u), std::make_pair(30u, 45u), L"Resource/Terrain.l3d");
 	//leo::MeshFile::meshdataTol3d(leo::helper::CreateBox(1.f, 1.f, 1.f), L"Resource/Box.l3d");
 	//leo::MeshFile::meshdataTol3d(leo::helper::CreateSphere(1.f, 32,32), L"Resource/Sphere.l3d");
 
+
+
 	pCamera = std::make_unique<leo::UVNCamera>();
 
 	using leo::float3;
 
-	auto Eye = float3(0.f,10.f,-10.f);
+	auto Eye = float3(0.f,10.f,-5.f);
 	auto At = float3(0.f,0.f,0.f);
 	auto Up = float3(0.f,1.f, 0.f);
 
-	pCamera->LookAt(Eye, At, Up);
+	//pCamera->LookAt(Eye, At, Up);
 
 	event.Wait();
 
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 
-	
+	auto  view = pCamera->View();
+	auto proj = pCamera->Proj();
+
+	auto xproj = leo::XMMatrixPerspectiveFovLH(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
+
 	auto& pEffect =  leo::EffectNormalMap::GetInstance(leo::DeviceMgr().GetDevice());	
 
 	leo::DirectionLight dirlight;
@@ -327,7 +334,8 @@ void BuildRes()
 	leo::ShadowMap::GetInstance(leo::DeviceMgr().GetDevice(), std::make_pair(2048u,2048u));
 	leo::EffectPack::GetInstance(leo::DeviceMgr().GetDevice());
 	leo::EffectShadowMap::GetInstance(leo::DeviceMgr().GetDevice());
-
+	leo::EffectLine::GetInstance(leo::DeviceMgr().GetDevice());
+	pAxis = std::make_unique<leo::Axis>(leo::DeviceMgr().GetDevice());
 
 
 	leo::Sphere mSphere{ leo::float3(0.0f, 0.0f, 0.0f),sqrtf(10.0f*10.0f + 15.0f*15.0f) };
@@ -343,8 +351,10 @@ void BuildRes()
 	pSphereMesh->Load(L"Resource/Sphere.l3d", leo::DeviceMgr().GetDevice());
 	pBoxMesh->Load(L"Resource/Box.l3d", leo::DeviceMgr().GetDevice());
 
-	pTerrainMesh->Translation(leo::float3(0.f, -1.f, 0.f));
-	pSphereMesh->Translation(leo::float3(1.f, 0.5f, 0.f));
+	pSphereMesh->Translation(leo::float3(-6.f, 6.5f, 0.f));
+	pBoxMesh->Scale(5.f);
+	pSphereMesh->Scale(5.f);
+	pTerrainMesh->Scale(8.f);
 	auto& vertices = leo::helper::CreateFullscreenQuad();
 
 	D3D11_BUFFER_DESC vbDesc;
@@ -396,7 +406,7 @@ void Render()
 		devicecontext->ClearRenderTargetView(dm.GetRenderTargetView(), ClearColor);
 		devicecontext->ClearDepthStencilView(dm.GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0, 0);
 
-
+#if 0
 		//Build Shadow Map
 		leo::ShadowMap::GetInstance().BeginShadowMap(devicecontext,*pShaderCamera);
 		if (renderAble)
@@ -420,9 +430,11 @@ void Render()
 		devicecontext->Draw(4, 0);
 
 		pPackEffect->SetPackSRV(nullptr, devicecontext);
-
-		//×´Ì¬»ú»ØÖÃ
-		leo::context_wrapper context(devicecontext);
+#endif
+		pAxis->Render(devicecontext, *pCamera);
+		pTerrainMesh->Render(devicecontext, *pCamera);
+		pBoxMesh->Render(devicecontext, *pCamera);
+		pSphereMesh->Render(devicecontext, *pCamera);
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 

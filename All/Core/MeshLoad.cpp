@@ -543,8 +543,8 @@ namespace leo
 
 		auto halfWidht = 0.5f*width;
 		auto halfDepth = 0.5f*height;
-		auto dx = width / (n - 1);
-		auto dz = height / (m - 1);
+		auto dx = width / (n - 1.f);
+		auto dz = height / (m - 1.f);
 		float du = 1.f / (n - 1);
 		float dv = 1.f / (m - 1);
 		for (auto i = 0; i != m; ++i)
