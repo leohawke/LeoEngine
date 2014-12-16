@@ -305,20 +305,16 @@ void BuildRes()
 
 	using leo::float3;
 
-	auto Eye = float3(0.f,10.f,-5.f);
+	auto Eye = float3(0.f,0.f,-5.f);
 	auto At = float3(0.f,0.f,0.f);
 	auto Up = float3(0.f,1.f, 0.f);
 
-	//pCamera->LookAt(Eye, At, Up);
+	pCamera->LookAt(Eye, At, Up);
 
 	event.Wait();
 
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 
-	auto  view = pCamera->View();
-	auto proj = pCamera->Proj();
-
-	auto xproj = leo::XMMatrixPerspectiveFovLH(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 
 	auto& pEffect =  leo::EffectNormalMap::GetInstance(leo::DeviceMgr().GetDevice());	
 

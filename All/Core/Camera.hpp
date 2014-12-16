@@ -229,6 +229,7 @@ namespace leo
 		void SetFrustum(PROJECTION_TYPE projtype, float orWidth=0, float orHeight=0)
 		{
 			CameraFrustum::SetFrustum(projtype, orWidth, orHeight);
+			Update();
 		}
 
 		float3 mRight = float3(1.f, 0.f, 0.f);

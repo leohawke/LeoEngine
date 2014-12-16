@@ -130,6 +130,7 @@ namespace leo
 		mEffect->WorldMatrix(world);
 		mEffect->WorldViewProjMatrix(Multiply(world,load(camera.ViewProj())));
 
+
 		mEffect->Apply(context);
 
 		for (auto it = m_subsets.cbegin(); it != m_subsets.cend();++it)
