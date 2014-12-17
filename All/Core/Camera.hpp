@@ -217,15 +217,14 @@ namespace leo
 
 			save(ImplViewProj(), Multiply(load(mMatrix), load(Proj())));
 		}
-
+		mutable float4x4 mViewProj;
 		float4x4& ImplViewProj() const{
-			static float4x4 mViewProj;
 			return mViewProj;
 		}
 	protected:
 		using CameraFrustum::mOrigin;
 		float4x4 mMatrix;
-
+		
 		void SetFrustum(PROJECTION_TYPE projtype, float orWidth=0, float orHeight=0)
 		{
 			CameraFrustum::SetFrustum(projtype, orWidth, orHeight);
@@ -482,8 +481,8 @@ namespace leo
 
 	class LB_API CastShadowCamera : public Camera {
 	private:
+		mutable  float4x4 mViewProjTex;
 		float4x4& ImplViewProjTex() const {
-			static  float4x4 mViewProjTex;
 			return mViewProjTex;
 		}
 	public:

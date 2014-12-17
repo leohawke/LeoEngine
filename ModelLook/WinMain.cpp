@@ -299,7 +299,7 @@ void BuildRes()
 	//leo::MeshFile::meshdataTol3d(leo::helper::CreateBox(1.f, 1.f, 1.f), L"Resource/Box.l3d");
 	//leo::MeshFile::meshdataTol3d(leo::helper::CreateSphere(1.f, 32,32), L"Resource/Sphere.l3d");
 
-	pCamera = std::make_unique<leo::UVNCamera>();
+	
 
 	using leo::float3;
 
@@ -364,8 +364,12 @@ void BuildRes()
 
 	leo::Sphere mSphere{ leo::float3(0.0f, 0.0f, 0.0f),sqrtf(10.0f*10.0f + 15.0f*15.0f) };
 	float3 dir{ -0.5773f, -0.57735f,0.57735f };
+
+	pCamera = std::make_unique<leo::UVNCamera>();
 	pShaderCamera = std::make_unique<leo::CastShadowCamera>();
 	pShaderCamera->SetSphereAndDir(mSphere, dir);
+
+	
 
 	leo::float3 pos;
 	save(pos, leo::Multiply(leo::Splat(-2.f*mSphere.GetRadius()), leo::load(dir)));
@@ -404,7 +408,7 @@ void Render()
 
 #if 1
 		//Build Shadow Map
-		leo::ShadowMap::GetInstance().BeginShadowMap(devicecontext,*pCamera);
+		leo::ShadowMap::GetInstance().BeginShadowMap(devicecontext,*pShaderCamera);
 		if (renderAble)
 			pModelMesh->CastShadow(devicecontext);
 
