@@ -63,7 +63,7 @@ namespace leo {
 		ID3D11ShaderResourceView* GetDepthSRV() {
 			return mDepthSRV;
 		}
-		void BeginShadowMap(ID3D11DeviceContext* con, const CastShadowCamera& camera) {
+		void BeginShadowMap(ID3D11DeviceContext* con, const Camera& camera) {
 			context_wrapper context(con);
 			UINT numVP = 1;
 			context.RSSetViewports(1, &mViewPort);
@@ -96,7 +96,7 @@ namespace leo {
 		return ((ShadowMapDelegate *)this)->GetDepthSRV(
 			);
 	}
-	void ShadowMap::BeginShadowMap(ID3D11DeviceContext* context, const CastShadowCamera& camera) {
+	void ShadowMap::BeginShadowMap(ID3D11DeviceContext* context, const Camera& camera) {
 		lassume(dynamic_cast<ShadowMapDelegate *>(this));
 
 		return ((ShadowMapDelegate *)this)->BeginShadowMap(context,camera

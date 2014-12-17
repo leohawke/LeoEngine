@@ -1,4 +1,4 @@
-Texture2D<float> gInput :register(t0);
+Texture2D gInput :register(t0);
 SamplerState LinearRepeat :register(s0);
 struct VertexOut
 {
@@ -8,7 +8,11 @@ struct VertexOut
 
 float4 main(VertexOut pin) : SV_TARGET
 {
-	float color = gInput.Sample(LinearRepeat, pin.Tex).x;
+	float color = gInput.Sample(LinearRepeat, pin.Tex).r;
 
-	return float4(color,color,color,1.f);
+
+	if(color < 1.f)
+		return float4(sin(color),cos(color), 0.f, 1.f);
+
+	return float4(color,0.f,0.f,1.f);
 }
