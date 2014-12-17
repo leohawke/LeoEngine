@@ -8,11 +8,15 @@ struct VertexOut
 
 float4 main(VertexOut pin) : SV_TARGET
 {
-	float color = gInput.Sample(LinearRepeat, pin.Tex).r;
+	float c = gInput.Sample(LinearRepeat, pin.Tex).r;
 
+	uint int_color = asuint(c);
 
-	if(color < 1.f)
-		return float4(sin(color),cos(color), 0.f, 1.f);
+	float4 color;
+	color.r = (float)(int_color >> 21) / 2047.0f;
+	color.g = (float)((int_color >> 10) & 0x7ff) / 2047.0f;
+	color.b = (float)(int_color & 0x0003ff) / 1023.0f;
+	color.a = 1;
 
-	return float4(color,0.f,0.f,1.f);
+	return color;
 }

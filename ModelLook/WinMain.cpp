@@ -299,8 +299,6 @@ void BuildRes()
 	//leo::MeshFile::meshdataTol3d(leo::helper::CreateBox(1.f, 1.f, 1.f), L"Resource/Box.l3d");
 	//leo::MeshFile::meshdataTol3d(leo::helper::CreateSphere(1.f, 32,32), L"Resource/Sphere.l3d");
 
-
-
 	pCamera = std::make_unique<leo::UVNCamera>();
 
 	using leo::float3;
@@ -340,7 +338,7 @@ void BuildRes()
 
 	pSphereMesh->Translation(leo::float3(-6.f, 6.5f, 0.f));
 	pBoxMesh->Scale(5.f);
-	pBoxMesh->Translation(leo::float3(+3.f, 3.f, -3.5f));
+	pBoxMesh->Translation(leo::float3(+5.f, 6.f, -3.5f));
 	pSphereMesh->Scale(5.f);
 	pTerrainMesh->Scale(8.f);
 	auto& vertices = leo::helper::CreateFullscreenQuad();
@@ -430,7 +428,7 @@ void Render()
 		pPackEffect->SetPackSRV(nullptr, devicecontext);
 
 		leo::context_wrapper context(devicecontext);
-#else
+
 		pAxis->Render(devicecontext, *pCamera);
 		pTerrainMesh->Render(devicecontext, *pCamera);
 		pBoxMesh->Render(devicecontext, *pCamera);
