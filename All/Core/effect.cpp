@@ -103,6 +103,7 @@ namespace leo
 
 			RenderStates rss;
 			mPixelShaderSampleState = rss.GetSamplerState(L"LinearRepeat");
+			mPixelShadersamShadow = rss.GetSamplerState(L"samShadow");
 		}
 
 		~EffectNormalMapDelegate()
@@ -133,14 +134,20 @@ namespace leo
 
 			ID3D11ShaderResourceView* mpssrvs[] = {
 				mPixelShaderDiffuseSRV,
-				mPixelShaderNormalMapSRV
+				mPixelShaderNormalMapSRV,
+				mPixelShaderShadowMapSRV
+			};
+
+			ID3D11SamplerState* mpssss[] = {
+				mPixelShaderSampleState,
+				mPixelShadersamShadow
 			};
 
 			mInstances[_gAbsLight_mInstanceIndex] = mLightInstances[static_cast<uint8>(mLightType)];
 			pContext.PSSetShader(mPixelShader, mInstances.get(), mNumofInstance);
 			pContext.PSSetConstantBuffers(0, 3, mpscbs);
-			pContext.PSSetShaderResources(0, 2, mpssrvs);
-			pContext.PSSetSamplers(0, 1, &mPixelShaderSampleState);
+			pContext.PSSetShaderResources(0, 3, mpssrvs);
+			pContext.PSSetSamplers(0, 2,mpssss);
 		}
 
 		void LM_VECTOR_CALL WorldMatrix(matrix Matrix, ID3D11DeviceContext* context)
@@ -154,6 +161,12 @@ namespace leo
 		void  LM_VECTOR_CALL WorldViewProjMatrix(matrix Matrix, ID3D11DeviceContext* context)
 		{
 			mVertexShaderConstantBufferPerFrame.worldviewproj = Transpose(Matrix);
+			if (context)
+				mVertexShaderConstantBufferPerFrame.Update(context);
+		}
+		void  LM_VECTOR_CALL ShadowViewProjTexMatrix(matrix Matrix, ID3D11DeviceContext* context)
+		{
+			mVertexShaderConstantBufferPerFrame.shadowviewprojtex = Transpose(Matrix);
 			if (context)
 				mVertexShaderConstantBufferPerFrame.Update(context);
 		}
@@ -200,9 +213,10 @@ namespace leo
 			if (context) {
 				ID3D11ShaderResourceView* mpssrvs[] = {
 					mPixelShaderDiffuseSRV,
-					mPixelShaderNormalMapSRV
+					mPixelShaderNormalMapSRV,
+					mPixelShaderShadowMapSRV
 				};
-				context->PSSetShaderResources(0, 2, mpssrvs);
+				context->PSSetShaderResources(0, 3, mpssrvs);
 			}
 		}
 		void NormalMapSRV(ID3D11ShaderResourceView * const nmap, ID3D11DeviceContext* context)
@@ -211,12 +225,23 @@ namespace leo
 			if (context) {
 				ID3D11ShaderResourceView* mpssrvs[] = {
 					mPixelShaderDiffuseSRV,
-					mPixelShaderNormalMapSRV
+					mPixelShaderNormalMapSRV,
+					mPixelShaderShadowMapSRV
 				};
-				context->PSSetShaderResources(0, 2, mpssrvs);
+				context->PSSetShaderResources(0, 3, mpssrvs);
 			}
 		}
-
+		void ShadowMapSRV(ID3D11ShaderResourceView * const nmap, ID3D11DeviceContext* context){
+			mPixelShaderShadowMapSRV = nmap;
+			if (context) {
+				ID3D11ShaderResourceView* mpssrvs[] = {
+					mPixelShaderDiffuseSRV,
+					mPixelShaderNormalMapSRV,
+					mPixelShaderShadowMapSRV
+				};
+				context->PSSetShaderResources(0, 3, mpssrvs);
+			}
+		}
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow
 		{
 			return true;
@@ -227,6 +252,7 @@ namespace leo
 			matrix world;
 			matrix worldinvtranspose;
 			matrix worldviewproj;
+			matrix shadowviewprojtex;
 		public:
 			const static std::uint8_t slot = 0;
 		};
@@ -268,11 +294,13 @@ namespace leo
 		ID3D11VertexShader* mVertexShader = nullptr;
 		ID3D11PixelShader*	mPixelShader = nullptr;
 		ID3D11SamplerState* mPixelShaderSampleState = nullptr;
+		ID3D11SamplerState* mPixelShadersamShadow = nullptr;
 		//Release
 		ID3D11ClassLinkage* mPixelShaderClassLinkage = nullptr;
 
 		ID3D11ShaderResourceView *mPixelShaderDiffuseSRV = nullptr;
 		ID3D11ShaderResourceView *mPixelShaderNormalMapSRV = nullptr;
+		ID3D11ShaderResourceView *mPixelShaderShadowMapSRV = nullptr;
 	};
 
 	const std::unique_ptr<EffectNormalMap>& EffectNormalMap::GetInstance(ID3D11Device* device)
@@ -323,6 +351,25 @@ namespace leo
 		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
 
 		return ((EffectNormalMapDelegate *)this)->WorldViewProjMatrix(
+			Matrix, context
+			);
+	}
+
+
+	void EffectNormalMap::ShadowViewProjTexMatrix(const float4x4& matrix, ID3D11DeviceContext* context)
+	{
+		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
+
+		return ((EffectNormalMapDelegate *)this)->ShadowViewProjTexMatrix(
+			load(matrix), context
+			);
+	}
+
+	void LM_VECTOR_CALL EffectNormalMap::ShadowViewProjTexMatrix(matrix Matrix, ID3D11DeviceContext* context)
+	{
+		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
+
+		return ((EffectNormalMapDelegate *)this)->ShadowViewProjTexMatrix(
 			Matrix, context
 			);
 	}
@@ -386,6 +433,15 @@ namespace leo
 		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
 
 		return ((EffectNormalMapDelegate *)this)->NormalMapSRV(
+			nmap, context
+			);
+	}
+
+	void EffectNormalMap::ShadowMapSRV(ID3D11ShaderResourceView * const nmap, ID3D11DeviceContext* context)
+	{
+		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
+
+		return ((EffectNormalMapDelegate *)this)->ShadowMapSRV(
 			nmap, context
 			);
 	}

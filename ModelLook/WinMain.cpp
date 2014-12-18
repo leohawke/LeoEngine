@@ -373,6 +373,8 @@ void BuildRes()
 
 	leo::float3 pos;
 	save(pos, leo::Multiply(leo::Splat(-2.f*mSphere.GetRadius()), leo::load(dir)));
+	pos.x = -pos.x;
+	pos.z = -pos.z;
 	pCamera->LookAt(pos, mSphere.GetCenter(), float3(0.f, 1.f, 0.f));
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 
@@ -406,8 +408,9 @@ void Render()
 		devicecontext->ClearRenderTargetView(dm.GetRenderTargetView(), ClearColor);
 		devicecontext->ClearDepthStencilView(dm.GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0, 0);
 
-#if 1
+
 		//Build Shadow Map
+		leo::EffectNormalMap::GetInstance()->ShadowMapSRV(nullptr, devicecontext);
 		leo::ShadowMap::GetInstance().BeginShadowMap(devicecontext,*pShaderCamera);
 		if (renderAble)
 			pModelMesh->CastShadow(devicecontext);
@@ -417,7 +420,7 @@ void Render()
 		pSphereMesh->CastShadow(devicecontext);
 
 		leo::ShadowMap::GetInstance().EndShadowMap(devicecontext);
-
+#if 0
 		auto& pPackEffect = leo::EffectPack::GetInstance();
 		pPackEffect->SetDstRTV(dm.GetRenderTargetView());
 		pPackEffect->SetPackSRV(leo::ShadowMap::GetInstance().GetDepthSRV());
@@ -432,6 +435,9 @@ void Render()
 		pPackEffect->SetPackSRV(nullptr, devicecontext);
 
 		leo::context_wrapper context(devicecontext);
+#else
+		leo::EffectNormalMap::GetInstance()->ShadowViewProjTexMatrix(pShaderCamera->ViewProjTex());
+		leo::EffectNormalMap::GetInstance()->ShadowMapSRV(leo::ShadowMap::GetInstance().GetDepthSRV());
 
 		pAxis->Render(devicecontext, *pCamera);
 		pTerrainMesh->Render(devicecontext, *pCamera);

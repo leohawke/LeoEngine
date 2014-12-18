@@ -20,3 +20,4 @@ cbuffer cbPerView : register(b2)
 
 Texture2D TexDiffuse :register(t0);
 Texture2D TexNormalMap : register(t1);
+Texture2D ShadowMap : register(t2);

@@ -100,6 +100,18 @@ namespace leo
 		linearRepeatDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 		p->CreateSamplerState(L"LinearClamp", linearRepeatDesc);
 
+
+		// samShadow
+		CD3D11_SAMPLER_DESC samShadow(D3D11_DEFAULT);
+		samShadow.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+		samShadow.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+		samShadow.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+		samShadow.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+		samShadow.BorderColor[0] = 0.f; samShadow.BorderColor[1] = 0.f;
+		samShadow.BorderColor[2] = 0.f; samShadow.BorderColor[3] = 0.f;
+		samShadow.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+		p->CreateSamplerState(L"samShadow", samShadow);
+
 		// NoDoubleDSS
 		CD3D11_DEPTH_STENCIL_DESC noDoubleDesc(D3D11_DEFAULT);
 		noDoubleDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
