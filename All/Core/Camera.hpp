@@ -111,7 +111,7 @@ namespace leo
 				mMatrix(1, 1) = 2.0f / mOrHeight;
 				mMatrix(3, 3) = 1.0f;
 				mMatrix(2, 3) = 0.f;
-				mMatrix(3, 2) = fRange*mNear;
+				mMatrix(3, 2) = -fRange*mNear;
 				break;
 			default:
 				break;

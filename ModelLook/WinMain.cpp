@@ -311,7 +311,7 @@ void BuildRes()
 	auto& pEffect =  leo::EffectNormalMap::GetInstance(leo::DeviceMgr().GetDevice());	
 
 	leo::DirectionLight dirlight;
-	dirlight.ambient = leo::float4(1.f, 1.f, 1.f, 1.f);
+	dirlight.ambient = leo::float4(1.0f, 1.0f, 1.0f, 1.f);
 	dirlight.diffuse = leo::float4(1.f, 1.f, 1.f, 1.f);
 	dirlight.specular = leo::float4(1.f, 1.f, 1.f, 32.f);
 	dirlight.dir = leo::float4(-0.5773f, -0.57735f,0.57735f, 0.f);
@@ -337,8 +337,7 @@ void BuildRes()
 	pBoxMesh->Load(L"Resource/Box.l3d", leo::DeviceMgr().GetDevice());
 
 	pSphereMesh->Translation(leo::float3(-6.f, 6.5f, 0.f));
-	pBoxMesh->Scale(5.f);
-	pBoxMesh->Translation(leo::float3(+5.f, 6.f, -3.5f));
+	
 	pSphereMesh->Scale(5.f);
 	pTerrainMesh->Scale(8.f);
 	auto& vertices = leo::helper::CreateFullscreenQuad();
@@ -375,8 +374,15 @@ void BuildRes()
 	save(pos, leo::Multiply(leo::Splat(-2.f*mSphere.GetRadius()), leo::load(dir)));
 	pos.x = -pos.x;
 	pos.z = -pos.z;
+
 	pCamera->LookAt(pos, mSphere.GetCenter(), float3(0.f, 1.f, 0.f));
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
+
+	pBoxMesh->Scale(5.f);
+	pBoxMesh->Translation(leo::float3(+5.f, 6.f, -3.5f));
+
+	leo::float4 rd{ -0.5f,-0.5f,-0.5f,1.f };
+	leo::float4 lu{ 0.5f,0.5f,0.5f,1.f };
 
 }
 

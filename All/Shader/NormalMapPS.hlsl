@@ -33,8 +33,10 @@ float4 main(PixelIn pin) : SV_TARGET
 		float4 diffuse = gAbsLight.Diffuse(bumpedNormalW, pin.PosW, v)*gMat.diffuse;
 		float4 spec = gAbsLight.Specular(bumpedNormalW, gMat.specular.w, pin.PosW, v)*gMat.specular;
 
-		//diffuse *= shadow;
-	//spec *= shadow;
+
+	diffuse *= shadow;
+	spec *= shadow;
+	ambient *= shadow;
 	float4 litColor = texColor*(ambient + diffuse) + spec;
 	litColor.a = texColor.a;
 	return litColor;
