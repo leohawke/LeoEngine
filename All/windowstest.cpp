@@ -162,12 +162,10 @@ protected:
 	}
 	BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpcs)
 	{
-		DebugPrintf("窗体创建\n");
 		return TRUE;
 	}
 	void OnDestory(HWND hwnd)
 	{
-		DebugPrintf("窗体删除\n");
 		PostQuitMessage(0);
 	}
 private:

@@ -1,34 +1,66 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 //  Leo Engine Source File.
-//  Copyright (C), FNS Studios, 2014-2014.
+//  Copyright (C), FNS Studios, 2014-2015.
 // -------------------------------------------------------------------------
 //  File name:   IndePlatform/ldef.hpp
-//  Version:     v1.01
+//  Version:     v1.02
 //  Created:     02/06/2014 by leo hawke.
-//  Compilers:   Visual Studio.NET 2013
+//  Compilers:   Visual Studio.NET 2015
 //  Description: 
 // -------------------------------------------------------------------------
 //  History:
 //		2014-9-27 11:02: 强制要求编译器支持alignas以及noexcept(以VS14 CTP1支持特性为主)
+//		2015-3-9  11:22  新增要求编译器支持noexcept(以VS14 CTP5支持特性为主),并格式化注释
 //
 ////////////////////////////////////////////////////////////////////////////
 #ifndef IndePlatform_ldef_h
 #define IndePlatform_ldef_h
 
+/*!	\defgroup lang_impl_versions Language Implementation Versions
+\brief 语言实现的版本。
+\since build 373
+*/
+//@{
 
-//def LB_IMPL_CPP
-//brief C++实现支持版本
-//定义为 __cplusplus
+/*!
+\def LB_IMPL_CPP
+\brief C++实现支持版本
+\since build 1.02
+
+定义为 __cplusplus
+*/
 #ifdef __cplusplus
 #define LB_IMPL_CPP __cplusplus
 #else
 # error "This header is only for C++."
 #endif
 
-//def LB_IMPL_MSCPP
-//brief Microsof C++ 实现支持版本
-//定义为 _MSC_VER 描述的版本号
+
+
+/*!
+\def LB_IMPL_MSCPP
+\brief Microsof C++ 实现支持版本
+\since build 1.02
+
+定义为 _MSC_VER 描述的版本号
+*/
+
+/*!
+\def LB_IMPL_GNUCPP
+\brief GNU C++ 实现支持版本
+\since build 1.02
+
+定义为 100进制的三重版本编号和
+*/
+
+/*!
+\def LB_IMPL_CLANGCPP
+\brief LLVM/Clang++ C++ 实现支持版本
+\since build 1.02
+
+定义为 100进制的三重版本编号和
+*/
 #ifdef _MSC_VER
 #	undef LB_IMPL_MSCPP
 #	define LB_IMPL_MSCPP _MSC_VER
@@ -53,6 +85,27 @@
 #undef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #endif
+//@}
+
+/*!
+\brief 特性检测宏补充定义：若不可用则替换为预处理记号 0 。
+\since build 1.02
+*/
+//@{
+#ifndef __has_feature
+#	define __has_feature(...) 0
+#endif
+
+#ifndef __has_extension
+#	define __has_extension(...) 0
+#endif
+
+//! \since build 535
+#ifndef __has_builtin
+#	define __has_builtin(...) 0
+#endif
+//@}
+
 
 #include <cstddef> //std::nullptr_t,std::size_t,std::ptrdiff_t,offsetof;
 #include <climits> //CHAR_BIT;
@@ -62,67 +115,142 @@
 #include <utility> //std::foward;
 #include <type_traits> //std:is_class,std::is_standard_layout;
 
-#ifndef __has_feature
-#define __has_feature(...) 0
-#endif
 
-#ifndef __has_extension
-#define __has_extension(...) 0
-#endif
-
-//预处理修正助手宏
+/*!	\defgroup preprocessor_helpers Perprocessor Helpers
+\brief 预处理器通用助手宏。
+\since build 1.02
+*/
+//@{
+//! \brief 替换为空的预处理记号。
 #define LPP_Empty
+
+/*!
+\brief 替换为逗号的预处理记号。
+\note 可用于代替宏的实际参数中出现的逗号。
+*/
 #define LPP_Comma ,
-//标准未定义##求值顺序,GCC中,##参数为宏不会被展开,故多一层包装
-#define LPP_Join(x,y) LPP_Concat(x,y) 
+
+/*
+\brief 记号连接。
+\sa YPP_Join
+*/
 #define LPP_Concat(x,y) x ## y
 
-//语言实现的必要支持:可变参数宏.
+/*
+\brief 带宏替换的记号连接。
+\see ISO WG21/N4140 16.3.3[cpp.concat]/3 。
+\see http://gcc.gnu.org/onlinedocs/cpp/Concatenation.html 。
+\see https://www.securecoding.cert.org/confluence/display/cplusplus/PRE05-CPP.+Understand+macro+replacement+when+concatenating+tokens+or+performing+stringification 。
+
+注意 ISO C++ 未确定宏定义内 # 和 ## 操作符求值顺序。
+注意宏定义内 ## 操作符修饰的形式参数为宏时，此宏不会被展开。
+*/
+#define LPP_Join(x,y) LPP_Concat(x,y)
+//@}
+
+
+/*!
+\brief 实现标签。
+\since build 1.02
+\todo 检查语言实现的必要支持：可变参数宏。
+*/
 #define limpl(...) __VA_ARGS__
 
-//语言特性检测
 
-//LB_HAS_ALIGNAS
-//内建 alignas 支持
+/*!	\defgroup lang_impl_features Language Implementation Features
+\brief 语言实现的特性。
+\since build 1.02
+*/
+//@{
+
+/*!
+\def LB_HAS_ALIGNAS
+\brief 内建 alignas 支持。
+\since build 1.02
+*/
 #undef  LB_HAS_ALIGNAS
 #define LB_HAS_ALIGNAS \
 	(__has_feature(cxx_alignas) || __has_extension(cxx_alignas) || \
 		LB_IMPL_CPP >= 201103L || LB_IMPL_MSCPP >= 1900)
-#if !LB_HAS_ALIGNAS && LB_IMPL_MSCPP != 1800
-#error "compiler must support alignas"
-#endif
 
-
+/*!
+\def LB_HAS_ALIGNOF
+\brief 内建 alignof 支持。
+\since build 1.02
+*/
 #undef LB_HAS_ALIGNOF
-#define LB_HAS_ALIGNOF (LB_IMPL_CPP >= 201103L)
+#define LB_HAS_ALIGNOF (LB_IMPL_CPP >= 201103L || LB_IMPL_GNUCPP >= 40500 || LB_IMPL_MSCPP >= 1900)
 
-
+/*!
+\def LB_HAS_BUILTIN_NULLPTR
+\brief 内建 nullptr 支持。
+\since build 1.02
+*/
 #undef LB_HAS_BUILTIN_NULLPTR
 #define LB_HAS_BUILTIN_NULLPTR \
 	(__has_feature(cxx_nullptr) || __has_extension(cxx_nullptr) || \
-	 LB_IMPL_CPP >= 201103L || LB_IMPL_MSCPP >= 1600)
-#if !LB_HAS_BUILTIN_NULLPTR
-#error "compiler must support builtin_nullptr"
-#endif
+	 LB_IMPL_CPP >= 201103L ||  LB_IMPL_GNUCPP >= 40600 || \
+	 LB_IMPL_MSCPP >= 1600)
+
+/*!
+\def LB_HAS_CONSTEXPR
+\brief constexpr 支持。
+\since build 1.02
+*/
 #undef LB_HAS_CONSTEXPR
 #define LB_HAS_CONSTEXPR \
 	(__has_feature(cxx_constexpr) || __has_extension(cxx_constexpr) || \
 	LB_IMPL_CPP >= 201103L || LB_IMPL_MSCPP >= 1900)
-#if !LB_HAS_CONSTEXPR && LB_IMPL_MSCPP != 1800
-#error "compiler must support constexpr"
-#endif
+
+/*!
+\def LB_HAS_NOEXCPT
+\brief noexcept 支持。
+\since build 1.02
+*/
 #undef LB_HAS_NOEXCEPT
 #define LB_HAS_NOEXCEPT \
 	(__has_feature(cxx_noexcept) || __has_extension(cxx_noexcept) || \
-		LB_IMPL_CPP >= 201103L || LB_IMPL_MSCPP >= 2000)
-#if !defined(LB_HAS_NOEXCEPT) && !defined(LB_IMPL_MSCPP)
-#error "compiler must support noexcept"
-#endif
+		LB_IMPL_CPP >= 201103L || LB_IMPL_MSCPP >= 1900)
+
+/*!
+\def LB_HAS_THREAD_LOCAL
+\brief thread_local 支持。
+\see http://gcc.gnu.org/bugzilla/show_bug.cgi?id=1773 。
+\since build 425
+*/
 #undef LB_HAS_THREAD_LOCAL
 #define LB_HAS_THREAD_LOCAL \
 	(__has_feature(cxx_thread_local) || (LB_IMPL_CPP >= 201103L \
-		&& !LB_IMPL_GNUCPP))
+		&& !LB_IMPL_GNUCPP) || (LB_IMPL_GNUCPP >= 40800 && _GLIBCXX_HAVE_TLS) ||\
+		LB_IMPL_MSCPP >= 1900)
+//@}
 
+/*!
+\def LB_ABORT
+\brief 非正常终止程序。
+\note 可能使用体系结构相关实现或标准库 std::abort 函数等。
+\since build 1.02
+*/
+#if __has_builtin(__builtin_trap) || LB_IMPL_GNUCPP >= 40203
+#	define LB_ABORT __builtin_trap()
+#else
+#	define LB_ABORT std::abort()
+#endif
+
+/*!
+\def LB_ASSUME(expr)
+\brief 假定表达式总是成立。
+\note 若假定成立有利于优化。
+\warning 若假定不成立则行为未定义。
+\since build 1.02
+*/
+#if LB_IMPL_MSCPP >= 1200
+#	define LB_ASSUME(_expr) __assume(_expr)
+#elif __has_builtin(__builtin_unreachable) || LB_IMPL_GNUCPP >= 40500
+#	define LB_ASSUME(_expr) (_expr) ? void(0) : __builtin_unreachable()
+#else
+#	define LB_ASSUME(_expr) (_expr) ? void(0) : LB_ABORT
+#endif
 
 //附加提示
 //保证忽略时不导致运行时语义差异的提示,主要用于便于实现可能的优化
@@ -178,36 +306,124 @@
 #	define LB_STATELESS
 #endif
 
-//库选项
-//LB_DLL 使用动态链接库
-//LB_BUILD_DLL 构建动态链接库
+/*!	\defgroup lib_options Library Options
+\brief 库选项。
+\since build 1.02
+*/
+//@{
+
+/*!
+\def LB_DLL
+\brief 使用 IndePlatform 动态链接库。
+\since build 1.02
+*/
+/*!
+\def LB_BUILD_DLL
+\brief 构建 IndePlatform 动态链接库。
+\since build 1.02
+*/
+/*!
+\def LB_API
+\brief IndePlatform 应用程序编程接口：用于向库文件约定链接。
+\since build 1.02
+\todo 判断语言特性支持。
+*/
 #if defined(LB_DLL) && defined(LB_BUILD_DLL)
 #	error "DLL could not be built and used at the same time."
 #endif
 
-#ifdef LB_DLL
-#	define LB_API __declspec(dllimport)
-#elif defined(LB_BUILD_DLL)
-#	define LB_API __declspec(dllexport)
+#if LB_IMPL_MSCPP \
+	|| (LB_IMPL_GNUCPP && (defined(__MINGW32__) || defined(__CYGWIN__)))
+#	ifdef LB_DLL
+#		define LB_API __declspec(dllimport)
+#	elif defined(LB_BUILD_DLL)
+#		define LB_API __declspec(dllexport)
+#	else
+#		define LB_API
+#	endif
+#elif defined(LB_BUILD_DLL) && (LB_IMPL_GNUCPP >= 40000 || LB_IMPL_CLANGPP)
+#	define LB_API LB_ATTR(__visibility__("default"))
 #else
 #	define LB_API
 #endif
 
-//指定类型的对齐
+/*!
+\def LB_Use_LAssert
+\brief 使用断言。
+\since build 1.02
+*/
+/*!
+\def LB_Use_LTrace
+\brief 使用调试跟踪记录。
+\since build 1.02
+*/
+#ifndef NDEBUG
+#	ifndef LB_Use_LAssert
+#		define LB_Use_LAssert 1
+#	endif
+#endif
+#define LB_Use_LTrace 1
+
+
+/*!
+\def LB_USE_EXCEPTION_SPECIFICATION
+\brief 使用 IndePlatform 动态异常规范。
+\since build 1.02
+*/
+#if 0 && !defined(NDEBUG)
+#	define LB_USE_EXCEPTION_SPECIFICATION 1
+#endif
+
+
+//@}
+
+/*!	\defgrouppseudo_keyword Specified Pseudo-Keywords
+\brief IndePlatform 指定的替代关键字。
+\since build 1.02
+*/
+//@{
+
+/*!
+\ingroup pseudo_keyword
+\def lalignof
+\brief 查询特定类型的对齐大小。
+\note 同 C++11 alignof 作用于类型时的语义。
+\since build 1.02
+*/
 #if LB_HAS_ALIGNOF
 #	define lalignof alignof
 #else
 #	define lalignof(_type) std::alignment_of<_type>::value
 #endif
 
+/*!
+\ingroup pseudo_keyword
+\def lalignas
+\brief 指定特定类型的对齐大小。
+\note 同 C++11 alignas 作用于类型时的语义。
+\since build 1.02
+*/
 #if LB_HAS_ALIGNAS
 #	define lalignas(_n) alignas(_n)
 #else
 #	define lalignas(_n) _declspec(align(_n))
 #endif
 
-//编译器常量
-#if LB_HAS_CONSTEXPR && !LB_IMPL_MSCPP
+/*!
+\ingroup pseudo_keyword
+\def lconstexpr
+\brief 指定编译时常量表达式。
+\note 同 C++11 constepxr 作用于编译时常量的语义。
+\since build 1.02
+*/
+/*!
+\ingroup pseudo_keyword
+\def lconstfn
+\brief 指定编译时常量函数。
+\note 同 C++11 constepxr 作用于编译时常量函数的语义。
+\since build 1.02
+*/
+#if LB_HAS_CONSTEXPR
 #	define lconstexpr constexpr
 #	define lconstfn constexpr
 #else
@@ -215,7 +431,12 @@
 #	define lconstfn inline
 #endif
 
-//搞不懂的异常规范,跳过
+/*!
+\ingroup pseudo_keyword
+\def lthrow
+\brief IndePlatform 动态异常规范：根据是否使用异常规范宏指定或忽略动态异常规范。
+\note lthrow = "yielded throwing" 。
+*/
 #if LB_USE_EXCEPTION_SPECIFICATION
 #	define lthrow throw
 #else
@@ -228,6 +449,18 @@
 #	define lnothrowv
 #endif
 
+/*!
+\ingroup pseudo_keyword
+\def lnoexcept
+\brief 无异常抛出保证：指定特定的异常规范。
+\since build 1.02
+*/
+#if LB_HAS_NOEXCEPT
+#	define lnoexcept noexcept
+#else
+#	define lnoexcept(...)
+#endif
+
 #if LB_HAS_NOEXCEPT
 #	define lnothrow lnoexcept
 #elif LB_IMPL_GNUCPP >= 30300
@@ -236,20 +469,41 @@
 #	define lnothrow lthrow()
 #endif
 
-#if LB_HAS_NOEXCEPT
-#	define lnoexcept noexcept
-#else
-#	define lnoexcept(...)
-#endif
 
+/*!
+\ingroup pseudo_keyword
+\def lthread
+\brief 线程局部存储：若实现支持，指定为 \c thread_local 。
+\since build 1.02
+*/
 #if LB_HAS_THREAD_LOCAL && defined(_MT)
 #	define lthread thread_local
 #else
+#ifdef LB_IMPL_MSCPP
+#	define lthread __declspec(thread)
+#else
 #	define lthread static
 #endif
+#endif
+//@}
 
-namespace leo
+namespace stdex
 {
+
+	//char无unsigned和signed指定
+	using byte = unsigned char;
+#if  CHAR_BIT == 8
+	//一字节并不一定等于8位!
+	using octet = byte;
+#else
+	using octet = void;
+#endif
+	using errno_t = int;
+	using std::ptrdiff_t;
+	using std::size_t;
+	using std::wint_t;
+
+
 #if LB_HAS_BUILTIN_NULLPTR
 	using std::nullptr_t;
 #else
@@ -305,65 +559,54 @@ namespace leo
 		return !rhs.equals(lhs);
 	}
 #endif
-	namespace stdex
+
+	template<typename...>
+	struct empty_base
+	{};
+
+	//tuple,pair所需的构造重载
+	using raw_tag = empty_base<>;
+
+	//成员计算静态类型检查. 
+	template<bool bMemObjPtr, bool bNoExcept, typename T>
+	class offsetof_check
 	{
-		//char无unsigned和signed指定
-		using byte = unsigned char;
-#if  CHAR_BIT == 8
-		//一字节并不一定等于8位!
-		using octet = byte;
-#else
-		using octet = void;
-#endif
-		using errno_t = int;
-		using std::ptrdiff_t;
-		using std::size_t;
-		using std::wint_t;
-
-
-		template<typename...>
-		struct empty_base
-		{};
-
-		//tuple,pair所需的构造重载
-		using raw_tag = empty_base<>;
-
-		//成员计算静态类型检查. 
-		template<bool bMemObjPtr, bool bNoExcept, typename T>
-		class offsetof_check
-		{
-			static_assert(std::is_class<T>::value, "Non class type found.");
-			static_assert(std::is_standard_layout<T>::value,
-				"Non standard layout type found.");
-			static_assert(bMemObjPtr, "Non-static member object violation found.");
-			static_assert(bNoExcept, "Exception guarantee violation found.");
-		};
+		static_assert(std::is_class<T>::value, "Non class type found.");
+		static_assert(std::is_standard_layout<T>::value,
+			"Non standard layout type found.");
+		static_assert(bMemObjPtr, "Non-static member object violation found.");
+		static_assert(bNoExcept, "Exception guarantee violation found.");
+	};
 
 #define lunused(...) static_cast<void>(__VA_ARGS__)
 
-#if LB_HAS_NOEXCEPT
 #define loffsetof(type,member) \
 	(decltype(sizeof(leo::stdex::offsetof_check<std::is_member_object_pointer< \
 	decltype(&type::member)>::value,lnoexcept(offsetof(type,member)), \
 	type>))(offsetof(type,member)))
-#else
-#define loffsetof(type,member) \
-	(decltype(sizeof(leo::stdex::offsetof_check<std::is_member_object_pointer< \
-	decltype(&type::member)>::value,true, \
-	type>))(offsetof(type,member)))
-#endif
+
+	/*!
+	\ingroup pseudo_keyword
+	\brief 根据参数类型使用 std::forward 传递对应参数。
+	\since build 1.02
+
+	传递参数：按类型保持值类别(value catory) 和 const 修饰符。
+	当表达式类型为函数或函数引用类型时，结果为左值(lvalue) ，否则：
+	当且仅当左值引用类型时结果为左值（此时类型不变）；
+	否则结果为对应的右值引用类型的消亡值(xvalue) 。
+	*/
 #define lforward(expr) std::forward<decltype(expr)>(expr)
 
-		template<typename type, typename ...tParams>
-		lconstfn auto
-			unsequenced(type && arg, tParams&&...)->decltype(lforward(arg))
-		{
-			return lforward(arg);
-		}
-
-		//无序求值
-#define lunseq leo::stdex::unsequenced
+	template<typename type, typename ...tParams>
+	lconstfn auto
+		unsequenced(type && arg, tParams&&...)->decltype(lforward(arg))
+	{
+		return lforward(arg);
 	}
+
+	//无序求值
+#define lunseq leo::stdex::unsequenced
+
 }
 
 #endif

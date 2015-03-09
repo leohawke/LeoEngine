@@ -252,6 +252,9 @@
     <ClCompile Include="Core\EffectShadowMap.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="OutputWindow.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.hpp">

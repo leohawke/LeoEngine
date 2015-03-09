@@ -146,6 +146,7 @@
     <ClCompile Include="Notation.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="OutputWindow.cpp" />
     <ClCompile Include="RenderStates.cpp" />
     <ClCompile Include="ShaderMgr.cpp" />
     <ClCompile Include="test.cpp">
