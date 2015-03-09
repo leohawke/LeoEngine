@@ -1,3 +1,18 @@
+////////////////////////////////////////////////////////////////////////////
+//
+//  Leo Engine Source File.
+//  Copyright (C), FNS Studios, 2014-2015.
+// -------------------------------------------------------------------------
+//  File name:   IndePlatform/utility.hpp
+//  Version:     v1.01
+//  Created:     ?/?/2014 by leo hawke.
+//  Compilers:   Visual Studio.NET 2015
+//  Description: 
+// -------------------------------------------------------------------------
+//  History:
+//		2014-3-9 14:54 加入新的工具类{临时状态暂存对象的 scope guard}
+//
+////////////////////////////////////////////////////////////////////////////
 #ifndef IndePlatform_utility_hpp
 #define IndePlatform_utility_hpp
 
@@ -8,7 +23,7 @@
 
 namespace leo
 {
-//不满足此断言的行为是接口明确地未定义的，行为不可预测
+	//不满足此断言的行为是接口明确地未定义的，行为不可预测
 #define lconstraint assert
 //运行时检查的环境条件约束断言。用于明确地非 yconstraint 适用的情形
 #define lassume assert
@@ -40,13 +55,11 @@ namespace leo
 	class noncopyable
 	{
 	protected:
-		lconstfn
-			noncopyable() = default;
+		noncopyable() = default;
 		~noncopyable() = default;
 
 	public:
-		lconstfn
-			noncopyable(const noncopyable&) = delete;
+		noncopyable(const noncopyable&) = delete;
 
 		noncopyable&
 			operator=(const noncopyable&) = delete;
@@ -55,13 +68,11 @@ namespace leo
 	class nonmovable
 	{
 	protected:
-		lconstfn
-			nonmovable() = default;
+		nonmovable() = default;
 		~nonmovable() = default;
 
 	public:
-		lconstfn
-			nonmovable(const nonmovable&) = delete;
+		nonmovable(const nonmovable&) = delete;
 
 		nonmovable&
 			operator=(const nonmovable&) = delete;
@@ -172,8 +183,8 @@ namespace leo
 	\brief 包装非类类型为类类型。
 	*/
 	template<typename _type>
-	using classify_value_t = conditional_t<std::is_class<_type>::value, _type,
-		boxed_value<_type >> ;
+	using classify_value_t = conditional_t < std::is_class<_type>::value, _type,
+		boxed_value < _type >> ;
 
 
 	/*!
@@ -327,7 +338,7 @@ namespace leo
 
 			return count;
 		}
-			static object_type*&
+		static object_type*&
 			get_object_ptr() lnothrow
 		{
 			lthread object_type* ptr;
@@ -353,7 +364,7 @@ namespace leo
 	对应 std::call_once ，则是线程安全的；
 	若使用 bool ，对应 leo::call_once ，不保证线程安全。
 	其它类型可使用用户自行定义 call_once 。
-	\since build 328
+	\since build 1.02
 	\todo 使用支持 lambda pack 展开的实现构造模板。
 	\todo 支持分配器。
 
@@ -426,22 +437,218 @@ namespace leo
 			delete get_object_ptr();
 		}
 	};
+
+	namespace details
+	{
+
+		//! \since build 1.01
+		//@{
+		template<typename _type, typename _tToken,
+			bool _bRef = is_reference<_tToken>::value>
+		struct state_guard_traits
+		{
+			static void
+				save(_tToken t, _type& val) lnoexcept(
+				lnoexcept(std::declval<_tToken&>()(true, std::declval<_type&>())))
+			{
+				t(true, val);
+			}
+
+			static void
+				restore(_tToken t, _type& val) lnoexcept(
+				lnoexcept(std::declval<_tToken&>()(false, std::declval<_type&>())))
+			{
+				t(false, val);
+			}
+		};
+
+		template<typename _type, typename _tToken>
+		struct state_guard_traits<_type, _tToken, true>
+		{
+			//! \todo 按 ISO C++ [utility.swap] 要求确定异常规范。
+			static void
+				save(_tToken t, _type& val)
+			{
+				using std::swap;
+
+				swap(val, static_cast<_type&>(t));
+			}
+
+			//! \todo 按 ISO C++ [utility.swap] 要求确定异常规范。
+			static void
+				restore(_tToken t, _type& val)
+			{
+				using std::swap;
+
+				swap(val, static_cast<_type&>(t));
+			}
+		};
+
+
+		template<typename _type, typename _tToken>
+		struct state_guard_impl : private state_guard_traits<_type, _tToken>
+		{
+			using value_type = _type;
+			using token_type = _tToken;
+
+			token_type token;
+			union
+			{
+				value_type value;
+				stdex::byte data[sizeof(value_type)];
+			};
+
+			state_guard_impl(token_type t)
+				: token(t)
+			{}
+			state_guard_impl(const state_guard_impl&) = delete;
+			~state_guard_impl()
+			{}
+
+			template<typename... _tParams>
+			void
+				construct_and_save(_tParams&&... args)
+			{
+				new(std::addressof(value)) value_type(yforward(args)...);
+				save();
+			}
+
+			void
+				destroy()
+			{
+				value.~value_type();
+			}
+
+			void
+				save() lnoexcept(noexcept(state_guard_traits<value_type, token_type>
+				::save(std::declval<token_type&>(), std::declval<value_type&>())))
+			{
+				state_guard_traits<value_type, token_type>::save(token, value);
+			}
+
+			void
+				restore() lnoexcept(noexcept(state_guard_traits<value_type, token_type>
+				::restore(std::declval<token_type&>(),
+				std::declval<value_type&>())))
+			{
+				state_guard_traits<value_type, token_type>::restore(token, value);
+			}
+
+			void
+				restore_and_destroy() lnoexcept(
+				noexcept(state_guard_traits<value_type, token_type>::restore(
+				std::declval<token_type&>(), std::declval<value_type&>())))
+			{
+				restore();
+				destroy();
+			}
+		};
+		//@}
+
+	} // namespace details;
+
+	 /*!
+	 \brief 使用临时状态暂存对象的 scope guard 。
+	 \since build 1.01
+	 \todo 支持分配器。
+	 \todo 支持有限的复制和转移。
+	 */
+	 //@{
+	template<typename _type, typename _tCond = bool,
+		typename _tToken = std::function<void(bool, _type&) >>
+	class state_guard : private details::state_guard_impl<_type, _tToken>
+	{
+	private:
+		using base = details::state_guard_impl<_type, _tToken>;
+
+	public:
+		using typename base::value_type;
+		using typename base::token_type;
+		using condition_type = _tCond;
+
+		using base::token;
+		using base::value;
+		using base::data;
+		mutable condition_type enabled{};
+
+		template<typename... _tParams>
+		state_guard(condition_type cond, token_type t, _tParams&&... args)
+			: base(t),
+			enabled(cond)
+		{
+			if (enabled)
+				base::construct_and_save(yforward(args)...);
+		}
+		~state_guard() lnoexcept(
+			noexcept(std::declval<state_guard&>().base::restore_and_destroy()))
+		{
+			if (enabled)
+				base::restore_and_destroy();
+		}
+
+		void
+			dismiss()
+		{
+			if (enabled)
+				base::destroy();
+			enabled = condition_type();
+		}
+	};
+
+	template<typename _type, typename _tToken>
+	class state_guard<_type, void, _tToken>
+		: private details::state_guard_impl<_type, _tToken>
+	{
+	private:
+		using base = details::state_guard_impl<_type, _tToken>;
+
+	public:
+		using typename base::value_type;
+		using typename base::token_type;
+		using condition_type = void;
+
+		using base::token;
+		using base::value;
+		using base::data;
+
+		template<typename... _tParams>
+		state_guard(token_type t, _tParams&&... args)
+			: base(t)
+		{
+			base::construct_and_save(yforward(args)...);
+		}
+		~state_guard()
+		{
+			base::restore_and_destroy();
+		}
+	};
+	//@}
+
+	/*!
+	\brief 使用 ADL swap 调用暂存对象的 scope guard 。
+	\since build 1.01
+	\todo 支持分配器。
+	\todo 支持有限的复制和转移。
+	\todo 等待帝球完成
+	*/
+	template<typename _type, typename _tCond = bool, typename _tRef = _type&>
+	using swap_guard = state_guard<_type, _tCond, _tRef>;
 }
 
 
 #include <unordered_map>
 
-namespace leo{
-	namespace details{
-		static class StringTableDelegate{
+namespace leo {
+	namespace details {
+		static class StringTableDelegate {
 		public:
-			~StringTableDelegate(){
+			~StringTableDelegate() {
 				for (auto &str : mMap)
 				{
 					free(str.second);
 				}
 			}
-			inline std::size_t hash(const wchar_t* str){
+			inline std::size_t hash(const wchar_t* str) {
 #ifdef LB_IMPL_MSCPP
 				auto sid = std::_Hash_seq((unsigned char*)str, wcslen(str)*sizeof(wchar_t) / sizeof(char));
 #else
@@ -451,11 +658,11 @@ namespace leo{
 					mMap[sid] = _wcsdup(str);
 				return sid;
 			}
-			inline std::size_t hash(const std::wstring& str){
+			inline std::size_t hash(const std::wstring& str) {
 				return hash(str.c_str());
 			}
 
-			const wchar_t* unhash(std::size_t sid){
+			const wchar_t* unhash(std::size_t sid) {
 				auto it = mMap.find(sid);
 
 				if (it == mMap.end())
@@ -468,15 +675,15 @@ namespace leo{
 		} mTable;
 	}
 
-	inline std::size_t hash(const wchar_t* str){
+	inline std::size_t hash(const wchar_t* str) {
 		return details::mTable.hash(str);
 	}
 
-	inline std::size_t hash(const std::wstring& str){
+	inline std::size_t hash(const std::wstring& str) {
 		return details::mTable.hash(str);
 	}
 
-	inline const wchar_t* unhash(std::size_t sid){
+	inline const wchar_t* unhash(std::size_t sid) {
 		if (auto str = details::mTable.unhash(sid))
 			return str;
 		else
@@ -484,7 +691,7 @@ namespace leo{
 	}
 }
 #if !LB_HAS_BUILTIN_NULLPTR
-using leo::stdex::nullptr;
+using stdex::nullptr;
 #endif
 
 #endif
