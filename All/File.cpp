@@ -20,7 +20,7 @@ namespace leo
 		private:
 			struct xFileCloser {
 				using value_type = HANDLE;
-				lconstexpr HANDLE operator()() const lnothrow{
+				HANDLE operator()() const lnothrow{
 					return INVALID_HANDLE_VALUE;
 				}
 					void operator()(HANDLE hFile) const lnothrow{

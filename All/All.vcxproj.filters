@@ -213,9 +213,6 @@
     <ClCompile Include="Core\Terrain.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="IndePlatform\leoMathTest.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
-    </ClCompile>
     <ClCompile Include="Core\SkeletonModel.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -234,9 +231,6 @@
     <ClCompile Include="Core\FileSearch.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="IndePlatform\BugTest.cpp">
-      <Filter>IndePlatform\WinSource</Filter>
-    </ClCompile>
     <ClCompile Include="Core\EffectTerrainSO.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -253,6 +247,9 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="OutputWindow.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LeoScheme\Sexp\Sexp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -164,10 +164,10 @@ namespace leo{
 		auto & mEffect = EffectSkeleton::GetInstance();
 
 
-		XMMATRIX world = convert(mMesh.operator std::array<__m128, 4U>());
+		auto world = mMesh.operator std::array<__m128, 4U>();
 		mEffect->WorldMatrix(world);
-		mEffect->WorldViewProjMatrix(world*camera.ViewProj());
-		mEffect->SkinMatrix(mPose->mSkinMatrixs, mSkeleton->mJointCount);
+		mEffect->WorldViewProjMatrix(Multiply(world,load(camera.ViewProj())));
+		mEffect->SkinMatrix(static_cast<float4x4Object*>(mPose->mSkinMatrixs.get()), mSkeleton->mJointCount);
 		mEffect->Apply(context);
 
 		for (auto it = mMesh.m_subsets.cbegin(); it != mMesh.m_subsets.cend(); ++it)

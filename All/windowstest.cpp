@@ -1,3 +1,4 @@
+#if 0
 #define _CRTDBG_MAP_ALLOC
 #include	<stdlib.h>
 #include	<crtdbg.h>
@@ -192,6 +193,25 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 #endif
 
 	leo::SingletonManger::GetInstance()->UnInstallAllSingleton();
+	FreeConsole();
+	return 0;
+}
+
+#endif
+
+#include "Win.hpp"
+#include "debug.hpp"
+#include "IndePlatform\utility.hpp"
+#include <iostream>
+
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
+	AllocConsole();
+	leo::ReSetStdIOtoFile(leo::which_stdio::ostream, L"CONOUT$");
+	{
+		auto&& close_file = leo::finally([]() noexcept {
+			std::cout << 1;
+		});
+	}
 	FreeConsole();
 	return 0;
 }

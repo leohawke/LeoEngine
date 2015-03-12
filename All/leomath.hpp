@@ -6,6 +6,7 @@
 #include "IndePlatform\LeoMath.h"
 #pragma warning(push)
 #pragma warning(disable : 4838)
+#pragma warning(disable : 4458)
 #include <DirectXMath.h>
 #include <DirectXCollision.h>
 #pragma warning(pop)

@@ -52,6 +52,13 @@ namespace leo{
 			return *this;
 		}
 
+		JointPose(JointPose&& rhs)
+			:SQTObject(rhs){
+		}
+
+		JointPose() {
+		}
+
 		//This function onlu uses the rotation portion of the JointPose
 		//See ..\LeoMath.hpp FILE 225 LINE
 		JointPose operator*(const JointPose& pose){

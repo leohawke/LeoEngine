@@ -1,4 +1,5 @@
 #include "..\IndePlatform\platform.h"
+
 #include "..\d3dx11.hpp"
 
 #include "Skeleton.hpp"
@@ -11,6 +12,7 @@
 #include "..\DeviceMgr.h"
 #include "MeshLoad.hpp"
 #include "FileSearch.h"
+
 namespace leo{
 
 	SkeletonData::~SkeletonData(){

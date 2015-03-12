@@ -81,7 +81,7 @@ namespace leo
 		auto& mEffect = EffectSprite::GetInstance();
 
 		float3 eyepos;
-		memcpy(eyepos, camera.GetOrigin());
+		leo::memcpy(eyepos, camera.GetOrigin());
 		mEffect->EyePos(eyepos);
 		mEffect->ViewProj(camera.ViewProj());
 		mEffect->Apply(context);

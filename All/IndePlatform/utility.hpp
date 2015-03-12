@@ -509,7 +509,7 @@ namespace leo
 			void
 				construct_and_save(_tParams&&... args)
 			{
-				new(std::addressof(value)) value_type(yforward(args)...);
+				new(std::addressof(value)) value_type(lforward(args)...);
 				save();
 			}
 
@@ -577,7 +577,7 @@ namespace leo
 			enabled(cond)
 		{
 			if (enabled)
-				base::construct_and_save(yforward(args)...);
+				base::construct_and_save(lforward(args)...);
 		}
 		~state_guard() lnoexcept(
 			noexcept(std::declval<state_guard&>().base::restore_and_destroy()))
@@ -615,7 +615,7 @@ namespace leo
 		state_guard(token_type t, _tParams&&... args)
 			: base(t)
 		{
-			base::construct_and_save(yforward(args)...);
+			base::construct_and_save(lforward(args)...);
 		}
 		~state_guard()
 		{
@@ -633,6 +633,34 @@ namespace leo
 	*/
 	template<typename _type, typename _tCond = bool, typename _tRef = _type&>
 	using swap_guard = state_guard<_type, _tCond, _tRef>;
+
+	/*!
+	\brief ÉÚ±ø¶ÔÏó sentry¡£
+	\since build 1.01
+	*/
+	template<typename T>
+	class sentry {
+		T functor;
+	public:
+		sentry(T fun) :functor(std::move(fun)) {
+		}
+
+		sentry(sentry &&) = delete;
+		sentry(sentry const &) = delete;
+
+		~sentry() noexcept {
+			static_assert(noexcept(functor()),
+				"Please check that the finally block cannot throw, "
+				"and mark the lambda as noexcept.");
+			functor();
+		}
+
+	};
+
+	template<typename T>
+	sentry<T> finally(T o) {
+		return {std::move(o)};
+	}
 }
 
 

@@ -1191,6 +1191,10 @@ namespace leo {
 #endif
 	}
 
+	inline __m128 __fastcall Multiply(__m128 ml, float mr) {
+		return Multiply(ml, Splat(mr));
+	}
+
 	inline std::array<__m128, 4> Multiply(const std::array<__m128, 4>& M1, const std::array<__m128, 4>& M2) {
 #if defined(LM_SSE_INTRINSICS)
 		std::array<__m128, 4> mResult;

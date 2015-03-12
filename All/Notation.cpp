@@ -480,3 +480,4 @@ wstring Notation::Export(const wchar_t *pwchIndent) const {
 	xExportPackageRecur(wcsResult, *this, wcsPrefix, pwchIndent, uIndentLength);
 	return std::move(wcsResult);
 }
+

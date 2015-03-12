@@ -5,6 +5,7 @@
 
 #pragma warning(push)
 #pragma warning(disable : 4005)
+#pragma warning(disable : 4458)// warning C4458: declaration of param hides class member
 #include <d2d1.h>
 #include <wincodec.h>
 #pragma warning(pop)
@@ -654,10 +655,10 @@ namespace leo
 
 		profiler profiler::global_profiler;
 
-		void profiler::init(ID3D11Device* device, ID3D11DeviceContext* context)
+		void profiler::init(ID3D11Device* dev, ID3D11DeviceContext* con)
 		{
-			this->device = device;
-			this->context = context;
+			this->device = dev;
+			this->context = con;
 		}
 
 		void profiler::startprofile(const std::wstring& name)

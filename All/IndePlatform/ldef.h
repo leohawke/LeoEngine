@@ -114,6 +114,7 @@
 #include <cwchar>  //std::wint_t;
 #include <utility> //std::foward;
 #include <type_traits> //std:is_class,std::is_standard_layout;
+#include <functional> //std::function
 
 
 /*!	\defgroup preprocessor_helpers Perprocessor Helpers
@@ -581,7 +582,7 @@ namespace stdex
 #define lunused(...) static_cast<void>(__VA_ARGS__)
 
 #define loffsetof(type,member) \
-	(decltype(sizeof(leo::stdex::offsetof_check<std::is_member_object_pointer< \
+	(decltype(sizeof(stdex::offsetof_check<std::is_member_object_pointer< \
 	decltype(&type::member)>::value,lnoexcept(offsetof(type,member)), \
 	type>))(offsetof(type,member)))
 

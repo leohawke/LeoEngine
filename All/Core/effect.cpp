@@ -5,6 +5,7 @@
 #include "Vertex.hpp"
 #include "FileSearch.h"
 #include "EngineConfig.h"
+#include "..\leomath.hpp"
 #include <d3dcompiler.h>
 
 #include <atomic>

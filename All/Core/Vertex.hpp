@@ -4,7 +4,7 @@
 #define Core_Vertex_Hpp
 
 #include "..\IndePlatform\memory.hpp"
-#include "..\leomath.hpp"
+#include "..\IndePlatform\LeoMath.h"
 #include <type_traits>
 #include <vector>
 struct D3D11_INPUT_ELEMENT_DESC;
@@ -40,9 +40,9 @@ namespace leo
 				tex = load(basic.tex);
 				return *this;
 			}
-			XMVECTOR pos;
-			XMVECTOR normal;
-			XMVECTOR tex;
+			__m128 pos;
+			__m128 normal;
+			__m128 tex;
 		};
 
 		struct NormalMap
@@ -80,10 +80,10 @@ namespace leo
 				tangent = load(NormalMap.tangent);
 				return *this;
 			}
-			XMVECTOR pos;
-			XMVECTOR normal;
-			XMVECTOR tex;
-			XMVECTOR tangent;
+			__m128 pos;
+			__m128 normal;
+			__m128 tex;
+			__m128 tangent;
 		};
 
 		struct PostEffect
@@ -164,6 +164,13 @@ namespace leo
 		{
 			std::vector < Vertex::NormalMap> Vertices;
 			std::vector<uint32> Indices;
+
+			MeshData(std::vector < Vertex::NormalMap> && v, std::vector<uint32> && i)
+				:Vertices(std::move(v)), Indices(std::move(i)) {
+			}
+
+			MeshData() {
+			}
 		};
 
 		///<summary>
@@ -202,7 +209,7 @@ namespace leo
 		/// postprocessing effects.
 		///IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP)
 		///</summary>
-		lconstexpr std::array<Vertex::PostEffect, 4>& CreateFullscreenQuad();
+		std::array<Vertex::PostEffect, 4>& CreateFullscreenQuad();
 
 	}
 }

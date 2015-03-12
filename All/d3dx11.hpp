@@ -3,7 +3,7 @@
 #pragma once
 
 
-#include "IndePlatform\utility.hpp"
+
 #include "IndePlatform\leoint.hpp"
 
 #include "IndePlatform\platform.h"
@@ -149,7 +149,7 @@ namespace leo
 	//helper function
 	namespace dx
 	{
-		struct d3d11_timer : private leo::noncopyable
+		struct d3d11_timer
 		{
 			static const std::uint64_t querylatency = 5;
 

@@ -165,8 +165,8 @@ namespace leo
 			Vertices.reserve(1 + (stackCount - 1)*(sliceCount + 1) + 1);//top + slice + bottom
 			Vertices.emplace_back(topVertex);
 
-			float phiStep = XM_PI / stackCount;
-			float thetaStep = 2.0f*XM_PI / sliceCount;
+			float phiStep = LM_PI / stackCount;
+			float thetaStep = 2.0f*LM_PI / sliceCount;
 
 			// Compute vertices for each stack ring (do not count the poles as rings).
 			for (uint32 i = 1; i <= stackCount - 1; ++i)
@@ -191,16 +191,16 @@ namespace leo
 					tangent.y = 0.0f;
 					tangent.z = +radius*sinf(phi)*cosf(theta);
 
-					XMVECTOR T = load(tangent);
-					save(tangent, XMVector3Normalize(T));
+					auto T = load(tangent);
+					save(tangent, Normalize<3>(T));
 
-					XMVECTOR p = load(pos);
+					auto p = load(pos);
 					float3 normal;
-					save(normal, XMVector3Normalize(p));
+					save(normal, Normalize<3>(p));
 
 					float2 tex;
-					tex.x = theta / XM_2PI;
-					tex.y = phi / XM_PI;
+					tex.x = theta / LM_TWOPI;
+					tex.y = phi / LM_PI;
 
 					Vertices.emplace_back(pos, normal, tex, tangent);
 				}
@@ -261,7 +261,10 @@ namespace leo
 				Indices.push_back(baseIndex + i + 1);
 			}
 
-			return{ std::move(Vertices), std::move(Indices) };
+
+			return MeshData{ std::move(Vertices), std::move(Indices) };
+
+			
 		}
 
 		MeshData Subdivide(const MeshData& result)
@@ -400,10 +403,10 @@ namespace leo
 			for (uint32 i = 0; i < result.Vertices.size(); ++i)
 			{
 				// Project onto unit sphere.
-				XMVECTOR n = XMVector3Normalize(load(result.Vertices[i].pos));
+				auto n = Normalize<3>(load(result.Vertices[i].pos));
 
 				// Project onto sphere.
-				XMVECTOR p = radius*n;
+				auto p =Multiply(n,radius);
 
 				save(result.Vertices[i].pos, p);
 				save(result.Vertices[i].normal, n);
@@ -415,7 +418,7 @@ namespace leo
 
 				float phi = acosf(result.Vertices[i].pos.y / radius);
 
-				result.Vertices[i].tex.x = theta / XM_2PI;
+				result.Vertices[i].tex.x = theta / LM_TWOPI;
 				result.Vertices[i].tex.y = phi / LM_PI;
 
 				// Partial derivative of P with respect to theta
@@ -423,8 +426,8 @@ namespace leo
 				result.Vertices[i].tangent.y = 0.0f;
 				result.Vertices[i].tangent.z = +radius*sinf(phi)*cosf(theta);
 
-				XMVECTOR T = load(result.Vertices[i].tangent);
-				save(result.Vertices[i].tangent, XMVector3Normalize(T));
+				auto T = load(result.Vertices[i].tangent);
+				save(result.Vertices[i].tangent, Normalize<3>(T));
 			}
 
 			return std::move(result);
@@ -493,10 +496,10 @@ namespace leo
 			return{ std::move(Vertices), std::move(Indices) };
 		}
 
-		lconstexpr std::array<Vertex::PostEffect, 4>& CreateFullscreenQuad()
+		std::array<Vertex::PostEffect, 4>& CreateFullscreenQuad()
 		{
 			using Vertex::PostEffect;
-			lconstexpr static std::array<Vertex::PostEffect, 4> result = {
+			 static std::array<Vertex::PostEffect, 4> result = {
 				PostEffect(float4(+1.f, +1.f, 1.f, 1.f)),
 				PostEffect(float4(+1.f, -1.f, 1.f, 1.f)),
 				PostEffect(float4(-1.f, +1.f, 1.f, 1.f)),

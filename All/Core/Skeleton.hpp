@@ -21,6 +21,7 @@
 #include "..\IndePlatform\ldef.h"
 #include "..\IndePlatform\memory.hpp"
 #include "..\IndePlatform\clock.hpp"
+#include "..\IndePlatform\\utility.hpp"
 #include "Lod.h"
 #include "Material.h"
 #include "Vertex.hpp"
