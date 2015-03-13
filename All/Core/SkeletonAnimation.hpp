@@ -97,12 +97,12 @@ namespace leo{
 		Animation(AnimationClip&& clip, std::shared_ptr<Skeleton> skeleton)
 			:mClip(std::move(clip)){
 			mSkePose.mSkeleton = skeleton;
-			mSkePose.mGlobalPoses = std::make_unique<float4x4[]>(skeleton->mJointCount);
-			mSkePose.mSkinMatrixs = std::make_unique<float4x4[]>(skeleton->mJointCount);
+			mSkePose.mGlobalPoses =std::make_unique<float4x4Object[]>(skeleton->mJointCount);
+			mSkePose.mSkinMatrixs = std::make_unique<float4x4Object[]>(skeleton->mJointCount);
 			mSkePose.mLocalPoses = std::make_unique<JointPose[]>(skeleton->mJointCount);
-#ifdef DEBUG
+
 			mT = 0.f;
-#endif
+
 		}
 
 		std::pair<uint32, uint32> CalcFrameIndex(float frame){
@@ -147,14 +147,14 @@ namespace leo{
 			//子节点在后面,只需找到父,即可相乘
 			for (auto jointIndex = 1u; jointIndex != mClip.mSkeleton->mJointCount; ++jointIndex){
 				auto & joint = mSkePose.mSkeleton->mJoints[jointIndex];
-				auto parentToRoot = load(mSkePose.mGlobalPoses[joint.mParent]);
+				auto parentToRoot = load(static_cast<float4x4&>(mSkePose.mGlobalPoses[joint.mParent]));
 				auto toParent = mSkePose.mLocalPoses[jointIndex].operator std::array<__m128, 4U>();
-				save(mSkePose.mGlobalPoses[jointIndex], Multiply(toParent, parentToRoot));
+				save(static_cast<float4x4&>(mSkePose.mGlobalPoses[jointIndex]), Multiply(toParent, parentToRoot));
 			}
 			for (auto jointIndex = 0u; jointIndex != mClip.mSkeleton->mJointCount; ++jointIndex){
 				auto invBindPose = load(mSkePose.mSkeleton->mJoints[jointIndex].mInvBindPose);
-				auto toRoot = load(mSkePose.mGlobalPoses[jointIndex]);
-				save(mSkePose.mSkinMatrixs[jointIndex], Multiply(invBindPose, toRoot));
+				auto toRoot = load(static_cast<float4x4&>(mSkePose.mGlobalPoses[jointIndex]));
+				save(static_cast<float4x4&>(mSkePose.mSkinMatrixs[jointIndex]), Multiply(invBindPose, toRoot));
 				//save(mSkePose.mSkinMatrixs[jointIndex], I());
 			}
 			return mSkePose;

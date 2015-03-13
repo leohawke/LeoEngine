@@ -138,9 +138,6 @@
     <ClCompile Include="ShaderMgr.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Water.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="RenderStates.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
@@ -301,9 +298,6 @@
     </ClInclude>
     <ClInclude Include="Input.h">
       <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Water.hpp">
-      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\DirectXTex\ScreenGrab\ScreenGrab.h">
       <Filter>ScreenGrab</Filter>

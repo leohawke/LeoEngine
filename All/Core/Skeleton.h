@@ -66,7 +66,7 @@ namespace leo{
 			JointPose result;
 			float4x4 matrix;
 			save(matrix, Multiply(this->operator std::array<__m128, 4U>(), pose.operator std::array<__m128, 4U>()));
-			result.q = MatrixToQuaternion(matrix);
+			save(result.q,Quaternion(load(matrix)));
 			result.s = 1.f;
 			result.t = float3(0.f,0.f, 0.f);
 			return result;
@@ -84,9 +84,9 @@ namespace leo{
 		std::unique_ptr<JointPose[]> mLocalPoses = nullptr;
 		//多个全局关节姿势,矩阵相乘之后无法存放至SQT对象
 
-		std::unique_ptr<float4x4[]> mGlobalPoses = nullptr;
+		std::unique_ptr<float4x4Object[]> mGlobalPoses = nullptr;
 
-		std::unique_ptr<float4x4[]> mSkinMatrixs = nullptr;
+		std::unique_ptr<float4x4Object[]> mSkinMatrixs = nullptr;
 
 		SkeletonPose& operator=(SkeletonPose&& rvalue){
 			mSkeleton = std::move(rvalue.mSkeleton);
@@ -106,13 +106,6 @@ namespace leo{
 
 		SkeletonPose() = default;
 
-#ifdef DEBUG
-		~SkeletonPose(){
-			mSkinMatrixs = nullptr;
-			mGlobalPoses = nullptr;
-			mLocalPoses = nullptr;
-		}
-#endif
 	};
 
 }
