@@ -102,9 +102,9 @@ namespace leo
 
 			mInstances[_gAbsLight_mInstanceIndex] = mLightInstances[static_cast<uint8>(mLightType)];
 
-			RenderStates rss;
-			mPixelShaderSampleState = rss.GetSamplerState(L"LinearRepeat");
-			mPixelShadersamShadow = rss.GetSamplerState(L"samShadow");
+			//RenderStates rss;
+			//mPixelShaderSampleState = rss.GetSamplerState(L"LinearRepeat");
+			//mPixelShadersamShadow = rss.GetSamplerState(L"samShadow");
 		}
 
 		~EffectNormalMapDelegate()

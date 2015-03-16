@@ -176,6 +176,7 @@
     </ClCompile>
     <ClCompile Include="OutputWindow.cpp" />
     <ClCompile Include="RenderStates.cpp" />
+    <ClCompile Include="RenderSystem\Deferred.cpp" />
     <ClCompile Include="ShaderMgr.cpp" />
     <ClCompile Include="test.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -186,7 +187,7 @@
     <ClCompile Include="timer.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="windowstest.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     </ClCompile>
   </ItemGroup>
@@ -268,6 +269,7 @@
     <ClInclude Include="exception.hpp" />
     <ClInclude Include="file.hpp" />
     <ClInclude Include="raii.hpp" />
+    <ClInclude Include="RenderSystem\Deferred.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Mgr.hpp" />
     <ClInclude Include="ShaderMgr.h" />

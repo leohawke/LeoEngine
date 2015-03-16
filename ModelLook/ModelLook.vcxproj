@@ -174,8 +174,12 @@
     <ClCompile Include="..\All\Core\EffectLine.cpp" />
     <ClCompile Include="..\All\Core\EffectShadowMap.cpp" />
     <ClCompile Include="..\All\Core\EffectSkeleton.cpp" />
-    <ClCompile Include="..\All\Core\EffectTerrain.cpp" />
-    <ClCompile Include="..\All\Core\EffectTerrainSO.cpp" />
+    <ClCompile Include="..\All\Core\EffectTerrain.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\All\Core\EffectTerrainSO.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\All\Core\EngineConfig.cpp" />
     <ClCompile Include="..\All\Core\FileSearch.cpp" />
     <ClCompile Include="..\All\Core\Mesh.cpp" />
@@ -185,7 +189,9 @@
     <ClCompile Include="..\All\Core\SkeletonData.cpp" />
     <ClCompile Include="..\All\Core\SkeletonInstance.cpp" />
     <ClCompile Include="..\All\Core\Sky.cpp" />
-    <ClCompile Include="..\All\Core\Terrain.cpp" />
+    <ClCompile Include="..\All\Core\Terrain.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\All\Core\Vertex.cpp" />
     <ClCompile Include="..\All\d3dx11.cpp" />
     <ClCompile Include="..\All\Debug.cpp" />
@@ -207,7 +213,9 @@
     <ClCompile Include="..\All\IndePlatform\type_info.cpp" />
     <ClCompile Include="..\All\Input.cpp" />
     <ClCompile Include="..\All\Mgr.cpp" />
+    <ClCompile Include="..\All\OutputWindow.cpp" />
     <ClCompile Include="..\All\RenderStates.cpp" />
+    <ClCompile Include="..\All\RenderSystem\Deferred.cpp" />
     <ClCompile Include="..\All\ShaderMgr.cpp" />
     <ClCompile Include="..\All\TextureMgr.cpp" />
     <ClCompile Include="..\All\timer.cpp" />
@@ -243,6 +251,7 @@
     <ClInclude Include="..\All\LightBuffer.h" />
     <ClInclude Include="..\All\LightHelper.h" />
     <ClInclude Include="..\All\RenderStates.hpp" />
+    <ClInclude Include="..\All\RenderSystem\Deferred.h" />
     <ClInclude Include="..\All\ShaderMgr.h" />
     <ClInclude Include="Axis.hpp" />
     <ClInclude Include="resource.h" />

@@ -17,7 +17,7 @@
 #include "Core\Water.hpp"
 #include "Core\Camera.hpp"
 #include "Core\BillBoard.hpp"
-#include "Core\Effect.hpp"
+#include "Core\Effect.h"
 #include "Core\Sky.hpp"
 #include "Core\MeshLoad.hpp"
 #include "Core\MeshLoad.hpp"

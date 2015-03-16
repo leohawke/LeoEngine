@@ -48,6 +48,9 @@
     <Filter Include="Sexp">
       <UniqueIdentifier>{c6e1c770-4f87-4bc7-966d-72398c0428b2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="RenderSystem">
+      <UniqueIdentifier>{561abbf7-31d8-4a60-9146-428103384541}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -176,6 +179,12 @@
     <ClCompile Include="..\All\Core\EffectShadowMap.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\Deferred.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\OutputWindow.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\All\IndePlatform\algorithm.hpp">
@@ -264,6 +273,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Rubbishmemory.h" />
+    <ClInclude Include="..\All\RenderSystem\Deferred.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\All\Shader\LightBuffer.hlsli">

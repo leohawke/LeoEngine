@@ -13,7 +13,6 @@
 #include <Core\RenderSync.hpp>
 #include <Core\EffectLine.hpp>
 #include <Core\EffectShadowMap.hpp>
-#include <Core\Terrain.hpp>
 #include <Core\Sky.hpp>
 #include <Core\Skeleton.hpp>
 #include <Core\MeshLoad.hpp>
@@ -129,6 +128,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	
 
 	DeviceMgr.CreateDevice(false, clientSize);
+	DeviceEvent();
+	BuildRes();
+#if 0
 
 	auto mNeedDuration = leo::clock::to_duration<>(1.f);
 	auto mHasDuration = leo::clock::to_duration<>(0.f);
@@ -276,6 +278,15 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	pBoxMesh.reset(nullptr);
 	pSphereMesh.reset(nullptr);
 	leo::win::ReleaseCOM(mFillScreenVB);
+#endif
+	pModelMesh.reset(nullptr);
+	pTerrainMesh.reset(nullptr);
+	
+#if 0
+	pBoxMesh.reset(nullptr);
+	pSphereMesh.reset(nullptr);
+#endif
+	leo::win::ReleaseCOM(mFillScreenVB);
 	leo::global::Destroy();
 #ifdef DEBUG
 	leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
@@ -305,10 +316,17 @@ void BuildRes()
 
 	event.Wait();
 
+	auto& pEffect = leo::EffectNormalMap::GetInstance(leo::DeviceMgr().GetDevice());
 	
 
+#if 0
 
-	auto& pEffect =  leo::EffectNormalMap::GetInstance(leo::DeviceMgr().GetDevice());	
+	leo::EffectNormalLine::GetInstance(leo::DeviceMgr().GetDevice());
+	leo::ShadowMap::GetInstance(leo::DeviceMgr().GetDevice(), std::make_pair(2048u, 2048u));
+	leo::EffectPack::GetInstance(leo::DeviceMgr().GetDevice());
+
+	pTerrainMesh.reset(new leo::Mesh());
+	pTerrainMesh->Load(L"Resource/Terrain.l3d", leo::DeviceMgr().GetDevice());
 
 	leo::DirectionLight dirlight;
 	dirlight.ambient = leo::float4(1.0f, 1.0f, 1.0f, 1.f);
@@ -318,16 +336,14 @@ void BuildRes()
 
 	pEffect->Light(dirlight);
 
-	leo::EffectNormalLine::GetInstance(leo::DeviceMgr().GetDevice());
-	leo::ShadowMap::GetInstance(leo::DeviceMgr().GetDevice(), std::make_pair(2048u,2048u));
-	leo::EffectPack::GetInstance(leo::DeviceMgr().GetDevice());
+	
 	leo::EffectShadowMap::GetInstance(leo::DeviceMgr().GetDevice());
 	leo::EffectLine::GetInstance(leo::DeviceMgr().GetDevice());
 	pAxis = std::make_unique<leo::Axis>(leo::DeviceMgr().GetDevice());
-
+#endif
 
 	
-
+#if 0
 	pTerrainMesh.reset(new leo::Mesh());
 	pSphereMesh.reset(new leo::Mesh());
 	pBoxMesh.reset(new leo::Mesh());
@@ -335,11 +351,15 @@ void BuildRes()
 	pTerrainMesh->Load(L"Resource/Terrain.l3d", leo::DeviceMgr().GetDevice());
 	pSphereMesh->Load(L"Resource/Sphere.l3d", leo::DeviceMgr().GetDevice());
 	pBoxMesh->Load(L"Resource/Box.l3d", leo::DeviceMgr().GetDevice());
-
 	pSphereMesh->Translation(leo::float3(-6.f, 6.5f, 0.f));
 	
 	pSphereMesh->Scale(5.f);
 	pTerrainMesh->Scale(8.f);
+
+	pBoxMesh->Scale(5.f);
+	pBoxMesh->Translation(leo::float3(+5.f, 6.f, -3.5f));
+#endif
+
 	auto& vertices = leo::helper::CreateFullscreenQuad();
 
 	D3D11_BUFFER_DESC vbDesc;
@@ -363,7 +383,7 @@ void BuildRes()
 
 	leo::Sphere mSphere{ leo::float3(0.0f, 0.0f, 0.0f),sqrtf(10.0f*10.0f + 15.0f*15.0f) };
 	float3 dir{ -0.5773f, -0.57735f,0.57735f };
-
+#if 0
 	pCamera = std::make_unique<leo::UVNCamera>();
 	pShaderCamera = std::make_unique<leo::CastShadowCamera>();
 	pShaderCamera->SetSphereAndDir(mSphere, dir);
@@ -378,12 +398,11 @@ void BuildRes()
 	pCamera->LookAt(pos, mSphere.GetCenter(), float3(0.f, 1.f, 0.f));
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 
-	pBoxMesh->Scale(5.f);
-	pBoxMesh->Translation(leo::float3(+5.f, 6.f, -3.5f));
+	
 
 	leo::float4 rd{ -0.5f,-0.5f,-0.5f,1.f };
 	leo::float4 lu{ 0.5f,0.5f,0.5f,1.f };
-
+#endif
 }
 
 void Update(){

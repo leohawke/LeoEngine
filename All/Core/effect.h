@@ -60,7 +60,6 @@ namespace leo
 	{
 	protected:
 		Effect();
-		~Effect() = default;
 	public:
 		template<typename BUFFPOD>
 		struct ShaderConstantBuffer : BUFFPOD

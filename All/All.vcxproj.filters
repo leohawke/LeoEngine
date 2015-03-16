@@ -249,6 +249,9 @@
     <ClCompile Include="..\LeoScheme\Sexp\Sexp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="RenderSystem\Deferred.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.hpp">
@@ -502,6 +505,9 @@
     </ClInclude>
     <ClInclude Include="Core\EffectShadowMap.hpp">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderSystem\Deferred.h">
+      <Filter>RenderSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -59,7 +59,7 @@ namespace leo
 		char *p = strBuffer;
 		va_list vlArgs;
 		va_start(vlArgs, strformat);
-		vsprintf(strBuffer, strformat, vlArgs);
+		vsnprintf(strBuffer,count-1,strformat, vlArgs);
 		va_end(vlArgs);
 		static HANDLE consoleout = CreateFileA("CONOUT$", GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 		switch (which)
