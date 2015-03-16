@@ -35,7 +35,7 @@ namespace leo {
 		~DeferredResources();
 
 		//todo:不再使用无参实例化,而是传入Device对象
-		DeferredResources& GetInstance() noexcept {
+		static DeferredResources& GetInstance() noexcept {
 			static DeferredResources obj;
 			return obj;
 		}

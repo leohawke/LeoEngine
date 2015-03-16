@@ -32,6 +32,9 @@ void DeferredResources::ReSize(const size_type& size) noexcept {
 	GBufferDesc.ArraySize = 1;
 	GBufferDesc.MipLevels = 1;
 
+	GBufferDesc.SampleDesc.Count = 1;
+	GBufferDesc.SampleDesc.Quality = 0;
+
 	GBufferDesc.Width = size.first;
 	GBufferDesc.Height = size.second;
 
@@ -58,8 +61,8 @@ void DeferredResources::ReSize(const size_type& size) noexcept {
 DeferredResources::~DeferredResources() {
 	for (auto i = 0u; i != 4; ++i) {
 		if (mSRVs[i])
-			mSRVs[i]->Release();
+			leo::win::ReleaseCOM(mSRVs[i]);
 		if (mMRTs[i])
-			mMRTs[i]->Release();
+			leo::win::ReleaseCOM(mMRTs[i]);
 	}
 }

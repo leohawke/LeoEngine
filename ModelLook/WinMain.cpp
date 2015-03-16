@@ -20,6 +20,11 @@
 #include <Core\\EngineConfig.h>
 #include <Core\ShadowMap.hpp>
 #include <Core\Vertex.hpp>
+#include <Core\FileSearch.h>
+
+
+#include <RenderSystem\Deferred.h>
+
 #include <COM.hpp>
 
 #include <TextureMgr.h>
@@ -58,7 +63,7 @@ std::atomic<bool> renderThreadRun = true;
 std::mutex mSizeMutex;
 
 ID3D11Buffer* mFillScreenVB = nullptr;
-
+ID3D11PixelShader* mGBufferPS = nullptr;
 
 void DeviceEvent()
 {
@@ -128,9 +133,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	
 
 	DeviceMgr.CreateDevice(false, clientSize);
-	DeviceEvent();
-	BuildRes();
-#if 0
+
 
 	auto mNeedDuration = leo::clock::to_duration<>(1.f);
 	auto mHasDuration = leo::clock::to_duration<>(0.f);
@@ -249,6 +252,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 	
 #endif
+#if 1
 
 	std::thread renderThread(Render);
 	std::thread updateThread(Update);
@@ -277,16 +281,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	pTerrainMesh.reset(nullptr);
 	pBoxMesh.reset(nullptr);
 	pSphereMesh.reset(nullptr);
-	leo::win::ReleaseCOM(mFillScreenVB);
 #endif
-	pModelMesh.reset(nullptr);
-	pTerrainMesh.reset(nullptr);
+	leo::win::ReleaseCOM(mFillScreenVB);
+
 	
-#if 0
-	pBoxMesh.reset(nullptr);
-	pSphereMesh.reset(nullptr);
-#endif
-	leo::win::ReleaseCOM(mFillScreenVB);
 	leo::global::Destroy();
 #ifdef DEBUG
 	leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
@@ -316,11 +314,10 @@ void BuildRes()
 
 	event.Wait();
 
-	auto& pEffect = leo::EffectNormalMap::GetInstance(leo::DeviceMgr().GetDevice());
 	
 
-#if 0
-
+	auto& pEffect = leo::EffectNormalMap::GetInstance(leo::DeviceMgr().GetDevice());
+#if 1
 	leo::EffectNormalLine::GetInstance(leo::DeviceMgr().GetDevice());
 	leo::ShadowMap::GetInstance(leo::DeviceMgr().GetDevice(), std::make_pair(2048u, 2048u));
 	leo::EffectPack::GetInstance(leo::DeviceMgr().GetDevice());
@@ -340,10 +337,8 @@ void BuildRes()
 	leo::EffectShadowMap::GetInstance(leo::DeviceMgr().GetDevice());
 	leo::EffectLine::GetInstance(leo::DeviceMgr().GetDevice());
 	pAxis = std::make_unique<leo::Axis>(leo::DeviceMgr().GetDevice());
-#endif
 
 	
-#if 0
 	pTerrainMesh.reset(new leo::Mesh());
 	pSphereMesh.reset(new leo::Mesh());
 	pBoxMesh.reset(new leo::Mesh());
@@ -359,7 +354,6 @@ void BuildRes()
 	pBoxMesh->Scale(5.f);
 	pBoxMesh->Translation(leo::float3(+5.f, 6.f, -3.5f));
 #endif
-
 	auto& vertices = leo::helper::CreateFullscreenQuad();
 
 	D3D11_BUFFER_DESC vbDesc;
@@ -383,7 +377,7 @@ void BuildRes()
 
 	leo::Sphere mSphere{ leo::float3(0.0f, 0.0f, 0.0f),sqrtf(10.0f*10.0f + 15.0f*15.0f) };
 	float3 dir{ -0.5773f, -0.57735f,0.57735f };
-#if 0
+#if 1
 	pCamera = std::make_unique<leo::UVNCamera>();
 	pShaderCamera = std::make_unique<leo::CastShadowCamera>();
 	pShaderCamera->SetSphereAndDir(mSphere, dir);
@@ -402,7 +396,14 @@ void BuildRes()
 
 	leo::float4 rd{ -0.5f,-0.5f,-0.5f,1.f };
 	leo::float4 lu{ 0.5f,0.5f,0.5f,1.f };
+
+	leo::DeferredResources::GetInstance();
 #endif
+
+	leo::ShaderMgr sm;
+	auto  mPSBlob = sm.CreateBlob(leo::FileSearch::Search(L"GBufferPS.cso"));
+	mGBufferPS = sm.CreatePixelShader(mPSBlob);
+
 }
 
 void Update(){
@@ -461,6 +462,14 @@ void Render()
 
 		leo::context_wrapper context(devicecontext);
 #else
+		auto mrts = leo::DeferredResources::GetInstance().GetMRTs();
+		devicecontext->OMSetRenderTargets(4, mrts, dm.GetDepthStencilView());
+		devicecontext->ClearRenderTargetView(mrts[0], ClearColor);
+		devicecontext->ClearRenderTargetView(mrts[1], ClearColor);
+		devicecontext->ClearRenderTargetView(mrts[2], ClearColor);
+		devicecontext->ClearRenderTargetView(mrts[3], ClearColor);
+
+
 		leo::EffectNormalMap::GetInstance()->ShadowViewProjTexMatrix(pShaderCamera->ViewProjTex());
 		leo::EffectNormalMap::GetInstance()->ShadowMapSRV(leo::ShadowMap::GetInstance().GetDepthSRV());
 
@@ -468,6 +477,58 @@ void Render()
 		pTerrainMesh->Render(devicecontext, *pCamera);
 		pBoxMesh->Render(devicecontext, *pCamera);
 		pSphereMesh->Render(devicecontext, *pCamera);
+
+		ID3D11RenderTargetView* rt[] = { dm.GetRenderTargetView(),nullptr,nullptr,nullptr };
+		//unbind
+		devicecontext->OMSetRenderTargets(4, rt, dm.GetDepthStencilView());
+
+		auto& pPackEffect = leo::EffectPack::GetInstance();
+		pPackEffect->SetDstRTV(dm.GetRenderTargetView());
+		pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[0]);
+		pPackEffect->Apply(devicecontext);
+		devicecontext->IASetInputLayout(leo::ShaderMgr().CreateInputLayout(leo::InputLayoutDesc::PostEffect));
+		UINT strides[] = { sizeof(leo::Vertex::PostEffect) };
+		UINT offsets[] = { 0 };
+		devicecontext->PSSetShader(mGBufferPS,nullptr,0);
+		devicecontext->IASetVertexBuffers(0, 1, &mFillScreenVB, strides, offsets);
+		devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+		D3D11_VIEWPORT prevVP;
+		UINT num = 1;
+		devicecontext->RSGetViewports(&num, &prevVP);
+
+		D3D11_VIEWPORT currvp = prevVP;
+
+		//左上
+		currvp.Height = prevVP.Height / 2;
+		currvp.Width = prevVP.Width / 2;
+		devicecontext->RSSetViewports(1, &currvp);
+		devicecontext->Draw(4, 0);
+
+		//右上
+		currvp.TopLeftX += currvp.Width;
+		devicecontext->RSSetViewports(1, &currvp);
+		pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[1],devicecontext);
+		devicecontext->Draw(4, 0);
+		
+		//右下
+		currvp.TopLeftY += currvp.Height;
+		devicecontext->RSSetViewports(1, &currvp);
+		pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[3], devicecontext);
+		devicecontext->Draw(4, 0);
+
+		//左下
+		currvp.TopLeftX -= currvp.Width;
+		devicecontext->RSSetViewports(1, &currvp);
+		pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[2], devicecontext);
+		devicecontext->Draw(4, 0);
+
+		//restate vp
+		devicecontext->RSSetViewports(1, &prevVP);
+
+		//You Need Do this to restore state
+		leo::context_wrapper context(devicecontext);
+
 #endif
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 

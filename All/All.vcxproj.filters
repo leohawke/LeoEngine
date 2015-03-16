@@ -594,6 +594,9 @@
     <FxCompile Include="Shader\GenMidGS.hlsl">
       <Filter>Shader\HLSL\ShadowMapGen</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\GBufferPS.hlsl">
+      <Filter>Shader\HLSL\PostRender</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Gaussian_color.hlsl">

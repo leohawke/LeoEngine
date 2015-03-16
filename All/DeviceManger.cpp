@@ -244,7 +244,7 @@ namespace leo
 			leo::win::ReleaseCOM(x);
 		leo::win::ReleaseCOM(pFactory);
 
-		//ReSize(size);
+		ReSize(size);
 		return true;
 	}
 

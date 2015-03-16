@@ -16,7 +16,7 @@ struct PixelOut {
 	float4 Normal : SV_Target0;
 	float4 Diffuse : SV_Target1;
 	float4 Specular : SV_Target2;
-	float4 Pos : SV_Target4;
+	float4 Pos : SV_Target3;
 };
 
 SamplerState LinearRepeat :register(s0);

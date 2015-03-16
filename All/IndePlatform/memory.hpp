@@ -432,7 +432,7 @@ namespace leo
 			std::uint8_t adjust = *reinterpret_cast<std::uint8_t*>((std::uintptr_t)p - 1);
 			std::uint8_t* rawAddress = reinterpret_cast<std::uint8_t*>((std::uintptr_t)p - adjust);
 			DebugPrintf(L"CateAlloc.deallocate Adddress: %p,Alignesize: %u\n", rawAddress, AlignSize);
-			::delete(rawAddress);
+			::operator delete(rawAddress);
 		}
 	};
 
