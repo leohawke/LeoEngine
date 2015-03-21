@@ -151,14 +151,20 @@ namespace leo
 			pContext.PSSetSamplers(0, 2,mpssss);
 		}
 
-		void LM_VECTOR_CALL WorldMatrix(matrix Matrix, ID3D11DeviceContext* context)
+		void LM_VECTOR_CALL WorldViewMatrix(matrix Matrix, ID3D11DeviceContext* context)
 		{
-			vector pDet;
-			mVertexShaderConstantBufferPerFrame.worldinvtranspose = Inverse(pDet, Matrix);
 			mVertexShaderConstantBufferPerFrame.world = Transpose(Matrix);
 			if (context)
 				mVertexShaderConstantBufferPerFrame.Update(context);
 		}
+
+		void LM_VECTOR_CALL WorldInvTransposeViewMatrix(std::array<__m128, 4> matrix, ID3D11DeviceContext* context = nullptr) {
+			mVertexShaderConstantBufferPerFrame.worldinvtranspose = Transpose(matrix);
+			if (context)
+				mVertexShaderConstantBufferPerFrame.Update(context);
+		}
+
+
 		void  LM_VECTOR_CALL WorldViewProjMatrix(matrix Matrix, ID3D11DeviceContext* context)
 		{
 			mVertexShaderConstantBufferPerFrame.worldviewproj = Transpose(Matrix);
@@ -319,11 +325,11 @@ namespace leo
 			);
 	}
 
-	void EffectNormalMap::WorldMatrix(const float4x4& matrix, ID3D11DeviceContext* context)
+	void EffectNormalMap::WorldViewMatrix(const float4x4& matrix, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
 
-		return ((EffectNormalMapDelegate *)this)->WorldMatrix(
+		return ((EffectNormalMapDelegate *)this)->WorldViewMatrix(
 			load(matrix), context
 			);
 	}
@@ -338,12 +344,20 @@ namespace leo
 	}
 
 
-	void LM_VECTOR_CALL EffectNormalMap::WorldMatrix(matrix Matrix, ID3D11DeviceContext* context)
+	void LM_VECTOR_CALL EffectNormalMap::WorldViewMatrix(matrix Matrix, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
 
-		return ((EffectNormalMapDelegate *)this)->WorldMatrix(
+		return ((EffectNormalMapDelegate *)this)->WorldViewMatrix(
 			Matrix, context
+			);
+	}
+
+	void LM_VECTOR_CALL  EffectNormalMap::WorldInvTransposeViewMatrix(std::array<__m128, 4> matrix, ID3D11DeviceContext* context) {
+		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
+
+		return ((EffectNormalMapDelegate *)this)->WorldInvTransposeViewMatrix(
+			matrix, context
 			);
 	}
 

@@ -127,8 +127,14 @@ namespace leo
 
 
 		auto world =SQT::operator std::array<__m128, 4U>();
-		mEffect->WorldMatrix(world);
+		
+
+		mEffect->WorldViewMatrix(Multiply(world,load(camera.View())));
 		mEffect->WorldViewProjMatrix(Multiply(world,load(camera.ViewProj())));
+
+		__m128 det;
+		world = Transpose(Inverse(det, world));
+		mEffect->WorldInvTransposeViewMatrix(Multiply(world, load(camera.View())));
 
 
 		mEffect->Apply(context);

@@ -80,6 +80,20 @@ namespace leo
 		linearRepeatDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 		p->CreateSamplerState(L"LinearRepeat", linearRepeatDesc);
 
+		// DepthMap
+		CD3D11_SAMPLER_DESC depthMapDesc(D3D11_DEFAULT);
+		depthMapDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+		depthMapDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+		depthMapDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+		depthMapDesc.BorderColor[0] = 0.f;
+		depthMapDesc.BorderColor[1] = 0.f;
+		depthMapDesc.BorderColor[2] = 0.f;
+		depthMapDesc.BorderColor[3] = 1e5f;
+
+		p->CreateSamplerState(L"DepthMap", depthMapDesc);
+
+
+
 		// NearestClamp
 		linearRepeatDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
 		linearRepeatDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;

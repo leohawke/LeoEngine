@@ -6,9 +6,9 @@ struct PixelIn
 {
 	float4 PosH     : SV_POSITION;
 	float4 Shadow_PosH : POSITION1;
-	float3 PosW     : POSITION0;
-	float3 NormalW  : NORMAL;
-	float3 TangentW : TANGENT;
+	float3 PosV     : POSITION0;
+	float3 NormalV  : NORMAL;
+	float3 TangentV : TANGENT;
 	float2 Tex      : TEXCOORD;
 };
 
@@ -56,19 +56,19 @@ PixelOut main(PixelIn pin) {
 	clip(texColor.a - 0.1f);
 
 	//lerp can unnormalize
-	pin.NormalW = normalize(pin.NormalW);
+	pin.NormalV = normalize(pin.NormalV);
 	float3 normalMapSample = TexNormalMap.Sample(LinearRepeat, pin.Tex).rgb;
-	float3 bumpedNormalW = NormalSampleToWorldSpace(normalMapSample, pin.NormalW, pin.TangentW);
+	float3 bumpedNormalV = NormalSampleCalc(normalMapSample, pin.NormalV, pin.TangentV);
 
 	float shadow = 1.f;
-	shadow = CalcShadowFactor(samShadow, ShadowMap, pin.Shadow_PosH);
-	float4 diffuse = gMat.diffuse*shadow;
+	//shadow = CalcShadowFactor(samShadow, ShadowMap, pin.Shadow_PosH);
+
 	float4 spec = float4(gMat.specular.xyz*shadow, gMat.specular.w);
 
 	PixelOut pout;
-	pout.Normal =float4(bumpedNormalW,1.0f);
-	pout.Diffuse = diffuse;
+	pout.Normal =float4(bumpedNormalV,pin.PosH.z/ pin.PosH.w);
+	pout.Diffuse = texColor;
 	pout.Specular = spec;
-	pout.Pos =float4(pin.PosW,1.0f);
+	pout.Pos =float4(pin.PosV,1.0f);
 	return pout;
 }

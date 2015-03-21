@@ -46,7 +46,7 @@
 #include <atomic>
 #include <mutex>
 #include "resource.h"
-
+#include <DirectXPackedVector.h>
 
 leo::Event event;
 std::unique_ptr<leo::Mesh> pModelMesh = nullptr;
@@ -63,7 +63,23 @@ std::atomic<bool> renderThreadRun = true;
 std::mutex mSizeMutex;
 
 ID3D11Buffer* mFillScreenVB = nullptr;
-ID3D11PixelShader* mGBufferPS = nullptr;
+ID3D11PixelShader* mSSAOPS = nullptr;
+ID3D11VertexShader* mSSAOVS = nullptr;
+ID3D11Buffer* mSSAOPSCB = nullptr;
+ID3D11ShaderResourceView* mSSAORandomVec = nullptr;
+ID3D11SamplerState* mLinearRepeat = nullptr;
+ID3D11SamplerState* msamNormalMap = nullptr;
+
+struct SSAO {
+	leo::float4x4 gProj;
+	leo::float4 gOffsetVectors[14];
+
+	float    gOcclusionRadius = 0.5f;
+	float    gOcclusionFadeStart = 0.2f;
+	float    gOcclusionFadeEnd = 2.0f;
+	float    gSurfaceEpsilon = 0.05f;
+};
+
 
 void DeviceEvent()
 {
@@ -80,6 +96,17 @@ void Update();
 
 void BuildRes();
 
+void ClearRes() {
+	leo::win::ReleaseCOM(mSSAOPSCB);
+
+	pModelMesh.reset(nullptr);
+	pTerrainMesh.reset(nullptr);
+	pBoxMesh.reset(nullptr);
+	pSphereMesh.reset(nullptr);
+
+	leo::win::ReleaseCOM(mSSAORandomVec);
+	leo::win::ReleaseCOM(mFillScreenVB);
+}
 
 std::wstring GetOpenL3dFile()
 {
@@ -277,15 +304,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	updateThread.join();
 	renderThread.join();
 	
-	pModelMesh.reset(nullptr);
-	pTerrainMesh.reset(nullptr);
-	pBoxMesh.reset(nullptr);
-	pSphereMesh.reset(nullptr);
+	
 #endif
-	leo::win::ReleaseCOM(mFillScreenVB);
 
 	
 	leo::global::Destroy();
+	ClearRes();
 #ifdef DEBUG
 	leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
 #endif
@@ -400,10 +424,97 @@ void BuildRes()
 	leo::DeferredResources::GetInstance();
 #endif
 
+	//SSAO ,GPU资源
 	leo::ShaderMgr sm;
-	auto  mPSBlob = sm.CreateBlob(leo::FileSearch::Search(L"GBufferPS.cso"));
-	mGBufferPS = sm.CreatePixelShader(mPSBlob);
+	auto  mPSBlob = sm.CreateBlob(leo::FileSearch::Search(L"SSAOPS.cso"));
+	auto mVSBlob = sm.CreateBlob(leo::FileSearch::Search(L"PostCommonVS.cso"));
+	mSSAOPS = sm.CreatePixelShader(mPSBlob);
+	mSSAOVS = sm.CreateVertexShader(mVSBlob);
 
+	D3D11_BUFFER_DESC Desc;
+	Desc.Usage = D3D11_USAGE_DEFAULT;
+	Desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	Desc.CPUAccessFlags = 0;
+	Desc.MiscFlags = 0;
+	Desc.StructureByteStride = 0;
+	Desc.ByteWidth = sizeof(SSAO);
+
+	SSAO ssao;
+	subData.pSysMem = &ssao;
+	subData.SysMemPitch = 0;
+	subData.SysMemSlicePitch = 0;
+	
+	// 8 cube corners
+	ssao.gOffsetVectors[0] = leo::float4(+1.0f, +1.0f, +1.0f, 0.0f);
+	ssao.gOffsetVectors[1] = leo::float4(-1.0f, -1.0f, -1.0f, 0.0f);
+
+	ssao.gOffsetVectors[2] = leo::float4(-1.0f, +1.0f, +1.0f, 0.0f);
+	ssao.gOffsetVectors[3] = leo::float4(+1.0f, -1.0f, -1.0f, 0.0f);
+
+	ssao.gOffsetVectors[4] = leo::float4(+1.0f, +1.0f, -1.0f, 0.0f);
+	ssao.gOffsetVectors[5] = leo::float4(-1.0f, -1.0f, +1.0f, 0.0f);
+
+	ssao.gOffsetVectors[6] = leo::float4(-1.0f, +1.0f, -1.0f, 0.0f);
+	ssao.gOffsetVectors[7] = leo::float4(+1.0f, -1.0f, +1.0f, 0.0f);
+
+	// 6 centers of cube faces
+	ssao.gOffsetVectors[8] = leo::float4(-1.0f, 0.0f, 0.0f, 0.0f);
+	ssao.gOffsetVectors[9] = leo::float4(+1.0f, 0.0f, 0.0f, 0.0f);
+
+	ssao.gOffsetVectors[10] = leo::float4(0.0f, -1.0f, 0.0f, 0.0f);
+	ssao.gOffsetVectors[11] = leo::float4(0.0f, +1.0f, 0.0f, 0.0f);
+
+	ssao.gOffsetVectors[12] = leo::float4(0.0f, 0.0f, -1.0f, 0.0f);
+	ssao.gOffsetVectors[13] = leo::float4(0.0f, 0.0f, +1.0f, 0.0f);
+
+	for (auto & v : ssao.gOffsetVectors) {
+		float s = (rand()*1.f  / RAND_MAX)*0.75f +0.25f;
+		leo::save(v, leo::Multiply(load(v), s));
+	}
+
+	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateBuffer(&Desc, &subData, &mSSAOPSCB));
+
+	//mSSAORandomVec
+	D3D11_TEXTURE2D_DESC texDesc;
+	texDesc.Width = 256;
+	texDesc.Height = 256;
+	texDesc.MipLevels = 1;
+	texDesc.ArraySize = 1;
+	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	texDesc.SampleDesc.Count = 1;
+	texDesc.SampleDesc.Quality = 0;
+	texDesc.Usage = D3D11_USAGE_IMMUTABLE;
+	texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	texDesc.CPUAccessFlags = 0;
+	texDesc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA initData = { 0 };
+	initData.SysMemPitch = 256 * sizeof(DirectX::PackedVector::XMCOLOR);
+
+	DirectX::PackedVector::XMCOLOR color[256 * 256];
+	for (int i = 0; i < 256; ++i)
+	{
+		for (int j = 0; j < 256; ++j)
+		{
+			leo::float3 v(rand()*1.f/RAND_MAX, rand()*1.f / RAND_MAX, rand()*1.f / RAND_MAX);
+
+			color[i * 256 + j] = DirectX::PackedVector::XMCOLOR(v.x, v.y, v.z, 0.0f);
+		}
+	}
+
+	initData.pSysMem = color;
+
+	ID3D11Texture2D* tex = 0;
+	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateTexture2D(&texDesc, &initData, &tex));
+
+	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateShaderResourceView(tex, 0, &mSSAORandomVec));
+
+	// view saves a reference.
+	leo::win::ReleaseCOM(tex);
+
+	leo::RenderStates ss;
+	mLinearRepeat = ss.GetSamplerState(L"LinearRepeat");
+	msamNormalMap = ss.GetSamplerState(L"DepthMap");
 }
 
 void Update(){
@@ -415,6 +526,27 @@ void Update(){
 		if (mRunTime < 1 / 30.f)
 			std::this_thread::sleep_for(leo::clock::to_duration<>(1 / 30.f - mRunTime));
 	}
+}
+
+void RenderFinall(ID3D11DeviceContext* context ) {
+	context->IASetInputLayout(leo::ShaderMgr().CreateInputLayout(leo::InputLayoutDesc::PostEffect));
+	UINT strides[] = { sizeof(leo::Vertex::PostEffect) };
+	UINT offsets[] = { 0 };
+	context->IASetVertexBuffers(0, 1, &mFillScreenVB, strides, offsets);
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+	context->VSSetShader(mSSAOVS, nullptr, 0);
+	context->PSSetShader(mSSAOPS, nullptr, 0);
+
+	auto srvs = leo::DeferredResources::GetInstance().GetSRVs();
+
+	context->PSSetConstantBuffers(0, 1, &mSSAOPSCB);
+	context->PSSetShaderResources(0, 4, srvs);
+	context->PSSetShaderResources(4, 1, &mSSAORandomVec);
+	ID3D11SamplerState* psss[] = { mLinearRepeat,msamNormalMap };
+	context->PSSetSamplers(0, 2, psss);
+
+	context->Draw(4, 0);
 }
 
 
@@ -489,47 +621,50 @@ void Render()
 		devicecontext->IASetInputLayout(leo::ShaderMgr().CreateInputLayout(leo::InputLayoutDesc::PostEffect));
 		UINT strides[] = { sizeof(leo::Vertex::PostEffect) };
 		UINT offsets[] = { 0 };
-		devicecontext->PSSetShader(mGBufferPS,nullptr,0);
 		devicecontext->IASetVertexBuffers(0, 1, &mFillScreenVB, strides, offsets);
 		devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 		D3D11_VIEWPORT prevVP;
 		UINT num = 1;
 		devicecontext->RSGetViewports(&num, &prevVP);
-
 		D3D11_VIEWPORT currvp = prevVP;
 
-		//左上
-		currvp.Height = prevVP.Height / 2;
-		currvp.Width = prevVP.Width / 2;
-		devicecontext->RSSetViewports(1, &currvp);
-		devicecontext->Draw(4, 0);
+		//绘制延迟Buff
+		{
 
-		//右上
+			//左上 绘制法线+深度
+			currvp.Height = prevVP.Height / 2;
+			currvp.Width = prevVP.Width / 2;
+			devicecontext->RSSetViewports(1, &currvp);
+			devicecontext->Draw(4, 0);
+
+			//右上 绘制颜色
+			currvp.TopLeftX += currvp.Width;
+			devicecontext->RSSetViewports(1, &currvp);
+			pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[1], devicecontext);
+			devicecontext->Draw(4, 0);
+
+			//左下 绘制坐标
+			currvp.TopLeftX -= currvp.Width;
+			currvp.TopLeftY += currvp.Height;
+			devicecontext->RSSetViewports(1, &currvp);
+			pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[3], devicecontext);
+			devicecontext->Draw(4, 0);
+
+			//You Need Do this to restore state
+			leo::context_wrapper context(devicecontext);
+		}
+
+		//右下绘制最终图像
 		currvp.TopLeftX += currvp.Width;
 		devicecontext->RSSetViewports(1, &currvp);
-		pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[1],devicecontext);
-		devicecontext->Draw(4, 0);
 		
-		//右下
-		currvp.TopLeftY += currvp.Height;
-		devicecontext->RSSetViewports(1, &currvp);
-		pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[3], devicecontext);
-		devicecontext->Draw(4, 0);
+		RenderFinall(devicecontext);
 
-		//左下
-		currvp.TopLeftX -= currvp.Width;
-		devicecontext->RSSetViewports(1, &currvp);
-		pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[2], devicecontext);
-		devicecontext->Draw(4, 0);
-
-		//restate vp
 		devicecontext->RSSetViewports(1, &prevVP);
 
-		//You Need Do this to restore state
-		leo::context_wrapper context(devicecontext);
-
 #endif
+
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 
 		leo::RenderSync::GetInstance()->Present();

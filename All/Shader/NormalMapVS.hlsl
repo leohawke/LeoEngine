@@ -1,7 +1,7 @@
 cbuffer cbChangerEveryFrame : register(b0)
 {
-	matrix World;
-	matrix WorldInvTranspose;
+	matrix WorldView;
+	matrix WorldInvTransposeView;
 	matrix WorldViewProj;
 	matrix ShadowViewProjTex;
 }
@@ -18,9 +18,9 @@ struct VertexOut
 {
 	float4 PosH     : SV_POSITION;
 	float4 Shadow_PosH : POSITION1;
-	float3 PosW     : POSITION0;
-	float3 NormalW  : NORMAL;
-	float3 TangentW : TANGENT;
+	float3 PosV     : POSITION0;
+	float3 NormalV  : NORMAL;
+	float3 TangentV : TANGENT;
 	float2 Tex      : TEXCOORD;
 };
 
@@ -28,14 +28,15 @@ VertexOut main(VertexIn vin)
 {
 	VertexOut vout;
 
-	// Transform to world space space.
-	vout.PosW = mul(float4(vin.PosL, 1.0f), World).xyz;
-	vout.NormalW = mul(vin.NormalL, (float3x3)WorldInvTranspose);
-	vout.TangentW = mul(vin.TangentL, (float3x3)World);
+	// Transform to view space space.
+	vout.PosV = mul(float4(vin.PosL, 1.0f), WorldView).xyz;
+	vout.NormalV = mul(vin.NormalL, (float3x3)WorldInvTransposeView);
+	vout.TangentV = mul(vin.TangentL, (float3x3)WorldView);
 
 	// Transform to homogeneous clip space.
 	vout.PosH = mul(float4(vin.PosL, 1.0f),WorldViewProj);
-	vout.Shadow_PosH = mul(float4(vout.PosW, 1.f), ShadowViewProjTex);
+	//vout.Shadow_PosH = mul(float4(vout.PosW, 1.f), ShadowViewProjTex);
+	vout.Shadow_PosH = float4(1.f, 1.f, 1.f, 1.f);
 	// Output vertex attributes for interpolation across triangle.
 	vout.Tex = vin.Tex;
 

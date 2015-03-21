@@ -106,11 +106,13 @@ namespace leo
 	public:
 		void Apply(ID3D11DeviceContext* context);
 
-		void WorldMatrix(const float4x4& matrix, ID3D11DeviceContext* context = nullptr);
+		void WorldViewMatrix(const float4x4& matrix, ID3D11DeviceContext* context = nullptr);
 		void WorldViewProjMatrix(const float4x4& matrix, ID3D11DeviceContext* context = nullptr);
 
-		void LM_VECTOR_CALL WorldMatrix(std::array<__m128,4> matrix, ID3D11DeviceContext* context = nullptr);
+		void LM_VECTOR_CALL WorldViewMatrix(std::array<__m128,4> matrix, ID3D11DeviceContext* context = nullptr);
 		void  LM_VECTOR_CALL WorldViewProjMatrix(std::array<__m128, 4>  matrix, ID3D11DeviceContext* context = nullptr);
+		void LM_VECTOR_CALL WorldInvTransposeViewMatrix(std::array<__m128, 4> matrix, ID3D11DeviceContext* context = nullptr);
+
 
 		void ShadowViewProjTexMatrix(const float4x4& matrix, ID3D11DeviceContext* context = nullptr);
 		void LM_VECTOR_CALL ShadowViewProjTexMatrix(std::array<__m128, 4> matrix, ID3D11DeviceContext* context = nullptr);
