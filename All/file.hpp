@@ -1,7 +1,7 @@
 #pragma once
-#include "IndePlatform\ldef.h"
-#include "IndePlatform\leoint.hpp"
-#include "IndePlatform\utility.hpp"
+#include "ldef.h"
+#include "leoint.hpp"
+#include "utility.hpp"
 
 #include <memory>
 #include <string>

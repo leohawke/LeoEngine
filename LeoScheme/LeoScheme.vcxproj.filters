@@ -13,15 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="IndePlatform">
-      <UniqueIdentifier>{e7a4110b-5c6e-4629-a28f-3df6d9821674}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="IndePlatform\WinSource">
-      <UniqueIdentifier>{71fa62ee-d751-4dd5-b403-fee5a4ea1b7d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="IndePlatform\BaseSource">
-      <UniqueIdentifier>{529f9881-34df-45a5-92f7-2e534d23623c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Sexp">
       <UniqueIdentifier>{6cc86564-dcdb-49a1-a0e6-29678fbef406}</UniqueIdentifier>
     </Filter>
@@ -41,25 +32,13 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\All\IndePlatform\any.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\IndePlatform\memory.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
-    </ClCompile>
     <ClCompile Include="Sexp\Sexp.cpp">
       <Filter>Sexp</Filter>
-    </ClCompile>
-    <ClCompile Include="Sexp_Test.cpp">
-      <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="scheme.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="SchemeIO.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\Debug.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="SchemeMath.cpp">

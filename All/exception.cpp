@@ -1,6 +1,6 @@
 #include <string>
 #include <assert.h>
-#include "IndePlatform\platform.h"
+#include "platform.h"
 #include "exception.hpp"
 
 static std::string formatmessage(const char* pre,DWORD errcode)

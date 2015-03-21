@@ -1,6 +1,6 @@
 #pragma once
-#include "IndePlatform\clock.hpp"
-#include "IndePlatform\Singleton.hpp"
+#include "clock.hpp"
+#include "Singleton.hpp"
 #include "Mgr.hpp"
 #include <thread>
 namespace leo

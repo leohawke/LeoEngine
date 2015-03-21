@@ -17,7 +17,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -40,10 +40,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)All\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Indeplatform\Include;$(IncludePath)</IncludePath>
+    <SourcePath>$(VC_SourcePath);$(UniversalCRT_SourcePath);</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)All\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Indeplatform\Include;$(IncludePath)</IncludePath>
+    <SourcePath>$(VC_SourcePath);$(UniversalCRT_SourcePath);$(SolutionDir)All\Indeplatform\src;</SourcePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -88,16 +90,15 @@
     <ClInclude Include="Sexp\Sexp.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\All\Debug.cpp" />
-    <ClCompile Include="..\All\IndePlatform\any.cpp" />
-    <ClCompile Include="..\All\IndePlatform\memory.cpp" />
     <ClCompile Include="scheme.cpp" />
     <ClCompile Include="SchemeIO.cpp" />
     <ClCompile Include="SchemeMath.cpp" />
     <ClCompile Include="Sexp\Sexp.cpp" />
-    <ClCompile Include="Sexp_Test.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IndePlatform\IndePlatform.vcxproj">
+      <Project>{b8a92299-1c60-42c9-b77d-47f317497131}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,6 +1,6 @@
-#include "IndePlatform\platform.h"
-#include "IndePlatform\raii.hpp"
-#include "IndePlatform\memory.hpp"
+#include "platform.h"
+#include "raii.hpp"
+#include "memory.hpp"
 #include <algorithm>
 #include <type_traits>
 #include <exception>
@@ -8,7 +8,7 @@
 
 #include "File.hpp"
 #include "exception.hpp"
-#include "Debug.hpp"
+#include "..\Debug.hpp"
 
 #pragma warning(push)
 #pragma warning(disable : 4800)

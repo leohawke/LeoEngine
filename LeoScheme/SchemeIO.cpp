@@ -4,8 +4,6 @@
 #include <stdexcept>
 #include <functional>
 
-#include <debug.hpp>
-
 namespace leo
 {
 	namespace scheme
@@ -170,16 +168,16 @@ namespace leo
 							else if (data->can_cast<scheme_list>())
 							{
 								
-								auto list = data->cast_list();
-								if (is_list(list))
-									print_scheme_list(list, setchar);
+								auto lists = data->cast_list();
+								if (is_list(lists))
+									print_scheme_list(lists, setchar);
 								else{
 
 									setchar('<');
 									stack.push(nullptr);
-									stack.push(&list->mCdr);
+									stack.push(&lists->mCdr);
 									stack.push(space);
-									stack.push(&list->mCar);
+									stack.push(&lists->mCar);
 								}
 							}
 							else

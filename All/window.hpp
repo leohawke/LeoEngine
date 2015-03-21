@@ -3,8 +3,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "IndePlatform\BaseMacro.h"
-#include "debug.hpp"
+#include "BaseMacro.h"
+#include "..\debug.hpp"
 
 
 namespace leo

@@ -1,4 +1,4 @@
-#include "IndePlatform\platform.h"
+#include "platform.h"
 #include "window.hpp"
 
 namespace leo

@@ -43,18 +43,6 @@
     <Filter Include="Shader\HLSL\BillBoard">
       <UniqueIdentifier>{14dbf4c6-8e3e-469b-a9d4-1566ee7dbca5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="IndePlatform">
-      <UniqueIdentifier>{9e18f84e-bdcb-4669-9ccf-0c72122bd47c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="IndePlatform\BaseHead">
-      <UniqueIdentifier>{45640dea-e925-434e-914f-1e76a7c00433}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="IndePlatform\WinSource">
-      <UniqueIdentifier>{4cebca97-03c3-4b19-8d87-9b791e6ceeb7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="IndePlatform\BaseSource">
-      <UniqueIdentifier>{20791af1-f5b8-4601-be6f-c41f73c54d12}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shader\HLSL\Sky">
       <UniqueIdentifier>{fd11749a-3255-40b5-b617-e7b2a52f6c26}</UniqueIdentifier>
     </Filter>
@@ -99,16 +87,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Debug.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="File.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="window.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="d3dx11.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="exception.cpp">
@@ -159,24 +141,6 @@
     <ClCompile Include="windowstest.cpp">
       <Filter>Test</Filter>
     </ClCompile>
-    <ClCompile Include="IndePlatform\any.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
-    </ClCompile>
-    <ClCompile Include="IndePlatform\memory.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
-    </ClCompile>
-    <ClCompile Include="IndePlatform\raii.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
-    </ClCompile>
-    <ClCompile Include="IndePlatform\string.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
-    </ClCompile>
-    <ClCompile Include="IndePlatform\ThreadSync.cpp">
-      <Filter>IndePlatform\WinSource</Filter>
-    </ClCompile>
-    <ClCompile Include="IndePlatform\type_info.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Sky.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -185,9 +149,6 @@
     </ClCompile>
     <ClCompile Include="Core\GaussBlur.cpp">
       <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="IndePlatform\Singleton.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
     </ClCompile>
     <ClCompile Include="Input.cpp">
       <Filter>源文件</Filter>
@@ -210,9 +171,6 @@
     <ClCompile Include="Core\Terrain.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\SkeletonModel.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="Core\EffectSkeleton.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -230,9 +188,6 @@
     </ClCompile>
     <ClCompile Include="Core\EffectTerrainSO.cpp">
       <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="IndePlatform\Geometry.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
     </ClCompile>
     <ClCompile Include="Core\CoreObject.cpp">
       <Filter>Core</Filter>
@@ -252,11 +207,14 @@
     <ClCompile Include="RenderSystem\Deferred.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
+    <ClCompile Include="d3dx11.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="debug.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="declara.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -326,69 +284,6 @@
     <ClInclude Include="Win.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="IndePlatform\algorithm.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\any.h">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\any_iterator.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\BaseMacro.h">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\bitseg.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\clock.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\container.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\EndianSwap.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\functional.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\iterator.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\ldef.h">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\leoint.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\memory.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\path.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\raii.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\string.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\ThreadSync.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\tuple.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\type_op.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\utility.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\variadic.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Sky.hpp">
       <Filter>Core</Filter>
     </ClInclude>
@@ -397,12 +292,6 @@
     </ClInclude>
     <ClInclude Include="Core\GaussBlur.hpp">
       <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\platform.h">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\Singleton.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
     </ClInclude>
     <ClInclude Include="TextureMgr.h">
       <Filter>头文件</Filter>
@@ -419,9 +308,6 @@
     <ClInclude Include="Core\CoreObject.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="IndePlatform\Abstract.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
     <ClInclude Include="Core\RenderSync.hpp">
       <Filter>Core</Filter>
     </ClInclude>
@@ -431,37 +317,10 @@
     <ClInclude Include="Core\Terrain.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="IndePlatform\ConstexprMath.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\LeoMath.h">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\leo_math_convert_impl.h">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
     <ClInclude Include="Core\EffectTerrain.hpp">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\Camera.hpp">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\Tree.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\ray.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\platform_macro.h">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\Geometry.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\SkeletonAnimation.hpp">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\SkeletonModel.hpp">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\EffectSkeleton.hpp">
@@ -493,12 +352,6 @@
     </ClInclude>
     <ClInclude Include="Core\EffectTerrainSO.hpp">
       <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\Geometry_impl.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
-    </ClInclude>
-    <ClInclude Include="IndePlatform\leo_math_impl.hpp">
-      <Filter>IndePlatform\BaseHead</Filter>
     </ClInclude>
     <ClInclude Include="Core\ShadowMap.hpp">
       <Filter>Core</Filter>

@@ -8,10 +8,10 @@
 #include <string.h>
 #include <memory>
 #include <array>
-#include "IndePlatform\BaseMacro.h"
-#include "IndePlatform\Singleton.hpp"
-#include "IndePlatform\leoint.hpp"
-#include "IndePlatform\utility.hpp"
+#include "BaseMacro.h"
+#include "Singleton.hpp"
+#include "leoint.hpp"
+#include "utility.hpp"
 #include "d3dx11.hpp"
 
 #include "window.hpp"

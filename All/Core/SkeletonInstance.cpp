@@ -15,10 +15,10 @@
 
 namespace leo{
 	float AnimationClip::GetTotalTime() const {
-			return mSamples[mFCount].mTimePoint;
+		return mSamples[mFCount].mTimePoint;
 	}
 
-	float AnimationClip::CalcFrame(float t) const{
+	float AnimationClip::CalcFrame(float t) const {
 		if (t == 1.f)
 			if (mLoop)
 				return mFCount + 0.5f;

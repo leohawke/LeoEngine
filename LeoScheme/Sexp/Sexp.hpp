@@ -17,9 +17,8 @@
 #ifndef LeoScheme_Sexp_hpp
 #define LeoScheme_Sexp_hpp
 
-
-#include "IndePlatform\any.h"
-#include "IndePlatform\memory.hpp"
+#include <any.h>
+#include <memory.hpp>
 #include <string>
 #include <queue>
 

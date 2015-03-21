@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Mgr.hpp"
-#include "IndePlatform\leoint.hpp"
+#include "leoint.hpp"
 
 namespace leo
 {

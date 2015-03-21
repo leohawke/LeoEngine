@@ -4,9 +4,9 @@
 
 
 
-#include "IndePlatform\leoint.hpp"
+#include "leoint.hpp"
 
-#include "IndePlatform\platform.h"
+#include "platform.h"
 #include "COM.hpp"
 #include <comdef.h>
 #include <d3d11.h>

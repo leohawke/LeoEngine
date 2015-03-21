@@ -1,4 +1,4 @@
-#include "IndePlatform\platform.h"
+#include "platform.h"
 //WARNING:Í·ÎÄ¼şË³ĞòÒÀÀµ
 #include "Mgr.hpp"
 #include "window.hpp"

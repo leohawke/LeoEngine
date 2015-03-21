@@ -1,4 +1,4 @@
-#include "Indeplatform\platform.h"
+#include <platform.h>
 
 #include <DXGIFormat.h>
 #include <assert.h>
@@ -12,7 +12,7 @@
 
 #include <memory>
 
-#include "debug.hpp"
+#include "..\debug.hpp"
 #include "d3dx11.hpp"
 #include "exception.hpp"
 

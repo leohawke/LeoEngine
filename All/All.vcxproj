@@ -40,7 +40,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <EmbedManifest>false</EmbedManifest>
-    <IncludePath>$(SolutionDir)LeoScheme\Sexp;;E:\program\All\All\D3DX11;$(SolutionDir)DirectXTex;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)LeoScheme\Sexp;;E:\program\All\All\D3DX11;$(SolutionDir)Indeplatform\Include;$(SolutionDir)DirectXTex;$(IncludePath)</IncludePath>
     <LibraryPath>E:\program\All\All\D3DX11\Lib\x86;$(LibraryPath)</LibraryPath>
     <ReferencePath>$(SolutionDir)LeoScheme\;;$(SolutionDir)DirectXTex;$(ReferencePath)</ReferencePath>
   </PropertyGroup>
@@ -114,10 +114,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Core\EffectTerrain.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Core\EffectTerrainSO.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Core\EngineConfig.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
@@ -127,7 +127,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Core\Mesh.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Core\MeshLoad.cpp" />
     <ClCompile Include="Core\RenderSync.cpp" />
@@ -136,9 +136,6 @@
     </ClCompile>
     <ClCompile Include="Core\SkeletonData.cpp" />
     <ClCompile Include="Core\SkeletonInstance.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="Core\SkeletonModel.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Core\Sky.cpp">
@@ -156,14 +153,6 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="File.cpp" />
-    <ClCompile Include="IndePlatform\any.cpp" />
-    <ClCompile Include="IndePlatform\Geometry.cpp" />
-    <ClCompile Include="IndePlatform\memory.cpp" />
-    <ClCompile Include="IndePlatform\raii.cpp" />
-    <ClCompile Include="IndePlatform\Singleton.cpp" />
-    <ClCompile Include="IndePlatform\string.cpp" />
-    <ClCompile Include="IndePlatform\ThreadSync.cpp" />
-    <ClCompile Include="IndePlatform\type_info.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="leomath.cpp" />
     <ClCompile Include="MeshConver.cpp">
@@ -214,8 +203,6 @@
     <ClInclude Include="Core\CoreObject.hpp" />
     <ClInclude Include="Core\RenderSync.hpp" />
     <ClInclude Include="Core\Skeleton.hpp" />
-    <ClInclude Include="Core\SkeletonAnimation.hpp" />
-    <ClInclude Include="Core\SkeletonModel.hpp" />
     <ClInclude Include="Core\Sky.hpp" />
     <ClInclude Include="Core\Terrain.hpp" />
     <ClInclude Include="Core\EffectTerrain.hpp" />
@@ -225,46 +212,12 @@
     <ClInclude Include="D3DX11\D3DX11core.h" />
     <ClInclude Include="D3DX11\D3DX11tex.h" />
     <ClInclude Include="DeviceMgr.h" />
-    <ClInclude Include="IndePlatform\Abstract.hpp" />
-    <ClInclude Include="IndePlatform\algorithm.hpp" />
-    <ClInclude Include="IndePlatform\any.h" />
-    <ClInclude Include="IndePlatform\any_iterator.hpp" />
-    <ClInclude Include="IndePlatform\BaseMacro.h" />
-    <ClInclude Include="IndePlatform\bitseg.hpp" />
-    <ClInclude Include="IndePlatform\clock.hpp" />
-    <ClInclude Include="IndePlatform\ConstexprMath.hpp" />
-    <ClInclude Include="IndePlatform\container.hpp" />
-    <ClInclude Include="IndePlatform\EndianSwap.hpp" />
-    <ClInclude Include="IndePlatform\functional.hpp" />
-    <ClInclude Include="IndePlatform\Geometry.hpp" />
-    <ClInclude Include="IndePlatform\Geometry_impl.hpp" />
-    <ClInclude Include="IndePlatform\iterator.hpp" />
-    <ClInclude Include="IndePlatform\ldef.h" />
-    <ClInclude Include="IndePlatform\leoint.hpp" />
-    <ClInclude Include="IndePlatform\LeoMath.h" />
-    <ClInclude Include="IndePlatform\leo_math_convert_impl.h" />
-    <ClInclude Include="IndePlatform\leo_math_impl.hpp" />
-    <ClInclude Include="IndePlatform\memory.hpp" />
-    <ClInclude Include="IndePlatform\path.hpp" />
-    <ClInclude Include="IndePlatform\platform.h" />
-    <ClInclude Include="IndePlatform\platform_macro.h" />
-    <ClInclude Include="IndePlatform\raii.hpp" />
-    <ClInclude Include="IndePlatform\ray.hpp" />
-    <ClInclude Include="IndePlatform\Singleton.hpp" />
-    <ClInclude Include="IndePlatform\string.hpp" />
-    <ClInclude Include="IndePlatform\ThreadSync.hpp" />
-    <ClInclude Include="IndePlatform\Tree.hpp" />
-    <ClInclude Include="IndePlatform\tuple.hpp" />
-    <ClInclude Include="IndePlatform\type_op.hpp" />
-    <ClInclude Include="IndePlatform\utility.hpp" />
-    <ClInclude Include="IndePlatform\variadic.hpp" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="LightBuffer.h" />
     <ClInclude Include="LightHelper.h" />
     <ClInclude Include="Notation.hpp" />
     <ClInclude Include="RenderStates.hpp" />
     <ClInclude Include="d3dx11.hpp" />
-    <ClInclude Include="debug.hpp" />
     <ClInclude Include="declara.hpp" />
     <ClInclude Include="exception.hpp" />
     <ClInclude Include="file.hpp" />
@@ -519,6 +472,9 @@
   <ItemGroup>
     <ProjectReference Include="..\DirectXTex\DirectXTex_Desktop_2013.vcxproj">
       <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\LeoScheme\LeoScheme.vcxproj">
+      <Project>{9c92e335-fb4d-4185-8a8e-4ddb0fc12378}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

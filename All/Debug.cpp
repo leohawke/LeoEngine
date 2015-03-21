@@ -1,7 +1,7 @@
-#include "IndePlatform\ldef.h"
+#include <ldef.h>
 
 #include "Win.hpp"
-#include "Debug.hpp"
+#include "..\Debug.hpp"
 #include <stdio.h>
 #include <string.h>
 

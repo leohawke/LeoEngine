@@ -4,8 +4,8 @@
 #include <cstdint>
 #include <assert.h>
 
-#include "IndePlatform\BaseMacro.h"
-#include "IndePlatform\leoint.hpp"
+#include "BaseMacro.h"
+#include "leoint.hpp"
 namespace leo
 {
 	enum class record_level : std::uint8_t

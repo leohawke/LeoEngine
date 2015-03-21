@@ -1,6 +1,6 @@
 #pragma once
 #include "d3dx11.hpp"
-#include "IndePlatform\Singleton.hpp"
+#include "Singleton.hpp"
 namespace leo
 {
 	class RenderStates

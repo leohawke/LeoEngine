@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 //增加插值函数
-#include "IndePlatform\LeoMath.h"
+#include "LeoMath.h"
 #pragma warning(push)
 #pragma warning(disable : 4838)
 #pragma warning(disable : 4458)

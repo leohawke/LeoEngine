@@ -2,7 +2,7 @@
 
 #include "LightHelper.h"
 #include "d3dx11.hpp"
-#include "IndePlatform\ldef.h"
+#include "ldef.h"
 #include "exception.hpp"
 #include "COM.hpp"
 namespace leo

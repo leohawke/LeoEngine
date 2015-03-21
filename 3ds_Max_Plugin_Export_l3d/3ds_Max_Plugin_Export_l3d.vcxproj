@@ -39,6 +39,7 @@
       <PreprocessorDefinitions>_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(MaxSdkInc);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</BrowseInformation>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(MaxSdkLib);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -51,6 +52,9 @@
     <PostBuildEvent>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$([System.IO.Path]::GetFullPath('$(MaxSdkDir)/tools/RunMUIRCT.exe'))" "$([System.IO.Path]::GetFullPath('$(TargetDir)'))\" $(TargetFileName)</Message>
     </PostBuildEvent>
+    <Bscmake>
+      <PreserveSBR Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</PreserveSBR>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="3ds_Max_Plugin_Export_l3d.cpp" />

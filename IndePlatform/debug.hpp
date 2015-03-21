@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DEBUG_HPP
+#define DEBUG_HPP
 namespace leo
 {
 	enum class which_stdio { istream, ostream, estream };
@@ -64,5 +65,7 @@ namespace leo
 #define DebugToStdOutput() {}
 #endif
 #endif
+
 		}
 }
+#endif
