@@ -70,6 +70,9 @@ ID3D11ShaderResourceView* mSSAORandomVec = nullptr;
 ID3D11SamplerState* mLinearRepeat = nullptr;
 ID3D11SamplerState* msamNormalMap = nullptr;
 
+//用于显示GBuffer
+ID3D11PixelShader* mGBufferPS = nullptr;
+
 struct SSAO {
 	leo::float4x4 gProj;
 	leo::float4 gOffsetVectors[14];
@@ -79,6 +82,7 @@ struct SSAO {
 	float    gOcclusionFadeEnd = 2.0f;
 	float    gSurfaceEpsilon = 0.05f;
 };
+SSAO ssao;
 
 
 void DeviceEvent()
@@ -428,6 +432,8 @@ void BuildRes()
 	leo::ShaderMgr sm;
 	auto  mPSBlob = sm.CreateBlob(leo::FileSearch::Search(L"SSAOPS.cso"));
 	auto mVSBlob = sm.CreateBlob(leo::FileSearch::Search(L"PostCommonVS.cso"));
+	auto mGBufferBlob = sm.CreateBlob(leo::FileSearch::Search(L"GBufferPS.cso"));
+	mGBufferPS = sm.CreatePixelShader(mGBufferBlob);
 	mSSAOPS = sm.CreatePixelShader(mPSBlob);
 	mSSAOVS = sm.CreateVertexShader(mVSBlob);
 
@@ -439,7 +445,6 @@ void BuildRes()
 	Desc.StructureByteStride = 0;
 	Desc.ByteWidth = sizeof(SSAO);
 
-	SSAO ssao;
 	subData.pSysMem = &ssao;
 	subData.SysMemPitch = 0;
 	subData.SysMemSlicePitch = 0;
@@ -471,6 +476,8 @@ void BuildRes()
 		float s = (rand()*1.f  / RAND_MAX)*0.75f +0.25f;
 		leo::save(v, leo::Multiply(load(v), s));
 	}
+
+	ssao.gProj = pCamera->Proj();
 
 	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateBuffer(&Desc, &subData, &mSSAOPSCB));
 
@@ -529,11 +536,7 @@ void Update(){
 }
 
 void RenderFinall(ID3D11DeviceContext* context ) {
-	context->IASetInputLayout(leo::ShaderMgr().CreateInputLayout(leo::InputLayoutDesc::PostEffect));
-	UINT strides[] = { sizeof(leo::Vertex::PostEffect) };
-	UINT offsets[] = { 0 };
-	context->IASetVertexBuffers(0, 1, &mFillScreenVB, strides, offsets);
-	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
 
 	context->VSSetShader(mSSAOVS, nullptr, 0);
 	context->PSSetShader(mSSAOPS, nullptr, 0);
@@ -547,6 +550,11 @@ void RenderFinall(ID3D11DeviceContext* context ) {
 	context->PSSetSamplers(0, 2, psss);
 
 	context->Draw(4, 0);
+
+	ID3D11ShaderResourceView* pssrvs[] = { nullptr,nullptr, nullptr, nullptr, nullptr };
+
+	context->PSSetShaderResources(0, 5, pssrvs);
+	context->PSSetShader(nullptr, nullptr, 0);
 }
 
 
@@ -610,14 +618,15 @@ void Render()
 		pBoxMesh->Render(devicecontext, *pCamera);
 		pSphereMesh->Render(devicecontext, *pCamera);
 
-		ID3D11RenderTargetView* rt[] = { dm.GetRenderTargetView(),nullptr,nullptr,nullptr };
+		ID3D11RenderTargetView* rts[] = { dm.GetRenderTargetView(),nullptr,nullptr,nullptr };
 		//unbind
-		devicecontext->OMSetRenderTargets(4, rt, dm.GetDepthStencilView());
+		devicecontext->OMSetRenderTargets(4, rts, dm.GetDepthStencilView());
 
 		auto& pPackEffect = leo::EffectPack::GetInstance();
 		pPackEffect->SetDstRTV(dm.GetRenderTargetView());
 		pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[0]);
 		pPackEffect->Apply(devicecontext);
+		devicecontext->PSSetShader(mGBufferPS, nullptr, 0);
 		devicecontext->IASetInputLayout(leo::ShaderMgr().CreateInputLayout(leo::InputLayoutDesc::PostEffect));
 		UINT strides[] = { sizeof(leo::Vertex::PostEffect) };
 		UINT offsets[] = { 0 };
@@ -651,15 +660,18 @@ void Render()
 			pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[3], devicecontext);
 			devicecontext->Draw(4, 0);
 
-			//You Need Do this to restore state
+
+			//右下绘制最终图像
+			currvp.TopLeftX += currvp.Width;
+			devicecontext->RSSetViewports(1, &currvp);
+
+			RenderFinall(devicecontext);
+
 			leo::context_wrapper context(devicecontext);
+			//You Need Do this to restore state
 		}
 
-		//右下绘制最终图像
-		currvp.TopLeftX += currvp.Width;
-		devicecontext->RSSetViewports(1, &currvp);
 		
-		RenderFinall(devicecontext);
 
 		devicecontext->RSSetViewports(1, &prevVP);
 

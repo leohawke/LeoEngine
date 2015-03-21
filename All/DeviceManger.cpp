@@ -268,9 +268,9 @@ namespace leo
 			//	Call ID3D11Device::QueryInterface(ID3D11Debug*) will Add ID3D11Device::RefCount,But We Need D3D11Debug::ReportLiveDeviceObjects
 			//Inteface Show Important Infomation,It's mean RefCount is 1,In fact ,is 2.Maybe It's a bug
 			//http://gamedev.stackexchange.com/questions/14633/what-do-these-state-creation-warnings-mean-in-the-dx11-debug-output
-			global::globalD3DDebug->ReportLiveDeviceObjects(D3D11_RLDO_SUMMARY);
+			global::globalD3DDebug->ReportLiveDeviceObjects(D3D11_RLDO_SUMMARY); 
+			leo::win::ReleaseCOM(global::globalD3DDebug);
 		}
-		leo::win::ReleaseCOM(global::globalD3DDebug);
 #endif
 	}
 

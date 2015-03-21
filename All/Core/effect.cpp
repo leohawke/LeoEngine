@@ -714,6 +714,8 @@ namespace leo
 			mPixelShader = sm.CreatePixelShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"pack", D3D11_PIXEL_SHADER)));
 
 			mSampler = leo::RenderStates().GetSamplerState(L"LinearRepeat");
+
+			mNoDepth = leo::RenderStates().GetDepthStencilState(L"NoDepthDSS");
 		}
 		~EffectPackDelegate() = default;
 	public:
@@ -722,7 +724,7 @@ namespace leo
 			context_wrapper pContext(context, L"pack");
 
 			pContext.OMSetRenderTargets(1, &mDstRTV, nullptr);
-
+			pContext.OMSetDepthStencilState(mNoDepth, 0);
 			pContext.VSSetShader(mVertexShader, nullptr, 0);
 			pContext.PSSetShader(mPixelShader, nullptr, 0);
 			pContext.PSSetShaderResources(0, 1, &mPackSRV);
@@ -748,6 +750,8 @@ namespace leo
 		ID3D11ShaderResourceView* mPackSRV = nullptr;
 
 		ID3D11SamplerState* mSampler = nullptr;
+
+		ID3D11DepthStencilState* mNoDepth = nullptr;
 	};
 
 	void EffectPack::Apply(ID3D11DeviceContext* context)

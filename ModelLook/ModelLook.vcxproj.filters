@@ -276,6 +276,9 @@
     <ClInclude Include="..\All\RenderSystem\Deferred.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
+    <ClInclude Include="..\All\COM.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\All\Shader\LightBuffer.hlsli">
