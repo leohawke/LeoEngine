@@ -22,7 +22,7 @@ float4 main(PixelIn pin) : SV_TARGET
 	//lerp can unnormalize
 	pin.NormalW = normalize(pin.NormalW);
 	float3 normalMapSample = TexNormalMap.Sample(LinearRepeat, pin.Tex).rgb;
-		float3 bumpedNormalW = NormalSampleToWorldSpace(normalMapSample, pin.NormalW, pin.TangentW);
+		float3 bumpedNormalW = NormalSampleCalc(normalMapSample, pin.NormalW, pin.TangentW);
 
 		float3 v = normalize(gEyePosW - pin.PosW);
 

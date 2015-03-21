@@ -18,8 +18,8 @@
 #define LeoScheme_Sexp_hpp
 
 
-#include <IndePlatform\any.h>
-#include <IndePlatform\memory.hpp>
+#include "IndePlatform\any.h"
+#include "IndePlatform\memory.hpp"
 #include <string>
 #include <queue>
 

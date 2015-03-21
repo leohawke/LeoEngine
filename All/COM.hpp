@@ -13,8 +13,12 @@ namespace leo
 					std::string name;
 					name.resize(DataSize);
 					com->GetPrivateData(::WKPDID_D3DDebugObjectName, &DataSize, &name[0]);
-					if(DataSize>1 && name[1] == char())
-						DebugPrintf(L"%s address: %p,refcount: ",name.c_str(),com);
+					if (DataSize > 1 && (name[1] == char())) {
+						std::wstring wname;
+						wname.resize(DataSize / 2);
+						com->GetPrivateData(::WKPDID_D3DDebugObjectName, &DataSize, &wname[0]);
+						DebugPrintf(L"%s address: %p,refcount: ", wname.c_str(), com);
+					}
 					else
 						DebugPrintf("%s address: %p,refcount: ", name.c_str(), com);
 					return;

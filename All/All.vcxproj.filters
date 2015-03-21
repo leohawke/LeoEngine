@@ -597,6 +597,9 @@
     <FxCompile Include="Shader\GBufferPS.hlsl">
       <Filter>Shader\HLSL\PostRender</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\SSAOPS.hlsl">
+      <Filter>Shader\HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Gaussian_color.hlsl">
@@ -610,6 +613,9 @@
     </None>
     <None Include="Shader\Noise.hlsli">
       <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\common.hlsli">
+      <Filter>Shader\HLSL</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
