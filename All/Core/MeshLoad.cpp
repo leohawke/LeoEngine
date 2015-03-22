@@ -594,6 +594,49 @@ namespace leo
 		fout->Write(offset, &indices[0], indices.size()*sizeof(std::uint32_t));
 	}
 
+	void MeshFile::d3dTol3d(std::wstring& d3dfilename, const std::wstring& l3dfilename) {
+		helper::MeshData meshData;
+
+		std::ifstream fin(d3dfilename);
+
+		if (!fin)
+			return;
+
+		std::string sgnore;
+		std::size_t vertexCount;
+		fin >> sgnore>>vertexCount;
+		std::size_t triangleCount;
+		fin >> sgnore >> triangleCount;
+
+		meshData.Indices.resize(triangleCount * 3);
+		meshData.Vertices.resize(vertexCount);
+
+		fin >> sgnore >> sgnore >> sgnore;
+		fin >> sgnore;
+		for (auto &v : meshData.Vertices) {
+			fin >> v.pos.x >> v.pos.y >> v.pos.z;
+			fin >> v.normal.x >> v.normal.y >> v.normal.z;
+			v.tex.u = 0.f;
+			v.tex.v = 1.f;
+
+			v.tangent = Cross(v.normal, float3(0.f, 1.f, 0.f));
+			v.tangent = Normalize(v.tangent);
+		}
+
+		fin >> sgnore;
+		fin >> sgnore;
+		fin >> sgnore;
+
+		for (auto & i : meshData.Indices) {
+			fin >> i;
+		}
+
+		if (!fin)
+			return;
+
+		meshdataTol3d(meshData, l3dfilename);
+	}
+
 	void MeshFile::meshdataTol3d(const helper::MeshData& meshData, const std::wstring& l3dfilename) {
 		MeshFileHeader l3d_header;
 		l3d_header.numvertice = meshData.Vertices.size();
