@@ -2,10 +2,10 @@
 #include	<stdlib.h>
 #include	<crtdbg.h>
 
-#include <IndePlatform\platform.h>
-#include <IndePlatform\Singleton.hpp>
-#include <IndePlatform\ThreadSync.hpp>
-#include <IndePlatform\clock.hpp>
+#include "platform.h"
+#include "Singleton.hpp"
+#include "ThreadSync.hpp"
+#include "clock.hpp"
 
 #include <Core\Mesh.hpp>
 #include <Core\Effect.h>
@@ -373,14 +373,15 @@ void BuildRes()
 
 	pTerrainMesh->Load(L"Resource/Terrain.l3d", leo::DeviceMgr().GetDevice());
 	pSphereMesh->Load(L"Resource/Sphere.l3d", leo::DeviceMgr().GetDevice());
-	pBoxMesh->Load(L"Resource/Box.l3d", leo::DeviceMgr().GetDevice());
+	pBoxMesh->Load(L"Resource/skull.l3d", leo::DeviceMgr().GetDevice());
 	pSphereMesh->Translation(leo::float3(-6.f, 6.5f, 0.f));
 	
 	pSphereMesh->Scale(5.f);
 	pTerrainMesh->Scale(8.f);
 
-	pBoxMesh->Scale(5.f);
-	pBoxMesh->Translation(leo::float3(+5.f, 6.f, -3.5f));
+	pBoxMesh->Scale(4.f);
+	pBoxMesh->Translation(leo::float3(+5.f, 2.f, -3.5f));
+	pBoxMesh->Rotation(leo::float3(0.f, 1.f, 0.f),leo::LM_PI/1.5f);
 #endif
 	auto& vertices = leo::helper::CreateFullscreenQuad();
 

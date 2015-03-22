@@ -58,7 +58,7 @@ PixelOut main(PixelIn pin) {
 	//lerp can unnormalize
 	pin.NormalV = normalize(pin.NormalV);
 	float3 normalMapSample = TexNormalMap.Sample(LinearRepeat, pin.Tex).rgb;
-	float3 bumpedNormalV = NormalSampleCalc(normalMapSample, pin.NormalV, pin.TangentV);
+	//float3 bumpedNormalV = NormalSampleCalc(normalMapSample, pin.NormalV, pin.TangentV);
 
 	float shadow = 1.f;
 	//shadow = CalcShadowFactor(samShadow, ShadowMap, pin.Shadow_PosH);
@@ -66,7 +66,7 @@ PixelOut main(PixelIn pin) {
 	float4 spec = float4(gMat.specular.xyz*shadow, gMat.specular.w);
 
 	PixelOut pout;
-	pout.Normal =float4(bumpedNormalV,pin.PosH.z/ pin.PosH.w);
+	pout.Normal =float4(pin.NormalV,pin.PosH.z/ pin.PosH.w);
 	pout.Diffuse = texColor;
 	pout.Specular = spec;
 	pout.Pos =float4(pin.PosV,1.0f);

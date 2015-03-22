@@ -27,7 +27,7 @@ namespace leo
 
 	bool operator<(const __memroy_track_struct& lhs, const __memroy_track_struct & rhs)
 	{
-		return lhs.p < rhs.p && lhs.alignsize < rhs.alignsize && lhs.placement < rhs.placement;
+		return lhs.p < rhs.p;
 	}
 
 	class ABCDEFGHIGK
@@ -57,19 +57,29 @@ namespace leo
 			}
 			sets.erase(pos);
 		}
-		static std::multiset<__memroy_track_struct> sets;
-	}
-	__memory_track_sets;
+		std::multiset<__memroy_track_struct> sets;
+	};
 
-	std::multiset<__memroy_track_struct> ABCDEFGHIGK::sets;
+	ABCDEFGHIGK* __memory_track_sets = nullptr;
+	UINT32 ref_count = 0;
 
 	void __memory_track_record_alloc(void * p, std::size_t count, std::uint8_t alignsize, const char* file, int line, const char* funcname, bool placement)
 	{
-		__memory_track_sets.record_alloc(p, alignsize, placement);
+		/*
+		if (ref_count == 0)
+			__memory_track_sets = new ABCDEFGHIGK();
+		++ref_count;
+		__memory_track_sets->record_alloc(p, alignsize, placement);
+		*/
 			
 	}
 	void __memory_track_dealloc_record(void * p, std::uint8_t alignsize, bool placement)
 	{
-		__memory_track_sets.dealloc_record(p, alignsize, placement);
+		/*
+		__memory_track_sets->dealloc_record(p, alignsize, placement);
+		--ref_count;
+		if (ref_count == 0)
+			delete __memory_track_sets;
+		*/
 	}
 }

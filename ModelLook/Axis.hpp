@@ -1,8 +1,8 @@
 #pragma once
 
 
-#include <IndePlatform\Singleton.hpp>
-#include <IndePlatform\memory.hpp>
+#include "Singleton.hpp"
+#include "memory.hpp"
 struct ID3D11Device;
 struct ID3D11Buffer;
 namespace leo

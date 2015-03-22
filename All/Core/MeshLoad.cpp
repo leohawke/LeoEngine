@@ -594,7 +594,7 @@ namespace leo
 		fout->Write(offset, &indices[0], indices.size()*sizeof(std::uint32_t));
 	}
 
-	void MeshFile::d3dTol3d(std::wstring& d3dfilename, const std::wstring& l3dfilename) {
+	void MeshFile::d3dTol3d(const std::wstring& d3dfilename, const std::wstring& l3dfilename) {
 		helper::MeshData meshData;
 
 		std::ifstream fin(d3dfilename);

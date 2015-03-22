@@ -17,9 +17,6 @@
     <Filter Include="IndePlatform\WinSource">
       <UniqueIdentifier>{6a8bc9b0-9144-4e87-a67f-1bcfeeb29301}</UniqueIdentifier>
     </Filter>
-    <Filter Include="IndePlatform\BaseSource">
-      <UniqueIdentifier>{6a5038ee-1270-4ac8-a0cc-1b2b62b7e28f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="WinMain">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
@@ -64,24 +61,6 @@
     </ClCompile>
     <ClCompile Include="..\All\Core\Vertex.cpp">
       <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\IndePlatform\ThreadSync.cpp">
-      <Filter>IndePlatform\WinSource</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\IndePlatform\memory.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\IndePlatform\raii.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\IndePlatform\Singleton.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\IndePlatform\string.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\IndePlatform\type_info.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
     </ClCompile>
     <ClCompile Include="..\All\d3dx11.cpp">
       <Filter>源文件</Filter>
@@ -152,9 +131,6 @@
     <ClCompile Include="..\All\Core\EngineConfig.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\All\IndePlatform\any.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
-    </ClCompile>
     <ClCompile Include="..\All\Core\SkeletonInstance.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -166,9 +142,6 @@
     </ClCompile>
     <ClCompile Include="..\All\Core\EffectTerrainSO.cpp">
       <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\IndePlatform\Geometry.cpp">
-      <Filter>IndePlatform\BaseSource</Filter>
     </ClCompile>
     <ClCompile Include="..\All\Core\CoreObject.cpp">
       <Filter>Core</Filter>

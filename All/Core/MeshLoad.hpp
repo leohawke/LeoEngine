@@ -88,7 +88,7 @@ namespace leo
 
 		static void sdkmeshTol3d(const std::wstring& sdkmeshfilename, const std::wstring& l3dfilename);
 
-		static void d3dTol3d(std::wstring& d3dfilename, const std::wstring& l3dfilename);
+		static void d3dTol3d(const std::wstring& d3dfilename, const std::wstring& l3dfilename);
 
 		static void meshdataTol3d(const helper::MeshData& meshData, const std::wstring& l3dfilename);
 
