@@ -143,10 +143,11 @@ float4 main(VertexOut pin) : SV_TARGET{
 	float access = 1.0f - occlusionSum;
 #endif
 	// Project q and generate projective tex-coords.  
-	// note [-1,-1] -> [1,1]
+	// note [-1,-1] -> [0,1]
 	float4 projP = mul(float4(p, 1.0f), gProj);
 	projP /= projP.w;
 	projP.xy = (projP.xy + 1.f) / 2.f;
+	projP.y = 1.f - projP.y;
 
 	float3 color = diffuse.Sample(LinearRepeat, projP.xy).rgb;
 
