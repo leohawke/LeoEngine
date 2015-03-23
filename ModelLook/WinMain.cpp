@@ -478,7 +478,8 @@ void BuildRes()
 		leo::save(v, leo::Multiply(load(v), s));
 	}
 
-	ssao.gProj = pCamera->Proj();
+	leo::save(ssao.gProj, leo::Transpose(leo::load(pCamera->Proj())));
+
 
 	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateBuffer(&Desc, &subData, &mSSAOPSCB));
 
@@ -582,9 +583,9 @@ void Render()
 		if (renderAble)
 			pModelMesh->CastShadow(devicecontext);
 
-		pTerrainMesh->CastShadow(devicecontext);
+		//pTerrainMesh->CastShadow(devicecontext);
 		pBoxMesh->CastShadow(devicecontext);
-		pSphereMesh->CastShadow(devicecontext);
+		//pSphereMesh->CastShadow(devicecontext);
 
 		leo::ShadowMap::GetInstance().EndShadowMap(devicecontext);
 #if 0
@@ -615,9 +616,9 @@ void Render()
 		leo::EffectNormalMap::GetInstance()->ShadowMapSRV(leo::ShadowMap::GetInstance().GetDepthSRV());
 
 		pAxis->Render(devicecontext, *pCamera);
-		pTerrainMesh->Render(devicecontext, *pCamera);
+		//pTerrainMesh->Render(devicecontext, *pCamera);
 		pBoxMesh->Render(devicecontext, *pCamera);
-		pSphereMesh->Render(devicecontext, *pCamera);
+		//pSphereMesh->Render(devicecontext, *pCamera);
 
 		ID3D11RenderTargetView* rts[] = { dm.GetRenderTargetView(),nullptr,nullptr,nullptr };
 		//unbind

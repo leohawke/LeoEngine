@@ -283,6 +283,7 @@
     <FxCompile Include="..\All\Shader\LinePS.hlsl">
       <Filter>Shader\HLSL\Line</Filter>
     </FxCompile>
+    <FxCompile Include="..\All\Shader\SSAOPS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ModelLook.rc">
