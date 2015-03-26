@@ -84,9 +84,8 @@ float4 main(VertexOut pin) : SV_TARGET{
 	float3 randVec = 2.f* RandomVecMap.SampleLevel(LinearRepeat, 4.f*pin.Tex, 0.f).rgb - 1.f;
 	float3 n = NormalDepth.xyz;
 	//此光照是错误的,先算SSAO
-#if 0
+
 	float occlusionSum = 0.f;
-	float3 r;
 	[unroll]
 	for (int i = 0; i < gSampleCount; ++i)
 	{
@@ -105,7 +104,6 @@ float4 main(VertexOut pin) : SV_TARGET{
 		// note [-1,-1] -> [1,1]
 		float4 projQ = mul(float4(q, 1.0f), gProj);
 		projQ /= projQ.w;
-		projQ.xy = (projQ.xy + 1.f) / 2.f;
 
 		// Find the nearest depth value along the ray from the eye to q (this is not
 		// the depth of q, as q is just an arbitrary point near p and might
@@ -116,7 +114,7 @@ float4 main(VertexOut pin) : SV_TARGET{
 		// Reconstruct full view space position r = (rx,ry,rz).  We know r
 		// lies on the ray of q, so there exists a t such that r = t*q.
 		// r.z = t*q.z ==> t = r.z / q.z
-
+		float3 r;
 		r = (rz / q.z) * q;
 
 		//
@@ -141,15 +139,9 @@ float4 main(VertexOut pin) : SV_TARGET{
 	occlusionSum /= gSampleCount;
 
 	float access = 1.0f - occlusionSum;
-#endif
-	// Project q and generate projective tex-coords.  
-	// note [-1,-1] -> [0,1]
-	float4 projP = mul(float4(p, 1.0f), gProj);
-	projP /= projP.w;
-	projP.xy = (projP.xy + 1.f) / 2.f;
-	projP.y = 1.f - projP.y;
 
-	float3 color = diffuse.Sample(LinearRepeat, projP.xy).rgb;
+	
 
-	return float4(color,1.f);
+
+	return float4(Diffuse*access,1.f);
 }

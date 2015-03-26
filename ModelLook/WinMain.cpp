@@ -77,10 +77,10 @@ struct SSAO {
 	leo::float4x4 gProj;
 	leo::float4 gOffsetVectors[14];
 
-	float    gOcclusionRadius = 0.5f;
-	float    gOcclusionFadeStart = 0.2f;
-	float    gOcclusionFadeEnd = 2.0f;
-	float    gSurfaceEpsilon = 0.05f;
+	float    gOcclusionRadius = 5.5f;
+	float    gOcclusionFadeStart = 2.2f;
+	float    gOcclusionFadeEnd = 20.0f;
+	float    gSurfaceEpsilon = 0.55f;
 };
 SSAO ssao;
 
@@ -379,9 +379,9 @@ void BuildRes()
 	pSphereMesh->Scale(5.f);
 	pTerrainMesh->Scale(8.f);
 
-	pBoxMesh->Scale(4.f);
-	pBoxMesh->Translation(leo::float3(+5.f, 2.f, -3.5f));
-	pBoxMesh->Rotation(leo::float3(0.f, 1.f, 0.f),leo::LM_PI/1.5f);
+	pBoxMesh->Scale(3.f);
+	pBoxMesh->Translation(leo::float3(+0.f, -5.f, 0.0f));
+	//pBoxMesh->Rotation(leo::float3(0.f, 1.f, 0.f),leo::LM_PI/2.0f);
 #endif
 	auto& vertices = leo::helper::CreateFullscreenQuad();
 
@@ -418,7 +418,7 @@ void BuildRes()
 	pos.x = -pos.x;
 	pos.z = -pos.z;
 
-	pCamera->LookAt(pos, mSphere.GetCenter(), float3(0.f, 1.f, 0.f));
+	pCamera->LookAt(float3(0.f,10.f,-10.f), float3(0.f,0.f,0.f), float3(0.f, 1.f, 0.f));
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 
 	
@@ -477,8 +477,18 @@ void BuildRes()
 		float s = (rand()*1.f  / RAND_MAX)*0.75f +0.25f;
 		leo::save(v, leo::Multiply(load(v), s));
 	}
+	
+	float data[] = { 0.5f,0.f,0.f,0.f,
+					0.f,-0.5f,0.f,0.f,
+					0.f,0.f,1.f,0.f,
+					0.5f,0.5f,0.f,1.f };
+	leo::float4x4 toTex{data};
 
-	leo::save(ssao.gProj, leo::Transpose(leo::load(pCamera->Proj())));
+	leo::save(ssao.gProj, 
+		leo::Transpose(
+		leo::Multiply(
+			leo::load(pCamera->Proj()),
+			load(toTex))));
 
 
 	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateBuffer(&Desc, &subData, &mSSAOPSCB));
@@ -583,7 +593,7 @@ void Render()
 		if (renderAble)
 			pModelMesh->CastShadow(devicecontext);
 
-		//pTerrainMesh->CastShadow(devicecontext);
+		pTerrainMesh->CastShadow(devicecontext);
 		pBoxMesh->CastShadow(devicecontext);
 		//pSphereMesh->CastShadow(devicecontext);
 
@@ -616,7 +626,7 @@ void Render()
 		leo::EffectNormalMap::GetInstance()->ShadowMapSRV(leo::ShadowMap::GetInstance().GetDepthSRV());
 
 		pAxis->Render(devicecontext, *pCamera);
-		//pTerrainMesh->Render(devicecontext, *pCamera);
+		pTerrainMesh->Render(devicecontext, *pCamera);
 		pBoxMesh->Render(devicecontext, *pCamera);
 		//pSphereMesh->Render(devicecontext, *pCamera);
 

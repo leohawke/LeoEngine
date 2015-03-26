@@ -133,6 +133,7 @@ namespace leo
 		mEffect->WorldViewProjMatrix(Multiply(world,load(camera.ViewProj())));
 
 		__m128 det;
+		world[3] = leo::set(0.f, 0.f, 0.f, 1.f);
 		world = Transpose(Inverse(det, world));
 		mEffect->WorldInvTransposeViewMatrix(Multiply(world, load(camera.View())));
 

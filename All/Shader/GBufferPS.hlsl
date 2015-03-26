@@ -8,5 +8,5 @@ struct VertexOut
 
 float4 main(VertexOut pin) : SV_TARGET
 {
-	return gInput.Sample(LinearRepeat, pin.Tex);
+	return float4(gInput.SampleLevel(LinearRepeat, pin.Tex,0).rgb,1.f);
 }
