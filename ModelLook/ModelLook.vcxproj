@@ -179,6 +179,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\All\Core\EffectGBuffer.cpp" />
     <ClCompile Include="..\All\Core\EffectLine.cpp" />
     <ClCompile Include="..\All\Core\EffectShadowMap.cpp" />
     <ClCompile Include="..\All\Core\EffectSkeleton.cpp" />

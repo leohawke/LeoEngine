@@ -17,6 +17,7 @@
 #include <Core\Skeleton.hpp>
 #include <Core\MeshLoad.hpp>
 #include <Core\EffectSkeleton.hpp>
+#include <Core\EffectGBuffer.hpp>
 #include <Core\\EngineConfig.h>
 #include <Core\ShadowMap.hpp>
 #include <Core\Vertex.hpp>
@@ -327,46 +328,24 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 void BuildRes()
 {
-
-	auto noise = [](float x, float z) {
-		return 0.2f;
-	};
-
-	//leo::MeshFile::terrainTol3d(noise, std::make_pair(10u, 15u), std::make_pair(30u, 45u), L"Resource/Terrain.l3d");
-	//leo::MeshFile::meshdataTol3d(leo::helper::CreateBox(1.f, 1.f, 1.f), L"Resource/Box.l3d");
-	//leo::MeshFile::meshdataTol3d(leo::helper::CreateSphere(1.f, 32,32), L"Resource/Sphere.l3d");
-
-	
-
 	using leo::float3;
 
 	event.Wait();
-
-	
-
-	auto& pEffect = leo::EffectNormalMap::GetInstance(leo::DeviceMgr().GetDevice());
+//Effect,Staic Instance	
 #if 1
-	leo::EffectNormalLine::GetInstance(leo::DeviceMgr().GetDevice());
+	//leo::EffectNormalLine::GetInstance(leo::DeviceMgr().GetDevice());
 	leo::ShadowMap::GetInstance(leo::DeviceMgr().GetDevice(), std::make_pair(2048u, 2048u));
 	leo::EffectPack::GetInstance(leo::DeviceMgr().GetDevice());
-
-	pTerrainMesh.reset(new leo::Mesh());
-	pTerrainMesh->Load(L"Resource/Terrain.l3d", leo::DeviceMgr().GetDevice());
-
-	leo::DirectionLight dirlight;
-	dirlight.ambient = leo::float4(1.0f, 1.0f, 1.0f, 1.f);
-	dirlight.diffuse = leo::float4(1.f, 1.f, 1.f, 1.f);
-	dirlight.specular = leo::float4(1.f, 1.f, 1.f, 32.f);
-	dirlight.dir = leo::float4(-0.5773f, -0.57735f,0.57735f, 0.f);
-
-	pEffect->Light(dirlight);
-
 	
 	leo::EffectShadowMap::GetInstance(leo::DeviceMgr().GetDevice());
 	leo::EffectLine::GetInstance(leo::DeviceMgr().GetDevice());
+	
+	leo::DeferredResources::GetInstance();
+	leo::EffectGBuffer::GetInstance(leo::DeviceMgr().GetDevice());
+#endif
 	pAxis = std::make_unique<leo::Axis>(leo::DeviceMgr().GetDevice());
 
-	
+
 	pTerrainMesh.reset(new leo::Mesh());
 	pSphereMesh.reset(new leo::Mesh());
 	pBoxMesh.reset(new leo::Mesh());
@@ -375,14 +354,13 @@ void BuildRes()
 	pSphereMesh->Load(L"Resource/Sphere.l3d", leo::DeviceMgr().GetDevice());
 	pBoxMesh->Load(L"Resource/skull.l3d", leo::DeviceMgr().GetDevice());
 	pSphereMesh->Translation(leo::float3(-6.f, 6.5f, 0.f));
-	
+
 	pSphereMesh->Scale(5.f);
 	pTerrainMesh->Scale(8.f);
 
-	pBoxMesh->Scale(3.f);
+	pBoxMesh->Scale(1.f);
 	pBoxMesh->Translation(leo::float3(+0.f, -5.f, 0.0f));
-	//pBoxMesh->Rotation(leo::float3(0.f, 1.f, 0.f),leo::LM_PI/2.0f);
-#endif
+
 	auto& vertices = leo::helper::CreateFullscreenQuad();
 
 	D3D11_BUFFER_DESC vbDesc;
@@ -404,9 +382,10 @@ void BuildRes()
 	}
 	Catch_DX_Exception
 
+//Camera Set	
+#if 1
 	leo::Sphere mSphere{ leo::float3(0.0f, 0.0f, 0.0f),sqrtf(10.0f*10.0f + 15.0f*15.0f) };
 	float3 dir{ -0.5773f, -0.57735f,0.57735f };
-#if 1
 	pCamera = std::make_unique<leo::UVNCamera>();
 	pShaderCamera = std::make_unique<leo::CastShadowCamera>();
 	pShaderCamera->SetSphereAndDir(mSphere, dir);
@@ -420,15 +399,10 @@ void BuildRes()
 
 	pCamera->LookAt(float3(0.f,10.f,-10.f), float3(0.f,0.f,0.f), float3(0.f, 1.f, 0.f));
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
-
 	
-
-	leo::float4 rd{ -0.5f,-0.5f,-0.5f,1.f };
-	leo::float4 lu{ 0.5f,0.5f,0.5f,1.f };
-
-	leo::DeferredResources::GetInstance();
 #endif
-
+//SSAO Dependent
+#if 1
 	//SSAO ,GPU资源
 	leo::ShaderMgr sm;
 	auto  mPSBlob = sm.CreateBlob(leo::FileSearch::Search(L"SSAOPS.cso"));
@@ -534,6 +508,8 @@ void BuildRes()
 	leo::RenderStates ss;
 	mLinearRepeat = ss.GetSamplerState(L"LinearRepeat");
 	msamNormalMap = ss.GetSamplerState(L"DepthMap");
+#endif
+
 }
 
 void Update(){
@@ -556,8 +532,8 @@ void RenderFinall(ID3D11DeviceContext* context ) {
 	auto srvs = leo::DeferredResources::GetInstance().GetSRVs();
 
 	context->PSSetConstantBuffers(0, 1, &mSSAOPSCB);
-	context->PSSetShaderResources(0, 4, srvs);
-	context->PSSetShaderResources(4, 1, &mSSAORandomVec);
+	context->PSSetShaderResources(0, 2, srvs);
+	context->PSSetShaderResources(2, 1, &mSSAORandomVec);
 	ID3D11SamplerState* psss[] = { mLinearRepeat,msamNormalMap };
 	context->PSSetSamplers(0, 2, psss);
 
@@ -588,16 +564,16 @@ void Render()
 
 
 		//Build Shadow Map
-		leo::EffectNormalMap::GetInstance()->ShadowMapSRV(nullptr, devicecontext);
-		leo::ShadowMap::GetInstance().BeginShadowMap(devicecontext,*pShaderCamera);
+	
+		//leo::ShadowMap::GetInstance().BeginShadowMap(devicecontext,*pShaderCamera);
 		if (renderAble)
 			pModelMesh->CastShadow(devicecontext);
 
-		pTerrainMesh->CastShadow(devicecontext);
-		pBoxMesh->CastShadow(devicecontext);
+		//pTerrainMesh->CastShadow(devicecontext);
+		//pBoxMesh->CastShadow(devicecontext);
 		//pSphereMesh->CastShadow(devicecontext);
 
-		leo::ShadowMap::GetInstance().EndShadowMap(devicecontext);
+		//leo::ShadowMap::GetInstance().EndShadowMap(devicecontext);
 #if 0
 		auto& pPackEffect = leo::EffectPack::GetInstance();
 		pPackEffect->SetDstRTV(dm.GetRenderTargetView());
@@ -615,18 +591,12 @@ void Render()
 		leo::context_wrapper context(devicecontext);
 #else
 		auto mrts = leo::DeferredResources::GetInstance().GetMRTs();
-		devicecontext->OMSetRenderTargets(4, mrts, dm.GetDepthStencilView());
+		devicecontext->OMSetRenderTargets(2, mrts, dm.GetDepthStencilView());
 		devicecontext->ClearRenderTargetView(mrts[0], ClearColor);
 		devicecontext->ClearRenderTargetView(mrts[1], ClearColor);
-		devicecontext->ClearRenderTargetView(mrts[2], ClearColor);
-		devicecontext->ClearRenderTargetView(mrts[3], ClearColor);
 
-
-		leo::EffectNormalMap::GetInstance()->ShadowViewProjTexMatrix(pShaderCamera->ViewProjTex());
-		leo::EffectNormalMap::GetInstance()->ShadowMapSRV(leo::ShadowMap::GetInstance().GetDepthSRV());
-
-		pAxis->Render(devicecontext, *pCamera);
-		pTerrainMesh->Render(devicecontext, *pCamera);
+		//pAxis->Render(devicecontext, *pCamera);
+		//pTerrainMesh->Render(devicecontext, *pCamera);
 		pBoxMesh->Render(devicecontext, *pCamera);
 		//pSphereMesh->Render(devicecontext, *pCamera);
 
@@ -637,9 +607,9 @@ void Render()
 		auto& pPackEffect = leo::EffectPack::GetInstance();
 		pPackEffect->SetDstRTV(dm.GetRenderTargetView());
 		pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[0]);
-		pPackEffect->Apply(devicecontext);
+		//pPackEffect->Apply(devicecontext);
 		devicecontext->PSSetShader(mGBufferPS, nullptr, 0);
-		devicecontext->IASetInputLayout(leo::ShaderMgr().CreateInputLayout(leo::InputLayoutDesc::PostEffect));
+		//devicecontext->IASetInputLayout(leo::ShaderMgr().CreateInputLayout(leo::InputLayoutDesc::PostEffect));
 		UINT strides[] = { sizeof(leo::Vertex::PostEffect) };
 		UINT offsets[] = { 0 };
 		devicecontext->IASetVertexBuffers(0, 1, &mFillScreenVB, strides, offsets);
@@ -657,27 +627,20 @@ void Render()
 			currvp.Height = prevVP.Height / 2;
 			currvp.Width = prevVP.Width / 2;
 			devicecontext->RSSetViewports(1, &currvp);
-			devicecontext->Draw(4, 0);
+			//devicecontext->Draw(4, 0);
 
 			//右上 绘制颜色
 			currvp.TopLeftX += currvp.Width;
 			devicecontext->RSSetViewports(1, &currvp);
-			pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[1], devicecontext);
-			devicecontext->Draw(4, 0);
-
-			//左下 绘制坐标
-			currvp.TopLeftX -= currvp.Width;
-			currvp.TopLeftY += currvp.Height;
-			devicecontext->RSSetViewports(1, &currvp);
-			pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[3], devicecontext);
-			devicecontext->Draw(4, 0);
+			//pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[1], devicecontext);
+			//devicecontext->Draw(4, 0);
 
 
 			//右下绘制最终图像
 			currvp.TopLeftX += currvp.Width;
 			devicecontext->RSSetViewports(1, &currvp);
 
-			RenderFinall(devicecontext);
+			//RenderFinall(devicecontext);
 
 			leo::context_wrapper context(devicecontext);
 			//You Need Do this to restore state

@@ -213,6 +213,9 @@
     <ClCompile Include="Debug.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Core\EffectGBuffer.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="declara.hpp">
@@ -362,6 +365,9 @@
     <ClInclude Include="RenderSystem\Deferred.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
+    <ClInclude Include="Core\EffectGBuffer.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">
@@ -451,6 +457,9 @@
       <Filter>Shader\HLSL\PostRender</Filter>
     </FxCompile>
     <FxCompile Include="Shader\SSAOPS.hlsl">
+      <Filter>Shader\HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\GBufferPass.hlsl">
       <Filter>Shader\HLSL</Filter>
     </FxCompile>
   </ItemGroup>

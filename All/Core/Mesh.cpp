@@ -13,7 +13,7 @@
 #include "FileSearch.h"
 #include "Camera.hpp"
 #include "EffectShadowMap.hpp"
-#include "Effect.h"
+#include "EffectGBuffer.hpp"
 
 namespace leo
 {
@@ -121,9 +121,10 @@ namespace leo
 		ID3D11Buffer* vbs[] = { m_vertexbuff };
 		context->IASetVertexBuffers(0, 1, vbs, strides, offsets);
 		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		context->IASetInputLayout(ShaderMgr().CreateInputLayout(InputLayoutDesc::NormalMap));
+		auto layout = ShaderMgr().CreateInputLayout(InputLayoutDesc::NormalMap);
+		context->IASetInputLayout(layout);
 
-		auto & mEffect = EffectNormalMap::GetInstance();
+		auto & mEffect = EffectGBuffer::GetInstance();
 
 
 		auto world =SQT::operator std::array<__m128, 4U>();
@@ -142,9 +143,9 @@ namespace leo
 
 		for (auto it = m_subsets.cbegin(); it != m_subsets.cend();++it)
 		{
-			mEffect->Mat(it->m_mat, context);
+			//mEffect->Mat(it->m_mat, context);
 			mEffect->DiffuseSRV(it->m_texdiff);
-			mEffect->NormalMapSRV(it->m_texnormalmap, context);
+			//mEffect->NormalMapSRV(it->m_texnormalmap, context);
 			context->DrawIndexed(it->m_indexcount, it->m_indexoffset, 0);
 		}
 

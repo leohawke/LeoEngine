@@ -104,6 +104,7 @@
     <ClCompile Include="Core\effect.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Core\EffectGBuffer.cpp" />
     <ClCompile Include="Core\EffectLine.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
@@ -186,6 +187,7 @@
     <ClInclude Include="Core\BillBoard.hpp" />
     <ClInclude Include="Core\Camera.hpp" />
     <ClInclude Include="Core\effect.h" />
+    <ClInclude Include="Core\EffectGBuffer.hpp" />
     <ClInclude Include="Core\EffectShadowMap.hpp" />
     <ClInclude Include="Core\EffectSkeleton.hpp" />
     <ClInclude Include="Core\EffectTerrainSO.hpp" />
@@ -261,6 +263,13 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)%(RelativeDir)%(Filename).cso</ObjectFileOutput>
       <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</TreatWarningAsError>
+    </FxCompile>
+    <FxCompile Include="Shader\GBufferPass.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">GBufferMRTPS</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)%(RelativeDir)%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="Shader\GBufferPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>

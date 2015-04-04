@@ -158,6 +158,9 @@
     <ClCompile Include="..\All\OutputWindow.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\Core\EffectGBuffer.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\All\IndePlatform\algorithm.hpp">

@@ -5,8 +5,8 @@
 using namespace leo;
 
 namespace {
-	ID3D11ShaderResourceView* mSRVs[4] = { nullptr,nullptr,nullptr,nullptr };
-	ID3D11RenderTargetView* mMRTs[4] = { nullptr,nullptr,nullptr,nullptr };
+	ID3D11ShaderResourceView* mSRVs[2] = { nullptr,nullptr };
+	ID3D11RenderTargetView* mMRTs[2] = { nullptr,nullptr };
 }
 
 DeferredResources::DeferredResources() noexcept {
@@ -28,7 +28,7 @@ void DeferredResources::ReSize(const size_type& size) noexcept {
 	auto device = mgr.GetDevice();
 
 	D3D11_TEXTURE2D_DESC GBufferDesc;
-	GBufferDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	GBufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	GBufferDesc.ArraySize = 1;
 	GBufferDesc.MipLevels = 1;
 
@@ -43,7 +43,7 @@ void DeferredResources::ReSize(const size_type& size) noexcept {
 	GBufferDesc.CPUAccessFlags = 0;
 	GBufferDesc.MiscFlags = 0;
 
-	for (auto i = 0u; i != 4; ++i) {
+	for (auto i = 0u; i != 2; ++i) {
 		if (mSRVs[i])
 			mSRVs[i]->Release();
 		if (mMRTs[i])
@@ -59,7 +59,7 @@ void DeferredResources::ReSize(const size_type& size) noexcept {
 }
 
 DeferredResources::~DeferredResources() {
-	for (auto i = 0u; i != 4; ++i) {
+	for (auto i = 0u; i != 2; ++i) {
 		if (mSRVs[i])
 			leo::win::ReleaseCOM(mSRVs[i]);
 		if (mMRTs[i])

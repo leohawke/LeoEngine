@@ -15,6 +15,16 @@ namespace leo
 	using vector = __m128;
 	using matrix = std::array < __m128, 4 >;
 
+	template<typename COM>
+	void ReleaseCOM(COM* &com, std::false_type) {
+		if (com)
+		{
+			com->Release();
+			com = nullptr;
+		}
+	}
+
+
 	class EffectConfig::Delegate
 	{
 	public:
@@ -1058,7 +1068,11 @@ namespace leo
 			f |= (static_cast<std::uint64_t>(1) << (state::omsetrendertargets + i));
 		swap_states[1]->f |= f;
 		context->OMGetRenderTargets(NumViews, reinterpret_cast<ID3D11RenderTargetView**>(&swap_states[1]->ptr[state::omsetrendertargets - 1].p), reinterpret_cast<ID3D11DepthStencilView**>(&swap_states[1]->ptr[state::omsetdepthstencilview - 1].p));
-		context->OMSetRenderTargets(NumViews, ppRenderTargetViews, pDepthStencilView);
+		if(!pDepthStencilView)
+			context->OMSetRenderTargets(NumViews, ppRenderTargetViews, pDepthStencilView);
+		else
+			context->OMSetRenderTargets(NumViews, ppRenderTargetViews,*reinterpret_cast<ID3D11DepthStencilView**>(&swap_states[1]->ptr[state::omsetdepthstencilview - 1].p));
+
 	}
 
 	inline void STDMETHODCALLTYPE context_wrapper::OMSetBlendState(
@@ -1175,8 +1189,8 @@ namespace leo
 			auto pDSV = reinterpret_cast<ID3D11DepthStencilView*>(swap_states[0]->ptr[state::omsetdepthstencilview - 1].p);
 			context->OMSetRenderTargets(numrt, pRTV, pDSV);
 			for (uint32 i = 0; i != numrt; ++i)
-				leo::win::ReleaseCOM(pRTV[i]);
-			leo::win::ReleaseCOM(pDSV);
+				ReleaseCOM(pRTV[i],std::false_type());
+			ReleaseCOM(pDSV, std::false_type());
 		}
 
 		if (and (state::rssetviewprots))

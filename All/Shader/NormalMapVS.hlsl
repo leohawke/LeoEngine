@@ -17,11 +17,11 @@ struct VertexIn
 struct VertexOut
 {
 	float4 PosH     : SV_POSITION;
+	half3 NormalV  : NORMAL;
+	float2 Tex      : TEXCOORD;
 	float4 Shadow_PosH : POSITION1;
 	float3 PosV     : POSITION0;
-	float3 NormalV  : NORMAL;
 	float3 TangentV : TANGENT;
-	float2 Tex      : TEXCOORD;
 };
 
 VertexOut main(VertexIn vin)
@@ -30,7 +30,7 @@ VertexOut main(VertexIn vin)
 
 	// Transform to view space space.
 	vout.PosV = mul(float4(vin.PosL, 1.0f), WorldView).xyz;
-	vout.NormalV = mul(vin.NormalL, (float3x3)WorldInvTransposeView);
+	vout.NormalV =half3(mul(vin.NormalL, (float3x3)WorldInvTransposeView));
 	vout.TangentV = mul(vin.TangentL, (float3x3)WorldView);
 
 	// Transform to homogeneous clip space.

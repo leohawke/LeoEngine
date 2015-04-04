@@ -93,6 +93,21 @@ namespace leo
 		p->CreateSamplerState(L"DepthMap", depthMapDesc);
 
 
+		CD3D11_SAMPLER_DESC anisoSampler(D3D11_DEFAULT);
+		anisoSampler.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+		anisoSampler.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+		anisoSampler.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+		anisoSampler.BorderColor[0] = 0.f;
+		anisoSampler.BorderColor[1] = 0.f;
+		anisoSampler.BorderColor[2] = 0.f;
+		anisoSampler.BorderColor[3] = 0.f;
+		p->CreateSamplerState(L"anisoSampler", anisoSampler);
+
+		CD3D11_SAMPLER_DESC trilinearSampler(D3D11_DEFAULT);
+		trilinearSampler.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+		trilinearSampler.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+		trilinearSampler.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		p->CreateSamplerState(L"trilinearSampler", trilinearSampler);
 
 		// NearestClamp
 		linearRepeatDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;

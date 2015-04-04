@@ -51,5 +51,8 @@
 		(effect	(name shadowmap)
 			(shader (v GenShadowMapVS.cso))
 		)
+		(effect	(name gbuffer)
+			(shader (v NormalMapVS.cso) (p GBufferPass.cso))
+		)
 	)
 )

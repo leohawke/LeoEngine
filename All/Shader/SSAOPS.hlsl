@@ -1,9 +1,7 @@
 
 Texture2D normal :register(t0);//w:depth
 Texture2D diffuse :register(t1);
-Texture2D spec :register(t2);
-Texture2D pos :register(t3);
-Texture2D RandomVecMap :register(t4);
+Texture2D RandomVecMap :register(t2);
 
 cbuffer SSAO : register(b0)
 {
@@ -74,9 +72,9 @@ float OcclusionFunction(float distZ)
 float4 main(VertexOut pin) : SV_TARGET{
 	float4 NormalDepth = normal.SampleLevel(samNormalDepth,pin.Tex,0);
 	float3 Diffuse = diffuse.Sample(LinearRepeat, pin.Tex).rgb;
-	float4 Spec = spec.Sample(LinearRepeat, pin.Tex);
-	float3 PosV = pos.Sample(LinearRepeat, pin.Tex).rgb;
 	float ambient = 1.f;
+	return float4(Diffuse,1.f);
+#if 0
 	//SSAO
 	float3 p = PosV;
 	float pz = NormalDepth.w;
@@ -144,4 +142,5 @@ float4 main(VertexOut pin) : SV_TARGET{
 
 
 	return float4(Diffuse*access,1.f);
+#endif
 }
