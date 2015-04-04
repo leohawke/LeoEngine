@@ -43,7 +43,4 @@ void GBufferMRTPS(float4 PosH: SV_POSITION,
 	clip(diffuse.a-0.1f);
 	DiffuseSpec.rgb = diffuse.rgb;
 	DiffuseSpec.a = 1.f;
-
-	NormalDepth = float4(1.f, 0.f, 0.f, 1.f);
-	DiffuseSpec = float4(1.f, 0.f, 0.f, 1.f);
 }

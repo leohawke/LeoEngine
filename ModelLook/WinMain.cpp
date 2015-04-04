@@ -607,9 +607,9 @@ void Render()
 		auto& pPackEffect = leo::EffectPack::GetInstance();
 		pPackEffect->SetDstRTV(dm.GetRenderTargetView());
 		pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[0]);
-		//pPackEffect->Apply(devicecontext);
+		pPackEffect->Apply(devicecontext);
 		devicecontext->PSSetShader(mGBufferPS, nullptr, 0);
-		//devicecontext->IASetInputLayout(leo::ShaderMgr().CreateInputLayout(leo::InputLayoutDesc::PostEffect));
+		devicecontext->IASetInputLayout(leo::ShaderMgr().CreateInputLayout(leo::InputLayoutDesc::PostEffect));
 		UINT strides[] = { sizeof(leo::Vertex::PostEffect) };
 		UINT offsets[] = { 0 };
 		devicecontext->IASetVertexBuffers(0, 1, &mFillScreenVB, strides, offsets);
@@ -627,20 +627,20 @@ void Render()
 			currvp.Height = prevVP.Height / 2;
 			currvp.Width = prevVP.Width / 2;
 			devicecontext->RSSetViewports(1, &currvp);
-			//devicecontext->Draw(4, 0);
+			devicecontext->Draw(4, 0);
 
 			//右上 绘制颜色
 			currvp.TopLeftX += currvp.Width;
 			devicecontext->RSSetViewports(1, &currvp);
-			//pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[1], devicecontext);
-			//devicecontext->Draw(4, 0);
+			pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[1], devicecontext);
+			devicecontext->Draw(4, 0);
 
 
 			//右下绘制最终图像
-			currvp.TopLeftX += currvp.Width;
+			currvp.TopLeftY += currvp.Height;
 			devicecontext->RSSetViewports(1, &currvp);
 
-			//RenderFinall(devicecontext);
+			RenderFinall(devicecontext);
 
 			leo::context_wrapper context(devicecontext);
 			//You Need Do this to restore state

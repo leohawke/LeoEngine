@@ -39,6 +39,7 @@ namespace leo {
 	public:
 		static const std::unique_ptr<EffectGBuffer>& GetInstance(ID3D11Device* device = nullptr);
 	};
+
 }
 
 
