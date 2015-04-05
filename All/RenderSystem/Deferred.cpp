@@ -75,7 +75,7 @@ void DeferredResources::ReSize(const size_type& size) noexcept {
 	auto device = mgr.GetDevice();
 
 	D3D11_TEXTURE2D_DESC GBufferDesc;
-	GBufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	GBufferDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
 	GBufferDesc.ArraySize = 1;
 	GBufferDesc.MipLevels = 1;
 

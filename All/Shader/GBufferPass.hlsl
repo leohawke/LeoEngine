@@ -29,6 +29,7 @@ void CompressUnsignedNormalToNormalsBuffer(inout half3 vNormal)
 
 
 void GBufferMRTPS(float4 PosH: SV_POSITION,
+	float3  PosV : POSITION0;
 	half3 NormalV : NORMAL,
 	float2 Tex : TEXCOORD,
 	out float4 NormalDepth: SV_TARGET0,
@@ -37,7 +38,7 @@ void GBufferMRTPS(float4 PosH: SV_POSITION,
 	half3 restoreNormal = NormalV;
 	CompressUnsignedNormalToNormalsBuffer(restoreNormal);
 	NormalDepth.rgb = restoreNormal;
-	NormalDepth.a = PosH.z / PosH.w;
+	NormalDepth.a = PosV.z;
 
 	float4 diffuse = texDiffuse.Sample(anisoSampler, Tex);
 	clip(diffuse.a-0.1f);
