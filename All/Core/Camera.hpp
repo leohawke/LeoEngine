@@ -167,7 +167,7 @@ namespace leo
 	};
 
 	//基础相机类
-	class LB_API Camera : private CameraFrustum, public GeneralAllocatedObject
+	class LB_API Camera : public CameraFrustum, public GeneralAllocatedObject
 	{
 	private:
 		

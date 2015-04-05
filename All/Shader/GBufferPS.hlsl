@@ -3,7 +3,8 @@ SamplerState LinearRepeat :register(s0);
 struct VertexOut
 {
 	float4 PosH : SV_POSITION;
-	float2 Tex : TEXCOORD;
+	float3 ToFarPlane : TEXCOORD0;
+	float2 Tex : TEXCOORD1;
 };
 
 float4 main(VertexOut pin) : SV_TARGET

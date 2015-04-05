@@ -63,13 +63,11 @@ std::atomic<bool> renderThreadRun = true;
 
 std::mutex mSizeMutex;
 
-ID3D11Buffer* mFillScreenVB = nullptr;
 ID3D11PixelShader* mSSAOPS = nullptr;
-ID3D11VertexShader* mSSAOVS = nullptr;
+
 ID3D11Buffer* mSSAOPSCB = nullptr;
 ID3D11ShaderResourceView* mSSAORandomVec = nullptr;
-ID3D11SamplerState* mLinearRepeat = nullptr;
-ID3D11SamplerState* msamNormalMap = nullptr;
+
 
 //用于显示GBuffer
 ID3D11PixelShader* mGBufferPS = nullptr;
@@ -79,7 +77,7 @@ struct SSAO {
 	leo::float4 gOffsetVectors[14];
 
 	float    gOcclusionRadius = 5.5f;
-	float    gOcclusionFadeStart = 2.2f;
+	float    gOcclusionFadeStart = 2.0f;
 	float    gOcclusionFadeEnd = 20.0f;
 	float    gSurfaceEpsilon = 0.55f;
 };
@@ -110,7 +108,6 @@ void ClearRes() {
 	pSphereMesh.reset(nullptr);
 
 	leo::win::ReleaseCOM(mSSAORandomVec);
-	leo::win::ReleaseCOM(mFillScreenVB);
 }
 
 std::wstring GetOpenL3dFile()
@@ -358,29 +355,9 @@ void BuildRes()
 	pSphereMesh->Scale(5.f);
 	pTerrainMesh->Scale(8.f);
 
-	pBoxMesh->Scale(1.f);
+	pBoxMesh->Scale(2.f);
 	pBoxMesh->Translation(leo::float3(+0.f, -5.f, 0.0f));
 
-	auto& vertices = leo::helper::CreateFullscreenQuad();
-
-	D3D11_BUFFER_DESC vbDesc;
-	vbDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbDesc.ByteWidth = vertices.size() * sizeof(leo::Vertex::PostEffect);
-	vbDesc.CPUAccessFlags = 0;
-	vbDesc.MiscFlags = 0;
-	vbDesc.StructureByteStride = 0;
-	vbDesc.Usage = D3D11_USAGE_IMMUTABLE;
-
-	D3D11_SUBRESOURCE_DATA subData;
-	subData.pSysMem = vertices.data();
-
-	try {
-		leo::dxcall(leo::DeviceMgr().GetDevice()->CreateBuffer(&vbDesc, &subData, &mFillScreenVB));
-
-
-		leo::dx::DebugCOM(mFillScreenVB, "ShadowMap::Draw");
-	}
-	Catch_DX_Exception
 
 //Camera Set	
 #if 1
@@ -400,17 +377,17 @@ void BuildRes()
 	pCamera->LookAt(float3(0.f,10.f,-10.f), float3(0.f,0.f,0.f), float3(0.f, 1.f, 0.f));
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 	
+	leo::DeferredResources::GetInstance().SetFrustum(*pCamera);
 #endif
 //SSAO Dependent
 #if 1
 	//SSAO ,GPU资源
 	leo::ShaderMgr sm;
 	auto  mPSBlob = sm.CreateBlob(leo::FileSearch::Search(L"SSAOPS.cso"));
-	auto mVSBlob = sm.CreateBlob(leo::FileSearch::Search(L"PostCommonVS.cso"));
 	auto mGBufferBlob = sm.CreateBlob(leo::FileSearch::Search(L"GBufferPS.cso"));
 	mGBufferPS = sm.CreatePixelShader(mGBufferBlob);
 	mSSAOPS = sm.CreatePixelShader(mPSBlob);
-	mSSAOVS = sm.CreateVertexShader(mVSBlob);
+
 
 	D3D11_BUFFER_DESC Desc;
 	Desc.Usage = D3D11_USAGE_DEFAULT;
@@ -420,6 +397,7 @@ void BuildRes()
 	Desc.StructureByteStride = 0;
 	Desc.ByteWidth = sizeof(SSAO);
 
+	D3D11_SUBRESOURCE_DATA subData;
 	subData.pSysMem = &ssao;
 	subData.SysMemPitch = 0;
 	subData.SysMemSlicePitch = 0;
@@ -505,9 +483,6 @@ void BuildRes()
 	// view saves a reference.
 	leo::win::ReleaseCOM(tex);
 
-	leo::RenderStates ss;
-	mLinearRepeat = ss.GetSamplerState(L"LinearRepeat");
-	msamNormalMap = ss.GetSamplerState(L"DepthMap");
 #endif
 
 }
@@ -523,26 +498,28 @@ void Update(){
 	}
 }
 
-void RenderFinall(ID3D11DeviceContext* context ) {
+void ComputeSSAO(ID3D11DeviceContext* context ) {
+	ID3D11RenderTargetView* mMRTs[] = { leo::DeferredResources::GetInstance().GetSSAORTV(),nullptr };
+	context->OMSetRenderTargets(2, mMRTs, nullptr);
+	float ClearColor[4] = { 0.0f, 0.25f, 0.25f, 0.8f };
+	context->ClearRenderTargetView(mMRTs[0], ClearColor);
 
-
-	context->VSSetShader(mSSAOVS, nullptr, 0);
 	context->PSSetShader(mSSAOPS, nullptr, 0);
 
-	auto srvs = leo::DeferredResources::GetInstance().GetSRVs();
-
 	context->PSSetConstantBuffers(0, 1, &mSSAOPSCB);
-	context->PSSetShaderResources(0, 2, srvs);
 	context->PSSetShaderResources(2, 1, &mSSAORandomVec);
-	ID3D11SamplerState* psss[] = { mLinearRepeat,msamNormalMap };
-	context->PSSetSamplers(0, 2, psss);
 
 	context->Draw(4, 0);
+}
 
-	ID3D11ShaderResourceView* pssrvs[] = { nullptr,nullptr, nullptr, nullptr, nullptr };
+void DrawSSAO(ID3D11DeviceContext* context) {
+	ID3D11RenderTargetView* mRTV = leo::DeviceMgr().GetRenderTargetView();
+	context->OMSetRenderTargets(1,&mRTV, nullptr);
 
-	context->PSSetShaderResources(0, 5, pssrvs);
-	context->PSSetShader(nullptr, nullptr, 0);
+	auto srv = leo::DeferredResources::GetInstance().GetSSAOSRV();
+	context->PSSetShader(mGBufferPS, nullptr, 0);
+	context->PSSetShaderResources(0, 1, &srv);
+	context->Draw(4, 0);
 }
 
 
@@ -558,11 +535,8 @@ void Render()
 		leo::RenderSync::GetInstance()->Sync();
 
 		auto devicecontext = dm.GetDeviceContext();
-		float ClearColor[4] = { 0.0f, 0.25f, 0.25f, 0.8f };
-		devicecontext->ClearRenderTargetView(dm.GetRenderTargetView(), ClearColor);
-		devicecontext->ClearDepthStencilView(dm.GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0, 0);
-
-
+		
+#if 0
 		//Build Shadow Map
 	
 		//leo::ShadowMap::GetInstance().BeginShadowMap(devicecontext,*pShaderCamera);
@@ -574,52 +548,31 @@ void Render()
 		//pSphereMesh->CastShadow(devicecontext);
 
 		//leo::ShadowMap::GetInstance().EndShadowMap(devicecontext);
-#if 0
-		auto& pPackEffect = leo::EffectPack::GetInstance();
-		pPackEffect->SetDstRTV(dm.GetRenderTargetView());
-		pPackEffect->SetPackSRV(leo::ShadowMap::GetInstance().GetDepthSRV());
-		pPackEffect->Apply(devicecontext);
-		devicecontext->IASetInputLayout(leo::ShaderMgr().CreateInputLayout(leo::InputLayoutDesc::PostEffect));
-		UINT strides[] = { sizeof(leo::Vertex::PostEffect) };
-		UINT offsets[] = { 0 };
-		devicecontext->IASetVertexBuffers(0, 1, &mFillScreenVB, strides, offsets);
-		devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-		devicecontext->Draw(4, 0);
-
-		pPackEffect->SetPackSRV(nullptr, devicecontext);
-
-		leo::context_wrapper context(devicecontext);
-#else
-		auto mrts = leo::DeferredResources::GetInstance().GetMRTs();
-		devicecontext->OMSetRenderTargets(2, mrts, dm.GetDepthStencilView());
-		devicecontext->ClearRenderTargetView(mrts[0], ClearColor);
-		devicecontext->ClearRenderTargetView(mrts[1], ClearColor);
-
+#endif
+		auto& defereed = leo::DeferredResources::GetInstance();
+		
+		defereed.UnIASet();
+		defereed.OMSet();
 		//pAxis->Render(devicecontext, *pCamera);
 		//pTerrainMesh->Render(devicecontext, *pCamera);
-		pBoxMesh->Render(devicecontext, *pCamera);
 		//pSphereMesh->Render(devicecontext, *pCamera);
+		pBoxMesh->Render(devicecontext, *pCamera);
 
-		ID3D11RenderTargetView* rts[] = { dm.GetRenderTargetView(),nullptr,nullptr,nullptr };
-		//unbind
-		devicecontext->OMSetRenderTargets(4, rts, dm.GetDepthStencilView());
+		defereed.IASet();
+		ComputeSSAO(devicecontext);
 
-		auto& pPackEffect = leo::EffectPack::GetInstance();
-		pPackEffect->SetDstRTV(dm.GetRenderTargetView());
-		pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[0]);
-		pPackEffect->Apply(devicecontext);
+		float ClearColor[4] = { 0.0f, 0.25f, 0.25f, 0.8f };
+		auto rtv = dm.GetRenderTargetView();
+		devicecontext->OMSetRenderTargets(1, &rtv, nullptr);
+		devicecontext->ClearRenderTargetView(rtv, ClearColor);
 		devicecontext->PSSetShader(mGBufferPS, nullptr, 0);
-		devicecontext->IASetInputLayout(leo::ShaderMgr().CreateInputLayout(leo::InputLayoutDesc::PostEffect));
-		UINT strides[] = { sizeof(leo::Vertex::PostEffect) };
-		UINT offsets[] = { 0 };
-		devicecontext->IASetVertexBuffers(0, 1, &mFillScreenVB, strides, offsets);
-		devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 		D3D11_VIEWPORT prevVP;
 		UINT num = 1;
 		devicecontext->RSGetViewports(&num, &prevVP);
 		D3D11_VIEWPORT currvp = prevVP;
 
+		auto srvs = defereed.GetSRVs();
 		//绘制延迟Buff
 		{
 
@@ -627,30 +580,30 @@ void Render()
 			currvp.Height = prevVP.Height / 2;
 			currvp.Width = prevVP.Width / 2;
 			devicecontext->RSSetViewports(1, &currvp);
+			devicecontext->PSSetShaderResources(0, 1, &srvs[0]);
 			devicecontext->Draw(4, 0);
 
 			//右上 绘制颜色
 			currvp.TopLeftX += currvp.Width;
 			devicecontext->RSSetViewports(1, &currvp);
-			pPackEffect->SetPackSRV(leo::DeferredResources::GetInstance().GetSRVs()[1], devicecontext);
+			devicecontext->PSSetShaderResources(0,1,&srvs[1]);
 			devicecontext->Draw(4, 0);
 
 
-			//右下绘制最终图像
+			//左下绘制SSAO
 			currvp.TopLeftY += currvp.Height;
+			currvp.TopLeftX -= currvp.Width;
 			devicecontext->RSSetViewports(1, &currvp);
 
-			RenderFinall(devicecontext);
+			DrawSSAO(devicecontext);
 
 			leo::context_wrapper context(devicecontext);
-			//You Need Do this to restore state
 		}
 
 		
 
 		devicecontext->RSSetViewports(1, &prevVP);
 
-#endif
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 

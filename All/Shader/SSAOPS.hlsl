@@ -29,7 +29,8 @@ BorderColor = float4(0.0f, 0.0f, 0.0f, 1e5f);
 struct VertexOut
 {
 	float4 PosH : SV_POSITION;
-	float2 Tex : TEXCOORD;
+	float3 ToFarPlane : TEXCOORD0;
+	float2 Tex : TEXCOORD1;
 };
 
 // Determines how much the sample point q occludes the point p as a function
@@ -69,15 +70,15 @@ float OcclusionFunction(float distZ)
 }
 
 #define gSampleCount 14
-float4 main(VertexOut pin) : SV_TARGET{
+float main(VertexOut pin) : SV_TARGET{
 	float4 NormalDepth = normal.SampleLevel(samNormalDepth,pin.Tex,0);
 	float3 Diffuse = diffuse.Sample(LinearRepeat, pin.Tex).rgb;
 	float ambient = 1.f;
-	return float4(Diffuse,1.f);
-#if 0
+
 	//SSAO
-	float3 p = PosV;
 	float pz = NormalDepth.w;
+	float3 p = (pz/pin.ToFarPlane.z)*pin.ToFarPlane;
+
 	//[-1,1] -> [1,1]
 	float3 randVec = 2.f* RandomVecMap.SampleLevel(LinearRepeat, 4.f*pin.Tex, 0.f).rgb - 1.f;
 	float3 n = NormalDepth.xyz;
@@ -139,8 +140,5 @@ float4 main(VertexOut pin) : SV_TARGET{
 	float access = 1.0f - occlusionSum;
 
 	
-
-
-	return float4(Diffuse*access,1.f);
-#endif
+	return access;
 }

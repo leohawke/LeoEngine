@@ -45,10 +45,16 @@ namespace leo {
 		ID3D11RenderTargetView** GetMRTs() const;
 		ID3D11ShaderResourceView** GetSRVs() const;
 
+		ID3D11RenderTargetView* GetSSAORTV() const;
+		ID3D11ShaderResourceView* GetSSAOSRV() const;
+
 		//GBuffer用作输出的准备动作
 		void OMSet() noexcept;
 		//GBuffer用作输入的准备动作
+		//note please clear RenderTarget
 		void IASet() noexcept;
+
+		void UnIASet() noexcept;
 
 		//before call this ,please call IASet
 		void ComputerSSAO() noexcept;
