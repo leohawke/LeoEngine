@@ -25,6 +25,8 @@ struct ID3D11ShaderResourceView;
 
 namespace leo {
 
+	class CameraFrustum;
+
 	class  DeferredResources :public Singleton<DeferredResources>  {
 	protected:
 		DeferredResources() noexcept;
@@ -43,7 +45,17 @@ namespace leo {
 		ID3D11RenderTargetView** GetMRTs() const;
 		ID3D11ShaderResourceView** GetSRVs() const;
 
+		//GBuffer用作输出的准备动作
+		void OMSet() noexcept;
+		//GBuffer用作输入的准备动作
+		void IASet() noexcept;
+
+		//before call this ,please call IASet
+		void ComputerSSAO() noexcept;
+
 		void ReSize(const size_type& size) noexcept;
+
+		void SetFrustum(const CameraFrustum& frustum) noexcept;
 	};
 
 }
