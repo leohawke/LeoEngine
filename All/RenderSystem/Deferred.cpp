@@ -113,7 +113,11 @@ void DeferredResources::ReSize(const size_type& size) noexcept {
 
 
 	D3D11_TEXTURE2D_DESC SSAOTexDesc;
+#ifdef DEBUG
+	SSAOTexDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+#else
 	SSAOTexDesc.Format = DXGI_FORMAT_R32_FLOAT;;
+#endif
 	SSAOTexDesc.ArraySize = 1;
 	SSAOTexDesc.MipLevels = 1;
 

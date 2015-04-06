@@ -287,6 +287,8 @@
       <Filter>Shader\HLSL\Line</Filter>
     </FxCompile>
     <FxCompile Include="..\All\Shader\SSAOPS.hlsl" />
+    <FxCompile Include="..\All\Shader\DeferredVS.hlsl" />
+    <FxCompile Include="..\All\Shader\GBufferPass.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ModelLook.rc">

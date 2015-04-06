@@ -28,19 +28,24 @@ void CompressUnsignedNormalToNormalsBuffer(inout half3 vNormal)
 }
 
 
-void GBufferMRTPS(float4 PosH: SV_POSITION,
-	float3  PosV : POSITION0;
-	half3 NormalV : NORMAL,
-	float2 Tex : TEXCOORD,
+struct VertexOut
+{
+	float4 PosH     : SV_POSITION;
+	half3 NormalV  : NORMAL;
+	float2 Tex      : TEXCOORD;
+	float3 PosV     : POSITION;
+};
+
+void GBufferMRTPS(VertexOut pin,
 	out float4 NormalDepth: SV_TARGET0,
 	out float4 DiffuseSpec: SV_TARGET1)
 {
-	half3 restoreNormal = NormalV;
+	half3 restoreNormal = pin.NormalV;
 	CompressUnsignedNormalToNormalsBuffer(restoreNormal);
-	NormalDepth.rgb = restoreNormal;
-	NormalDepth.a = PosV.z;
+	NormalDepth.rgb = pin.PosV;
+	NormalDepth.a = NormalDepth.rgb.b;
 
-	float4 diffuse = texDiffuse.Sample(anisoSampler, Tex);
+	float4 diffuse = texDiffuse.Sample(anisoSampler, pin.Tex);
 	clip(diffuse.a-0.1f);
 	DiffuseSpec.rgb = diffuse.rgb;
 	DiffuseSpec.a = 1.f;

@@ -70,7 +70,12 @@ float OcclusionFunction(float distZ)
 }
 
 #define gSampleCount 14
-float main(VertexOut pin) : SV_TARGET{
+#ifdef DEBUG
+float4
+#else
+float
+#endif
+main(VertexOut pin) : SV_TARGET{
 	float4 NormalDepth = normal.SampleLevel(samNormalDepth,pin.Tex,0);
 	float3 Diffuse = diffuse.Sample(LinearRepeat, pin.Tex).rgb;
 	float ambient = 1.f;
@@ -78,6 +83,8 @@ float main(VertexOut pin) : SV_TARGET{
 	//SSAO
 	float pz = NormalDepth.w;
 	float3 p = (pz/pin.ToFarPlane.z)*pin.ToFarPlane;
+	p = NormalDepth.xyz;
+	return float4(p, 1.f);
 
 	//[-1,1] -> [1,1]
 	float3 randVec = 2.f* RandomVecMap.SampleLevel(LinearRepeat, 4.f*pin.Tex, 0.f).rgb - 1.f;
