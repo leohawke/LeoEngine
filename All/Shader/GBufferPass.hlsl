@@ -42,8 +42,8 @@ void GBufferMRTPS(VertexOut pin,
 {
 	half3 restoreNormal = pin.NormalV;
 	CompressUnsignedNormalToNormalsBuffer(restoreNormal);
-	NormalDepth.rgb = pin.PosV;
-	NormalDepth.a = NormalDepth.rgb.b;
+	NormalDepth.rgb = restoreNormal;
+	NormalDepth.a = pin.PosV.z;
 
 	float4 diffuse = texDiffuse.Sample(anisoSampler, pin.Tex);
 	clip(diffuse.a-0.1f);

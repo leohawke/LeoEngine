@@ -559,6 +559,14 @@ void Render()
 		pBoxMesh->Render(devicecontext, *pCamera);
 
 		defereed.IASet();
+
+		D3D11_VIEWPORT prevVP;
+		UINT num = 1;
+		devicecontext->RSGetViewports(&num, &prevVP);
+		D3D11_VIEWPORT currvp = prevVP;
+		currvp.Height = prevVP.Height / 2;
+		currvp.Width = prevVP.Width / 2;
+		devicecontext->RSSetViewports(1, &currvp);
 		ComputeSSAO(devicecontext);
 
 		float ClearColor[4] = { 0.0f, 0.25f, 0.25f, 0.8f };
@@ -567,19 +575,11 @@ void Render()
 		devicecontext->ClearRenderTargetView(rtv, ClearColor);
 		devicecontext->PSSetShader(mGBufferPS, nullptr, 0);
 
-		D3D11_VIEWPORT prevVP;
-		UINT num = 1;
-		devicecontext->RSGetViewports(&num, &prevVP);
-		D3D11_VIEWPORT currvp = prevVP;
+		
 
 		auto srvs = defereed.GetSRVs();
 		//绘制延迟Buff
 		{
-
-			//左上 绘制法线+深度
-			currvp.Height = prevVP.Height / 2;
-			currvp.Width = prevVP.Width / 2;
-			devicecontext->RSSetViewports(1, &currvp);
 			devicecontext->PSSetShaderResources(0, 1, &srvs[0]);
 			devicecontext->Draw(4, 0);
 
