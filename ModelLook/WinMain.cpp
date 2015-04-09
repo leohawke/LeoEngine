@@ -1,8 +1,10 @@
+#define _DEBUG
 #define _CRTDBG_MAP_ALLOC
 #include	<stdlib.h>
 #include	<crtdbg.h>
 
 #include "platform.h"
+#if 0
 #include "Singleton.hpp"
 #include "ThreadSync.hpp"
 #include "clock.hpp"
@@ -49,6 +51,8 @@
 #include "resource.h"
 #include <DirectXPackedVector.h>
 
+#endif
+#if 0
 leo::Event event;
 std::unique_ptr<leo::Mesh> pModelMesh = nullptr;
 std::unique_ptr<leo::Mesh> pTerrainMesh = nullptr;
@@ -136,19 +140,20 @@ std::wstring GetOpenL3dFile()
 	}
 	return std::wstring();
 }
-
+#endif
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-
-	leo::EngineConfig::Read();
+	_CrtSetBreakAlloc(309);
+	//CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+#if 0
+	//leo::EngineConfig::Read();
 	
-	leo::EngineConfig::ShaderConfig::GetAllBlendStateName();
-	leo::DeviceMgr DeviceMgr;
+	//leo::EngineConfig::ShaderConfig::GetAllBlendStateName();
+	//leo::DeviceMgr DeviceMgr;
 	leo::OutputWindow win;
 
-	auto clientSize = leo::EngineConfig::ClientSize();
+	auto clientSize = std::make_pair<std::uint16_t,std::uint16_t>(640u, 480u); //leo::EngineConfig::ClientSize();
 	if (!win.Create(GetModuleHandle(nullptr), clientSize, L"Model LooK", 
 		WS_BORDER | WS_SIZEBOX,0,
 		MAKEINTRESOURCE(IDI_ICON1)))
@@ -161,7 +166,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 	
 
-	DeviceMgr.CreateDevice(false, clientSize);
+	//DeviceMgr.CreateDevice(false, clientSize);
 
 
 	auto mNeedDuration = leo::clock::to_duration<>(1.f);
@@ -170,6 +175,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	auto sizeproc = [&](HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		leo::RenderSync::Block block;
+#if 0
 		if (DeviceMgr.GetDevice())
 		{
 			if (mHasDuration > mNeedDuration)
@@ -184,13 +190,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 				mTimePoint = leo::clock::now();
 			}
 		}
+#endif
 		return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	};
 
 	win.BindMsgFunc(WM_SIZE, sizeproc);
 
-	DeviceEvent();
-	BuildRes();
+	//DeviceEvent();
+	//BuildRes();
 
 	auto cmdmsgproc = [&](HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)-> LRESULT
 	{
@@ -283,7 +290,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 #endif
 #if 1
 
-	std::thread renderThread(Render);
+	//std::thread renderThread(Render);
 	std::thread updateThread(Update);
 	while (true)
 	{
@@ -304,7 +311,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	}
 	renderThreadRun = false;
 	updateThread.join();
-	renderThread.join();
+	//renderThread.join();
 	
 	
 #endif
@@ -313,16 +320,21 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	leo::global::Destroy();
 	ClearRes();
 #ifdef DEBUG
-	leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
+	//leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
 #endif
-	leo::SingletonManger::GetInstance()->UnInstallAllSingleton();
+	//leo::SingletonManger::GetInstance()->UnInstallAllSingleton();
 
-	leo::EngineConfig::Write();
-
+	//leo::EngineConfig::Write();
+#endif
+	while (true)
+	{
+		Sleep(5*1000);
+		break;
+	}
 	return 0;
 }
 
-
+#if 0
 void BuildRes()
 {
 	using leo::float3;
@@ -611,3 +623,4 @@ void Render()
 
 	}
 }
+#endif

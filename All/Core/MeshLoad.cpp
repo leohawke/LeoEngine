@@ -616,8 +616,8 @@ namespace leo
 		for (auto &v : meshData.Vertices) {
 			fin >> v.pos.x >> v.pos.y >> v.pos.z;
 			fin >> v.normal.x >> v.normal.y >> v.normal.z;
-			v.tex.u = 0.f;
-			v.tex.v = 1.f;
+			v.tex.u = 0.5f;
+			v.tex.v = 0.5f;
 
 			v.tangent = Cross(v.normal, float3(0.f, 1.f, 0.f));
 			v.tangent = Normalize(v.tangent);
