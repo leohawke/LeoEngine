@@ -40,8 +40,6 @@ namespace leo
 		//WindowMgr
 		extern win::HWND globalHwnd;
 
-		//
-		extern win::KeysState globalKeysState;
 
 #if defined DEBUG || defined _DEBUG
 		extern ID3D11Debug* globalD3DDebug;

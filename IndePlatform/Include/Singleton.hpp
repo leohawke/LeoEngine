@@ -7,7 +7,7 @@ namespace leo
 {
 	namespace details
 	{
-		void SingletonRegister(const std::function<void()>& f,const std::type_info&);
+		void SingletonRegister(const std::function<void()>& f);
 	}
 	template<typename Single,bool Manged = true>
 	//单列模式基类
@@ -22,7 +22,7 @@ namespace leo
 			{
 				this->~Singleton();
 			};
-			details::SingletonRegister(f, typeid(Single));
+			details::SingletonRegister(f);
 		}
 	public:
 		virtual ~Singleton()
@@ -37,7 +37,7 @@ namespace leo
 	protected:
 		Singleton()
 		{
-			details::SingletonRegister([]{}, typeid(Single));
+			details::SingletonRegister([]{});
 		}
 	public:
 		virtual ~Singleton()

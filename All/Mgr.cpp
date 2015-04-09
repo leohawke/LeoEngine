@@ -18,7 +18,6 @@ namespace leo
 
 
 		std::set<std::pair<leo::uint16, leo::uint16>> globalDXGISizeSet;
-
 #if defined DEBUG || defined _DEBUG
 		extern ID3D11Debug* globalD3DDebug = nullptr;
 #endif

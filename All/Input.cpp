@@ -1,27 +1,31 @@
+#include "platform.h"
 #include "Input.h"
 #include <set>
 
 namespace leo
 {
-	namespace global
-	{
-		extern win::KeysState globalKeysState = {};
-	}
+	
 
 	namespace win
 	{
+		//KeysState globalKeysState;
+
+
 		//
-		
-		static std::set<KeyAction*> Register;
+		//KeysState* KeysState::GetInstance()
+		//{
+			//return &globalKeysState;
+		//}
+		//std::set<KeyAction*> Register;
 
 		KeyAction::KeyAction()
 		{
-			Register.insert(this);
+			//Register.insert(this);
 		}
 
 		KeyAction::~KeyAction()
 		{
-			Register.erase(this);
+			//Register.erase(this);
 		}
 
 		KeysState::KeyState KeysState::m_currstates[256];
@@ -54,9 +58,9 @@ namespace leo
 			}
 
 
-			for (auto& ka : Register)
+			//for (auto& ka : Register)
 			{
-				ka->Update();
+				//ka->Update();
 			}
 
 			//if (m_currstates['T'] & risingedge_mask)

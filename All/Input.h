@@ -1,7 +1,7 @@
-#pragma once
+#ifndef Input_H
+#define Input_H
 #include "clock.hpp"
 #include "Singleton.hpp"
-#include "Mgr.hpp"
 #include <thread>
 namespace leo
 {
@@ -11,7 +11,6 @@ namespace leo
 		{
 		public:
 			using KeyState = std::uint8_t;
-			~KeysState() = default;
 		public:
 			void Update();
 			bool KeyRisingEdge(std::uint8_t key);
@@ -27,10 +26,7 @@ namespace leo
 			static KeyState m_currstates[256];
 			static KeyState m_prevstates[256];
 		public:
-			static KeysState* GetInstance()
-			{
-				return &global::globalKeysState;
-			}
+			static KeysState* GetInstance();
 		};
 
 		class KeyAction
@@ -48,17 +44,17 @@ namespace leo
 
 		inline bool KeyFallingEdge(std::uint8_t key)
 		{
-			return leo::global::globalKeysState.KeyFallingEdge(key);
+			return KeysState::GetInstance()->KeyFallingEdge(key);
 			//return GetAsyncKeyState(key) == 0x8000;
 		}
 		inline bool KeyRisingEdge(std::uint8_t key)
 		{
-			return leo::global::globalKeysState.KeyRisingEdge(key);
+			return KeysState::GetInstance()->KeyRisingEdge(key);
 			//return GetAsyncKeyState(key) == 0x1;
 		}
 		inline bool KeyPress(std::uint8_t key)
 		{
-			return leo::global::globalKeysState.KeyPress(key);
+			return KeysState::GetInstance()->KeyPress(key);
 			//return GetAsyncKeyState(key) & 0x8000;
 		}
 
@@ -269,3 +265,5 @@ namespace leo
 	}
 	
 }
+
+#endif
