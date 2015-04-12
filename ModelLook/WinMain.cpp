@@ -1,10 +1,9 @@
-#define _DEBUG
 #define _CRTDBG_MAP_ALLOC
 #include	<stdlib.h>
 #include	<crtdbg.h>
 
 #include "platform.h"
-#if 0
+
 #include "Singleton.hpp"
 #include "ThreadSync.hpp"
 #include "clock.hpp"
@@ -51,8 +50,8 @@
 #include "resource.h"
 #include <DirectXPackedVector.h>
 
-#endif
-#if 0
+
+
 leo::Event event;
 std::unique_ptr<leo::Mesh> pModelMesh = nullptr;
 std::unique_ptr<leo::Mesh> pTerrainMesh = nullptr;
@@ -66,6 +65,7 @@ std::atomic<bool> renderAble = false;
 std::atomic<bool> renderThreadRun = true;
 
 std::mutex mSizeMutex;
+std::mutex mRenderMutex;
 
 ID3D11PixelShader* mSSAOPS = nullptr;
 
@@ -103,16 +103,7 @@ void Update();
 
 void BuildRes();
 
-void ClearRes() {
-	leo::win::ReleaseCOM(mSSAOPSCB);
-
-	pModelMesh.reset(nullptr);
-	pTerrainMesh.reset(nullptr);
-	pBoxMesh.reset(nullptr);
-	pSphereMesh.reset(nullptr);
-
-	leo::win::ReleaseCOM(mSSAORandomVec);
-}
+void ClearRes();
 
 std::wstring GetOpenL3dFile()
 {
@@ -140,20 +131,20 @@ std::wstring GetOpenL3dFile()
 	}
 	return std::wstring();
 }
-#endif
+
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	_CrtSetBreakAlloc(309);
-	//CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-#if 0
-	//leo::EngineConfig::Read();
+	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+
+	leo::EngineConfig::Read();
 	
-	//leo::EngineConfig::ShaderConfig::GetAllBlendStateName();
-	//leo::DeviceMgr DeviceMgr;
+	leo::EngineConfig::ShaderConfig::GetAllBlendStateName();
+	leo::DeviceMgr DeviceMgr;
 	leo::OutputWindow win;
 
-	auto clientSize = std::make_pair<std::uint16_t,std::uint16_t>(640u, 480u); //leo::EngineConfig::ClientSize();
+	auto clientSize = leo::EngineConfig::ClientSize();
 	if (!win.Create(GetModuleHandle(nullptr), clientSize, L"Model LooK", 
 		WS_BORDER | WS_SIZEBOX,0,
 		MAKEINTRESOURCE(IDI_ICON1)))
@@ -166,7 +157,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 	
 
-	//DeviceMgr.CreateDevice(false, clientSize);
+	DeviceMgr.CreateDevice(false, clientSize);
 
 
 	auto mNeedDuration = leo::clock::to_duration<>(1.f);
@@ -175,7 +166,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	auto sizeproc = [&](HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		leo::RenderSync::Block block;
-#if 0
+		std::lock_guard<std::mutex> lock(mRenderMutex);
+
 		if (DeviceMgr.GetDevice())
 		{
 			if (mHasDuration > mNeedDuration)
@@ -190,14 +182,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 				mTimePoint = leo::clock::now();
 			}
 		}
-#endif
+
 		return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	};
 
 	win.BindMsgFunc(WM_SIZE, sizeproc);
 
-	//DeviceEvent();
-	//BuildRes();
+	DeviceEvent();
+	BuildRes();
 
 	auto cmdmsgproc = [&](HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)-> LRESULT
 	{
@@ -252,21 +244,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	};
 	win.BindMsgFunc(WM_COMMAND, cmdmsgproc);
 	
-#if 0
-	leo::ViewPort vp;
-	UINT numVp = 1;
-	D3D11_VIEWPORT dvp;
-	DeviceMgr.GetDeviceContext()->RSGetViewports(&numVp, &dvp);
-	vp.mHeight = dvp.Height;
-	vp.mMaxDepth = dvp.MaxDepth;
-	vp.mMinDepth = dvp.MinDepth;
-	vp.mTLX = dvp.TopLeftX;
-	vp.mTLY = dvp.TopLeftY;
-	vp.mWindth = dvp.Width;
-	leo::float4x4 proj;
-	leo::XMStoreFloat4x4A((leo::XMFLOAT4X4A*)&proj, pCamera->Proj());
-	
 
+	
+	
+#if 0
 	auto mouseproc = [&](HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
 		auto x = (float)GET_X_LPARAM(lParam);
 		auto y = (float)GET_Y_LPARAM(lParam);
@@ -285,12 +266,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	};
 	win.BindMsgFunc(WM_LBUTTONDOWN, mouseproc);
 	mBox.Color(leo::float4(1.f, 0.f, 0.f, 1.f));
-
-	
 #endif
-#if 1
+	
 
-	//std::thread renderThread(Render);
+
+
+	std::thread renderThread(Render);
 	std::thread updateThread(Update);
 	while (true)
 	{
@@ -307,34 +288,63 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 		}
 		else
 			::WaitMessage();
-		leo::win::KeysState::GetInstance()->Update();
+		
 	}
 	renderThreadRun = false;
 	updateThread.join();
-	//renderThread.join();
+	renderThread.join();
 	
 	
-#endif
 
 	
 	leo::global::Destroy();
 	ClearRes();
 #ifdef DEBUG
-	//leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
+	leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
 #endif
-	//leo::SingletonManger::GetInstance()->UnInstallAllSingleton();
+	leo::SingletonManger::GetInstance()->UnInstallAllSingleton();
 
-	//leo::EngineConfig::Write();
-#endif
-	while (true)
-	{
-		Sleep(5*1000);
-		break;
-	}
+	leo::EngineConfig::Write();
+
+	
 	return 0;
 }
 
-#if 0
+struct PointLight
+{
+	leo::float4 diffuse;
+	leo::float4 position;//w : range
+	leo::float4 att;//ignore w;
+} pl;
+
+ID3D11PixelShader* mPointLightPS = nullptr;
+
+ID3D11Buffer* mPointLightPSCB = nullptr;
+
+void BuildLight(ID3D11Device* device) {
+	leo::ShaderMgr sm;
+	auto  mPSBlob = sm.CreateBlob(leo::FileSearch::Search(L"PointLightPS.cso"));
+	mPointLightPS = sm.CreatePixelShader(mPSBlob);
+
+
+	D3D11_BUFFER_DESC Desc;
+	Desc.Usage = D3D11_USAGE_DEFAULT;
+	Desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	Desc.CPUAccessFlags = 0;
+	Desc.MiscFlags = 0;
+	Desc.StructureByteStride = 0;
+	Desc.ByteWidth = sizeof(PointLight);
+
+	D3D11_SUBRESOURCE_DATA subData;
+	subData.pSysMem = &pl;
+	subData.SysMemPitch = 0;
+	subData.SysMemSlicePitch = 0;
+
+	leo::dxcall(device->CreateBuffer(&Desc, &subData, &mPointLightPSCB));
+}
+void ClearLight() {
+	leo::win::ReleaseCOM(mPointLightPSCB);
+}
 void BuildRes()
 {
 	using leo::float3;
@@ -495,9 +505,23 @@ void BuildRes()
 	// view saves a reference.
 	leo::win::ReleaseCOM(tex);
 
+	BuildLight(leo::DeviceMgr().GetDevice());
 #endif
 
 }
+void ClearRes() {
+	leo::win::ReleaseCOM(mSSAOPSCB);
+
+	pModelMesh.reset(nullptr);
+	pTerrainMesh.reset(nullptr);
+	pBoxMesh.reset(nullptr);
+	pSphereMesh.reset(nullptr);
+
+	leo::win::ReleaseCOM(mSSAORandomVec);
+
+	ClearLight();
+}
+
 
 void Update(){
 	while (renderThreadRun)
@@ -507,6 +531,7 @@ void Update(){
 		auto mRunTime =leo::clock::duration_to<>(leo::clock::now()-mBegin);
 		if (mRunTime < 1 / 30.f)
 			std::this_thread::sleep_for(leo::clock::to_duration<>(1 / 30.f - mRunTime));
+		leo::win::KeysState::GetInstance()->Update();
 	}
 }
 
@@ -525,13 +550,25 @@ void ComputeSSAO(ID3D11DeviceContext* context ) {
 }
 
 void DrawSSAO(ID3D11DeviceContext* context) {
-	ID3D11RenderTargetView* mRTV = leo::DeviceMgr().GetRenderTargetView();
-	context->OMSetRenderTargets(1,&mRTV, nullptr);
+	
 
 	auto srv = leo::DeferredResources::GetInstance().GetSSAOSRV();
 	context->PSSetShader(mGBufferPS, nullptr, 0);
 	context->PSSetShaderResources(0, 1, &srv);
 	context->Draw(4, 0);
+}
+
+void DrawLight(ID3D11DeviceContext* context) {
+
+	context->PSSetShader(mPointLightPS, nullptr, 0);
+	context->PSSetConstantBuffers(0, 1, &mPointLightPSCB);
+
+	auto srv = leo::DeferredResources::GetInstance().GetSSAOSRV();
+	context->PSSetShaderResources(2, 1, &srv);
+	context->Draw(4, 0);
+	srv = nullptr;
+	context->PSSetShaderResources(2, 1, &srv);
+
 }
 
 
@@ -545,6 +582,7 @@ void Render()
 
 		
 		leo::RenderSync::GetInstance()->Sync();
+		std::lock_guard<std::mutex> lock(mRenderMutex);
 
 		auto devicecontext = dm.GetDeviceContext();
 		
@@ -563,7 +601,7 @@ void Render()
 #endif
 		auto& defereed = leo::DeferredResources::GetInstance();
 		
-		defereed.UnIASet();
+		
 		defereed.OMSet();
 		//pAxis->Render(devicecontext, *pCamera);
 		//pTerrainMesh->Render(devicecontext, *pCamera);
@@ -585,13 +623,23 @@ void Render()
 		auto rtv = dm.GetRenderTargetView();
 		devicecontext->OMSetRenderTargets(1, &rtv, nullptr);
 		devicecontext->ClearRenderTargetView(rtv, ClearColor);
-		devicecontext->PSSetShader(mGBufferPS, nullptr, 0);
 
 		
-
-		auto srvs = defereed.GetSRVs();
 		//绘制延迟Buff
 		{
+			//右下,最终图像
+			currvp.TopLeftX += currvp.Width;
+			currvp.TopLeftY += currvp.Height;
+			devicecontext->RSSetViewports(1, &currvp);
+			DrawLight(devicecontext);
+
+			//
+			auto srvs = defereed.GetSRVs();
+			devicecontext->PSSetShader(mGBufferPS, nullptr, 0);
+			//左上,法线
+			currvp.TopLeftX -= currvp.Width;
+			currvp.TopLeftY -= currvp.Height;
+			devicecontext->RSSetViewports(1, &currvp);
 			devicecontext->PSSetShaderResources(0, 1, &srvs[0]);
 			devicecontext->Draw(4, 0);
 
@@ -609,11 +657,11 @@ void Render()
 
 			DrawSSAO(devicecontext);
 
+
 			leo::context_wrapper context(devicecontext);
 		}
 
-		
-
+		defereed.UnIASet();
 		devicecontext->RSSetViewports(1, &prevVP);
 
 
@@ -623,4 +671,3 @@ void Render()
 
 	}
 }
-#endif

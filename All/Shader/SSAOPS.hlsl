@@ -84,7 +84,7 @@ main(VertexOut pin) : SV_TARGET{
 	float pz = NormalDepth.w;
 	float3 p = (pz/pin.ToFarPlane.z)*pin.ToFarPlane;
 
-
+	
 	//[-1,1] -> [1,1]
 	float3 randVec = 2.f* RandomVecMap.SampleLevel(LinearRepeat, 4.f*pin.Tex, 0.f).rgb - 1.f;
 	float3 n = NormalDepth.xyz;

@@ -8,17 +8,7 @@
 #include "Singleton.hpp"
 
 namespace leo {
-	namespace win
-	{
-		KeysState globalKeysState;
-
-
-		//
-		KeysState* KeysState::GetInstance()
-		{
-			return &globalKeysState;
-		}
-	}
+	
 }
 
 namespace xp
