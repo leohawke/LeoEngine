@@ -340,6 +340,11 @@ void BuildLight(ID3D11Device* device) {
 	subData.SysMemPitch = 0;
 	subData.SysMemSlicePitch = 0;
 
+	pl.diffuse = leo::float4(0.8f, 0.8f, 0.8f, 1.f);
+	pl.att = leo::float4(0.f,1.f,0.f,1.f);
+	const float Radius = 9;
+	pl.position = leo::float4(Radius,0.f,0.f,8.f);
+
 	leo::dxcall(device->CreateBuffer(&Desc, &subData, &mPointLightPSCB));
 }
 void ClearLight() {
@@ -526,12 +531,39 @@ void ClearRes() {
 void Update(){
 	while (renderThreadRun)
 	{
-		auto mBegin = leo::clock::now();
+		
+		leo::win::KeysState::GetInstance()->Update();
 
-		auto mRunTime =leo::clock::duration_to<>(leo::clock::now()-mBegin);
+		std::lock_guard<std::mutex> lock(mRenderMutex);
+		const float Radius = 9;
+		const float cosb = std::cos(1.f/leo::LM_DPR);
+		const float sinb = std::sin(1.f /leo::LM_DPR);
+
+		//cos(a+b) = cos(a) cos(b) - sin(a) sin(b) 
+		//sin(a + b) = sin(a) cos(b) + sin(b) cos(a)
+		//cosa = x ,sina = y
+		//sinb = sin(pi/180)
+		auto cosa = pl.position.x/Radius;
+		auto sina = pl.position.y/Radius;
+		pl.position.x = cosa*cosb - sina*sinb;
+		pl.position.y = sina*cosb + sinb*cosa;
+
+		pl.position.x *= Radius;
+		pl.position.y *= Radius;
+
+		auto density = pl.position.y/ Radius;
+		leo::clamp(0.f, 1.f, density);
+
+		pl.diffuse = leo::float4(density, density, density, 1.f);
+
+		leo::DeviceMgr().GetDeviceContext()->UpdateSubresource(mPointLightPSCB, 0, nullptr, &pl, 0, 0);
+
+		static auto mBegin = leo::clock::now();
+
+		auto mRunTime = leo::clock::duration_to<>(leo::clock::now() - mBegin);
+		mBegin = leo::clock::now();
 		if (mRunTime < 1 / 30.f)
 			std::this_thread::sleep_for(leo::clock::to_duration<>(1 / 30.f - mRunTime));
-		leo::win::KeysState::GetInstance()->Update();
 	}
 }
 

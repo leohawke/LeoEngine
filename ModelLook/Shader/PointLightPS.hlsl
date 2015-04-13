@@ -34,7 +34,7 @@ float4 main(VertexOut pin) : SV_TARGET
 	float3 PosV = (pz / pin.ToFarPlane.z)*pin.ToFarPlane;
 
 	float3 lightVec = position.xyz - PosV;
-	float d = length(lightVec);
+	float d = min(length(lightVec),1.f);
 	lightVec /= d;
 	float lambert = dot(lightVec, NormalDepth.xyz);
 	if (d > position.w)
