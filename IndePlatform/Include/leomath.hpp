@@ -40,6 +40,12 @@ namespace leo {
 	template<typename scalar,size_t multi>
 	struct data_storage;
 
+//behavior change: constructor is no longer implicitly called
+#ifdef LB_IMPL_MSCPP
+#pragma warning(push)
+#pragma warning(disable :4587)
+#endif
+
 	template<typename scalar>
 	struct data_storage<scalar, 2> {
 		using scalar_type = scalar;
@@ -142,6 +148,9 @@ namespace leo {
 		}
 	};
 
+#ifdef LB_IMPL_MSCPP
+#pragma warning(pop)
+#endif
 
 	//The float2 data type
 	struct lalignas(16) float2 :data_storage<float,2>

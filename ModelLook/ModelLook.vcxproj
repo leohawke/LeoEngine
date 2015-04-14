@@ -166,6 +166,9 @@
     <ProjectReference Include="..\DirectXTex\DirectXTex_Desktop_2013.vcxproj">
       <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\IndePlatform\IndePlatform.vcxproj">
+      <Project>{b8a92299-1c60-42c9-b77d-47f317497131}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\All\Core\BillBoard.cpp">
