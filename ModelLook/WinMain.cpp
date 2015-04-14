@@ -554,6 +554,7 @@ void Update(){
 		auto density = pl.position.y/ Radius;
 		leo::clamp(0.f, 1.f, density);
 
+
 		pl.diffuse = leo::float4(density, density, density, 1.f);
 
 		leo::DeviceMgr().GetDeviceContext()->UpdateSubresource(mPointLightPSCB, 0, nullptr, &pl, 0, 0);
