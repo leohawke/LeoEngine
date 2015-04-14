@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B8A92299-1C60-42C9-B77D-47F317497131}</ProjectGuid>
+    <RootNamespace>IndePlatform</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(ProjectDir)\Include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(ProjectDir)\Include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>DEBUG;MULTI_THREAD;PLATFORM_WIN32;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>MULTI_THREAD;PLATFORM_WIN32;;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\any.cpp" />
+    <ClCompile Include="src\Geometry.cpp" />
+    <ClCompile Include="src\memory.cpp" />
+    <ClCompile Include="src\raii.cpp" />
+    <ClCompile Include="src\Singleton.cpp" />
+    <ClCompile Include="src\string.cpp" />
+    <ClCompile Include="src\ThreadSync.cpp" />
+    <ClCompile Include="src\type_info.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include\Abstract.hpp" />
+    <ClInclude Include="Include\algorithm.hpp" />
+    <ClInclude Include="Include\any.h" />
+    <ClInclude Include="Include\any_iterator.hpp" />
+    <ClInclude Include="Include\BaseMacro.h" />
+    <ClInclude Include="Include\bitseg.hpp" />
+    <ClInclude Include="Include\clock.hpp" />
+    <ClInclude Include="Include\ConstexprMath.hpp" />
+    <ClInclude Include="Include\container.hpp" />
+    <ClInclude Include="Include\EndianSwap.hpp" />
+    <ClInclude Include="Include\functional.hpp" />
+    <ClInclude Include="Include\Geometry.hpp" />
+    <ClInclude Include="Include\Geometry_impl.hpp" />
+    <ClInclude Include="Include\iterator.hpp" />
+    <ClInclude Include="Include\ldef.h" />
+    <ClInclude Include="Include\leoint.hpp" />
+    <ClInclude Include="Include\LeoMath.h" />
+    <ClInclude Include="Include\leomath.hpp" />
+    <ClInclude Include="Include\leo_math_convert_impl.h" />
+    <ClInclude Include="Include\leo_math_impl.hpp" />
+    <ClInclude Include="Include\memory.hpp" />
+    <ClInclude Include="Include\Operators.hpp" />
+    <ClInclude Include="Include\path.hpp" />
+    <ClInclude Include="Include\platform.h" />
+    <ClInclude Include="Include\platform_macro.h" />
+    <ClInclude Include="Include\raii.hpp" />
+    <ClInclude Include="Include\ray.hpp" />
+    <ClInclude Include="Include\Singleton.hpp" />
+    <ClInclude Include="Include\string.hpp" />
+    <ClInclude Include="Include\ThreadSync.hpp" />
+    <ClInclude Include="Include\Tree.hpp" />
+    <ClInclude Include="Include\tuple.hpp" />
+    <ClInclude Include="Include\type_op.hpp" />
+    <ClInclude Include="Include\utility.hpp" />
+    <ClInclude Include="Include\variadic.hpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
