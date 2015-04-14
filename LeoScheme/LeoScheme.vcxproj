@@ -95,11 +95,6 @@
     <ClCompile Include="SchemeMath.cpp" />
     <ClCompile Include="Sexp\Sexp.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\IndePlatform\IndePlatform.vcxproj">
-      <Project>{b8a92299-1c60-42c9-b77d-47f317497131}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
