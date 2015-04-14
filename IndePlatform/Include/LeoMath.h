@@ -45,8 +45,7 @@ namespace leo
 //Inhert std::
 namespace leo
 {
-	using std::max;
-	using std::min;
+	
 }
 
 //Math Constant Number
@@ -2567,11 +2566,7 @@ namespace leo {
 //Other Function
 namespace leo
 {
-	template<typename _Ty>
-	inline void clamp(const _Ty& _Min, const _Ty& _Max, _Ty & _X)
-	{
-		_X = leo::max(_Min, leo::min(_Max, _X));
-	}
+	
 
 	inline float distance(const float2& left, const float2& right)
 	{

@@ -26,6 +26,7 @@
 #include <array>
 #include <cmath>
 
+//data type
 namespace leo {
 	struct float2;
 	struct float3;
@@ -42,16 +43,23 @@ namespace leo {
 	template<typename scalar>
 	struct data_storage<scalar, 2> {
 		using scalar_type = scalar;
+		using vec_type = data_storage<scalar, 2>;
 
 		union {
 			struct {
-				scaler x, y;
+				scalar x, y;
 			};
 			struct {
-				scaler u, v;
+				scalar u, v;
 			};
-			scaler data[2];
+			scalar data[2];
 		};
+
+		vec_type(scalar X, scalar Y)
+			:x(X), y(Y)
+		{}
+
+		vec_type() = default;
 
 		constexpr size_t size() const{
 			return 2;
@@ -69,16 +77,23 @@ namespace leo {
 	template<typename scalar>
 	struct data_storage<scalar, 3> {
 		using scalar_type = scalar;
+		using vec_type = data_storage<scalar, 3>;
 
 		union {
 			struct {
-				scaler x, y,z;
+				scalar x, y,z;
 			};
 			struct {
-				scaler u, v,w;
+				scalar u, v,w;
 			};
-			scaler data[3];
+			scalar data[3];
 		};
+
+		vec_type() = default;
+
+		vec_type(scalar X, scalar Y,scalar Z)
+			:x(X), y(Y),z(Z)
+		{}
 
 		constexpr size_t size() const {
 			return 3;
@@ -96,16 +111,23 @@ namespace leo {
 	template<typename scalar>
 	struct data_storage<scalar, 4> {
 		using scalar_type = scalar;
+		using vec_type = data_storage<scalar, 4>;
 
 		union {
 			struct {
-				scaler x, y, z,w;
+				scalar x, y, z,w;
 			};
 			struct {
-				scaler r, g, b,a;
+				scalar r, g, b,a;
 			};
-			scaler data[4];
+			scalar data[4];
 		};
+
+		vec_type() = default;
+
+		vec_type(scalar X, scalar Y, scalar Z,scalar W)
+			:x(X), y(Y), z(Z),w(W)
+		{}
 
 		constexpr size_t size() const {
 			return 4;
@@ -128,12 +150,12 @@ namespace leo {
 		float2() noexcept = default;
 
 		float2(float X, float Y) noexcept
-			:u(X), v(Y)
+			:vec_type(X,Y)
 		{}
 
-		explicit float2(const float* src) noexcept {
-			std::memcpy(data, src, sizeof(float) * 2);
-		}
+		explicit float2(const float* src) noexcept
+			:vec_type(src[0],src[1])
+		{}
 
 		template<typename T>
 		explicit float2(const T& src) noexcept
@@ -160,38 +182,24 @@ namespace leo {
 	//The float3 data type
 	struct lalignas(16) float3 :data_storage<float, 3>
 	{
-		union {
-			struct {
-				float x, y, z;
-			};
-			struct {
-				float u, v, w;
-			};
-			struct {
-				float r, g, b;
-			};
-			float data[3];
-		};
 
 		float3() noexcept = default;
 
 		float3(float X, float Y, float Z) noexcept
-			:u(X), v(Y), w(Z)
+			:vec_type(X,Y,Z)
 		{}
 
 		float3(const float2& XY, float Z) noexcept
-			: x(XY.x), y(XY.y), z(Z)
-		{
-		}
+			: vec_type(XY.x, XY.y, Z)
+		{}
 
 		float3(float X, const float2& YZ) noexcept
-			: x(X), y(YZ.x), z(YZ.y)
-		{
-		}
+			: vec_type(X,YZ.x, YZ.y)
+		{}
 
-		explicit float3(const float* src) noexcept {
-			std::memcpy(&x, src, sizeof(float) * 3);
-		}
+		explicit float3(const float* src) noexcept
+		:vec_type(src[0],src[1],src[2])
+		{}
 
 		template<typename T>
 		explicit float3(const T& src) noexcept
@@ -218,55 +226,46 @@ namespace leo {
 	//The float4 data type
 	struct lalignas(16) float4 :data_storage<float, 4>
 	{
-		union {
-			struct {
-				float x, y, z, w;
-			};
-			struct {
-				float r, g, b,a;
-			};
-			float data[4];
-		};
-
+		
 		float4() noexcept = default;
 
 		float4(float X, float Y, float Z, float W) noexcept
-			:x(X), y(Y), z(Z), w(W)
+			:vec_type(X,Y,Z,W)
 		{}
 
 		float4(const float2& XY, const float2& ZW) noexcept
-			: x(XY.x), y(XY.y), z(ZW.x), w(ZW.y)
+			: vec_type(XY.x,XY.y,ZW.x,ZW.y)
 		{
 		}
 
 		float4(const float2& XY, float Z, float W) noexcept
-			: x(XY.x), y(XY.y), z(Z), w(W)
+			: vec_type(XY.x,XY.y, Z, W)
 		{
 		}
 
 		float4(float X, const float2& YZ, float W) noexcept
-			: x(X), y(YZ.x), z(YZ.y), w(W)
+			: vec_type(X,YZ.x,YZ.y,W)
 		{
 		}
 
 		float4(float X, float Y, const float2& ZW) noexcept
-			: x(X), y(Y), z(ZW.x), w(ZW.y)
+			: vec_type(X,Y,ZW.x,ZW.y)
 		{
 		}
 
 		float4(const float3& XYZ, float W) noexcept
-			: x(XYZ.x), y(XYZ.y), z(XYZ.z), w(W)
+			: vec_type(XYZ.x,XYZ.y,XYZ.z, W)
 		{
 		}
 
 		float4(float X, const float3& YZW) noexcept
-			: x(X), y(YZW.x), z(YZW.y), w(YZW.z)
+			: vec_type( X,YZW.x,YZW.y,YZW.z)
 		{
 		}
 
 
-		explicit float4(const float* src) noexcept {
-			std::memcpy(&x, src, sizeof(float) * 4);
+		explicit float4(const float* src) noexcept
+			: vec_type(src[0],src[1],src[2], src[3]) {
 		}
 
 		template<typename T>
@@ -387,6 +386,10 @@ namespace leo {
 		{
 		}
 
+		half() noexcept 
+			:data(0)
+		{}
+
 		half& operator=(float f) noexcept
 		{
 			*this = half(f);
@@ -432,15 +435,7 @@ namespace leo {
 
 	struct lalignas(8) half3 :data_storage<half, 3>
 	{
-		union {
-			struct {
-				half x, y, z;
-			};
-			struct {
-				half u, v, w;
-			};
-			half data[3];
-		};
+		
 
 		half3(float X, float Y, float Z) noexcept
 			:u(x), v(Y), w(Z)
@@ -471,15 +466,7 @@ namespace leo {
 
 	struct lalignas(8) half4 :data_storage<half, 4>
 	{
-		union {
-			struct {
-				half x, y, z, w;
-			};
-			struct {
-				half r, g, b, a;
-			};
-			half data[4];
-		};
+		
 
 		half4(float X, float Y, float Z, float W) noexcept
 			:x(X), y(Y), z(Z), w(W)
@@ -567,5 +554,85 @@ namespace leo {
 	};
 }
 
+//data base function
+namespace leo {
+	using std::max;
+	using std::min;
 
+	inline float2 max(const float2& l, const float2& r) {
+		return float2(max(l.x, r.x), max(l.y, r.y));
+	}
+
+	inline float2 min(const float2& l, const float2& r) {
+		return float2(min(l.x, r.x), min(l.y, r.y));
+	}
+
+	inline float3 max(const float3& l, const float3& r) {
+		return float3(max(l.x, r.x), max(l.y, r.y),max(l.z,r.z));
+	}
+
+	inline float3 min(const float3& l, const float3& r) {
+		return float3(min(l.x, r.x), min(l.y, r.y), min(l.z,r.z));
+	}
+
+	inline float4 max(const float4& l, const float4& r) {
+		return float4(max(l.x, r.x), max(l.y, r.y), max(l.b, r.b), max(l.a, r.a));
+	}
+
+	inline float4 min(const float4& l, const float4& r) {
+		return float4(min(l.x, r.x), min(l.y, r.y), min(l.b, r.b), min(l.a, r.a));
+	}
+
+	using std::abs;
+
+	inline float2 abs(const float2& l, const float2& r) {
+		return float2(abs(l.x, r.x), abs(l.y, r.y));
+	}
+
+	inline float3 abs(const float3& l, const float3& r) {
+		return float3(abs(l.x,r.x), abs(l.y, r.y), abs(l.z,r.z));
+	}
+
+	inline float4 abs(const float4& l, const float4& r) {
+		return float4(abs(l.x, r.x), abs(l.y, r.y), abs(l.z, r.z), abs(l.w, r.w));
+	}
+}
+
+//data Trigonometry Function
+namespace leo {
+}
+
+//data depend-base function
+namespace leo {
+	template<typename vec>
+	inline vec clamp(const vec& _Min, const vec& _Max,const vec & _X){
+		return leo::max(_Min, leo::min(_Max, _X));
+	}
+
+	inline float2 saturate(const float2& x) {
+		const static auto zero = float2(0.f, 0.f);
+		const static auto one = float2(1.f, 1.f);
+		return  clamp(zero, one, x);
+	}
+
+	inline float3 saturate(const float3& x) {
+		const static auto zero = float3(0.f, 0.f,0.f);
+		const static auto one = float3(1.f, 1.f,1.f);
+		return  clamp(zero, one, x);
+	}
+
+	inline float4 saturate(const float4& x) {
+		const static auto zero = float4(0.f, 0.f,0.f,0.f);
+		const static auto one = float4(1.f, 1.f,1.f,1.f);
+		return  clamp(zero, one, x);
+	}
+}
+
+//__m128 function
+namespace leo {
+}
+
+//__m128,4 function
+namespace leo {
+}
 #endif
