@@ -14,7 +14,7 @@
 #ifndef Core_EngineConfig_H
 #define Core_EngineConfig_H
 
-#include "..\IndePlatform\leoint.hpp"
+#include "leoint.hpp"
 
 #include <utility>
 #include <vector>

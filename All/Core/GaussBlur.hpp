@@ -3,10 +3,10 @@
 #ifndef Core_GaussBlur_Hpp
 #define Core_GaussBlur_Hpp
 
-#include "..\IndePlatform\BaseMacro.h"
-#include "..\IndePlatform\memory.hpp"
-#include "..\IndePlatform\leoint.hpp"
-#include "..\IndePlatform\Singleton.hpp"
+#include "BaseMacro.h"
+#include "memory.hpp"
+#include "leoint.hpp"
+#include "Singleton.hpp"
 #include "..\COM.hpp"
 
 

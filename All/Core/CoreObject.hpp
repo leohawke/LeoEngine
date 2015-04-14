@@ -14,8 +14,8 @@
 ////////////////////////////////////////////////////////////////////////////
 #ifndef Core_CoreObject_HPP
 #define Core_CoreObject_HPP
-#include "..\IndePlatform\LeoMath.h"
-#include "..\IndePlatform\memory.hpp"
+#include "LeoMath.h"
+#include "memory.hpp"
 namespace leo
 {
 	struct SQT;

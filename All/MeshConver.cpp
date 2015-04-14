@@ -44,7 +44,7 @@ namespace xp
 			{
 				this->~Singleton();
 			};
-			leo::details::SingletonRegister(f);
+			leo::details::SingletonRegister(f,typeid(Single));
 		}
 	public:
 		virtual ~Singleton()

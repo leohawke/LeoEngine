@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..\IndePlatform\leomath.h"
+#include "leomath.h"
 #include "Core\Material.h"
 namespace leo
 {

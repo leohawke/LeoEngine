@@ -18,9 +18,9 @@
 #ifndef Core_RenderSync_hpp
 #define Core_RenderSync_hpp
 
-#include "..\IndePlatform\ldef.h"
-#include "..\IndePlatform\utility.hpp"
-#include "..\IndePlatform\memory.hpp"
+#include "ldef.h"
+#include "utility.hpp"
+#include "memory.hpp"
 
 namespace leo
 {

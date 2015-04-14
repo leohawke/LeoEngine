@@ -43,7 +43,7 @@ namespace leo
 						info += L" (what the fucking) ";
 						break;
 					}
-					info += leo::towstring(globalCpuInfo.model, 17);
+					info += leo::to_wstring(globalCpuInfo.model, 17);
 					return info;
 				}
 

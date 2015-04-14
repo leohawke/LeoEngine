@@ -1,5 +1,5 @@
-#include "..\IndePlatform\platform.h"
-#include "..\IndePlatform\string.hpp"
+#include "platform.h"
+
 
 #include "EngineConfig.h"
 #include "FileSearch.h"
@@ -8,9 +8,10 @@
 #include "..\exception.hpp"
 #include "..\DeviceMgr.h"
 #include "..\scheme_helper.h"
-
+#include "string.hpp"
 #include <fstream>
-namespace leo {
+
+using namespace leo;
 
 	static leo::scheme::sexp::sexp_list read_config_sexp = nullptr;
 
@@ -286,5 +287,3 @@ namespace leo {
 		return find_helper(mSamplDescs, mSamplNames, samName);
 	}
 
-
-}

@@ -3,8 +3,8 @@
 #ifndef Core_Vertex_Hpp
 #define Core_Vertex_Hpp
 
-#include "..\IndePlatform\memory.hpp"
-#include "..\IndePlatform\LeoMath.h"
+#include "memory.hpp"
+#include "LeoMath.h"
 #include <type_traits>
 #include <vector>
 struct D3D11_INPUT_ELEMENT_DESC;

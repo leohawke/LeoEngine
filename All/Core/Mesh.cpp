@@ -1,8 +1,8 @@
-#include "..\IndePlatform\platform.h"
+#include "platform.h"
 
 
-#include "..\IndePlatform\memory.hpp"
-#include "..\string.hpp"
+#include "memory.hpp"
+#include "string.hpp"
 #include "..\file.hpp"
 #include "MeshLoad.hpp"
 #include "..\exception.hpp"

@@ -4,6 +4,7 @@
 #include <cmath>
 //增加插值函数
 #include "LeoMath.h"
+#include "memory.hpp"
 #pragma warning(push)
 #pragma warning(disable : 4838)
 #pragma warning(disable : 4458)

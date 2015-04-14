@@ -17,8 +17,8 @@
 #ifndef ShaderSystem_Deferred_H
 #define ShaderSystem_Deferred_H
 
-#include "..\IndePlatform\utility.hpp"
-#include "..\IndePlatform\Singleton.hpp"
+#include "utility.hpp"
+#include "Singleton.hpp"
 
 struct ID3D11RenderTargetView;
 struct ID3D11ShaderResourceView;

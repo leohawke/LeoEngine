@@ -1,5 +1,5 @@
-#include "..\IndePlatform\platform.h"
-#include "..\IndePlatform\utility.hpp"
+#include "platform.h"
+#include "utility.hpp"
 
 
 #include "EffectSkeleton.hpp"

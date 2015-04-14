@@ -13,8 +13,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#include "..\IndePlatform\utility.hpp"
-#include "..\IndePlatform\Singleton.hpp"
+#include "utility.hpp"
+#include "Singleton.hpp"
 
 struct ID3D11Device;
 struct ID3D11ShaderResourceView;

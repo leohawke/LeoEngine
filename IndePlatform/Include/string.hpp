@@ -283,14 +283,11 @@ namespace leo
 
 		template LB_ATTR(format(printf, 1, 2)) std::string
 			sfmt<char>(const char*, ...);
-}
 
-namespace leo
-{
-	std::wstring to_wstring(const char* c_str, std::size_t len);
-	std::wstring to_wstring(const std::string& string);
+		std::wstring to_wstring(const char* c_str, std::size_t len);
+		std::wstring to_wstring(const std::string& string);
 
-	std::string to_string(const wchar_t* c_str, std::size_t len);
-	std::string to_string(const std::wstring& string);
+		std::string to_string(const wchar_t* c_str, std::size_t len);
+		std::string to_string(const std::wstring& string);
 }
 #endif

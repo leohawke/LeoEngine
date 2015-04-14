@@ -1,6 +1,6 @@
-#include "..\IndePlatform\Singleton.hpp"
-#include "..\IndePlatform\ThreadSync.hpp"
-#include "..\IndePlatform\leoint.hpp"
+#include "Singleton.hpp"
+#include "ThreadSync.hpp"
+#include "leoint.hpp"
 #include "RenderSync.hpp"
 #include <atomic>
 #include <thread>

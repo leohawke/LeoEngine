@@ -17,7 +17,7 @@
 #ifndef Core_camera_h
 #define Core_camera_h
 
-#include "..\IndePlatform\Geometry.hpp"
+#include "Geometry.hpp"
 #include "CoreObject.hpp"
 namespace leo
 {

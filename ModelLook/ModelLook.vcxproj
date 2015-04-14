@@ -169,6 +169,9 @@
     <ProjectReference Include="..\IndePlatform\IndePlatform.vcxproj">
       <Project>{b8a92299-1c60-42c9-b77d-47f317497131}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\LeoScheme\LeoScheme.vcxproj">
+      <Project>{9c92e335-fb4d-4185-8a8e-4ddb0fc12378}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\All\Core\BillBoard.cpp">
@@ -290,29 +293,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\All\COM.hpp" />
-    <ClInclude Include="..\All\IndePlatform\algorithm.hpp" />
-    <ClInclude Include="..\All\IndePlatform\any.h" />
-    <ClInclude Include="..\All\IndePlatform\any_iterator.hpp" />
-    <ClInclude Include="..\All\IndePlatform\BaseMacro.h" />
-    <ClInclude Include="..\All\IndePlatform\bitseg.hpp" />
-    <ClInclude Include="..\All\IndePlatform\clock.hpp" />
-    <ClInclude Include="..\All\IndePlatform\container.hpp" />
-    <ClInclude Include="..\All\IndePlatform\EndianSwap.hpp" />
-    <ClInclude Include="..\All\IndePlatform\functional.hpp" />
-    <ClInclude Include="..\All\IndePlatform\iterator.hpp" />
-    <ClInclude Include="..\All\IndePlatform\ldef.h" />
-    <ClInclude Include="..\All\IndePlatform\leoint.hpp" />
-    <ClInclude Include="..\All\IndePlatform\memory.hpp" />
-    <ClInclude Include="..\All\IndePlatform\path.hpp" />
-    <ClInclude Include="..\All\IndePlatform\platform.h" />
-    <ClInclude Include="..\All\IndePlatform\raii.hpp" />
-    <ClInclude Include="..\All\IndePlatform\Singleton.hpp" />
-    <ClInclude Include="..\All\IndePlatform\string.hpp" />
-    <ClInclude Include="..\All\IndePlatform\ThreadSync.hpp" />
-    <ClInclude Include="..\All\IndePlatform\tuple.hpp" />
-    <ClInclude Include="..\All\IndePlatform\type_op.hpp" />
-    <ClInclude Include="..\All\IndePlatform\utility.hpp" />
-    <ClInclude Include="..\All\IndePlatform\variadic.hpp" />
     <ClInclude Include="..\All\LightBuffer.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClInclude>

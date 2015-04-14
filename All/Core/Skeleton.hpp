@@ -16,12 +16,11 @@
 #ifndef Core_Skeleton_Hpp
 #define Core_Skeleton_Hpp
 
-
-#include "..\IndePlatform\LeoMath.h"
-#include "..\IndePlatform\ldef.h"
-#include "..\IndePlatform\memory.hpp"
-#include "..\IndePlatform\clock.hpp"
-#include "..\IndePlatform\\utility.hpp"
+#include "ldef.h"
+#include "LeoMath.h"
+#include "memory.hpp"
+#include "clock.hpp"
+#include "utility.hpp"
 #include "Lod.h"
 #include "Material.h"
 #include "Vertex.hpp"

@@ -3,7 +3,7 @@
 #ifndef Core_Sky_Hpp
 #define Core_Sky_Hpp
 
-#include "..\IndePlatform\BaseMacro.h"
+#include "BaseMacro.h"
 #include "..\COM.hpp"
 #include <string>
 

@@ -17,10 +17,10 @@
 #ifndef Core_effect_h
 #define Core_effect_h
 
-#include "..\IndePlatform\platform.h"
-#include "..\IndePlatform\Singleton.hpp"
-#include "..\IndePlatform\leoint.hpp"
-#include "..\IndePlatform\utility.hpp"
+#include "platform.h"
+#include "Singleton.hpp"
+#include "leoint.hpp"
+#include "utility.hpp"
 #include "..\LightBuffer.h"
 #include <d3d11.h>
 #pragma comment(lib,"d3d11.lib")

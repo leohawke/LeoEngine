@@ -13,8 +13,8 @@
 #include "..\LightBuffer.h"
 #include "..\debug.hpp"
 #include "CoreObject.hpp"
-#include "..\IndePlatform\BaseMacro.h"
-#include "..\IndePlatform\leoint.hpp"
+#include "BaseMacro.h"
+#include "leoint.hpp"
 
 
 namespace leo

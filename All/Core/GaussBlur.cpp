@@ -5,7 +5,7 @@
 #include "Effect.h"
 #include "Vertex.hpp"
 #include "..\exception.hpp"
-#include "..\IndePlatform\Geometry.hpp"
+#include "Geometry.hpp"
 
 #include <d3dcompiler.h>
 #pragma warning(disable: 4172)

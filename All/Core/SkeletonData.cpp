@@ -1,4 +1,4 @@
-#include "..\IndePlatform\platform.h"
+#include "platform.h"
 
 #include "..\d3dx11.hpp"
 
