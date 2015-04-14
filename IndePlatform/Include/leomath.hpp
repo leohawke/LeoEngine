@@ -408,16 +408,16 @@ namespace leo {
 
 	struct lalignas(4) half2 :data_storage<half, 2>
 	{
-		half2(float X, float Y) noexcept
-			:u(X), v(Y)
+		half2(half X, half Y) noexcept
+			:vec_type(X, Y)
 		{}
 
-		half2(half X, half Y) noexcept
-			: u(X), v(Y)
+		half2(float X, float Y) noexcept
+			: half2(half(X),half(Y))
 		{}
 
 		half2(const float2& XY) noexcept
-		:u(XY.x),v(XY.y){
+		:half2(XY.x,XY.y){
 		}
 
 		half2() noexcept = default;
@@ -435,22 +435,32 @@ namespace leo {
 
 	struct lalignas(8) half3 :data_storage<half, 3>
 	{
-		
+		half3(half X, half Y, half Z) noexcept
+		:vec_type(X,Y,Z)
+		{}
 
 		half3(float X, float Y, float Z) noexcept
-			:u(x), v(Y), w(Z)
+			:half3(half(X),half(Y),half(Z))
 		{}
 
 		half3(const float3& XYZ) noexcept
-			: u(XYZ.x), v(XYZ.y), w(XYZ.z)
+			:half3(XYZ.x,XYZ.y,XYZ.z)
 		{}
 
+		half3(const half2& XY,half Z) noexcept 
+			:vec_type(XY.x,XY.y,Z){
+		}
+
 		half3(const float2& XY, float Z) noexcept
-			: u(XY.x), v(XY.y), w(Z)
+			:half3(half2(XY),half(Z))
+		{}
+
+		half3(half X,const half2& YZ) noexcept
+			:vec_type(X,YZ.x,YZ.y)
 		{}
 
 		half3(float X,const float2& YZ) noexcept
-			: u(X), v(YZ.x), w(YZ.y)
+			:half3(half(X),YZ)
 		{}
 
 		half3& operator=(const float3& XYZ) noexcept
@@ -466,81 +476,65 @@ namespace leo {
 
 	struct lalignas(8) half4 :data_storage<half, 4>
 	{
-		
-
-		half4(float X, float Y, float Z, float W) noexcept
-			:x(X), y(Y), z(Z), w(W)
-		{}
-
-		half4(const float4& XYZW) noexcept
-			: x(XYZW.x), y(XYZW.y), z(XYZW.z), w(XYZW.w)
-		{}
-
-		half4(const float2& XY, const float2& ZW) noexcept
-			: x(XY.x), y(XY.y), z(ZW.x), w(ZW.y)
-		{
-		}
-
-		half4(const float2& XY, float Z, float W) noexcept
-			: x(XY.x), y(XY.y), z(Z), w(W)
-		{
-		}
-
-		half4(float X, const float2& YZ, float W) noexcept
-			: x(X), y(YZ.x), z(YZ.y), w(W)
-		{
-		}
-
-		half4(float X, float Y, const float2& ZW) noexcept
-			: x(X), y(Y), z(ZW.x), w(ZW.y)
-		{
-		}
-
-		half4(const float3& XYZ, float W) noexcept
-			: x(XYZ.x), y(XYZ.y), z(XYZ.z), w(W)
-		{
-		}
-
-		half4(float X, const float3& YZW) noexcept
-			: x(X), y(YZW.x), z(YZW.y), w(YZW.z)
-		{
-		}
-
-
 		half4(half X, half Y, half Z, half W) noexcept
-			: x(X), y(Y), z(Z), w(W)
+		:vec_type(X, Y, Z,W)
 		{}
 
 		half4(const half2& XY, const half2& ZW) noexcept
-			: x(XY.x), y(XY.y), z(ZW.x), w(ZW.y)
-		{
-		}
+			: vec_type(XY.x, XY.y,ZW.x,ZW.y)
+		{}
 
 		half4(const half2& XY, half Z, half W) noexcept
-			: x(XY.x), y(XY.y), z(Z), w(W)
-		{
-		}
+			:vec_type(XY.x,XY.y,Z,W)
+		{}
 
 		half4(half X, const half2& YZ, half W) noexcept
-			: x(X), y(YZ.x), z(YZ.y), w(W)
-		{
-		}
+			: vec_type(X,YZ.x,YZ.y,W)
+		{}
 
 		half4(half X, half Y, const half2& ZW) noexcept
-			: x(X), y(Y), z(ZW.x), w(ZW.y)
-		{
-		}
+			: vec_type(X, Y,ZW.x,ZW.y)
+		{}
 
 		half4(const half3& XYZ, half W) noexcept
-			: x(XYZ.x), y(XYZ.y), z(XYZ.z), w(W)
-		{
-		}
+			: vec_type(XYZ.x, XYZ.y, XYZ.z, W)
+		{}
 
 		half4(half X, const half3& YZW) noexcept
-			: x(X), y(YZW.x), z(YZW.y), w(YZW.z)
-		{
-		}
+			: vec_type(X,YZW.x, YZW.y,YZW.z)
+		{}
 
+		half4(float X, float Y, float Z, float W) noexcept
+			:half4(half(X), half(Y), half(Z), half(W))
+		{}
+
+		half4(const float4& XYZW) noexcept
+			:half4(half(XYZW.x),half(XYZW.y), half(XYZW.z), half(XYZW.w))
+		{}
+
+		half4(const float2& XY, const float2& ZW) noexcept
+			:half4(half2(XY),half2(ZW))
+		{}
+
+		half4(const float2& XY, float Z, float W) noexcept
+			:half4(half2(XY), half(Z), half(W))
+		{}
+
+		half4(float X, const float2& YZ, float W) noexcept
+			:half4(half(X), half2(YZ), half(W))
+		{}
+
+		half4(float X, float Y, const float2& ZW) noexcept
+			:half4(half(X), half(Y), half2(ZW))
+		{}
+
+		half4(const float3& XYZ, float W) noexcept
+			:half4( half3(XYZ), half(W))
+		{}
+
+		half4(float X, const float3& YZW) noexcept
+			:half4(half(X),half3(YZW))
+		{}
 
 		half4& operator=(const float4& XYZW) noexcept
 		{
@@ -559,42 +553,42 @@ namespace leo {
 	using std::max;
 	using std::min;
 
-	inline float2 max(const float2& l, const float2& r) {
+	inline float2 max(const float2& l, const float2& r) noexcept {
 		return float2(max(l.x, r.x), max(l.y, r.y));
 	}
 
-	inline float2 min(const float2& l, const float2& r) {
+	inline float2 min(const float2& l, const float2& r) noexcept {
 		return float2(min(l.x, r.x), min(l.y, r.y));
 	}
 
-	inline float3 max(const float3& l, const float3& r) {
+	inline float3 max(const float3& l, const float3& r) noexcept {
 		return float3(max(l.x, r.x), max(l.y, r.y),max(l.z,r.z));
 	}
 
-	inline float3 min(const float3& l, const float3& r) {
+	inline float3 min(const float3& l, const float3& r) noexcept {
 		return float3(min(l.x, r.x), min(l.y, r.y), min(l.z,r.z));
 	}
 
-	inline float4 max(const float4& l, const float4& r) {
+	inline float4 max(const float4& l, const float4& r) noexcept {
 		return float4(max(l.x, r.x), max(l.y, r.y), max(l.b, r.b), max(l.a, r.a));
 	}
 
-	inline float4 min(const float4& l, const float4& r) {
+	inline float4 min(const float4& l, const float4& r) noexcept {
 		return float4(min(l.x, r.x), min(l.y, r.y), min(l.b, r.b), min(l.a, r.a));
 	}
 
 	using std::abs;
 
-	inline float2 abs(const float2& l, const float2& r) {
-		return float2(abs(l.x, r.x), abs(l.y, r.y));
+	inline float2 abs(const float2& f2) noexcept {
+		return float2(abs(f2.x), abs(f2.y));
 	}
 
-	inline float3 abs(const float3& l, const float3& r) {
-		return float3(abs(l.x,r.x), abs(l.y, r.y), abs(l.z,r.z));
+	inline float3 abs(const float3& f3) noexcept {
+		return float3(abs(f3.x),abs(f3.y), abs(f3.z));
 	}
 
-	inline float4 abs(const float4& l, const float4& r) {
-		return float4(abs(l.x, r.x), abs(l.y, r.y), abs(l.z, r.z), abs(l.w, r.w));
+	inline float4 abs(const float4& f4) noexcept {
+		return float4(abs(f4.x), abs(f4.y), abs(f4.z), abs(f4.w));
 	}
 }
 
