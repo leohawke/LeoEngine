@@ -72,7 +72,7 @@ namespace leo
 //Trigonometry Function<uint Radian>
 namespace leo
 {
-#if LB_IMPL_MSCPP && !PLATFORM_64BIT
+#if defined(LB_IMPL_MSCPP) && !defined(PLATFORM_64BIT)
 	//from LH_MOUSE
 	inline __declspec(naked) float __stdcall sincosr(float *pcos, float rad)
 	{

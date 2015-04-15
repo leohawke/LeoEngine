@@ -25,6 +25,7 @@
 #include "leo_math_convert_impl.h"
 #include <array>
 #include <cmath>
+#include <cstring> //std::memcpy 
 
 //data type
 namespace leo {
@@ -61,11 +62,11 @@ namespace leo {
 			scalar data[2];
 		};
 
-		vec_type(scalar X, scalar Y)
+		data_storage(scalar X, scalar Y)
 			:x(X), y(Y)
 		{}
 
-		vec_type() = default;
+		data_storage() = default;
 
 		constexpr size_t size() const{
 			return 2;
@@ -95,9 +96,9 @@ namespace leo {
 			scalar data[3];
 		};
 
-		vec_type() = default;
+		data_storage() = default;
 
-		vec_type(scalar X, scalar Y,scalar Z)
+		data_storage(scalar X, scalar Y,scalar Z)
 			:x(X), y(Y),z(Z)
 		{}
 
@@ -129,9 +130,9 @@ namespace leo {
 			scalar data[4];
 		};
 
-		vec_type() = default;
+		data_storage() = default;
 
-		vec_type(scalar X, scalar Y, scalar Z,scalar W)
+		data_storage(scalar X, scalar Y, scalar Z,scalar W)
 			:x(X), y(Y), z(Z),w(W)
 		{}
 

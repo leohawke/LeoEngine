@@ -2,7 +2,7 @@
 
 namespace leo
 {
-	void SwapEndian(const type_info& info, std::size_t check, void * data, std::size_t nCount, bool bWriting)
+	void SwapEndian(const std::type_info& info, std::size_t check, void * data, std::size_t nCount, bool bWriting)
 	{
 		switch (check)
 		{

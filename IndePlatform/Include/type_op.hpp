@@ -5,6 +5,8 @@
 
 namespace leo
 {
+	using stdex::nullptr_t;
+
 	using std::integral_constant;
 	using std::true_type;
 	using std::false_type;

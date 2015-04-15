@@ -606,7 +606,7 @@ namespace stdex
 	}
 
 	//Œﬁ–Ú«Û÷µ
-#define lunseq leo::stdex::unsequenced
+#define lunseq stdex::unsequenced
 
 }
 

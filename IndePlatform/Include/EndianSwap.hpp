@@ -20,7 +20,8 @@
 //大端平台,读取时间增加
 
 #include "leoint.hpp"
-
+#include "platform_macro.h"
+#include <cstring> //std::memcpy
 namespace leo
 {
 	enum class endian : bool
@@ -39,7 +40,7 @@ namespace leo
 	}
 
 
-	void SwapEndian(const type_info& info, std::size_t check, void * data, std::size_t nCount = 1, bool bWriting = false);
+	void SwapEndian(const std::type_info& info, std::size_t check, void * data, std::size_t nCount = 1, bool bWriting = false);
 
 	template<typename T>
 	inline void SwapEndianBase(T* t, std::size_t nCount = 1, bool bWriting = false)
@@ -110,6 +111,9 @@ namespace leo
 	{
 		SwapEndianBase((uint64*)p, nCount);
 	}
+
+#ifndef PLATFORM_64BIT
+
 	template<>
 	//warning: sizeof(double) == sizeof(uint64) == 8
 	inline void SwapEndianBase(double* p, std::size_t nCount, bool bWriting)
@@ -117,7 +121,7 @@ namespace leo
 		static_assert(sizeof(double) == 8, "UnSuppoted Platform(sizeof(double) != 8)");
 		SwapEndianBase((uint64*)p, nCount);
 	}
-#if 0
+
 	template<>
 	//warning: sizeof(long long) == sizeof(uint64) == 8
 	inline void SwapEndianBase(long long* p, std::size_t nCount, bool bWriting)
@@ -125,7 +129,7 @@ namespace leo
 		static_assert(sizeof(long long) == 8, "UnSuppoted Platform(sizeof(long long) != 8)");
 		SwapEndianBase((uint64*)p, nCount);
 	}
-#endif
+
 	template<>
 	//warning: sizeof(long double) == sizeof(uint64) == 8
 	inline void SwapEndianBase(long double* p, std::size_t nCount, bool bWriting)
@@ -133,6 +137,7 @@ namespace leo
 		static_assert(sizeof(long double) == 8, "UnSuppoted Platform(sizeof(long double) != 8)");
 		SwapEndianBase((uint64*)p, nCount);
 	}
+#endif
 
 	template<class T>
 	inline void SwapEndian(T* t, std::size_t nCount, endian bSwapEndian = GetPlatformEndian())
