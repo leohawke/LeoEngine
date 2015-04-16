@@ -93,6 +93,7 @@
     <ClInclude Include="Include\ConstexprMath.hpp" />
     <ClInclude Include="Include\container.hpp" />
     <ClInclude Include="Include\EndianSwap.hpp" />
+    <ClInclude Include="Include\experimental\string_view.hpp" />
     <ClInclude Include="Include\functional.hpp" />
     <ClInclude Include="Include\Geometry.hpp" />
     <ClInclude Include="Include\Geometry_impl.hpp" />
@@ -120,7 +121,15 @@
     <ClInclude Include="Include\variadic.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="g++compiler.bat" />
+    <CustomBuild Include="g++compiler.bat">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">compiler.log</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Include\experimental\string_view.tcc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

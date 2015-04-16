@@ -16,6 +16,9 @@
     <Filter Include="Source Files\WinSource">
       <UniqueIdentifier>{e62dccee-921b-4cd1-83a7-0580dabd0de3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\experimental">
+      <UniqueIdentifier>{a4a8dd00-a36f-43da-a293-016760b93956}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\any.cpp">
@@ -149,8 +152,16 @@
     <ClInclude Include="Include\leomath.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\experimental\string_view.hpp">
+      <Filter>Header Files\experimental</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="g++compiler.bat" />
+    <CustomBuild Include="g++compiler.bat" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Include\experimental\string_view.tcc">
+      <Filter>Header Files\experimental</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -122,13 +122,6 @@ namespace leo
 		SwapEndianBase((uint64*)p, nCount);
 	}
 
-	template<>
-	//warning: sizeof(long long) == sizeof(uint64) == 8
-	inline void SwapEndianBase(long long* p, std::size_t nCount, bool bWriting)
-	{
-		static_assert(sizeof(long long) == 8, "UnSuppoted Platform(sizeof(long long) != 8)");
-		SwapEndianBase((uint64*)p, nCount);
-	}
 
 	template<>
 	//warning: sizeof(long double) == sizeof(uint64) == 8
