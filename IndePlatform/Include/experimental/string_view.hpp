@@ -1,72 +1,29 @@
-// Components for manipulating non-owning sequences of characters -*- C++ -*-
-
-// Copyright (C) 2013-2014 Free Software Foundation, Inc.
+//fiile experimental/string_view
+//This is a Standard C++ Library header.
 //
-// This file is part of the GNU ISO C++ Library.  This library is free
-// software; you can redistribute it and/or modify it under the
-// terms of the GNU General Public License as published by the
-// Free Software Foundation; either version 3, or (at your option)
-// any later version.
-
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-
-// Under Section 7 of GPL version 3, you are granted additional
-// permissions described in the GCC Runtime Library Exception, version
-// 3.1, as published by the Free Software Foundation.
-
-// You should have received a copy of the GNU General Public License and
-// a copy of the GCC Runtime Library Exception along with this program;
-// see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
-// <http://www.gnu.org/licenses/>.
-
-/** @file experimental/string_view
-*  This is a Standard C++ Library header.
-*/
 
 //
 // N3762 basic_string_view library
 //
 
-#ifndef _GLIBCXX_EXPERIMENTAL_STRING_VIEW
-#define _GLIBCXX_EXPERIMENTAL_STRING_VIEW 1
+#ifndef  IndePlatform_string_view_hpp
+#define IndePlatform_string_view_hpp
 
-#pragma GCC system_header
-
-#if __cplusplus <= 201103L
-# include <bits/c++14_warning.h>
-#else
-
+#include "..\ldef.h"
 #include <string>
 #include <limits>
+#include <stdexcept>
+#if defined(LB_IMPL_MSCPP)
+#include <xutility>
+#endif
 
-namespace std _GLIBCXX_VISIBILITY(default)
+namespace std
 {
 	namespace experimental
 	{
-		_GLIBCXX_BEGIN_NAMESPACE_VERSION
+		//http://en.cppreference.com/w/cpp/experimental/basic_string_view
 
-			/**
-			*  @class basic_string_view <string_view>
-			*  @brief  A non-owning reference to a string.
-			*
-			*  @ingroup strings
-			*  @ingroup sequences
-			*
-			*  @tparam _CharT  Type of character
-			*  @tparam _Traits  Traits for character type, defaults to
-			*                   char_traits<_CharT>.
-			*
-			*  A basic_string_view looks like this:
-			*
-			*  @code
-			*    _CharT*    _M_str
-			*    size_t     _M_len
-			*  @endcode
-			*/
-			template<typename _CharT, typename _Traits = std::char_traits<_CharT>>
+		template<typename _CharT, typename _Traits = std::char_traits<_CharT>>
 		class basic_string_view
 		{
 		public:
@@ -204,6 +161,11 @@ namespace std _GLIBCXX_VISIBILITY(default)
 			constexpr const _CharT&
 				at(size_type __pos) const
 			{
+#if defined(LB_IMPL_MSCPP)
+				return __pos < this->_M_len
+					? *(this->_M_str + __pos)
+					: (_Xout_of_range("invalid string position"), *this->_M_str);
+#elif defined(LB_IMPL_GNUCPP)
 				return __pos < this->_M_len
 					? *(this->_M_str + __pos)
 					: (__throw_out_of_range_fmt(__N("basic_string_view::at: __pos "
@@ -211,21 +173,24 @@ namespace std _GLIBCXX_VISIBILITY(default)
 					"(which is %zu)"),
 					__pos, this->size()),
 					*this->_M_str);
+#else
+				return __pos < this->_M_len
+					? *(this->_M_str + __pos)
+					: (throw out_of_range("invalid string position"), *this->_M_str);
+#endif
 			}
 
 			constexpr const _CharT&
 				front() const
 			{
-				// TODO: Assert to restore in a way compatible with the constexpr.
-				// _GLIBCXX_DEBUG_ASSERT(this->_M_len > 0);
+
 				return *this->_M_str;
 			}
 
 			constexpr const _CharT&
 				back() const
 			{
-				// TODO: Assert to restore in a way compatible with the constexpr.
-				// _GLIBCXX_DEBUG_ASSERT(this->_M_len > 0);
+
 				return *(this->_M_str + this->_M_len - 1);
 			}
 
@@ -247,7 +212,6 @@ namespace std _GLIBCXX_VISIBILITY(default)
 			void
 				remove_prefix(size_type __n)
 			{
-				_GLIBCXX_DEBUG_ASSERT(this->_M_len >= __n);
 				this->_M_str += __n;
 				this->_M_len -= __n;
 			}
@@ -286,10 +250,17 @@ namespace std _GLIBCXX_VISIBILITY(default)
 			{
 				__glibcxx_requires_string_len(__str, __n);
 				if (__pos > this->_M_len)
+#if defined(LB_IMPL_MSCPP)
+					_Xout_of_range("invalid string position");
+#elif defined(LB_IMPL_GNUCPP)
 					__throw_out_of_range_fmt(__N("basic_string_view::copy: __pos "
 					"(which is %zu) > this->size() "
 					"(which is %zu)"),
 					__pos, this->size());
+#else
+					throw out_of_range("invalid string position");
+#endif
+
 				size_type __rlen{ std::min(__n, size_type{ this->_M_len - __pos }) };
 				for (auto __begin = this->_M_str + __pos,
 					__end = __begin + __rlen; __begin != __end;)
@@ -306,10 +277,16 @@ namespace std _GLIBCXX_VISIBILITY(default)
 				return __pos <= this->_M_len
 					? basic_string_view{ this->_M_str + __pos,
 					std::min(__n, size_type{ this->_M_len - __pos }) }
+#if defined(LB_IMPL_MSCPP)
+				: (_Xout_of_range("invalid string position"), basic_string_view{});
+#elif defined(LB_IMPL_GNUCPP)
 					: (__throw_out_of_range_fmt(__N("basic_string_view::substr: __pos "
 					"(which is %zu) > this->size() "
 					"(which is %zu)"),
 					__pos, this->size()), basic_string_view{});
+#else
+				:(throw out_of_range("invalid string position"), basic_string_view{});
+#endif
 			}
 
 			int
@@ -478,15 +455,19 @@ namespace std _GLIBCXX_VISIBILITY(default)
 			}
 
 		private:
-
+			//workaround : std::numeric_limits<int> in mscpp doesn't return constexpr
+#if defined(LB_IMPL_MSCPP)
+			static const int
+#elif 
 			static constexpr const int
+#endif
 				_S_compare(size_type __n1, size_type __n2) noexcept
 			{
-				return difference_type{ __n1 - __n2 } > std::numeric_limits<int>::max()
+				return difference_type{ static_cast<difference_type>(__n1 - __n2) } > std::numeric_limits<int>::max()
 					? std::numeric_limits<int>::max()
-					: difference_type{ __n1 - __n2 } < std::numeric_limits<int>::min()
+					: difference_type{ static_cast<difference_type>(__n1 - __n2) } < std::numeric_limits<int>::min()
 					? std::numeric_limits<int>::min()
-					: static_cast<int>(difference_type{ __n1 - __n2 });
+					: static_cast<int>(difference_type{ static_cast<difference_type>(__n1 - __n2) });
 			}
 
 			size_t	    _M_len;
@@ -670,22 +651,22 @@ namespace std _GLIBCXX_VISIBILITY(default)
 		// basic_string_view typedef names
 
 		using string_view = basic_string_view<char>;
-#ifdef _GLIBCXX_USE_WCHAR_T
+
 		using wstring_view = basic_string_view<wchar_t>;
-#endif
-#ifdef _GLIBCXX_USE_C99_STDINT_TR1
+
+
 		using u16string_view = basic_string_view<char16_t>;
 		using u32string_view = basic_string_view<char32_t>;
-#endif
 
-		_GLIBCXX_END_NAMESPACE_VERSION
+
 	} // namespace experimental
 
 
 	  // [string.view.hash], hash support:
 
-	_GLIBCXX_BEGIN_NAMESPACE_VERSION
-		template<typename _Tp>
+
+#if defined(LB_IMPL_GNUCPP)
+	template<typename _Tp>
 	struct hash;
 
 	template<>
@@ -703,7 +684,7 @@ namespace std _GLIBCXX_VISIBILITY(default)
 	struct __is_fast_hash<hash<experimental::string_view>> : std::false_type
 	{};
 
-#ifdef _GLIBCXX_USE_WCHAR_T
+
 	template<>
 	struct hash<experimental::wstring_view>
 		: public __hash_base<size_t, wstring>
@@ -719,9 +700,9 @@ namespace std _GLIBCXX_VISIBILITY(default)
 	template<>
 	struct __is_fast_hash<hash<experimental::wstring_view>> : std::false_type
 	{};
-#endif
 
-#ifdef _GLIBCXX_USE_C99_STDINT_TR1
+
+
 	template<>
 	struct hash<experimental::u16string_view>
 		: public __hash_base<size_t, experimental::u16string_view>
@@ -753,56 +734,67 @@ namespace std _GLIBCXX_VISIBILITY(default)
 	template<>
 	struct __is_fast_hash<hash<experimental::u32string_view>> : std::false_type
 	{};
+#elif defined(LB_IMPL_MSCPP)
+	// TEMPLATE STRUCT SPECIALIZATION hash
+	template<class _Elem,
+	class _Traits>
+	struct hash<experimental::basic_string_view<_Elem, _Traits> >
+	{	// hash functor for basic_string_view
+		typedef experimental::basic_string_view<_Elem, _Traits> argument_type;
+		typedef size_t result_type;
+
+		size_t operator()(const argument_type& _Keyval) const
+		{	// hash _Keyval to size_t value by pseudorandomizing transform
+			return (_Hash_seq((const unsigned char *)_Keyval.c_str(),
+				_Keyval.size() * sizeof(_Elem)));
+		}
+	};
 #endif
-	_GLIBCXX_END_NAMESPACE_VERSION
+
 
 	namespace experimental
 	{
-		_GLIBCXX_BEGIN_NAMESPACE_VERSION
-
-			// I added these EMSR.
-			inline namespace literals
+		inline namespace literals
 		{
 			inline namespace string_view_literals
 			{
 
-				inline basic_string_view<char>
-					operator""sv(const char* __str, size_t __len)
-				{
-					return basic_string_view<char>{__str, __len};
-				}
-
-#ifdef _GLIBCXX_USE_WCHAR_T
-				inline basic_string_view<wchar_t>
-					operator""sv(const wchar_t* __str, size_t __len)
-				{
-					return basic_string_view<wchar_t>{__str, __len};
-				}
+				//Literal suffix identifiers that do not start with an underscore 
+				//are reserved for future standardization
+#if defined(LB_IMPL_MSCPP)
+#pragma warning(push,1)
+#pragma warning(disable: 4455)
 #endif
-
-#ifdef _GLIBCXX_USE_C99_STDINT_TR1
-				inline basic_string_view<char16_t>
-					operator""sv(const char16_t* __str, size_t __len)
+				inline basic_string_view<char> operator""sv(const char* str, size_t _len)
 				{
-					return basic_string_view<char16_t>{__str, __len};
+					return basic_string_view<char>{str, _len};
 				}
 
-				inline basic_string_view<char32_t>
-					operator""sv(const char32_t* __str, size_t __len)
+
+				inline basic_string_view<wchar_t> operator""sv(const wchar_t* str, size_t _len)
 				{
-					return basic_string_view<char32_t>{__str, __len};
+					return basic_string_view<wchar_t>{str, _len};
 				}
+
+
+
+				inline basic_string_view<char16_t> operator""sv(const char16_t* str, size_t _len)
+				{
+					return basic_string_view<char16_t>{str, _len};
+				}
+
+				inline basic_string_view<char32_t> operator""sv(const char32_t* str, size_t _len)
+				{
+					return basic_string_view<char32_t>{str, _len};
+				}
+#if defined(LB_IMPL_MSCPP)
+#pragma warning(pop)
 #endif
-
 			}
 		}
-
-		_GLIBCXX_END_NAMESPACE_VERSION
 	} // namespace experimental
 } // namespace std
 
-#include <experimental/string_view.tcc>
+#include <experimental/string_view.hcc>
 
-#endif // __cplusplus <= 201103L
-
-#endif // _GLIBCXX_EXPERIMENTAL_STRING_VIEW
+#endif

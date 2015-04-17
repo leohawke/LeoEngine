@@ -1,4 +1,7 @@
 ﻿(config
+	(test
+		(IMG false)
+	)
 	(window (width 1280)
 			(height 768)
 			(window? false)

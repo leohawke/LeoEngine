@@ -12,7 +12,7 @@
 #include <fstream>
 
 using namespace leo;
-
+using namespace std::experimental::string_view_literals;
 	static leo::scheme::sexp::sexp_list read_config_sexp = nullptr;
 
 	static scheme::sexp::sexp_list pack_effect(const std::wstring& shader);
@@ -20,21 +20,21 @@ using namespace leo;
 	void EngineConfig::Read(const std::wstring& configScheme) {
 		read_config_sexp = leo::parse_file(configScheme);
 
-		auto window_sexp = leo::scheme::sexp::ops::find_sexp("window", read_config_sexp);
+		auto window_sexp = leo::scheme::sexp::ops::find_sexp("window"sv, read_config_sexp);
 
-		auto width = static_cast<leo::uint16>(leo::expack_long(window_sexp, S("width")));
-		auto height = static_cast<leo::uint16>(leo::expack_long(window_sexp, S("height")));
+		auto width = static_cast<leo::uint16>(leo::expack_long(window_sexp,"width"sv));
+		auto height = static_cast<leo::uint16>(leo::expack_long(window_sexp,"height"sv));
 
 		global::globalClientSize.first = width;
 		global::globalClientSize.second = height;
 
-		auto dirs_sexp = leo::scheme::sexp::ops::find_sexp("search-dirs", read_config_sexp);
+		auto dirs_sexp = leo::scheme::sexp::ops::find_sexp("search-dirs"sv, read_config_sexp);
 		auto dirs_num = leo::scheme::sexp::ops::sexp_list_length(dirs_sexp)-1;
 
 		auto dirs_iter = dirs_sexp->mNext;
 		while (dirs_iter)
 		{
-			auto dir_sexp = leo::scheme::sexp::ops::find_sexp("dir", dirs_iter);
+			auto dir_sexp = leo::scheme::sexp::ops::find_sexp("dir"sv, dirs_iter);
 			FileSearch::PushSearchDir(to_wstring(dir_sexp->mNext->mValue.cast_atom<scheme::sexp::sexp_string>()));
 			dirs_iter = dirs_iter->mNext;
 		}
@@ -108,7 +108,7 @@ using namespace leo;
 
 	static void expack_effect(scheme::sexp::sexp_list effect_sexp) {
 		using namespace scheme;
-		auto name_sexp = sexp::ops::find_sexp("name", effect_sexp);
+		auto name_sexp = sexp::ops::find_sexp("name"sv, effect_sexp);
 		mShaderNames.push_back(
 				to_wstring(
 				name_sexp->mNext->mValue.cast_atom<sexp::sexp_string>()
@@ -116,7 +116,7 @@ using namespace leo;
 			);
 		auto index = mShaderFileNames.size();
 		mShaderFileNames.push_back(ShaderFileName());
-		auto shader_sexp = sexp::ops::find_sexp("shader", effect_sexp);
+		auto shader_sexp = sexp::ops::find_sexp("shader"sv, effect_sexp);
 		auto shader_iter = shader_sexp->mNext;
 		while (shader_iter)
 		{
@@ -217,14 +217,14 @@ using namespace leo;
 		static bool init = false;
 		if (!init) {
 
-			auto effects_sexp = sexp::ops::find_sexp("effects", read_config_sexp);
+			auto effects_sexp = sexp::ops::find_sexp("effects"sv, read_config_sexp);
 			if (effects_sexp) {
 				auto effects_num = sexp::ops::sexp_list_length(effects_sexp) - 1;
 
 				auto effects_iter = effects_sexp->mNext;
 				while (effects_iter)
 				{
-					auto effect_sexp = sexp::ops::find_sexp("effect", effects_iter);
+					auto effect_sexp = sexp::ops::find_sexp("effect"sv, effects_iter);
 					expack_effect(effect_sexp);
 
 					effects_iter = effects_iter->mNext;
@@ -285,5 +285,54 @@ using namespace leo;
 	const D3D11_SAMPLER_DESC& EngineConfig::ShaderConfig::GetSampleState(const std::wstring& samName) {
 		ShaderConfigInit();
 		return find_helper(mSamplDescs, mSamplNames, samName);
+	}
+
+	scheme::sexp::sexp_list ParsePath(const std::string& path){
+		using namespace leo::scheme::sexp;
+
+		auto iter_index = path.find_first_of('/');
+		auto iter_end = path.find_last_of('/');
+		sexp_list iter_sexp = read_config_sexp;
+		for (; iter_index != iter_end;) {
+			auto iter_next = path.find_first_of('/', iter_index + 1);
+			auto dir = to_string(path.substr(iter_index + 1, iter_next - iter_index - 1));
+			iter_index = iter_next;
+			iter_sexp = ops::find_sexp(dir, iter_sexp);
+		}
+
+		auto property_name = path.substr(iter_index + 1, path.size() - 1 - iter_index);
+		iter_sexp = ops::find_sexp(property_name, iter_sexp);
+
+		if (!iter_sexp)
+			throw logged_event(property_name+": this property doesn't exist(path="+path+")", record_level::Warning);
+		return iter_sexp;
+	}
+
+	void EngineConfig::Save(const std::string& path, bool value) {
+	}
+	void EngineConfig::Save(const std::string& path, char value) {
+	}
+	void EngineConfig::Save(const std::string& path, std::int64_t value) {
+	}
+	void EngineConfig::Save(const std::string& path, std::double_t value) {
+	}
+	void EngineConfig::Save(const std::string& path, const std::string& value) {
+	}
+
+	void EngineConfig::Read(const std::string& path, bool& value){
+		try {
+			auto property_sexp = ParsePath(path);
+			value = expack_bool(property_sexp);
+		}
+		catch (...)
+		{}
+	}
+	void EngineConfig::Read(const std::string& path, char& value) {
+	}
+	void EngineConfig::Read(const std::string& path, std::int64_t & value) {
+	}
+	void EngineConfig::Read(const std::string& path, std::double_t& value) {
+	}
+	void EngineConfig::Read(const std::string& path, std::string& value) {
 	}
 

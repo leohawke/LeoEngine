@@ -155,13 +155,11 @@
     <ClInclude Include="Include\experimental\string_view.hpp">
       <Filter>Header Files\experimental</Filter>
     </ClInclude>
+    <ClInclude Include="Include\experimental\string_view.hcc">
+      <Filter>Header Files\experimental</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="g++compiler.bat" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Include\experimental\string_view.tcc">
-      <Filter>Header Files\experimental</Filter>
-    </None>
   </ItemGroup>
 </Project>

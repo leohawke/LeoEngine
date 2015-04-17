@@ -227,6 +227,7 @@
     <ClInclude Include="RenderSystem\Deferred.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Mgr.hpp" />
+    <ClInclude Include="scheme_helper.h" />
     <ClInclude Include="ShaderMgr.h" />
     <ClInclude Include="TextureMgr.h" />
     <ClInclude Include="timer.hpp" />

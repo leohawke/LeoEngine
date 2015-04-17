@@ -129,7 +129,10 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Include\experimental\string_view.tcc" />
+    <ClInclude Include="Include\experimental\string_view.hcc">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

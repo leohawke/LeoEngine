@@ -193,7 +193,7 @@ namespace leo
 					return copysexp;
 				}
 
-				sexp_list find_sexp(const sexp_char * word, const sexp_list & s)
+				sexp_list find_sexp(const std::experimental::basic_string_view<char>& word, const sexp_list & s)
 				{
 					if (!s)
 						return nullptr;
@@ -210,7 +210,7 @@ namespace leo
 					return nullptr;
 				}
 
-				sexp_list bfs_find_sexp(const sexp_char * word, const sexp_list & s)
+				sexp_list bfs_find_sexp(const std::experimental::basic_string_view<char>& word, const sexp_list & s)
 				{
 					if (!s)
 						return nullptr;
@@ -422,9 +422,9 @@ namespace leo
 				{
 					dst->mValue =sexp_value(word[1]);
 				}
-				else if (word[0] == '#')
+				else if (word[0] == '#' || word == "true" || word=="false")
 				{
-					if (word[1] == 't' || word[1] == 'T')
+					if (word == "true" || word[1] == 't' || word[1] == 'T')
 						dst->mValue =sexp_value(true);
 					else
 						dst->mValue =sexp_value(false);

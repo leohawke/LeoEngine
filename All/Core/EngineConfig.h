@@ -49,6 +49,20 @@ namespace leo{
 			static const D3D11_BLEND_DESC& GetBlendState(const std::wstring&);
 			static const D3D11_SAMPLER_DESC& GetSampleState(const std::wstring&);
 		};
+
+
+		static void Save(const std::string& path, bool value);
+		static void Save(const std::string& path, char value);
+		static void Save(const std::string& path, std::int64_t value);
+		static void Save(const std::string& path, std::double_t value);
+		static void Save(const std::string& path, const std::string& value);
+
+		static void Read(const std::string& path, bool& value);
+		static void Read(const std::string& path, char& value);
+		static void Read(const std::string& path, std::int64_t & value);
+		static void Read(const std::string& path, std::double_t& value);
+		static void Read(const std::string& path, std::string& value);
+
 	};
 }
 

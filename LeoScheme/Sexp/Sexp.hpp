@@ -20,6 +20,7 @@
 #include <any.h>
 #include <memory.hpp>
 #include <string>
+#include <experimental\string_view.hpp>
 #include <queue>
 
 namespace leo
@@ -251,18 +252,18 @@ namespace leo
 			{
 				sexp_list make_copy(const const_sexp_list & s);
 
-				sexp_list find_sexp(const sexp_char * word, const sexp_list & s);
 
-				inline sexp_list find_sexp(const sexp_string& word, const sexp_list & s)
-				{
-					return find_sexp(word.c_str(), s);
+				sexp_list find_sexp(const std::experimental::basic_string_view<sexp_char> & word, const sexp_list & s);
+
+				inline sexp_list find_sexp(const sexp_string& word, const sexp_list & s) {
+					return find_sexp(std::experimental::basic_string_view<sexp_char>(word), s);
 				}
 
-				sexp_list bfs_find_sexp(const sexp_char * word, const sexp_list & s);
+				sexp_list bfs_find_sexp(const std::experimental::basic_string_view<sexp_char> & word, const sexp_list & s);
 
 				inline sexp_list bfs_find_sexp(const sexp_string& word, const sexp_list & s)
 				{
-					return bfs_find_sexp(word.c_str(), s);
+					return bfs_find_sexp(std::experimental::basic_string_view<sexp_char>(word), s);
 				}
 
 				std::size_t sexp_list_length(const const_sexp_list & s);

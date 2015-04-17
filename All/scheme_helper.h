@@ -11,6 +11,10 @@
 namespace leo
 {
 
+	bool expack_bool(std::shared_ptr<scheme::sexp::sexp> sexp) {
+		return sexp->mNext->mValue.cast_atom<scheme::sexp::sexp_bool>();
+	}
+
 	template<typename string_type>
 	float3 expack_float3(std::shared_ptr<scheme::sexp::sexp> sexp, const string_type& name)
 	{
@@ -66,10 +70,11 @@ namespace leo
 
 	SQT expack_SQT(std::shared_ptr<scheme::sexp::sexp> sexp)
 	{
+		using namespace std::experimental::string_view_literals;
 		SQT temp;
-		temp.s = expack_float(sexp,S("s"));
-		temp.t = expack_float3(sexp, S("t"));
-		temp.q = expack_float3(sexp,S("q"));
+		temp.s = expack_float(sexp,"s"sv);
+		temp.t = expack_float3(sexp, "t"sv);
+		temp.q = expack_float3(sexp,"q"sv);
 
 		return SQT(temp);
 	}

@@ -140,6 +140,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 	leo::EngineConfig::Read();
 	
+	bool value = true;
+	leo::EngineConfig::Read("/config/test/IMG", value);
 	leo::EngineConfig::ShaderConfig::GetAllBlendStateName();
 	leo::DeviceMgr DeviceMgr;
 	leo::OutputWindow win;

@@ -368,6 +368,9 @@
     <ClInclude Include="Core\EffectGBuffer.hpp">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="scheme_helper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">
