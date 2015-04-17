@@ -77,8 +77,8 @@ using namespace std::experimental::string_view_literals;
 		//config_sexp->mNext->mNext->mNext = effects_sexp;
 		config_sexp->mNext->mNext->mNext = sexp::make_sexp(std::shared_ptr<sexp::sexp>(effects_sexp));
 
-		auto config_string = scheme::sexp::ops::print_sexp(config_sexp);
-
+		//auto config_string = scheme::sexp::ops::print_sexp(config_sexp);
+		auto config_string = scheme::sexp::ops::print_sexp(write_config_sexp);
 		std::ofstream fout(configScheme);
 		const unsigned char BOM[] = { 0xEFu, 0XBBu,0xBFu };
 		fout.write((char*)BOM, 3);
@@ -296,7 +296,7 @@ using namespace std::experimental::string_view_literals;
 
 		auto iter_index = path.find_first_of('/');
 		auto iter_end = path.find_last_of('/');
-		sexp_list iter_sexp = read_config_sexp;
+		sexp_list iter_sexp = write_config_sexp;
 		sexp_list prev_sexp = iter_sexp;
 		auto prev_index = iter_index;
 		for (; iter_index != iter_end;) {
@@ -386,36 +386,21 @@ using namespace std::experimental::string_view_literals;
 			throw logged_event(property_name + ": this property doesn't exist(path=" + path + ")", record_level::Warning);
 		return iter_sexp;
 	}
-	void CheckType(scheme::sexp::sexp_list property, const bool&) {
+
+	template<typename T>
+	void CheckType(scheme::sexp::sexp_list property, const T&) {
 #if defined(DEBUG)
-		if (!property->mNext->mValue.can_cast<scheme::sexp::sexp_bool>())
-			throw logged_event(car_to_string(property) + ": this property isn't bool", record_level::Warning);
+		if (!property->mNext->mValue.can_cast<T>())
+			throw logged_event(car_to_string(property) + ": this property isn't "+typeid(T).name(), record_level::Warning);
 #endif
 	}
 
-	void CheckType(scheme::sexp::sexp_list property, const char&) {
-#if defined(DEBUG)
-		if (!property->mNext->mValue.can_cast<scheme::sexp::sexp_char>())
-			throw logged_event(car_to_string(property) + ": this property isn't char", record_level::Warning);
-#endif
-	}
-	void EngineConfig::Read(const std::string& path, bool& value){
+	template<typename T>
+	void read_sexp_type(const std::string& path, T& value) {
 		try {
 			auto property_sexp = ParsePath(path);
 			CheckType(property_sexp, value);
-			value = expack_bool(property_sexp);
-		}
-		catch (logged_event & e)
-		{
-			auto str = format_logged_event(e);
-			DebugPrintf("%s",str.c_str());
-		}
-	}
-	void EngineConfig::Read(const std::string& path, char& value) {
-		try {
-			auto property_sexp = ParsePath(path);
-			CheckType(property_sexp, value);
-			value = expack_char(property_sexp);
+			value = expack<T>(property_sexp);
 		}
 		catch (logged_event & e)
 		{
@@ -423,10 +408,20 @@ using namespace std::experimental::string_view_literals;
 			DebugPrintf("%s", str.c_str());
 		}
 	}
+
+	void EngineConfig::Read(const std::string& path, bool& value){
+		read_sexp_type(path, value);
+	}
+	void EngineConfig::Read(const std::string& path, char& value) {
+		read_sexp_type(path, value);
+	}
 	void EngineConfig::Read(const std::string& path, std::int64_t & value) {
+		read_sexp_type(path, value);
 	}
 	void EngineConfig::Read(const std::string& path, std::double_t& value) {
+		read_sexp_type(path, value);
 	}
 	void EngineConfig::Read(const std::string& path, std::string& value) {
+		read_sexp_type(path, value);
 	}
 

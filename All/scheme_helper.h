@@ -11,12 +11,10 @@
 namespace leo
 {
 
-	bool expack_bool(std::shared_ptr<scheme::sexp::sexp> sexp) {
-		return sexp->mNext->mValue.cast_atom<scheme::sexp::sexp_bool>();
-	}
 
-	char expack_char(std::shared_ptr<scheme::sexp::sexp> sexp) {
-		return sexp->mNext->mValue.cast_atom<scheme::sexp::sexp_char>();
+	template<typename T>
+	T expack(std::shared_ptr<scheme::sexp::sexp> sexp) {
+		return sexp->mNext->mValue.cast_atom<T>();
 	}
 
 	template<typename string_type>

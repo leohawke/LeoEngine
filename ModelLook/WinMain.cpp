@@ -143,8 +143,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	bool value = true;
 	leo::EngineConfig::Read("/config/test/IMG", value);
 	leo::EngineConfig::Save("/config/aa/bb",value);
-	leo::EngineConfig::Save("/config/test/xx", value);
+	leo::EngineConfig::Save("/config/test/xx/bb", value);
 	leo::EngineConfig::ShaderConfig::GetAllBlendStateName();
+	leo::EngineConfig::Write(L"test.scheme");
+
 	leo::DeviceMgr DeviceMgr;
 	leo::OutputWindow win;
 
@@ -308,7 +310,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 #endif
 	leo::SingletonManger::GetInstance()->UnInstallAllSingleton();
 
-	leo::EngineConfig::Write();
 
 	
 	return 0;
