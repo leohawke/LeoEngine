@@ -1,6 +1,6 @@
 ﻿(config
 	(test
-		(IMG false)
+		(IMG fal)
 	)
 	(window (width 1280)
 			(height 768)

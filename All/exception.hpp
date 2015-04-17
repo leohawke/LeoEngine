@@ -33,8 +33,11 @@ namespace leo
 	public:
 		logged_event(const std::string&, level_type);
 		logged_event(const general_event&, level_type);
+
+		friend std::string format_logged_event(const logged_event& e);
 	};
 	
+
 	namespace win
 	{
 		class host_exception : public logged_event

@@ -14,6 +14,7 @@
 using namespace leo;
 using namespace std::experimental::string_view_literals;
 	static leo::scheme::sexp::sexp_list read_config_sexp = nullptr;
+	static leo::scheme::sexp::sexp_list write_config_sexp = nullptr;
 
 	static scheme::sexp::sexp_list pack_effect(const std::wstring& shader);
 
@@ -38,6 +39,8 @@ using namespace std::experimental::string_view_literals;
 			FileSearch::PushSearchDir(to_wstring(dir_sexp->mNext->mValue.cast_atom<scheme::sexp::sexp_string>()));
 			dirs_iter = dirs_iter->mNext;
 		}
+
+		write_config_sexp = scheme::sexp::ops::make_copy(read_config_sexp);
 	}
 	void EngineConfig::Write(const std::wstring& configScheme) {
 		using namespace scheme;
@@ -287,7 +290,83 @@ using namespace std::experimental::string_view_literals;
 		return find_helper(mSamplDescs, mSamplNames, samName);
 	}
 
-	scheme::sexp::sexp_list ParsePath(const std::string& path){
+
+	scheme::sexp::sexp_list ParsePath(const std::string& path, std::string& subpath) {
+		using namespace leo::scheme::sexp;
+
+		auto iter_index = path.find_first_of('/');
+		auto iter_end = path.find_last_of('/');
+		sexp_list iter_sexp = read_config_sexp;
+		sexp_list prev_sexp = iter_sexp;
+		auto prev_index = iter_index;
+		for (; iter_index != iter_end;) {
+			prev_index = iter_index;
+			auto iter_next = path.find_first_of('/', iter_index + 1);
+			auto dir = to_string(path.substr(iter_index + 1, iter_next - iter_index - 1));
+			iter_index = iter_next;
+			prev_sexp = iter_sexp;
+			iter_sexp = ops::find_sexp(dir, iter_sexp);
+			if (!iter_sexp)
+				break;
+		}
+
+		if (!iter_sexp) {
+			subpath = path.substr(prev_index, path.size()  - prev_index);
+			return prev_sexp;
+		}
+
+		auto property_name = path.substr(iter_index + 1, path.size() - 1 - iter_index);
+
+		prev_sexp = iter_sexp;
+		iter_sexp = ops::find_sexp(property_name, iter_sexp);
+
+		if (!iter_sexp) {
+			subpath = path.substr(iter_index, path.size()  - iter_index);
+			return prev_sexp;
+		}
+
+		subpath = std::string();
+		return iter_sexp;
+	}
+
+	template<typename T>
+	scheme::sexp::sexp_list PathPack(const std::string& path, const T& value) {
+		auto iter_index = path.find_last_of('/');
+
+		auto str = path.substr(iter_index + 1, path.size() - 1 - iter_index);
+		auto path_sexp = pack_key_value(path.substr(iter_index + 1, path.size() - 1 - iter_index), value);
+
+		while (iter_index != 0) {
+			auto iter_next = path.find_last_of('/', iter_index - 1);
+			path_sexp = pack_key_value(path.substr(iter_next + 1, iter_index - 1 - iter_next), path_sexp);
+			str = path.substr(iter_next + 1, iter_index - 1 - iter_next);
+			iter_index = iter_next;
+		}
+		return path_sexp;
+	}
+
+	void EngineConfig::Save(const std::string& path, bool value) {
+		std::string subpath {};
+		auto parent_sexp = ParsePath(path, subpath);
+		auto path_sexp = PathPack(subpath, value);
+
+		while (parent_sexp->mNext) {
+			parent_sexp = parent_sexp->mNext;
+		}
+
+		parent_sexp->mNext =scheme::sexp::make_sexp(scheme::sexp::sexp_list(path_sexp));
+		//·´Ïòpack
+	}
+	void EngineConfig::Save(const std::string& path, char value) {
+	}
+	void EngineConfig::Save(const std::string& path, std::int64_t value) {
+	}
+	void EngineConfig::Save(const std::string& path, std::double_t value) {
+	}
+	void EngineConfig::Save(const std::string& path, const std::string& value) {
+	}
+
+	scheme::sexp::sexp_list ParsePath(const std::string& path) {
 		using namespace leo::scheme::sexp;
 
 		auto iter_index = path.find_first_of('/');
@@ -304,30 +383,45 @@ using namespace std::experimental::string_view_literals;
 		iter_sexp = ops::find_sexp(property_name, iter_sexp);
 
 		if (!iter_sexp)
-			throw logged_event(property_name+": this property doesn't exist(path="+path+")", record_level::Warning);
+			throw logged_event(property_name + ": this property doesn't exist(path=" + path + ")", record_level::Warning);
 		return iter_sexp;
 	}
-
-	void EngineConfig::Save(const std::string& path, bool value) {
-	}
-	void EngineConfig::Save(const std::string& path, char value) {
-	}
-	void EngineConfig::Save(const std::string& path, std::int64_t value) {
-	}
-	void EngineConfig::Save(const std::string& path, std::double_t value) {
-	}
-	void EngineConfig::Save(const std::string& path, const std::string& value) {
+	void CheckType(scheme::sexp::sexp_list property, const bool&) {
+#if defined(DEBUG)
+		if (!property->mNext->mValue.can_cast<scheme::sexp::sexp_bool>())
+			throw logged_event(car_to_string(property) + ": this property isn't bool", record_level::Warning);
+#endif
 	}
 
+	void CheckType(scheme::sexp::sexp_list property, const char&) {
+#if defined(DEBUG)
+		if (!property->mNext->mValue.can_cast<scheme::sexp::sexp_char>())
+			throw logged_event(car_to_string(property) + ": this property isn't char", record_level::Warning);
+#endif
+	}
 	void EngineConfig::Read(const std::string& path, bool& value){
 		try {
 			auto property_sexp = ParsePath(path);
+			CheckType(property_sexp, value);
 			value = expack_bool(property_sexp);
 		}
-		catch (...)
-		{}
+		catch (logged_event & e)
+		{
+			auto str = format_logged_event(e);
+			DebugPrintf("%s",str.c_str());
+		}
 	}
 	void EngineConfig::Read(const std::string& path, char& value) {
+		try {
+			auto property_sexp = ParsePath(path);
+			CheckType(property_sexp, value);
+			value = expack_char(property_sexp);
+		}
+		catch (logged_event & e)
+		{
+			auto str = format_logged_event(e);
+			DebugPrintf("%s", str.c_str());
+		}
 	}
 	void EngineConfig::Read(const std::string& path, std::int64_t & value) {
 	}

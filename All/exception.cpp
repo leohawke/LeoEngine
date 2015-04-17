@@ -88,4 +88,76 @@ namespace leo
 			Raise_Win32_Exception();
 		}
 	}
+
+	/*
+	Emergent = 0x00,
+	Alert = 0x20,
+	Critical = 0x40,
+	Err = 0x60,
+	Warning = 0x80,
+	Notice = 0xA0,
+	Informative = 0xC0,
+	Debug = 0xE0
+	*/
+
+	std::string format_logged_event(const logged_event& e) {
+		std::string str;
+		
+		str.reserve(24+strlen(e.what()));
+		switch (e.level) {
+		case record_level::Emergent:
+			str.append("Emergent !!! ");
+			break;
+		case record_level::Alert:
+			str.append("Alert @@@ ");
+			break;
+		case record_level::Critical:
+			str.append("Critical ### ");
+			break;
+		case record_level::Err:
+			str.append("Err $$$ ");
+			break;
+		case record_level::Warning:
+			str.append("Warning %%% ");
+			break;
+		case record_level::Notice:
+			str.append("Notice ^^^ ");
+			break;
+		case record_level::Informative:
+			str.append("Informative &&& ");
+			break;
+		case record_level::Debug:
+			str.append("Debug *** ");
+			break;
+		}
+		str += e.what();
+		switch (e.level) {
+		case record_level::Emergent:
+			str.append(" !!!");
+			break;
+		case record_level::Alert:
+			str.append(" @@@");
+			break;
+		case record_level::Critical:
+			str.append(" ###");
+			break;
+		case record_level::Err:
+			str.append(" $$$");
+			break;
+		case record_level::Warning:
+			str.append(" %%%");
+			break;
+		case record_level::Notice:
+			str.append(" ^^^");
+			break;
+		case record_level::Informative:
+			str.append(" &&&");
+			break;
+		case record_level::Debug:
+			str.append(" ***");
+			break;
+		}
+		
+		return str;
+	}
 }
