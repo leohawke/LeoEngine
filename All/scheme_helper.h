@@ -10,8 +10,6 @@
 #include "Core\CoreObject.hpp"
 namespace leo
 {
-
-
 	template<typename T>
 	T expack(std::shared_ptr<scheme::sexp::sexp> sexp) {
 		return sexp->mNext->mValue.cast_atom<T>();
@@ -160,5 +158,28 @@ namespace leo
 		}
 
 		return {};
+	}
+
+
+	template<typename sexp_typex,typename sexp_typey>
+	inline scheme::sexp::sexp_list cons(sexp_typex && car, sexp_typey&& cdr) {
+		auto pair = scheme::sexp::make_sexp(lforward(car));
+		pair->mNext = scheme::sexp::make_sexp(lforward(cdr));
+		return pair;
+	}
+
+	template<typename sexp_type>
+	inline scheme::sexp::sexp_list list(sexp_type && car){
+		auto pair = scheme::sexp::make_sexp(lforward(car));
+		return pair;
+	}
+
+	inline scheme::sexp::sexp_list list(){
+		return nullptr;
+	}
+
+	template<typename sexp_type,typename... sexp_types>
+	scheme::sexp::sexp_list list(sexp_type && head,sexp_types&&... tail) {
+		return cons(head, list(tail...));
 	}
 }

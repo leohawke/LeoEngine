@@ -345,8 +345,9 @@ using namespace std::experimental::string_view_literals;
 		return path_sexp;
 	}
 
-	void EngineConfig::Save(const std::string& path, bool value) {
-		std::string subpath {};
+	template<typename T>
+	void write_sexp_type(const std::string& path,const T& value) {
+		std::string subpath{};
 		auto parent_sexp = ParsePath(path, subpath);
 		auto path_sexp = PathPack(subpath, value);
 
@@ -354,16 +355,23 @@ using namespace std::experimental::string_view_literals;
 			parent_sexp = parent_sexp->mNext;
 		}
 
-		parent_sexp->mNext =scheme::sexp::make_sexp(scheme::sexp::sexp_list(path_sexp));
-		//·´Ïòpack
+		parent_sexp->mNext = scheme::sexp::make_sexp(scheme::sexp::sexp_list(path_sexp));
+	}
+
+	void EngineConfig::Save(const std::string& path, bool value) {
+		write_sexp_type(path, value);
 	}
 	void EngineConfig::Save(const std::string& path, char value) {
+		write_sexp_type(path, value);
 	}
 	void EngineConfig::Save(const std::string& path, std::int64_t value) {
+		write_sexp_type(path, value);
 	}
 	void EngineConfig::Save(const std::string& path, std::double_t value) {
+		write_sexp_type(path, value);
 	}
 	void EngineConfig::Save(const std::string& path, const std::string& value) {
+		write_sexp_type(path, value);
 	}
 
 	scheme::sexp::sexp_list ParsePath(const std::string& path) {
@@ -423,5 +431,139 @@ using namespace std::experimental::string_view_literals;
 	}
 	void EngineConfig::Read(const std::string& path, std::string& value) {
 		read_sexp_type(path, value);
+	}
+
+	void leo::EngineConfig::Save(const std::string & path, const std::vector<std::string>& value){
+		assert( value.size() > 0 );
+		if (value.size() == 1)
+			return Save(path, value[0]);
+		auto iter = value.rbegin();
+		auto iter_end = value.rend();
+		auto vector_sexp = pack_key_value(*(iter + 1), *iter);
+		++iter;
+		while (iter != iter_end) {
+			if (++iter != iter_end)
+				vector_sexp = pack_key_value(*iter, vector_sexp);
+		}
+		Save(path, vector_sexp);
+	}
+
+	void leo::EngineConfig::Read(const std::string & path, std::vector<std::string>& value){
+		try {
+			auto property_sexp = ParsePath(path);
+			while (property_sexp->mNext) {
+				CheckType(property_sexp, std::string());
+				value.push_back(expack<std::string>(property_sexp));
+				property_sexp = property_sexp->mNext;
+			}
+		}
+		catch (logged_event & e)
+		{
+			auto str = format_logged_event(e);
+			DebugPrintf("%s", str.c_str());
+		}
+	}
+
+	void leo::EngineConfig::Save(const std::string & path, const scheme::sexp::sexp_list & value){
+		write_sexp_type(path, value);
+	}
+
+	void leo::EngineConfig::Read(const std::string & path, scheme::sexp::sexp_list & value,bool copy){
+		auto val = value;
+		read_sexp_type(path, val);
+		if (copy)
+			value = scheme::sexp::ops::make_copy(val);
+		else
+			value = val;
+	}
+
+
+	template<size_t multi>
+	void read_multifloat_type(const std::string& path,data_storage<float,multi>& value) {
+		try {
+			auto property_sexp = ParsePath(path);
+			auto value_iter = value.begin();
+			auto end_iter = value.end();
+			while (property_sexp->mNext && (value_iter != end_iter)) {
+				CheckType(property_sexp,scheme::sexp::sexp_real());
+				*value_iter =float(expack<scheme::sexp::sexp_real>(property_sexp));
+				property_sexp = property_sexp->mNext;
+			}
+		}
+		catch (logged_event & e)
+		{
+			auto str = format_logged_event(e);
+			DebugPrintf("%s", str.c_str());
+		}
+	}
+
+	void leo::EngineConfig::Save(const std::string & path, const float2 & value){
+		auto float2_sexp = cons(value.x,value.y);
+		Save(path, float2_sexp);
+	}
+
+	void leo::EngineConfig::Read(const std::string & path, float2 & value){
+		read_multifloat_type(path, value);
+	}
+
+	void leo::EngineConfig::Save(const std::string & path, const float3 & value){
+		auto float3_sexp = list(value.x, value.y, value.z);
+		Save(path, float3_sexp);
+	}
+
+	void leo::EngineConfig::Read(const std::string & path, float3 & value){
+		read_multifloat_type(path, value);
+	}
+
+	void leo::EngineConfig::Save(const std::string & path, const float4 & value){
+		auto float4_sexp = list(value.x, value.y, value.z,value.w);
+		Save(path, float4_sexp);
+	}
+
+	void leo::EngineConfig::Read(const std::string & path, float4 & value){
+		read_multifloat_type(path, value);
+	}
+
+	template<size_t multi>
+	void read_multihalf_type(const std::string& path, data_storage<half, multi>& value) {
+		try {
+			auto property_sexp = ParsePath(path);
+			auto value_iter = value.begin();
+			auto end_iter = value.end();
+			while (property_sexp->mNext && (value_iter != end_iter)) {
+				CheckType(property_sexp, scheme::sexp::sexp_int());
+				value_iter->data = decltype(half::data)(expack<scheme::sexp::sexp_int>(property_sexp));
+				property_sexp = property_sexp->mNext;
+			}
+		}
+		catch (logged_event & e)
+		{
+			auto str = format_logged_event(e);
+			DebugPrintf("%s", str.c_str());
+		}
+	}
+
+	void leo::EngineConfig::Save(const std::string & path, const half2 & value)
+	{
+	}
+
+	void leo::EngineConfig::Read(const std::string & path, half2 & value){
+		read_multihalf_type(path, value);
+	}
+
+	void leo::EngineConfig::Save(const std::string & path, const half3 & value)
+	{
+	}
+
+	void leo::EngineConfig::Read(const std::string & path, half3 & value) {
+		read_multihalf_type(path, value);
+	}
+
+	void leo::EngineConfig::Save(const std::string & path, const half4 & value)
+	{
+	}
+
+	void leo::EngineConfig::Read(const std::string & path, half4 & value) {
+		read_multihalf_type(path, value);
 	}
 

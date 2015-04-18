@@ -72,12 +72,20 @@ namespace leo {
 			return 2;
 		}
 
-		scalar_type* begin() const{
-			return data;
+		const scalar_type* begin() const{
+			return data+0;
 		}
 
-		scalar_type* end() const{
+		const scalar_type* end() const{
 			return data+size();
+		}
+
+		scalar_type* begin(){
+			return data + 0;
+		}
+
+		scalar_type* end(){
+			return data + size();
 		}
 	};
 
@@ -106,11 +114,19 @@ namespace leo {
 			return 3;
 		}
 
-		scalar_type* begin() const{
-			return data;
+		const scalar_type* begin() const{
+			return data+0;
 		}
 
-		scalar_type* end() const {
+		const scalar_type* end() const {
+			return data + size();
+		}
+
+		scalar_type* begin() {
+			return data+0;
+		}
+
+		scalar_type* end()  {
 			return data + size();
 		}
 	};
@@ -140,12 +156,20 @@ namespace leo {
 			return 4;
 		}
 
-		scalar_type* begin() const {
-			return data;
+		const scalar_type* begin() const {
+			return data + 0;
 		}
 
-		scalar_type* end() const {
-			return data + size();
+		const scalar_type* end() const {
+			return  data + size();
+		}
+
+		scalar_type* begin(){
+			return data + 0;
+		}
+
+		scalar_type* end(){
+			return  data + size();
 		}
 	};
 

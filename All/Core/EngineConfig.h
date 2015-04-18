@@ -19,6 +19,7 @@
 #include <utility>
 #include <vector>
 #include <string>
+#include <memory>
 
 enum D3D11_SHADER_TYPE;
 struct D3D11_RASTERIZER_DESC;
@@ -26,6 +27,22 @@ struct D3D11_DEPTH_STENCIL_DESC;
 struct D3D11_BLEND_DESC;
 struct D3D11_SAMPLER_DESC;
 namespace leo{
+
+	namespace scheme {
+		namespace sexp {
+			struct sexp;
+			using sexp_list = std::shared_ptr < sexp >;
+		}
+	}
+
+	struct float2;
+	struct float3;
+	struct float4;
+
+	struct half2;
+	struct half3;
+	struct half4;
+
 	class EngineConfig{
 	public:
 		static void Read(const std::wstring& configScheme = L"config.scheme");
@@ -63,6 +80,29 @@ namespace leo{
 		static void Read(const std::string& path, std::double_t& value);
 		static void Read(const std::string& path, std::string& value);
 
+		static void Save(const std::string& path,const std::vector<std::string>& value);
+		static void Read(const std::string& path, std::vector<std::string>& value);
+
+		static void Save(const std::string& path, const scheme::sexp::sexp_list& value);
+		static void Read(const std::string& path, scheme::sexp::sexp_list& value,bool copy = true);
+
+		static void Save(const std::string& path, const float2& value);
+		static void Read(const std::string& path, float2& value);
+
+		static void Save(const std::string& path, const float3& value);
+		static void Read(const std::string& path, float3& value);
+
+		static void Save(const std::string& path, const float4& value);
+		static void Read(const std::string& path, float4& value);
+
+		static void Save(const std::string& path, const half2& value);
+		static void Read(const std::string& path, half2& value);
+
+		static void Save(const std::string& path, const half3& value);
+		static void Read(const std::string& path, half3& value);
+
+		static void Save(const std::string& path, const half4& value);
+		static void Read(const std::string& path, half4& value);
 	};
 }
 
