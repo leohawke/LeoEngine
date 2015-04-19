@@ -545,6 +545,9 @@ using namespace std::experimental::string_view_literals;
 
 	void leo::EngineConfig::Save(const std::string & path, const half2 & value)
 	{
+		using scheme::sexp::sexp_int;
+		auto half2_sexp = list(sexp_int(value.x.data), sexp_int(value.y.data));
+		Save(path, half2_sexp);
 	}
 
 	void leo::EngineConfig::Read(const std::string & path, half2 & value){
@@ -553,6 +556,9 @@ using namespace std::experimental::string_view_literals;
 
 	void leo::EngineConfig::Save(const std::string & path, const half3 & value)
 	{
+		using scheme::sexp::sexp_int;
+		auto half3_sexp = list(sexp_int(value.x.data), sexp_int(value.y.data), sexp_int(value.z.data));
+		Save(path, half3_sexp);
 	}
 
 	void leo::EngineConfig::Read(const std::string & path, half3 & value) {
@@ -561,6 +567,9 @@ using namespace std::experimental::string_view_literals;
 
 	void leo::EngineConfig::Save(const std::string & path, const half4 & value)
 	{
+		using scheme::sexp::sexp_int;
+		auto half4_sexp = list(sexp_int(value.x.data), sexp_int(value.y.data), sexp_int(value.z.data), sexp_int(value.w.data));
+		Save(path, half4_sexp);
 	}
 
 	void leo::EngineConfig::Read(const std::string & path, half4 & value) {

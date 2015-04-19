@@ -140,13 +140,62 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 	leo::EngineConfig::Read();
 	
-	bool value = true;
-	leo::EngineConfig::Read("/config/test/IMG", value);
-	leo::EngineConfig::Save("/config/aa/bb",value);
-	leo::EngineConfig::Save("/config/test/xx/bb", value);
-	leo::EngineConfig::ShaderConfig::GetAllBlendStateName();
+	bool bool_value = true;
+	leo::EngineConfig::Save("/config/test/bool/t", bool_value);
+	leo::EngineConfig::Save("/config/test/bool/f", false);
+
+	std::string path = "/config/test/char/";
+	for (char c = 1; c != 3;++c)
+		leo::EngineConfig::Save(path+c, c);
+
+	path = "/config/test/int64/";
+	for (std::int64_t i = 1; i != 0;i <<= 1)
+		leo::EngineConfig::Save(path +std::to_string(i), i);
+
+	path = "/config/test/double/";
+	leo::EngineConfig::Save(path + "0.0", 0.);
+
+	path = "/config/test/string";
+	leo::EngineConfig::Save(path,path);
+
+	path += "vector/1";
+	std::vector<std::string> strings;
+	strings.emplace_back("xx");
+	leo::EngineConfig::Save(path,strings);
+	*path.rbegin() = '2';
+	strings.emplace_back("yy");
+	leo::EngineConfig::Save(path, strings);
+	*path.rbegin() = '3';
+	strings.emplace_back("zz");
+	leo::EngineConfig::Save(path, strings);
+
+	leo::float2 f2;
+	path = "/config/test/f/2";
+	leo::EngineConfig::Save(path, f2);
+
+	leo::float3 f3;
+	path = "/config/test/f/3";
+	leo::EngineConfig::Save(path, f3);
+
+	leo::float4 f4;
+	path = "/config/test/f/4";
+	leo::EngineConfig::Save(path, f4);
+
+	leo::half2 h2{0.f,1.f};
+	path = "/config/test/h/2";
+	leo::EngineConfig::Save(path, h2);
+
+	leo::half3 h3{ h2,leo::half(2.f) };
+	path = "/config/test/h/3";
+	leo::EngineConfig::Save(path, h3);
+
+	leo::half4 h4{leo::half(3.f),h3};
+	path = "/config/test/h/4";
+	leo::EngineConfig::Save(path, h4);
+
 	leo::EngineConfig::Write(L"test.scheme");
 
+	leo::EngineConfig::ShaderConfig::GetAllBlendStateName();
 	leo::DeviceMgr DeviceMgr;
 	leo::OutputWindow win;
 

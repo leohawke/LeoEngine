@@ -180,6 +180,6 @@ namespace leo
 
 	template<typename sexp_type,typename... sexp_types>
 	scheme::sexp::sexp_list list(sexp_type && head,sexp_types&&... tail) {
-		return cons(head, list(tail...));
+		return cons(lforward(head),list(lforward(tail)...));
 	}
 }
