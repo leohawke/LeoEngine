@@ -290,6 +290,28 @@ using namespace std::experimental::string_view_literals;
 		return find_helper(mSamplDescs, mSamplNames, samName);
 	}
 
+	scheme::sexp::sexp_list find_sexp(const std::experimental::basic_string_view<char>& word, const scheme::sexp::sexp_list & s)
+	{
+		using namespace scheme::sexp;
+		auto iter = s;
+		while (true)
+		{
+			if (!iter)
+				return nullptr;
+			if (iter->mValue.can_cast<sexp_list>()) {
+				 auto next = iter->mValue.cast_list();
+				//做一次向下查找
+				if (next->mValue.can_cast<sexp_string>() && (car_to_string(next) == word))
+					return next;
+			}
+			else
+				if (iter->mValue.can_cast<sexp_string>() &&  car_to_string(iter) == word)
+					return iter;
+			iter = iter->mNext;
+		}
+
+		return nullptr;
+	}
 
 	scheme::sexp::sexp_list ParsePath(const std::string& path, std::string& subpath) {
 		using namespace leo::scheme::sexp;
@@ -305,7 +327,7 @@ using namespace std::experimental::string_view_literals;
 			auto dir = to_string(path.substr(iter_index + 1, iter_next - iter_index - 1));
 			iter_index = iter_next;
 			prev_sexp = iter_sexp;
-			iter_sexp = ops::find_sexp(dir, iter_sexp);
+			iter_sexp = find_sexp(dir, iter_sexp);
 			if (!iter_sexp)
 				break;
 		}
@@ -318,7 +340,7 @@ using namespace std::experimental::string_view_literals;
 		auto property_name = path.substr(iter_index + 1, path.size() - 1 - iter_index);
 
 		prev_sexp = iter_sexp;
-		iter_sexp = ops::find_sexp(property_name, iter_sexp);
+		iter_sexp = find_sexp(property_name, iter_sexp);
 
 		if (!iter_sexp) {
 			subpath = path.substr(iter_index, path.size()  - iter_index);
@@ -388,11 +410,11 @@ using namespace std::experimental::string_view_literals;
 			auto iter_next = path.find_first_of('/', iter_index + 1);
 			auto dir = to_string(path.substr(iter_index + 1, iter_next - iter_index - 1));
 			iter_index = iter_next;
-			iter_sexp = ops::find_sexp(dir, iter_sexp);
+			iter_sexp = find_sexp(dir, iter_sexp);
 		}
 
 		auto property_name = path.substr(iter_index + 1, path.size() - 1 - iter_index);
-		iter_sexp = ops::find_sexp(property_name, iter_sexp);
+		iter_sexp = find_sexp(property_name, iter_sexp);
 
 		if (!iter_sexp)
 			throw logged_event(property_name + ": this property doesn't exist(path=" + path + ")", record_level::Warning);
