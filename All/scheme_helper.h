@@ -160,12 +160,30 @@ namespace leo
 		return {};
 	}
 
+	namespace details {
+		template<typename sexp_typex, typename sexp_typey,bool is_list = false>
+		struct cons_impl {
+			static inline scheme::sexp::sexp_list cons(sexp_typex && car, sexp_typey&& cdr) {
+				auto pair = scheme::sexp::make_sexp(lforward(car));
+				pair->mNext = scheme::sexp::make_sexp(lforward(cdr));
+				return pair;
+			}
+		};
+
+		template<typename sexp_typex, typename sexp_typey>
+		struct cons_impl<sexp_typex, sexp_typey,true> {
+			static inline scheme::sexp::sexp_list cons(sexp_typex && car,sexp_typey&& cdr) {
+				auto pair = scheme::sexp::make_sexp(lforward(car));
+				pair->mNext =lforward(cdr);
+				return pair;
+			}
+		};
+	}
 
 	template<typename sexp_typex,typename sexp_typey>
 	inline scheme::sexp::sexp_list cons(sexp_typex && car, sexp_typey&& cdr) {
-		auto pair = scheme::sexp::make_sexp(lforward(car));
-		pair->mNext = scheme::sexp::make_sexp(lforward(cdr));
-		return pair;
+		return details::cons_impl<sexp_typex,sexp_typey,
+			std::is_same<scheme::sexp::sexp_list,decay_t<sexp_typey>>::value>::cons(lforward(car),lforward(cdr));
 	}
 
 	template<typename sexp_type>

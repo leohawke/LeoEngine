@@ -330,12 +330,15 @@ using namespace std::experimental::string_view_literals;
 	}
 
 	template<typename T>
-	scheme::sexp::sexp_list PathPack(const std::string& path, const T& value) {
+	scheme::sexp::sexp_list PathPack(const std::string& path, const T& value,bool data = false) {
 		auto iter_index = path.find_last_of('/');
 
 		auto str = path.substr(iter_index + 1, path.size() - 1 - iter_index);
-		auto path_sexp = pack_key_value(path.substr(iter_index + 1, path.size() - 1 - iter_index), value);
-
+		auto path_sexp =pack_key_value(
+							path.substr(iter_index + 1, path.size() - 1 - iter_index), 
+							value);
+		if (data)
+			path_sexp->mNext =path_sexp->mNext->mValue.mListValue;
 		while (iter_index != 0) {
 			auto iter_next = path.find_last_of('/', iter_index - 1);
 			path_sexp = pack_key_value(path.substr(iter_next + 1, iter_index - 1 - iter_next), path_sexp);
@@ -346,10 +349,10 @@ using namespace std::experimental::string_view_literals;
 	}
 
 	template<typename T>
-	void write_sexp_type(const std::string& path,const T& value) {
+	void write_sexp_type(const std::string& path,const T& value, bool data = false) {
 		std::string subpath{};
 		auto parent_sexp = ParsePath(path, subpath);
-		auto path_sexp = PathPack(subpath, value);
+		auto path_sexp = PathPack(subpath, value,data);
 
 		while (parent_sexp->mNext) {
 			parent_sexp = parent_sexp->mNext;
@@ -357,6 +360,7 @@ using namespace std::experimental::string_view_literals;
 
 		parent_sexp->mNext = scheme::sexp::make_sexp(scheme::sexp::sexp_list(path_sexp));
 	}
+
 
 	void EngineConfig::Save(const std::string& path, bool value) {
 		write_sexp_type(path, value);
@@ -439,13 +443,13 @@ using namespace std::experimental::string_view_literals;
 			return Save(path, value[0]);
 		auto iter = value.rbegin();
 		auto iter_end = value.rend();
-		auto vector_sexp = pack_key_value(*(iter + 1), *iter);
+		auto vector_sexp = cons(*(iter + 1), *iter);
 		++iter;
 		while (iter != iter_end) {
 			if (++iter != iter_end)
-				vector_sexp = pack_key_value(*iter, vector_sexp);
+				vector_sexp = cons(*iter, vector_sexp);
 		}
-		Save(path, vector_sexp);
+		write_sexp_type(path, vector_sexp,true);
 	}
 
 	void leo::EngineConfig::Read(const std::string & path, std::vector<std::string>& value){
@@ -499,7 +503,7 @@ using namespace std::experimental::string_view_literals;
 
 	void leo::EngineConfig::Save(const std::string & path, const float2 & value){
 		auto float2_sexp = cons(value.x,value.y);
-		Save(path, float2_sexp);
+		write_sexp_type(path, float2_sexp,true);
 	}
 
 	void leo::EngineConfig::Read(const std::string & path, float2 & value){
@@ -508,7 +512,7 @@ using namespace std::experimental::string_view_literals;
 
 	void leo::EngineConfig::Save(const std::string & path, const float3 & value){
 		auto float3_sexp = list(value.x, value.y, value.z);
-		Save(path, float3_sexp);
+		write_sexp_type(path, float3_sexp,true);
 	}
 
 	void leo::EngineConfig::Read(const std::string & path, float3 & value){
@@ -517,7 +521,7 @@ using namespace std::experimental::string_view_literals;
 
 	void leo::EngineConfig::Save(const std::string & path, const float4 & value){
 		auto float4_sexp = list(value.x, value.y, value.z,value.w);
-		Save(path, float4_sexp);
+		write_sexp_type(path, float4_sexp,true);
 	}
 
 	void leo::EngineConfig::Read(const std::string & path, float4 & value){
@@ -547,7 +551,8 @@ using namespace std::experimental::string_view_literals;
 	{
 		using scheme::sexp::sexp_int;
 		auto half2_sexp = list(sexp_int(value.x.data), sexp_int(value.y.data));
-		Save(path, half2_sexp);
+		write_sexp_type(path, half2_sexp, true);
+
 	}
 
 	void leo::EngineConfig::Read(const std::string & path, half2 & value){
@@ -558,7 +563,7 @@ using namespace std::experimental::string_view_literals;
 	{
 		using scheme::sexp::sexp_int;
 		auto half3_sexp = list(sexp_int(value.x.data), sexp_int(value.y.data), sexp_int(value.z.data));
-		Save(path, half3_sexp);
+		write_sexp_type(path, half3_sexp, true);
 	}
 
 	void leo::EngineConfig::Read(const std::string & path, half3 & value) {
@@ -569,7 +574,7 @@ using namespace std::experimental::string_view_literals;
 	{
 		using scheme::sexp::sexp_int;
 		auto half4_sexp = list(sexp_int(value.x.data), sexp_int(value.y.data), sexp_int(value.z.data), sexp_int(value.w.data));
-		Save(path, half4_sexp);
+		write_sexp_type(path, half4_sexp, true);
 	}
 
 	void leo::EngineConfig::Read(const std::string & path, half4 & value) {

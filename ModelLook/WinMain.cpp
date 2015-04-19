@@ -167,6 +167,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	leo::EngineConfig::Save(path, strings);
 	*path.rbegin() = '3';
 	strings.emplace_back("zz");
+	strings.emplace_back("ww");
 	leo::EngineConfig::Save(path, strings);
 
 	leo::float2 f2;
