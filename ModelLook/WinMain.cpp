@@ -140,47 +140,20 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 	leo::EngineConfig::Read(L"test.scheme");
 	
-
-	std::string path = "/config/test/bool/f";
-	bool b = true;
-	leo::EngineConfig::Read(path, b);
-
-
-	path = "/config/test/double/";
-	double d;
-	leo::EngineConfig::Read(path + "0.0", d);
-
-	path = "/config/test/string";
-	leo::EngineConfig::Read(path,path);
-
-	path += "vector/3";
-	std::vector<std::string> strings;
-
-	leo::EngineConfig::Read(path, strings);
-
 	leo::float2 f2;
-	path = "/config/test/f/2";
+	std::string path = "/config/test/f/two";
+	leo::EngineConfig::Read(path, f2);
+
+	path = "/config/test/bool/f/two";
 	leo::EngineConfig::Read(path, f2);
 
 	leo::float3 f3;
-	path = "/config/test/f/3";
+	path = "/config/test/bool/f/three";
 	leo::EngineConfig::Read(path, f3);
 
 	leo::float4 f4;
-	path = "/config/test/f/4";
+	path = "/config/test/bool/f/four";
 	leo::EngineConfig::Read(path, f4);
-
-	leo::half2 h2{0.f,1.f};
-	path = "/config/test/h/2";
-	leo::EngineConfig::Read(path, h2);
-
-	leo::half3 h3{ h2,leo::half(2.f) };
-	path = "/config/test/h/3";
-	leo::EngineConfig::Read(path, h3);
-
-	leo::half4 h4{leo::half(3.f),h3};
-	path = "/config/test/h/4";
-	leo::EngineConfig::Read(path, h4);
 
 	leo::EngineConfig::Write(L"test.scheme");
 

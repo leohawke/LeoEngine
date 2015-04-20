@@ -513,6 +513,7 @@ using namespace std::experimental::string_view_literals;
 			while (property_sexp->mNext && (value_iter != end_iter)) {
 				CheckType(property_sexp,scheme::sexp::sexp_real());
 				*value_iter =float(expack<scheme::sexp::sexp_real>(property_sexp));
+				++value_iter;
 				property_sexp = property_sexp->mNext;
 			}
 		}
@@ -559,6 +560,7 @@ using namespace std::experimental::string_view_literals;
 			while (property_sexp->mNext && (value_iter != end_iter)) {
 				CheckType(property_sexp, scheme::sexp::sexp_int());
 				value_iter->data = decltype(half::data)(expack<scheme::sexp::sexp_int>(property_sexp));
+				++value_iter;
 				property_sexp = property_sexp->mNext;
 			}
 		}
