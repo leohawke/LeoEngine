@@ -113,6 +113,16 @@ namespace leo
 		return result;
 	}
 
+	template<typename string_typex,typename string_typey>
+	std::shared_ptr<scheme::sexp::sexp> pack_key_word(const string_typex& key, const string_typey& word) {
+
+		using scheme::sexp::make_sexp_word;
+		auto result = scheme::sexp::make_sexp_word(key);
+
+		result->mNext = make_sexp_word(word);
+		return result;
+	}
+
 	scheme::sexp::sexp_string car_to_string(scheme::sexp::sexp_list list) {
 		auto data = list;
 		using namespace scheme::sexp;

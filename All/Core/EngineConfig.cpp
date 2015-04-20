@@ -43,10 +43,20 @@ using namespace std::experimental::string_view_literals;
 		write_config_sexp = scheme::sexp::ops::make_copy(read_config_sexp);
 	}
 	
-	void LinkList(scheme::sexp::sexp_list list) {
+	void LinkList(const std::string& name,scheme::sexp::sexp_list list) {
 		auto iter_sexp = write_config_sexp;
 		while (iter_sexp->mNext) {
+			if (iter_sexp->mNext
+				&& iter_sexp->mNext->mValue.can_cast <scheme::sexp::sexp_list>()
+				&& iter_sexp->mNext->mValue.cast_list()->mValue.can_cast<scheme::sexp::sexp_string>()
+				&& iter_sexp->mNext->mValue.cast_list()->mValue.cast_atom < scheme::sexp::sexp_string>() == name) {
+				auto next_next_sexp = iter_sexp->mNext->mNext;
+				iter_sexp->mNext = scheme::sexp::make_sexp(list);
+				iter_sexp->mNext->mNext = next_next_sexp;
+				return;
+			}
 			iter_sexp = iter_sexp->mNext;
+			
 		}
 		iter_sexp->mNext =scheme::sexp::make_sexp(list);
 	}
@@ -64,7 +74,7 @@ using namespace std::experimental::string_view_literals;
 			prev->mNext = sexp::make_sexp(sexp::sexp_list(dir_sexp));
 			prev = prev->mNext;
 		}
-		LinkList(dirs_sexp);
+		LinkList("search-dirs",dirs_sexp);
 
 		auto effects_sexp = sexp::make_sexp_word(S("effects"));
 		prev = effects_sexp;
@@ -74,7 +84,7 @@ using namespace std::experimental::string_view_literals;
 			prev = prev->mNext;
 		}
 
-		LinkList(effects_sexp);
+		LinkList("effects",effects_sexp);
 
 		auto config_string = scheme::sexp::ops::print_sexp(write_config_sexp);
 		std::ofstream fout(configScheme);
@@ -185,7 +195,7 @@ using namespace std::experimental::string_view_literals;
 				break;
 			}
 			prev->mNext = sexp::make_sexp(
-				sexp::sexp_list(pack_key_value(
+				sexp::sexp_list(pack_key_word(
 				type,
 				to_string(EngineConfig::ShaderConfig::GetShaderFileName(shader, s)))
 				));
@@ -197,7 +207,7 @@ using namespace std::experimental::string_view_literals;
 		using namespace scheme;
 		auto effect_sexp = sexp::make_sexp_word(S("effect"));
 
-		auto name_sexp = pack_key_value("name", to_string(shader));
+		auto name_sexp = pack_key_word("name", to_string(shader));
 		effect_sexp->mNext = sexp::make_sexp(sexp::sexp_list(name_sexp));
 
 		auto shader_sexp = sexp::make_sexp_word(S("shader"));
