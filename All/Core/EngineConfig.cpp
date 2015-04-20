@@ -42,19 +42,20 @@ using namespace std::experimental::string_view_literals;
 
 		write_config_sexp = scheme::sexp::ops::make_copy(read_config_sexp);
 	}
+	
+	void LinkList(scheme::sexp::sexp_list list) {
+		auto iter_sexp = write_config_sexp;
+		while (iter_sexp->mNext) {
+			iter_sexp = iter_sexp->mNext;
+		}
+		iter_sexp->mNext =scheme::sexp::make_sexp(list);
+	}
+	
 	void EngineConfig::Write(const std::wstring& configScheme) {
 		using namespace scheme;
-		auto config_sexp = sexp::make_sexp_word(S("config"));
-
-		auto window_sexp = sexp::make_sexp_word(S("window"));
-		auto width_sexp = pack_key_value(S("width"), ClientSize().first);
-		auto height_sexp = pack_key_value(S("height"), ClientSize().second);
-		window_sexp->mNext = sexp::make_sexp(sexp::sexp_list(width_sexp));
-		window_sexp->mNext->mNext = sexp::make_sexp(sexp::sexp_list(height_sexp));
-
-
-
-		config_sexp->mNext = sexp::make_sexp(sexp::sexp_list(window_sexp));
+		
+		Save("/config/window/width",int64(ClientSize().first));
+		Save("/config/window/width", int64(ClientSize().second));
 
 		auto dirs_sexp = sexp::make_sexp_word(S("search-dirs"));
 		auto prev = dirs_sexp;
@@ -63,7 +64,7 @@ using namespace std::experimental::string_view_literals;
 			prev->mNext = sexp::make_sexp(sexp::sexp_list(dir_sexp));
 			prev = prev->mNext;
 		}
-		config_sexp->mNext->mNext = sexp::make_sexp(std::shared_ptr<sexp::sexp>(dirs_sexp));
+		LinkList(dirs_sexp);
 
 		auto effects_sexp = sexp::make_sexp_word(S("effects"));
 		prev = effects_sexp;
@@ -73,11 +74,8 @@ using namespace std::experimental::string_view_literals;
 			prev = prev->mNext;
 		}
 
-		//end
-		//config_sexp->mNext->mNext->mNext = effects_sexp;
-		config_sexp->mNext->mNext->mNext = sexp::make_sexp(std::shared_ptr<sexp::sexp>(effects_sexp));
+		LinkList(effects_sexp);
 
-		//auto config_string = scheme::sexp::ops::print_sexp(config_sexp);
 		auto config_string = scheme::sexp::ops::print_sexp(write_config_sexp);
 		std::ofstream fout(configScheme);
 		const unsigned char BOM[] = { 0xEFu, 0XBBu,0xBFu };
@@ -374,13 +372,17 @@ using namespace std::experimental::string_view_literals;
 	void write_sexp_type(const std::string& path,const T& value, bool data = false) {
 		std::string subpath{};
 		auto parent_sexp = ParsePath(path, subpath);
-		auto path_sexp = PathPack(subpath, value,data);
+		if (subpath.size() > 0) {
+			auto path_sexp = PathPack(subpath, value, data);
 
-		while (parent_sexp->mNext) {
-			parent_sexp = parent_sexp->mNext;
+			while (parent_sexp->mNext) {
+				parent_sexp = parent_sexp->mNext;
+			}
+
+			parent_sexp->mNext = scheme::sexp::make_sexp(scheme::sexp::sexp_list(path_sexp));
+			return;
 		}
-
-		parent_sexp->mNext = scheme::sexp::make_sexp(scheme::sexp::sexp_list(path_sexp));
+		parent_sexp->mNext = scheme::sexp::make_sexp(value);
 	}
 
 

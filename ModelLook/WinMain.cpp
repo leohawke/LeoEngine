@@ -140,22 +140,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 	leo::EngineConfig::Read(L"test.scheme");
 	
-	leo::float2 f2;
-	std::string path = "/config/test/f/two";
-	leo::EngineConfig::Read(path, f2);
 
-	path = "/config/test/bool/f/two";
-	leo::EngineConfig::Read(path, f2);
-
-	leo::float3 f3;
-	path = "/config/test/bool/f/three";
-	leo::EngineConfig::Read(path, f3);
-
-	leo::float4 f4;
-	path = "/config/test/bool/f/four";
-	leo::EngineConfig::Read(path, f4);
-
-	leo::EngineConfig::Write(L"test.scheme");
+	leo::EngineConfig::Write(L"test.bat.scheme");
 
 	leo::EngineConfig::ShaderConfig::GetAllBlendStateName();
 	leo::DeviceMgr DeviceMgr;
