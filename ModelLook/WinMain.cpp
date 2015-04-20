@@ -23,6 +23,7 @@
 #include <Core\ShadowMap.hpp>
 #include <Core\Vertex.hpp>
 #include <Core\FileSearch.h>
+#include <Core\BilateralFilter.hpp>
 
 
 #include <RenderSystem\Deferred.h>
@@ -138,12 +139,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	_CrtSetBreakAlloc(309);
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
-	leo::EngineConfig::Read(L"test.scheme");
-	
-
-	leo::EngineConfig::Write(L"test.bat.scheme");
-
+	leo::EngineConfig::Read(L"config.scheme");
 	leo::EngineConfig::ShaderConfig::GetAllBlendStateName();
+	leo::CompilerBilaterCS(7, L"test.cso");
+
+	leo::EngineConfig::Write();
+
 	leo::DeviceMgr DeviceMgr;
 	leo::OutputWindow win;
 

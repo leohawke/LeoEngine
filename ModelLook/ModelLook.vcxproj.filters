@@ -152,6 +152,9 @@
     <ClCompile Include="..\All\Core\EffectGBuffer.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\Core\BilaterFilter.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\All\LightBuffer.h">
@@ -176,6 +179,9 @@
     </ClInclude>
     <ClInclude Include="..\All\COM.hpp">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\Core\BilateralFilter.hpp">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -212,6 +218,9 @@
     <FxCompile Include="..\All\Shader\DeferredVS.hlsl" />
     <FxCompile Include="..\All\Shader\GBufferPass.hlsl" />
     <FxCompile Include="Shader\PointLightPS.hlsl">
+      <Filter>Shader\HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\BilateralFilterCS.hlsl">
       <Filter>Shader\HLSL</Filter>
     </FxCompile>
   </ItemGroup>
