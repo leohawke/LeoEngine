@@ -73,6 +73,10 @@ ID3D11PixelShader* mSSAOPS = nullptr;
 ID3D11Buffer* mSSAOPSCB = nullptr;
 ID3D11ShaderResourceView* mSSAORandomVec = nullptr;
 
+ID3D11ShaderResourceView* mBlurSSAOSRV = nullptr;
+ID3D11UnorderedAccessView* mBlurSSAOUAV = nullptr;
+
+ID3D11ComputeShader* mBlurSSAOCS = nullptr;
 
 //用于显示GBuffer
 ID3D11PixelShader* mGBufferPS = nullptr;
@@ -102,7 +106,7 @@ void DeviceEvent()
 void Render();
 void Update();
 
-void BuildRes();
+void BuildRes(std::pair<leo::uint16,leo::uint16> size);
 
 void ClearRes();
 
@@ -141,7 +145,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 	leo::EngineConfig::Read(L"config.scheme");
 	leo::EngineConfig::ShaderConfig::GetAllBlendStateName();
-	leo::CompilerBilaterCS(7, L"test.cso");
 
 	leo::EngineConfig::Write();
 
@@ -193,7 +196,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	win.BindMsgFunc(WM_SIZE, sizeproc);
 
 	DeviceEvent();
-	BuildRes();
+	BuildRes(clientSize);
 
 	auto cmdmsgproc = [&](HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)-> LRESULT
 	{
@@ -353,7 +356,7 @@ void BuildLight(ID3D11Device* device) {
 void ClearLight() {
 	leo::win::ReleaseCOM(mPointLightPSCB);
 }
-void BuildRes()
+void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 {
 	using leo::float3;
 
@@ -417,6 +420,7 @@ void BuildRes()
 	auto mGBufferBlob = sm.CreateBlob(leo::FileSearch::Search(L"GBufferPS.cso"));
 	mGBufferPS = sm.CreatePixelShader(mGBufferBlob);
 	mSSAOPS = sm.CreatePixelShader(mPSBlob);
+
 
 
 	D3D11_BUFFER_DESC Desc;
@@ -513,10 +517,41 @@ void BuildRes()
 	// view saves a reference.
 	leo::win::ReleaseCOM(tex);
 
+	D3D11_TEXTURE2D_DESC SSAOTexDesc;
+#ifdef DEBUG
+	SSAOTexDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+#else
+	SSAOTexDesc.Format = DXGI_FORMAT_R32_FLOAT;;
+#endif
+	SSAOTexDesc.ArraySize = 1;
+	SSAOTexDesc.MipLevels = 1;
+
+	SSAOTexDesc.SampleDesc.Count = 1;
+	SSAOTexDesc.SampleDesc.Quality = 0;
+
+	SSAOTexDesc.Width = size.first / 2;
+	SSAOTexDesc.Height = size.second / 2;
+
+	SSAOTexDesc.Usage = D3D11_USAGE_DEFAULT;
+	SSAOTexDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+	SSAOTexDesc.CPUAccessFlags = 0;
+	SSAOTexDesc.MiscFlags = 0;
+
+	ID3D11Texture2D* mTex = nullptr;
+	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateTexture2D(&SSAOTexDesc, nullptr, &mTex));
+	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateShaderResourceView(mTex, nullptr, &mBlurSSAOSRV));
+	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateUnorderedAccessView(mTex, nullptr, &mBlurSSAOUAV));
+	mTex->Release();
+
+	leo::CompilerBilaterCS(7, L"BilateralFilterCS.cso");
+
+	auto mBlurCSBlob = sm.CreateBlob(leo::FileSearch::Search(L"BilateralFilterCS.cso"));
+
+	mBlurSSAOCS = sm.CreateComputeShader(mBlurCSBlob);
 	BuildLight(leo::DeviceMgr().GetDevice());
 #endif
-
 }
+
 void ClearRes() {
 	leo::win::ReleaseCOM(mSSAOPSCB);
 
@@ -526,6 +561,8 @@ void ClearRes() {
 	pSphereMesh.reset(nullptr);
 
 	leo::win::ReleaseCOM(mSSAORandomVec);
+	leo::win::ReleaseCOM(mBlurSSAOSRV);
+	leo::win::ReleaseCOM(mBlurSSAOUAV);
 
 	ClearLight();
 }
@@ -583,6 +620,28 @@ void ComputeSSAO(ID3D11DeviceContext* context ) {
 	context->PSSetShaderResources(2, 1, &mSSAORandomVec);
 
 	context->Draw(4, 0);
+}
+
+void BlurSSAO(ID3D11DeviceContext* context,unsigned width, unsigned height) {
+	context->CSSetShader(mBlurSSAOCS, nullptr, 0);
+	auto srv = leo::DeferredResources::GetInstance().GetSSAOSRV();
+	
+	context->CSSetShaderResources(0, 1, &srv);
+	context->CSSetUnorderedAccessViews(0, 1, &mBlurSSAOUAV,nullptr);
+
+	context->Dispatch(width / 32, height / 32, 1);
+	context->CSSetShader(nullptr, nullptr, 0);
+
+	ID3D11UnorderedAccessView* mUAV = nullptr;
+	ID3D11ShaderResourceView* mSRV = nullptr;
+	context->CSSetUnorderedAccessViews(0, 1, &mUAV, nullptr);
+	context->CSSetShaderResources(0, 1, &mSRV);
+
+	ID3D11Resource* mSSAORes = nullptr;
+	ID3D11Resource* mBlurSSAORes = nullptr;
+	srv->GetResource(&mSSAORes);
+	mBlurSSAOSRV->GetResource(&mBlurSSAORes);
+	context->CopyResource(mSSAORes, mBlurSSAORes);
 }
 
 void DrawSSAO(ID3D11DeviceContext* context) {
@@ -660,7 +719,7 @@ void Render()
 		devicecontext->OMSetRenderTargets(1, &rtv, nullptr);
 		devicecontext->ClearRenderTargetView(rtv, ClearColor);
 
-		
+		BlurSSAO(devicecontext,prevVP.Width,prevVP.Height);
 		//绘制延迟Buff
 		{
 			//右下,最终图像
