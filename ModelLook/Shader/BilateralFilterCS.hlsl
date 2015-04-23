@@ -1,11 +1,12 @@
+Texture2D<float4> Input:register(t0);
+RWTexture2D<float4> Output:register(u0);
 #ifndef APPROACH 
 /*
 #define RADIUS 5
 
 static const float filter[RADIUS][RADIUS] = {};
 */
-Texture2D<float4> Input:register(t0);
-RWTexture2D<float4> Output:register(u0);
+
 
 #define PATH_SIZE_X 32
 #define PATH_SIZE_Y 32

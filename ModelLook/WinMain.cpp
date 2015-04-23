@@ -76,7 +76,13 @@ ID3D11ShaderResourceView* mSSAORandomVec = nullptr;
 ID3D11ShaderResourceView* mBlurSSAOSRV = nullptr;
 ID3D11UnorderedAccessView* mBlurSSAOUAV = nullptr;
 
+ID3D11ShaderResourceView* mBlurSwapSSAOSRV = nullptr;
+ID3D11UnorderedAccessView* mBlurSwapSSAOUAV = nullptr;
+
 ID3D11ComputeShader* mBlurSSAOCS = nullptr;
+
+ID3D11ComputeShader* mBlurVerSSAOCS = nullptr;
+ID3D11ComputeShader* mBlurHorSSAOCS = nullptr;
 
 //”√”⁄œ‘ æGBuffer
 ID3D11PixelShader* mGBufferPS = nullptr;
@@ -543,11 +549,20 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateUnorderedAccessView(mTex, nullptr, &mBlurSSAOUAV));
 	mTex->Release();
 
-	leo::CompilerBilaterCS(7, L"BilateralFilterCS.cso");
+	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateTexture2D(&SSAOTexDesc, nullptr, &mTex));
+	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateShaderResourceView(mTex, nullptr, &mBlurSwapSSAOSRV));
+	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateUnorderedAccessView(mTex, nullptr, &mBlurSwapSSAOUAV));
+	mTex->Release();
 
+	leo::CompilerBilaterCS(7, L"BilateralFilterCS.cso");
+	leo::CompilerBilaterCS(7, size, L"BilateralFilterVerCS.cso", L"BilateralFilterHorCS.cso");
 	auto mBlurCSBlob = sm.CreateBlob(leo::FileSearch::Search(L"BilateralFilterCS.cso"));
 
 	mBlurSSAOCS = sm.CreateComputeShader(mBlurCSBlob);
+
+	mBlurHorSSAOCS = sm.CreateComputeShader(leo::FileSearch::Search(L"BilateralFilterHorCS.cso"));
+	mBlurVerSSAOCS = sm.CreateComputeShader(leo::FileSearch::Search(L"BilateralFilterVerCS.cso"));
+
 	BuildLight(leo::DeviceMgr().GetDevice());
 #endif
 }
@@ -564,6 +579,8 @@ void ClearRes() {
 	leo::win::ReleaseCOM(mBlurSSAOSRV);
 	leo::win::ReleaseCOM(mBlurSSAOUAV);
 
+	leo::win::ReleaseCOM(mBlurSwapSSAOSRV);
+	leo::win::ReleaseCOM(mBlurSwapSSAOUAV);
 	ClearLight();
 }
 
@@ -623,17 +640,23 @@ void ComputeSSAO(ID3D11DeviceContext* context ) {
 }
 
 void BlurSSAO(ID3D11DeviceContext* context,unsigned width, unsigned height) {
-	context->CSSetShader(mBlurSSAOCS, nullptr, 0);
 	auto srv = leo::DeferredResources::GetInstance().GetSSAOSRV();
 	
+	context->CSSetShader(mBlurHorSSAOCS, nullptr, 0);
 	context->CSSetShaderResources(0, 1, &srv);
-	context->CSSetUnorderedAccessViews(0, 1, &mBlurSSAOUAV,nullptr);
+	context->CSSetUnorderedAccessViews(0, 1, &mBlurSwapSSAOUAV,nullptr);//swapUAV
 
-	context->Dispatch(width / 32, height / 32, 1);
-	context->CSSetShader(nullptr, nullptr, 0);
+	context->Dispatch(width, 1, 1);
 
 	ID3D11UnorderedAccessView* mUAV = nullptr;
 	ID3D11ShaderResourceView* mSRV = nullptr;
+	context->CSSetUnorderedAccessViews(0, 1, &mUAV, nullptr);
+	context->CSSetShaderResources(0, 1, &mSRV);
+
+	context->CSSetShader(mBlurVerSSAOCS, nullptr, 0);
+	context->CSSetShaderResources(0, 1, &mBlurSwapSSAOSRV);//swapSRV
+	context->CSSetUnorderedAccessViews(0, 1, &mBlurSSAOUAV, nullptr);
+	context->Dispatch(1, height, 1);
 	context->CSSetUnorderedAccessViews(0, 1, &mUAV, nullptr);
 	context->CSSetShaderResources(0, 1, &mSRV);
 
