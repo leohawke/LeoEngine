@@ -16,8 +16,13 @@
 #ifndef Core_BilaterFilter_hpp
 #define Core_BilaterFilter_hpp
 
+#include <leoint.hpp>
+#include <utility>
 namespace leo {
-	void CompilerBilaterCS(unsigned int radius, const wchar_t* savepath);
+	void CompilerBilaterCS(unsigned int radius, const wchar_t* savename);
+
+	void CompilerBilaterCS(unsigned int radius, std::pair<uint16,uint16> size , const wchar_t* savevername /*ÊúÖ±*/, const wchar_t* savehorname/*Ë®Æ½*/);
+
 }
 
 #endif

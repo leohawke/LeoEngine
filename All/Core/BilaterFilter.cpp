@@ -87,4 +87,90 @@ namespace leo {
 		outFile->Write(0, pBlobCS->GetBufferPointer(), pBlobCS->GetBufferSize());
 		pBlobCS->Release();
 	}
+
+	void CompilerBilaterCS(unsigned int radius, std::pair<uint16, uint16> size, const wchar_t* savevername /*ÊúÖ±*/, const wchar_t* savehorname/*Ë®Æ½*/) {
+		const static double rsigma = 1.6;
+
+		std::string prev = "#define RADIUS\r\n#define APPROACH";
+		prev += std::to_string(radius);
+
+		prev += "\r\n\r\n";
+
+		prev += "static const float filter[RADIUS] = {";
+		{
+			auto filter = std::make_unique<float[]>(radius);
+
+			std::stringstream strstream;
+
+			auto weight = 0.f;
+			int middle = (radius - 1) / 2;
+			for (int x = 0; x != radius; ++x) {
+					auto delta = -((x - middle)*(x - middle));
+					auto power = delta*0.25 - 2.507901035590337872276786476796;
+					auto range = exp(power);
+					filter[x] = static_cast<float>(range);
+					weight += static_cast<float>(range);
+			}
+			for (unsigned int x = 0; x != radius; ++x)
+					filter[x ] /= weight;
+
+			strstream << std::setprecision(6);
+			for (unsigned int x = 0; x != radius; ++x) {
+					strstream << filter[x] << ',';
+			}
+
+			prev += strstream.str();
+
+		}
+		prev += "};\r\n\r\n";
+
+
+		std::ifstream inFile(FileSearch::Search(L"BilateralFilterCS.hlsl"));
+		std::string str{ std::istreambuf_iterator<char>(inFile),
+			std::istreambuf_iterator<char>() };
+
+		prev += str;
+
+
+		UINT flags = 0;
+#if defined( DEBUG ) || defined( _DEBUG )
+		flags |= D3DCOMPILE_DEBUG;
+#else
+		flags |= D3DCOMPILE_OPTIMIZATION_LEVEL3;
+#endif
+
+		HRESULT hr = E_FAIL;
+
+		ID3DBlob* pBlobCS = nullptr;
+		ID3DBlob* pErrorBlob = nullptr;
+
+		hr = D3DCompile(prev.data(), prev.size(), nullptr, nullptr, nullptr, "approach_ver_main", "cs_5_0", flags, 0, &pBlobCS, &pErrorBlob);
+
+		if (pErrorBlob) {
+			DebugPrintf((const char*)(pErrorBlob->GetBufferPointer()));
+			pErrorBlob->Release();
+			pBlobCS ? pBlobCS->Release() : 0;
+			Raise_DX_Exception(hr)
+		}
+
+		auto outFile = win::File::Open(savevername, win::File::TO_WRITE);
+
+		outFile->Write(0, pBlobCS->GetBufferPointer(), pBlobCS->GetBufferSize());
+		pBlobCS->Release();
+
+		hr = D3DCompile(prev.data(), prev.size(), nullptr, nullptr, nullptr, "approach_hor_main", "cs_5_0", flags, 0, &pBlobCS, &pErrorBlob);
+
+		if (pErrorBlob) {
+			DebugPrintf((const char*)(pErrorBlob->GetBufferPointer()));
+			pErrorBlob->Release();
+			pBlobCS ? pBlobCS->Release() : 0;
+			Raise_DX_Exception(hr)
+		}
+
+		auto outFile = win::File::Open(savehorname, win::File::TO_WRITE);
+
+		outFile->Write(0, pBlobCS->GetBufferPointer(), pBlobCS->GetBufferSize());
+		pBlobCS->Release();
+	}
+
 }
