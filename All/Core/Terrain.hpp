@@ -440,6 +440,7 @@ namespace leo
 		struct Vertex
 		{
 			Vertex()
+				:pos(0.f,0.f)
 			{}
 			Vertex& operator=(const half2 rhs)
 			{

@@ -548,7 +548,9 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	BuildLight(leo::DeviceMgr().GetDevice());
 #endif
 
-	pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(),L"Test.Terrain");
+	pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(),L"Resource/Test.Terrain");
+	
+	pTerrain->Render(nullptr,*pCamera);
 }
 
 void ClearRes() {
