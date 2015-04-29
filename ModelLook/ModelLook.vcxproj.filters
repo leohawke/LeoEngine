@@ -39,6 +39,9 @@
     <Filter Include="RenderSystem">
       <UniqueIdentifier>{561abbf7-31d8-4a60-9146-428103384541}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Support Tool Config">
+      <UniqueIdentifier>{1c924059-add0-4ad9-99af-740975ac8ac1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -190,6 +193,9 @@
     </None>
     <None Include="..\All\Shader\LightHelper.hlsli">
       <Filter>Shader\HLSL</Filter>
+    </None>
+    <None Include="The LeoEngine Terrain File.tpl">
+      <Filter>Support Tool Config</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -18,12 +18,12 @@
 
 
 
-#include "..\IndePlatform\platform.h"
-#include "..\IndePlatform\\ConstexprMath.hpp"
-#include "..\IndePlatform\leoint.hpp"
-#include "..\IndePlatform\LeoMath.h"
-#include "..\IndePlatform\memory.hpp"
-#include "..\IndePlatform\Tree.hpp"
+#include <platform.h>
+#include <ConstexprMath.hpp>
+#include <leoint.hpp>
+#include <LeoMath.h>
+#include <memory.hpp>
+#include <Tree.hpp>
 #include "Camera.hpp"
 #include "Vertex.hpp"
 #include "..\exception.hpp"

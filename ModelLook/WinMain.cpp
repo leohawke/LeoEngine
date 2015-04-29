@@ -19,6 +19,7 @@
 #include <Core\MeshLoad.hpp>
 #include <Core\EffectSkeleton.hpp>
 #include <Core\EffectGBuffer.hpp>
+#include <Core\Terrain.hpp>
 #include <Core\\EngineConfig.h>
 #include <Core\ShadowMap.hpp>
 #include <Core\Vertex.hpp>
@@ -55,12 +56,10 @@
 
 leo::Event event;
 std::unique_ptr<leo::Mesh> pModelMesh = nullptr;
-std::unique_ptr<leo::Mesh> pTerrainMesh = nullptr;
-std::unique_ptr<leo::Mesh> pBoxMesh = nullptr;
-std::unique_ptr<leo::Mesh> pSphereMesh = nullptr;
 std::unique_ptr<leo::UVNCamera> pCamera = nullptr;
 std::unique_ptr<leo::CastShadowCamera> pShaderCamera;
-std::unique_ptr<leo::Axis> pAxis = nullptr;
+
+std::unique_ptr<leo::Terrain<>> pTerrain = nullptr;
 
 std::atomic<bool> renderAble = false;
 std::atomic<bool> renderThreadRun = true;
@@ -379,23 +378,6 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	leo::DeferredResources::GetInstance();
 	leo::EffectGBuffer::GetInstance(leo::DeviceMgr().GetDevice());
 #endif
-	pAxis = std::make_unique<leo::Axis>(leo::DeviceMgr().GetDevice());
-
-
-	pTerrainMesh.reset(new leo::Mesh());
-	pSphereMesh.reset(new leo::Mesh());
-	pBoxMesh.reset(new leo::Mesh());
-
-	pTerrainMesh->Load(L"Resource/Terrain.l3d", leo::DeviceMgr().GetDevice());
-	pSphereMesh->Load(L"Resource/Sphere.l3d", leo::DeviceMgr().GetDevice());
-	pBoxMesh->Load(L"Resource/skull.l3d", leo::DeviceMgr().GetDevice());
-	pSphereMesh->Translation(leo::float3(-6.f, 6.5f, 0.f));
-
-	pSphereMesh->Scale(5.f);
-	pTerrainMesh->Scale(8.f);
-
-	pBoxMesh->Scale(2.f);
-	pBoxMesh->Translation(leo::float3(+0.f, -5.f, 0.0f));
 
 
 //Camera Set	
@@ -565,15 +547,14 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 
 	BuildLight(leo::DeviceMgr().GetDevice());
 #endif
+
+	pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(),L"Test.Terrain");
 }
 
 void ClearRes() {
 	leo::win::ReleaseCOM(mSSAOPSCB);
 
 	pModelMesh.reset(nullptr);
-	pTerrainMesh.reset(nullptr);
-	pBoxMesh.reset(nullptr);
-	pSphereMesh.reset(nullptr);
 
 	leo::win::ReleaseCOM(mSSAORandomVec);
 	leo::win::ReleaseCOM(mBlurSSAOSRV);
@@ -724,7 +705,6 @@ void Render()
 		//pAxis->Render(devicecontext, *pCamera);
 		//pTerrainMesh->Render(devicecontext, *pCamera);
 		//pSphereMesh->Render(devicecontext, *pCamera);
-		pBoxMesh->Render(devicecontext, *pCamera);
 
 		defereed.IASet();
 
@@ -742,7 +722,7 @@ void Render()
 		devicecontext->OMSetRenderTargets(1, &rtv, nullptr);
 		devicecontext->ClearRenderTargetView(rtv, ClearColor);
 
-		BlurSSAO(devicecontext,prevVP.Width,prevVP.Height);
+		BlurSSAO(devicecontext,unsigned int(prevVP.Width),unsigned int(prevVP.Height));
 		//ªÊ÷∆—”≥ŸBuff
 		{
 			//”“œ¬,◊Ó÷’ÕºœÒ
