@@ -377,6 +377,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	
 	leo::DeferredResources::GetInstance();
 	leo::EffectGBuffer::GetInstance(leo::DeviceMgr().GetDevice());
+	//leo::EffectTerrain::GetInstance(leo::DeviceMgr().GetDevice());
 #endif
 
 
@@ -536,28 +537,27 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateUnorderedAccessView(mTex, nullptr, &mBlurSwapSSAOUAV));
 	mTex->Release();
 
-	leo::CompilerBilaterCS(7, L"BilateralFilterCS.cso");
-	leo::CompilerBilaterCS(7, size, L"BilateralFilterVerCS.cso", L"BilateralFilterHorCS.cso");
-	auto mBlurCSBlob = sm.CreateBlob(leo::FileSearch::Search(L"BilateralFilterCS.cso"));
+	//leo::CompilerBilaterCS(7, L"BilateralFilterCS.cso");
+	//leo::CompilerBilaterCS(7, size, L"BilateralFilterVerCS.cso", L"BilateralFilterHorCS.cso");
+	//auto mBlurCSBlob = sm.CreateBlob(leo::FileSearch::Search(L"BilateralFilterCS.cso"));
 
-	mBlurSSAOCS = sm.CreateComputeShader(mBlurCSBlob);
+	//mBlurSSAOCS = sm.CreateComputeShader(mBlurCSBlob);
 
-	mBlurHorSSAOCS = sm.CreateComputeShader(leo::FileSearch::Search(L"BilateralFilterHorCS.cso"));
-	mBlurVerSSAOCS = sm.CreateComputeShader(leo::FileSearch::Search(L"BilateralFilterVerCS.cso"));
+	//mBlurHorSSAOCS = sm.CreateComputeShader(leo::FileSearch::Search(L"BilateralFilterHorCS.cso"));
+	//mBlurVerSSAOCS = sm.CreateComputeShader(leo::FileSearch::Search(L"BilateralFilterVerCS.cso"));
 
 	BuildLight(leo::DeviceMgr().GetDevice());
 #endif
 
-	pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(),L"Resource/Test.Terrain");
+	//pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(),L"Resource/Test.Terrain");
 	
-	pTerrain->Render(nullptr,*pCamera);
 }
 
 void ClearRes() {
 	leo::win::ReleaseCOM(mSSAOPSCB);
 
 	pModelMesh.reset(nullptr);
-
+	pTerrain.reset(nullptr);
 	leo::win::ReleaseCOM(mSSAORandomVec);
 	leo::win::ReleaseCOM(mBlurSSAOSRV);
 	leo::win::ReleaseCOM(mBlurSSAOUAV);
@@ -597,7 +597,7 @@ void Update(){
 
 		pl.diffuse = leo::float4(density, density, density, 1.f);
 
-		leo::DeviceMgr().GetDeviceContext()->UpdateSubresource(mPointLightPSCB, 0, nullptr, &pl, 0, 0);
+		//leo::DeviceMgr().GetDeviceContext()->UpdateSubresource(mPointLightPSCB, 0, nullptr, &pl, 0, 0);
 
 		static auto mBegin = leo::clock::now();
 
@@ -704,9 +704,8 @@ void Render()
 		
 		
 		defereed.OMSet();
-		//pAxis->Render(devicecontext, *pCamera);
-		//pTerrainMesh->Render(devicecontext, *pCamera);
-		//pSphereMesh->Render(devicecontext, *pCamera);
+		
+		//pTerrain->Render(devicecontext, *pCamera);
 
 		defereed.IASet();
 
@@ -758,7 +757,6 @@ void Render()
 			DrawSSAO(devicecontext);
 
 
-			leo::context_wrapper context(devicecontext);
 		}
 
 		defereed.UnIASet();

@@ -116,6 +116,7 @@ main(VertexOut pin) : SV_TARGET{
 
 		float rz = normal.SampleLevel(samNormalDepth, projQ.xy, 0.0f).a;
 
+
 		// Reconstruct full view space position r = (rx,ry,rz).  We know r
 		// lies on the ray of q, so there exists a t such that r = t*q.
 		// r.z = t*q.z ==> t = r.z / q.z
