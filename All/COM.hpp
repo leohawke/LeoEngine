@@ -52,7 +52,7 @@ namespace leo
 			template<typename COM>
 			struct com_deleter {
 				void operator()(COM* obj) {
-					ReleaseCOM(obj);
+					obj->Release();
 				}
 			};
 		}
@@ -265,7 +265,12 @@ namespace leo
 
 		template<typename COM>
 		decltype(auto) make_scope_com(COM&& obj) {
-			return unique_com<leo::remove_pointer_t<COM>, details::com_deleter<leo::remove_pointer_t<COM>>>(lforward(obj));
+			return unique_com<leo::remove_pointer_t<COM>>(lforward(obj));
+		}
+
+		template<typename COM>
+		decltype(auto) make_scope_com(std::nullptr_t = nullptr) {
+			return unique_com<COM>(nullptr);
 		}
 	}
 }

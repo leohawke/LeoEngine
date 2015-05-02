@@ -111,7 +111,9 @@ void DeviceEvent()
 void Render();
 void Update();
 
-void BuildRes(std::pair<leo::uint16,leo::uint16> size);
+void BuildRes(std::pair<leo::uint16, leo::uint16> size);
+
+void ReSize(std::pair<leo::uint16, leo::uint16> size);
 
 void ClearRes();
 
@@ -157,8 +159,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	leo::OutputWindow win;
 
 	auto clientSize = leo::EngineConfig::ClientSize();
-	if (!win.Create(GetModuleHandle(nullptr), clientSize, L"Model LooK", 
-		WS_BORDER | WS_SIZEBOX,0,
+	if (!win.Create(GetModuleHandle(nullptr), clientSize, L"Model LooK",
+		WS_BORDER | WS_SIZEBOX, 0,
 		MAKEINTRESOURCE(IDI_ICON1)))
 	{
 		return 0;
@@ -167,7 +169,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	HACCEL hAccel = LoadAccelerators(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDR_ACCELERATOR1));
 
 
-	
+
 
 	DeviceMgr.CreateDevice(false, clientSize);
 
@@ -186,11 +188,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 			{
 				auto size = std::make_pair<leo::uint16, leo::uint16>(LOWORD(lParam), HIWORD(lParam));
 				DeviceMgr.ReSize(size);
+				leo::DeferredResources::GetInstance().ReSize(size);
+				ReSize(size);
 				mHasDuration = leo::clock::to_duration<>(0.f);
 			}
 			else
 			{
-				mHasDuration += leo::clock::now()-mTimePoint;
+				mHasDuration += leo::clock::now() - mTimePoint;
 				mTimePoint = leo::clock::now();
 			}
 		}
@@ -218,7 +222,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 			if (pModelMesh->Load(GetOpenL3dFile(), leo::DeviceMgr().GetDevice()))
 				renderAble = (true);
 		}
-			break;
+		break;
 		case ID_ROLL_LEFT:
 			pCamera->Roll(-1.f);
 			break;
@@ -236,6 +240,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 			break;
 		case ID_PITCH_DOWN:
 			pCamera->Pitch(+1.f);
+			break;
+		case ID_WALK_GO:
+			pCamera->Walk(+1.f);
+			break;
+		case ID_WALK_BACK:
+			pCamera->Walk(-1.f);
+			break;
 		case ID_NORMALLINE:
 			if (!leo::EffectConfig::GetInstance()->NormalLine())
 			{
@@ -255,18 +266,18 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 		return 0;
 	};
 	win.BindMsgFunc(WM_COMMAND, cmdmsgproc);
-	
 
-	
-	
+
+
+
 #if 0
-	auto mouseproc = [&](HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
+	auto mouseproc = [&](HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		auto x = (float)GET_X_LPARAM(lParam);
 		auto y = (float)GET_Y_LPARAM(lParam);
 		leo::float4x4 inv;
 		leo::XMVECTOR temp;
 		auto ray = leo::Ray::Pick(vp, proj, leo::float2(x, y));
-		for (auto i = 0; i != 10;++i){
+		for (auto i = 0; i != 10;++i) {
 			leo::XMStoreFloat4x4A((leo::XMFLOAT4X4A*)&inv, leo::XMMatrixInverse(&temp, pCamera->View())*leo::XMMatrixInverse(&temp, mBoxSqts[i].operator DirectX::XMMATRIX()));
 
 			if (ray.Transform(inv).Normalize().Intersect(mBox.GetBoundingBox()).first)
@@ -279,7 +290,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	win.BindMsgFunc(WM_LBUTTONDOWN, mouseproc);
 	mBox.Color(leo::float4(1.f, 0.f, 0.f, 1.f));
 #endif
-	
+
 
 
 
@@ -300,15 +311,15 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 		}
 		else
 			::WaitMessage();
-		
+
 	}
 	renderThreadRun = false;
 	updateThread.join();
 	renderThread.join();
-	
-	
 
-	
+
+
+
 	leo::global::Destroy();
 	ClearRes();
 #ifdef DEBUG
@@ -317,7 +328,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	leo::SingletonManger::GetInstance()->UnInstallAllSingleton();
 
 
-	
+
 	return 0;
 }
 
@@ -352,9 +363,9 @@ void BuildLight(ID3D11Device* device) {
 	subData.SysMemSlicePitch = 0;
 
 	pl.diffuse = leo::float4(0.8f, 0.8f, 0.8f, 1.f);
-	pl.att = leo::float4(0.f,1.f,0.f,1.f);
+	pl.att = leo::float4(0.f, 1.f, 0.f, 1.f);
 	const float Radius = 9;
-	pl.position = leo::float4(Radius,0.f,0.f,8.f);
+	pl.position = leo::float4(Radius, 0.f, 0.f, 8.f);
 
 	leo::dxcall(device->CreateBuffer(&Desc, &subData, &mPointLightPSCB));
 }
@@ -366,22 +377,22 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	using leo::float3;
 
 	event.Wait();
-//Effect,Staic Instance	
+	//Effect,Staic Instance	
 #if 1
 	//leo::EffectNormalLine::GetInstance(leo::DeviceMgr().GetDevice());
 	leo::ShadowMap::GetInstance(leo::DeviceMgr().GetDevice(), std::make_pair(2048u, 2048u));
 	leo::EffectPack::GetInstance(leo::DeviceMgr().GetDevice());
-	
+
 	leo::EffectShadowMap::GetInstance(leo::DeviceMgr().GetDevice());
 	leo::EffectLine::GetInstance(leo::DeviceMgr().GetDevice());
-	
+
 	leo::DeferredResources::GetInstance();
 	leo::EffectGBuffer::GetInstance(leo::DeviceMgr().GetDevice());
 	leo::EffectTerrain::GetInstance(leo::DeviceMgr().GetDevice());
 #endif
 
 
-//Camera Set	
+	//Camera Set	
 #if 1
 	leo::Sphere mSphere{ leo::float3(0.0f, 0.0f, 0.0f),sqrtf(10.0f*10.0f + 15.0f*15.0f) };
 	float3 dir{ -0.5773f, -0.57735f,0.57735f };
@@ -389,19 +400,19 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pShaderCamera = std::make_unique<leo::CastShadowCamera>();
 	pShaderCamera->SetSphereAndDir(mSphere, dir);
 
-	
+
 
 	leo::float3 pos;
 	save(pos, leo::Multiply(leo::Splat(-2.f*mSphere.GetRadius()), leo::load(dir)));
 	pos.x = -pos.x;
 	pos.z = -pos.z;
 
-	pCamera->LookAt(float3(0.f,10.f,-10.f), float3(0.f,0.f,0.f), float3(0.f, 1.f, 0.f));
+	pCamera->LookAt(float3(0.f, 10.f, -10.f), float3(0.f, 0.f, 0.f), float3(0.f, 1.f, 0.f));
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
-	
+
 	leo::DeferredResources::GetInstance().SetFrustum(*pCamera);
 #endif
-//SSAO Dependent
+	//SSAO Dependent
 #if 1
 	//SSAO ,GPU资源
 	leo::ShaderMgr sm;
@@ -424,7 +435,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	subData.pSysMem = &ssao;
 	subData.SysMemPitch = 0;
 	subData.SysMemSlicePitch = 0;
-	
+
 	// 8 cube corners
 	ssao.gOffsetVectors[0] = leo::float4(+1.0f, +1.0f, +1.0f, 0.0f);
 	ssao.gOffsetVectors[1] = leo::float4(-1.0f, -1.0f, -1.0f, 0.0f);
@@ -449,21 +460,21 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	ssao.gOffsetVectors[13] = leo::float4(0.0f, 0.0f, +1.0f, 0.0f);
 
 	for (auto & v : ssao.gOffsetVectors) {
-		float s = (rand()*1.f  / RAND_MAX)*0.75f +0.25f;
+		float s = (rand()*1.f / RAND_MAX)*0.75f + 0.25f;
 		leo::save(v, leo::Multiply(load(v), s));
 	}
-	
+
 	float data[] = { 0.5f,0.f,0.f,0.f,
 					0.f,-0.5f,0.f,0.f,
 					0.f,0.f,1.f,0.f,
 					0.5f,0.5f,0.f,1.f };
-	leo::float4x4 toTex{data};
+	leo::float4x4 toTex{ data };
 
-	leo::save(ssao.gProj, 
+	leo::save(ssao.gProj,
 		leo::Transpose(
-		leo::Multiply(
-			leo::load(pCamera->Proj()),
-			load(toTex))));
+			leo::Multiply(
+				leo::load(pCamera->Proj()),
+				load(toTex))));
 
 
 	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateBuffer(&Desc, &subData, &mSSAOPSCB));
@@ -490,7 +501,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	{
 		for (int j = 0; j < 256; ++j)
 		{
-			leo::float3 v(rand()*1.f/RAND_MAX, rand()*1.f / RAND_MAX, rand()*1.f / RAND_MAX);
+			leo::float3 v(rand()*1.f / RAND_MAX, rand()*1.f / RAND_MAX, rand()*1.f / RAND_MAX);
 
 			color[i * 256 + j] = DirectX::PackedVector::XMCOLOR(v.x, v.y, v.z, 0.0f);
 		}
@@ -526,16 +537,19 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	SSAOTexDesc.CPUAccessFlags = 0;
 	SSAOTexDesc.MiscFlags = 0;
 
-	ID3D11Texture2D* mTex = nullptr;
-	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateTexture2D(&SSAOTexDesc, nullptr, &mTex));
-	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateShaderResourceView(mTex, nullptr, &mBlurSSAOSRV));
-	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateUnorderedAccessView(mTex, nullptr, &mBlurSSAOUAV));
-	mTex->Release();
-
-	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateTexture2D(&SSAOTexDesc, nullptr, &mTex));
-	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateShaderResourceView(mTex, nullptr, &mBlurSwapSSAOSRV));
-	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateUnorderedAccessView(mTex, nullptr, &mBlurSwapSSAOUAV));
-	mTex->Release();
+	using leo::win::make_scope_com;
+	{
+		auto mTex = make_scope_com<ID3D11Texture2D>();
+		leo::dxcall(leo::DeviceMgr().GetDevice()->CreateTexture2D(&SSAOTexDesc, nullptr, &mTex));
+		leo::dxcall(leo::DeviceMgr().GetDevice()->CreateShaderResourceView(mTex, nullptr, &mBlurSSAOSRV));
+		leo::dxcall(leo::DeviceMgr().GetDevice()->CreateUnorderedAccessView(mTex, nullptr, &mBlurSSAOUAV));
+	}
+	{
+		auto mTex = make_scope_com<ID3D11Texture2D>();
+		leo::dxcall(leo::DeviceMgr().GetDevice()->CreateTexture2D(&SSAOTexDesc, nullptr, &mTex));
+		leo::dxcall(leo::DeviceMgr().GetDevice()->CreateShaderResourceView(mTex, nullptr, &mBlurSwapSSAOSRV));
+		leo::dxcall(leo::DeviceMgr().GetDevice()->CreateUnorderedAccessView(mTex, nullptr, &mBlurSwapSSAOUAV));
+	}
 
 	leo::CompilerBilaterCS(7, L"BilateralFilterCS.cso");
 	leo::CompilerBilaterCS(7, size, L"BilateralFilterVerCS.cso", L"BilateralFilterHorCS.cso");
@@ -549,8 +563,8 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	BuildLight(leo::DeviceMgr().GetDevice());
 #endif
 
-	pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(),L"Resource/Test.Terrain");
-	
+	pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(), L"Resource/Test.Terrain");
+
 }
 
 void ClearRes() {
@@ -568,36 +582,81 @@ void ClearRes() {
 }
 
 
-void Update(){
+void ReSize(std::pair<leo::uint16, leo::uint16> size) {
+	//do many thing ,but 我不想写
+	//改变AO资源的大小
+	D3D11_TEXTURE2D_DESC SSAOTexDesc;
+#ifdef DEBUG
+	SSAOTexDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+#else
+	SSAOTexDesc.Format = DXGI_FORMAT_R32_FLOAT;;
+#endif
+	SSAOTexDesc.ArraySize = 1;
+	SSAOTexDesc.MipLevels = 1;
+
+	SSAOTexDesc.SampleDesc.Count = 1;
+	SSAOTexDesc.SampleDesc.Quality = 0;
+
+	SSAOTexDesc.Width = size.first / 2;
+	SSAOTexDesc.Height = size.second / 2;
+
+	SSAOTexDesc.Usage = D3D11_USAGE_DEFAULT;
+	SSAOTexDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+	SSAOTexDesc.CPUAccessFlags = 0;
+	SSAOTexDesc.MiscFlags = 0;
+
+	using leo::win::make_scope_com;
+	{
+		auto mTex = make_scope_com<ID3D11Texture2D>();
+		leo::dxcall(leo::DeviceMgr().GetDevice()->CreateTexture2D(&SSAOTexDesc, nullptr, &mTex));
+		mBlurSSAOSRV->Release();
+		mBlurSSAOUAV->Release();
+		leo::dxcall(leo::DeviceMgr().GetDevice()->CreateShaderResourceView(mTex, nullptr, &mBlurSSAOSRV));
+		leo::dxcall(leo::DeviceMgr().GetDevice()->CreateUnorderedAccessView(mTex, nullptr, &mBlurSSAOUAV));
+	}
+	{
+		auto mTex = make_scope_com<ID3D11Texture2D>();
+		leo::dxcall(leo::DeviceMgr().GetDevice()->CreateTexture2D(&SSAOTexDesc, nullptr, &mTex));
+		mBlurSwapSSAOSRV->Release();
+		mBlurSwapSSAOUAV->Release();
+		leo::dxcall(leo::DeviceMgr().GetDevice()->CreateShaderResourceView(mTex, nullptr, &mBlurSwapSSAOSRV));
+		leo::dxcall(leo::DeviceMgr().GetDevice()->CreateUnorderedAccessView(mTex, nullptr, &mBlurSwapSSAOUAV));
+	}
+
+
+}
+
+void Update() {
 	while (renderThreadRun)
 	{
-		
+
 		leo::win::KeysState::GetInstance()->Update();
 
 		std::lock_guard<std::mutex> lock(mRenderMutex);
 		const float Radius = 9;
-		const float cosb = std::cos(1.f/leo::LM_DPR);
-		const float sinb = std::sin(1.f /leo::LM_DPR);
+		const float cosb = std::cos(1.f / leo::LM_DPR);
+		const float sinb = std::sin(1.f / leo::LM_DPR);
 
 		//cos(a+b) = cos(a) cos(b) - sin(a) sin(b) 
 		//sin(a + b) = sin(a) cos(b) + sin(b) cos(a)
 		//cosa = x ,sina = y
 		//sinb = sin(pi/180)
-		auto cosa = pl.position.x/Radius;
-		auto sina = pl.position.y/Radius;
+		auto cosa = pl.position.x / Radius;
+		auto sina = pl.position.y / Radius;
 		pl.position.x = cosa*cosb - sina*sinb;
 		pl.position.y = sina*cosb + sinb*cosa;
 
 		pl.position.x *= Radius;
 		pl.position.y *= Radius;
 
-		auto density = pl.position.y/ Radius;
+		auto density = pl.position.y / Radius;
 		leo::clamp(0.f, 1.f, density);
 
 
 		pl.diffuse = leo::float4(density, density, density, 1.f);
 
 		//leo::DeviceMgr().GetDeviceContext()->UpdateSubresource(mPointLightPSCB, 0, nullptr, &pl, 0, 0);
+
 
 		static auto mBegin = leo::clock::now();
 
@@ -608,7 +667,7 @@ void Update(){
 	}
 }
 
-void ComputeSSAO(ID3D11DeviceContext* context ) {
+void ComputeSSAO(ID3D11DeviceContext* context) {
 	ID3D11RenderTargetView* mMRTs[] = { leo::DeferredResources::GetInstance().GetSSAORTV(),nullptr };
 	context->OMSetRenderTargets(2, mMRTs, nullptr);
 	float ClearColor[4] = { 0.0f, 0.25f, 0.25f, 0.8f };
@@ -622,12 +681,12 @@ void ComputeSSAO(ID3D11DeviceContext* context ) {
 	context->Draw(4, 0);
 }
 
-void BlurSSAO(ID3D11DeviceContext* context,unsigned width, unsigned height) {
+void BlurSSAO(ID3D11DeviceContext* context, unsigned width, unsigned height) {
 	auto srv = leo::DeferredResources::GetInstance().GetSSAOSRV();
-	
+
 	context->CSSetShader(mBlurHorSSAOCS, nullptr, 0);
 	context->CSSetShaderResources(0, 1, &srv);
-	context->CSSetUnorderedAccessViews(0, 1, &mBlurSwapSSAOUAV,nullptr);//swapUAV
+	context->CSSetUnorderedAccessViews(0, 1, &mBlurSwapSSAOUAV, nullptr);//swapUAV
 
 	context->Dispatch(width, 1, 1);
 
@@ -644,18 +703,19 @@ void BlurSSAO(ID3D11DeviceContext* context,unsigned width, unsigned height) {
 	context->CSSetShaderResources(0, 1, &mSRV);
 
 
-	ID3D11Resource* mBlurSSAORes = nullptr;
 
-	auto mSSAORes = leo::win::make_scope_com<ID3D11Resource*>(nullptr);
+	using leo::win::make_scope_com;
+
+	auto mSSAORes = make_scope_com<ID3D11Resource>();
+	auto mBlurSSAORes = make_scope_com<ID3D11Resource>();
 	srv->GetResource(&mSSAORes);
 	mBlurSSAOSRV->GetResource(&mBlurSSAORes);
 	context->CopyResource(mSSAORes, mBlurSSAORes);
 
-	leo::win::ReleaseCOM(mBlurSSAORes);
 }
 
 void DrawSSAO(ID3D11DeviceContext* context) {
-	
+
 
 	auto srv = leo::DeferredResources::GetInstance().GetSSAOSRV();
 	context->PSSetShader(mGBufferPS, nullptr, 0);
@@ -685,15 +745,16 @@ void Render()
 	{
 		leo::DeviceMgr dm;
 
-		
+		pCamera->UpdateViewMatrix();
+
 		leo::RenderSync::GetInstance()->Sync();
 		std::lock_guard<std::mutex> lock(mRenderMutex);
 
 		auto devicecontext = dm.GetDeviceContext();
-		
+
 #if 0
 		//Build Shadow Map
-	
+
 		//leo::ShadowMap::GetInstance().BeginShadowMap(devicecontext,*pShaderCamera);
 		if (renderAble)
 			pModelMesh->CastShadow(devicecontext);
@@ -705,10 +766,10 @@ void Render()
 		//leo::ShadowMap::GetInstance().EndShadowMap(devicecontext);
 #endif
 		auto& defereed = leo::DeferredResources::GetInstance();
-		
-		
+
+
 		defereed.OMSet();
-		
+
 		pTerrain->Render(devicecontext, *pCamera);
 
 		defereed.IASet();
@@ -727,7 +788,7 @@ void Render()
 		devicecontext->OMSetRenderTargets(1, &rtv, nullptr);
 		devicecontext->ClearRenderTargetView(rtv, ClearColor);
 
-		BlurSSAO(devicecontext,unsigned int(prevVP.Width),unsigned int(prevVP.Height));
+		BlurSSAO(devicecontext, unsigned int(prevVP.Width), unsigned int(prevVP.Height));
 		//绘制延迟Buff
 		{
 			//右下,最终图像
@@ -749,7 +810,7 @@ void Render()
 			//右上 绘制颜色
 			currvp.TopLeftX += currvp.Width;
 			devicecontext->RSSetViewports(1, &currvp);
-			devicecontext->PSSetShaderResources(0,1,&srvs[1]);
+			devicecontext->PSSetShaderResources(0, 1, &srvs[1]);
 			devicecontext->Draw(4, 0);
 
 

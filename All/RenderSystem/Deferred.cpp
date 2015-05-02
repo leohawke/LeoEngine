@@ -132,8 +132,11 @@ void DeferredResources::ReSize(const size_type& size) noexcept {
 	SSAOTexDesc.CPUAccessFlags = 0;
 	SSAOTexDesc.MiscFlags = 0;
 
-	ID3D11Texture2D* mTex = nullptr;
+	using leo::win::make_scope_com;
+	auto mTex = make_scope_com<ID3D11Texture2D>();
 	device->CreateTexture2D(&SSAOTexDesc, nullptr, &mTex);
+	mSSAOSRV? mSSAOSRV->Release():0;
+	mSSAPRTV? mSSAPRTV->Release():0;
 	device->CreateShaderResourceView(mTex, nullptr, &mSSAOSRV);
 	device->CreateRenderTargetView(mTex, nullptr, &mSSAPRTV);
 	mTex->Release();
