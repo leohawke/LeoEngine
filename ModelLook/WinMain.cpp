@@ -377,7 +377,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	
 	leo::DeferredResources::GetInstance();
 	leo::EffectGBuffer::GetInstance(leo::DeviceMgr().GetDevice());
-	//leo::EffectTerrain::GetInstance(leo::DeviceMgr().GetDevice());
+	leo::EffectTerrain::GetInstance(leo::DeviceMgr().GetDevice());
 #endif
 
 
@@ -537,19 +537,19 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	leo::dxcall(leo::DeviceMgr().GetDevice()->CreateUnorderedAccessView(mTex, nullptr, &mBlurSwapSSAOUAV));
 	mTex->Release();
 
-	//leo::CompilerBilaterCS(7, L"BilateralFilterCS.cso");
-	//leo::CompilerBilaterCS(7, size, L"BilateralFilterVerCS.cso", L"BilateralFilterHorCS.cso");
-	//auto mBlurCSBlob = sm.CreateBlob(leo::FileSearch::Search(L"BilateralFilterCS.cso"));
+	leo::CompilerBilaterCS(7, L"BilateralFilterCS.cso");
+	leo::CompilerBilaterCS(7, size, L"BilateralFilterVerCS.cso", L"BilateralFilterHorCS.cso");
+	auto mBlurCSBlob = sm.CreateBlob(leo::FileSearch::Search(L"BilateralFilterCS.cso"));
 
-	//mBlurSSAOCS = sm.CreateComputeShader(mBlurCSBlob);
+	mBlurSSAOCS = sm.CreateComputeShader(mBlurCSBlob);
 
-	//mBlurHorSSAOCS = sm.CreateComputeShader(leo::FileSearch::Search(L"BilateralFilterHorCS.cso"));
-	//mBlurVerSSAOCS = sm.CreateComputeShader(leo::FileSearch::Search(L"BilateralFilterVerCS.cso"));
+	mBlurHorSSAOCS = sm.CreateComputeShader(leo::FileSearch::Search(L"BilateralFilterHorCS.cso"));
+	mBlurVerSSAOCS = sm.CreateComputeShader(leo::FileSearch::Search(L"BilateralFilterVerCS.cso"));
 
 	BuildLight(leo::DeviceMgr().GetDevice());
 #endif
 
-	//pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(),L"Resource/Test.Terrain");
+	pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(),L"Resource/Test.Terrain");
 	
 }
 
@@ -648,6 +648,9 @@ void BlurSSAO(ID3D11DeviceContext* context,unsigned width, unsigned height) {
 	srv->GetResource(&mSSAORes);
 	mBlurSSAOSRV->GetResource(&mBlurSSAORes);
 	context->CopyResource(mSSAORes, mBlurSSAORes);
+
+	leo::win::ReleaseCOM(mSSAORes);
+	leo::win::ReleaseCOM(mBlurSSAORes);
 }
 
 void DrawSSAO(ID3D11DeviceContext* context) {
@@ -705,7 +708,7 @@ void Render()
 		
 		defereed.OMSet();
 		
-		//pTerrain->Render(devicecontext, *pCamera);
+		pTerrain->Render(devicecontext, *pCamera);
 
 		defereed.IASet();
 
