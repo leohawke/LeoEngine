@@ -643,13 +643,14 @@ void BlurSSAO(ID3D11DeviceContext* context,unsigned width, unsigned height) {
 	context->CSSetUnorderedAccessViews(0, 1, &mUAV, nullptr);
 	context->CSSetShaderResources(0, 1, &mSRV);
 
-	ID3D11Resource* mSSAORes = nullptr;
+
 	ID3D11Resource* mBlurSSAORes = nullptr;
+
+	auto mSSAORes = leo::win::make_scope_com<ID3D11Resource*>(nullptr);
 	srv->GetResource(&mSSAORes);
 	mBlurSSAOSRV->GetResource(&mBlurSSAORes);
 	context->CopyResource(mSSAORes, mBlurSSAORes);
 
-	leo::win::ReleaseCOM(mSSAORes);
 	leo::win::ReleaseCOM(mBlurSSAORes);
 }
 
