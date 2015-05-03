@@ -1,5 +1,4 @@
-
-
+#include "common.hlsli"
 cbuffer  cbMatrix{
 	float4x4 gViewProj;
 	float2 gOffset;
@@ -26,7 +25,7 @@ struct VertexOut
 {
 	float4 PosH : SV_POSITION;
 	float2 Tex : TEXCOORD;
-	float3 NormalV :NORMAL;
+	half3 NormalV :NORMAL;
 };
 
 VertexOut main(VertexIn vin)
@@ -40,5 +39,6 @@ VertexOut main(VertexIn vin)
 	VertexOut vout;
 	vout.PosH = mul(float4(newpos.x, y, newpos.y, 1.f), gViewProj);
 	vout.Tex = uv;
+	vout.NormalV = Sobel(uv, gHeightMap, ClampPoint);
 	return vout;
 }

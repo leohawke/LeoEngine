@@ -9,6 +9,7 @@ struct PixelIn
 {
 	float4 PosH : SV_POSITION;
 	float2 Tex : TEXCOORD;
+	half3 NormalV :NORMAL;
 };
 
 Texture2D<float4> gAlphaTexture : register(t0);
@@ -55,11 +56,11 @@ void main(PixelIn pin,out half4 NormalDepth: SV_TARGET0,
 	float4 c2 = gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 3.f));
 	float4 c3 = gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 4.f));
 
-	half3 normal = gNormalMap.Sample(RepeatLinear, pin.Tex);
-	CompressUnsignedNormalToNormalsBuffer(normal);
+	half3 restoreNormal = pin.NormalV;
+	CompressUnsignedNormalToNormalsBuffer(restoreNormal);
 
 
-	NormalDepth = half4(normal, pin.PosH.z / pin.PosH.w);
+	NormalDepth = half4(restoreNormal, pin.PosH.z / pin.PosH.w);
 	color = lerp(color,c0,weight.r);
 	color = lerp(color, c1, weight.g);
 	color = lerp(color, c2, weight.b);

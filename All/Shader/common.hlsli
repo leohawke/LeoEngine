@@ -1,15 +1,15 @@
-float3 Sobel(float2 texcoord, Texture2D tex, SamplerState s) {
+float3 Sobel(float2 texcoord, Texture2D<half> tex, SamplerState s) {
 	float4 r = tex.GatherRed(s, texcoord,
 		int2(-1, -1),//top-left00
 		int2(0, -1),//top-middle10
 		int2(1, -1),//top-right20
-		int2(-1, 0),//middle-left01
+		int2(-1, 0)//middle-left01
 		);
 	float4 g = tex.GatherRed(s, texcoord,
 		int2(1, 0),//middle-right21
 		int2(-1, 1),//top-middle02
 		int2(0, 1),//top-right12
-		int2(1, 1),//middle-left22
+		int2(1, 1)//middle-left22
 		);
 
 	//[ r.x r.y r.z ]   [ 1  2  1 ]
