@@ -6,15 +6,16 @@ cbuffer  cbMatrix{
 	float2 gUVScale;
 };
 
-Texture2D gNoiseTexure : register(t0);
-SamplerState RepeatPoint:register(s0)
+
+Texture2D<half> gHeightMap : register(t0);
+
+SamplerState ClampPoint:register(s0)
 {
 	Filter = MIN_MAG_MIP_POINT;
-	AddressU = Wrap;
-	AddressV = Wrap;
+	AddressU = Clamp;
+	AddressV = Clamp;
 };
 
-#include "Noise.hlsli"
 
 struct VertexIn
 {
@@ -25,19 +26,17 @@ struct VertexOut
 {
 	float4 PosH : SV_POSITION;
 	float2 Tex : TEXCOORD;
+	float3 NormalV :NORMAL;
 };
 
 VertexOut main(VertexIn vin)
 {
 	float2 newpos = f16tof32(vin.pos) + gOffset;
-		float2 uv = newpos*gUVScale + float2(0.5f, 0.5f);
-		uv.y = 1.f - uv.y;
-	float NoiseScale = 5.f;
-#if 0
-	float y = hybridTerrain(NoiseScale*uv, int3(3, 3, 1))-0.5f;
-#endif
-	float y = inoise(NoiseScale*uv);
-	y *= 5;
+	float2 uv = newpos*gUVScale + float2(0.5f, 0.5f);
+	uv.y = 1.f - uv.y;
+	
+	float y = gHeightMap.SampleLevel(ClampPoint, uv, 0);
+
 	VertexOut vout;
 	vout.PosH = mul(float4(newpos.x, y, newpos.y, 1.f), gViewProj);
 	vout.Tex = uv;

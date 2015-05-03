@@ -248,8 +248,8 @@ namespace leo
 					return size[i];
 				};
 
-				mNormaMapHorSize = clamp_size(uint16(mChunkSize*mHorChunkNum*mChunkSize / MAXEDGE));
-				mNormaMapVerSize = clamp_size(uint16(mChunkSize*mVerChunkNum*mChunkSize / MAXEDGE));
+				mNormaMapHorSize = clamp_size(uint16(mChunkSize*mHorChunkNum*mChunkSize*8 / MAXEDGE));
+				mNormaMapVerSize = clamp_size(uint16(mChunkSize*mVerChunkNum*mChunkSize*8 / MAXEDGE));
 
 				float4 Params{ 1.f / mNormaMapHorSize,1.f / mNormaMapVerSize,5.f,5.f };
 
@@ -316,7 +316,7 @@ namespace leo
 	public:
 		void Render(ID3D11DeviceContext* context, const Camera& camera)
 		{
-			bool has_normal_map = false;
+			static bool has_normal_map = false;
 			if (!has_normal_map) {
 				ComputerNormalMap(context);
 				has_normal_map = true;

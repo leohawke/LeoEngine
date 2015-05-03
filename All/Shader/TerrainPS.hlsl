@@ -13,7 +13,6 @@ struct PixelIn
 
 Texture2D<float4> gAlphaTexture : register(t0);
 Texture2DArray gMatTexture :  register(t1);
-Texture2D<half3> gNormalMap : register(t2);
 SamplerState RepeatLinear:register(s0)
 {
 	Filter = MIN_MAG_MIP_LINEAR;
@@ -21,7 +20,7 @@ SamplerState RepeatLinear:register(s0)
 	AddressV = Wrap;
 };
 
-Texture2D texNormals:register(t3);
+Texture2D texNormals:register(t2);
 SamplerState normalSampler:register(s1);
 
 void CompressUnsignedNormalToNormalsBuffer(inout half3 vNormal)
