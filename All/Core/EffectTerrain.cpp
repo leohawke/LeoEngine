@@ -24,9 +24,9 @@ namespace leo
 			mPS = SM.CreatePixelShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"terrain", D3D11_PIXEL_SHADER)));
 
 			leo::RenderStates SS;
-			mSS = SS.GetSamplerState(L"NearestRepeat");
+			mLinearClamp = SS.GetSamplerState(L"LinearClamp");
 
-			mPSSS = SS.GetSamplerState(L"LinearRepeat");
+			mLinearRepeat = SS.GetSamplerState(L"LinearRepeat");
 
 			normalSampler = SS.GetSamplerState(L"trilinearSampler");
 
@@ -37,20 +37,24 @@ namespace leo
 		{
 			context_wrapper context(con);
 
-			context.VSSetShader(mVS, nullptr, 0);
 			mVSCBPerMatrix.Update(con);
+
+			context.VSSetShader(mVS, nullptr, 0);
+
 			context.VSSetConstantBuffers(0, 1, &mVSCBPerMatrix.mBuffer);
+			context->VSSetShaderResources(0, 1, &mHeightSRV);
+			context->VSSetSamplers(0, 1, &mLinearClamp);
+
 			context.PSSetShader(mPS, nullptr, 0);
 #ifdef DEBUG
 			context.PSSetConstantBuffers(0, 1, &mPSCBPerLodColor.mBuffer);
 #endif
-			context->VSSetShaderResources(0, 1, &mSRV);
-			context->VSSetSamplers(0, 1, &mSS);
+			
 
-			ID3D11SamplerState* mPSSSs[] = { mPSSS,normalSampler };
+			ID3D11SamplerState* mPSSSs[] = { mLinearRepeat,normalSampler };
 
 			context.PSSetSamplers(0, 2, mPSSSs);
-			ID3D11ShaderResourceView* mArray[] = { mWeightSRV, mPSSRVArray,mNormalMapSRV,texNormals };
+			ID3D11ShaderResourceView* mArray[] = { mWeightSRV, mPSSRVArray,texNormals };
 			context.PSSetShaderResources(0,arrlen(mArray), mArray);
 		}
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow
@@ -79,15 +83,15 @@ namespace leo
 			if (context)
 				mVSCBPerMatrix.Update(context);
 		}
+		
 		void HeightMap(ID3D11ShaderResourceView * srv, ID3D11DeviceContext * context)
 		{
-			mSRV = srv;
+			mHeightSRV = srv;
 			if (context)
-				context->VSSetShaderResources(0, 1, &mSRV);
+				context->VSSetShaderResources(0, 1, &mHeightSRV);
 		}
 
-		void WeightMap(ID3D11ShaderResourceView* srv, ID3D11DeviceContext* context)
-		{
+		void WeightMap(ID3D11ShaderResourceView * srv, ID3D11DeviceContext * context) {
 			mWeightSRV = srv;
 			if (context)
 				context->PSSetShaderResources(0, 1, &mWeightSRV);
@@ -106,11 +110,6 @@ namespace leo
 			mPSCBPerLodColor.Update(context);
 		}
 #endif
-		void NormalMap(ID3D11ShaderResourceView* srv, ID3D11DeviceContext * context) {
-			mNormalMapSRV = srv;
-			if (context)
-				context->PSSetShaderResources(2, 1, &mWeightSRV);
-		}
 	public:
 	private:
 		struct vsCBMatrix
@@ -132,15 +131,15 @@ namespace leo
 
 		ID3D11VertexShader* mVS = nullptr;
 		ID3D11PixelShader* mPS = nullptr;
-		ID3D11SamplerState* mSS = nullptr;
-		ID3D11ShaderResourceView* mSRV = nullptr;
+		ID3D11SamplerState* mLinearClamp = nullptr;
+
+		ID3D11ShaderResourceView* mHeightSRV = nullptr;
+
 
 		ID3D11ShaderResourceView* mWeightSRV = nullptr;
 		ID3D11ShaderResourceView* mPSSRVArray = nullptr;
 
-		ID3D11ShaderResourceView* mNormalMapSRV = nullptr;
-
-		ID3D11SamplerState* mPSSS = nullptr;
+		ID3D11SamplerState* mLinearRepeat = nullptr;
 
 		ID3D11ShaderResourceView *texNormals = nullptr;
 
@@ -202,15 +201,6 @@ namespace leo
 		lassume(dynamic_cast<EffectTerrainDelegate *>(this));
 
 		return ((EffectTerrainDelegate *)this)->WeightMap(
-			srv, context
-			);
-	}
-
-	void leo::EffectTerrain::NormalMap(ID3D11ShaderResourceView * srv, ID3D11DeviceContext * context)
-	{
-		lassume(dynamic_cast<EffectTerrainDelegate *>(this));
-
-		return ((EffectTerrainDelegate *)this)->NormalMap(
 			srv, context
 			);
 	}

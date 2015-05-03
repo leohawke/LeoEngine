@@ -223,7 +223,7 @@ namespace leo
 			}
 			Catch_DX_Exception
 			leo::TextureMgr tm;
-			mHeightMap = tm.LoadTextureSRV(mTerrainFileHeader.mHeightMap);
+			mNoiseMap = tm.LoadTextureSRV(mTerrainFileHeader.mHeightMap);
 
 			mWeightMap = tm.LoadTextureSRV(L"Resource/blend.dds");
 			mMatArrayMap = tm.LoadTexture2DArraySRV(std::array<const wchar_t*, 5>({
@@ -269,7 +269,7 @@ namespace leo
 
 				D3D11_TEXTURE2D_DESC NormalMapTexDesc;
 
-				NormalMapTexDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+				NormalMapTexDesc.Format = DXGI_FORMAT_R16_FLOAT;
 
 				NormalMapTexDesc.ArraySize = 1;
 				NormalMapTexDesc.MipLevels = 1;
@@ -288,8 +288,8 @@ namespace leo
 				auto mTex = leo::win::make_scope_com<ID3D11Texture2D>();
 
 				leo::dxcall(device->CreateTexture2D(&NormalMapTexDesc, nullptr, &mTex));
-				leo::dxcall(device->CreateShaderResourceView(mTex, nullptr, &mNormalMapSRV));
-				leo::dxcall(device->CreateUnorderedAccessView(mTex, nullptr, &mNormalMapUAV));
+				leo::dxcall(device->CreateShaderResourceView(mTex, nullptr, &mHeightMapSRV));
+				leo::dxcall(device->CreateUnorderedAccessView(mTex, nullptr, &mHeightMapUAV));
 
 				leo::ShaderMgr SM;
 				mCHMCS = SM.CreateComputeShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"terrain", D3D11_COMPUTE_SHADER)));
@@ -331,11 +331,10 @@ namespace leo
 
 			auto & mEffect = EffectTerrain::GetInstance();
 			mEffect->ViewProjMatrix(camera.ViewProj());
-			mEffect->HeightMap(mHeightMap);
+			mEffect->HeightMap(mHeightMapSRV);
 			mEffect->UVScale(float2(1.f / mHorChunkNum / mChunkSize, 1.f / mVerChunkNum / mChunkSize));
 			mEffect->WeightMap(mWeightMap);
 			mEffect->MatArrayMap(mMatArrayMap);
-			mEffect->NormalMap(mNormalMapSRV);
 			mEffect->Apply(context);
 
 			mNeedDrawChunks.clear();
@@ -553,7 +552,7 @@ namespace leo
 		uint16 mNormaMapHorSize;
 		uint16 mNormaMapVerSize;
 
-		ID3D11ShaderResourceView* mHeightMap;
+		ID3D11ShaderResourceView* mNoiseMap;
 
 		ID3D11ShaderResourceView* mWeightMap;
 		ID3D11ShaderResourceView* mMatArrayMap;
@@ -582,8 +581,8 @@ namespace leo
 
 		ID3D11SamplerState* mSS = nullptr;
 
-		leo::win::unique_com<ID3D11ShaderResourceView> mNormalMapSRV = nullptr;
-		leo::win::unique_com<ID3D11UnorderedAccessView> mNormalMapUAV = nullptr;
+		leo::win::unique_com<ID3D11ShaderResourceView> mHeightMapSRV = nullptr;
+		leo::win::unique_com<ID3D11UnorderedAccessView> mHeightMapUAV = nullptr;
 
 		leo::win::unique_com<ID3D11Buffer> mCHMCSCB = nullptr;
 	private:
@@ -716,9 +715,9 @@ namespace leo
 
 		void ComputerNormalMap(ID3D11DeviceContext* context) {
 			context->CSSetShader(mCHMCS, nullptr, 0);
-			context->CSSetUnorderedAccessViews(0, 1, &mNormalMapUAV, nullptr);
+			context->CSSetUnorderedAccessViews(0, 1, &mHeightMapUAV, nullptr);
 			context->CSSetConstantBuffers(0, 1, &mCHMCSCB);
-			context->CSSetShaderResources(0, 1, &mHeightMap);
+			context->CSSetShaderResources(0, 1, &mNoiseMap);
 			context->CSSetSamplers(0, 1, &mSS);
 
 			context->Dispatch(mNormaMapHorSize / 32, mNormaMapVerSize / 32, 1);

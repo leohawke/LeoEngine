@@ -14,8 +14,6 @@ cbuffer cbCHMCS :register(c0){
 	float4 gParam;//x,y=>UVScale,z=>NoiseScale,w=>HeightScale
 };
 
-groupshared float Height[32 * 32];
-
 
 #include "Noise.hlsli"
 [numthreads(32,32, 1)]
