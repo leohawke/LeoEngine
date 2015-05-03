@@ -33,6 +33,9 @@ namespace leo
 #endif
 		void MatArrayMap(ID3D11ShaderResourceView * srv, ID3D11DeviceContext * context = nullptr);
 		void WeightMap(ID3D11ShaderResourceView * srv, ID3D11DeviceContext * context = nullptr);
+
+		void NormalMap(ID3D11ShaderResourceView * srv, ID3D11DeviceContext * context = nullptr);
+
 	public:
 		static const std::unique_ptr<EffectTerrain>& GetInstance(ID3D11Device* device = nullptr);
 	};

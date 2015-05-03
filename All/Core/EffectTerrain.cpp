@@ -206,7 +206,14 @@ namespace leo
 			);
 	}
 
+	void leo::EffectTerrain::NormalMap(ID3D11ShaderResourceView * srv, ID3D11DeviceContext * context)
+	{
+		lassume(dynamic_cast<EffectTerrainDelegate *>(this));
 
+		return ((EffectTerrainDelegate *)this)->NormalMap(
+			srv, context
+			);
+	}
 
 	bool EffectTerrain::SetLevel(EffectConfig::EffectLevel l) lnothrow
 	{

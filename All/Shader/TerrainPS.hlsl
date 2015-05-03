@@ -22,7 +22,7 @@ SamplerState RepeatLinear:register(s0)
 };
 
 Texture2D texNormals:register(t3);
-SamplerState normalSampler:register(s2);
+SamplerState normalSampler:register(s1);
 
 void CompressUnsignedNormalToNormalsBuffer(inout half3 vNormal)
 {
@@ -46,8 +46,7 @@ void CompressUnsignedNormalToNormalsBuffer(inout half3 vNormal)
 	vNormal.rgb = vNormal.rgb * .5h + .5h;
 }
 
-
-float4 main(out half4 NormalDepth: SV_TARGET0,
+void main(PixelIn pin,out half4 NormalDepth: SV_TARGET0,
 	out float4 DiffuseSpec : SV_TARGET1)
 {
 	float4 weight = gAlphaTexture.Sample(RepeatLinear, pin.Tex);
@@ -57,12 +56,20 @@ float4 main(out half4 NormalDepth: SV_TARGET0,
 	float4 c2 = gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 3.f));
 	float4 c3 = gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 4.f));
 
+	half3 normal = gNormalMap.Sample(RepeatLinear, pin.Tex);
+	CompressUnsignedNormalToNormalsBuffer(normal);
+
+
+	NormalDepth = half4(normal, pin.PosH.z / pin.PosH.w);
 	color = lerp(color,c0,weight.r);
 	color = lerp(color, c1, weight.g);
 	color = lerp(color, c2, weight.b);
 	color = lerp(color, c3, weight.a);
 #ifdef DEBUG
-	return color*0.75f + gColor*0.25f;
+	DiffuseSpec.xyz = color.xyz*0.75f + gColor.xyz*0.25f;
+#else
+	DiffuseSpec.xyz = color.xyz;
 #endif
-	return color;
+
+	DiffuseSpec.w = 1.f;
 }

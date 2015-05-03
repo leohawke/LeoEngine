@@ -244,7 +244,7 @@ namespace leo
 						else
 							break;
 					}
-					i = min(i, arrlen(size) - 1);
+					i = std::min<size_t>(i, arrlen(size) - 1);
 					return size[i];
 				};
 
@@ -293,6 +293,9 @@ namespace leo
 
 				leo::ShaderMgr SM;
 				mCHMCS = SM.CreateComputeShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"terrain", D3D11_COMPUTE_SHADER)));
+
+				leo::RenderStates SS;
+				mSS = SS.GetSamplerState(L"NearestRepeat");
 			}
 		}
 		~Terrain()
@@ -332,6 +335,7 @@ namespace leo
 			mEffect->UVScale(float2(1.f / mHorChunkNum / mChunkSize, 1.f / mVerChunkNum / mChunkSize));
 			mEffect->WeightMap(mWeightMap);
 			mEffect->MatArrayMap(mMatArrayMap);
+			mEffect->NormalMap(mNormalMapSRV);
 			mEffect->Apply(context);
 
 			mNeedDrawChunks.clear();
@@ -576,7 +580,7 @@ namespace leo
 
 		ID3D11ComputeShader* mCHMCS = nullptr;
 
-	
+		ID3D11SamplerState* mSS = nullptr;
 
 		leo::win::unique_com<ID3D11ShaderResourceView> mNormalMapSRV = nullptr;
 		leo::win::unique_com<ID3D11UnorderedAccessView> mNormalMapUAV = nullptr;
@@ -711,6 +715,17 @@ namespace leo
 		}
 
 		void ComputerNormalMap(ID3D11DeviceContext* context) {
+			context->CSSetShader(mCHMCS, nullptr, 0);
+			context->CSSetUnorderedAccessViews(0, 1, &mNormalMapUAV, nullptr);
+			context->CSSetConstantBuffers(0, 1, &mCHMCSCB);
+			context->CSSetShaderResources(0, 1, &mHeightMap);
+			context->CSSetSamplers(0, 1, &mSS);
+
+			context->Dispatch(mNormaMapHorSize / 32, mNormaMapVerSize / 32, 1);
+
+			ID3D11UnorderedAccessView* mNullptrUAV = nullptr;
+			context->CSSetUnorderedAccessViews(0, 1, &mNullptrUAV, nullptr);
+			context->CSSetShader(nullptr, nullptr, 0);
 
 		}
 	};
