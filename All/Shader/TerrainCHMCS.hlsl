@@ -8,13 +8,14 @@ SamplerState RepeatPoint:register(s0)
 	AddressV = Wrap;
 };
 
-RWTexture2D<float3> Output:register(u0);
+RWTexture2D<half3> Output:register(u0);
 
 cbuffer cbCHMCS {
 	float4 gParam;//x,y=>UVScale,z=>NoiseScale,w=>HeightScale
 };
 
 groupshared float Height[32 * 32];
+
 
 #include "Noise.hlsli"
 [numthreads(32,32, 1)]
@@ -67,5 +68,7 @@ void main( uint3 DTid : SV_DispatchThreadID,uint2 GTid:SV_GroupThreadID )
 
 	float dz = 0.01f*sqrt(max(0.f, 1.f - dx*dx - dy*dy));
 
-	Output[DTid.xy] = normalize(float3(2.f*dx, dz, 2.f*dy));
+	half3 Normal = normalize(half3(2.f*dx, dz, 2.f*dy));
+
+	Output[DTid.xy] = Normal;
 }

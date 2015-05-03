@@ -232,6 +232,65 @@ namespace leo
 				L"Resource/stone.dds",
 				L"Resource/lightdirt.dds",
 				L"Resource/snow.dds"}));
+
+			{
+				const uint16 size[] = { 256,512,1024,2048,4096 };
+
+				auto clamp_size = [&](uint16 ord_size){
+					uint8 i = 0;
+					for (;i != arrlen(size);){
+						if (ord_size > size[i])
+							++i;
+						else
+							break;
+					}
+					i = min(i, arrlen(size) - 1);
+					return size[i];
+				};
+
+				mNormaMapHorSize = clamp_size(uint16(mChunkSize*mHorChunkNum*mChunkSize / MAXEDGE));
+				mNormaMapVerSize = clamp_size(uint16(mChunkSize*mVerChunkNum*mChunkSize / MAXEDGE));
+
+				float4 Params{ 1.f / mNormaMapHorSize,1.f / mNormaMapVerSize,5.f,5.f };
+
+				D3D11_BUFFER_DESC Desc;
+				Desc.Usage = D3D11_USAGE_DEFAULT;
+				Desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+				Desc.CPUAccessFlags = 0;
+				Desc.MiscFlags = 0;
+				Desc.StructureByteStride = 0;
+				Desc.ByteWidth = sizeof(Params);
+
+				D3D11_SUBRESOURCE_DATA Data;
+				Data.pSysMem = &Params;
+
+				dxcall(device->CreateBuffer(&Desc, &Data, &mCHMCSCB));
+
+
+				D3D11_TEXTURE2D_DESC NormalMapTexDesc;
+
+				NormalMapTexDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+
+				NormalMapTexDesc.ArraySize = 1;
+				NormalMapTexDesc.MipLevels = 1;
+
+				NormalMapTexDesc.SampleDesc.Count = 1;
+				NormalMapTexDesc.SampleDesc.Quality = 0;
+
+				NormalMapTexDesc.Width = mNormaMapHorSize;
+				NormalMapTexDesc.Height =mNormaMapVerSize;
+
+				NormalMapTexDesc.Usage = D3D11_USAGE_DEFAULT;
+				NormalMapTexDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+				NormalMapTexDesc.CPUAccessFlags = 0;
+				NormalMapTexDesc.MiscFlags = 0;
+
+				auto mTex = leo::win::make_scope_com<ID3D11Texture2D>();
+
+				leo::dxcall(device->CreateTexture2D(&NormalMapTexDesc, nullptr, &mTex));
+				leo::dxcall(device->CreateShaderResourceView(mTex, nullptr, &mNormalMapSRV));
+				leo::dxcall(device->CreateUnorderedAccessView(mTex, nullptr, &mNormalMapUAV));
+			}
 		}
 		~Terrain()
 		{
@@ -251,6 +310,11 @@ namespace leo
 	public:
 		void Render(ID3D11DeviceContext* context, const Camera& camera)
 		{
+			bool has_normal_map = false;
+			if (!has_normal_map) {
+				ComputerNormalMap(context);
+				has_normal_map = true;
+			}
 
 			context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			UINT strides[] = { sizeof(Terrain::Vertex) };
@@ -479,6 +543,9 @@ namespace leo
 		std::uint32_t mHorChunkNum;
 		std::uint32_t mVerChunkNum;
 
+		uint16 mNormaMapHorSize;
+		uint16 mNormaMapVerSize;
+
 		ID3D11ShaderResourceView* mHeightMap;
 
 		ID3D11ShaderResourceView* mWeightMap;
@@ -503,6 +570,15 @@ namespace leo
 		std::vector<Chunk*> mNeedDrawChunks;
 
 		std::vector<float3, aligned_alloc<float3, 16>> mVersInfo;
+
+		ID3D11ComputeShader* mCHMCS = nullptr;
+
+	
+
+		leo::win::unique_com<ID3D11ShaderResourceView> mNormalMapSRV = nullptr;
+		leo::win::unique_com<ID3D11UnorderedAccessView> mNormalMapUAV = nullptr;
+
+		leo::win::unique_com<ID3D11Buffer> mCHMCSCB = nullptr;
 	private:
 #if 0
 		uint8 ClipToScreenSpaceLod(XMVECTOR clip0, XMVECTOR clip1)
@@ -629,6 +705,10 @@ namespace leo
 
 		float2 Offset(uint32 slotX, uint32 slotY) const{
 			return float2((mHorChunkNum - 1)*mChunkSize / -2.f + slotX*mChunkSize, +(mVerChunkNum - 1)*mChunkSize / 2 - slotY*mChunkSize);
+		}
+
+		void ComputerNormalMap(ID3D11DeviceContext* context) {
+
 		}
 	};
 }

@@ -37,7 +37,7 @@ struct VertexOut
 };
 
 void GBufferMRTPS(VertexOut pin,
-	out float4 NormalDepth: SV_TARGET0,
+	out half4 NormalDepth: SV_TARGET0,
 	out float4 DiffuseSpec: SV_TARGET1)
 {
 	half3 restoreNormal = pin.NormalV;

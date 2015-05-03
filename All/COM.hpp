@@ -52,7 +52,7 @@ namespace leo
 			template<typename COM>
 			struct com_deleter {
 				void operator()(COM* obj) {
-					obj->Release();
+					obj?obj->Release():0;
 				}
 			};
 		}
