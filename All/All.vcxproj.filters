@@ -471,6 +471,9 @@
     <FxCompile Include="Shader\CrysisSSAO.hlsl">
       <Filter>Shader\HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\TerrainCHMCS.hlsl">
+      <Filter>Shader\HLSL\Terrain</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Gaussian_color.hlsl">

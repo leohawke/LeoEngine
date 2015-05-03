@@ -29,7 +29,7 @@
 			(shader (v SkinVS.cso) (p SkinPS.cso))
 		)
 		(effect	(name terrain)
-			(shader (v TerrainVS.cso) (p TerrainPS.cso))
+			(shader (v TerrainVS.cso) (p TerrainPS.cso) (c TerrainCHMCS.cso))
 		)
 		(effect	(name terrainso)
 			(shader (v TerrainSOVS.cso) (g TerrainSOGS.cso))
