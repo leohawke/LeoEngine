@@ -290,6 +290,9 @@ namespace leo
 				leo::dxcall(device->CreateTexture2D(&NormalMapTexDesc, nullptr, &mTex));
 				leo::dxcall(device->CreateShaderResourceView(mTex, nullptr, &mNormalMapSRV));
 				leo::dxcall(device->CreateUnorderedAccessView(mTex, nullptr, &mNormalMapUAV));
+
+				leo::ShaderMgr SM;
+				mCHMCS = SM.CreateComputeShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"terrain", D3D11_COMPUTE_SHADER)));
 			}
 		}
 		~Terrain()

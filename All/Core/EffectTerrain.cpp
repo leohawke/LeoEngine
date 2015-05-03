@@ -27,6 +27,11 @@ namespace leo
 			mSS = SS.GetSamplerState(L"NearestRepeat");
 
 			mPSSS = SS.GetSamplerState(L"LinearRepeat");
+
+			normalSampler = SS.GetSamplerState(L"trilinearSampler");
+
+			leo::TextureMgr texmgr;
+			texNormals = texmgr.LoadTextureSRV(FileSearch::Search(L"NormalsFitting.dds"));
 		}
 		void Apply(ID3D11DeviceContext* con)
 		{
@@ -42,9 +47,11 @@ namespace leo
 			context->VSSetShaderResources(0, 1, &mSRV);
 			context->VSSetSamplers(0, 1, &mSS);
 
-			context.PSSetSamplers(0, 1, &mPSSS);
-			ID3D11ShaderResourceView* mArray[] = { mWeightSRV, mPSSRVArray };
-			context.PSSetShaderResources(0, 2, mArray);
+			ID3D11SamplerState* mPSSSs[] = { mPSSS,normalSampler };
+
+			context.PSSetSamplers(0, 2, mPSSSs);
+			ID3D11ShaderResourceView* mArray[] = { mWeightSRV, mPSSRVArray,mNormalMapSRV,texNormals };
+			context.PSSetShaderResources(0,arrlen(mArray), mArray);
 		}
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow
 		{
@@ -99,6 +106,11 @@ namespace leo
 			mPSCBPerLodColor.Update(context);
 		}
 #endif
+		void NormalMap(ID3D11ShaderResourceView* srv, ID3D11DeviceContext * context) {
+			mNormalMapSRV = srv;
+			if (context)
+				context->PSSetShaderResources(2, 1, &mWeightSRV);
+		}
 	public:
 	private:
 		struct vsCBMatrix
@@ -125,7 +137,14 @@ namespace leo
 
 		ID3D11ShaderResourceView* mWeightSRV = nullptr;
 		ID3D11ShaderResourceView* mPSSRVArray = nullptr;
+
+		ID3D11ShaderResourceView* mNormalMapSRV = nullptr;
+
 		ID3D11SamplerState* mPSSS = nullptr;
+
+		ID3D11ShaderResourceView *texNormals = nullptr;
+
+		ID3D11SamplerState* normalSampler = nullptr;
 	};
 	void EffectTerrain::Apply(ID3D11DeviceContext * context)
 	{
