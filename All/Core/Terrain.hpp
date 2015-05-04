@@ -683,7 +683,7 @@ namespace leo
 				) != mNeedDrawChunks.cend())
 				if (neigbourChunk.mLodLevel > chunkInfo.mLodLevel)
 
-					context->DrawIndexed(mIndexInfo[chunkInfo.mLodLevel].mCrackOffset[(uint8)direct], mIndexInfo[chunkInfo.mLodLevel].mCrackCount[(uint8)direct], 0);
+					context->DrawIndexed(mIndexInfo[chunkInfo.mLodLevel].mCrackCount[(uint8)direct], mIndexInfo[chunkInfo.mLodLevel].mCrackOffset[(uint8)direct],  0);
 		}
 
 		void DetermineDrawChunk(const Camera& camera)
