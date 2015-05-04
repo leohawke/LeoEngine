@@ -8,12 +8,7 @@ cbuffer  cbMatrix{
 
 Texture2D<half> gHeightMap : register(t0);
 
-SamplerState ClampPoint:register(s0)
-{
-	Filter = MIN_MAG_MIP_POINT;
-	AddressU = Clamp;
-	AddressV = Clamp;
-};
+SamplerState ClampPoint:register(s0);
 
 
 struct VertexIn

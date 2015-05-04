@@ -248,8 +248,8 @@ namespace leo
 					return size[i];
 				};
 
-				mNormaMapHorSize = clamp_size(uint16(mChunkSize*mHorChunkNum*mChunkSize*8 / MAXEDGE));
-				mNormaMapVerSize = clamp_size(uint16(mChunkSize*mVerChunkNum*mChunkSize*8 / MAXEDGE));
+				mNormaMapHorSize = clamp_size(uint16(mHorChunkNum*MAXEDGE));
+				mNormaMapVerSize = clamp_size(uint16(mVerChunkNum* MAXEDGE));
 
 				float4 Params{ 1.f / mNormaMapHorSize,1.f / mNormaMapVerSize,5.f,5.f };
 

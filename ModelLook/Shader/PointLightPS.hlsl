@@ -30,6 +30,8 @@ float4 main(VertexOut pin) : SV_TARGET
 	float3 Diffuse = diffuseTex.Sample(LinearRepeat, pin.Tex).rgb;
 	float Ambient = ambientTex.SampleLevel(samNormalDepth, pin.Tex, 0).r;
 
+	NormalDepth.xyz = (NormalDepth.xyz - .5h)*2.h;
+
 	float pz = NormalDepth.w;
 	float3 PosV = (pz / pin.ToFarPlane.z)*pin.ToFarPlane;
 
