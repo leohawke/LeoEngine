@@ -21,9 +21,8 @@ void main( uint3 DTid : SV_DispatchThreadID,uint2 GTid:SV_GroupThreadID )
 {
 	float2 uv = DTid.xy * gParam.xy;
 	//Calc UV
-	float y = inoise(gParam.z*uv);
+	float y = inoise(gParam.z*uv)*gParam.w;
 
-	y = y*0.5f + 0.5f;
 
 	Output[DTid.xy] = y;
 }
