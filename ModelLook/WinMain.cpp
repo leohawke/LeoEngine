@@ -365,7 +365,12 @@ void BuildLight(ID3D11Device* device) {
 	pl.diffuse = leo::float4(0.8f, 0.8f, 0.8f, 1.f);
 	pl.att = leo::float4(0.f, 1.f, 0.f, 1.f);
 	const float Radius = 9;
-	pl.position = leo::float4(Radius, 0.f, 0.f, 8.f);
+	//world origin in view speace
+	auto origin = pCamera->GetOrigin();
+	origin.x = -origin.x;
+	origin.y = -origin.y;
+	origin.z = -origin.z;
+	pl.position = leo::float4(origin, 1800.f);
 
 	leo::dxcall(device->CreateBuffer(&Desc, &subData, &mPointLightPSCB));
 }

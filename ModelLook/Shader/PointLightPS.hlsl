@@ -46,7 +46,7 @@ float4 main(VertexOut pin) : SV_TARGET
 	[flatten]
 	if (lambert > 0.f)
 	{
-		float ka = 1.0f / dot(att.xyz, float3(1.0f, d, d*d));
+		float ka = 1.0f;// dot(att.xyz, float3(1.0f, d, d*d));
 		kd = lambert*ka;
 	}
 	
