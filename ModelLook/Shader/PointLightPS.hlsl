@@ -27,6 +27,7 @@ struct VertexOut
 float4 main(VertexOut pin) : SV_TARGET
 {
 	float4 NormalDepth = normalTex.SampleLevel(samNormalDepth,pin.Tex,0);
+	NormalDepth.xyz = NormalDepth.xyz*2.f - 1.f;
 	float3 Diffuse = diffuseTex.Sample(LinearRepeat, pin.Tex).rgb;
 	float Ambient = ambientTex.SampleLevel(samNormalDepth, pin.Tex, 0).r;
 
@@ -49,5 +50,5 @@ float4 main(VertexOut pin) : SV_TARGET
 		kd = lambert*ka;
 	}
 	
-	return kd*diffuse *float4(Diffuse,1.f)*Ambient;
+	return diffuse *float4(Diffuse,1.f)*(Ambient);
 }

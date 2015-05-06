@@ -1,4 +1,4 @@
-#include "common.hlsli"
+
 cbuffer  cbMatrix{
 	float4x4 gViewProj;
 	float2 gOffset;
@@ -6,7 +6,7 @@ cbuffer  cbMatrix{
 };
 
 
-Texture2D<half> gHeightMap : register(t0);
+Texture2D<float> gHeightMap : register(t0);
 
 SamplerState ClampPoint:register(s0);
 
@@ -20,7 +20,6 @@ struct VertexOut
 {
 	float4 PosH : SV_POSITION;
 	float2 Tex : TEXCOORD;
-	half3 NormalV :NORMAL;
 };
 
 VertexOut main(VertexIn vin)
@@ -34,6 +33,5 @@ VertexOut main(VertexIn vin)
 	VertexOut vout;
 	vout.PosH = mul(float4(newpos.x, y, newpos.y, 1.f), gViewProj);
 	vout.Tex = uv;
-	vout.NormalV = Sobel(uv, gHeightMap, ClampPoint);
 	return vout;
 }

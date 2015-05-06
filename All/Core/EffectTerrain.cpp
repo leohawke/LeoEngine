@@ -51,10 +51,10 @@ namespace leo
 #endif
 			
 
-			ID3D11SamplerState* mPSSSs[] = { mLinearRepeat,normalSampler };
+			ID3D11SamplerState* mPSSSs[] = { mLinearRepeat,normalSampler,mLinearClamp };
 
-			context.PSSetSamplers(0, 2, mPSSSs);
-			ID3D11ShaderResourceView* mArray[] = { mWeightSRV, mPSSRVArray,texNormals };
+			context.PSSetSamplers(0, 3, mPSSSs);
+			ID3D11ShaderResourceView* mArray[] = { mWeightSRV, mPSSRVArray,texNormals,mHeightSRV };
 			context.PSSetShaderResources(0,arrlen(mArray), mArray);
 		}
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow

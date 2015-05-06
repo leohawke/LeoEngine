@@ -8,7 +8,7 @@ SamplerState RepeatPoint:register(s0)
 	AddressV = Wrap;
 };
 
-RWTexture2D<half> Output:register(u0);
+RWTexture2D<float> Output:register(u0);
 
 cbuffer cbCHMCS :register(c0){
 	float4 gParam;//x,y=>UVScale,z=>NoiseScale,w=>HeightScale
@@ -21,7 +21,9 @@ void main( uint3 DTid : SV_DispatchThreadID,uint2 GTid:SV_GroupThreadID )
 {
 	float2 uv = DTid.xy * gParam.xy;
 	//Calc UV
-	float y = inoise(gParam.z*uv) * gParam.w;
+	float y = inoise(gParam.z*uv);
+
+	y = y*0.5f + 0.5f;
 
 	Output[DTid.xy] = y;
 }

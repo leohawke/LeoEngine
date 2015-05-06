@@ -39,7 +39,7 @@
 namespace leo
 {
 	
-	template<std::uint8_t MAXLOD = 4, std::uint16_t MAXEDGE = 256, std::uint8_t MINEDGEPIXEL = 6>
+	template<std::uint8_t MAXLOD = 4, std::uint16_t MAXEDGE = 128, std::uint8_t MINEDGEPIXEL = 6>
 	//static_assert(pow(2,MAXLOD) <= MAXEDGE)
 	class Terrain : public LodAlloc
 	{
@@ -269,7 +269,7 @@ namespace leo
 
 				D3D11_TEXTURE2D_DESC NormalMapTexDesc;
 
-				NormalMapTexDesc.Format = DXGI_FORMAT_R16_FLOAT;
+				NormalMapTexDesc.Format = DXGI_FORMAT_R32_FLOAT;
 
 				NormalMapTexDesc.ArraySize = 1;
 				NormalMapTexDesc.MipLevels = 1;
@@ -319,7 +319,7 @@ namespace leo
 			static bool has_normal_map = false;
 			if (!has_normal_map) {
 				ComputerNormalMap(context);
-				has_normal_map = true;
+				//has_normal_map = true;
 			}
 
 			context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -340,6 +340,7 @@ namespace leo
 			mNeedDrawChunks.clear();
 
 			DetermineDrawChunk(camera);
+
 
 			for (auto chunk : mNeedDrawChunks) {
 				auto slotX = chunk->mSlotX;
@@ -714,6 +715,10 @@ namespace leo
 		}
 
 		void ComputerNormalMap(ID3D11DeviceContext* context) {
+			ID3D11ShaderResourceView* nullSRV = nullptr;
+			context->VSSetShaderResources(0, 1, &nullSRV);
+			context->PSSetShaderResources(3, 1, &nullSRV);
+
 			context->CSSetShader(mCHMCS, nullptr, 0);
 			context->CSSetUnorderedAccessViews(0, 1, &mHeightMapUAV, nullptr);
 			context->CSSetConstantBuffers(0, 1, &mCHMCSCB);

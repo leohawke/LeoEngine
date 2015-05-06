@@ -1,4 +1,4 @@
-float3 Sobel(float2 texcoord, Texture2D<half> tex, SamplerState s) {
+float3 Sobel(float2 texcoord, Texture2D<float> tex, SamplerState s) {
 	uint Width;
 	uint Height;
 	tex.GetDimensions(Width, Height);
@@ -30,6 +30,6 @@ float3 Sobel(float2 texcoord, Texture2D<half> tex, SamplerState s) {
 
 	float dz = 0.01f*sqrt(max(0.f, 1.f - dx*dx - dy*dy));
 
-	return normalize(float3(2.f*dx, dz, 2.f*dy));
+	return float3(2.f*dx, dz, 2.f*dy);
 
 }

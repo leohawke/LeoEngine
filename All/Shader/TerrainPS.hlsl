@@ -1,3 +1,4 @@
+#include "common.hlsli"
 #ifdef DEBUG
 cbuffer LodColor
 {
@@ -9,7 +10,6 @@ struct PixelIn
 {
 	float4 PosH : SV_POSITION;
 	float2 Tex : TEXCOORD;
-	half3 NormalV :NORMAL;
 };
 
 Texture2D<float4> gAlphaTexture : register(t0);
@@ -23,6 +23,10 @@ SamplerState RepeatLinear:register(s0)
 
 Texture2D texNormals:register(t2);
 SamplerState normalSampler:register(s1);
+
+Texture2D<float> gHeightMap : register(t3);
+
+SamplerState ClampPoint:register(s2);
 
 void CompressUnsignedNormalToNormalsBuffer(inout half3 vNormal)
 {
@@ -56,8 +60,9 @@ void main(PixelIn pin,out half4 NormalDepth: SV_TARGET0,
 	float4 c2 = gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 3.f));
 	float4 c3 = gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 4.f));
 
-	half3 restoreNormal = pin.NormalV;
-	//CompressUnsignedNormalToNormalsBuffer(restoreNormal);
+	half3 restoreNormal = Sobel(pin.Tex, gHeightMap, ClampPoint);
+
+	CompressUnsignedNormalToNormalsBuffer(restoreNormal);
 
 
 	NormalDepth = half4(restoreNormal, pin.PosH.z / pin.PosH.w);
