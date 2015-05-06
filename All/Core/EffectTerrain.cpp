@@ -67,6 +67,12 @@ namespace leo
 			if (context)
 				mVSCBPerMatrix.Update(context);
 		}
+		void ViewMatrix(const float4x4& matrix, ID3D11DeviceContext* context)
+		{
+			mVSCBPerMatrix.gView = Transpose(load(matrix));
+			if (context)
+				mVSCBPerMatrix.Update(context);
+		}
 		void WorldOffset(const float2& offset, ID3D11DeviceContext* context)
 		{
 			mVSCBPerMatrix.gOffsetUVScale.x = offset.x;
@@ -115,6 +121,7 @@ namespace leo
 		struct vsCBMatrix
 		{
 			matrix gViwProj;
+			matrix gView;
 			float4 gOffsetUVScale;
 			const static std::uint8_t slot = 0;
 		};
@@ -159,6 +166,15 @@ namespace leo
 
 		return ((EffectTerrainDelegate *)this)->ViewProjMatrix(
 			matrix,context
+			);
+	}
+
+	void EffectTerrain::ViewMatrix(const float4x4& matrix, ID3D11DeviceContext * context)
+	{
+		lassume(dynamic_cast<EffectTerrainDelegate *>(this));
+
+		return ((EffectTerrainDelegate *)this)->ViewMatrix(
+			matrix, context
 			);
 	}
 	void EffectTerrain::WorldOffset(const float2 & offset, ID3D11DeviceContext * context)

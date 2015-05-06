@@ -35,7 +35,7 @@ float4 main(VertexOut pin) : SV_TARGET
 	float3 PosV = (pz / pin.ToFarPlane.z)*pin.ToFarPlane;
 
 	float3 lightVec = position.xyz - PosV;
-	float d = min(length(lightVec),1.f);
+	float d = max(length(lightVec),1.f);
 	lightVec /= d;
 	float lambert = dot(lightVec, NormalDepth.xyz);
 	if (d > position.w)
@@ -50,5 +50,5 @@ float4 main(VertexOut pin) : SV_TARGET
 		kd = lambert*ka;
 	}
 	
-	return diffuse *float4(Diffuse,1.f)*(Ambient);
+	return kd*diffuse *float4(Diffuse,1.f)*(Ambient);
 }

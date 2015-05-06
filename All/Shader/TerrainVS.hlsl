@@ -1,6 +1,7 @@
 
 cbuffer  cbMatrix{
 	float4x4 gViewProj;
+	float4x4 gView;
 	float2 gOffset;
 	float2 gUVScale;
 };
@@ -20,6 +21,7 @@ struct VertexOut
 {
 	float4 PosH : SV_POSITION;
 	float2 Tex : TEXCOORD;
+	float Distance : TEXCOORD1;
 };
 
 VertexOut main(VertexIn vin)
@@ -32,6 +34,7 @@ VertexOut main(VertexIn vin)
 
 	VertexOut vout;
 	vout.PosH = mul(float4(newpos.x, y, newpos.y, 1.f), gViewProj);
+	vout.Distance = mul(float4(newpos.x, y, newpos.y, 1.f), gView).z;
 	vout.Tex = uv;
 	return vout;
 }

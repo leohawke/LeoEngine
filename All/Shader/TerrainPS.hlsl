@@ -10,6 +10,7 @@ struct PixelIn
 {
 	float4 PosH : SV_POSITION;
 	float2 Tex : TEXCOORD;
+	float Distance : TEXCOORD1;
 };
 
 Texture2D<float4> gAlphaTexture : register(t0);
@@ -65,7 +66,7 @@ void main(PixelIn pin,out half4 NormalDepth: SV_TARGET0,
 	CompressUnsignedNormalToNormalsBuffer(restoreNormal);
 
 
-	NormalDepth = half4(restoreNormal, pin.PosH.z / pin.PosH.w);
+	NormalDepth = half4(restoreNormal, pin.Distance);
 	color = lerp(color,c0,weight.r);
 	color = lerp(color, c1, weight.g);
 	color = lerp(color, c2, weight.b);
