@@ -24,5 +24,5 @@ void main( uint3 DTid : SV_DispatchThreadID,uint2 GTid:SV_GroupThreadID )
 	float y = inoise(gParam.z*uv)*gParam.w;
 
 
-	Output[DTid.xy] = y;
+	Output[DTid.xy] =y;
 }

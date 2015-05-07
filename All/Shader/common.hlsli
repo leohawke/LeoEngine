@@ -28,8 +28,8 @@ float3 Sobel(float2 texcoord, Texture2D<float> tex, SamplerState s) {
 	//[ g.y g.z g.w ]   [ 1 -0  -1 ]
 	float dy = r.x + 2.f*r.y + r.z - g.y - 2.f*g.z - g.w;
 
-	float dz = 0.01f*sqrt(max(0.f, 1.f - dx*dx - dy*dy));
+	float dz = sqrt(max(0.f, 1.f - dx*dx - dy*dy));
 
-	return float3(2.f*dx, dz, 2.f*dy);
+	return float3(dx, dz, dy);
 
 }
