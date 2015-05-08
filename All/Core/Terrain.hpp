@@ -335,6 +335,7 @@ namespace leo
 			mEffect->UVScale(float2(1.f / mHorChunkNum / mChunkSize, 1.f / mVerChunkNum / mChunkSize));
 			mEffect->WeightMap(mWeightMap);
 			mEffect->MatArrayMap(mMatArrayMap);
+			mEffect->DxDy(float2(mHorChunkNum*mChunkSize*1.f / mNormaMapHorSize, mVerChunkNum*mChunkSize*1.f / mNormaMapVerSize));
 			mEffect->ViewMatrix(camera.View());
 			mEffect->Apply(context);
 

@@ -49,6 +49,8 @@ float4 main(VertexOut pin) : SV_TARGET
 		float ka = 1.0f;// dot(att.xyz, float3(1.0f, d, d*d));
 		kd = lambert*ka;
 	}
+
+	kd = max(0.1f, kd);
 	
 	return kd*diffuse *float4(Diffuse,1.f)*(Ambient);
 }

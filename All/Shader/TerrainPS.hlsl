@@ -1,10 +1,13 @@
-#include "common.hlsli"
-#ifdef DEBUG
-cbuffer LodColor
+
+cbuffer cbParam
 {
+#ifdef DEBUG
 	float4 gColor;
-};
 #endif
+	float2 dxdy;
+	float2 ex;
+};
+
 
 struct PixelIn
 {
@@ -51,6 +54,14 @@ void CompressUnsignedNormalToNormalsBuffer(inout half3 vNormal)
 	vNormal.rgb = vNormal.rgb * .5h + .5h;
 }
 
+half3 CalcNormal(float2 uv) {
+	float4 lrbt = gHeightMap.GatherRed(ClampPoint,uv,int2(-1,0),int2(1,0),int2(0,1),int2(0,-1));
+	float3 tangent = normalize(float3(2.f*dxdy.x,lrbt.y-lrbt.x,0.f));
+	float3 bitan = normalize(float3(0.f, lrbt.z - lrbt.w, -2.f*dxdy.y));
+	return cross(tangent, bitan);
+}
+
+
 void main(PixelIn pin,out half4 NormalDepth: SV_TARGET0,
 	out float4 DiffuseSpec : SV_TARGET1)
 {
@@ -61,7 +72,7 @@ void main(PixelIn pin,out half4 NormalDepth: SV_TARGET0,
 	float4 c2 = gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 3.f));
 	float4 c3 = gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 4.f));
 
-	half3 restoreNormal = Sobel(pin.Tex, gHeightMap, ClampPoint);
+	half3 restoreNormal = CalcNormal(pin.Tex);
 
 	CompressUnsignedNormalToNormalsBuffer(restoreNormal);
 
@@ -72,7 +83,7 @@ void main(PixelIn pin,out half4 NormalDepth: SV_TARGET0,
 	color = lerp(color, c2, weight.b);
 	color = lerp(color, c3, weight.a);
 #ifdef DEBUG
-	DiffuseSpec.xyz = color.xyz*0.75f + gColor.xyz*0.25f;
+	DiffuseSpec.xyz = color.xyz;
 #else
 	DiffuseSpec.xyz = color.xyz;
 #endif
