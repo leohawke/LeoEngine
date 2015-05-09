@@ -41,7 +41,38 @@ ops::Rect leo::CalcScissorRect(const PointLight & wPointLight, const Camera & ca
 	bottomVS.z = bottomVS.x < 0.f ? bottomVS.z - radius : bottomVS.z + radius;
 
 	//Clamp the z coordinate to the clip planes
-	auto near = camera.g//can't get near?
-	leftVS
-	return ops::Rect();
+	auto near = 0.f;//camera//can't get near?
+	auto far = 1000.f;
+	leftVS.z = clamp( near, far, leftVS.z);
+	rightVS.z = clamp( near, far, rightVS.z);
+	topVS.z = clamp(near, far, topVS.z);
+	bottomVS.z = clamp( near, far, bottomVS.z);
+
+	//Figure out the rectangle in clip-space by applying the
+	//perspective transfrom. We assume that the perspective
+	//transfrom is symmetrical with respect to X and Y
+	auto ProjMatrix = camera.Proj();
+
+	auto rectLeftCS = leftVS.x*ProjMatrix(0, 0) / leftVS.z;
+	auto rectRightCS = rightVS.x*ProjMatrix(0, 0)/ rightVS.z;
+	auto rectTopCS = topVS.y*ProjMatrix(1, 1) / topVS.z;
+	auto rectBottomCS = bottomVS.y*ProjMatrix(1, 1) / bottomVS.z;
+
+	//Clamp the rectangle to the screen extents
+	rectLeftCS = clamp(-1.f, 1.f, rectLeftCS);
+	rectRightCS = clamp(-1.f, 1.f, rectRightCS);
+	rectTopCS = clamp(-1.f, 1.f, rectTopCS);
+	rectBottomCS = clamp(-1.f, 1.f, rectBottomCS);
+
+	//Now we convert to screen coordinates by applying the
+	//viewport transfrom
+	auto rectTopSS = rectTopCS*0.5f + 0.5f;
+	auto rectRightSS = rectRightCS*0.5f + 0.5f;
+	auto rectBottomSS = rectBottomCS*0.5f + 0.5f;
+	auto rectLeftSS = rectLeftCS*0.5f + 0.5f;
+
+	rectTopSS = 1.f - rectTopSS;
+	rectBottomSS = 1.f - rectBottomSS;
+
+	return ops::Rect(float4(rectTopSS,rectLeftSS,rectBottomSS,rectRightSS));
 }

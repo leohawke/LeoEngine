@@ -19,10 +19,20 @@
 
 namespace leo {
 	namespace ops{
+		enum class axis_system {
+			cartesian_system,
+			windows_system
+		};
+
+
 		struct Rect {
 			//top-left(x,y)
 			//bottom-right(z,w)
 			float4 tlbr;
+
+			Rect(const float4& TopLeftBottomRight)
+				:tlbr(TopLeftBottomRight) {
+			}
 
 			float2 GetLeftTopCornet() const noexcept{
 				return float2(tlbr.x, tlbr.y);

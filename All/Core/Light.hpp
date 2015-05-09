@@ -36,6 +36,8 @@ namespace leo {
 	};
 
 	class Camera;
+
+	//windows_system
 	ops::Rect CalcScissorRect(const PointLight& wPointLight, const Camera& camera);
 }
 
