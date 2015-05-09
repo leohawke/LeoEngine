@@ -159,7 +159,7 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\All\Core\Light.cpp">
-      <Filter>WinMain</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

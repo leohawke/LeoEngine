@@ -69,6 +69,14 @@ namespace leo {
 #endif
 	}
 
+	inline __m128 Subtract(__m128 sl, __m128 sr) {
+#if defined(LM_ARM_NEON_INTRINSICS)
+		return vsubq_f32(sl, sr);
+#elif defined(LM_SSE_INTRINSICS)
+		return _mm_sub_ps(sl, sr);
+#endif
+	}
+
 	inline __m128 LM_VECTOR_CALL MultiplyAdd(__m128 ml, __m128 mr, __m128 ar) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vmlaq_f32(ar, ml, mr);
@@ -205,4 +213,49 @@ namespace leo {
 	inline __m128 LM_VECTOR_CALL Divide(__m128 dl, float dr) {
 		return Divide(dl, Splat(dr));
 	}
+
+
+#ifdef LB_IMPL_MSCPP
+		inline __m128  operator * (__m128 lhs, __m128 rhs) {
+			return Multiply(lhs, rhs);
+		}
+
+		inline __m128  operator * (__m128 lhs, float rhs) {
+			return Multiply(lhs, rhs);
+		}
+
+		inline __m128  operator * (__m128 lhs, const std::array<__m128, 4>& rhs) {
+			return Multiply(lhs, rhs);
+		}
+
+		inline __m128  operator / (__m128 lhs, __m128 rhs) {
+			return Divide(lhs, rhs);
+		}
+
+		inline __m128  operator / (__m128 lhs, float rhs) {
+			return Divide(lhs, rhs);
+		}
+
+		inline __m128  operator - (__m128 lhs, __m128 rhs) {
+			return Subtract(lhs, rhs);
+		}
+
+		inline __m128  operator - (__m128 lhs) {
+#if defined(LM_ARM_NEON_INTRINSICS)
+			return vnegq_f32(V);
+#elif defined(LM_SSE_INTRINSICS)
+			__m128 Z;
+
+			Z = _mm_setzero_ps();
+
+			return _mm_sub_ps(Z, lhs);
+#else 
+#endif
+		}
+
+		inline __m128  operator + (__m128 lhs, __m128 rhs) {
+			return Add(lhs, rhs);
+		}
+
+#endif
 }

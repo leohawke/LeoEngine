@@ -293,13 +293,7 @@ namespace leo {
 		return szero;
 	}
 
-	inline __m128 Subtract(__m128 sl, __m128 sr) {
-#if defined(LM_ARM_NEON_INTRINSICS)
-		return vsubq_f32(sl, sr);
-#elif defined(LM_SSE_INTRINSICS)
-		return _mm_sub_ps(sl, sr);
-#endif
-	}
+	
 
 	template<uint8 D = 4>
 	inline bool Less(__m128 lhs, __m128 rhs) {

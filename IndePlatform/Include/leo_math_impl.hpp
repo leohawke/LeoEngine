@@ -26,35 +26,7 @@
 
 
 namespace leo {
-
-#ifdef LB_IMPL_MSCPP
-	inline __m128  operator * (__m128 lhs, __m128 rhs) {
-		return leo::Multiply(lhs, rhs);
-	}
-
-	inline __m128  operator - (__m128 lhs, __m128 rhs) {
-		return leo::Subtract(lhs, rhs);
-	}
-
-	inline __m128  operator + (__m128 lhs, __m128 rhs) {
-		return leo::Add(lhs, rhs);
-	}
-
-	inline __m128  operator - (__m128 lhs) {
-#if defined(LM_ARM_NEON_INTRINSICS)
-		return vnegq_f32(V);
-#elif defined(LM_SSE_INTRINSICS)
-		__m128 Z;
-
-		Z = _mm_setzero_ps();
-
-		return _mm_sub_ps(Z, lhs);
-#else // LM_VMX128_INTRINSICS_
-#endif // LM_VMX128_INTRINSICS
-	}
-#endif
 	
-
 	inline float GetX(__m128 v) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		return vgetq_lane_f32(v, 0);
