@@ -16,7 +16,7 @@
 #ifndef IndePlatform_leo_math_ray_h
 #define IndePlatform_leo_math_ray_h
 
-#include "LeoMath.h"
+#include "LeoMathutility.hpp"
 #include "Geometry.hpp"
 
 namespace leo{
@@ -63,7 +63,7 @@ namespace leo{
 			float3 origin;
 			save(origin, TransformCoord<>(load(mOrigin), matrix));
 			float4 dir;
-			save(dir,leo::Transform(load(mDir), matrix));
+			save(dir,leo::Multiply(load(mDir), matrix));
 			return Ray(origin,dir);
 		}
 

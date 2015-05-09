@@ -14,14 +14,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#ifndef IndePlatform_LeoMath_h
+#ifndef IndePlatform_LeoMathutility_hpp
 #error "不要包含实现头文件"
 #endif
 
 #ifndef IndePlatform_LeoMath_impl_hpp
 #define IndePlatform_LeoMath_impl_hpp
 
-#include "leomath.h"
+#include "leomathutility.hpp"
 
 
 

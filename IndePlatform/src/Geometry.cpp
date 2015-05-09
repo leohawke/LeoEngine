@@ -1,6 +1,5 @@
-#include "LeoMath.h"
+#include "leomathutility.hpp"
 #include "leo_math_impl.hpp"
-
 #include "Geometry.hpp"
 #include "Geometry_impl.hpp"
 
@@ -418,7 +417,7 @@ namespace leo {
 		for (size_t i = 0; i < 6; ++i)
 		{
 			// Transform point.
-			Points[i] = leo::Transform(HomogenousPoints[i], matInverse);
+			Points[i] = leo::Multiply(HomogenousPoints[i], matInverse);
 		}
 
 		mOrigin = float3(0.0f, 0.0f, 0.0f);

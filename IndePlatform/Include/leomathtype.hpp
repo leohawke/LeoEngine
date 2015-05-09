@@ -33,7 +33,7 @@
 #include "leo_math_convert_impl.h"
 #include <algorithm> //std::max,std::min
 #include <cstring> //std::memcpy 
-
+#include <array> //std::array
 //data type
 namespace leo {
 	struct float2;
