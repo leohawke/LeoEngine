@@ -17,7 +17,7 @@
 #define IndePlatform_Geometry_hpp
 
 #include "leoint.hpp"
-#include "LeoMath.h"
+#include "LeoMathutility.hpp"
 
 namespace leo {
 

@@ -101,9 +101,6 @@
     <ClInclude Include="Include\leoint.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\LeoMath.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Include\memory.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -149,14 +146,23 @@
     <ClInclude Include="Include\variadic.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\leomath.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Include\experimental\string_view.hpp">
       <Filter>Header Files\experimental</Filter>
     </ClInclude>
     <ClInclude Include="Include\experimental\string_view.hcc">
       <Filter>Header Files\experimental</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\leo2DMath.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\leomathtype.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\leomathutility.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\leomathsse.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -3,7 +3,7 @@
 //  Leo Engine Source File.
 //  Copyright (C), FNS Studios, 2014-2014.
 // -------------------------------------------------------------------------
-//  File name:   IndePlatform/leomath.h
+//  File name:   IndePlatform/leomathtype.h
 //  Version:     v1.03
 //  Created:     9/28/2014 by leo hawke.
 //  Compilers:   Visual Studio.NET 2013
@@ -15,13 +15,12 @@
 //		     04/13/2014 增加对应HLSL部分
 ////////////////////////////////////////////////////////////////////////////
 
-#ifndef IndePlatform_LeoMath_hpp
-#define IndePlatform_LeoMath_hpp
+#ifndef IndePlatform_LeoMathtype_hpp
+#define IndePlatform_LeoMathtype_hpp
 
 #include "ldef.h"
 #include "platform_macro.h"
 #include "leoint.hpp"
-#include <immintrin.h>
 #include "leo_math_convert_impl.h"
 #include <array>
 #include <cmath>
@@ -656,11 +655,4 @@ namespace leo {
 	}
 }
 
-//__m128 function
-namespace leo {
-}
-
-//__m128,4 function
-namespace leo {
-}
 #endif

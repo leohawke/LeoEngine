@@ -99,9 +99,11 @@
     <ClInclude Include="Include\Geometry_impl.hpp" />
     <ClInclude Include="Include\iterator.hpp" />
     <ClInclude Include="Include\ldef.h" />
+    <ClInclude Include="Include\leo2DMath.hpp" />
     <ClInclude Include="Include\leoint.hpp" />
-    <ClInclude Include="Include\LeoMath.h" />
-    <ClInclude Include="Include\leomath.hpp" />
+    <ClInclude Include="Include\leomathsse.hpp" />
+    <ClInclude Include="Include\leomathutility.hpp" />
+    <ClInclude Include="Include\leomathtype.hpp" />
     <ClInclude Include="Include\leo_math_convert_impl.h" />
     <ClInclude Include="Include\leo_math_impl.hpp" />
     <ClInclude Include="Include\memory.hpp" />

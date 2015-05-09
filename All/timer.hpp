@@ -20,14 +20,14 @@ namespace leo
 			elapse = newelapse;
 		}
 		template<typename Return_Type, typename Ratio_Type = std::milli>
-		Return_Type get_elapse() const _NOEXCEPT
+		Return_Type get_elapse() const noexcept
 		{
 			std::chrono::duration<duration::rep, Ratio_Type> result = 
 			std::chrono::duration_cast<decltype(result)>(elapse);
 			return static_cast<Return_Type>(result.count());
 		}
 		template<typename Return_Type, typename Ratio_Type = std::milli>
-		Return_Type get_delta() const _NOEXCEPT
+		Return_Type get_delta() const noexcept
 		{
 			std::chrono::duration<duration::rep, Ratio_Type> result =
 			std::chrono::duration_cast<decltype(result)>(delta);
@@ -94,14 +94,14 @@ namespace leo
 			void update();
 
 			template<typename _Return_type,typename _Ratio_type = std::milli>
-			_Return_type get_elapse() const _NOEXCEPT
+			_Return_type get_elapse() const noexcept
 			{
 				const std::intmax_t den = typename std::ratio_divide<std::milli, _Ratio_type>::type::den;
 				const std::intmax_t num = typename std::ratio_divide<std::milli, _Ratio_type>::type::num;
 				return static_cast<_Return_type>(elapse*num/den);
 			}
 			template<typename _Return_type, typename _Ratio_type = std::milli>
-			_Return_type get_delta() const _NOEXCEPT
+			_Return_type get_delta() const noexcept
 			{
 				const std::intmax_t den = typename std::ratio_divide<std::milli, _Ratio_type>::type::den;
 				const std::intmax_t num = typename std::ratio_divide<std::milli, _Ratio_type>::type::num;

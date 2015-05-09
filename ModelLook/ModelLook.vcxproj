@@ -211,6 +211,7 @@
     <ClCompile Include="..\All\Core\FileSearch.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\All\Core\Light.cpp" />
     <ClCompile Include="..\All\Core\Mesh.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
@@ -295,6 +296,7 @@
   <ItemGroup>
     <ClInclude Include="..\All\COM.hpp" />
     <ClInclude Include="..\All\Core\BilateralFilter.hpp" />
+    <ClInclude Include="..\All\Core\Light.hpp" />
     <ClInclude Include="..\All\LightBuffer.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClInclude>

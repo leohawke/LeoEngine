@@ -3,7 +3,7 @@
 //  Leo Engine Source File.
 //  Copyright (C), FNS Studios, 2014-2014.
 // -------------------------------------------------------------------------
-//  File name:   IndePlatform/leomath.h
+//  File name:   IndePlatform/leomathutility.hpp
 //  Version:     v1.02
 //  Created:     9/28/2014 by leo hawke.
 //  Compilers:   Visual Studio.NET 2013
@@ -14,11 +14,11 @@
 //			 12/1/2014  新增四元数函数
 ////////////////////////////////////////////////////////////////////////////
 
-#ifndef IndePlatform_LeoMath_h
-#define IndePlatform_LeoMath_h
+#ifndef IndePlatform_LeoMathutility_hpp
+#define IndePlatform_LeoMathutility_hpp
 
-#include "leomath.hpp"
-
+#include "leomathtype.hpp"
+#include <immintrin.h>
 //Macro
 namespace leo
 {

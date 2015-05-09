@@ -158,6 +158,9 @@
     <ClCompile Include="..\All\Core\BilaterFilter.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\Core\Light.cpp">
+      <Filter>WinMain</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\All\LightBuffer.h">
@@ -184,6 +187,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\All\Core\BilateralFilter.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\Core\Light.hpp">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
