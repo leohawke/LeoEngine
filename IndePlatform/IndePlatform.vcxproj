@@ -102,6 +102,8 @@
     <ClInclude Include="Include\leo2DMath.hpp" />
     <ClInclude Include="Include\leoint.hpp" />
     <ClInclude Include="Include\leomathsse.hpp" />
+    <ClInclude Include="Include\leomathsseconvert.hpp" />
+    <ClInclude Include="Include\leomathsseoper.hpp" />
     <ClInclude Include="Include\leomathutility.hpp" />
     <ClInclude Include="Include\leomathtype.hpp" />
     <ClInclude Include="Include\leo_math_convert_impl.h" />

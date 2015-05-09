@@ -28,12 +28,6 @@
 #endif
 #endif
 
-#ifndef ARCH_ARM
-#define LM_SSE_INTRINSICS
-#else
-#define LM_ARM_NEON_INTRINSICS
-#endif
-
 #ifdef PLATFORM_WIN32
 #define WIN32_LEAN_AND_MEAN
 #define STRICT

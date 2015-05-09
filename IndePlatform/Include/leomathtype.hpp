@@ -20,10 +20,18 @@
 
 #include "ldef.h"
 #include "platform_macro.h"
-#include "leoint.hpp"
+#ifndef ARCH_ARM
+#define LM_SSE_INTRINSICS
+#else
+#define LM_ARM_NEON_INTRINSICS
+#endif
+#ifdef LB_IMPL_MSCPP
+#define LM_VECTOR_CALL __vectorcall
+#else
+#define LM_VECTOR_CALL __fastcall
+#endif
 #include "leo_math_convert_impl.h"
-#include <array>
-#include <cmath>
+#include <algorithm> //std::max,std::min
 #include <cstring> //std::memcpy 
 
 //data type
@@ -623,10 +631,6 @@ namespace leo {
 	inline float4 abs(const float4& f4) noexcept {
 		return float4(abs(f4.x), abs(f4.y), abs(f4.z), abs(f4.w));
 	}
-}
-
-//data Trigonometry Function
-namespace leo {
 }
 
 //data depend-base function

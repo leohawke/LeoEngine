@@ -15,4 +15,7 @@
 #ifndef IndePlatform_LeoMathSSE_hpp
 #define IndePlatform_LeoMathSSE_hpp
 
+#include "leomathsseconvert.hpp"
+#include "leomathsseoper.hpp"
+
 #endif
