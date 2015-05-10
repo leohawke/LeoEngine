@@ -5,7 +5,8 @@
 #include <functional>
 #include "CoreObject.hpp"
 #include "Vertex.hpp"
-#include "..\leomath.hpp"
+#include <leomathutility.hpp>
+#include "..\math.hpp"
 namespace leo
 {
 	class MeshFile

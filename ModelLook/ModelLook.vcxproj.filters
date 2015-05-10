@@ -163,12 +163,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\All\LightBuffer.h">
-      <Filter>Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\LightHelper.h">
-      <Filter>Shader</Filter>
-    </ClInclude>
     <ClInclude Include="..\All\RenderStates.hpp">
       <Filter>Shader</Filter>
     </ClInclude>

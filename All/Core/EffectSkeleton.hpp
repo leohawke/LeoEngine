@@ -12,7 +12,7 @@ namespace leo{
 		void EyePos(const float3& pos, ID3D11DeviceContext* context = nullptr);
 
 		void SkinMatrix(float4x4Object * globalmatrix, std::uint32_t numJoint);
-		void Light(const DirectionLight& dl, ID3D11DeviceContext* context = nullptr);
+		void Light(const DirectionalLight& dl, ID3D11DeviceContext* context = nullptr);
 		void Light(const PointLight& pl, ID3D11DeviceContext* context = nullptr);
 		void Light(const SpotLight& sl, ID3D11DeviceContext* context = nullptr);
 

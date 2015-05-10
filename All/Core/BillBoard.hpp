@@ -25,8 +25,6 @@
 #include <d3d11shader.h>
 */
 
-#include "..\LightBuffer.h"
-
 namespace leo
 {
 	class effect;

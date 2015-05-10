@@ -19,6 +19,7 @@
 #include "..\ShaderMgr.h"
 #include "Camera.hpp"
 #include "Vertex.hpp"
+#include "..\exception.hpp"
 namespace leo
 {
 	ID3D11Buffer* BillBoard::mVertexBuffer = nullptr;

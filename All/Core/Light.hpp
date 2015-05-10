@@ -22,7 +22,7 @@ namespace leo {
 	struct SpotLight;
 
 	struct PointLight {
-		float4 PointRange;
+		float4 PositionRange;
 		float3 Diffuse;
 	};
 

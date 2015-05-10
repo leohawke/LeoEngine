@@ -5,6 +5,7 @@
 #include "Sky.hpp"
 #include "..\TextureMgr.h"
 #include "..\ShaderMgr.h"
+#include "..\exception.hpp"
 #include "Vertex.hpp"
 namespace leo
 {

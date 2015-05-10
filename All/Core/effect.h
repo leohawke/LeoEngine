@@ -21,7 +21,9 @@
 #include "Singleton.hpp"
 #include "leoint.hpp"
 #include "utility.hpp"
-#include "..\LightBuffer.h"
+#include "Core\Light.hpp"
+#include "Core\Material.h"
+#include "..\exception.hpp"
 #include <d3d11.h>
 #pragma comment(lib,"d3d11.lib")
 namespace leo
@@ -119,7 +121,7 @@ namespace leo
 
 		void EyePos(const float3& pos, ID3D11DeviceContext* context = nullptr);
 
-		void Light(const DirectionLight& dl, ID3D11DeviceContext* context = nullptr);
+		void Light(const DirectionalLight& dl, ID3D11DeviceContext* context = nullptr);
 		void Light(const PointLight& pl, ID3D11DeviceContext* context = nullptr);
 		void Light(const SpotLight& sl, ID3D11DeviceContext* context = nullptr);
 

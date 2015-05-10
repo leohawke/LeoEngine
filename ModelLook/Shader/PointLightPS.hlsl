@@ -1,8 +1,7 @@
 cbuffer PointLight
 {
-	float4 diffuse;
 	float4 position;//w : range
-	float4 att;//ignore w;
+	float4 diffuse;
 }
 
 Texture2D normalTex :register(t0);//w:depth

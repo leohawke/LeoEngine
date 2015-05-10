@@ -6,7 +6,7 @@
 #include "FileSearch.h"
 #include "EngineConfig.h"
 #include "..\TextureMgr.h"
-#include "..\leomath.hpp"
+#include "..\math.hpp"
 
 namespace leo {
 #pragma region EffectGBuffer

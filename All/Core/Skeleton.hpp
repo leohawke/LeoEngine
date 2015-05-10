@@ -17,7 +17,7 @@
 #define Core_Skeleton_Hpp
 
 #include "ldef.h"
-#include "LeoMath.h"
+#include <leomathutility.hpp>
 #include "memory.hpp"
 #include "clock.hpp"
 #include "utility.hpp"

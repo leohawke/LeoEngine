@@ -3,7 +3,7 @@
 #include "Deferred.h"
 #include "..\ShaderMgr.h"
 #include "..\RenderStates.hpp"
-#include "..\leomath.hpp"
+#include "leomathutility.hpp"
 #include "..\Core\FileSearch.h"
 #include "..\Core\EngineConfig.h"
 #include "..\Core\Vertex.hpp"

@@ -4,7 +4,7 @@
 #define Core_Vertex_Hpp
 
 #include "memory.hpp"
-#include "LeoMath.h"
+#include "leomathutility.hpp"
 #include <type_traits>
 #include <vector>
 struct D3D11_INPUT_ELEMENT_DESC;

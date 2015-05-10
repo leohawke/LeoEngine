@@ -21,7 +21,7 @@
 #include <platform.h>
 #include <ConstexprMath.hpp>
 #include <leoint.hpp>
-#include <LeoMath.h>
+#include <leomathutility.hpp>
 #include <memory.hpp>
 #include <Tree.hpp>
 #include "Camera.hpp"
@@ -666,8 +666,8 @@ namespace leo
 
 		uint8 LM_VECTOR_CALL DetermineLod(__m128 p0, __m128 p1,const std::array<__m128,4>& view, const std::array<__m128, 4>& proj)
 		{
-			auto vp0 = Transform(p0, view);
-			auto vp1 = Transform(p1, view);
+			auto vp0 = Multiply(p0, view);
+			auto vp1 = Multiply(p1, view);
 			auto cameralod = DistanceToCameraLod(vp0, vp1);
 
 			//auto pp0 = XMVector4Transform(vp0, proj);

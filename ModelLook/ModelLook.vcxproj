@@ -297,12 +297,6 @@
     <ClInclude Include="..\All\COM.hpp" />
     <ClInclude Include="..\All\Core\BilateralFilter.hpp" />
     <ClInclude Include="..\All\Core\Light.hpp" />
-    <ClInclude Include="..\All\LightBuffer.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="..\All\LightHelper.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="..\All\RenderStates.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClInclude>

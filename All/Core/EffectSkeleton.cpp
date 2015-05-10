@@ -112,7 +112,7 @@ namespace leo{
 				mPixelShaderConstantBufferPerView.Update(context);
 		}
 
-		void Light(const DirectionLight& dl, ID3D11DeviceContext* context)
+		void Light(const DirectionalLight& dl, ID3D11DeviceContext* context)
 		{
 			mPixelShaderConstantBufferPerFrame.gDirLight = dl;
 			mLightType = LightType::DirectionLight;
@@ -196,7 +196,7 @@ namespace leo{
 		ShaderConstantBuffer<VScbPerSkin> mVertexShaderConstantBufferPerSkin;
 		struct PScbPerFrame
 		{
-			DirectionLight gDirLight;
+			DirectionalLight gDirLight;
 			PointLight	   gPoiLight;
 			SpotLight	   gSpoLight;
 		public:
@@ -300,7 +300,7 @@ namespace leo{
 			);
 	}
 
-	void EffectSkeleton::Light(const DirectionLight& dl, ID3D11DeviceContext* context)
+	void EffectSkeleton::Light(const DirectionalLight& dl, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectSkeletonDelegate *>(this));
 

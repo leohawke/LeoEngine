@@ -17,7 +17,7 @@
 #ifndef Core_Material_H
 #define Core_Material_H
 
-#include "LeoMath.h"
+#include "LeoMathutility.hpp"
 
 namespace leo{
 	struct Material

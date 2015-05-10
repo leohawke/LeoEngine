@@ -14,7 +14,7 @@
 ////////////////////////////////////////////////////////////////////////////
 #ifndef Core_CoreObject_HPP
 #define Core_CoreObject_HPP
-#include "LeoMath.h"
+#include "leomathutility.hpp"
 #include "memory.hpp"
 namespace leo
 {

@@ -25,6 +25,7 @@
 #include <Core\Vertex.hpp>
 #include <Core\FileSearch.h>
 #include <Core\BilateralFilter.hpp>
+#include <Core\Light.hpp>
 
 
 #include <RenderSystem\Deferred.h>
@@ -332,17 +333,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	return 0;
 }
 
-struct PointLight
-{
-	leo::float4 diffuse;
-	leo::float4 position;//w : range
-	leo::float4 att;//ignore w;
-} pl;
-
 ID3D11PixelShader* mPointLightPS = nullptr;
 
 ID3D11Buffer* mPointLightPSCB = nullptr;
 
+leo::PointLight pl;
 void BuildLight(ID3D11Device* device) {
 	leo::ShaderMgr sm;
 	auto  mPSBlob = sm.CreateBlob(leo::FileSearch::Search(L"PointLightPS.cso"));
@@ -355,24 +350,27 @@ void BuildLight(ID3D11Device* device) {
 	Desc.CPUAccessFlags = 0;
 	Desc.MiscFlags = 0;
 	Desc.StructureByteStride = 0;
-	Desc.ByteWidth = sizeof(PointLight);
+	Desc.ByteWidth = sizeof(leo::PointLight);
+
+	
 
 	D3D11_SUBRESOURCE_DATA subData;
 	subData.pSysMem = &pl;
 	subData.SysMemPitch = 0;
 	subData.SysMemSlicePitch = 0;
 
-	pl.diffuse = leo::float4(0.8f, 0.8f, 0.8f, 1.f);
-	pl.att = leo::float4(0.f, 1.f, 0.f, 1.f);
+	pl.Diffuse = leo::float4(0.8f, 0.8f, 0.8f, 1.f);
 	const float Radius = 9;
 	//world origin in view speace
 	auto origin = pCamera->GetOrigin();
 	origin.x = -origin.x;
 	origin.y = -origin.y;
 	origin.z = -origin.z;
-	pl.position = leo::float4(origin, 1800.f);
+	pl.PositionRange = leo::float4(origin, 1800.f);
 
 	leo::dxcall(device->CreateBuffer(&Desc, &subData, &mPointLightPSCB));
+
+	auto rect = leo::CalcScissorRect(pl, *pCamera);
 }
 void ClearLight() {
 	leo::win::ReleaseCOM(mPointLightPSCB);
@@ -646,19 +644,19 @@ void Update() {
 		//sin(a + b) = sin(a) cos(b) + sin(b) cos(a)
 		//cosa = x ,sina = y
 		//sinb = sin(pi/180)
-		auto cosa = pl.position.x / Radius;
-		auto sina = pl.position.y / Radius;
-		pl.position.x = cosa*cosb - sina*sinb;
-		pl.position.y = sina*cosb + sinb*cosa;
+		auto cosa = pl.PositionRange.x / Radius;
+		auto sina = pl.PositionRange.y / Radius;
+		pl.PositionRange.x = cosa*cosb - sina*sinb;
+		pl.PositionRange.y = sina*cosb + sinb*cosa;
 
-		pl.position.x *= Radius;
-		pl.position.y *= Radius;
+		pl.PositionRange.x *= Radius;
+		pl.PositionRange.y *= Radius;
 
-		auto density = pl.position.y / Radius;
+		auto density = pl.PositionRange.y / Radius;
 		leo::clamp(0.f, 1.f, density);
 
 
-		pl.diffuse = leo::float4(density, density, density, 1.f);
+		pl.Diffuse = leo::float4(density, density, density, 1.f);
 
 		//leo::DeviceMgr().GetDeviceContext()->UpdateSubresource(mPointLightPSCB, 0, nullptr, &pl, 0, 0);
 

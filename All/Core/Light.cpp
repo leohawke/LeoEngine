@@ -7,7 +7,7 @@ ops::Rect leo::CalcScissorRect(const PointLight & wPointLight, const Camera & ca
 {
 	//Create a bounding sphere for the light,based on the position
 	//and range
-	auto centerWS = wPointLight.PointRange;
+	auto centerWS = wPointLight.PositionRange;
 	auto radius = centerWS.w;
 
 	centerWS.w = 1.f;

@@ -45,18 +45,14 @@ class DirectionLight : iBaseLight
 
 struct PointLight : iBaseLight
 {
-	float4 ambient;
-	float4 diffuse;
-	float4 specular;
 	float3 position;
 	float range;
 
-	float3 att;
-	float pad;
+	float4 diffuse;
 
 	float4 Ambient(float3 normal)
 	{
-		return ambient;
+		return 1.f;
 	}
 	float4 Diffuse(float3 normal, float3 pos, float3 toEye)
 	{
@@ -72,7 +68,7 @@ struct PointLight : iBaseLight
 		[flatten]
 		if (lambert > 0.f)
 		{
-			float ka = 1.0f / dot(att, float3(1.0f, d, d*d));
+			float ka = 1.0f;// dot(att, float3(1.0f, d, d*d));
 			kd = lambert*ka;
 		}
 		return kd*diffuse;
@@ -90,33 +86,30 @@ struct PointLight : iBaseLight
 		[flatten]
 		if (lambert > 0.f)
 		{
-			float ka = 1.0f / dot(att, float3(1.0f, d, d*d));
+			float ka = 1.0f; // dot(att, float3(1.0f, d, d*d));
 			float3 v = reflect(-lightVec, normal);
 			ks = pow(saturate(dot(v, toEye)), sh);
 			ks = ks*ka;
 		}
-		return ks*specular;
+		return 1.f;//ks*specular;
 	}
 };
 
 struct SpotLight : iBaseLight
 {
-	float4 ambient;
-	float4 diffuse;
-	float4 specular;
 
 	float3 position;
 	float range;
 
+	float4 diffuse;
+
+
 	float3 direction;
 	float spot;
 
-	float3 att;
-	float pad;
-
 	float4 Ambient(float3 normal)
 	{
-		return ambient;
+		return 1.f;
 	}
 	float4 Diffuse(float3 normal, float3 pos, float3 toEye)
 	{
@@ -133,7 +126,7 @@ struct SpotLight : iBaseLight
 		if (lambert > 0.f)
 		{
 			float kspot = pow(saturate(dot(-lightVec, direction)), spot);
-			float ka = kspot / dot(att, float3(1.0f, d, d*d));
+			float ka = kspot; // dot(att, float3(1.0f, d, d*d));
 			kd = lambert*ka;
 		}
 		return kd*diffuse;
@@ -152,12 +145,12 @@ struct SpotLight : iBaseLight
 		if (lambert > 0.f)
 		{
 			float kspot = pow(saturate(dot(-lightVec, direction)), spot);
-			float ka = kspot / dot(att, float3(1.0f, d, d*d));
+			float ka = kspot; // dot(att, float3(1.0f, d, d*d));
 			float3 v = reflect(-lightVec, normal);
 			ks = pow(saturate(dot(v, toEye)), sh);
 			ks = ks*ka;
 		}
-		return ks*specular;
+		return ks*1.f;
 	}
 };
 

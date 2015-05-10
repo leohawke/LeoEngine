@@ -5,7 +5,7 @@
 #include "Vertex.hpp"
 #include "FileSearch.h"
 #include "EngineConfig.h"
-#include "..\leomath.hpp"
+#include "..\math.hpp"
 #include <d3dcompiler.h>
 
 #include <atomic>
@@ -194,7 +194,7 @@ namespace leo
 				mPixelShaderConstantBufferPerView.Update(context);
 		}
 
-		void Light(const DirectionLight& dl, ID3D11DeviceContext* context)
+		void Light(const DirectionalLight& dl, ID3D11DeviceContext* context)
 		{
 			mPixelShaderConstantBufferPerFrame.gDirLight = dl;
 			mLightType = LightType::DirectionLight;
@@ -276,7 +276,7 @@ namespace leo
 		ShaderConstantBuffer<VScbPerFrame> mVertexShaderConstantBufferPerFrame;
 		struct PScbPerFrame
 		{
-			DirectionLight gDirLight;
+			DirectionalLight gDirLight;
 			PointLight	   gPoiLight;
 			SpotLight	   gSpoLight;
 		public:
@@ -408,7 +408,7 @@ namespace leo
 			);
 	}
 
-	void EffectNormalMap::Light(const DirectionLight& dl, ID3D11DeviceContext* context)
+	void EffectNormalMap::Light(const DirectionalLight& dl, ID3D11DeviceContext* context)
 	{
 		lassume(dynamic_cast<EffectNormalMapDelegate *>(this));
 
