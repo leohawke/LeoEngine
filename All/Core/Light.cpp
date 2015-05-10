@@ -41,8 +41,8 @@ ops::Rect leo::CalcScissorRect(const PointLight & wPointLight, const Camera & ca
 	bottomVS.z = bottomVS.x < 0.f ? bottomVS.z - radius : bottomVS.z + radius;
 
 	//Clamp the z coordinate to the clip planes
-	auto near = 0.f;//camera//can't get near?
-	auto far = 1000.f;
+	auto near = camera.mNear;
+	auto far = camera.mFar;
 	leftVS.z = clamp( near, far, leftVS.z);
 	rightVS.z = clamp( near, far, rightVS.z);
 	topVS.z = clamp(near, far, topVS.z);

@@ -366,11 +366,13 @@ void BuildLight(ID3D11Device* device) {
 	origin.x = -origin.x;
 	origin.y = -origin.y;
 	origin.z = -origin.z;
-	pl.PositionRange = leo::float4(origin, 1800.f);
+	pl.PositionRange = leo::float4(origin, 18.f);
 
 	leo::dxcall(device->CreateBuffer(&Desc, &subData, &mPointLightPSCB));
 
 	auto rect = leo::CalcScissorRect(pl, *pCamera);
+
+	auto clientRect = leo::dx::ScissorRectFromNDCRect(rect, leo::DeviceMgr().GetClientSize());
 }
 void ClearLight() {
 	leo::win::ReleaseCOM(mPointLightPSCB);

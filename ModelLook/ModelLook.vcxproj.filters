@@ -229,6 +229,9 @@
     <FxCompile Include="Shader\BilateralFilterCS.hlsl">
       <Filter>Shader\HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\DirectionalLightPS.hlsl">
+      <Filter>Shader\HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ModelLook.rc">

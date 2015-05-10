@@ -1,7 +1,9 @@
-cbuffer PointLight : register(c0)
+cbuffer DirectionalLight : register(c0)
 {
-	float4 position;//w : range
-	float4 diffuse;
+	float3 direction;//w : range
+	float pad;
+	float3 diffuse;
+	float3 specPow;
 }
 
 Texture2D normalTex :register(t0);//w:depth
@@ -30,26 +32,10 @@ float4 main(VertexOut pin) : SV_TARGET
 	float3 Diffuse = diffuseTex.Sample(LinearRepeat, pin.Tex).rgb;
 	float Ambient = ambientTex.SampleLevel(samNormalDepth, pin.Tex, 0).r;
 
-	float pz = NormalDepth.w;
-	float3 PosV = (pz / pin.ToFarPlane.z)*pin.ToFarPlane;
+	float lambert = dot(direction, NormalDepth.xyz);
 
-	float3 lightVec = position.xyz - PosV;
-	float d = max(length(lightVec),1.f);
-	lightVec /= d;
-	float lambert = dot(lightVec, NormalDepth.xyz);
-	if (d > position.w)
-		lambert = 0.f;
+	float kd = max(0.1f, lambert);
 
-	float kd = 0.f;
-
-	[flatten]
-	if (lambert > 0.f)
-	{
-		float ka = 1.0f;// dot(att.xyz, float3(1.0f, d, d*d));
-		kd = lambert*ka;
-	}
-
-	kd = max(0.1f, kd);
-	
-	return kd*diffuse *float4(Diffuse,1.f)*(Ambient);
+	return float4(kd*diffuse *Diffuse*Ambient,1.f);
 }
+

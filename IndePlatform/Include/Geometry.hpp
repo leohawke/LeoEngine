@@ -198,6 +198,7 @@ namespace leo {
 		float mBottomSlope;          // Negative Y slope.
 		float mNear, mFar;            // Z of the near plane and far plane.
 
+
 		// Creators
 		Frustum() = default;
 		Frustum(const float3& Origin, const float4& Orientation,

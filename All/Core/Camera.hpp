@@ -72,18 +72,18 @@ namespace leo
 			return mMatrix;
 		}
 
-		DefGetter(const lnothrow,const PROJECTION_TYPE&, Type, mProjType);
+		DefGetter(const noexcept,const PROJECTION_TYPE&, Type, mProjType);
 
-		DefGetter(const lnothrow, const float&, Fov, mFov);
+		DefGetter(const noexcept,float, Fov, mFov);
 
-		DefGetter(const lnothrow, const float&, Aspect, mAspect);
+		DefGetter(const noexcept,float, Aspect, mAspect);
 
-		DefGetter(const lnothrow, const float&, OrHeight, mOrHeight);
-		DefGetter(const lnothrow, const float&, OrWidth, mOrWidth);
+		DefGetter(const noexcept, float, OrHeight, mOrHeight);
+		DefGetter(const noexcept, float, OrWidth, mOrWidth);
 
-		DefGetter(const lnothrow, const float3&, Origin, mOrigin);
+		DefGetter(const noexcept, const float3&, Origin, mOrigin);
 
-		DefGetter(const lnothrow, const float4&, Orientation, mOrientation);
+		DefGetter(const noexcept, const float4&, Orientation, mOrientation);
 	private:
 		void Update()
 		{
