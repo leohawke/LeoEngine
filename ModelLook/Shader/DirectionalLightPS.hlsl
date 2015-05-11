@@ -3,7 +3,7 @@ cbuffer DirectionalLight : register(c0)
 	float3 direction;//w : range
 	float pad;
 	float3 diffuse;
-	float3 specPow;
+	float specPow;
 }
 
 Texture2D normalTex :register(t0);//w:depth

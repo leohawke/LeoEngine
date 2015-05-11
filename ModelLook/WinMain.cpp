@@ -337,12 +337,17 @@ ID3D11PixelShader* mPointLightPS = nullptr;
 
 ID3D11Buffer* mPointLightPSCB = nullptr;
 
+ID3D11PixelShader* mDirectionalLightPS = nullptr;
+
+ID3D11Buffer* mDirectionalLightPSCB = nullptr;
+
 leo::PointLight pl;
+leo::DirectionalLight dl;
 void BuildLight(ID3D11Device* device) {
 	leo::ShaderMgr sm;
 	auto  mPSBlob = sm.CreateBlob(leo::FileSearch::Search(L"PointLightPS.cso"));
 	mPointLightPS = sm.CreatePixelShader(mPSBlob);
-
+	mDirectionalLightPS = sm.CreatePixelShader(leo::FileSearch::Search(L"DirectionalLightPS.cso"));
 
 	D3D11_BUFFER_DESC Desc;
 	Desc.Usage = D3D11_USAGE_DEFAULT;
@@ -351,8 +356,6 @@ void BuildLight(ID3D11Device* device) {
 	Desc.MiscFlags = 0;
 	Desc.StructureByteStride = 0;
 	Desc.ByteWidth = sizeof(leo::PointLight);
-
-	
 
 	D3D11_SUBRESOURCE_DATA subData;
 	subData.pSysMem = &pl;
@@ -370,12 +373,20 @@ void BuildLight(ID3D11Device* device) {
 
 	leo::dxcall(device->CreateBuffer(&Desc, &subData, &mPointLightPSCB));
 
+	Desc.ByteWidth = sizeof(leo::DirectionalLight);
+	subData.pSysMem = &dl;
+	dl.Directional = leo::float3(0.f, 1.f, 0.f);
+	dl.Diffuse = leo::float3(0.8f, 0.8f, 0.8f);
+
+	leo::dxcall(device->CreateBuffer(&Desc, &subData, &mDirectionalLightPSCB));
+
 	auto rect = leo::CalcScissorRect(pl, *pCamera);
 
 	auto clientRect = leo::dx::ScissorRectFromNDCRect(rect, leo::DeviceMgr().GetClientSize());
 }
 void ClearLight() {
 	leo::win::ReleaseCOM(mPointLightPSCB);
+	leo::win::ReleaseCOM(mDirectionalLightPSCB);
 }
 void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 {
@@ -730,8 +741,8 @@ void DrawSSAO(ID3D11DeviceContext* context) {
 
 void DrawLight(ID3D11DeviceContext* context) {
 
-	context->PSSetShader(mPointLightPS, nullptr, 0);
-	context->PSSetConstantBuffers(0, 1, &mPointLightPSCB);
+	context->PSSetShader(mDirectionalLightPS, nullptr, 0);
+	context->PSSetConstantBuffers(0, 1, &mDirectionalLightPSCB);
 
 	auto srv = leo::DeferredResources::GetInstance().GetSSAOSRV();
 	context->PSSetShaderResources(2, 1, &srv);

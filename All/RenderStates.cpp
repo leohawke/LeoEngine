@@ -184,6 +184,29 @@ namespace leo
 		ShadowMapRS.DepthBiasClamp = 0.f;
 		ShadowMapRS.SlopeScaledDepthBias = 1.f;
 		p->CreateRasterizerState(L"ShadowMapRS", ShadowMapRS);
+
+		// LightBlenBS
+		CD3D11_BLEND_DESC lightblendDesc(D3D11_DEFAULT);
+		lightblendDesc.AlphaToCoverageEnable = false;
+		lightblendDesc.IndependentBlendEnable = false;
+		lightblendDesc.RenderTarget[0].BlendEnable = true;
+		lightblendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+		lightblendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+		lightblendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		lightblendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+		lightblendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+		lightblendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		lightblendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		p->CreateBlendState(L"LightBlenBS", transparentDesc);
+
+		// ScissorNoCullRS
+		CD3D11_RASTERIZER_DESC ScissorNoCullDesc(D3D11_DEFAULT);
+		noCullDesc.FillMode = D3D11_FILL_SOLID;
+		noCullDesc.CullMode = D3D11_CULL_NONE;
+		noCullDesc.FrontCounterClockwise = false;
+		noCullDesc.DepthClipEnable = true;
+		noCullDesc.ScissorEnable = true;
+		p->CreateRasterizerState(L"ScissorNoCullRS", noCullDesc);
 	}
 
 	RenderStates::Delegate::~Delegate()
