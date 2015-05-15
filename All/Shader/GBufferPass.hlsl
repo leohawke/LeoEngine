@@ -48,5 +48,7 @@ void GBufferMRTPS(VertexOut pin,
 	float4 diffuse = texDiffuse.Sample(anisoSampler, pin.Tex);
 	clip(diffuse.a-0.1f);
 	DiffuseSpec.rgb = diffuse.rgb;
+
+
 	DiffuseSpec.a = 1.f;
 }

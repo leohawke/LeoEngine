@@ -122,7 +122,8 @@ namespace leo
 		SwapEndianBase((uint64*)p, nCount);
 	}
 
-
+//x86 g++ sizeof(long double) != sizeof(uint64) == 8
+#ifndef LB_IMPL_GNUCPP
 	template<>
 	//warning: sizeof(long double) == sizeof(uint64) == 8
 	inline void SwapEndianBase(long double* p, std::size_t nCount, bool bWriting)
@@ -130,6 +131,7 @@ namespace leo
 		static_assert(sizeof(long double) == 8, "UnSuppoted Platform(sizeof(long double) != 8)");
 		SwapEndianBase((uint64*)p, nCount);
 	}
+#endif
 #endif
 
 	template<class T>

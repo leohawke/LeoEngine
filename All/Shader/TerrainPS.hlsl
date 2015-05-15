@@ -73,8 +73,9 @@ void main(PixelIn pin,out half4 NormalDepth: SV_TARGET0,
 	float4 c3 = gMatTexture.Sample(RepeatLinear, float3(pin.Tex, 4.f));
 
 	half3 restoreNormal = CalcNormal(pin.Tex);
-
-	CompressUnsignedNormalToNormalsBuffer(restoreNormal);
+	restoreNormal.rgb = normalize(restoreNormal.rgb);
+	restoreNormal.rgb = restoreNormal.rgb * .5h + .5h;
+	//CompressUnsignedNormalToNormalsBuffer(restoreNormal);
 
 
 	NormalDepth = half4(restoreNormal, pin.Distance);
