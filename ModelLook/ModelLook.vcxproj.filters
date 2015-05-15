@@ -161,6 +161,18 @@
     <ClCompile Include="..\All\Core\Light.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\Core\Debug.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\DepthStencil.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\RenderStates.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\ShaderMgr.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\All\RenderStates.hpp">
@@ -177,14 +189,26 @@
     <ClInclude Include="..\All\RenderSystem\Deferred.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
-    <ClInclude Include="..\All\COM.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="..\All\Core\BilateralFilter.hpp">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\All\Core\Light.hpp">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\RenderSystem\DepthStencil.hpp">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\Core\COM.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\Core\debug.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\RenderSystem\RenderStates.hpp">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\RenderSystem\ShaderMgr.h">
+      <Filter>RenderSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

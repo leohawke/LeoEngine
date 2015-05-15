@@ -181,6 +181,7 @@
     <ClCompile Include="..\All\Core\CoreObject.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\All\Core\Debug.cpp" />
     <ClCompile Include="..\All\Core\effect.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -273,6 +274,9 @@
     <ClCompile Include="..\All\RenderSystem\Deferred.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\DepthStencil.cpp" />
+    <ClCompile Include="..\All\RenderSystem\RenderStates.cpp" />
+    <ClCompile Include="..\All\RenderSystem\ShaderMgr.cpp" />
     <ClCompile Include="..\All\ShaderMgr.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
@@ -294,13 +298,17 @@
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\All\COM.hpp" />
     <ClInclude Include="..\All\Core\BilateralFilter.hpp" />
+    <ClInclude Include="..\All\Core\COM.hpp" />
+    <ClInclude Include="..\All\Core\debug.hpp" />
     <ClInclude Include="..\All\Core\Light.hpp" />
     <ClInclude Include="..\All\RenderStates.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\All\RenderSystem\Deferred.h" />
+    <ClInclude Include="..\All\RenderSystem\DepthStencil.hpp" />
+    <ClInclude Include="..\All\RenderSystem\RenderStates.hpp" />
+    <ClInclude Include="..\All\RenderSystem\ShaderMgr.h" />
     <ClInclude Include="..\All\ShaderMgr.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClInclude>

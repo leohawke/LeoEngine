@@ -117,12 +117,6 @@
     <ClCompile Include="TextureMgr.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ShaderMgr.cpp">
-      <Filter>Shader</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderStates.cpp">
-      <Filter>Shader</Filter>
-    </ClCompile>
     <ClCompile Include="..\DirectXTex\ScreenGrab\ScreenGrab.cpp">
       <Filter>ScreenGrab</Filter>
     </ClCompile>
@@ -290,9 +284,6 @@
     <ClInclude Include="Core\Sky.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="RenderStates.hpp">
-      <Filter>Shader</Filter>
-    </ClInclude>
     <ClInclude Include="Core\GaussBlur.hpp">
       <Filter>Core</Filter>
     </ClInclude>
@@ -301,9 +292,6 @@
     </ClInclude>
     <ClInclude Include="DeviceMgr.h">
       <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ShaderMgr.h">
-      <Filter>Shader</Filter>
     </ClInclude>
     <ClInclude Include="Core\effect.h">
       <Filter>Core</Filter>

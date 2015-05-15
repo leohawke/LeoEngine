@@ -1,5 +1,5 @@
 #pragma once
-#include "..\debug.hpp"
+#include "debug.hpp"
 #include <utility.hpp>
 namespace leo
 {

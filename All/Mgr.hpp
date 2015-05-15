@@ -12,10 +12,10 @@
 #include "Singleton.hpp"
 #include "leoint.hpp"
 #include "utility.hpp"
-#include "d3dx11.hpp"
+#include "RenderSystem\d3dx11.hpp"
 
 #include "window.hpp"
-#include "COM.hpp"
+#include "Core\COM.hpp"
 namespace leo
 {
 	namespace win
