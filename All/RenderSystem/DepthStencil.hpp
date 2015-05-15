@@ -28,7 +28,7 @@ struct DXGI_SAMPLE_DESC;
 namespace leo {
 	class DepthStencil {
 	public:
-		DepthStencil(std::pair<uint16,uint16> size,ID3D11Device* device) noexcept;
+		DepthStencil(std::pair<uint16,uint16> size,ID3D11Device* device);
 
 		DepthStencil(std::pair<uint16, uint16> size,ID3D11Device* device,DXGI_SAMPLE_DESC sampleDesc);
 
@@ -38,7 +38,7 @@ namespace leo {
 
 		ID3D11ShaderResourceView* GetDepthSRV() const noexcept;
 
-		void ReSize(std::pair<uint16, uint16> size);
+		void ReSize(std::pair<uint16, uint16> size, ID3D11Device* device);
 
 	private:
 		win::unique_com<ID3D11DepthStencilView> mDepthStencilView = nullptr;
