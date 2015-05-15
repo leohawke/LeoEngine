@@ -3,6 +3,7 @@
 #include "platform.h"
 #include "exception.hpp"
 
+#ifdef PLATFORM_WIN32
 static std::string formatmessage(const char* pre,DWORD errcode)
 {
 	LPVOID msgbuff;
@@ -18,6 +19,7 @@ static std::string formatmessage(const char* pre,DWORD errcode)
 	LocalFree(msgbuff);
 	return rvalue;
 }
+#endif
 
 namespace leo
 {
@@ -55,6 +57,7 @@ namespace leo
 		std::string
 			win32_exception::formatmessage(error_code_type ec) lnothrow
 		{
+#ifdef PLATFORM_WIN32
 			try
 			{
 				LPVOID msgbuff;
@@ -70,6 +73,7 @@ namespace leo
 			catch (...)
 			{
 			}
+#endif
 			return {};
 		}
 	}

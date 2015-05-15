@@ -1,5 +1,8 @@
-#pragma once
-//todo :更改目录,增加打印异常信息的宏
+#ifndef IndePlatform_exception_hpp
+#define IndePlatform_exception_hpp
+
+//Todo :fix debug printf
+
 #include <exception>
 #include <stdexcept>
 #include <cstdint>
@@ -37,7 +40,7 @@ namespace leo
 		friend std::string format_logged_event(const logged_event& e);
 	};
 	
-
+	std::string format_logged_event(const logged_event& e);
 	namespace win
 	{
 		class host_exception : public logged_event
@@ -49,7 +52,7 @@ namespace leo
 		class win32_exception : public host_exception
 		{
 		public:
-			using error_code_type = dword;
+			using error_code_type = DWORD;
 		private:
 			error_code_type errcode;
 		public:
@@ -70,6 +73,7 @@ namespace leo
 				: win32_exception(ec, s, l)
 			{}
 		};
+
 #define Raise_Error_Exception(err,...)\
 		{\
 		throw leo::win::win32_exception(err,__VA_ARGS__);\
@@ -102,3 +106,5 @@ namespace leo
 	void dxcall(win::HRESULT hr);
 	void win32call(win::BOOL retval);
 }
+
+#endif

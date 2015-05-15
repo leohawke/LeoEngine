@@ -74,6 +74,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\any.cpp" />
+    <ClCompile Include="src\exception.cpp" />
     <ClCompile Include="src\Geometry.cpp" />
     <ClCompile Include="src\memory.cpp" />
     <ClCompile Include="src\raii.cpp" />
@@ -93,6 +94,7 @@
     <ClInclude Include="Include\ConstexprMath.hpp" />
     <ClInclude Include="Include\container.hpp" />
     <ClInclude Include="Include\EndianSwap.hpp" />
+    <ClInclude Include="Include\exception.hpp" />
     <ClInclude Include="Include\experimental\string_view.hpp" />
     <ClInclude Include="Include\functional.hpp" />
     <ClInclude Include="Include\Geometry.hpp" />

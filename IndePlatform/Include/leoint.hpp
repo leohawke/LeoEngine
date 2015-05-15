@@ -19,8 +19,8 @@ namespace leo
 
 	namespace win
 	{
-		using uint = unsigned int;
-		using dword = unsigned long;
+		using UINT = unsigned int;
+		using DWORD = unsigned long;
 		using BOOL = int;
 		using HRESULT = long;
 	}
