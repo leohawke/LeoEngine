@@ -6,7 +6,7 @@ using namespace leo;
 
 //TODO :Support MSAA
 
-class DeferredRender::DeferredImpl {
+class DeferredRender::DeferredResImpl {
 public:
 	/*
 	RT0:R8G8B8A8_UNORM<normal,specmono>{
@@ -33,16 +33,16 @@ public:
 	win::unique_com<ID3D11ShaderResourceView> mLightSRV = nullptr;
 
 	//TODO:格式检查支持,替换格式
-	DeferredImpl(ID3D11Device* device,std::pair<uint16,uint16> size) {
+	DeferredResImpl(ID3D11Device* device,std::pair<uint16,uint16> size) {
 
 		CreateRes(device, size);
 	}
 
-	~DeferredImpl() = default;
+	~DeferredResImpl() = default;
 
 	//clear the bind state,then call this function
 	void ReSize(ID3D11Device* device, std::pair<uint16, uint16> size) {
-		this->~DeferredImpl();
+		this->~DeferredResImpl();
 		CreateRes(device, size);
 		
 	}
@@ -89,3 +89,23 @@ private:
 		}
 	}
 };
+
+class DeferredRender::DeferredStateImpl {
+public:
+	DeferredStateImpl(ID3D11Device* device) {
+	}
+};
+
+leo::DeferredRender::DeferredRender(ID3D11Device * device, size_type size)
+	:pResImpl(std::make_unique<DeferredResImpl>(device,size)),
+	pStateImpl(std::make_unique<DeferredStateImpl>(device))
+{
+}
+
+void leo::DeferredRender::OMSet(ID3D11DeviceContext * context) noexcept
+{
+}
+
+void leo::DeferredRender::ReSize(ID3D11Device * device, size_type size) noexcept
+{
+}

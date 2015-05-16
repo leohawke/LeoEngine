@@ -12,39 +12,31 @@
 //  History:
 ////////////////////////////////////////////////////////////////////////////
 
-
-/*
-R8G8B8A8 NORMAL_SPECULAR <float3->float2->float3>
-R10G10B10A2 DIFFUSE
-R10G10B10A2 LIGHT
-*/
-
-
 #ifndef ShaderSystem_DeferredRender_Hpp
 #define ShaderSystem_DeferredRender_Hpp
 
 #include <memory>
-
+#include <leoint.hpp>
+struct ID3D11Device;
+struct ID3D11DeviceContext;
+struct ID3D11RenderTargetView;
 namespace leo {
 	class DeferredRender {
 	private:
-		class DeferredImpl;
-		std::unique_ptr<DeferredImpl> pImpl;
+		class DeferredResImpl;
+		class DeferredStateImpl;
+		std::unique_ptr<DeferredResImpl> pResImpl;
+		std::unique_ptr<DeferredStateImpl> pStateImpl;
+
 	public:
-		/*
-		ID3D11RenderTargetView** GetMRTs() const;
-		ID3D11ShaderResourceView** GetSRVs() const;
+		using size_type = std::pair<uint16, uint16>;
 
-		//GBuffer用作输出的准备动作
-		void OMSet() noexcept;
-		//GBuffer用作输入的准备动作
-		//note please clear RenderTarget
-		void IASet() noexcept;
+		DeferredRender(ID3D11Device* device, size_type size);
 
-		void UnIASet() noexcept;
+		void OMSet(ID3D11DeviceContext* context) noexcept;
 
-		void ReSize(const size_type& size) noexcept;
-		*/
+		void ReSize(ID3D11Device* device,size_type size) noexcept;
+		
 	};
 }
 
