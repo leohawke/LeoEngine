@@ -1,5 +1,5 @@
 #include "TextureMgr.h"
-#include "COM.hpp"
+#include "Core\COM.hpp"
 #include "DirectXTex.h"
 #include "file.hpp"
 #include "exception.hpp"

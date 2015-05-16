@@ -26,10 +26,10 @@
 #include <Tree.hpp>
 #include "Camera.hpp"
 #include "Vertex.hpp"
-#include "..\exception.hpp"
+#include "exception.hpp"
 #include "..\DeviceMgr.h"
 #include "..\TextureMgr.h"
-#include "..\ShaderMgr.h"
+#include "RenderSystem\ShaderMgr.h"
 #include "EffectTerrain.hpp"
 #include "EffectTerrainSO.hpp"
 #include "..\file.hpp"

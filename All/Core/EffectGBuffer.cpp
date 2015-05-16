@@ -1,6 +1,6 @@
 #include "EffectGBuffer.hpp"
-#include "..\ShaderMgr.h"
-#include "..\RenderStates.hpp"
+#include "RenderSystem\ShaderMgr.h"
+#include "RenderSystem\RenderStates.hpp"
 #include "..\DeviceMgr.h"
 #include "Vertex.hpp"
 #include "FileSearch.h"

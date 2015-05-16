@@ -56,16 +56,7 @@
     <ClCompile Include="..\All\Core\Vertex.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\All\d3dx11.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\Debug.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="..\All\DeviceManger.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\exception.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\All\File.cpp">
@@ -85,12 +76,6 @@
     </ClCompile>
     <ClCompile Include="..\All\window.cpp">
       <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\RenderStates.cpp">
-      <Filter>Shader</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\ShaderMgr.cpp">
-      <Filter>Shader</Filter>
     </ClCompile>
     <ClCompile Include="..\All\Core\effect.cpp">
       <Filter>Core</Filter>
@@ -161,9 +146,6 @@
     <ClCompile Include="..\All\Core\Light.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\All\Core\Debug.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="..\All\RenderSystem\DepthStencil.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
@@ -173,14 +155,14 @@
     <ClCompile Include="..\All\RenderSystem\ShaderMgr.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\d3dx11.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\Core\CoreDebug.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\All\RenderStates.hpp">
-      <Filter>Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\ShaderMgr.h">
-      <Filter>Shader</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h" />
     <ClInclude Include="Axis.hpp">
       <Filter>头文件</Filter>
@@ -199,9 +181,6 @@
       <Filter>RenderSystem</Filter>
     </ClInclude>
     <ClInclude Include="..\All\Core\COM.hpp">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\All\Core\debug.hpp">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\All\RenderSystem\RenderStates.hpp">

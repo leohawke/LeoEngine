@@ -9,7 +9,8 @@
 #pragma warning(disable: 4172)
 
 #include <exception.hpp>
-#include <..\debug.hpp>
+
+#include <Core\CoreDebug.hpp>
 namespace leo {
 	void CompilerBilaterCS(unsigned int radius, const wchar_t* savepath) {
 

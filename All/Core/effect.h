@@ -21,9 +21,9 @@
 #include "Singleton.hpp"
 #include "leoint.hpp"
 #include "utility.hpp"
-#include "Core\Light.hpp"
-#include "Core\Material.h"
-#include "..\exception.hpp"
+#include "Light.hpp"
+#include "Material.h"
+#include "exception.hpp"
 #include <d3d11.h>
 #pragma comment(lib,"d3d11.lib")
 namespace leo
@@ -276,7 +276,7 @@ namespace leo
 
 			union
 			{
-				win::uint n;
+				win::UINT n;
 				std::uintptr_t p;
 				D3D11_VIEWPORT v;
 				D3D11_RECT r;

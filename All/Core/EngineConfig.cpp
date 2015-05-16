@@ -4,8 +4,8 @@
 #include "EngineConfig.h"
 #include "FileSearch.h"
 
-#include "..\d3dx11.hpp"
-#include "..\exception.hpp"
+#include "RenderSystem\d3dx11.hpp"
+#include "exception.hpp"
 #include "..\DeviceMgr.h"
 #include "..\scheme_helper.h"
 #include "string.hpp"

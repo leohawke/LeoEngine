@@ -1,7 +1,7 @@
 #include <fstream>
 
 #include "ShaderMgr.h"
-#include "COM.hpp"
+#include "Core\COM.hpp"
 #include "DirectXTex.h"
 #include "file.hpp"
 #include "exception.hpp"
@@ -54,7 +54,7 @@ namespace leo
 		fin->Read(m_buffer.get(),m_size,0);
 	}
 
-	ID3D11VertexShader* ShaderMgr::CreateVertexShader(const ShaderBlob& blob, ID3D11ClassLinkage* linkage, const D3D11_INPUT_ELEMENT_DESC * layoutdesc, win::uint arraysize, ID3D11InputLayout** pLayout)
+	ID3D11VertexShader* ShaderMgr::CreateVertexShader(const ShaderBlob& blob, ID3D11ClassLinkage* linkage, const D3D11_INPUT_ELEMENT_DESC * layoutdesc, win::UINT arraysize, ID3D11InputLayout** pLayout)
 	{
 		ID3D11VertexShader* shader = 0;
 
@@ -243,7 +243,7 @@ namespace leo
 		return shader;
 	}
 
-	ID3D11InputLayout* ShaderMgr::CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* layoutdesc, win::uint arraysize/*hint*/)
+	ID3D11InputLayout* ShaderMgr::CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* layoutdesc, win::UINT arraysize/*hint*/)
 	{
 		auto it = mInputLayouts.find(layoutdesc);
 		if (it != mInputLayouts.end())

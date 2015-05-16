@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "BaseMacro.h"
-#include "..\debug.hpp"
+#include "Core\CoreDebug.hpp"
 
 
 namespace leo

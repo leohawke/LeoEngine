@@ -1,9 +1,9 @@
-#include "..\d3dx11.hpp"
+#include "RenderSystem\d3dx11.hpp"
 #include "Camera.hpp"
 #include "ShadowMap.hpp"
 #include "EffectShadowMap.hpp"
 #include "effect.h"
-#include "..\exception.hpp"
+#include "exception.hpp"
 namespace leo {
 	class ShadowMapDelegate :CONCRETE(ShadowMap), public Singleton<ShadowMapDelegate>
 	{

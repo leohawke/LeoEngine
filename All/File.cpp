@@ -8,7 +8,7 @@
 
 #include "File.hpp"
 #include "exception.hpp"
-#include "..\Debug.hpp"
+#include "Core\CoreDebug.hpp"
 
 #pragma warning(push)
 #pragma warning(disable : 4800)
@@ -132,7 +132,7 @@ namespace leo
 
 				OVERLAPPED vOverlapped;
 				BZero(vOverlapped);
-				vOverlapped.Offset = static_cast<win::dword>(u64Offset);
+				vOverlapped.Offset = static_cast<win::DWORD>(u64Offset);
 				vOverlapped.OffsetHigh = (u64Offset >> 32);
 				vOverlapped.hEvent = (HANDLE)&vApcResult;
 				const bool bSucceeds = ::ReadFileEx(xm_hFile.Get(), pBuffer, dwBytesToReadThisTime, &vOverlapped, &xAioCallback);
@@ -167,7 +167,7 @@ namespace leo
 
 					BZero(vOverlapped);
 					const auto u64NewOffset = u64Offset + uBytesRead;
-					vOverlapped.Offset = static_cast<win::dword>(u64NewOffset);
+					vOverlapped.Offset = static_cast<win::DWORD>(u64NewOffset);
 					vOverlapped.OffsetHigh = (u64NewOffset >> 32);
 					vOverlapped.hEvent = (HANDLE)&vApcResult;
 					if (!::ReadFileEx(
@@ -502,7 +502,7 @@ namespace leo
 				unique_handle hHeap(HeapCreate(HEAP_GENERATE_EXCEPTIONS | HEAP_NO_SERIALIZE, HEAP_SIZE, 0), heap_check, heap_delete);
 				if (!hHeap.is_good())
 				{
-					DebugLastError(); throw;
+					DebugOutputLastError(); throw;
 				}
 				assert(true);
 				int z = 0;

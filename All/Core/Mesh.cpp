@@ -5,11 +5,11 @@
 #include "string.hpp"
 #include "..\file.hpp"
 #include "MeshLoad.hpp"
-#include "..\exception.hpp"
+#include "exception.hpp"
 #include "Mesh.hpp"
 #include "..\TextureMgr.h"
-#include "..\ShaderMgr.h"
-#include "..\RenderStates.hpp"
+#include "RenderSystem\ShaderMgr.h"
+#include "RenderSystem\RenderStates.hpp"
 #include "FileSearch.h"
 #include "Camera.hpp"
 #include "EffectShadowMap.hpp"
@@ -89,14 +89,14 @@ namespace leo
 			Desc.CPUAccessFlags = 0;
 			Desc.MiscFlags = 0;
 			Desc.StructureByteStride = 0;
-			Desc.ByteWidth =static_cast<win::uint> (sizeof(vertex_type)*vertices.size());
+			Desc.ByteWidth =static_cast<win::UINT> (sizeof(vertex_type)*vertices.size());
 
 			D3D11_SUBRESOURCE_DATA resDesc;
 			resDesc.pSysMem = &vertices[0];
 			dxcall(device->CreateBuffer(&Desc, &resDesc, &m_vertexbuff));
 
 			Desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-			Desc.ByteWidth = static_cast<win::uint> (sizeof(std::uint32_t)*indices.size());
+			Desc.ByteWidth = static_cast<win::UINT> (sizeof(std::uint32_t)*indices.size());
 			resDesc.pSysMem = &indices[0];
 			dxcall(device->CreateBuffer(&Desc, &resDesc, &m_indexbuff));
 		}

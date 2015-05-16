@@ -2,8 +2,8 @@
 #include "Vertex.hpp"
 #include "EngineConfig.h"
 #include "FileSearch.h"
-#include "..\ShaderMgr.h"
-#include "..\RenderStates.hpp"
+#include "RenderSystem\ShaderMgr.h"
+#include "RenderSystem\RenderStates.hpp"
 #include <d3dcompiler.h>
 
 #include <atomic>

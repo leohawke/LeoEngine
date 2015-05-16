@@ -12,7 +12,7 @@
 
 #include <memory>
 
-#include "..\debug.hpp"
+#include "debugoutput.hpp"
 #include "d3dx11.hpp"
 #include "exception.hpp"
 
@@ -689,8 +689,8 @@ namespace leo
 
 				if (time == 0.f)
 					continue;
-				LogPrintf(L"currframe: %u ",currframe);
-				LogPrintf(L"%s: %f\n", iter->first.c_str(), time);
+				RecordPrintf(L"currframe: %u ",currframe);
+				RecordPrintf(L"%s: %f\n", iter->first.c_str(), time);
 			}
 		}
 

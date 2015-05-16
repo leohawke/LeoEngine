@@ -1,8 +1,8 @@
 #include "EffectShadowMap.hpp"
 #include "EngineConfig.h"
 #include "FileSearch.h"
-#include "..\ShaderMgr.h"
-#include "..\RenderStates.hpp"
+#include "RenderSystem\ShaderMgr.h"
+#include "RenderSystem\RenderStates.hpp"
 
 namespace leo {
 	using matrix = std::array<__m128, 4>;

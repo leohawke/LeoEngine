@@ -8,7 +8,7 @@
 
 #include "platform.h"
 #include <leo2DMath.hpp>
-#include "COM.hpp"
+#include "Core\COM.hpp"
 #include <comdef.h>
 #include <d3d11.h>
 #include <d3d11shader.h>
@@ -45,15 +45,15 @@ namespace leo
 		template<typename DXCOM>
 		void DebugCOM(DXCOM* &com, std::size_t ecount, const char * objectname)
 		{
-#if defined(_DEBUG) || defined(PROFILE)
+#if defined(DEBUG) || defined(PROFILE)
 			if (com)
-				com->SetPrivateData(::WKPDID_D3DDebugObjectName,static_cast<win::uint>( ecount), objectname);
+				com->SetPrivateData(::WKPDID_D3DDebugObjectName,static_cast<win::UINT>( ecount), objectname);
 #endif
 		}
 		template<typename DXCOM>
 		void DebugCOM(DXCOM &com, std::size_t ecount, const char * objectname)
 		{
-#if defined(_DEBUG) || defined(PROFILE)
+#if defined(DEBUG) || defined(PROFILE)
 			if (com)
 				com->SetPrivateData(::WKPDID_D3DDebugObjectName, ecount, objectname);
 #endif
@@ -62,23 +62,23 @@ namespace leo
 		template<typename DXCOM>
 		void DebugCOM(DXCOM* &com,const char * objectname)
 		{
-#if defined(_DEBUG) || defined(PROFILE)
+#if defined(DEBUG) || defined(PROFILE)
 			if (com)
-				com->SetPrivateData(::WKPDID_D3DDebugObjectName,static_cast<win::uint>(std::strlen(objectname)), objectname);
+				com->SetPrivateData(::WKPDID_D3DDebugObjectName,static_cast<win::UINT>(std::strlen(objectname)), objectname);
 #endif
 		}
 		template<typename DXCOM>
 		void DebugCOM(DXCOM* &com, const wchar_t * objectname)
 		{
-#if defined(_DEBUG) || defined(PROFILE)
+#if defined(DEBUG) || defined(PROFILE)
 			if (com)
-				com->SetPrivateData(::WKPDID_D3DDebugObjectName, static_cast<win::uint>(std::wcslen(objectname) * 2), objectname);
+				com->SetPrivateData(::WKPDID_D3DDebugObjectName, static_cast<win::UINT>(std::wcslen(objectname) * 2), objectname);
 #endif
 		}
 		template<typename DXCOM>
 		void DebugCOM(DXCOM &com,const char * objectname)
 		{
-#if defined(_DEBUG) || defined(PROFILE)
+#if defined(DEBUG) || defined(PROFILE)
 			if (com)
 				com->SetPrivateData(::WKPDID_D3DDebugObjectName, std::strlen(objectname), objectname);
 #endif

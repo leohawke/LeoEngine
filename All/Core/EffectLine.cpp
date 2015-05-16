@@ -1,6 +1,6 @@
 #include "EffectLine.hpp"
 #include "Vertex.hpp"
-#include "..\ShaderMgr.h"
+#include "RenderSystem\ShaderMgr.h"
 #include "FileSearch.h"
 #include "EngineConfig.h"
 namespace leo

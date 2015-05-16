@@ -1,6 +1,6 @@
 #include "RenderStates.hpp"
 #include "Mgr.hpp"
-#include "COM.hpp"
+#include "Core\COM.hpp"
 #include "exception.hpp"
 
 namespace leo

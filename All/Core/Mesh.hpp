@@ -6,11 +6,11 @@
 
 #include <vector>
 
-#include "..\d3dx11.hpp"
-#include "..\COM.hpp"
+#include "RenderSystem\d3dx11.hpp"
+#include "COM.hpp"
 #include "Vertex.hpp"
-#include "Core\Material.h"
-#include "..\debug.hpp"
+#include "Material.h"
+#include "Coredebug.hpp"
 #include "CoreObject.hpp"
 #include "BaseMacro.h"
 #include "leoint.hpp"
@@ -28,8 +28,8 @@ namespace leo
 			Material m_mat;
 			ID3D11ShaderResourceView* m_texdiff;
 			ID3D11ShaderResourceView* m_texnormalmap;
-			win::uint m_indexoffset;
-			win::uint	m_indexcount;
+			win::UINT m_indexoffset;
+			win::UINT	m_indexcount;
 		};
 
 		using vertex_type = leo::Vertex::NormalMap;

@@ -6,9 +6,9 @@
 
 #include "Camera.hpp"
 
-#include "..\d3dx11.hpp"
+#include "RenderSystem\d3dx11.hpp"
 #include "..\DeviceMgr.h"
-#include "..\ShaderMgr.h"
+#include "RenderSystem\ShaderMgr.h"
 
 #include "Skeleton.hpp"
 

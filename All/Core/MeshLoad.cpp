@@ -2,7 +2,7 @@
 
 #include "MeshLoad.hpp"
 #include "..\file.hpp"
-#include "..\exception.hpp"
+#include "exception.hpp"
 #include "string.hpp"
 #include "Vertex.hpp"
 #include <fstream>

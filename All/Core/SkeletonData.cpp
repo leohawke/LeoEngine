@@ -1,14 +1,14 @@
 #include "platform.h"
 
-#include "..\d3dx11.hpp"
+#include "RenderSystem\d3dx11.hpp"
 
 #include "Skeleton.hpp"
 
 #include "..\TextureMgr.h"
-#include "..\ShaderMgr.h"
-#include "..\RenderStates.hpp"
+#include "RenderSystem\ShaderMgr.h"
+#include "RenderSystem\RenderStates.hpp"
 #include "..\file.hpp"
-#include "..\exception.hpp"
+#include "exception.hpp"
 #include "..\DeviceMgr.h"
 #include "MeshLoad.hpp"
 #include "FileSearch.h"
@@ -164,7 +164,7 @@ namespace leo{
 			Desc.CPUAccessFlags = 0;
 			Desc.MiscFlags = 0;
 			Desc.StructureByteStride = 0;
-			Desc.ByteWidth = static_cast<win::uint> (sizeof(vertex)*vertices.size());
+			Desc.ByteWidth = static_cast<win::UINT> (sizeof(vertex)*vertices.size());
 
 			D3D11_SUBRESOURCE_DATA resDesc;
 			resDesc.pSysMem = &vertices[0];
@@ -181,7 +181,7 @@ namespace leo{
 				offset += sizeof(ske_header);
 			}
 			Desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-			Desc.ByteWidth = static_cast<win::uint> (sizeof(std::uint32_t)*indices.size());
+			Desc.ByteWidth = static_cast<win::UINT> (sizeof(std::uint32_t)*indices.size());
 			resDesc.pSysMem = &indices[0];
 			dxcall(device->CreateBuffer(&Desc, &resDesc, &out->mIndicesBuffer));
 

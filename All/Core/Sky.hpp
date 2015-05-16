@@ -4,7 +4,7 @@
 #define Core_Sky_Hpp
 
 #include "BaseMacro.h"
-#include "..\COM.hpp"
+#include "COM.hpp"
 #include <string>
 
 

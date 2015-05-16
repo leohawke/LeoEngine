@@ -1,11 +1,11 @@
 #include <string>
-#include  "..\d3dx11.hpp"
+#include  "RenderSystem\d3dx11.hpp"
 #include "Camera.hpp"
 #include "Effect.h"
 #include "Sky.hpp"
 #include "..\TextureMgr.h"
-#include "..\ShaderMgr.h"
-#include "..\exception.hpp"
+#include "RenderSystem\ShaderMgr.h"
+#include "exception.hpp"
 #include "Vertex.hpp"
 namespace leo
 {

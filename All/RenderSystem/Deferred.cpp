@@ -1,14 +1,14 @@
 #include "..\DeviceMgr.h"
-#include "..\d3dx11.hpp"
+#include "d3dx11.hpp"
 #include "Deferred.h"
-#include "..\ShaderMgr.h"
-#include "..\RenderStates.hpp"
+#include "ShaderMgr.h"
+#include "RenderStates.hpp"
 #include "leomathutility.hpp"
-#include "..\Core\FileSearch.h"
-#include "..\Core\EngineConfig.h"
-#include "..\Core\Vertex.hpp"
-#include "..\Core\Camera.hpp"
-#include "..\exception.hpp"
+#include "Core\FileSearch.h"
+#include "Core\EngineConfig.h"
+#include "Core\Vertex.hpp"
+#include "Core\Camera.hpp"
+#include "exception.hpp"
 
 namespace {
 	ID3D11ShaderResourceView* mSRVs[2] = { nullptr,nullptr };
@@ -180,7 +180,7 @@ void DeferredResources::SetFrustum(const CameraFrustum& frustum) noexcept {
 	vbDesc.CPUAccessFlags = 0;
 	vbDesc.MiscFlags = 0;
 	vbDesc.StructureByteStride = 0;
-	vbDesc.ByteWidth = static_cast<win::uint> (sizeof(GBufferIAVertex)*arrlen(vertexs));
+	vbDesc.ByteWidth = static_cast<win::UINT> (sizeof(GBufferIAVertex)*arrlen(vertexs));
 
 	D3D11_SUBRESOURCE_DATA resDesc;
 	resDesc.pSysMem = &vertexs[0];

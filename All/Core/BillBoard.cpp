@@ -14,12 +14,12 @@
 #include <d3d11shader.h>
 */
 
-#include	"..\RenderStates.hpp"
+#include	"RenderSystem\RenderStates.hpp"
 #include	 "..\TextureMgr.h"
-#include "..\ShaderMgr.h"
+#include "RenderSystem\ShaderMgr.h"
 #include "Camera.hpp"
 #include "Vertex.hpp"
-#include "..\exception.hpp"
+#include "exception.hpp"
 namespace leo
 {
 	ID3D11Buffer* BillBoard::mVertexBuffer = nullptr;

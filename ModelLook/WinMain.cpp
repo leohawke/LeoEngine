@@ -30,11 +30,11 @@
 
 #include <RenderSystem\Deferred.h>
 
-#include <COM.hpp>
+#include <Core\COM.hpp>
 
 #include <TextureMgr.h>
-#include <ShaderMgr.h>
-#include <RenderStates.hpp>
+#include <RenderSystem\ShaderMgr.h>
+#include <RenderSystem\RenderStates.hpp>
 #include <exception.hpp>
 #include <Input.h>
 
@@ -42,7 +42,7 @@
 #include "Axis.hpp"
 
 #include "window.hpp"
-#include "COM.hpp"
+
 #include "DeviceMgr.h"
 
 #include <Commdlg.h>

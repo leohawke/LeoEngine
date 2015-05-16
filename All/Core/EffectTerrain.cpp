@@ -1,6 +1,6 @@
 #include "EffectTerrain.hpp"
-#include "..\ShaderMgr.h"
-#include "..\RenderStates.hpp"
+#include "RenderSystem\ShaderMgr.h"
+#include "RenderSystem\RenderStates.hpp"
 #include "Terrain.hpp"
 #include "FileSearch.h"
 #include "EngineConfig.h"

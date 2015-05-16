@@ -6,7 +6,7 @@
 #include "DeviceMgr.h"
 #include "exception.hpp"
 #include "window.hpp"
-#include "COM.hpp"
+#include "Core\COM.hpp"
 
 
 #include <dxgi.h>
@@ -118,18 +118,18 @@ namespace leo
 			DXGI_ADAPTER_DESC adapterDesc;
 			dxcall(CreateDXGIFactory(IID_IDXGIFactory, (void **)&pFactory));
 			leo::dx::DebugCOM(pFactory, "DeviceManger::CreateDevice::pFactory");
-			for (win::uint i = 0; pFactory->EnumAdapters(i, &pAdapter) != DXGI_ERROR_NOT_FOUND; ++i)
+			for (win::UINT i = 0; pFactory->EnumAdapters(i, &pAdapter) != DXGI_ERROR_NOT_FOUND; ++i)
 			{
 				leo::dx::DebugCOM(pAdapter, "DeviceManger::CreateDevice::EnumerAdapters::pAdapter");
 				Adapters.push_back(pAdapter);
 				pAdapter->GetDesc(&adapterDesc);
-				LogPrintf(L"AdapterIndex: %u VendorId: %u ", i, adapterDesc.VendorId);
-				LogPrintf(L"DeviceId: %u SubSysId: %u ", adapterDesc.DeviceId, adapterDesc.SubSysId);
-				LogPrintf(L"Revision: %u\n\t", adapterDesc.Revision);
-				LogPrintf(L"Description: %ls\n\t", adapterDesc.Description);
-				LogPrintf(L"DedicatedVideoMemory: %lu\n\t", adapterDesc.DedicatedVideoMemory);
-				LogPrintf(L"DedicatedSystemMemory: %lu\n\t", adapterDesc.DedicatedSystemMemory);
-				LogPrintf(L"SharedSystemMemory: %lu\n", adapterDesc.SharedSystemMemory);
+				DebugPrintf(L"AdapterIndex: %u VendorId: %u ", i, adapterDesc.VendorId);
+				DebugPrintf(L"DeviceId: %u SubSysId: %u ", adapterDesc.DeviceId, adapterDesc.SubSysId);
+				DebugPrintf(L"Revision: %u\n\t", adapterDesc.Revision);
+				DebugPrintf(L"Description: %ls\n\t", adapterDesc.Description);
+				DebugPrintf(L"DedicatedVideoMemory: %lu\n\t", adapterDesc.DedicatedVideoMemory);
+				DebugPrintf(L"DedicatedSystemMemory: %lu\n\t", adapterDesc.DedicatedSystemMemory);
+				DebugPrintf(L"SharedSystemMemory: %lu\n", adapterDesc.SharedSystemMemory);
 			}
 			return Adapters;
 		};
@@ -149,14 +149,14 @@ namespace leo
 #if defined(DEBUG) | defined(_DEBUG)
 			DXGI_OUTPUT_DESC outputDesc;
 			pOutput->GetDesc(&outputDesc);
-			LogPrintf(L"OUTPUT DevcieName: %s\n", outputDesc.DeviceName);
-			LogPrintf(L"\tDesktopCoordinates:\n\t\tTop: %ld Left: %d Bottom: %ld Right: %ld\n",
+			DebugPrintf(L"OUTPUT DevcieName: %s\n", outputDesc.DeviceName);
+			DebugPrintf(L"\tDesktopCoordinates:\n\t\tTop: %ld Left: %d Bottom: %ld Right: %ld\n",
 				outputDesc.DesktopCoordinates.top, outputDesc.DesktopCoordinates.left,
 				outputDesc.DesktopCoordinates.bottom, outputDesc.DesktopCoordinates.right);
 #endif
 			UINT numModes;
 			pOutput->GetDisplayModeList(format, DXGI_ENUM_MODES_INTERLACED, &numModes, nullptr);
-			LogPrintf(L"\tDisplayModelNums: %u\n", numModes);
+			DebugPrintf(L"\tDisplayModelNums: %u\n", numModes);
 			auto modeDescs = std::make_unique<DXGI_MODE_DESC[]>(numModes);
 			pOutput->GetDisplayModeList(format, DXGI_ENUM_MODES_INTERLACED, &numModes, modeDescs.get());
 			defaultMode = modeDescs[numModes - 1];
@@ -165,8 +165,8 @@ namespace leo
 				size_type  modesize{ std::make_pair(modeDescs[i - 1].Width, modeDescs[i - 1].Height) };
 				if (modesize == size)
 					defaultMode = modeDescs[i - 1];
-				LogPrintf(L"\t\t ModelsIndex: %2u Width: %4u Height: %4u ", numModes - i, modesize.first, modesize.second);
-				LogPrintf(L"RefreshRate.Numerator: %2u RefreshRate.Denominator: %u\n",
+				DebugPrintf(L"\t\t ModelsIndex: %2u Width: %4u Height: %4u ", numModes - i, modesize.first, modesize.second);
+				DebugPrintf(L"RefreshRate.Numerator: %2u RefreshRate.Denominator: %u\n",
 					modeDescs[i - 1].RefreshRate.Numerator,
 					modeDescs[i - 1].RefreshRate.Denominator
 					);

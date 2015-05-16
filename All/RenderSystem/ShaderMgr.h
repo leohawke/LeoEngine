@@ -57,18 +57,18 @@ namespace leo
 			return CreateBlob(filename.c_str());
 		}
 
-		ID3D11VertexShader* CreateVertexShader(const ShaderBlob& blob, ID3D11ClassLinkage* linkage = nullptr, const D3D11_INPUT_ELEMENT_DESC * layoutdesc = nullptr, win::uint arraysize = 0, ID3D11InputLayout** pLayout = nullptr);
+		ID3D11VertexShader* CreateVertexShader(const ShaderBlob& blob, ID3D11ClassLinkage* linkage = nullptr, const D3D11_INPUT_ELEMENT_DESC * layoutdesc = nullptr, win::UINT arraysize = 0, ID3D11InputLayout** pLayout = nullptr);
 
 		ID3D11PixelShader*	CreatePixelShader(const ShaderBlob& blob, ID3D11ClassLinkage* linkage = nullptr);
 		ID3D11GeometryShader* CreateGeometryShader(const ShaderBlob& blob, ID3D11ClassLinkage* linkage = nullptr);
 
-		ID3D11GeometryShader* CreateGeometryShaderWithSO(const ShaderBlob& blob, const D3D11_SO_DECLARATION_ENTRY * pSODecl, UINT NumEntries, const UINT* pBufferStrides, UINT NumStrides, UINT RasterizedSteam, ID3D11ClassLinkage* linkage = nullptr);
+		ID3D11GeometryShader* CreateGeometryShaderWithSO(const ShaderBlob& blob, const D3D11_SO_DECLARATION_ENTRY * pSODecl, win::UINT NumEntries, const win::UINT* pBufferStrides, win::UINT NumStrides, win::UINT RasterizedSteam, ID3D11ClassLinkage* linkage = nullptr);
 		
 		ID3D11HullShader*	CreateHullShader(const ShaderBlob& blob, ID3D11ClassLinkage* linkage = nullptr);
 		ID3D11DomainShader* CreateDomainShader(const ShaderBlob& blob, ID3D11ClassLinkage* linkage = nullptr);
 		ID3D11ComputeShader* CreateComputeShader(const ShaderBlob& blob, ID3D11ClassLinkage* linkage = nullptr);
 
-		ID3D11InputLayout* CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC*, win::uint arraysize = 0/*hint*/);
+		ID3D11InputLayout* CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC*, win::UINT arraysize = 0/*hint*/);
 	private:
 		struct Shader
 		{
