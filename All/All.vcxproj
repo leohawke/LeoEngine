@@ -100,6 +100,7 @@
     <ClCompile Include="Core\BillBoard.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Core\CoreDebug.cpp" />
     <ClCompile Include="Core\CoreObject.cpp" />
     <ClCompile Include="Core\effect.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
@@ -185,6 +186,7 @@
     <ClInclude Include="COM.hpp" />
     <ClInclude Include="Core\BillBoard.hpp" />
     <ClInclude Include="Core\Camera.hpp" />
+    <ClInclude Include="Core\CoreDebug.hpp" />
     <ClInclude Include="Core\effect.h" />
     <ClInclude Include="Core\EffectGBuffer.hpp" />
     <ClInclude Include="Core\EffectShadowMap.hpp" />

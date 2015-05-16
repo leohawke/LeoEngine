@@ -51,7 +51,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>DEBUG;MULTI_THREAD;PLATFORM_WIN32;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IDE_VS;DEBUG;MULTI_THREAD;PLATFORM_WIN32;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -74,6 +74,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\any.cpp" />
+    <ClCompile Include="src\DebugOutput.cpp" />
     <ClCompile Include="src\exception.cpp" />
     <ClCompile Include="src\Geometry.cpp" />
     <ClCompile Include="src\memory.cpp" />
@@ -93,6 +94,7 @@
     <ClInclude Include="Include\clock.hpp" />
     <ClInclude Include="Include\ConstexprMath.hpp" />
     <ClInclude Include="Include\container.hpp" />
+    <ClInclude Include="Include\DebugOutput.hpp" />
     <ClInclude Include="Include\EndianSwap.hpp" />
     <ClInclude Include="Include\exception.hpp" />
     <ClInclude Include="Include\experimental\string_view.hpp" />

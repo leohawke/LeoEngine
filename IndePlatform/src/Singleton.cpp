@@ -1,4 +1,5 @@
 #include "Singleton.hpp"
+#include "DebugOutput.hpp"
 #include <string>
 #include <vector>
 #include <list>

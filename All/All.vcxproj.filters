@@ -210,6 +210,9 @@
     <ClCompile Include="Core\EffectGBuffer.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\CoreDebug.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="declara.hpp">
@@ -358,6 +361,9 @@
     </ClInclude>
     <ClInclude Include="scheme_helper.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\CoreDebug.hpp">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

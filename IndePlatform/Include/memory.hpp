@@ -171,9 +171,8 @@ namespace leo
 #include <cassert>
 
 #include "BaseMacro.h"
-#include "..\debug.hpp"
 //≤¢≤ª÷ÿ‘ÿoperator new
-
+#include "DebugOutput.hpp"
 
 #if defined LEO_MEMORY_TRACKER
 namespace leo

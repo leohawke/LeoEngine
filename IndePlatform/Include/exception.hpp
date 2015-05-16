@@ -1,28 +1,16 @@
 #ifndef IndePlatform_exception_hpp
 #define IndePlatform_exception_hpp
 
-//Todo :fix debug printf
-
 #include <exception>
 #include <stdexcept>
 #include <cstdint>
 #include <assert.h>
 
 #include "BaseMacro.h"
-#include "leoint.hpp"
+#include "DebugOutput.hpp" // record_level
 namespace leo
 {
-	enum class record_level : std::uint8_t
-	{
-		Emergent = 0x00,
-		Alert = 0x20,
-		Critical = 0x40,
-		Err = 0x60,
-		Warning = 0x80,
-		Notice = 0xA0,
-		Informative = 0xC0,
-		Debug = 0xE0
-	};
+	
 
 	//using exception = std::exception;
 	using general_event = std::runtime_error;
@@ -36,6 +24,8 @@ namespace leo
 	public:
 		logged_event(const std::string&, level_type);
 		logged_event(const general_event&, level_type);
+
+		DefGetter(const lnothrow, level_type, Level, level);
 
 		friend std::string format_logged_event(const logged_event& e);
 	};
@@ -93,12 +83,12 @@ namespace leo
 #define Catch_Win32_Exception \
 		catch(leo::win::win32_exception & e) \
 				{\
-			OutputDebugStringA(e.what());\
+			RecordPrintf(e.GetLevel(),e.what());\
 				}
 #define Catch_DX_Exception \
 		catch(leo::win::dx_exception & e) \
 		{\
-			OutputDebugStringA(e.what());\
+			RecordPrintf(e.GetLevel(),e.what());\
 		}
 	}
 
