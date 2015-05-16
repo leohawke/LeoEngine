@@ -161,6 +161,9 @@
     <ClCompile Include="..\All\Core\CoreDebug.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\DeferredRender.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -187,6 +190,9 @@
       <Filter>RenderSystem</Filter>
     </ClInclude>
     <ClInclude Include="..\All\RenderSystem\ShaderMgr.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\RenderSystem\DeferredRender.hpp">
       <Filter>RenderSystem</Filter>
     </ClInclude>
   </ItemGroup>

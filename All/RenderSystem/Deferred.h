@@ -14,6 +14,13 @@
 ////////////////////////////////////////////////////////////////////////////
 
 
+/*
+R8G8B8A8 NORMAL_SPECULAR <float3->float2->float3>
+R10G10B10A2 DIFFUSE
+R10G10B10A2 LIGHT
+*/
+
+
 #ifndef ShaderSystem_Deferred_H
 #define ShaderSystem_Deferred_H
 
