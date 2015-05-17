@@ -14,7 +14,7 @@ public:
 				specpow(Material)<>A8
 				}
 	RT1:R8G8B8A8 <diffuse,pad>{
-				tex.Sample()<>R18G8B8,
+				tex.Sample()<>R8G8B8,
 				specmono(dot(specular,float3(0.2126f,0.7152f,0.0722f)))<>A8
 				}
 	*/
