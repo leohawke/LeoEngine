@@ -93,6 +93,10 @@ private:
 class DeferredRender::DeferredStateImpl {
 public:
 	DeferredStateImpl(ID3D11Device* device) {
+		//front -cc
+		//depth-test :<
+		//stenicl ,high bit set 1
+		D3D11_DEPTH_STENCIL_DESC FrontLessLightDSDesc;
 	}
 };
 
