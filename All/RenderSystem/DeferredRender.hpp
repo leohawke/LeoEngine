@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <leoint.hpp>
+#include "DepthStencil.hpp"
 struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct ID3D11RenderTargetView;
@@ -33,7 +34,7 @@ namespace leo {
 
 		DeferredRender(ID3D11Device* device, size_type size);
 
-		void OMSet(ID3D11DeviceContext* context) noexcept;
+		void OMSet(ID3D11DeviceContext* context,DepthStencil& depthstencil) noexcept;
 
 		void ReSize(ID3D11Device* device,size_type size) noexcept;
 		

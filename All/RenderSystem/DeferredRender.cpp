@@ -39,14 +39,6 @@ public:
 	}
 
 	~DeferredResImpl() = default;
-
-	//clear the bind state,then call this function
-	void ReSize(ID3D11Device* device, std::pair<uint16, uint16> size) {
-		this->~DeferredResImpl();
-		CreateRes(device, size);
-		
-	}
-
 private:
 	void CreateRes(ID3D11Device* device, std::pair<uint16, uint16> size) {
 		CD3D11_TEXTURE2D_DESC gbuffTexDesc{ DXGI_FORMAT_R8G8B8A8_UNORM,size.first,size.second };
@@ -93,11 +85,33 @@ private:
 class DeferredRender::DeferredStateImpl {
 public:
 	DeferredStateImpl(ID3D11Device* device) {
-		//front -cc
-		//depth-test :<
-		//stenicl ,high bit set 1
-		D3D11_DEPTH_STENCIL_DESC FrontLessLightDSDesc;
+		//light :stencil-ref : 0x10
+		//no-light:stencil-ref: 0x01
+		CD3D11_DEPTH_STENCIL_DESC gBufferPassDSDesc{D3D11_DEFAULT};
+		gBufferPassDSDesc.StencilEnable = true;
+		gBufferPassDSDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
+		device->CreateDepthStencilState(&gBufferPassDSDesc, &mGBufferPassDepthStenciState);
+
+		CD3D11_DEPTH_STENCIL_DESC lightPassDSDesc{ D3D11_DEFAULT };
+		lightPassDSDesc.DepthEnable = false;
+		lightPassDSDesc.StencilEnable = true;
+		lightPassDSDesc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;
+		lightPassDSDesc.BackFace = lightPassDSDesc.FrontFace;
+		device->CreateDepthStencilState(&lightPassDSDesc, &mLightPassDepthStenciState);
+
+		CD3D11_DEPTH_STENCIL_DESC shaderPassDesc{ D3D11_DEFAULT };
+		shaderPassDesc.DepthEnable = false;
+		shaderPassDesc.StencilEnable = true;
+		shaderPassDesc.FrontFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
+		shaderPassDesc.StencilReadMask = 0x11;
+		shaderPassDesc.BackFace = shaderPassDesc.FrontFace;
+		device->CreateDepthStencilState(&shaderPassDesc, &mShaderPassDepthStenciState);
+
 	}
+
+	win::unique_com<ID3D11DepthStencilState> mGBufferPassDepthStenciState = nullptr;
+	win::unique_com<ID3D11DepthStencilState> mLightPassDepthStenciState = nullptr;
+	win::unique_com<ID3D11DepthStencilState> mShaderPassDepthStenciState = nullptr;
 };
 
 leo::DeferredRender::DeferredRender(ID3D11Device * device, size_type size)
@@ -106,10 +120,15 @@ leo::DeferredRender::DeferredRender(ID3D11Device * device, size_type size)
 {
 }
 
-void leo::DeferredRender::OMSet(ID3D11DeviceContext * context) noexcept
+void leo::DeferredRender::OMSet(ID3D11DeviceContext * context, DepthStencil& depthstencil) noexcept
 {
+	ID3D11RenderTargetView* mRTVs[] = { pResImpl->mGBuffRTVs[0], pResImpl->mGBuffRTVs[1] };
+	context->OMSetRenderTargets(arrlen(pResImpl->mGBuffRTVs), mRTVs, depthstencil);
+	context->OMSetDepthStencilState(pStateImpl->mGBufferPassDepthStenciState, 0x10);
 }
 
 void leo::DeferredRender::ReSize(ID3D11Device * device, size_type size) noexcept
 {
+	pResImpl.reset(nullptr);
+	pResImpl = std::make_unique<DeferredResImpl>(device, size);
 }
