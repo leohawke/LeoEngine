@@ -206,6 +206,9 @@
     <None Include="The LeoEngine Terrain File.tpl">
       <Filter>Support Tool Config</Filter>
     </None>
+    <None Include="Shader\NormalUti.hlsli">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\All\Shader\NormalMapPS.hlsl">
@@ -246,6 +249,12 @@
     </FxCompile>
     <FxCompile Include="Shader\LinearizeDepthPS.hlsl">
       <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PointLightVolumePS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\ShaderPS.hlsl">
+      <Filter>Shader\HLSL</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
