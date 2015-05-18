@@ -254,7 +254,7 @@
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="Shader\ShaderPS.hlsl">
-      <Filter>Shader\HLSL</Filter>
+      <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

@@ -10,10 +10,6 @@ cbuffer LightParam:register(b0) {
 	float3 Point;
 }
 
-cbuffer CameraParam : register(b1) {
-	float3 CameraPos;
-}
-
 struct VertexOut {
 	float3 ViewDir :POSITION;
 	float4 PosH: SV_POSITION;
@@ -25,14 +21,14 @@ struct VertexOut {
 float4 main(VertexOut pin) : SV_TARGET
 {
 	float4 NormalAlpha = texNormalAlpha.Sample(samPoint, pin.Tex);
-	float3 p = pin.ViewDir*texDepth.Sample(samPoint,pin.Tex).r / pin.ViewDir.z;
+	float3 v = normalize(pin.ViewDir);
+	float3 p = v*texDepth.Sample(samPoint,pin.Tex).r / v.z;
 	float3 l = normalize(Point - p);
-	float3 v = normalize(CameraPos - p);
 	float3 h = (v + l) / 2;
 	float3 n = decode(decode(half3(NormalAlpha.rgb)));
 
 	float lambert =saturate(dot(n, l));
 
-	float spec = pow(dot(n, h), NormalAlpha.a);
+	float spec = pow(max(dot(n, h),0), NormalAlpha.a*256.f);
 	return float4(1.0f, 1.0f, 1.0f,spec)*Diffuse*lambert;
 }
