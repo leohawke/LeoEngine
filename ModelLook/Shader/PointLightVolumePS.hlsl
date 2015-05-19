@@ -13,16 +13,17 @@ cbuffer LightParam:register(b0) {
 struct VertexOut {
 	float3 ViewDir :POSITION;
 	float4 PosH: SV_POSITION;
-	float2 Tex :TEXCOORD;
+	float3 Tex :TEXCOORD;
 };
 
 
 
 float4 main(VertexOut pin) : SV_TARGET
 {
-	float4 NormalAlpha = texNormalAlpha.Sample(samPoint, pin.Tex);
+	float2 tc = pin.Tex.xy / pin.Tex.z;
+	float4 NormalAlpha = texNormalAlpha.Sample(samPoint, tc);
 	float3 v = normalize(pin.ViewDir);
-	float3 p = v*texDepth.Sample(samPoint,pin.Tex).r / v.z;
+	float3 p = v*texDepth.Sample(samPoint, tc).r / v.z;
 	float3 l = normalize(Point - p);
 	float3 h = (v + l) / 2;
 	float3 n = decode(decode(half3(NormalAlpha.rgb)));

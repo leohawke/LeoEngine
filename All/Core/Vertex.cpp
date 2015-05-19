@@ -267,6 +267,104 @@ namespace leo
 			
 		}
 
+		SimpleMeshData CreateSphere(uint32 sliceCount, uint32 stackCount)
+		{
+			//
+			// Compute the vertices stating at the top pole and moving down the stacks.
+			//
+
+			// Poles: note that there will be texture coordinate distortion as there is
+			// not a unique point on the texture map to assign to the pole when mapping
+			// a rectangular texture onto a sphere.
+			auto radius = 1.f;
+			float3 topVertex(0.0f, +radius, 0.0f);
+			float3 bottomVertex(0.0f, -radius, 0.0f);
+
+			std::vector <float3, leo::aligned_alloc<float3, 16>> Vertices;
+			Vertices.reserve(1 + (stackCount - 1)*(sliceCount + 1) + 1);//top + slice + bottom
+			Vertices.emplace_back(topVertex);
+
+			float phiStep = LM_PI / stackCount;
+			float thetaStep = 2.0f*LM_PI / sliceCount;
+
+			// Compute vertices for each stack ring (do not count the poles as rings).
+			for (uint32 i = 1; i <= stackCount - 1; ++i)
+			{
+				float phi = i*phiStep;
+
+				// Vertices of ring.
+				for (uint32 j = 0; j <= sliceCount; ++j)
+				{
+					float theta = j*thetaStep;
+
+					float3 pos;
+
+					// spherical to cartesian
+					pos.x = radius*sinf(phi)*cosf(theta);
+					pos.y = radius*cosf(phi);
+					pos.z = radius*sinf(phi)*sinf(theta);
+				}
+			}
+
+			Vertices.emplace_back(bottomVertex);
+
+			std::vector<uint32> Indices;
+			Indices.reserve(sliceCount * 3 + (stackCount - 2)*sliceCount * 3 + sliceCount * 3);//top + slice + bottom
+																							   //
+																							   // Compute indices for top stack.  The top stack was written first to the vertex buffer
+																							   // and connects the top pole to the first ring.
+																							   //
+			for (uint32 i = 1; i <= sliceCount; ++i)
+			{
+				Indices.push_back(0);
+				Indices.push_back(i + 1);
+				Indices.push_back(i);
+			}
+
+			//
+			// Compute indices for inner stacks (not connected to poles).
+			//
+
+			// Offset the indices to the index of the first vertex in the first ring.
+			// This is just skipping the top pole vertex.
+			uint32 baseIndex = 1;
+			uint32 ringVertexCount = sliceCount + 1;
+			for (uint32 i = 0; i < stackCount - 2; ++i)
+			{
+				for (uint32 j = 0; j < sliceCount; ++j)
+				{
+					Indices.push_back(baseIndex + i*ringVertexCount + j);
+					Indices.push_back(baseIndex + i*ringVertexCount + j + 1);
+					Indices.push_back(baseIndex + (i + 1)*ringVertexCount + j);
+
+					Indices.push_back(baseIndex + (i + 1)*ringVertexCount + j);
+					Indices.push_back(baseIndex + i*ringVertexCount + j + 1);
+					Indices.push_back(baseIndex + (i + 1)*ringVertexCount + j + 1);
+				}
+			}
+
+			//
+			// Compute indices for bottom stack.  The bottom stack was written last to the vertex buffer
+			// and connects the bottom pole to the bottom ring.
+			//
+
+			// South pole vertex was added last.
+			uint32 southPoleIndex = (uint32)Vertices.size() - 1;
+
+			// Offset the indices to the index of the first vertex in the last ring.
+			baseIndex = southPoleIndex - ringVertexCount;
+
+			for (uint32 i = 0; i < sliceCount; ++i)
+			{
+				Indices.push_back(southPoleIndex);
+				Indices.push_back(baseIndex + i);
+				Indices.push_back(baseIndex + i + 1);
+			}
+
+
+			return SimpleMeshData{ std::move(Vertices), std::move(Indices) };
+		}
+
 		MeshData Subdivide(const MeshData& result)
 		{
 			using Vertex::NormalMap;

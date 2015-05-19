@@ -173,6 +173,19 @@ namespace leo
 			}
 		};
 
+		struct SimpleMeshData
+		{
+			std::vector <float3,leo::aligned_alloc<float3,16>> Vertices;
+			std::vector<uint32> Indices;
+
+			SimpleMeshData(std::vector < float3, leo::aligned_alloc<float3, 16>> && v, std::vector<uint32> && i)
+				:Vertices(std::move(v)), Indices(std::move(i)) {
+			}
+
+			SimpleMeshData() {
+			}
+		};
+
 		///<summary>
 		/// Creates a box centered at the origin with the given dimensions.
 		///</summary>
@@ -183,6 +196,7 @@ namespace leo
 		/// slices and stacks parameters control the degree of tessellation.
 		///</summary>
 		MeshData CreateSphere(float radius, uint32 sliceCount, uint32 stackCount);
+		SimpleMeshData CreateSphere(uint32 sliceCount, uint32 stackCount);
 
 		///<summary>
 		/// Creates a geosphere centered at the origin with the given radius.  The

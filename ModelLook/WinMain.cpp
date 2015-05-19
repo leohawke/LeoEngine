@@ -94,6 +94,27 @@ struct SSAO {
 };
 SSAO ssao;
 
+//set rt
+//set blendstate
+//set srv,set sample
+class PointLightVolume {
+	ID3D11InputLayout* mLightVolumeVertexLayout;
+	D3D11_INPUT_ELEMENT_DESC mLightVolumeVertexElement_Desc[] = 
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+
+	ID3D11VertexShader* mLightVolumeVS = nullptr;
+	ID3D11PixelShader* mPointLightVolumePS = nullptr;
+
+	ID3D11Buffer* mPointVolumeVB = nullptr;
+	ID3D11Buffer* mPointVolumeIB = nullptr;
+
+	PointLightVolume(ID3D11Device* device) {
+
+	}
+};
+
 
 void DeviceEvent()
 {
@@ -104,6 +125,10 @@ void DeviceEvent()
 	event.Set();
 }
 
+
+void LightPreable() {
+
+}
 
 void Render();
 void Update();
