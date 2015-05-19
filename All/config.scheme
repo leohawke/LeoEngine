@@ -38,7 +38,7 @@
 			(shader (v GenShadowMapVS.cso))
 		)
 		(effect	(name gbuffer)
-			(shader (v GenBufferVS.cso) (p GenBufferPS.cso))
+			(shader (v GenGBufferVS.cso) (p GenGBufferPS.cso))
 		)
 		(effect	(name deferred)
 			(shader (v DeferredVS.cso))

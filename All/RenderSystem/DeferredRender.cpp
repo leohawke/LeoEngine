@@ -2,11 +2,10 @@
 #include <platform.h>
 #include <Core\COM.hpp>
 #include "d3dx11.hpp"
-using namespace leo;
 
 //TODO :Support MSAA
 
-class DeferredRender::DeferredResImpl {
+class leo::DeferredRender::DeferredResImpl {
 public:
 	/*
 	RT0:R8G8B8A8_UNORM<normal,specmono>{
@@ -82,7 +81,7 @@ private:
 	}
 };
 
-class DeferredRender::DeferredStateImpl {
+class leo::DeferredRender::DeferredStateImpl {
 public:
 	DeferredStateImpl(ID3D11Device* device) {
 		//light :stencil-ref : 0x10

@@ -104,8 +104,6 @@ namespace leo
 		p->CreateSamplerState(L"anisoSampler", anisoSampler);
 
 		CD3D11_SAMPLER_DESC trilinearSampler(D3D11_DEFAULT);
-		trilinearSampler.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-		trilinearSampler.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
 		trilinearSampler.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 		p->CreateSamplerState(L"trilinearSampler", trilinearSampler);
 
@@ -121,14 +119,6 @@ namespace leo
 		linearRepeatDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 		linearRepeatDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 		p->CreateSamplerState(L"NearestRepeat", linearRepeatDesc);
-
-		// LinearClamp
-		linearRepeatDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-		linearRepeatDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-		linearRepeatDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-		linearRepeatDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-		p->CreateSamplerState(L"LinearClamp", linearRepeatDesc);
-
 
 		// samShadow
 		CD3D11_SAMPLER_DESC samShadow(D3D11_DEFAULT);
@@ -197,16 +187,16 @@ namespace leo
 		lightblendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
 		lightblendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 		lightblendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-		p->CreateBlendState(L"LightBlenBS", transparentDesc);
+		p->CreateBlendState(L"LightBlenBS", lightblendDesc);
 
 		// ScissorNoCullRS
 		CD3D11_RASTERIZER_DESC ScissorNoCullDesc(D3D11_DEFAULT);
-		noCullDesc.FillMode = D3D11_FILL_SOLID;
-		noCullDesc.CullMode = D3D11_CULL_NONE;
-		noCullDesc.FrontCounterClockwise = false;
-		noCullDesc.DepthClipEnable = true;
-		noCullDesc.ScissorEnable = true;
-		p->CreateRasterizerState(L"ScissorNoCullRS", noCullDesc);
+		ScissorNoCullDesc.FillMode = D3D11_FILL_SOLID;
+		ScissorNoCullDesc.CullMode = D3D11_CULL_NONE;
+		ScissorNoCullDesc.FrontCounterClockwise = false;
+		ScissorNoCullDesc.DepthClipEnable = true;
+		ScissorNoCullDesc.ScissorEnable = true;
+		p->CreateRasterizerState(L"ScissorNoCullRS", ScissorNoCullDesc);
 	}
 
 	RenderStates::Delegate::~Delegate()

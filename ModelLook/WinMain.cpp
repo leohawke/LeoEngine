@@ -35,6 +35,7 @@
 #include <TextureMgr.h>
 #include <RenderSystem\ShaderMgr.h>
 #include <RenderSystem\RenderStates.hpp>
+//#include <RenderSystem\DeferredRender.hpp>
 #include <exception.hpp>
 #include <Input.h>
 
@@ -59,7 +60,7 @@ leo::Event event;
 std::unique_ptr<leo::Mesh> pModelMesh = nullptr;
 std::unique_ptr<leo::UVNCamera> pCamera = nullptr;
 std::unique_ptr<leo::CastShadowCamera> pShaderCamera;
-
+//std::unique_ptr<leo::DeferredRender> pRender = nullptr;
 std::unique_ptr<leo::Terrain<>> pTerrain = nullptr;
 
 std::atomic<bool> renderAble = false;
@@ -154,7 +155,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	leo::EngineConfig::Read(L"config.scheme");
 	leo::EngineConfig::ShaderConfig::GetAllBlendStateName();
 
-	leo::EngineConfig::Write();
 
 	leo::DeviceMgr DeviceMgr;
 	leo::OutputWindow win;
@@ -320,9 +320,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 
 
-
+	leo::EngineConfig::Write();
 	leo::global::Destroy();
 	ClearRes();
+	DeviceMgr.DestroyDevice();
 #ifdef DEBUG
 	leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
 #endif
@@ -781,6 +782,7 @@ void Render()
 
 		//leo::ShadowMap::GetInstance().EndShadowMap(devicecontext);
 #endif
+		/*
 		auto& defereed = leo::DeferredResources::GetInstance();
 
 
@@ -798,12 +800,13 @@ void Render()
 		currvp.Width = prevVP.Width / 2;
 		devicecontext->RSSetViewports(1, &currvp);
 		ComputeSSAO(devicecontext);
-
+		*/
 		float ClearColor[4] = { 0.0f, 0.25f, 0.25f, 0.8f };
 		auto rtv = dm.GetRenderTargetView();
 		devicecontext->OMSetRenderTargets(1, &rtv, nullptr);
 		devicecontext->ClearRenderTargetView(rtv, ClearColor);
 
+		/*
 		BlurSSAO(devicecontext, unsigned int(prevVP.Width), unsigned int(prevVP.Height));
 		//»æÖÆÑÓ³ÙBuff
 		{
@@ -842,7 +845,7 @@ void Render()
 
 		defereed.UnIASet();
 		devicecontext->RSSetViewports(1, &prevVP);
-
+		*/
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 
