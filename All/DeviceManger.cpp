@@ -101,12 +101,6 @@ namespace leo
 		}
 	}
 
-	DeviceMgr::Delegate::~Delegate()
-	{
-		reinterpret_cast<DeviceMgr*>(0)->DestroyDevice();
-	}
-
-
 	//ComputerInfo DeviceManger::computerinfo;
 	bool DeviceMgr::CreateDevice(bool fullscreen,const size_type& size)
 	{
@@ -244,6 +238,7 @@ namespace leo
 			leo::win::ReleaseCOM(x);
 		leo::win::ReleaseCOM(pFactory);
 
+		global::globalDepthStencil = std::make_unique<DepthStencil>(size, global::globalD3DDevice, sd.SampleDesc);
 		ReSize(size);
 		return true;
 	}
@@ -256,8 +251,7 @@ namespace leo
 		global::globalDXGISwapChain->SetFullscreenState(false, nullptr);
 		leo::win::ReleaseCOM(global::globalD3DRenderTargetTexture2D);
 		leo::win::ReleaseCOM(global::globalD3DRenderTargetView);
-		leo::win::ReleaseCOM(global::globalD3DDepthTexture);
-		leo::win::ReleaseCOM(global::globalD3DDepthStencilView);
+		global::globalDepthStencil.reset(nullptr);
 		leo::win::ReleaseCOM(global::globalDXGISwapChain);
 		leo::win::ReleaseCOM(global::globalD3DContext);
 		leo::win::ReleaseCOM(global::globalD3DDevice);
@@ -280,8 +274,7 @@ namespace leo
 		global::globalD3DContext->OMSetRenderTargets(0, nullptr, nullptr);
 		leo::win::ReleaseCOM(global::globalD3DRenderTargetTexture2D);
 		leo::win::ReleaseCOM(global::globalD3DRenderTargetView);
-		leo::win::ReleaseCOM(global::globalD3DDepthTexture);
-		leo::win::ReleaseCOM(global::globalD3DDepthStencilView);
+		global::globalDepthStencil->ReSize(size,global::globalD3DDevice);
 
 		try{
 			dxcall(global::globalDXGISwapChain->ResizeBuffers(1, size.first, size.second, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
@@ -296,6 +289,7 @@ namespace leo
 			dxcall(global::globalDXGISwapChain->GetDesc(&swapDesc));
 			global::globalAspect = (float)swapDesc.BufferDesc.Width / swapDesc.BufferDesc.Height;
 
+			/*
 			D3D11_TEXTURE2D_DESC depthStencilDesc;
 			depthStencilDesc.Width = swapDesc.BufferDesc.Width;
 			depthStencilDesc.Height = swapDesc.BufferDesc.Height;
@@ -318,9 +312,9 @@ namespace leo
 
 			dxcall(global::globalD3DDevice->CreateDepthStencilView(global::globalD3DDepthTexture, 0, &global::globalD3DDepthStencilView));
 			leo::dx::DebugCOM(global::globalD3DDepthStencilView, "global::globalD3DDepthStencilView");
+			*/
 
-			global::globalD3DContext->OMSetRenderTargets(1, &global::globalD3DRenderTargetView, global::globalD3DDepthStencilView);
-
+			global::globalD3DContext->OMSetRenderTargets(1, &global::globalD3DRenderTargetView, *global::globalDepthStencil);
 			D3D11_VIEWPORT vp;
 			vp.Height = (float)swapDesc.BufferDesc.Height;
 			vp.Width = (float)swapDesc.BufferDesc.Width;

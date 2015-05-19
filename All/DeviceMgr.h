@@ -2,6 +2,7 @@
 
 #include "Mgr.hpp"
 #include "string.hpp"
+
 namespace leo
 {
 	namespace win
@@ -72,21 +73,9 @@ namespace leo
 	class DeviceMgr
 	{
 	private:
-		class Delegate : public Singleton<Delegate>
-		{
-		public:
-			~Delegate();
-		public:
-			static const std::unique_ptr<Delegate>& GetInstance()
-			{
-				static auto mInstance = unique_raw(new Delegate());
-				return mInstance;
-			}
-		};
 	public:
 		DeviceMgr()
 		{
-			Delegate::GetInstance();
 		}
 		using size_type = std::pair<leo::uint16, leo::uint16>;
 	public:
@@ -98,8 +87,7 @@ namespace leo
 		DefGetter(const lnothrow, ID3D11Device*, Device, global::globalD3DDevice);
 		DefGetter(const lnothrow, ID3D11DeviceContext*, DeviceContext, global::globalD3DContext);
 		DefGetter(const lnothrow, IDXGISwapChain*, SwapChain, global::globalDXGISwapChain);
-		DefGetter(const lnothrow, ID3D11Texture2D*, DepthStencilTexture, global::globalD3DDepthTexture);
-		DefGetter(const lnothrow, ID3D11DepthStencilView*, DepthStencilView, global::globalD3DDepthStencilView);
+		DefGetter(const lnothrow, ID3D11DepthStencilView*, DepthStencilView, *global::globalDepthStencil);
 		DefGetter(const lnothrow, ID3D11RenderTargetView*, RenderTargetView, global::globalD3DRenderTargetView);
 		DefGetter(const lnothrow, ID3D11Texture2D*, RenderTargetTexture2D, global::globalD3DRenderTargetTexture2D);
 		DefGetter(const lnothrow, float, Aspect, global::globalAspect);

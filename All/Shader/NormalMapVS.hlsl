@@ -1,7 +1,7 @@
 cbuffer cbChangerEveryFrame : register(b0)
 {
 	matrix WorldView;
-	matrix WorldInvTransposeView;
+	matrix InvTransposeWorldView;
 	matrix WorldViewProj;
 	matrix ShadowViewProjTex;
 }
@@ -28,7 +28,7 @@ VertexOut main(VertexIn vin)
 
 	// Transform to view space space.
 	//vout.PosV = mul(float4(vin.PosL, 1.0f), WorldView).xyz;
-	vout.NormalV =half3(mul(vin.NormalL, (float3x3)WorldInvTransposeView));
+	vout.NormalV =half3(mul(vin.NormalL, (float3x3)InvTransposeWorldView));
 	//vout.TangentV = mul(vin.TangentL, (float3x3)WorldView);
 
 	// Transform to homogeneous clip space.

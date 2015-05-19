@@ -1,12 +1,10 @@
 #include "EffectGBuffer.hpp"
 #include "RenderSystem\ShaderMgr.h"
 #include "RenderSystem\RenderStates.hpp"
-#include "..\DeviceMgr.h"
 #include "Vertex.hpp"
 #include "FileSearch.h"
 #include "EngineConfig.h"
-#include "..\TextureMgr.h"
-#include "..\math.hpp"
+#include "leomathutility.hpp"
 
 namespace leo {
 #pragma region EffectGBuffer
@@ -17,7 +15,7 @@ namespace leo {
 	{
 	public:
 		EffectGBufferDelegate(ID3D11Device* device)
-			:mVertexShaderConstantBufferPerFrame(device)
+			:mVSCBPerFrame(device),mPSCBPerMatrial(device)
 		{
 			leo::ShaderMgr sm;
 			ID3D11InputLayout* layout;
@@ -29,10 +27,6 @@ namespace leo {
 
 			RenderStates rss;
 			anisoSampler = rss.GetSamplerState(L"anisoSampler");
-			normalSampler = rss.GetSamplerState(L"trilinearSampler");
-
-			leo::TextureMgr texmgr;
-			mPixelShaderNormalsSRV =texmgr.LoadTextureSRV(FileSearch::Search(L"NormalsFitting.dds"));
 		}
 
 		~EffectGBufferDelegate()
@@ -43,46 +37,40 @@ namespace leo {
 		void Apply(ID3D11DeviceContext* context)
 		{
 			context_wrapper pContext(context, L"gbuffer");
-			mVertexShaderConstantBufferPerFrame.Update(context);
+			mVSCBPerFrame.Update(context);
 
 			pContext.VSSetShader(mVertexShader, nullptr, 0);
-			pContext.VSSetConstantBuffers(0, 1, &mVertexShaderConstantBufferPerFrame.mBuffer);
+			pContext.VSSetConstantBuffers(0, 1, &mVSCBPerFrame.mBuffer);
 
 			ID3D11SamplerState* msss[] = {
-				normalSampler,
 				anisoSampler
 			};
 
 			ID3D11ShaderResourceView* mrss[] = {
-				mPixelShaderNormalsSRV,
 				mPixelShaderDiffuseSRV
 			};
 
+			mPSCBPerMatrial.Update(context);
 			pContext.PSSetShader(mPixelShader, nullptr, 0);
-			pContext.PSSetSamplers(0, 2, msss);
-			pContext.PSSetShaderResources(0, 2, mrss);
+			pContext.PSSetConstantBuffers(0, 1, &mPSCBPerMatrial.mBuffer);
+			pContext.PSSetSamplers(0, arrlen(msss), msss);
+			pContext.PSSetShaderResources(0, arrlen(mrss), mrss);
 
 		}
 
-		void LM_VECTOR_CALL WorldViewMatrix(matrix Matrix, ID3D11DeviceContext* context)
-		{
-			mVertexShaderConstantBufferPerFrame.world = Transpose(Matrix);
-			if (context)
-				mVertexShaderConstantBufferPerFrame.Update(context);
-		}
 
-		void LM_VECTOR_CALL WorldInvTransposeViewMatrix(std::array<__m128, 4> matrix, ID3D11DeviceContext* context = nullptr) {
-			mVertexShaderConstantBufferPerFrame.worldinvtranspose = Transpose(matrix);
+		void LM_VECTOR_CALL InvTransposeWorldViewMatrix(matrix Matrix, ID3D11DeviceContext* context = nullptr) {
+			mVSCBPerFrame.InvTransposeWorldView = Matrix;
 			if (context)
-				mVertexShaderConstantBufferPerFrame.Update(context);
+				mVSCBPerFrame.Update(context);
 		}
 
 
 		void  LM_VECTOR_CALL WorldViewProjMatrix(matrix Matrix, ID3D11DeviceContext* context)
 		{
-			mVertexShaderConstantBufferPerFrame.worldviewproj = Transpose(Matrix);
+			mVSCBPerFrame.WorldViewProj = Transpose(Matrix);
 			if (context)
-				mVertexShaderConstantBufferPerFrame.Update(context);
+				mVSCBPerFrame.Update(context);
 		}
 		
 
@@ -91,15 +79,11 @@ namespace leo {
 			mPixelShaderDiffuseSRV = diff;
 
 		}
-		void NormalsSRV(ID3D11ShaderResourceView * const nmap, ID3D11DeviceContext* context)
-		{
-			mPixelShaderNormalsSRV = nmap;
-		}
-
-		void OMSetMRT(ID3D11RenderTargetView* rt0, ID3D11RenderTargetView* rt1) {
-			mMRTs[0] = rt0;
-			mMRTs[1] = rt1;
-			DeviceMgr().GetDeviceContext()->OMSetRenderTargets(2, mMRTs, DeviceMgr().GetDepthStencilView());
+		
+		void Specular(const float4& specular_power, ID3D11DeviceContext* context) {
+			mPSCBPerMatrial.specular_pow = specular_power;
+			if (context)
+				mPSCBPerMatrial.Update(context);
 		}
 		
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow
@@ -109,27 +93,37 @@ namespace leo {
 	private:
 		struct VScbPerFrame
 		{
-			matrix world;
-			matrix worldinvtranspose;
-			matrix worldviewproj;
-			matrix shadowviewprojtex;
+			matrix InvTransposeWorldView;
+			matrix WorldViewProj;
 		public:
 			const static std::uint8_t slot = 0;
 		};
-		ShaderConstantBuffer<VScbPerFrame> mVertexShaderConstantBufferPerFrame;
+
+		ShaderConstantBuffer<VScbPerFrame> mVSCBPerFrame;
 		
+		struct PScbPerMaterial {
+			float4 specular_pow;
+		public:
+			const static std::uint8_t slot = 0;
+		};
+		ShaderConstantBuffer<PScbPerMaterial> mPSCBPerMatrial;
 
 		ID3D11VertexShader* mVertexShader = nullptr;
 		ID3D11PixelShader*	mPixelShader = nullptr;
 
 		ID3D11ShaderResourceView *mPixelShaderDiffuseSRV = nullptr;
-		ID3D11ShaderResourceView *mPixelShaderNormalsSRV = nullptr;
 
-		ID3D11SamplerState* normalSampler = nullptr;
 		ID3D11SamplerState* anisoSampler = nullptr;
-
-		ID3D11RenderTargetView* mMRTs[2];
 	};
+
+	void leo::EffectGBuffer::Specular(const float4 & specular_power, ID3D11DeviceContext * context)
+	{
+		lassume(dynamic_cast<EffectGBufferDelegate *>(this));
+
+		return ((EffectGBufferDelegate *)this)->Specular(
+			specular_power, context
+			);
+	}
 
 	const std::unique_ptr<EffectGBuffer>& EffectGBuffer::GetInstance(ID3D11Device* device)
 	{
@@ -146,14 +140,6 @@ namespace leo {
 			);
 	}
 
-	void EffectGBuffer::WorldViewMatrix(const float4x4& matrix, ID3D11DeviceContext* context)
-	{
-		lassume(dynamic_cast<EffectGBufferDelegate *>(this));
-
-		return ((EffectGBufferDelegate *)this)->WorldViewMatrix(
-			load(matrix), context
-			);
-	}
 
 	void EffectGBuffer::WorldViewProjMatrix(const float4x4& matrix, ID3D11DeviceContext* context)
 	{
@@ -165,19 +151,11 @@ namespace leo {
 	}
 
 
-	void LM_VECTOR_CALL EffectGBuffer::WorldViewMatrix(matrix Matrix, ID3D11DeviceContext* context)
-	{
+
+	void LM_VECTOR_CALL  EffectGBuffer::InvTransposeWorldViewMatrix(std::array<__m128, 4> matrix, ID3D11DeviceContext* context) {
 		lassume(dynamic_cast<EffectGBufferDelegate *>(this));
 
-		return ((EffectGBufferDelegate *)this)->WorldViewMatrix(
-			Matrix, context
-			);
-	}
-
-	void LM_VECTOR_CALL  EffectGBuffer::WorldInvTransposeViewMatrix(std::array<__m128, 4> matrix, ID3D11DeviceContext* context) {
-		lassume(dynamic_cast<EffectGBufferDelegate *>(this));
-
-		return ((EffectGBufferDelegate *)this)->WorldInvTransposeViewMatrix(
+		return ((EffectGBufferDelegate *)this)->InvTransposeWorldViewMatrix(
 			matrix, context
 			);
 	}
@@ -201,29 +179,12 @@ namespace leo {
 			);
 	}
 
-	void EffectGBuffer::NormalsSRV(ID3D11ShaderResourceView * const nmap, ID3D11DeviceContext* context)
-	{
-		lassume(dynamic_cast<EffectGBufferDelegate *>(this));
-
-		return ((EffectGBufferDelegate *)this)->NormalsSRV(
-			nmap, context
-			);
-	}
-
 	bool EffectGBuffer::SetLevel(EffectConfig::EffectLevel l)  lnothrow
 	{
 		lassume(dynamic_cast<EffectGBufferDelegate *>(this));
 
 		return ((EffectGBufferDelegate *)this)->SetLevel(
 			l
-			);
-	}
-
-	void EffectGBuffer::OMSetMRT(ID3D11RenderTargetView* rt0, ID3D11RenderTargetView* rt1) {
-		lassume(dynamic_cast<EffectGBufferDelegate *>(this));
-
-		return ((EffectGBufferDelegate *)this)->OMSetMRT(
-			rt0,rt1
 			);
 	}
 #pragma endregion

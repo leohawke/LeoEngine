@@ -8,7 +8,7 @@ struct VertexIn
 struct VertexOut
 {
 	float4 PosH : SV_POSITION;
-	float3 ToFarPlane :TEXCOORD0;
+	float3 ToFarPlane :TEXCOORD0;//view_dir
 	float2 Tex : TEXCOORD1;
 };
 

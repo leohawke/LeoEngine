@@ -129,22 +129,23 @@ namespace leo
 
 		auto world =SQT::operator std::array<__m128, 4U>();
 		
+		auto world_view = Multiply(world, load(camera.View()));
 
-		mEffect->WorldViewMatrix(Multiply(world,load(camera.View())));
 		mEffect->WorldViewProjMatrix(Multiply(world,load(camera.ViewProj())));
 
 		__m128 det;
-		world[3] = leo::set(0.f, 0.f, 0.f, 1.f);
-		world = Transpose(Inverse(det, world));
-		mEffect->WorldInvTransposeViewMatrix(Multiply(world, load(camera.View())));
+		world_view[3] = leo::set(0.f, 0.f, 0.f, 1.f);
+		world_view = Inverse(det, world_view);
+		mEffect->InvTransposeWorldViewMatrix(world_view);
 
 
 		mEffect->Apply(context);
 
 		for (auto it = m_subsets.cbegin(); it != m_subsets.cend();++it)
 		{
-			//mEffect->Mat(it->m_mat, context);
+			mEffect->Specular(it->m_mat.specular, context);
 			mEffect->DiffuseSRV(it->m_texdiff);
+			//TODO : Add NormalMap
 			//mEffect->NormalMapSRV(it->m_texnormalmap, context);
 			context->DrawIndexed(it->m_indexcount, it->m_indexoffset, 0);
 		}
@@ -164,7 +165,9 @@ namespace leo
 		
 	}
 
+	//Todo :draw shadow map
 	void Mesh::CastShadow(ID3D11DeviceContext* context) {
+		/*
 		context->IASetIndexBuffer(m_indexbuff, DXGI_FORMAT_R32_UINT, 0);
 		static UINT strides[] = { sizeof(vertex_type) };
 		static UINT offsets[] = { 0 };
@@ -178,5 +181,6 @@ namespace leo
 		{
 			context->DrawIndexed(it->m_indexcount, it->m_indexoffset, 0);
 		}
+		*/
 	}
 }

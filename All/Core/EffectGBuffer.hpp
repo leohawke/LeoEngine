@@ -24,18 +24,15 @@ namespace leo {
 	public:
 		void Apply(ID3D11DeviceContext* context);
 
-		void WorldViewMatrix(const float4x4& matrix, ID3D11DeviceContext* context = nullptr);
 		void WorldViewProjMatrix(const float4x4& matrix, ID3D11DeviceContext* context = nullptr);
 
-		void LM_VECTOR_CALL WorldViewMatrix(std::array<__m128, 4> matrix, ID3D11DeviceContext* context = nullptr);
 		void  LM_VECTOR_CALL WorldViewProjMatrix(std::array<__m128, 4>  matrix, ID3D11DeviceContext* context = nullptr);
-		void LM_VECTOR_CALL WorldInvTransposeViewMatrix(std::array<__m128, 4> matrix, ID3D11DeviceContext* context = nullptr);
+		void LM_VECTOR_CALL InvTransposeWorldViewMatrix(std::array<__m128, 4> matrix, ID3D11DeviceContext* context = nullptr);
 
 		void DiffuseSRV(ID3D11ShaderResourceView * const diff, ID3D11DeviceContext* context = nullptr);
-		void NormalsSRV(ID3D11ShaderResourceView * const nmap, ID3D11DeviceContext* context = nullptr);
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow;
 
-		void OMSetMRT(ID3D11RenderTargetView* rt0, ID3D11RenderTargetView* rt1);
+		void Specular(const float4& specular_power, ID3D11DeviceContext* context = nullptr);
 	public:
 		static const std::unique_ptr<EffectGBuffer>& GetInstance(ID3D11Device* device = nullptr);
 	};

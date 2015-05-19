@@ -13,8 +13,8 @@
 ////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef ShaderSystem_Deferred_H
-#define ShaderSystem_Deferred_H
+#ifndef ShaderSystem_DepthStencil_Hpp
+#define ShaderSystem_DepthStencil_Hpp
 
 #include "Core\COM.hpp"
 

@@ -13,7 +13,7 @@
 #include "leoint.hpp"
 #include "utility.hpp"
 #include "RenderSystem\d3dx11.hpp"
-
+#include "RenderSystem\DepthStencil.hpp"
 #include "window.hpp"
 #include "Core\COM.hpp"
 namespace leo
@@ -28,8 +28,7 @@ namespace leo
 		extern ID3D11Device* globalD3DDevice;
 		extern ID3D11DeviceContext* globalD3DContext;
 		extern IDXGISwapChain* globalDXGISwapChain;
-		extern ID3D11Texture2D* globalD3DDepthTexture;
-		extern ID3D11DepthStencilView* globalD3DDepthStencilView;
+		extern std::unique_ptr<DepthStencil> globalDepthStencil;
 		extern ID3D11RenderTargetView* globalD3DRenderTargetView;
 		extern ID3D11Texture2D*	globalD3DRenderTargetTexture2D;
 		extern std::set<std::pair<leo::uint16, leo::uint16>> globalDXGISizeSet;

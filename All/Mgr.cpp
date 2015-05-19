@@ -15,6 +15,7 @@ namespace leo
 		extern ID3D11DepthStencilView* globalD3DDepthStencilView = nullptr;
 		extern ID3D11RenderTargetView* globalD3DRenderTargetView = nullptr;
 		extern ID3D11Texture2D*	globalD3DRenderTargetTexture2D = nullptr;
+		extern std::unique_ptr<DepthStencil> globalDepthStencil = nullptr;
 
 
 		std::set<std::pair<leo::uint16, leo::uint16>> globalDXGISizeSet;
