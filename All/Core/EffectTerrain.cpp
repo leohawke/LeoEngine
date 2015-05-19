@@ -24,7 +24,7 @@ namespace leo
 			mPS = SM.CreatePixelShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"terrain", D3D11_PIXEL_SHADER)));
 
 			leo::RenderStates SS;
-			mLinearClamp = SS.GetSamplerState(L"LinearClamp");
+			mLinearClamp = SS.GetSamplerState(L"trilinearSampler");
 
 			mLinearRepeat = SS.GetSamplerState(L"LinearRepeat");
 

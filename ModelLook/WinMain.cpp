@@ -323,11 +323,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	leo::EngineConfig::Write();
 	leo::global::Destroy();
 	ClearRes();
-	DeviceMgr.DestroyDevice();
 #ifdef DEBUG
 	leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
 #endif
 	leo::SingletonManger::GetInstance()->UnInstallAllSingleton();
+	DeviceMgr.DestroyDevice();
 
 
 
