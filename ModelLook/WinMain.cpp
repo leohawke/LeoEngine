@@ -27,15 +27,10 @@
 #include <Core\BilateralFilter.hpp>
 #include <Core\Light.hpp>
 
-
-#include <RenderSystem\Deferred.h>
-
-#include <Core\COM.hpp>
-
 #include <TextureMgr.h>
 #include <RenderSystem\ShaderMgr.h>
 #include <RenderSystem\RenderStates.hpp>
-//#include <RenderSystem\DeferredRender.hpp>
+#include <RenderSystem\DeferredRender.hpp>
 #include <exception.hpp>
 #include <Input.h>
 
@@ -60,7 +55,7 @@ leo::Event event;
 std::unique_ptr<leo::Mesh> pModelMesh = nullptr;
 std::unique_ptr<leo::UVNCamera> pCamera = nullptr;
 std::unique_ptr<leo::CastShadowCamera> pShaderCamera;
-//std::unique_ptr<leo::DeferredRender> pRender = nullptr;
+std::unique_ptr<leo::DeferredRender> pRender = nullptr;
 std::unique_ptr<leo::Terrain<>> pTerrain = nullptr;
 
 std::atomic<bool> renderAble = false;
@@ -189,7 +184,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 			{
 				auto size = std::make_pair<leo::uint16, leo::uint16>(LOWORD(lParam), HIWORD(lParam));
 				DeviceMgr.ReSize(size);
-				leo::DeferredResources::GetInstance().ReSize(size);
 				ReSize(size);
 				mHasDuration = leo::clock::to_duration<>(0.f);
 			}
@@ -392,20 +386,21 @@ void ClearLight() {
 void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 {
 	using leo::float3;
+	auto device = leo::DeviceMgr().GetDevice();
 
 	event.Wait();
 	//Effect,Staic Instance	
 #if 1
 	//leo::EffectNormalLine::GetInstance(leo::DeviceMgr().GetDevice());
-	leo::ShadowMap::GetInstance(leo::DeviceMgr().GetDevice(), std::make_pair(2048u, 2048u));
-	leo::EffectPack::GetInstance(leo::DeviceMgr().GetDevice());
+	//leo::ShadowMap::GetInstance(leo::DeviceMgr().GetDevice(), std::make_pair(2048u, 2048u));
+	//leo::EffectPack::GetInstance(leo::DeviceMgr().GetDevice());
 
-	leo::EffectShadowMap::GetInstance(leo::DeviceMgr().GetDevice());
-	leo::EffectLine::GetInstance(leo::DeviceMgr().GetDevice());
+	//leo::EffectShadowMap::GetInstance(leo::DeviceMgr().GetDevice());
+	//leo::EffectLine::GetInstance(leo::DeviceMgr().GetDevice());
 
-	leo::DeferredResources::GetInstance();
+	//leo::DeferredResources::GetInstance();
 	leo::EffectGBuffer::GetInstance(leo::DeviceMgr().GetDevice());
-	leo::EffectTerrain::GetInstance(leo::DeviceMgr().GetDevice());
+	//leo::EffectTerrain::GetInstance(leo::DeviceMgr().GetDevice());
 #endif
 
 
@@ -427,7 +422,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pCamera->LookAt(float3(0.f, 10.f, -10.f), float3(0.f, 0.f, 0.f), float3(0.f, 1.f, 0.f));
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 
-	leo::DeferredResources::GetInstance().SetFrustum(*pCamera);
+	//leo::DeferredResources::GetInstance().SetFrustum(*pCamera);
 #endif
 	//SSAO Dependent
 #if 1
@@ -580,8 +575,8 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	BuildLight(leo::DeviceMgr().GetDevice());
 #endif
 
-	pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(), L"Resource/Test.Terrain");
-
+	//pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(), L"Resource/Test.Terrain");
+	pRender = std::make_unique<leo::DeferredRender>(device,size);
 }
 
 void ClearRes() {
@@ -589,6 +584,7 @@ void ClearRes() {
 
 	pModelMesh.reset(nullptr);
 	pTerrain.reset(nullptr);
+	pRender.reset(nullptr);
 	leo::win::ReleaseCOM(mSSAORandomVec);
 	leo::win::ReleaseCOM(mBlurSSAOSRV);
 	leo::win::ReleaseCOM(mBlurSSAOUAV);
@@ -640,7 +636,9 @@ void ReSize(std::pair<leo::uint16, leo::uint16> size) {
 		leo::dxcall(leo::DeviceMgr().GetDevice()->CreateUnorderedAccessView(mTex, nullptr, &mBlurSwapSSAOUAV));
 	}
 
-
+	if (pRender) {
+		pRender->ReSize(leo::DeviceMgr().GetDevice(), size);
+	}
 }
 
 void Update() {
@@ -685,7 +683,7 @@ void Update() {
 }
 
 void ComputeSSAO(ID3D11DeviceContext* context) {
-	ID3D11RenderTargetView* mMRTs[] = { leo::DeferredResources::GetInstance().GetSSAORTV(),nullptr };
+	ID3D11RenderTargetView* mMRTs[] = { nullptr,nullptr };
 	context->OMSetRenderTargets(2, mMRTs, nullptr);
 	float ClearColor[4] = { 0.0f, 0.25f, 0.25f, 0.8f };
 	context->ClearRenderTargetView(mMRTs[0], ClearColor);
@@ -699,7 +697,7 @@ void ComputeSSAO(ID3D11DeviceContext* context) {
 }
 
 void BlurSSAO(ID3D11DeviceContext* context, unsigned width, unsigned height) {
-	auto srv = leo::DeferredResources::GetInstance().GetSSAOSRV();
+	ID3D11ShaderResourceView* srv = nullptr;
 
 	context->CSSetShader(mBlurHorSSAOCS, nullptr, 0);
 	context->CSSetShaderResources(0, 1, &srv);
@@ -734,7 +732,8 @@ void BlurSSAO(ID3D11DeviceContext* context, unsigned width, unsigned height) {
 void DrawSSAO(ID3D11DeviceContext* context) {
 
 
-	auto srv = leo::DeferredResources::GetInstance().GetSSAOSRV();
+	ID3D11ShaderResourceView* srv = nullptr;
+
 	context->PSSetShader(mGBufferPS, nullptr, 0);
 	context->PSSetShaderResources(0, 1, &srv);
 	context->Draw(4, 0);
@@ -745,7 +744,8 @@ void DrawLight(ID3D11DeviceContext* context) {
 	context->PSSetShader(mDirectionalLightPS, nullptr, 0);
 	context->PSSetConstantBuffers(0, 1, &mDirectionalLightPSCB);
 
-	auto srv = leo::DeferredResources::GetInstance().GetSSAOSRV();
+	ID3D11ShaderResourceView* srv = nullptr;
+
 	context->PSSetShaderResources(2, 1, &srv);
 	context->Draw(4, 0);
 	srv = nullptr;
@@ -806,6 +806,17 @@ void Render()
 		devicecontext->OMSetRenderTargets(1, &rtv, nullptr);
 		devicecontext->ClearRenderTargetView(rtv, ClearColor);
 
+		if (pRender) {
+			pRender->OMSet(devicecontext,*leo::global::globalDepthStencil);
+		}
+		if (pModelMesh) {
+			pModelMesh->Render(devicecontext, *pCamera);
+		}
+		//Light Pass
+		//Shader Pass
+		if (pRender) {
+			pRender->UnBind(devicecontext, *leo::global::globalDepthStencil);
+		}
 		/*
 		BlurSSAO(devicecontext, unsigned int(prevVP.Width), unsigned int(prevVP.Height));
 		//ªÊ÷∆—”≥ŸBuff

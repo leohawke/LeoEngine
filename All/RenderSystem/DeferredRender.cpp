@@ -61,6 +61,7 @@ private:
 		//mDepthSRV
 		{
 			CD3D11_TEXTURE2D_DESC depthTexDesc{ DXGI_FORMAT_R32_FLOAT,size.first,size.second };
+			depthTexDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 
 			auto mDepthTex = win::make_scope_com<ID3D11Texture2D>();
 			device->CreateTexture2D(&depthTexDesc, nullptr, &mDepthTex);
@@ -71,6 +72,7 @@ private:
 		//mLightSRV
 		{
 			CD3D11_TEXTURE2D_DESC lightTexDesc{ DXGI_FORMAT_R8G8B8A8_UNORM,size.first,size.second };
+			lightTexDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 
 			auto mLightTex = win::make_scope_com<ID3D11Texture2D>();
 			device->CreateTexture2D(&lightTexDesc, nullptr, &mLightTex);
@@ -119,12 +121,23 @@ leo::DeferredRender::DeferredRender(ID3D11Device * device, size_type size)
 {
 }
 
+leo::DeferredRender::~DeferredRender() {
+
+}
+
 void leo::DeferredRender::OMSet(ID3D11DeviceContext * context, DepthStencil& depthstencil) noexcept
 {
 	ID3D11RenderTargetView* mRTVs[] = { pResImpl->mGBuffRTVs[0], pResImpl->mGBuffRTVs[1] };
 	context->OMSetRenderTargets(arrlen(pResImpl->mGBuffRTVs), mRTVs, depthstencil);
 	context->OMSetDepthStencilState(pStateImpl->mGBufferPassDepthStenciState, 0x10);
 }
+
+void leo::DeferredRender::UnBind(ID3D11DeviceContext* context, DepthStencil& depthstencil) noexcept {
+	ID3D11RenderTargetView* mRTVs[] = {nullptr,nullptr };
+	context->OMSetRenderTargets(arrlen(mRTVs),mRTVs, depthstencil);
+
+}
+
 
 void leo::DeferredRender::ReSize(ID3D11Device * device, size_type size) noexcept
 {

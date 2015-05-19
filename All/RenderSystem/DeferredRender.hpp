@@ -34,7 +34,11 @@ namespace leo {
 
 		DeferredRender(ID3D11Device* device, size_type size);
 
+		~DeferredRender();
+
 		void OMSet(ID3D11DeviceContext* context,DepthStencil& depthstencil) noexcept;
+
+		void UnBind(ID3D11DeviceContext* context,DepthStencil& depthstencil) noexcept;
 
 		void ReSize(ID3D11Device* device,size_type size) noexcept;
 		
