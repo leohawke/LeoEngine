@@ -94,25 +94,79 @@ struct SSAO {
 };
 SSAO ssao;
 
+const D3D11_INPUT_ELEMENT_DESC static mLightVolumeVertexElement_Desc[] =
+{
+	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+};
 //set rt
 //set blendstate
 //set srv,set sample
-class PointLightVolume {
-	ID3D11InputLayout* mLightVolumeVertexLayout;
-	D3D11_INPUT_ELEMENT_DESC mLightVolumeVertexElement_Desc[] = 
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-	};
+
+class PointLightVolume : public leo::DataAllocatedObject<leo::GeneralAllocPolicy>{
+	ID3D11InputLayout* mLightVolumeVertexLayout = nullptr;
+	
 
 	ID3D11VertexShader* mLightVolumeVS = nullptr;
+
+	struct TransfromMatrix {
+		std::array<__m128, 4> WorldView;
+		std::array<__m128, 4> Proj;
+	} mVSCBParams;
+	leo::win::unique_com<ID3D11Buffer>  mVSCB = nullptr;
+
 	ID3D11PixelShader* mPointLightVolumePS = nullptr;
 
-	ID3D11Buffer* mPointVolumeVB = nullptr;
-	ID3D11Buffer* mPointVolumeIB = nullptr;
+	leo::PointLight mPSCBParams;
+	leo::win::unique_com<ID3D11Buffer>  mPSCB = nullptr;
 
+	leo::win::unique_com<ID3D11Buffer> mPointVolumeVB = nullptr;
+	leo::win::unique_com<ID3D11Buffer>  mPointVolumeIB = nullptr;
+public:
 	PointLightVolume(ID3D11Device* device) {
+		auto meshdata = leo::helper::CreateSphere(16,16);
 
+		CD3D11_BUFFER_DESC vbDesc{ meshdata.Vertices.size()*sizeof(decltype(meshdata.Vertices)::value_type),
+		D3D11_BIND_VERTEX_BUFFER,D3D11_USAGE_IMMUTABLE };
+
+		D3D11_SUBRESOURCE_DATA resDesc;
+		resDesc.pSysMem = &meshdata.Vertices[0];
+		leo::dxcall(device->CreateBuffer(&vbDesc, &resDesc, &mPointVolumeVB));
+
+		CD3D11_BUFFER_DESC ibDesc{ vbDesc };
+		ibDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		ibDesc.ByteWidth = static_cast<leo::win::UINT> (sizeof(std::uint32_t)*meshdata.Indices.size());
+		resDesc.pSysMem = &meshdata.Indices[0];
+		leo::dxcall(device->CreateBuffer(&ibDesc, &resDesc, &mPointVolumeIB));
+
+		CD3D11_BUFFER_DESC vscbDesc{sizeof(TransfromMatrix),D3D11_BIND_CONSTANT_BUFFER};
+
+		leo::dxcall(device->CreateBuffer(&vscbDesc, nullptr, &mVSCB));
+
+		CD3D11_BUFFER_DESC pscbDesc{ sizeof(leo::PointLight),D3D11_BIND_CONSTANT_BUFFER };
+
+		leo::dxcall(device->CreateBuffer(&pscbDesc,nullptr,&mPSCB));
+
+		leo::ShaderMgr sm;
+
+		mLightVolumeVS = sm.CreateVertexShader(
+			leo::FileSearch::Search(
+				leo::EngineConfig::ShaderConfig::GetShaderFileName(L"pointlight", D3D11_VERTEX_SHADER)
+				),
+			nullptr,
+			mLightVolumeVertexElement_Desc,
+			leo::arrlen(mLightVolumeVertexElement_Desc),
+			&mLightVolumeVertexLayout);
+
+		mPointLightVolumePS = sm.CreatePixelShader(
+			leo::FileSearch::Search(
+				leo::EngineConfig::ShaderConfig::GetShaderFileName(L"pointlight", D3D11_PIXEL_SHADER)
+				));
 	}
+
+	void SetLightParams(const leo::PointLight& params,ID3D11DeviceContext* context);
+	void SetCamera(const leo::Camera& params, ID3D11DeviceContext* context);
+
+	void Draw(ID3D11DeviceContext* context);
 };
 
 
@@ -353,16 +407,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	return 0;
 }
 
-ID3D11PixelShader* mPointLightPS = nullptr;
 
-ID3D11Buffer* mPointLightPSCB = nullptr;
 
-ID3D11PixelShader* mDirectionalLightPS = nullptr;
-
-ID3D11Buffer* mDirectionalLightPSCB = nullptr;
-
-leo::PointLight pl;
-leo::DirectionalLight dl;
 void BuildLight(ID3D11Device* device) {
 	leo::ShaderMgr sm;
 	auto  mPSBlob = sm.CreateBlob(leo::FileSearch::Search(L"PointLightPS.cso"));

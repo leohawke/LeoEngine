@@ -1,11 +1,11 @@
 cbuffer perLight :register(b0) {
-	matrix WorldViewProj;
+	matrix WorldView;
 	matrix Proj;
 }
 
 struct LightVolumePoint {
 	float3 PosL :POSITION;
-}
+};
 
 
 struct VertexOut {
@@ -24,5 +24,5 @@ VertexOut main(LightVolumePoint vin)
 
 	vout.Tex.xy = vout.Tex.xy*0.5f + 0.5f;
 	vout.Tex.y = 1.f - vout.Tex.y;
-	return pos;
+	return vout;
 }
