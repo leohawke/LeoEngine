@@ -163,10 +163,30 @@ public:
 				));
 	}
 
-	void SetLightParams(const leo::PointLight& params,ID3D11DeviceContext* context);
-	void SetCamera(const leo::Camera& params, ID3D11DeviceContext* context);
+	void SetLightParams(const leo::PointLight& params) {
+		mPSCBParams = params;
+	}
+	void SetCamera(const leo::Camera& params) {
+		leo::SQT scale{};
+		auto world = scale.operator std::array<__m128, 4U>();
+		mVSCBParams.WorldView = leo::Transpose(leo::Multiply(world, load(params.View())));
+		mVSCBParams.Proj = leo::Transpose(load(params.Proj()));
+	}
 
-	void Draw(ID3D11DeviceContext* context);
+	void Draw(ID3D11DeviceContext* context) {
+		context->UpdateSubresource(mVSCB, 0, nullptr, &mVSCBParams, 0, 0);
+		context->UpdateSubresource(mPSCB, 0, nullptr, &mPSCBParams, 0, 0);
+
+		UINT strides[] = { sizeof(leo::float3) };
+		UINT offsets[] = { 0 };
+
+		context->IASetVertexBuffers(0, 1, &mPointVolumeVB,strides,offsets );
+		context->IASetInputLayout(mLightVolumeVertexLayout);
+		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		context->VSSetShader(mLightVolumeVS, nullptr, 0);
+		context->PSSetShader(mPointLightVolumePS, nullptr, 0);
+	}
 };
 
 
@@ -180,9 +200,6 @@ void DeviceEvent()
 }
 
 
-void LightPreable() {
-
-}
 
 void Render();
 void Update();
@@ -407,13 +424,36 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	return 0;
 }
 
+ID3D11VertexShader* mIAVS = nullptr;
 
+ID3D11Buffer* mIAVB = nullptr;
+ID3D11InputLayout* mIALayout = nullptr;
+
+struct GBufferIAVertex {
+	leo::float4 PosH;//POSITION;
+	leo::float3 ToFarPlane;//TEXCOORD0;
+	leo::float2 Tex;//TEXCOORD1;
+};
+
+extern const D3D11_INPUT_ELEMENT_DESC GBufferIA[3]
+=
+{
+	{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, loffsetof(GBufferIAVertex, PosH), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, loffsetof(GBufferIAVertex, ToFarPlane), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, loffsetof(GBufferIAVertex, Tex), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+};
 
 void BuildLight(ID3D11Device* device) {
 	leo::ShaderMgr sm;
 	auto  mPSBlob = sm.CreateBlob(leo::FileSearch::Search(L"PointLightPS.cso"));
-	mPointLightPS = sm.CreatePixelShader(mPSBlob);
-	mDirectionalLightPS = sm.CreatePixelShader(leo::FileSearch::Search(L"DirectionalLightPS.cso"));
+
+	using namespace leo;
+
+	mIAVS = sm.CreateVertexShader(
+		FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"deferred", D3D11_VERTEX_SHADER)),
+		nullptr,
+		GBufferIA, arrlen(GBufferIA),
+		&mIALayout);
 
 	D3D11_BUFFER_DESC Desc;
 	Desc.Usage = D3D11_USAGE_DEFAULT;
@@ -810,20 +850,12 @@ void DrawSSAO(ID3D11DeviceContext* context) {
 	context->Draw(4, 0);
 }
 
-void DrawLight(ID3D11DeviceContext* context) {
-
-	context->PSSetShader(mDirectionalLightPS, nullptr, 0);
-	context->PSSetConstantBuffers(0, 1, &mDirectionalLightPSCB);
-
-	ID3D11ShaderResourceView* srv = nullptr;
-
-	context->PSSetShaderResources(2, 1, &srv);
-	context->Draw(4, 0);
-	srv = nullptr;
-	context->PSSetShaderResources(2, 1, &srv);
-
+void LineraDepth(ID3D11DeviceContext* context) {
 }
 
+void LightPreable(ID3D11DeviceContext* context) {
+	LineraDepth(context);
+}
 
 void Render()
 {
