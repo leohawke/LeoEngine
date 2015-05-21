@@ -43,7 +43,7 @@ namespace leo {
 
 		void ReSize(ID3D11Device* device,size_type size) noexcept;
 
-		void LinearizeDepth(ID3D11DeviceContext* context,float near_z,float far_z) noexcept;
+		void LinearizeDepth(ID3D11DeviceContext* context, DepthStencil& depthstencil,float near_z,float far_z) noexcept;
 		
 		void SetSSAOParams(bool enable, uint8 level) noexcept;
 

@@ -505,32 +505,8 @@ void DrawSSAO(ID3D11DeviceContext* context) {
 	context->Draw(4, 0);
 }
 
-void LineraDepth(ID3D11DeviceContext* context) {
-	/*
-	//设置本cpp已有资源
-	UINT strides[] = { sizeof(GBufferIAVertex) };
-	UINT offsets[] = { 0 };
-	context->IASetVertexBuffers(0, 1, &mIAVB, strides, offsets);
-	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	context->IASetInputLayout(mIALayout);
-
-	context->VSSetShader(mIAVS, nullptr, 0);
-	context->PSSetShader(mLinearizeDepthPS, nullptr, 0);
-
-	//设置资源
-	context->PSSetSamplers(0, 1, &mSamPoint);
-	auto srv = leo::global::globalDepthStencil->GetDepthSRV();
-	context->PSSetShaderResources(0, 1,&srv);
-	//设置RT
-	ID3D11RenderTargetView* mMRTs[2] = {pRender->GetLinearDepthRTV() ,nullptr};
-	context->OMSetRenderTargets(2,mMRTs,nullptr);
-
-	context->Draw(4, 0);
-	*/
-}
 
 void LightPreable(ID3D11DeviceContext* context) {
-	LineraDepth(context);
 }
 
 void Render()
@@ -571,6 +547,9 @@ void Render()
 		}
 		if (pModelMesh) {
 			pModelMesh->Render(devicecontext, *pCamera);
+		}
+		if (pRender) {
+			pRender->LinearizeDepth(devicecontext, *leo::global::globalDepthStencil, pCamera->mNear, pCamera->mFar);
 		}
 		//Light Pass
 		LightPreable(devicecontext);

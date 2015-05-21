@@ -200,15 +200,20 @@ void leo::DeferredRender::ReSize(ID3D11Device * device, size_type size) noexcept
 	pResImpl = std::make_unique<DeferredResImpl>(device, size);
 }
 
-void leo::DeferredRender::LinearizeDepth(ID3D11DeviceContext * context, float near_z, float far_z) noexcept
+void leo::DeferredRender::LinearizeDepth(ID3D11DeviceContext * context, DepthStencil& depthstencil, float near_z, float far_z) noexcept
 {
 	auto & effectQuad = leo::EffectQuad::GetInstance();
 
 	effectQuad.Apply(context);
 	LinearizeDepthImpl::GetInstance().Apply(context, near_z, far_z);
 
-	//set rt
-	//set srv
+	auto srv = depthstencil.GetDepthSRV();
+	context->PSSetShaderResources(0, 1, &srv);
+	context->OMSetRenderTargets(1, &pResImpl->mDepthRTV, nullptr);
+
+	const static float rgba[] = {near_z,1.f,1.f,1.f};
+
+	context->ClearRenderTargetView(pResImpl->mDepthRTV,rgba );
 
 	effectQuad.Draw(context);
 }
