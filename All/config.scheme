@@ -40,7 +40,7 @@
 		(effect	(name gbuffer)
 			(shader (v GenGBufferVS.cso) (p GenGBufferPS.cso))
 		)
-		(effect	(name deferred)
+		(effect	(name quad)
 			(shader (v DeferredVS.cso))
 		)
 		(effect (name pointlight)

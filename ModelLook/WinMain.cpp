@@ -2,54 +2,35 @@
 #include	<stdlib.h>
 #include	<crtdbg.h>
 
-#include "platform.h"
-
-#include "Singleton.hpp"
-#include "ThreadSync.hpp"
-#include "clock.hpp"
-
-#include <Core\Mesh.hpp>
-#include <Core\Effect.h>
-#include <Core\Camera.hpp>
-#include <Core\RenderSync.hpp>
-#include <Core\EffectLine.hpp>
-#include <Core\EffectShadowMap.hpp>
-#include <Core\Sky.hpp>
-#include <Core\Skeleton.hpp>
-#include <Core\MeshLoad.hpp>
-#include <Core\EffectSkeleton.hpp>
-#include <Core\EffectGBuffer.hpp>
-#include <Core\Terrain.hpp>
-#include <Core\\EngineConfig.h>
-#include <Core\ShadowMap.hpp>
-#include <Core\Vertex.hpp>
-#include <Core\FileSearch.h>
-#include <Core\BilateralFilter.hpp>
-#include <Core\Light.hpp>
-
-#include <TextureMgr.h>
-#include <RenderSystem\ShaderMgr.h>
-#include <RenderSystem\RenderStates.hpp>
-#include <RenderSystem\DeferredRender.hpp>
-#include <exception.hpp>
-#include <Input.h>
-
-
-#include "Axis.hpp"
-
-#include "window.hpp"
-
-#include "DeviceMgr.h"
-
-#include <Commdlg.h>
-
+//first,Indeplafrom
 #include <thread>
 #include <atomic>
 #include <mutex>
+#include <platform.h>
+#include <ThreadSync.hpp>
+#include <clock.hpp>
+
+//second,Core and RenderSystem
+#include <Core\Mesh.hpp>
+#include <Core\Camera.hpp>
+#include <Core\Terrain.hpp>
+#include <Core\FileSearch.h>
+#include <Core\EngineConfig.h>
+#include <Core\RenderSync.hpp>
+#include <Input.h>//to core!
+//Effect header
+#include <Core\EffectGBuffer.hpp>
+#include <RenderSystem\DeferredRender.hpp>
+#include <RenderSystem\RenderStates.hpp>
+#include "window.hpp"
+
+//another
+#include <Commdlg.h>
 #include "resource.h"
 #include <DirectXPackedVector.h>
 
 
+#include "DeviceMgr.h"
 
 leo::Event event;
 std::unique_ptr<leo::Mesh> pModelMesh = nullptr;
@@ -64,12 +45,8 @@ std::atomic<bool> renderThreadRun = true;
 std::mutex mSizeMutex;
 std::mutex mRenderMutex;
 
-
-
 //用于显示GBuffer
 ID3D11PixelShader* mGBufferPS = nullptr;
-
-
 
 const D3D11_INPUT_ELEMENT_DESC static mLightVolumeVertexElement_Desc[] =
 {
@@ -252,11 +229,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 	HACCEL hAccel = LoadAccelerators(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDR_ACCELERATOR1));
 
-
-
-
 	DeviceMgr.CreateDevice(false, clientSize);
-
 
 	auto mNeedDuration = leo::clock::to_duration<>(1.f);
 	auto mHasDuration = leo::clock::to_duration<>(0.f);
@@ -350,33 +323,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	};
 	win.BindMsgFunc(WM_COMMAND, cmdmsgproc);
 
-
-
-
-#if 0
-	auto mouseproc = [&](HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-		auto x = (float)GET_X_LPARAM(lParam);
-		auto y = (float)GET_Y_LPARAM(lParam);
-		leo::float4x4 inv;
-		leo::XMVECTOR temp;
-		auto ray = leo::Ray::Pick(vp, proj, leo::float2(x, y));
-		for (auto i = 0; i != 10;++i) {
-			leo::XMStoreFloat4x4A((leo::XMFLOAT4X4A*)&inv, leo::XMMatrixInverse(&temp, pCamera->View())*leo::XMMatrixInverse(&temp, mBoxSqts[i].operator DirectX::XMMATRIX()));
-
-			if (ray.Transform(inv).Normalize().Intersect(mBox.GetBoundingBox()).first)
-				mBoxPicked[i] = true;
-			else
-				mBoxPicked[i] = false;
-		}
-		return 0;
-	};
-	win.BindMsgFunc(WM_LBUTTONDOWN, mouseproc);
-	mBox.Color(leo::float4(1.f, 0.f, 0.f, 1.f));
-#endif
-
-
-
-
 	std::thread renderThread(Render);
 	std::thread updateThread(Update);
 	while (true)
@@ -417,85 +363,22 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 }
 
 
-
-struct GBufferIAVertex {
-	leo::float4 PosH;//POSITION;
-	leo::float3 ToFarPlane;//TEXCOORD0;
-	leo::float2 Tex;//TEXCOORD1;
-};
-
-extern const D3D11_INPUT_ELEMENT_DESC GBufferIA[3]
-=
-{
-	{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, loffsetof(GBufferIAVertex, PosH), D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, loffsetof(GBufferIAVertex, ToFarPlane), D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, loffsetof(GBufferIAVertex, Tex), D3D11_INPUT_PER_VERTEX_DATA, 0 },
-};
-
-ID3D11VertexShader* mIAVS = nullptr;
-
-ID3D11Buffer* mIAVB = nullptr;
-ID3D11InputLayout* mIALayout = nullptr;
-
 ID3D11PixelShader* mLinearizeDepthPS = nullptr;
 
 
-
 void BuildQuad(ID3D11Device* device, const leo::CameraFrustum& frustum) {
+	
 	using namespace leo;
-	ShaderMgr sm;
-	mIAVS = sm.CreateVertexShader(
-		FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"deferred", D3D11_VERTEX_SHADER)),
-		nullptr,
-		GBufferIA, arrlen(GBufferIA),
-		&mIALayout);
 
+	ShaderMgr sm;
 
 	mLinearizeDepthPS = sm.CreatePixelShader(
 		FileSearch::Search(L"LinearizeDepthPS.cso")
 		);
-
-	static GBufferIAVertex vertexs[4] = {
-		{ float4(+1.f, +1.f, 1.f, 1.f),float3(0.f,0.f,0.f),float2(1.f,0.f) },
-		{ float4(+1.f, -1.f, 1.f, 1.f),float3(0.f,0.f,0.f),float2(1.f,1.f) },
-		{ float4(-1.f, +1.f, 1.f, 1.f),float3(0.f,0.f,0.f),float2(0.f,0.f) },
-		{ float4(-1.f, -1.f, 1.f, 1.f),float3(0.f,0.f,0.f),float2(0.f,1.f) }
-	};
-
-	auto aspect = frustum.GetAspect();
-	auto farZ = frustum.mFar;
-	auto halfHeight = farZ*tanf(0.5f*frustum.GetFov());
-	auto halfWidth = aspect*halfHeight;
-
-	vertexs[0].ToFarPlane = float3(+halfWidth, +halfHeight, farZ);
-	vertexs[1].ToFarPlane = float3(+halfWidth, -halfHeight, farZ);
-	vertexs[2].ToFarPlane = float3(-halfWidth, +halfHeight, farZ);
-	vertexs[3].ToFarPlane = float3(-halfWidth, -halfHeight, farZ);
-
-	leo::win::ReleaseCOM(mIAVB);
-
-	D3D11_BUFFER_DESC vbDesc;
-	vbDesc.Usage = D3D11_USAGE_IMMUTABLE;
-	vbDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbDesc.CPUAccessFlags = 0;
-	vbDesc.MiscFlags = 0;
-	vbDesc.StructureByteStride = 0;
-	vbDesc.ByteWidth = static_cast<win::UINT> (sizeof(GBufferIAVertex)*arrlen(vertexs));
-
-	D3D11_SUBRESOURCE_DATA resDesc;
-	resDesc.pSysMem = &vertexs[0];
-
-	try {
-		dxcall(device->CreateBuffer(&vbDesc, &resDesc, &mIAVB));
-		dx::DebugCOM(mIAVB, "GBuFFInputVertexBuffer");
-	}
-	Catch_DX_Exception
-
 		leo::RenderStates sss;
 	mSamPoint = sss.GetSamplerState(L"NearestClamp");
 }
 void ClearQuad() {
-	leo::win::ReleaseCOM(mIAVB);
 }
 
 void BuildLight(ID3D11Device* device) {
@@ -508,8 +391,6 @@ void BuildLight(ID3D11Device* device) {
 }
 void ClearLight() {
 }
-
-
 
 void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 {
@@ -576,7 +457,6 @@ void ClearRes() {
 	ClearQuad();
 }
 
-
 void ReSize(std::pair<leo::uint16, leo::uint16> size) {
 	//do many thing ,but 我不想写
 	
@@ -615,7 +495,6 @@ void Update() {
 	}
 }
 
-
 void DrawSSAO(ID3D11DeviceContext* context) {
 
 
@@ -627,6 +506,7 @@ void DrawSSAO(ID3D11DeviceContext* context) {
 }
 
 void LineraDepth(ID3D11DeviceContext* context) {
+	/*
 	//设置本cpp已有资源
 	UINT strides[] = { sizeof(GBufferIAVertex) };
 	UINT offsets[] = { 0 };
@@ -646,6 +526,7 @@ void LineraDepth(ID3D11DeviceContext* context) {
 	context->OMSetRenderTargets(2,mMRTs,nullptr);
 
 	context->Draw(4, 0);
+	*/
 }
 
 void LightPreable(ID3D11DeviceContext* context) {

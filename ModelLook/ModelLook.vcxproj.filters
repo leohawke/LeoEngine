@@ -164,6 +164,9 @@
     <ClCompile Include="..\All\RenderSystem\DeferredRender.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\Core\EffectQuad.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -194,6 +197,9 @@
     </ClInclude>
     <ClInclude Include="..\All\RenderSystem\DeferredRender.hpp">
       <Filter>RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\Core\EffectQuad.hpp">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
