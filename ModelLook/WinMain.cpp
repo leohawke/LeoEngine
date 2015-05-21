@@ -17,6 +17,7 @@
 #include <Core\FileSearch.h>
 #include <Core\EngineConfig.h>
 #include <Core\RenderSync.hpp>
+#include <Core\EffectQuad.hpp>
 #include <Input.h>//to core!
 //Effect header
 #include <Core\EffectGBuffer.hpp>
@@ -409,6 +410,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 
 	//leo::DeferredResources::GetInstance();
 	leo::EffectGBuffer::GetInstance(leo::DeviceMgr().GetDevice());
+	leo::EffectQuad::GetInstance(device);
 	//leo::EffectTerrain::GetInstance(leo::DeviceMgr().GetDevice());
 #endif
 
@@ -431,6 +433,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pCamera->LookAt(float3(0.f, 10.f, -10.f), float3(0.f, 0.f, 0.f), float3(0.f, 1.f, 0.f));
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 
+	leo::EffectQuad::GetInstance().SetFrustum(device, *pCamera);
 	//leo::DeferredResources::GetInstance().SetFrustum(*pCamera);
 #endif
 	leo::ShaderMgr sm;
@@ -554,7 +557,7 @@ void Render()
 		//Light Pass
 		LightPreable(devicecontext);
 		pPointLightVolueme->SetCamera(*pCamera);
-		pPointLightVolueme->Draw(devicecontext);
+		//pPointLightVolueme->Draw(devicecontext);
 		//Shader Pass
 		if (pRender) {
 			pRender->UnBind(devicecontext, *leo::global::globalDepthStencil);

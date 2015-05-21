@@ -185,6 +185,13 @@ void leo::DeferredRender::OMSet(ID3D11DeviceContext * context, DepthStencil& dep
 	ID3D11RenderTargetView* mRTVs[] = { pResImpl->mGBuffRTVs[0], pResImpl->mGBuffRTVs[1] };
 	context->OMSetRenderTargets(arrlen(pResImpl->mGBuffRTVs), mRTVs, depthstencil);
 	context->OMSetDepthStencilState(pStateImpl->mGBufferPassDepthStenciState, 0x10);
+
+	const static float rgba[] = { 0.f,0.f,0.f,0.f };
+
+	context->ClearRenderTargetView(pResImpl->mGBuffRTVs[0], rgba);
+	context->ClearRenderTargetView(pResImpl->mGBuffRTVs[1], rgba);
+	context->ClearDepthStencilView(depthstencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
+
 }
 
 void leo::DeferredRender::UnBind(ID3D11DeviceContext* context, DepthStencil& depthstencil) noexcept {
@@ -207,15 +214,17 @@ void leo::DeferredRender::LinearizeDepth(ID3D11DeviceContext * context, DepthSte
 	effectQuad.Apply(context);
 	LinearizeDepthImpl::GetInstance().Apply(context, near_z, far_z);
 
+	context->OMSetRenderTargets(1, &pResImpl->mDepthRTV, nullptr);
 	auto srv = depthstencil.GetDepthSRV();
 	context->PSSetShaderResources(0, 1, &srv);
-	context->OMSetRenderTargets(1, &pResImpl->mDepthRTV, nullptr);
 
 	const static float rgba[] = {near_z,1.f,1.f,1.f};
 
 	context->ClearRenderTargetView(pResImpl->mDepthRTV,rgba );
 
 	effectQuad.Draw(context);
+	srv = nullptr;
+	context->PSSetShaderResources(0, 1, &srv);
 }
 
 void leo::DeferredRender::SetSSAOParams(bool enable, uint8 level) noexcept
