@@ -49,6 +49,12 @@ namespace leo {
 		ID3D11RenderTargetView* GetLightRTV() const	noexcept;
 		ID3D11ShaderResourceView* GetNormalAlphaSRV() const noexcept;
 
+	public:
+		class SSAO {
+			class DeferredSSAOImpl;
+			std::unique_ptr<DeferredSSAOImpl> pTecImpl;
+			~SSAO();
+		};
 	};
 }
 
