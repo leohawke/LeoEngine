@@ -4,13 +4,17 @@
 #include <Core\FileSearch.h>
 #include <Core\Camera.hpp>
 #include <Core\BilateralFilter.hpp>
+#include <Core\EffectQuad.hpp>
 #include "d3dx11.hpp"
 #include "ShaderMgr.h"
+#include "RenderStates.hpp"
 #include <leomathutility.hpp>
 #include <exception.hpp>
 
 #include <DirectXPackedVector.h>
 //TODO :Support MSAA
+
+class LinearizeDepthImpl;
 
 class leo::DeferredRender::DeferredResImpl {
 public:
@@ -122,14 +126,58 @@ public:
 	win::unique_com<ID3D11DepthStencilState> mShaderPassDepthStenciState = nullptr;
 };
 
+class LinearizeDepthImpl : public leo::Singleton<LinearizeDepthImpl, false>
+{
+public:
+	LinearizeDepthImpl(ID3D11Device* device) {
+		using	namespace leo;
+
+		CD3D11_BUFFER_DESC cbDesc{ sizeof(leo::float4),D3D11_BIND_CONSTANT_BUFFER };
+		device->CreateBuffer(&cbDesc, nullptr, &mPSCB);
+
+		ShaderMgr sm;
+		mLinearizeDepthPS= sm.CreatePixelShader(FileSearch::Search(L"LinearizeDepthPS.cso"));
+
+		RenderStates ss;
+		mSamPoint = ss.GetSamplerState(L"NearestClamp");
+	}
+	~LinearizeDepthImpl() {
+
+	}
+
+	void Apply(ID3D11DeviceContext * context, float near_z, float far_z) {
+		float Q = far_z / (far_z - near_z);
+		float Mul = near_z*Q;
+
+		leo::float2 MulQ{ Mul,Q };
+
+		context->UpdateSubresource(mPSCB, 0, nullptr, &MulQ, 0, 0);
+
+		context->PSSetShader(mLinearizeDepthPS, nullptr, 0);
+		context->PSSetConstantBuffers(0, 1, &mPSCB);
+		context->PSSetSamplers(0, 1, &mSamPoint);
+	}
+
+	ID3D11PixelShader* mLinearizeDepthPS = nullptr;
+	ID3D11SamplerState* mSamPoint = nullptr;
+
+	leo::win::unique_com<ID3D11Buffer> mPSCB = nullptr;
+
+	static LinearizeDepthImpl& GetInstance(ID3D11Device* device = nullptr) {
+		static LinearizeDepthImpl mInstance{ device };
+		return mInstance;
+	}
+};
+
 leo::DeferredRender::DeferredRender(ID3D11Device * device, size_type size)
 	:pResImpl(std::make_unique<DeferredResImpl>(device, size)),
 	pStateImpl(std::make_unique<DeferredStateImpl>(device))
 {
+	LinearizeDepthImpl::GetInstance(device);
 }
 
 leo::DeferredRender::~DeferredRender() {
-
+	LinearizeDepthImpl::GetInstance().~LinearizeDepthImpl();
 }
 
 void leo::DeferredRender::OMSet(ID3D11DeviceContext * context, DepthStencil& depthstencil) noexcept
@@ -152,9 +200,21 @@ void leo::DeferredRender::ReSize(ID3D11Device * device, size_type size) noexcept
 	pResImpl = std::make_unique<DeferredResImpl>(device, size);
 }
 
-ID3D11RenderTargetView * leo::DeferredRender::GetLinearDepthRTV() const noexcept
+void leo::DeferredRender::LinearizeDepth(ID3D11DeviceContext * context, float near_z, float far_z) noexcept
 {
-	return pResImpl->mDepthRTV;
+	auto & effectQuad = leo::EffectQuad::GetInstance();
+
+	effectQuad.Apply(context);
+	LinearizeDepthImpl::GetInstance().Apply(context, near_z, far_z);
+
+	//set rt
+	//set srv
+
+	effectQuad.Draw(context);
+}
+
+void leo::DeferredRender::SetSSAOParams(bool enable, uint8 level) noexcept
+{
 }
 
 ID3D11ShaderResourceView * leo::DeferredRender::GetLinearDepthSRV() const noexcept

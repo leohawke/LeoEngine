@@ -42,8 +42,11 @@ namespace leo {
 		void UnBind(ID3D11DeviceContext* context,DepthStencil& depthstencil) noexcept;
 
 		void ReSize(ID3D11Device* device,size_type size) noexcept;
+
+		void LinearizeDepth(ID3D11DeviceContext* context,float near_z,float far_z) noexcept;
 		
-		ID3D11RenderTargetView* GetLinearDepthRTV() const noexcept;
+		void SetSSAOParams(bool enable, uint8 level) noexcept;
+
 		ID3D11ShaderResourceView* GetLinearDepthSRV() const noexcept;
 
 		ID3D11RenderTargetView* GetLightRTV() const	noexcept;
