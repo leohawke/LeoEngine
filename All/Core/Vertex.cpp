@@ -303,6 +303,9 @@ namespace leo
 					pos.x = radius*sinf(phi)*cosf(theta);
 					pos.y = radius*cosf(phi);
 					pos.z = radius*sinf(phi)*sinf(theta);
+
+					Vertices.emplace_back(pos);
+
 				}
 			}
 

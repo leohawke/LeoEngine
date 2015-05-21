@@ -62,6 +62,11 @@ namespace leo
 	{
 	protected:
 		Effect();
+
+		Effect(const Effect&) = delete;
+
+	private:
+		void operator=(const Effect&);
 	public:
 		template<typename BUFFPOD>
 		struct ShaderConstantBuffer : BUFFPOD

@@ -266,6 +266,7 @@ namespace leo
 			{	// delete the pointer
 				if (this->Myptr != pointer())
 					this->get_deleter()(this->Myptr);
+				this->Myptr = pointer();
 			}
 
 			unique_com(const Myt&);	// not defined

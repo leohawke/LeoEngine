@@ -127,6 +127,7 @@ public:
 	}
 	void SetCamera(const leo::Camera& params) {
 		leo::SQT scale{};
+		scale.s = mPSCBParams.PositionRange.w;
 		auto world = scale.operator std::array<__m128, 4U>();
 		mVSCBParams.WorldView = leo::Transpose(leo::Multiply(world, load(params.View())));
 		mVSCBParams.Proj = leo::Transpose(load(params.Proj()));
@@ -557,7 +558,7 @@ void Render()
 		//Light Pass
 		LightPreable(devicecontext);
 		pPointLightVolueme->SetCamera(*pCamera);
-		//pPointLightVolueme->Draw(devicecontext);
+		pPointLightVolueme->Draw(devicecontext);
 		//Shader Pass
 		if (pRender) {
 			pRender->UnBind(devicecontext, *leo::global::globalDepthStencil);

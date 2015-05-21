@@ -21,8 +21,9 @@ VertexOut main(LightVolumePoint vin)
 	vout.PosH = mul(float4(vout.ViewDir, 1.f), Proj);
 
 	vout.Tex = vout.PosH.xyw;
-
+	vout.Tex.xy /= vout.Tex.z;
 	vout.Tex.xy = vout.Tex.xy*0.5f + 0.5f;
 	vout.Tex.y = 1.f - vout.Tex.y;
+	vout.Tex.xy *= vout.Tex.z;
 	return vout;
 }
