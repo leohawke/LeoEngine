@@ -144,3 +144,23 @@ void leo::DeferredRender::ReSize(ID3D11Device * device, size_type size) noexcept
 	pResImpl.reset(nullptr);
 	pResImpl = std::make_unique<DeferredResImpl>(device, size);
 }
+
+ID3D11RenderTargetView * leo::DeferredRender::GetLinearDepthRTV() const noexcept
+{
+	return pResImpl->mDepthRTV;
+}
+
+ID3D11ShaderResourceView * leo::DeferredRender::GetLinearDepthSRV() const noexcept
+{
+	return pResImpl->mDepthSRV;
+}
+
+ID3D11RenderTargetView * leo::DeferredRender::GetLightRTV() const noexcept
+{
+	return pResImpl->mLightRTV;
+}
+
+ID3D11ShaderResourceView * leo::DeferredRender::GetNormalAlphaSRV() const noexcept
+{
+	return pResImpl->mNormalSpecPowSRV;
+}

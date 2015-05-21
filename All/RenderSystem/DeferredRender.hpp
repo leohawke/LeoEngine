@@ -21,6 +21,7 @@
 struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct ID3D11RenderTargetView;
+struct ID3D11ShaderResourceView;
 namespace leo {
 	class DeferredRender {
 	private:
@@ -42,6 +43,12 @@ namespace leo {
 
 		void ReSize(ID3D11Device* device,size_type size) noexcept;
 		
+		ID3D11RenderTargetView* GetLinearDepthRTV() const noexcept;
+		ID3D11ShaderResourceView* GetLinearDepthSRV() const noexcept;
+
+		ID3D11RenderTargetView* GetLightRTV() const	noexcept;
+		ID3D11ShaderResourceView* GetNormalAlphaSRV() const noexcept;
+
 	};
 }
 
