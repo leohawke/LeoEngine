@@ -215,6 +215,9 @@
     <None Include="Shader\NormalUti.hlsli">
       <Filter>Shader</Filter>
     </None>
+    <None Include="Shader\Lighting.hlsli">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\All\Shader\NormalMapPS.hlsl">

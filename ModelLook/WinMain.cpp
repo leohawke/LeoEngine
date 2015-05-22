@@ -149,13 +149,15 @@ public:
 		context->VSSetConstantBuffers(0, 1, &mVSCB);
 		context->PSSetShader(mPointLightVolumePS, nullptr, 0);
 		context->PSSetConstantBuffers(0, 1, &mPSCB);
+		//
 		auto rtv = pRender->GetLightRTV();
 		context->OMSetRenderTargets(1, &rtv, nullptr);
 		//∫ˆ¬‘ƒ£∞Â≤‚ ‘,∫ˆ¬‘ƒ£∞Â
 		ID3D11ShaderResourceView* srvs[] = { pRender->GetLinearDepthSRV(),pRender->GetNormalAlphaSRV() };
 		context->PSSetSamplers(0, 1, &mSamPoint);
+		
 		context->PSSetShaderResources(0, 2, srvs);
-
+		//
 		context->DrawIndexed(mIndexCount, 0, 0);
 		srvs[0] = nullptr;srvs[1] = nullptr;
 		context->PSSetShaderResources(0, 2, srvs);
@@ -541,17 +543,20 @@ void Render()
 
 		//leo::ShadowMap::GetInstance().EndShadowMap(devicecontext);
 #endif
-		float ClearColor[4] = { 0.0f, 0.25f, 0.25f, 0.8f };
-		auto rtv = dm.GetRenderTargetView();
-		devicecontext->OMSetRenderTargets(1, &rtv, nullptr);
-		devicecontext->ClearRenderTargetView(rtv, ClearColor);
+		
 
 		if (pRender) {
 			pRender->OMSet(devicecontext,*leo::global::globalDepthStencil);
 		}
+
 		if (pModelMesh) {
 			pModelMesh->Render(devicecontext, *pCamera);
 		}
+
+		if (pRender) {
+			pRender->UnBind(devicecontext, *leo::global::globalDepthStencil);
+		}
+
 		if (pRender) {
 			pRender->LinearizeDepth(devicecontext, *leo::global::globalDepthStencil, pCamera->mNear, pCamera->mFar);
 		}
@@ -561,8 +566,9 @@ void Render()
 		pPointLightVolueme->Draw(devicecontext);
 		//Shader Pass
 		if (pRender) {
-			pRender->UnBind(devicecontext, *leo::global::globalDepthStencil);
+			pRender->ShadingPass(devicecontext, leo::global::globalD3DRenderTargetView);
 		}
+		
 		/*
 		BlurSSAO(devicecontext, unsigned int(prevVP.Width), unsigned int(prevVP.Height));
 		//ªÊ÷∆—”≥ŸBuff

@@ -119,11 +119,15 @@ public:
 		shaderPassDesc.BackFace = shaderPassDesc.FrontFace;
 		device->CreateDepthStencilState(&shaderPassDesc, &mShaderPassDepthStenciState);
 
+		ShaderMgr sm;
+		mShaderPS = sm.CreatePixelShader(FileSearch::Search(L"ShaderPS.cso"));
 	}
 
 	win::unique_com<ID3D11DepthStencilState> mGBufferPassDepthStenciState = nullptr;
 	win::unique_com<ID3D11DepthStencilState> mLightPassDepthStenciState = nullptr;
 	win::unique_com<ID3D11DepthStencilState> mShaderPassDepthStenciState = nullptr;
+
+	ID3D11PixelShader* mShaderPS = nullptr;
 };
 
 class LinearizeDepthImpl : public leo::Singleton<LinearizeDepthImpl, false>
@@ -225,6 +229,35 @@ void leo::DeferredRender::LinearizeDepth(ID3D11DeviceContext * context, DepthSte
 	effectQuad.Draw(context);
 	srv = nullptr;
 	context->PSSetShaderResources(0, 1, &srv);
+}
+
+void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context, ID3D11RenderTargetView * finally_rtv) noexcept
+{
+
+	auto & effectQuad = leo::EffectQuad::GetInstance();
+
+
+	static const float rgba[4] = { 0.0f, 0.25f, 0.25f, 0.8f };
+	context->OMSetRenderTargets(1, &finally_rtv, nullptr);
+	context->ClearRenderTargetView(finally_rtv, rgba);
+
+	effectQuad.Apply(context);
+	context->PSSetShader(pStateImpl->mShaderPS, nullptr, 0);
+
+	ID3D11ShaderResourceView* srvs[] = {
+		pResImpl->mNormalSpecPowSRV,
+		pResImpl->mLightSRV ,
+		pResImpl->mDiffuseSpecSRV
+	};
+
+	context->PSSetShaderResources(0,arrlen(srvs),srvs);
+	context->PSSetSamplers(0, 1, &(LinearizeDepthImpl::GetInstance().mSamPoint));
+
+	effectQuad.Draw(context);
+
+	for (auto & s : srvs)
+		s = nullptr;
+	context->PSSetShaderResources(0, arrlen(srvs), srvs);
 }
 
 void leo::DeferredRender::SetSSAOParams(bool enable, uint8 level) noexcept

@@ -45,6 +45,8 @@ namespace leo {
 
 		void LinearizeDepth(ID3D11DeviceContext* context, DepthStencil& depthstencil,float near_z,float far_z) noexcept;
 		
+		void ShadingPass(ID3D11DeviceContext* context, ID3D11RenderTargetView* finally_rtv) noexcept;
+
 		void SetSSAOParams(bool enable, uint8 level) noexcept;
 
 		ID3D11ShaderResourceView* GetLinearDepthSRV() const noexcept;
