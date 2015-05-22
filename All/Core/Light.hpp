@@ -15,7 +15,7 @@
 #define Core_Light_Hpp
 
 #include <leo2dmath.hpp>
-
+#include <RenderSystem\DeferredRender.hpp>
 namespace leo {
 	struct PointLight;
 	struct DirectionalLight;
@@ -39,6 +39,47 @@ namespace leo {
 
 	//windows_system
 	ops::Rect CalcScissorRect(const PointLight& wPointLight, const Camera& camera);
+
+	class LB_API LightSource {
+	public:
+		enum light_type {
+			point_light = 0,
+
+			type_count
+		};
+
+	public:
+		explicit LightSource(light_type type);
+		
+		light_type Type() const;
+
+		const float3 & Position() const;
+		float Range() const;
+
+		const float3& Diffuse() const;
+
+		void Position(const float3& pos);
+		void Range(float range);
+
+		void Diffuse(const float3& diffuse);
+
+	private:
+		float3 mPos;
+		float mRange;
+		float3 mDiffuse;
+
+		light_type _type;
+	};
+
+	class LB_API PointLightSource : public LightSource {
+	public:
+		PointLightSource();
+	};
+
+	class LB_API LightRender {
+	public:
+		void Draw(ID3D11DeviceContext* context,const DeferredRender& pRender,const LightSource& light_source, const Camera& camera);
+	};
 }
 
 

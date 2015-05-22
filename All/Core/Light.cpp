@@ -76,3 +76,48 @@ ops::Rect leo::CalcScissorRect(const PointLight & wPointLight, const Camera & ca
 
 	return ops::Rect(float4(rectTopSS,rectLeftSS,rectBottomSS,rectRightSS));
 }
+
+leo::LightSource::LightSource(light_type type)
+	:_type(type)
+{
+}
+
+leo::LightSource::light_type leo::LightSource::Type() const
+{
+	return _type;
+}
+
+const float3 & leo::LightSource::Position() const
+{
+	return mPos;
+}
+
+float leo::LightSource::Range() const
+{
+	return mRange;
+}
+
+const float3 & leo::LightSource::Diffuse() const
+{
+	return mDiffuse;
+}
+
+void leo::LightSource::Position(const float3 & pos)
+{
+	mPos = pos;
+}
+
+void leo::LightSource::Range(float range)
+{
+	mRange = range;
+}
+
+void leo::LightSource::Diffuse(const float3 & diffuse)
+{
+	mDiffuse = diffuse;
+}
+
+leo::PointLightSource::PointLightSource()
+	:LightSource(point_light)
+{
+}
