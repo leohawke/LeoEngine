@@ -182,7 +182,7 @@ namespace leo
 				&global::globalD3DContext);
 			if (SUCCEEDED(hr) && featureLevel >= D3D_FEATURE_LEVEL_11_0)
 			{
-				EnumSizes(adapter, DXGI_FORMAT_R8G8B8A8_UNORM);
+				EnumSizes(adapter, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB);
 				break;
 			}
 			else
@@ -209,7 +209,6 @@ namespace leo
 		DXGI_SWAP_CHAIN_DESC sd;
 
 		sd.Windowed = true;
-
 		sd.BufferDesc = defaultMode;
 		sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 		sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
@@ -218,7 +217,7 @@ namespace leo
 		// All Direct3D 11 capable devices support 4X MSAA for all render 
 		// target formats, so we only need to check quality support.
 		UINT m4xMsaaQuality = 0;
-		dxcall(global::globalD3DDevice->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, 4, &m4xMsaaQuality));
+		dxcall(global::globalD3DDevice->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, 4, &m4xMsaaQuality));
 
 		//Warning: if not use MSAA,the VSGraphicDebug will throw thre exceptions
 		sd.SampleDesc.Count = 1;
@@ -277,7 +276,7 @@ namespace leo
 		global::globalDepthStencil->ReSize(size,global::globalD3DDevice);
 
 		try{
-			dxcall(global::globalDXGISwapChain->ResizeBuffers(1, size.first, size.second, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
+			dxcall(global::globalDXGISwapChain->ResizeBuffers(1, size.first, size.second, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, 0));
 
 			dxcall(global::globalDXGISwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&global::globalD3DRenderTargetTexture2D)));
 			leo::dx::DebugCOM(global::globalD3DRenderTargetTexture2D, "global::globalD3DRenderTargetTexture2D");
@@ -289,30 +288,6 @@ namespace leo
 			dxcall(global::globalDXGISwapChain->GetDesc(&swapDesc));
 			global::globalAspect = (float)swapDesc.BufferDesc.Width / swapDesc.BufferDesc.Height;
 
-			/*
-			D3D11_TEXTURE2D_DESC depthStencilDesc;
-			depthStencilDesc.Width = swapDesc.BufferDesc.Width;
-			depthStencilDesc.Height = swapDesc.BufferDesc.Height;
-			depthStencilDesc.MipLevels = 1;
-			depthStencilDesc.ArraySize = 1;
-			depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-
-			//4X MSAA? --must match swap chain MSAA values.
-			depthStencilDesc.SampleDesc.Count = swapDesc.SampleDesc.Count;
-			depthStencilDesc.SampleDesc.Quality = swapDesc.SampleDesc.Quality;
-
-
-			depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
-			depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-			depthStencilDesc.CPUAccessFlags = 0;
-			depthStencilDesc.MiscFlags = 0;
-
-			dxcall(global::globalD3DDevice->CreateTexture2D(&depthStencilDesc, 0, &global::globalD3DDepthTexture));
-			leo::dx::DebugCOM(global::globalD3DDepthTexture, "global::globalD3DDepthTexture");
-
-			dxcall(global::globalD3DDevice->CreateDepthStencilView(global::globalD3DDepthTexture, 0, &global::globalD3DDepthStencilView));
-			leo::dx::DebugCOM(global::globalD3DDepthStencilView, "global::globalD3DDepthStencilView");
-			*/
 
 			global::globalD3DContext->OMSetRenderTargets(1, &global::globalD3DRenderTargetView, *global::globalDepthStencil);
 			D3D11_VIEWPORT vp;

@@ -19,10 +19,9 @@ ops::Rect leo::CalcScissorRect(const PointLight & wPointLight, const Camera & ca
 {
 	//Create a bounding sphere for the light,based on the position
 	//and range
-	auto centerWS = wPointLight.PositionRange;
-	auto radius = centerWS.w;
+	auto centerWS =float4( wPointLight.Position,1.f);
+	auto radius = wPointLight.FallOff_Range.w;
 
-	centerWS.w = 1.f;
 
 	auto centerWSvector = load(centerWS);
 	auto ViewMatrixmatrix = load(camera.View());
@@ -134,6 +133,14 @@ leo::PointLightSource::PointLightSource()
 {
 }
 
+const float3& leo::PointLightSource::FallOff() const {
+	return mFallOff;
+}
+
+void leo::PointLightSource::FallOff(const float3& falloff){
+	 mFallOff = falloff;
+}
+
 const D3D11_INPUT_ELEMENT_DESC static mLightVolumeVertexElement_Desc[] =
 {
 	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
@@ -196,8 +203,10 @@ public:
 		ApplyLightVolumeCommon(context, camera);
 
 		PointLight mPSCBParams;
-		mPSCBParams.PositionRange = float4(light_source.Position(), light_source.Range());
+		auto point =float4( light_source.Position(),1.f);
+		save(mPSCBParams.Position,Multiply(load(point),load(camera.View())));
 		mPSCBParams.Diffuse = light_source.Diffuse();
+		mPSCBParams.FallOff_Range = float4(light_source.FallOff(), light_source.Range());
 
 		context->UpdateSubresource(mPSCB, 0, nullptr, &mPSCBParams, 0, 0);
 

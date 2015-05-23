@@ -122,6 +122,7 @@ public:
 		CD3D11_BLEND_DESC lightPassBDesc{ D3D11_DEFAULT };
 		lightPassBDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
 		lightPassBDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+		lightPassBDesc.RenderTarget[0].BlendEnable = true;
 		device->CreateBlendState(&lightPassBDesc, &mLightPassBlendState);
 
 		ShaderMgr sm;
@@ -249,7 +250,7 @@ void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context, ID3D11Rende
 	static const float rgba[4] = { 0.0f, 0.25f, 0.25f, 0.8f };
 	context->OMSetRenderTargets(1, &finally_rtv, nullptr);
 	context->ClearRenderTargetView(finally_rtv, rgba);
-
+	context->OMSetBlendState(nullptr, nullptr, 0xffffffff);
 	effectQuad.Apply(context);
 	context->PSSetShader(pStateImpl->mShaderPS, nullptr, 0);
 
@@ -278,6 +279,7 @@ void leo::DeferredRender::ApplyLightPass(ID3D11DeviceContext * context) noexcept
 	const static float factor[] = { 0.f,0.f,0.f,0.f };
 	context->OMSetBlendState(pStateImpl->mLightPassBlendState,factor, 0xffffffff);
 
+	context->ClearRenderTargetView(pResImpl->mLightRTV, factor);
 	context->OMSetRenderTargets(1, &pResImpl->mLightRTV, nullptr);
 	//ºöÂÔÄ£°å²âÊÔ,ºöÂÔÄ£°å
 	ID3D11ShaderResourceView* srvs[] = { GetLinearDepthSRV(),GetNormalAlphaSRV() };

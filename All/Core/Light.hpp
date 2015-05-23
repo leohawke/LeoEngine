@@ -22,8 +22,9 @@ namespace leo {
 	struct SpotLight;
 
 	struct PointLight {
-		float4 PositionRange;
+		float3 Position;
 		float3 Diffuse;
+		float4 FallOff_Range;
 	};
 
 	struct DirectionalLight {
@@ -76,6 +77,13 @@ namespace leo {
 	class LB_API PointLightSource : public LightSource {
 	public:
 		PointLightSource();
+
+		const float3& FallOff() const;
+
+		void FallOff(const float3& falloff);
+
+	private:
+		float3 mFallOff;
 	};
 
 	class LB_API LightSourcesRender {

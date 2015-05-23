@@ -257,11 +257,12 @@ void BuildLight(ID3D11Device* device) {
 	pLightRender = std::make_unique<leo::LightSourcesRender>(device);
 
 	auto mPointLight = std::make_shared<leo::PointLightSource>();
-	mPointLight->Position(leo::float3(0.f, 0.f, 0.f));
-	mPointLight->Range(10.f);
+	mPointLight->Position(leo::float3(0.f, 0.f, -2.f));
+	mPointLight->Range(6.f);
 	mPointLight->Diffuse(leo::float3(0.8f, 0.7f, 0.6f));
-
+	mPointLight->FallOff(leo::float3(0.f,0.1f,0.1f));
 	pLightRender->AddLight(mPointLight);
+
 }
 void ClearLight() {
 	pLightRender.reset(nullptr);
@@ -304,7 +305,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pos.x = -pos.x;
 	pos.z = -pos.z;
 
-	pCamera->LookAt(float3(0.f, 10.f, -10.f), float3(0.f, 0.f, 0.f), float3(0.f, 1.f, 0.f));
+	pCamera->LookAt(float3(0.f, 0.f, -7.f), float3(0.f, 0.f, 0.f), float3(0.f, 1.f, 0.f));
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 
 	leo::EffectQuad::GetInstance().SetFrustum(device, *pCamera);
