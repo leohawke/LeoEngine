@@ -119,6 +119,11 @@ public:
 		shaderPassDesc.BackFace = shaderPassDesc.FrontFace;
 		device->CreateDepthStencilState(&shaderPassDesc, &mShaderPassDepthStenciState);
 
+		CD3D11_BLEND_DESC lightPassBDesc{ D3D11_DEFAULT };
+		lightPassBDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+		lightPassBDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+		device->CreateBlendState(&lightPassBDesc, &mLightPassBlendState);
+
 		ShaderMgr sm;
 		mShaderPS = sm.CreatePixelShader(FileSearch::Search(L"ShaderPS.cso"));
 	}
@@ -127,7 +132,11 @@ public:
 	win::unique_com<ID3D11DepthStencilState> mLightPassDepthStenciState = nullptr;
 	win::unique_com<ID3D11DepthStencilState> mShaderPassDepthStenciState = nullptr;
 
+	//×ÅÉ«½×¶Î
 	ID3D11PixelShader* mShaderPS = nullptr;
+
+	//¹âÕÕ½×¶ÎBlendState
+	win::unique_com<ID3D11BlendState> mLightPassBlendState = nullptr;
 };
 
 class LinearizeDepthImpl : public leo::Singleton<LinearizeDepthImpl, false>
@@ -262,6 +271,12 @@ void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context, ID3D11Rende
 
 void leo::DeferredRender::SetSSAOParams(bool enable, uint8 level) noexcept
 {
+}
+
+void leo::DeferredRender::ApplyLightPass(ID3D11DeviceContext * context) noexcept
+{
+	const static float factor[] = { 0.f,0.f,0.f,0.f };
+	context->OMSetBlendState(pStateImpl->mLightPassBlendState,factor, 0xffffffff);
 }
 
 ID3D11ShaderResourceView * leo::DeferredRender::GetLinearDepthSRV() const noexcept

@@ -50,6 +50,8 @@ namespace leo {
 
 	public:
 		explicit LightSource(light_type type);
+
+		virtual ~LightSource(){}
 		
 		light_type Type() const;
 
@@ -76,9 +78,23 @@ namespace leo {
 		PointLightSource();
 	};
 
-	class LB_API LightRender {
+	class LB_API LightSourcesRender {
 	public:
-		void Draw(ID3D11DeviceContext* context,const DeferredRender& pRender,const LightSource& light_source, const Camera& camera);
+		LightSourcesRender(ID3D11Device* device);
+
+		~LightSourcesRender();
+
+		void Draw(ID3D11DeviceContext* context,DeferredRender& pRender, const Camera& camera);
+
+		void AddLight(std::shared_ptr<LightSource> light_source);
+
+	private:
+		void Apply(ID3D11DeviceContext* context);
+
+
+		std::list<std::shared_ptr<LightSource>> mLightSourceList;
+
+	
 	};
 }
 

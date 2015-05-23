@@ -49,6 +49,8 @@ namespace leo {
 
 		void SetSSAOParams(bool enable, uint8 level) noexcept;
 
+		void ApplyLightPass(ID3D11DeviceContext* context) noexcept;
+
 		ID3D11ShaderResourceView* GetLinearDepthSRV() const noexcept;
 
 		ID3D11RenderTargetView* GetLightRTV() const	noexcept;

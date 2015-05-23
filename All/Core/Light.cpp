@@ -1,6 +1,13 @@
 #include "Light.hpp"
 #include "Camera.hpp"
+#include "FileSearch.h"
+#include "EngineConfig.h"
+#include "Vertex.hpp"
+#include <RenderSystem\d3dx11.hpp>
+#include <RenderSystem\ShaderMgr.h>
 #include <leomathutility.hpp>
+#include <Singleton.hpp>
+#include <exception.hpp>
 using namespace leo;
 
 ops::Rect leo::CalcScissorRect(const PointLight & wPointLight, const Camera & camera)
@@ -119,5 +126,134 @@ void leo::LightSource::Diffuse(const float3 & diffuse)
 
 leo::PointLightSource::PointLightSource()
 	:LightSource(point_light)
+{
+}
+
+const D3D11_INPUT_ELEMENT_DESC static mLightVolumeVertexElement_Desc[] =
+{
+	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+};
+
+class PointLightVolumeImpl :public leo::Singleton<PointLightVolumeImpl,false>{
+public:
+	PointLightVolumeImpl(ID3D11Device* device) {
+		leo::ShaderMgr sm;
+		//common
+		{
+		mLightVolumeVS = sm.CreateVertexShader(
+			leo::FileSearch::Search(
+				leo::EngineConfig::ShaderConfig::GetShaderFileName(L"pointlight", D3D11_VERTEX_SHADER)
+				),
+			nullptr,
+			mLightVolumeVertexElement_Desc,
+			leo::arrlen(mLightVolumeVertexElement_Desc),
+			&mLightVolumeVertexLayout);
+
+		CD3D11_BUFFER_DESC vscbDesc{ sizeof(TransfromMatrix),D3D11_BIND_CONSTANT_BUFFER };
+
+		leo::dxcall(device->CreateBuffer(&vscbDesc, nullptr, &mVSCB));
+		}
+
+		auto meshdata = leo::helper::CreateSphere(16, 16);
+		mIndexCount = meshdata.Indices.size();
+		CD3D11_BUFFER_DESC vbDesc{ meshdata.Vertices.size()*sizeof(decltype(meshdata.Vertices)::value_type),
+			D3D11_BIND_VERTEX_BUFFER,D3D11_USAGE_IMMUTABLE };
+
+		D3D11_SUBRESOURCE_DATA resDesc;
+		resDesc.pSysMem = &meshdata.Vertices[0];
+		leo::dxcall(device->CreateBuffer(&vbDesc, &resDesc, &mPointVolumeVB));
+
+		CD3D11_BUFFER_DESC ibDesc{ vbDesc };
+		ibDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		ibDesc.ByteWidth = static_cast<leo::win::UINT> (sizeof(std::uint32_t)*meshdata.Indices.size());
+		resDesc.pSysMem = &meshdata.Indices[0];
+		leo::dxcall(device->CreateBuffer(&ibDesc, &resDesc, &mPointVolumeIB));
+
+		CD3D11_BUFFER_DESC pscbDesc{ sizeof(leo::PointLight),D3D11_BIND_CONSTANT_BUFFER };
+
+		leo::dxcall(device->CreateBuffer(&pscbDesc, nullptr, &mPSCB));
+
+		mPointLightVolumePS = sm.CreatePixelShader(
+			leo::FileSearch::Search(
+				leo::EngineConfig::ShaderConfig::GetShaderFileName(L"pointlight", D3D11_PIXEL_SHADER)
+				));
+	}
+
+	~PointLightVolumeImpl() {
+
+	}
+
+	void Apply(ID3D11DeviceContext * context, PointLightSource& light_source,const Camera& camera) {
+
+	}
+	void Draw(ID3D11DeviceContext * context) {
+
+	}
+
+	void ApplyLightVolumeCommon(ID3D11DeviceContext * context, const Camera& camera) {
+
+	}
+public:
+	static PointLightVolumeImpl& GetInstance(ID3D11Device* device =nullptr) {
+		static PointLightVolumeImpl mInstance{device};
+		return mInstance;
+	}
+
+	//common
+	ID3D11InputLayout* mLightVolumeVertexLayout = nullptr;
+
+
+	ID3D11VertexShader* mLightVolumeVS = nullptr;
+
+	struct TransfromMatrix {
+		std::array<__m128, 4> WorldView;
+		std::array<__m128, 4> Proj;
+	} mVSCBParams;
+	leo::win::unique_com<ID3D11Buffer>  mVSCB = nullptr;
+	//end-common
+
+	ID3D11PixelShader* mPointLightVolumePS = nullptr;
+
+	leo::win::unique_com<ID3D11Buffer>  mPSCB = nullptr;
+
+	leo::win::unique_com<ID3D11Buffer> mPointVolumeVB = nullptr;
+	leo::win::unique_com<ID3D11Buffer>  mPointVolumeIB = nullptr;
+
+	UINT mIndexCount = 0;
+};
+
+leo::LightSourcesRender::LightSourcesRender(ID3D11Device * device)
+{
+	PointLightVolumeImpl::GetInstance(device);
+}
+
+leo::LightSourcesRender::~LightSourcesRender()
+{
+	PointLightVolumeImpl::GetInstance().~PointLightVolumeImpl();
+}
+
+void leo::LightSourcesRender::Draw(ID3D11DeviceContext * context,DeferredRender & pRender, const Camera & camera)
+{
+	pRender.ApplyLightPass(context);
+	Apply(context);
+	for (auto &light_source : mLightSourceList) {
+		switch (light_source->Type())
+		{
+		case LightSource::point_light:
+			PointLightVolumeImpl::GetInstance().Apply(context, dynamic_cast<PointLightSource&>(*light_source));
+			PointLightVolumeImpl::GetInstance().Draw(context);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+void leo::LightSourcesRender::AddLight(std::shared_ptr<LightSource> light_source)
+{
+	mLightSourceList.push_back(light_source);
+}
+
+void leo::LightSourcesRender::Apply(ID3D11DeviceContext * context)
 {
 }
