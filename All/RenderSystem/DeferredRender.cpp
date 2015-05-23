@@ -277,6 +277,13 @@ void leo::DeferredRender::ApplyLightPass(ID3D11DeviceContext * context) noexcept
 {
 	const static float factor[] = { 0.f,0.f,0.f,0.f };
 	context->OMSetBlendState(pStateImpl->mLightPassBlendState,factor, 0xffffffff);
+
+	context->OMSetRenderTargets(1, &pResImpl->mLightRTV, nullptr);
+	//ºöÂÔÄ£°å²âÊÔ,ºöÂÔÄ£°å
+	ID3D11ShaderResourceView* srvs[] = { GetLinearDepthSRV(),GetNormalAlphaSRV() };
+	context->PSSetSamplers(0, 1, &LinearizeDepthImpl::GetInstance().mSamPoint);
+
+	context->PSSetShaderResources(0, 2, srvs);
 }
 
 ID3D11ShaderResourceView * leo::DeferredRender::GetLinearDepthSRV() const noexcept

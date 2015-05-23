@@ -10,6 +10,11 @@
 #include <exception.hpp>
 using namespace leo;
 
+#ifdef near
+#undef near
+#undef far
+#endif
+
 ops::Rect leo::CalcScissorRect(const PointLight & wPointLight, const Camera & camera)
 {
 	//Create a bounding sphere for the light,based on the position
@@ -184,14 +189,47 @@ public:
 	}
 
 	void Apply(ID3D11DeviceContext * context, PointLightSource& light_source,const Camera& camera) {
+		leo::SQT scale{};
+		scale.s = light_source.Range();
+		mVSCBParams.WorldView = scale.operator std::array<__m128, 4U>();
+
+		ApplyLightVolumeCommon(context, camera);
+
+		PointLight mPSCBParams;
+		mPSCBParams.PositionRange = float4(light_source.Position(), light_source.Range());
+		mPSCBParams.Diffuse = light_source.Diffuse();
+
+		context->UpdateSubresource(mPSCB, 0, nullptr, &mPSCBParams, 0, 0);
+
+		UINT strides[] = { sizeof(leo::float3) };
+		UINT offsets[] = { 0 };
+
+		context->IASetVertexBuffers(0, 1, &mPointVolumeVB, strides, offsets);
+		context->IASetIndexBuffer(mPointVolumeIB, DXGI_FORMAT_R32_UINT, 0);
+
+		context->PSSetShader(mPointLightVolumePS, nullptr, 0);
+		context->PSSetConstantBuffers(0, 1, &mPSCB);
 
 	}
 	void Draw(ID3D11DeviceContext * context) {
-
+		context->DrawIndexed(mIndexCount, 0, 0);
 	}
 
+	//vertex shader
+	//input layout
+	//update matrix
+	//note mVSCBParams.WorldView == WorldMatrix
 	void ApplyLightVolumeCommon(ID3D11DeviceContext * context, const Camera& camera) {
+		mVSCBParams.WorldView = leo::Transpose(leo::Multiply(mVSCBParams.WorldView, load(camera.View())));
+		mVSCBParams.Proj = leo::Transpose(load(camera.Proj()));
 
+		context->UpdateSubresource(mVSCB, 0, nullptr, &mVSCBParams, 0, 0);
+
+		context->IASetInputLayout(mLightVolumeVertexLayout);
+		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		context->VSSetShader(mLightVolumeVS, nullptr, 0);
+		context->VSSetConstantBuffers(0, 1, &mVSCB);
 	}
 public:
 	static PointLightVolumeImpl& GetInstance(ID3D11Device* device =nullptr) {
@@ -240,7 +278,7 @@ void leo::LightSourcesRender::Draw(ID3D11DeviceContext * context,DeferredRender 
 		switch (light_source->Type())
 		{
 		case LightSource::point_light:
-			PointLightVolumeImpl::GetInstance().Apply(context, dynamic_cast<PointLightSource&>(*light_source));
+			PointLightVolumeImpl::GetInstance().Apply(context, dynamic_cast<PointLightSource&>(*light_source),camera);
 			PointLightVolumeImpl::GetInstance().Draw(context);
 			break;
 		default:

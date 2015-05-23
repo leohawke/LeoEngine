@@ -51,6 +51,7 @@ namespace leo {
 
 		void ApplyLightPass(ID3D11DeviceContext* context) noexcept;
 
+		//Todo :Remove this Get*** function
 		ID3D11ShaderResourceView* GetLinearDepthSRV() const noexcept;
 
 		ID3D11RenderTargetView* GetLightRTV() const	noexcept;

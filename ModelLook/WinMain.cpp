@@ -38,6 +38,7 @@ std::unique_ptr<leo::Mesh> pModelMesh = nullptr;
 std::unique_ptr<leo::UVNCamera> pCamera = nullptr;
 std::unique_ptr<leo::CastShadowCamera> pShaderCamera;
 std::unique_ptr<leo::DeferredRender> pRender = nullptr;
+std::unique_ptr<leo::LightSourcesRender> pLightRender = nullptr;
 std::unique_ptr<leo::Terrain<>> pTerrain = nullptr;
 
 std::atomic<bool> renderAble = false;
@@ -50,63 +51,6 @@ std::mutex mRenderMutex;
 ID3D11PixelShader* mGBufferPS = nullptr;
 
 
-//set rt
-//set blendstate
-//set srv,set sample
-
-ID3D11SamplerState* mSamPoint = nullptr;
-
-class PointLightVolume : public leo::DataAllocatedObject<leo::GeneralAllocPolicy>{
-	
-
-public:
-	PointLightVolume(ID3D11Device* device) {
-		
-	}
-
-	void SetLightParams(const leo::PointLight& params) {
-		mPSCBParams = params;
-	}
-	void SetCamera(const leo::Camera& params) {
-		leo::SQT scale{};
-		scale.s = mPSCBParams.PositionRange.w;
-		auto world = scale.operator std::array<__m128, 4U>();
-		mVSCBParams.WorldView = leo::Transpose(leo::Multiply(world, load(params.View())));
-		mVSCBParams.Proj = leo::Transpose(load(params.Proj()));
-	}
-
-	void Draw(ID3D11DeviceContext* context) {
-		context->UpdateSubresource(mVSCB, 0, nullptr, &mVSCBParams, 0, 0);
-		context->UpdateSubresource(mPSCB, 0, nullptr, &mPSCBParams, 0, 0);
-
-		UINT strides[] = { sizeof(leo::float3) };
-		UINT offsets[] = { 0 };
-
-		context->IASetVertexBuffers(0, 1, &mPointVolumeVB,strides,offsets );
-		context->IASetIndexBuffer(mPointVolumeIB, DXGI_FORMAT_R32_UINT, 0);
-		context->IASetInputLayout(mLightVolumeVertexLayout);
-		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		context->VSSetShader(mLightVolumeVS, nullptr, 0);
-		context->VSSetConstantBuffers(0, 1, &mVSCB);
-		context->PSSetShader(mPointLightVolumePS, nullptr, 0);
-		context->PSSetConstantBuffers(0, 1, &mPSCB);
-		//
-		auto rtv = pRender->GetLightRTV();
-		context->OMSetRenderTargets(1, &rtv, nullptr);
-		//ºöÂÔÄ£°å²âÊÔ,ºöÂÔÄ£°å
-		ID3D11ShaderResourceView* srvs[] = { pRender->GetLinearDepthSRV(),pRender->GetNormalAlphaSRV() };
-		context->PSSetSamplers(0, 1, &mSamPoint);
-		
-		context->PSSetShaderResources(0, 2, srvs);
-		//
-		context->DrawIndexed(mIndexCount, 0, 0);
-		srvs[0] = nullptr;srvs[1] = nullptr;
-		context->PSSetShaderResources(0, 2, srvs);
-
-	}
-};
-std::unique_ptr<PointLightVolume> pPointLightVolueme = nullptr;
 void DeviceEvent()
 {
 	while (!leo::DeviceMgr().GetDevice())
@@ -309,33 +253,18 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 }
 
 
-ID3D11PixelShader* mLinearizeDepthPS = nullptr;
-
-
-void BuildQuad(ID3D11Device* device, const leo::CameraFrustum& frustum) {
-	
-	using namespace leo;
-
-	ShaderMgr sm;
-
-	mLinearizeDepthPS = sm.CreatePixelShader(
-		FileSearch::Search(L"LinearizeDepthPS.cso")
-		);
-		leo::RenderStates sss;
-	mSamPoint = sss.GetSamplerState(L"NearestClamp");
-}
-void ClearQuad() {
-}
-
 void BuildLight(ID3D11Device* device) {
-	pPointLightVolueme = std::make_unique<PointLightVolume>(device);
-	leo::PointLight pl;
-	pl.Diffuse = leo::float3(0.8f, 0.7f, 0.6f);
-	pl.PositionRange = leo::float4(0.f, 0.f, 0.f, 10.f);
-	pPointLightVolueme->SetLightParams(pl);
-	pPointLightVolueme->SetCamera(*pCamera);
+	pLightRender = std::make_unique<leo::LightSourcesRender>(device);
+
+	auto mPointLight = std::make_shared<leo::PointLightSource>();
+	mPointLight->Position(leo::float3(0.f, 0.f, 0.f));
+	mPointLight->Range(10.f);
+	mPointLight->Diffuse(leo::float3(0.8f, 0.7f, 0.6f));
+
+	pLightRender->AddLight(mPointLight);
 }
 void ClearLight() {
+	pLightRender.reset(nullptr);
 }
 
 void BuildRes(std::pair<leo::uint16, leo::uint16> size)
@@ -388,7 +317,6 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 
 	BuildLight(leo::DeviceMgr().GetDevice());
 
-	BuildQuad(device, *pCamera);
 
 	//pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(), L"Resource/Test.Terrain");
 	pRender = std::make_unique<leo::DeferredRender>(device,size);
@@ -399,10 +327,8 @@ void ClearRes() {
 	pModelMesh.reset(nullptr);
 	pTerrain.reset(nullptr);
 	pRender.reset(nullptr);
-	pPointLightVolueme.reset(nullptr);
 	
 	ClearLight();
-	ClearQuad();
 }
 
 void ReSize(std::pair<leo::uint16, leo::uint16> size) {
@@ -454,9 +380,6 @@ void DrawSSAO(ID3D11DeviceContext* context) {
 }
 
 
-void LightPreable(ID3D11DeviceContext* context) {
-}
-
 void Render()
 {
 	event.Wait();
@@ -503,9 +426,9 @@ void Render()
 			pRender->LinearizeDepth(devicecontext, *leo::global::globalDepthStencil, pCamera->mNear, pCamera->mFar);
 		}
 		//Light Pass
-		LightPreable(devicecontext);
-		pPointLightVolueme->SetCamera(*pCamera);
-		pPointLightVolueme->Draw(devicecontext);
+		if (pRender && pLightRender) {
+			pLightRender->Draw(devicecontext, *pRender, *pCamera);
+		}
 		//Shader Pass
 		if (pRender) {
 			pRender->ShadingPass(devicecontext, leo::global::globalD3DRenderTargetView);
