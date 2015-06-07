@@ -102,6 +102,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	_CrtSetBreakAlloc(309);
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
+	leo::float4 axis{ 0.7071f,0.7071f,0.f,0.f };
+	auto matrix = leo::RotationAxis(load(axis), leo::LM_PI);
+	leo::float4 point{-1.f, 1.f,0.f,1.f};
+
+	auto newpoint = leo::Multiply(load(point), matrix);
+
 	leo::EngineConfig::Read(L"config.scheme");
 	leo::EngineConfig::ShaderConfig::GetAllBlendStateName();
 
