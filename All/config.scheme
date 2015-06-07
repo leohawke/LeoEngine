@@ -46,7 +46,7 @@
 		(effect (name pointlight)
 			(shader (v LightVolumeVS.cso) (p PointLightVolumePS.cso))
 		)
-		(effect (name soitlight)
+		(effect (name spotlight)
 			(shader  (p SpotLightVolumePS.cso))
 		)
 		(effect	(name ssao)

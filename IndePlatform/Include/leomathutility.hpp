@@ -1445,6 +1445,9 @@ namespace leo {
 
 //__m128 Trigonometry Function
 namespace leo {
+	using std::sin;
+	using std::atan2;
+
 	inline __m128 modangle(__m128 Angles) {
 #if defined(LM_ARM_NEON_INTRINSICS)
 		// Modulo the range of the given angles such that -XM_PI <= Angles < XM_PI

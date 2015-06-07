@@ -187,6 +187,12 @@ namespace leo
 		};
 
 		///<summary>
+		/// Creates a Cone top at the origin with the toward z-axis.
+		///</summary>
+		SimpleMeshData CreateCone(float height, float radius, std::uint8_t n);
+
+
+		///<summary>
 		/// Creates a box centered at the origin with the given dimensions.
 		///</summary>
 		MeshData CreateBox(float width, float height, float depth);

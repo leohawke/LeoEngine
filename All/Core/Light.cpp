@@ -283,6 +283,89 @@ public:
 	UINT mIndexCount = 0;
 };
 
+class SpotLightVolumeImpl :public leo::Singleton<PointLightVolumeImpl, false> {
+public:
+	SpotLightVolumeImpl(ID3D11Device* device) {
+		leo::ShaderMgr sm;
+		
+		auto meshdata = leo::helper::CreateCone(100.f,100.f,12);
+		mIndexCount = meshdata.Indices.size();
+		CD3D11_BUFFER_DESC vbDesc{ meshdata.Vertices.size()*sizeof(decltype(meshdata.Vertices)::value_type),
+			D3D11_BIND_VERTEX_BUFFER,D3D11_USAGE_IMMUTABLE };
+
+		D3D11_SUBRESOURCE_DATA resDesc;
+		resDesc.pSysMem = &meshdata.Vertices[0];
+		leo::dxcall(device->CreateBuffer(&vbDesc, &resDesc, &mSpotVolumeVB));
+
+		CD3D11_BUFFER_DESC ibDesc{ vbDesc };
+		ibDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		ibDesc.ByteWidth = static_cast<leo::win::UINT> (sizeof(std::uint32_t)*meshdata.Indices.size());
+		resDesc.pSysMem = &meshdata.Indices[0];
+		leo::dxcall(device->CreateBuffer(&ibDesc, &resDesc, &mSpotVolumeIB));
+
+		CD3D11_BUFFER_DESC pscbDesc{ sizeof(leo::PointLight),D3D11_BIND_CONSTANT_BUFFER };
+
+		leo::dxcall(device->CreateBuffer(&pscbDesc, nullptr, &mPSCB));
+
+		mSpotLightVolumePS = sm.CreatePixelShader(
+			leo::FileSearch::Search(
+				leo::EngineConfig::ShaderConfig::GetShaderFileName(L"spotlight", D3D11_PIXEL_SHADER)
+				));
+	}
+
+	~SpotLightVolumeImpl() {
+
+	}
+
+	void Apply(ID3D11DeviceContext * context, SpotLightSource& light_source, const Camera& camera) {
+
+		PointLightVolumeImpl::GetInstance().mVSCBParams.WorldView = CalcWorld(light_source);
+
+		PointLightVolumeImpl::GetInstance().ApplyLightVolumeCommon(context, camera);
+
+		PointLight mPSCBParams;
+		auto point = float4(light_source.Position(), 1.f);
+		save(mPSCBParams.Position, Multiply(load(point), load(camera.View())));
+		mPSCBParams.Diffuse = light_source.Diffuse();
+		mPSCBParams.FallOff_Range = float4(light_source.FallOff(), light_source.Range());
+
+		context->UpdateSubresource(mPSCB, 0, nullptr, &mPSCBParams, 0, 0);
+
+		UINT strides[] = { sizeof(leo::float3) };
+		UINT offsets[] = { 0 };
+
+		context->IASetVertexBuffers(0, 1, &mSpotVolumeVB, strides, offsets);
+		context->IASetIndexBuffer(mSpotVolumeIB, DXGI_FORMAT_R32_UINT, 0);
+
+		context->PSSetShader(mSpotLightVolumePS, nullptr, 0);
+		context->PSSetConstantBuffers(0, 1, &mPSCB);
+
+	}
+	void Draw(ID3D11DeviceContext * context) {
+		context->DrawIndexed(mIndexCount, 0, 0);
+	}
+
+private:
+	std::array<__m128, 4U> CalcWorld(SpotLightSource& light_source) {
+		return I();
+	}
+
+public:
+	static SpotLightVolumeImpl& GetInstance(ID3D11Device* device = nullptr) {
+		static SpotLightVolumeImpl mInstance{ device };
+		return mInstance;
+	}
+
+	ID3D11PixelShader* mSpotLightVolumePS = nullptr;
+
+	leo::win::unique_com<ID3D11Buffer>  mPSCB = nullptr;
+
+	leo::win::unique_com<ID3D11Buffer> mSpotVolumeVB = nullptr;
+	leo::win::unique_com<ID3D11Buffer>  mSpotVolumeIB = nullptr;
+
+	UINT mIndexCount = 0;
+};
+
 leo::LightSourcesRender::LightSourcesRender(ID3D11Device * device)
 {
 	PointLightVolumeImpl::GetInstance(device);
@@ -304,6 +387,9 @@ void leo::LightSourcesRender::Draw(ID3D11DeviceContext * context,DeferredRender 
 			PointLightVolumeImpl::GetInstance().Apply(context, dynamic_cast<PointLightSource&>(*light_source),camera);
 			PointLightVolumeImpl::GetInstance().Draw(context);
 			break;
+		case LightSource::spot_light:
+			SpotLightVolumeImpl::GetInstance().Apply(context, dynamic_cast<SpotLightSource&>(*light_source), camera);
+			SpotLightVolumeImpl::GetInstance().Draw(context);
 		default:
 			break;
 		}

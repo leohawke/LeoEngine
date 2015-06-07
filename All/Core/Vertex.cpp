@@ -73,6 +73,64 @@ namespace leo
 		void BuildCylinderTopCap(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount, MeshData& result);
 		void BuildCylinderBottomCap(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount, MeshData& result);
 		*/
+		SimpleMeshData CreateCone(float height, float radius, std::uint8_t n)
+		{
+			std::vector <float3, leo::aligned_alloc<float3, 16>> vb;
+
+			//Origin
+			for (int i = 0; i < n; ++i)
+			{
+				vb.emplace_back(0.f,0.f,0.f);
+			}
+
+			float outer_radius = radius / cos(LM_PI / n);
+			//Circle
+			for (int i = 0; i < n; ++i)
+			{
+				float angle = i * 2 * LM_PI / n;
+				auto x = outer_radius * cos(angle);
+				auto y = outer_radius * sin(angle);
+				auto z = height;
+				vb.emplace_back(x,y,z);
+			}
+
+			//Circle Center
+			vb.emplace_back(0.f,0.f,height);
+
+			//Circle
+			for (int i = 0; i < n; ++i)
+			{
+				vb.emplace_back(vb[n + i]);
+			}
+
+			std::vector<uint32> ib;
+
+			//Cone
+			for (uint16_t i = 0; i < n - 1; ++i)
+			{
+				ib.push_back(  i);
+				ib.push_back( n + i + 1);
+				ib.push_back( n + i);
+			}
+			ib.push_back( n - 1);
+			ib.push_back( n + 0);
+			ib.push_back( n + n - 1);
+
+			//Circle
+			for (uint16_t i = 0; i < n - 1; ++i)
+			{
+				ib.push_back( 2 * n);
+				ib.push_back( 2 * n + 1 + i);
+				ib.push_back( 2 * n + 1 + i + 1);
+			}
+			ib.push_back( 2 * n);
+			ib.push_back( 2 * n + 1 + n - 1);
+			ib.push_back( 2 * n + 1);
+
+			return{ std::move(vb), std::move(ib) };
+
+		}
+
 		MeshData CreateBox(float width, float height, float depth)
 		{
 			using Vertex::NormalMap;
