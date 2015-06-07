@@ -212,6 +212,7 @@ public:
 	void Apply(ID3D11DeviceContext * context, PointLightSource& light_source,const Camera& camera) {
 		leo::SQT scale{};
 		scale.s = light_source.Range();
+		scale.t = light_source.Position();
 		mVSCBParams.WorldView = scale.operator std::array<__m128, 4U>();
 
 		ApplyLightVolumeCommon(context, camera);
