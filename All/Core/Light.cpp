@@ -141,6 +141,20 @@ void leo::PointLightSource::FallOff(const float3& falloff){
 	 mFallOff = falloff;
 }
 
+
+leo::SpotLightSource::SpotLightSource()
+	:LightSource(spot_light)
+{
+}
+
+const float3& leo::SpotLightSource::FallOff() const {
+	return mFallOff;
+}
+
+void leo::SpotLightSource::FallOff(const float3& falloff) {
+	mFallOff = falloff;
+}
+
 const D3D11_INPUT_ELEMENT_DESC static mLightVolumeVertexElement_Desc[] =
 {
 	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }

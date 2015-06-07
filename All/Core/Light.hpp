@@ -32,8 +32,11 @@ namespace leo {
 		float3 Diffuse;
 	};
 
-	struct SpotLight : public PointLight {
-		float4 Directional_Radius;
+	struct SpotLight {
+		float4 Position_Inner;
+		float3 Diffuse;
+		float4 FallOff_Range;
+		float4 Directional_Outer;
 	};
 
 	class Camera;
@@ -70,15 +73,18 @@ namespace leo {
 
 		//Spot,Directional
 		virtual const float3& Directional() const = 0;
-		//Spot
-		virtual float Radius() const = 0;
 
 		//Spot,Directional
 		virtual void Directional(const float3& dir) = 0;
-		//Spot
-		virtual void Radius(float r) = 0;
 		
-
+		//Spot
+		virtual float CosInnerAngle() const = 0;
+		//Spot
+		virtual void InnerAngle(float angle) = 0;
+		//Spot
+		virtual float CosOuterAngle() const = 0;
+		//Spot
+		virtual void OuterAngle(float angle) = 0;
 
 	private:
 		float3 mPos;
@@ -96,23 +102,34 @@ namespace leo {
 
 		void FallOff(const float3& falloff);
 
+		
 	protected:
 		//Spot,Directional
-		virtual const float3& Directional() const {
-			return float3();
+		const float3& Directional() const {
+			DebugPrintf("Error: Call Error Function");
+			return mFallOff;
 		}
+	
+		//Spot,Directional
+		void Directional(const float3& dir) {
+		}
+		
 		//Spot
-		virtual float Radius() const {
+		float CosInnerAngle() const {
 			return 0;
 		}
+		//Spot
+		void InnerAngle(float angle) {
 
-		//Spot,Directional
-		virtual void Directional(const float3& dir) {
 		}
 		//Spot
-		virtual void Radius(float r) {
+		float CosOuterAngle() const {
+			return 0;
 		}
+		//Spot
+		void OuterAngle(float angle) {
 
+		}
 	private:
 		float3 mFallOff;
 	};
@@ -127,24 +144,33 @@ namespace leo {
 
 		//Spot,Directional
 		const float3& Directional() const{
-			return  *reinterpret_cast<const float3*>(&Directional_Radius);
+			return  *reinterpret_cast<const float3*>(&Directional_Outer);
 		}
 		//Spot
-		float Radius() const {
-			return Directional_Radius.a;
+		float CosOuterAngle() const {
+			return Directional_Outer.a;
 		}
-
+		//Spot
+		float CosInnerAngle() const{
+			return Inner;
+		}
 		//Spot,Directional
 		void Directional(const float3& dir) {
-			std::copy(dir.begin(), dir.end(), Directional_Radius.begin());
+			std::copy(dir.begin(), dir.end(), Directional_Outer.begin());
 		}
 		//Spot
-		void Radius(float r) {
-			Directional_Radius.a = r;
+		void OuterAngle(float angle) {
+			Directional_Outer.a = cos(angle);
+		}
+
+		//Spot
+		void InnerAngle(float angle) {
+			Inner = cos(angle);
 		}
 	private:
 		float3 mFallOff;
-		float4 Directional_Radius;
+		float4 Directional_Outer;
+		float Inner;
 	};
 
 	class LB_API LightSourcesRender {

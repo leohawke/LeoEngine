@@ -18,6 +18,21 @@
 #include "leomathtype.hpp"
 
 namespace leo {
+	//todo:另外一个文件
+
+	float saturate(float x)
+	{
+		return max(0.f, min(1.f, x));
+	}
+
+
+	float smoothstep(float a, float b, float x)
+	{
+		float t = saturate((x - a) / (b - a));
+		return t*t*(3.0f - (2.0f*t));
+	}
+
+
 	namespace ops{
 		enum class axis_system {
 			cartesian_system,

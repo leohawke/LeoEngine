@@ -12,6 +12,16 @@ float attenuation_term(float3 light_pos, float3 pos, float3 atten)
 	return 1 / dot(atten, float3(1, d, d2));
 }
 
+float spot_lighting(float3 light_pos, float3 light_dir, float2 cos_cone, float3 pos)
+{
+	// cos_cone is (cos_outer_cone, cos_inner_cone)
+
+	float3 v = normalize(pos - light_pos);
+	float cos_direction = dot(v, light_dir);
+
+	return smoothstep(cos_cone.x, cos_cone.y, cos_direction);
+}
+
 float4 CalcColor(float lambert,float spec,float atten,float3 light_color) {
 	float2 ds = lambert*atten*float2(1, spec);
 	return ds.xxxy*float4(light_color, 1.f);

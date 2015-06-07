@@ -6,10 +6,10 @@ Texture2D<float4> texNormalAlpha:register(t1);
 SamplerState samPoint : register(s0);
 
 struct SpotLight {
-	float3 Position;
+	float4 Position_Inner;
 	float3 Diffuse;
 	float4 FallOff_Range;
-	float4 Directional_Radius;
+	float4 Directional_Outer;
 };
 
 cbuffer LightParam:register(b0) {
@@ -32,9 +32,12 @@ float4 main(VertexOut pin) : SV_TARGET
 	float3 p = v*texDepth.Sample(samPoint, tc).r / v.z;
 	float3 normal = DeCompressionNormal(half3(NormalAlpha.rgb));
 
-	return CalcDRLighting(Light.Position, p, normal, v,
+	float spot = spot_lighting(Light.Position_Inner.xyz, Light.Directional_Outer.xyz,
+		float2(Light.Directional_Outer.w, Light.Position_Inner.w), p);
+
+	return CalcDRLighting(Light.Position_Inner.xyz, p, normal, v,
 		NormalAlpha.w*256.f,
-		attenuation_term(Light.Position, p, Light.FallOff_Range.xyz),
+		spot*attenuation_term(Light.Position_Inner.xyz, p, Light.FallOff_Range.xyz),
 		Light.Diffuse,
 		Light.FallOff_Range.w
 		);
