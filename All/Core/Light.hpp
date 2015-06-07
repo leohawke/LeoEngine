@@ -33,7 +33,7 @@ namespace leo {
 	};
 
 	struct SpotLight : public PointLight {
-		float4 DirectionalRadius;
+		float4 Directional_Radius;
 	};
 
 	class Camera;
@@ -45,6 +45,8 @@ namespace leo {
 	public:
 		enum light_type {
 			point_light = 0,
+
+			spot_light,
 
 			type_count
 		};
@@ -66,6 +68,18 @@ namespace leo {
 
 		void Diffuse(const float3& diffuse);
 
+		//Spot,Directional
+		virtual const float3& Directional() const = 0;
+		//Spot
+		virtual float Radius() const = 0;
+
+		//Spot,Directional
+		virtual void Directional(const float3& dir) = 0;
+		//Spot
+		virtual void Radius(float r) = 0;
+		
+
+
 	private:
 		float3 mPos;
 		float mRange;
@@ -82,8 +96,55 @@ namespace leo {
 
 		void FallOff(const float3& falloff);
 
+	protected:
+		//Spot,Directional
+		virtual const float3& Directional() const {
+			return float3();
+		}
+		//Spot
+		virtual float Radius() const {
+			return 0;
+		}
+
+		//Spot,Directional
+		virtual void Directional(const float3& dir) {
+		}
+		//Spot
+		virtual void Radius(float r) {
+		}
+
 	private:
 		float3 mFallOff;
+	};
+
+	class LB_API SpotLightSource :public LightSource {
+	public:
+		SpotLightSource();
+
+		const float3& FallOff() const;
+
+		void FallOff(const float3& falloff);
+
+		//Spot,Directional
+		const float3& Directional() const{
+			return  *reinterpret_cast<const float3*>(&Directional_Radius);
+		}
+		//Spot
+		float Radius() const {
+			return Directional_Radius.a;
+		}
+
+		//Spot,Directional
+		void Directional(const float3& dir) {
+			std::copy(dir.begin(), dir.end(), Directional_Radius.begin());
+		}
+		//Spot
+		void Radius(float r) {
+			Directional_Radius.a = r;
+		}
+	private:
+		float3 mFallOff;
+		float4 Directional_Radius;
 	};
 
 	class LB_API LightSourcesRender {

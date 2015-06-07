@@ -20,3 +20,11 @@ half2 decode(half3 enc) {
 	half nz = floor(enc.z * 255) / 16;
 	return enc.xy + float2(floor(nz) / 16, frac(nz)) / 255;
 }
+
+half3 CompressionNormal(half3 n) {
+	return encode(encode(n));
+}
+
+half3 DeCompressionNormal(half3 n) {
+	return decode(decode(n));
+}

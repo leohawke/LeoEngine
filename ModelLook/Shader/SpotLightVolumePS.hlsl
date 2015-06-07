@@ -5,14 +5,15 @@ Texture2D<float4> texNormalAlpha:register(t1);
 
 SamplerState samPoint : register(s0);
 
-struct PointLight {
+struct SpotLight {
 	float3 Position;
 	float3 Diffuse;
 	float4 FallOff_Range;
+	float4 Directional_Radius;
 };
 
 cbuffer LightParam:register(b0) {
-	PointLight Light;
+	SpotLight Light;
 }
 
 struct VertexOut {

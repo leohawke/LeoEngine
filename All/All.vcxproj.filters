@@ -462,9 +462,6 @@
     <FxCompile Include="Shader\DeferredVS.hlsl">
       <Filter>Shader\HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Shader\CrysisSSAO.hlsl">
-      <Filter>Shader\HLSL</Filter>
-    </FxCompile>
     <FxCompile Include="Shader\TerrainCHMCS.hlsl">
       <Filter>Shader\HLSL\Terrain</Filter>
     </FxCompile>
