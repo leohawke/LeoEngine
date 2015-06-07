@@ -304,7 +304,7 @@ public:
 		resDesc.pSysMem = &meshdata.Indices[0];
 		leo::dxcall(device->CreateBuffer(&ibDesc, &resDesc, &mSpotVolumeIB));
 
-		CD3D11_BUFFER_DESC pscbDesc{ sizeof(leo::PointLight),D3D11_BIND_CONSTANT_BUFFER };
+		CD3D11_BUFFER_DESC pscbDesc{ sizeof(leo::SpotLight),D3D11_BIND_CONSTANT_BUFFER };
 
 		leo::dxcall(device->CreateBuffer(&pscbDesc, nullptr, &mPSCB));
 
@@ -348,7 +348,24 @@ public:
 
 private:
 	std::array<__m128, 4U> CalcWorld(SpotLightSource& light_source) {
-		return I();
+		auto xyscale = tan(acos(light_source.CosOuterAngle()))/tan(15*LM_RPD);
+		auto zscale = light_source.Range() / 100.f;
+		std::array<__m128, 4> scalematrix  {};
+		scalematrix[0] = load(float4(xyscale, 0.f, 0.f, 0.f));
+		scalematrix[1] = load(float4(0.f, xyscale, 0.f, 0.f));
+		scalematrix[2] = load(float4(0.f, 0.f,zscale, 0.f));
+		scalematrix[3] = details::SplatR3();
+
+		auto axis = light_source.Directional();
+		axis.x /= 2;
+		axis.y /= 2;
+		axis.z += 1;
+		axis.z /= 2;
+
+		SQTObject sqt;
+		sqt.Rotation(axis, LM_PI);
+		sqt.Translation(light_source.Position());
+		return Multiply(scalematrix,sqt);
 	}
 
 public:
@@ -370,6 +387,7 @@ public:
 leo::LightSourcesRender::LightSourcesRender(ID3D11Device * device)
 {
 	PointLightVolumeImpl::GetInstance(device);
+	SpotLightVolumeImpl::GetInstance(device);
 }
 
 leo::LightSourcesRender::~LightSourcesRender()
