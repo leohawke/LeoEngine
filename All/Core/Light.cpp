@@ -324,11 +324,16 @@ public:
 
 		PointLightVolumeImpl::GetInstance().ApplyLightVolumeCommon(context, camera);
 
-		PointLight mPSCBParams;
-		auto point = float4(light_source.Position(), 1.f);
-		save(mPSCBParams.Position, Multiply(load(point), load(camera.View())));
+		SpotLight mPSCBParams;
+		auto point = float4(light_source.Position(),1.f);
+		save(mPSCBParams.Position_Inner, Multiply(load(point), load(camera.View())));
+		mPSCBParams.Position_Inner.w = light_source.CosInnerAngle();
 		mPSCBParams.Diffuse = light_source.Diffuse();
 		mPSCBParams.FallOff_Range = float4(light_source.FallOff(), light_source.Range());
+		auto dir = float4(light_source.Directional(), 1.f);
+		//Todo: TransposeInverse view
+		save(mPSCBParams.Directional_Outer, Multiply(load(dir), load(camera.View())));
+		mPSCBParams.Directional_Outer.w = light_source.CosOuterAngle();
 
 		context->UpdateSubresource(mPSCB, 0, nullptr, &mPSCBParams, 0, 0);
 
