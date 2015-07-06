@@ -189,7 +189,7 @@ namespace leo
 	// -------------------------------------------------------------------------
 	template<typename T, int AlignSize>
 	//¶ÔÆë·ÖÅäÆ÷
-	class aligned_alloc
+	class lalignas(AlignSize) aligned_alloc
 	{
 		static_assert(AlignSize > 1, "AlignSize must more than 1");
 		static_assert(!(AlignSize &(AlignSize - 1)), "AlignSize must be power of 2");
@@ -230,9 +230,9 @@ namespace leo
 		}
 
 		template<typename... ARGS>
-		void construct(pointer const p, ARGS... args) const {
+		void construct(pointer const p, ARGS&&... args) const {
 			void * const pv = static_cast<void*>(p);
-			new (pv)value_type(args...);
+			new (pv)value_type(std::forward<ARGS>(args)...);
 		}
 
 		void destroy(pointer const p) const;
@@ -595,6 +595,7 @@ namespace leo
 	typedef AnimationAllocatedObject    AnimableAlloc;
 	typedef AnimationAllocatedObject    AnimationAlloc;
 	typedef GeneralAllocatedObject      ArchiveAlloc;
+	typedef GeneralAllocatedObject      LightAlloc;
 	typedef GeometryAllocatedObject     BatchedGeometryAlloc;
 	typedef RenderSysAllocatedObject    BufferAlloc;
 	typedef GeneralAllocatedObject      CodecAlloc;

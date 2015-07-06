@@ -258,13 +258,24 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 void BuildLight(ID3D11Device* device) {
 	pLightRender = std::make_unique<leo::LightSourcesRender>(device);
 
-	auto mPointLight = std::make_shared<leo::PointLightSource>();
+	static_assert(sizeof(std::_Ref_count_obj_alloc<int, leo::aligned_alloc<leo::PointLightSource, 16>>) %16 ==0, "fuck");
+
+	auto mPointLight = std::allocate_shared<leo::PointLightSource,leo::aligned_alloc<leo::PointLightSource,16>>(leo::aligned_alloc<leo::PointLightSource, 16>());
 	mPointLight->Position(leo::float3(0.f, 0.f,-2.f));
-	mPointLight->Range(6.f);
+	mPointLight->Range(3.f);
 	mPointLight->Diffuse(leo::float3(0.8f, 0.7f, 0.6f));
 	mPointLight->FallOff(leo::float3(0.f, 0.1f, 0.1f));
-	pLightRender->AddLight(mPointLight);
+	//pLightRender->AddLight(mPointLight);
 
+	auto mSpotLight = std::allocate_shared<leo::SpotLightSource, leo::aligned_alloc<leo::SpotLightSource, 16>>(leo::aligned_alloc<leo::SpotLightSource, 16>());
+	mSpotLight->InnerAngle(leo::LM_RPD * 10);
+	mSpotLight->OuterAngle(leo::LM_RPD * 45);
+	mSpotLight->Diffuse(leo::float3(0.9f, 0.2f, 0.2f));
+	mSpotLight->Directional(leo::float3(0.f,0.707f,0.707f));
+	mSpotLight->FallOff(leo::float3(0.f, 0.1f, 0.1f));
+	mSpotLight->Position(leo::float3(0.f, 0.f, -3.f));
+	mSpotLight->Range(4.f);
+	pLightRender->AddLight(mSpotLight);
 }
 void ClearLight() {
 	pLightRender.reset(nullptr);

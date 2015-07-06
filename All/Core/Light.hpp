@@ -16,6 +16,7 @@
 
 #include <leo2dmath.hpp>
 #include <RenderSystem\DeferredRender.hpp>
+#include <memory.hpp>
 namespace leo {
 	struct PointLight;
 	struct DirectionalLight;
@@ -44,7 +45,7 @@ namespace leo {
 	//windows_system
 	ops::Rect CalcScissorRect(const PointLight& wPointLight, const Camera& camera);
 
-	class LB_API LightSource {
+	class LB_API LightSource :public LightAlloc {
 	public:
 		enum light_type {
 			point_light = 0,
