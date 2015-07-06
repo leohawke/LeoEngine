@@ -34,7 +34,7 @@
 #include "DeviceMgr.h"
 
 leo::Event event;
-std::unique_ptr<leo::Mesh> pModelMesh = nullptr;
+std::vector<std::unique_ptr<leo::Mesh>> Models = {};
 std::unique_ptr<leo::UVNCamera> pCamera = nullptr;
 std::unique_ptr<leo::CastShadowCamera> pShaderCamera;
 std::unique_ptr<leo::DeferredRender> pRender = nullptr;
@@ -164,9 +164,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 		{
 			leo::RenderSync::Block block;
 			renderAble = false;
-			pModelMesh.reset(new leo::Mesh());
-			if (pModelMesh->Load(GetOpenL3dFile(), leo::DeviceMgr().GetDevice()))
+			auto pModelMesh = std::make_unique<leo::Mesh>();
+			if (pModelMesh->Load(GetOpenL3dFile(), leo::DeviceMgr().GetDevice())) {
 				renderAble = (true);
+				Models.push_back(std::move(pModelMesh));
+			}
 		}
 		break;
 		case ID_ROLL_LEFT:
@@ -260,7 +262,7 @@ void BuildLight(ID3D11Device* device) {
 	mPointLight->Position(leo::float3(0.f, 0.f, -2.f));
 	mPointLight->Range(6.f);
 	mPointLight->Diffuse(leo::float3(0.8f, 0.7f, 0.6f));
-	mPointLight->FallOff(leo::float3(0.f,0.1f,0.1f));
+	mPointLight->FallOff(leo::float3(0.f, 0.1f, 0.1f));
 	pLightRender->AddLight(mPointLight);
 
 }
@@ -320,21 +322,22 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 
 
 	//pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(), L"Resource/Test.Terrain");
-	pRender = std::make_unique<leo::DeferredRender>(device,size);
+	pRender = std::make_unique<leo::DeferredRender>(device, size);
 }
 
 void ClearRes() {
 
-	pModelMesh.reset(nullptr);
+	for (auto& prt : Models)
+		prt.reset(nullptr);
 	pTerrain.reset(nullptr);
 	pRender.reset(nullptr);
-	
+
 	ClearLight();
 }
 
 void ReSize(std::pair<leo::uint16, leo::uint16> size) {
 	//do many thing ,but 我不想写
-	
+
 
 	if (pRender) {
 		pRender->ReSize(leo::DeviceMgr().GetDevice(), size);
@@ -356,7 +359,15 @@ void Update() {
 		//sin(a + b) = sin(a) cos(b) + sin(b) cos(a)
 		//cosa = x ,sina = y
 		//sinb = sin(pi/180)
-		
+
+		/*for (auto & pModelMesh : Models) {
+			auto max_rand = std::rand() % 10;
+			auto dir = std::rand() % 2;
+			dir == 0 ?
+				pModelMesh->Translation(leo::float3(max_rand*cosb, max_rand*sinb, max_rand)) :
+				pModelMesh->Translation(leo::float3(max_rand*cosb, max_rand*sinb, -max_rand));
+		}*/
+
 
 		//leo::DeviceMgr().GetDeviceContext()->UpdateSubresource(mPointLightPSCB, 0, nullptr, &pl, 0, 0);
 
@@ -409,13 +420,13 @@ void Render()
 
 		//leo::ShadowMap::GetInstance().EndShadowMap(devicecontext);
 #endif
-		
+
 
 		if (pRender) {
-			pRender->OMSet(devicecontext,*leo::global::globalDepthStencil);
+			pRender->OMSet(devicecontext, *leo::global::globalDepthStencil);
 		}
 
-		if (pModelMesh) {
+		for(auto & pModelMesh:Models){
 			pModelMesh->Render(devicecontext, *pCamera);
 		}
 
@@ -424,7 +435,7 @@ void Render()
 		}
 
 		if (pRender) {
-			pRender->LinearizeDepth(devicecontext, *leo::global::globalDepthStencil, pCamera->mNear, pCamera->mFar);
+			//pRender->LinearizeDepth(devicecontext, *leo::global::globalDepthStencil, pCamera->mNear, pCamera->mFar);
 		}
 		//Light Pass
 		if (pRender && pLightRender) {
@@ -434,7 +445,7 @@ void Render()
 		if (pRender) {
 			pRender->ShadingPass(devicecontext, leo::global::globalD3DRenderTargetView);
 		}
-		
+
 		/*
 		BlurSSAO(devicecontext, unsigned int(prevVP.Width), unsigned int(prevVP.Height));
 		//绘制延迟Buff

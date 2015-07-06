@@ -9,7 +9,6 @@
 #include <memory>
 #include <array>
 #include "BaseMacro.h"
-#include "Singleton.hpp"
 #include "leoint.hpp"
 #include "utility.hpp"
 #include "RenderSystem\d3dx11.hpp"

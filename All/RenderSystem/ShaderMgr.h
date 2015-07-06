@@ -2,7 +2,7 @@
 
 #include "Mgr.hpp"
 #include "leoint.hpp"
-
+#include <Singleton.hpp>
 namespace leo
 {
 	class ShaderMgr

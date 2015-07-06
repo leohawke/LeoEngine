@@ -414,6 +414,7 @@ void leo::LightSourcesRender::Draw(ID3D11DeviceContext * context,DeferredRender 
 		case LightSource::spot_light:
 			SpotLightVolumeImpl::GetInstance().Apply(context, dynamic_cast<SpotLightSource&>(*light_source), camera);
 			SpotLightVolumeImpl::GetInstance().Draw(context);
+			break;
 		default:
 			break;
 		}

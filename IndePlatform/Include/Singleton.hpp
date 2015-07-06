@@ -2,6 +2,7 @@
 #define IndePlatform_Singleton_hpp
 
 #include "memory.hpp"
+#include "utility.hpp"
 #include <functional>
 namespace leo
 {
@@ -13,7 +14,7 @@ namespace leo
 	//单列模式基类
 	//0.继承Singleton ->class Sample : public Singleton<Sample>
 	//1.析构函数修饰为public,并完成资源释放
-	class Singleton
+	class Singleton : noncopyable
 	{
 	protected:
 		Singleton()
@@ -32,7 +33,7 @@ namespace leo
 	};
 
 	template<typename Single>
-	class Singleton < Single, false >
+	class Singleton < Single, false > : noncopyable
 	{
 	protected:
 		Singleton()

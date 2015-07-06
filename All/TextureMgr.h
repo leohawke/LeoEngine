@@ -1,6 +1,6 @@
 #pragma once
 #include "Mgr.hpp"
-
+#include <Singleton.hpp>
 
 namespace leo
 {
