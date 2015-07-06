@@ -299,6 +299,7 @@ public:
 
 		CD3D11_BUFFER_DESC ibDesc{ vbDesc };
 		ibDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		ibDesc.Usage = D3D11_USAGE_IMMUTABLE;
 		ibDesc.ByteWidth = static_cast<leo::win::UINT> (sizeof(std::uint32_t)*meshdata.Indices.size());
 		resDesc.pSysMem = &meshdata.Indices[0];
 		leo::dxcall(device->CreateBuffer(&ibDesc, &resDesc, &mSpotVolumeIB));
@@ -352,12 +353,15 @@ public:
 
 private:
 	std::array<__m128, 4U> CalcWorld(SpotLightSource& light_source) {
-		auto xyscale = tan(acos(light_source.CosOuterAngle()))/tan(15*LM_RPD);
-		auto zscale = light_source.Range() / 100.f;
+		auto range = light_source.Range();
+		auto sinouter = light_source.SinOuterAngle();
+		auto cosouter = light_source.CosOuterAngle();
+		auto yscale = range*cosouter / 100.f;
+		auto xzscale = range*sinouter / (100.f/cos(LM_PI / 12));
 		std::array<__m128, 4> scalematrix  {};
-		scalematrix[0] = load(float4(xyscale, 0.f, 0.f, 0.f));
-		scalematrix[1] = load(float4(0.f, xyscale, 0.f, 0.f));
-		scalematrix[2] = load(float4(0.f, 0.f,zscale, 0.f));
+		scalematrix[0] = load(float4(xzscale, 0.f, 0.f, 0.f));
+		scalematrix[1] = load(float4(0.f, yscale, 0.f, 0.f));
+		scalematrix[2] = load(float4(0.f, 0.f, xzscale, 0.f));
 		scalematrix[3] = details::SplatR3();
 
 		auto axis = light_source.Directional();

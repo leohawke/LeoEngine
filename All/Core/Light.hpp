@@ -18,6 +18,7 @@
 #include <RenderSystem\DeferredRender.hpp>
 #include <memory.hpp>
 #include "LightStruct.hpp"
+#include <leomathutility.hpp>
 
 namespace leo {
 	
@@ -70,6 +71,8 @@ namespace leo {
 		//Spot
 		virtual float CosOuterAngle() const = 0;
 		//Spot
+		virtual float SinOuterAngle() const = 0;
+		//Spot
 		virtual void OuterAngle(float angle) = 0;
 
 	private:
@@ -113,6 +116,10 @@ namespace leo {
 			return 0;
 		}
 		//Spot
+		float SinOuterAngle() const {
+			return 0;
+		}
+		//Spot
 		void OuterAngle(float angle) {
 
 		}
@@ -137,6 +144,10 @@ namespace leo {
 			return Directional_Outer.a;
 		}
 		//Spot
+		float SinOuterAngle() const {
+			return Outer_Sin;
+		}
+		//Spot
 		float CosInnerAngle() const{
 			return Inner;
 		}
@@ -146,7 +157,7 @@ namespace leo {
 		}
 		//Spot
 		void OuterAngle(float angle) {
-			Directional_Outer.a = cos(angle);
+			Outer_Sin = sincosr(&Directional_Outer.a,angle);
 		}
 
 		//Spot
@@ -157,6 +168,7 @@ namespace leo {
 		float3 mFallOff;
 		float4 Directional_Outer;
 		float Inner;
+		float Outer_Sin;
 	};
 
 	class LB_API LightSourcesRender {

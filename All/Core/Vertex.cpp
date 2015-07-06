@@ -100,7 +100,9 @@ namespace leo
 			//Circle
 			for (int i = 0; i < n; ++i)
 			{
-				vb.emplace_back(vb[n + i]);
+				//error,maybe result valid reference
+				//vb.emplace_back(vb[n + i]);
+				vb.emplace_back(float3(vb[n + i]));
 			}
 
 			std::vector<uint32> ib;
