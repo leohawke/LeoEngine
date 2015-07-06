@@ -244,8 +244,10 @@ public:
 	//update matrix
 	//note mVSCBParams.WorldView == WorldMatrix
 	void ApplyLightVolumeCommon(ID3D11DeviceContext * context, const Camera& camera) {
-		mVSCBParams.WorldView = leo::Transpose(leo::Multiply(mVSCBParams.WorldView, load(camera.View())));
+		mVSCBParams.WorldView = leo::Transpose(load(camera.View()));
+		//leo::Multiply(mVSCBParams.WorldView, 
 		mVSCBParams.Proj = leo::Transpose(load(camera.Proj()));
+
 
 		context->UpdateSubresource(mVSCB, 0, nullptr, &mVSCBParams, 0, 0);
 

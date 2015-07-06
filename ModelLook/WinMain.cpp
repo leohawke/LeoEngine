@@ -435,7 +435,7 @@ void Render()
 		}
 
 		if (pRender) {
-			//pRender->LinearizeDepth(devicecontext, *leo::global::globalDepthStencil, pCamera->mNear, pCamera->mFar);
+			pRender->LinearizeDepth(devicecontext, *leo::global::globalDepthStencil, pCamera->mNear, pCamera->mFar);
 		}
 		//Light Pass
 		if (pRender && pLightRender) {
