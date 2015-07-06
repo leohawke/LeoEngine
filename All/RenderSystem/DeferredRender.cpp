@@ -125,6 +125,10 @@ public:
 		lightPassBDesc.RenderTarget[0].BlendEnable = true;
 		device->CreateBlendState(&lightPassBDesc, &mLightPassBlendState);
 
+		CD3D11_RASTERIZER_DESC lightPassRDesc{ D3D11_DEFAULT };
+		lightPassRDesc.CullMode = D3D11_CULL_NONE;
+		device->CreateRasterizerState(&lightPassRDesc, &mLigthPassRasterizeState);
+
 		ShaderMgr sm;
 		mShaderPS = sm.CreatePixelShader(FileSearch::Search(L"ShaderPS.cso"));
 	}
@@ -132,6 +136,8 @@ public:
 	win::unique_com<ID3D11DepthStencilState> mGBufferPassDepthStenciState = nullptr;
 	win::unique_com<ID3D11DepthStencilState> mLightPassDepthStenciState = nullptr;
 	win::unique_com<ID3D11DepthStencilState> mShaderPassDepthStenciState = nullptr;
+
+	win::unique_com<ID3D11RasterizerState> mLigthPassRasterizeState = nullptr;
 
 	//×ÅÉ«½×¶Î
 	ID3D11PixelShader* mShaderPS = nullptr;
@@ -199,7 +205,8 @@ void leo::DeferredRender::OMSet(ID3D11DeviceContext * context, DepthStencil& dep
 	ID3D11RenderTargetView* mRTVs[] = { pResImpl->mGBuffRTVs[0], pResImpl->mGBuffRTVs[1] };
 	context->OMSetRenderTargets(arrlen(pResImpl->mGBuffRTVs), mRTVs, depthstencil);
 	context->OMSetDepthStencilState(pStateImpl->mGBufferPassDepthStenciState, 0x10);
-
+	//ÇÐ»»»ØÄ¬ÈÏ¹âÕ¤
+	context->RSSetState(nullptr);
 	const static float rgba[] = { 0.f,0.f,0.f,0.f };
 
 	context->ClearRenderTargetView(pResImpl->mGBuffRTVs[0], rgba);
@@ -280,7 +287,11 @@ void leo::DeferredRender::ApplyLightPass(ID3D11DeviceContext * context) noexcept
 	context->OMSetBlendState(pStateImpl->mLightPassBlendState,factor, 0xffffffff);
 
 	context->ClearRenderTargetView(pResImpl->mLightRTV, factor);
+	//TODO:read-only dsv
 	context->OMSetRenderTargets(1, &pResImpl->mLightRTV, nullptr);
+
+	//¹âÕ¤ÉèÖÃ£¬²»²Ã¼ô
+	context->RSSetState(pStateImpl->mLigthPassRasterizeState);
 	//ºöÂÔÄ£°å²âÊÔ,ºöÂÔÄ£°å
 	ID3D11ShaderResourceView* srvs[] = { GetLinearDepthSRV(),GetNormalAlphaSRV() };
 	context->PSSetSamplers(0, 1, &LinearizeDepthImpl::GetInstance().mSamPoint);

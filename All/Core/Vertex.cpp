@@ -421,20 +421,6 @@ namespace leo
 				Indices.push_back(baseIndex + i);
 				Indices.push_back(baseIndex + i + 1);
 			}
-			/*std::vector <float3, leo::aligned_alloc<float3, 16>> Vertices;
-			std::vector<uint32> Indices;
-			Vertices.emplace_back(+1.f, +1.f, 1.f);
-			Vertices.emplace_back(+1.f, -1.f, 1.f);
-			Vertices.emplace_back(-1.f, +1.f, 1.f);
-			Vertices.emplace_back(-1.f, -1.f, 1.f);
-
-			Indices.push_back(0);
-			Indices.push_back(1);
-			Indices.push_back(2);
-
-			Indices.push_back(2);
-			Indices.push_back(1);
-			Indices.push_back(3);*/
 
 			return SimpleMeshData{ std::move(Vertices), std::move(Indices) };
 		}

@@ -259,7 +259,7 @@ void BuildLight(ID3D11Device* device) {
 	pLightRender = std::make_unique<leo::LightSourcesRender>(device);
 
 	auto mPointLight = std::make_shared<leo::PointLightSource>();
-	mPointLight->Position(leo::float3(0.f, 0.f, -2.f));
+	mPointLight->Position(leo::float3(0.f, 0.f,-2.f));
 	mPointLight->Range(6.f);
 	mPointLight->Diffuse(leo::float3(0.8f, 0.7f, 0.6f));
 	mPointLight->FallOff(leo::float3(0.f, 0.1f, 0.1f));
