@@ -365,6 +365,9 @@
     <ClInclude Include="Core\CoreDebug.hpp">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Core\LightStruct.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">

@@ -1,10 +1,10 @@
 //  Copyright (C), FNS Studios, 2014-2014.
 // -------------------------------------------------------------------------
 //  File name:   Core/Light.hpp
-//  Version:     v1.00
+//  Version:     v1.01
 //  Created:     05/09/2015 by leo hawke.
 //  Compilers:   Visual Studio.NET 2013
-//  Description: 提供光照结构体和相关函数
+//  Description: 提供光源类和相关函数
 // -------------------------------------------------------------------------
 //  History:
 //				
@@ -17,35 +17,20 @@
 #include <leo2dmath.hpp>
 #include <RenderSystem\DeferredRender.hpp>
 #include <memory.hpp>
+#include "LightStruct.hpp"
+
 namespace leo {
-	struct PointLight;
-	struct DirectionalLight;
-	struct SpotLight;
-
-	struct PointLight {
-		float3 Position;
-		float3 Diffuse;
-		float4 FallOff_Range;
-	};
-
-	struct DirectionalLight {
-		float3 Directional;
-		float3 Diffuse;
-	};
-
-	struct SpotLight {
-		float4 Position_Inner;
-		float3 Diffuse;
-		float4 FallOff_Range;
-		float4 Directional_Outer;
-	};
-
+	
 	class Camera;
 
 	//windows_system
 	ops::Rect CalcScissorRect(const PointLight& wPointLight, const Camera& camera);
 
-	class LB_API LightSource :public LightAlloc {
+#ifdef LEO_MEMORY_LIMIT
+	class LB_API LightSource :LightAlloc {
+#else
+	class LB_API LightSource{
+#endif
 	public:
 		enum light_type {
 			point_light = 0,
@@ -192,6 +177,38 @@ namespace leo {
 
 	
 	};
+}
+
+namespace std {
+	//make_shared overload for PointLightSource
+	template<> 
+	inline shared_ptr<leo::PointLightSource> make_shared()
+	{	// make a shared_ptr
+#ifdef LEO_MEMORY_LIMIT
+		shared_ptr<leo::PointLightSource> _Ret;
+		_Ret.reset(new leo::PointLightSource());
+#else
+		auto _Ret = std::allocate_shared<
+			leo::PointLightSource, leo::aligned_alloc<leo::PointLightSource, 16>>
+			(leo::aligned_alloc<leo::PointLightSource, 16>());
+#endif
+		return (_Ret);
+	}
+
+	//make_shared overload for SpotLightSource
+	template<>
+	inline shared_ptr<leo::SpotLightSource> make_shared()
+	{	// make a shared_ptr
+#ifdef LEO_MEMORY_LIMIT
+		shared_ptr<leo::SpotLightSource> _Ret;
+		_Ret.reset(new leo::SpotLightSource());
+#else
+		auto _Ret = std::allocate_shared<
+			leo::SpotLightSource, leo::aligned_alloc<leo::SpotLightSource, 16 >>
+			(leo::aligned_alloc<leo::SpotLightSource, 16>());
+#endif
+		return (_Ret);
+	}
 }
 
 

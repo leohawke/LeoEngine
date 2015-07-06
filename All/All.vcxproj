@@ -196,6 +196,7 @@
     <ClInclude Include="Core\FileSearch.h" />
     <ClInclude Include="Core\GaussBlur.hpp" />
     <ClInclude Include="Core\EffectLine.hpp" />
+    <ClInclude Include="Core\LightStruct.hpp" />
     <ClInclude Include="Core\Lod.h" />
     <ClInclude Include="Core\Material.h" />
     <ClInclude Include="Core\MeshData.hpp" />

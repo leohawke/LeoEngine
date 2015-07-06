@@ -21,7 +21,7 @@
 #include "Singleton.hpp"
 #include "leoint.hpp"
 #include "utility.hpp"
-#include "Light.hpp"
+#include "LightStruct.hpp"
 #include "Material.h"
 #include "exception.hpp"
 #include <d3d11.h>

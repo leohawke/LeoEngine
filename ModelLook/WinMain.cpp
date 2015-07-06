@@ -18,6 +18,7 @@
 #include <Core\EngineConfig.h>
 #include <Core\RenderSync.hpp>
 #include <Core\EffectQuad.hpp>
+#include <Core\Light.hpp>
 #include <Input.h>//to core!
 //Effect header
 #include <Core\EffectGBuffer.hpp>
@@ -258,16 +259,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 void BuildLight(ID3D11Device* device) {
 	pLightRender = std::make_unique<leo::LightSourcesRender>(device);
 
-	static_assert(sizeof(std::_Ref_count_obj_alloc<int, leo::aligned_alloc<leo::PointLightSource, 16>>) %16 ==0, "fuck");
-
-	auto mPointLight = std::allocate_shared<leo::PointLightSource,leo::aligned_alloc<leo::PointLightSource,16>>(leo::aligned_alloc<leo::PointLightSource, 16>());
+	auto mPointLight = std::make_shared<leo::PointLightSource>();
 	mPointLight->Position(leo::float3(0.f, 0.f,-2.f));
 	mPointLight->Range(3.f);
 	mPointLight->Diffuse(leo::float3(0.8f, 0.7f, 0.6f));
 	mPointLight->FallOff(leo::float3(0.f, 0.1f, 0.1f));
 	//pLightRender->AddLight(mPointLight);
 
-	auto mSpotLight = std::allocate_shared<leo::SpotLightSource, leo::aligned_alloc<leo::SpotLightSource, 16>>(leo::aligned_alloc<leo::SpotLightSource, 16>());
+	auto mSpotLight = std::make_shared<leo::SpotLightSource>();
 	mSpotLight->InnerAngle(leo::LM_RPD * 10);
 	mSpotLight->OuterAngle(leo::LM_RPD * 45);
 	mSpotLight->Diffuse(leo::float3(0.9f, 0.2f, 0.2f));
