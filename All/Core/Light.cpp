@@ -397,6 +397,7 @@ leo::LightSourcesRender::LightSourcesRender(ID3D11Device * device)
 leo::LightSourcesRender::~LightSourcesRender()
 {
 	PointLightVolumeImpl::GetInstance().~PointLightVolumeImpl();
+	SpotLightVolumeImpl::GetInstance().~SpotLightVolumeImpl();
 }
 
 void leo::LightSourcesRender::Draw(ID3D11DeviceContext * context,DeferredRender & pRender, const Camera & camera)

@@ -359,16 +359,15 @@ void Update() {
 		//sin(a + b) = sin(a) cos(b) + sin(b) cos(a)
 		//cosa = x ,sina = y
 		//sinb = sin(pi/180)
-
-		/*for (auto & pModelMesh : Models) {
-			auto max_rand = std::rand() % 10;
-			auto dir = std::rand() % 2;
-			dir == 0 ?
-				pModelMesh->Translation(leo::float3(max_rand*cosb, max_rand*sinb, max_rand)) :
-				pModelMesh->Translation(leo::float3(max_rand*cosb, max_rand*sinb, -max_rand));
-		}*/
-
-
+		auto total_mesh = Models.size();
+		auto theta = leo::LM_TWOPI/total_mesh;
+		auto i = 0u;
+		for (auto & pModelMesh : Models) {
+			leo::float3 pos(2 * leo::sinr(theta*i), 2 * leo::cosr(theta*i), 3);
+			pModelMesh->t = pos;
+			++i;
+		}
+	
 		//leo::DeviceMgr().GetDeviceContext()->UpdateSubresource(mPointLightPSCB, 0, nullptr, &pl, 0, 0);
 
 
