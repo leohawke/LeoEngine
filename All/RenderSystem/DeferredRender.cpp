@@ -104,13 +104,6 @@ public:
 		gBufferPassDSDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
 		device->CreateDepthStencilState(&gBufferPassDSDesc, &mGBufferPassDepthStenciState);
 
-		CD3D11_DEPTH_STENCIL_DESC lightPassDSDesc{ D3D11_DEFAULT };
-		lightPassDSDesc.DepthEnable = false;
-		lightPassDSDesc.StencilEnable = true;
-		lightPassDSDesc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;
-		lightPassDSDesc.BackFace = lightPassDSDesc.FrontFace;
-		device->CreateDepthStencilState(&lightPassDSDesc, &mLightPassDepthStenciState);
-
 		CD3D11_DEPTH_STENCIL_DESC shaderPassDesc{ D3D11_DEFAULT };
 		shaderPassDesc.DepthEnable = false;
 		shaderPassDesc.StencilEnable = true;
@@ -125,19 +118,53 @@ public:
 		lightPassBDesc.RenderTarget[0].BlendEnable = true;
 		device->CreateBlendState(&lightPassBDesc, &mLightPassBlendState);
 
-		CD3D11_RASTERIZER_DESC lightPassRDesc{ D3D11_DEFAULT };
-		lightPassRDesc.CullMode = D3D11_CULL_NONE;
-		device->CreateRasterizerState(&lightPassRDesc, &mLigthPassRasterizeState);
+		BuildDRLightStencil_StateObject(device);
 
 		ShaderMgr sm;
 		mShaderPS = sm.CreatePixelShader(FileSearch::Search(L"ShaderPS.cso"));
 	}
 
+	void BuildDRLightStencil_StateObject(ID3D11Device* device) {
+		CD3D11_RASTERIZER_DESC rasterizer_desc{ D3D11_DEFAULT };
+		rasterizer_desc.CullMode = D3D11_CULL_NONE;
+		rasterizer_desc.DepthClipEnable = false;
+		device->CreateRasterizerState(&rasterizer_desc, &mDRLightStenci_RasterizerState);
+
+		//enable z-test/stencil-test,disable zwrite,depth_func less
+		CD3D11_DEPTH_STENCIL_DESC depth_stencil_desc{ D3D11_DEFAULT };
+		depth_stencil_desc.DepthEnable = true;
+		depth_stencil_desc.StencilEnable = true;
+		depth_stencil_desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+		//z-oper:less,John Carmack z-fail stencil shadow algorithm
+		depth_stencil_desc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;
+		depth_stencil_desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+		depth_stencil_desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+		depth_stencil_desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+		depth_stencil_desc.BackFace.StencilFunc = D3D11_COMPARISON_EQUAL;
+		depth_stencil_desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+		depth_stencil_desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+		depth_stencil_desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+
+		device->CreateDepthStencilState(&depth_stencil_desc, &mDRLightStenci_DepthStenciState);
+
+		CD3D11_BLEND_DESC blend_desc{ D3D11_DEFAULT };
+		blend_desc.RenderTarget[0].BlendEnable = false;
+		blend_desc.RenderTarget[0].RenderTargetWriteMask = 0;
+		blend_desc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+		blend_desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+		blend_desc.RenderTarget[0].BlendEnable = true;
+		device->CreateBlendState(&blend_desc, &mLightPassBlendState);
+	}
+
 	win::unique_com<ID3D11DepthStencilState> mGBufferPassDepthStenciState = nullptr;
-	win::unique_com<ID3D11DepthStencilState> mLightPassDepthStenciState = nullptr;
 	win::unique_com<ID3D11DepthStencilState> mShaderPassDepthStenciState = nullptr;
 
-	win::unique_com<ID3D11RasterizerState> mLigthPassRasterizeState = nullptr;
+	win::unique_com<ID3D11BlendState> mDRLightStenci_BlendState = nullptr;
+	win::unique_com<ID3D11DepthStencilState> mDRLightStenci_DepthStenciState = nullptr;
+	win::unique_com<ID3D11RasterizerState> mDRLightStenci_RasterizerState = nullptr;
+	ID3D11VertexShader* mmDRLightStenci_VS = nullptr;
+	ID3D11PixelShader* mmDRLightStenci_PS = nullptr;
+
 
 	//×ÅÉ«½×¶Î
 	ID3D11PixelShader* mShaderPS = nullptr;
@@ -290,8 +317,10 @@ void leo::DeferredRender::ApplyLightPass(ID3D11DeviceContext * context) noexcept
 	//TODO:read-only dsv
 	context->OMSetRenderTargets(1, &pResImpl->mLightRTV, nullptr);
 
-	//¹âÕ¤ÉèÖÃ£¬²»²Ã¼ô
-	context->RSSetState(pStateImpl->mLigthPassRasterizeState);
+	//¹âÕ¤ÉèÖÃ£¬²»²Ã¼ô,this is error!
+	//Todo :remove this
+	//Todo :Ligth maiantian state
+	//context->RSSetState(pStateImpl->mLigthPassRasterizeState);
 	//ºöÂÔÄ£°å²âÊÔ,ºöÂÔÄ£°å
 	ID3D11ShaderResourceView* srvs[] = { GetLinearDepthSRV(),GetNormalAlphaSRV() };
 	context->PSSetSamplers(0, 1, &LinearizeDepthImpl::GetInstance().mSamPoint);
