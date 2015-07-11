@@ -50,7 +50,7 @@ public:
 		context->IASetVertexBuffers(0, 1, &mQUADVB, strides, offsets);
 		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 		context->IASetInputLayout(mQUADIALayout);
-
+		context->RSSetState(nullptr);
 		context->VSSetShader(mQUADVS, nullptr, 0);
 	}
 

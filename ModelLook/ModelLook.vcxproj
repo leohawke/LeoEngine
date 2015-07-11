@@ -262,6 +262,9 @@
     </ClCompile>
     <ClCompile Include="..\All\RenderSystem\DeferredRender.cpp" />
     <ClCompile Include="..\All\RenderSystem\DepthStencil.cpp" />
+    <ClInclude Include="..\All\RenderSystem\DRLightImpl.inl">
+      <FileType>CppCode</FileType>
+    </ClInclude>
     <ClCompile Include="..\All\RenderSystem\RenderStates.cpp" />
     <ClCompile Include="..\All\RenderSystem\ShaderMgr.cpp" />
     <ClCompile Include="..\All\TextureMgr.cpp">

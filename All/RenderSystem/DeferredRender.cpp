@@ -146,12 +146,12 @@ public:
 		blend_desc.RenderTarget[0].RenderTargetWriteMask = 0;
 		blend_desc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
 		blend_desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
-		blend_desc.RenderTarget[0].BlendEnable = true;
+		blend_desc.RenderTarget[0].BlendEnable = false;
 		device->CreateBlendState(&blend_desc, &mDRLightStenci_BlendState);
 
 		ShaderMgr sm;
-		mmDRLightStenci_VS = sm.CreateVertexShader(FileSearch::Search(L"DRDepthOnlyVS.cso"));
-		mmDRLightStenci_PS = sm.CreatePixelShader(FileSearch::Search(L"DRDepthOnlyPS.cso"));
+		mDRLightStenci_VS = sm.CreateVertexShader(FileSearch::Search(L"DRDepthOnlyVS.cso"));
+		mDRLightStenci_PS = sm.CreatePixelShader(FileSearch::Search(L"DRDepthOnlyPS.cso"));
 
 	}
 
@@ -188,8 +188,8 @@ public:
 	win::unique_com<ID3D11BlendState> mDRLightStenci_BlendState = nullptr;
 	win::unique_com<ID3D11DepthStencilState> mDRLightStenci_DepthStenciState = nullptr;
 	win::unique_com<ID3D11RasterizerState> mDRLightStenci_RasterizerState = nullptr;
-	ID3D11VertexShader* mmDRLightStenci_VS = nullptr;
-	ID3D11PixelShader* mmDRLightStenci_PS = nullptr;
+	ID3D11VertexShader* mDRLightStenci_VS = nullptr;
+	ID3D11PixelShader* mDRLightStenci_PS = nullptr;
 
 	//实际绘制光源体的渲染状态
 	win::unique_com<ID3D11BlendState> mDRRenderingVolume_BlendState = nullptr;
@@ -250,10 +250,12 @@ leo::DeferredRender::DeferredRender(ID3D11Device * device, size_type size)
 	pStateImpl(std::make_unique<DeferredStateImpl>(device))
 {
 	LinearizeDepthImpl::GetInstance(device);
+	LightSourcesRender::Init(device);
 }
 
 leo::DeferredRender::~DeferredRender() {
 	LinearizeDepthImpl::GetInstance().~LinearizeDepthImpl();
+	LightSourcesRender::Destroy();
 }
 
 void leo::DeferredRender::OMSet(ID3D11DeviceContext * context, DepthStencil& depthstencil) noexcept
@@ -337,16 +339,16 @@ void leo::DeferredRender::SetSSAOParams(bool enable, uint8 level) noexcept
 {
 }
 
-void leo::DeferredRender::ApplyLightPass(ID3D11DeviceContext * context,DepthStencil& depthstencil) noexcept
-{
-	const static float factor[] = { 0.f,0.f,0.f,0.f };
-
-	context->ClearRenderTargetView(pResImpl->mLightRTV, factor);
-	context->OMSetRenderTargets(1, &pResImpl->mLightRTV, depthstencil);
-	ID3D11ShaderResourceView* srvs[] = { GetLinearDepthSRV(),GetNormalAlphaSRV() };
-	context->PSSetSamplers(0, 1, &LinearizeDepthImpl::GetInstance().mSamPoint);
-
-	context->PSSetShaderResources(0, 2, srvs);
+void leo::DeferredRender::LightVolumePass(ID3D11DeviceContext* context, unsigned int index_count) {
+	context->OMSetBlendState(pStateImpl->mDRLightStenci_BlendState,nullptr,0);
+	context->OMSetDepthStencilState(pStateImpl->mDRLightStenci_DepthStenciState, 0);
+	context->RSSetState(pStateImpl->mDRLightStenci_RasterizerState);
+	context->VSSetShader(pStateImpl->mDRLightStenci_VS, nullptr, 0);
+	context->PSSetShader(pStateImpl->mDRLightStenci_PS, nullptr, 0);
+	context->DrawIndexed(index_count, 0, 0);
+	context->OMSetBlendState(pStateImpl->mDRRenderingVolume_BlendState, nullptr,0xffffffff);
+	context->OMSetDepthStencilState(pStateImpl->mDRRenderingVolume_DepthStenciState, 0);
+	context->RSSetState(pStateImpl->mDRRenderingVolume_RasterizerState);
 }
 
 ID3D11ShaderResourceView * leo::DeferredRender::GetLinearDepthSRV() const noexcept
@@ -363,6 +365,8 @@ ID3D11ShaderResourceView * leo::DeferredRender::GetNormalAlphaSRV() const noexce
 {
 	return pResImpl->mNormalSpecPowSRV;
 }
+
+#include "DRLightImpl.inl"
 
 leo::DeferredRender::SSAO::~SSAO()
 {

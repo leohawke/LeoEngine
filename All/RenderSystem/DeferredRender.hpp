@@ -18,18 +18,26 @@
 #include <memory>
 #include <leoint.hpp>
 #include "DepthStencil.hpp"
+#include "Core\Light.hpp"
 struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct ID3D11RenderTargetView;
 struct ID3D11ShaderResourceView;
 namespace leo {
-	class DeferredRender {
+	
+	class LB_API DeferredRender {
 	private:
 		class DeferredResImpl;
 		class DeferredStateImpl;
 		std::unique_ptr<DeferredResImpl> pResImpl;
 		std::unique_ptr<DeferredStateImpl> pStateImpl;
-
+		std::list<std::shared_ptr<LightSource>> mLightSourceList;
+	public:
+		class LightSourcesRender {
+		public:
+			static void Init(ID3D11Device* device);
+			static void Destroy();
+		};
 	public:
 		using size_type = std::pair<uint16, uint16>;
 
@@ -49,14 +57,17 @@ namespace leo {
 
 		void SetSSAOParams(bool enable, uint8 level) noexcept;
 
-		void ApplyLightPass(ID3D11DeviceContext* context, DepthStencil& depthstencil) noexcept;
+		void LightPass(ID3D11DeviceContext* context,DepthStencil& depth_stencil, const Camera& camera) noexcept;
+
+		void AddLight(std::shared_ptr<LightSource> light_source);
 
 		//Todo :Remove this Get*** function
 		ID3D11ShaderResourceView* GetLinearDepthSRV() const noexcept;
 
 		ID3D11RenderTargetView* GetLightRTV() const	noexcept;
 		ID3D11ShaderResourceView* GetNormalAlphaSRV() const noexcept;
-
+	protected:
+		void LightVolumePass(ID3D11DeviceContext* context,unsigned int index_count);
 	public:
 		class SSAO {
 			class DeferredSSAOImpl;

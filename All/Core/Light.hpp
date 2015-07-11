@@ -15,7 +15,6 @@
 #define Core_Light_Hpp
 
 #include <leo2dmath.hpp>
-#include <RenderSystem\DeferredRender.hpp>
 #include <memory.hpp>
 #include "LightStruct.hpp"
 #include <leomathutility.hpp>
@@ -169,25 +168,6 @@ namespace leo {
 		float4 Directional_Outer;
 		float Inner;
 		float Outer_Sin;
-	};
-
-	class LB_API LightSourcesRender {
-	public:
-		LightSourcesRender(ID3D11Device* device);
-
-		~LightSourcesRender();
-
-		void Draw(ID3D11DeviceContext* context,DeferredRender& pRender, const Camera& camera);
-
-		void AddLight(std::shared_ptr<LightSource> light_source);
-
-	private:
-		void Apply(ID3D11DeviceContext* context);
-
-
-		std::list<std::shared_ptr<LightSource>> mLightSourceList;
-
-	
 	};
 }
 

@@ -39,7 +39,6 @@ std::vector<std::unique_ptr<leo::Mesh>> Models = {};
 std::unique_ptr<leo::UVNCamera> pCamera = nullptr;
 std::unique_ptr<leo::CastShadowCamera> pShaderCamera;
 std::unique_ptr<leo::DeferredRender> pRender = nullptr;
-std::unique_ptr<leo::LightSourcesRender> pLightRender = nullptr;
 std::unique_ptr<leo::Terrain<>> pTerrain = nullptr;
 
 std::atomic<bool> renderAble = false;
@@ -257,14 +256,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 
 void BuildLight(ID3D11Device* device) {
-	pLightRender = std::make_unique<leo::LightSourcesRender>(device);
 
 	auto mPointLight = std::make_shared<leo::PointLightSource>();
 	mPointLight->Position(leo::float3(0.f, 0.f,1.f));
 	mPointLight->Range(5.f);
 	mPointLight->Diffuse(leo::float3(0.8f, 0.7f, 0.6f));
 	mPointLight->FallOff(leo::float3(0.f, 0.1f, 0.1f));
-	pLightRender->AddLight(mPointLight);
+	pRender->AddLight(mPointLight);
 
 	auto mSpotLight = std::make_shared<leo::SpotLightSource>();
 	mSpotLight->InnerAngle(leo::LM_RPD * 10);
@@ -274,10 +272,9 @@ void BuildLight(ID3D11Device* device) {
 	mSpotLight->FallOff(leo::float3(0.f, 0.1f, 0.1f));
 	mSpotLight->Position(leo::float3(0.f, 0.f, -3.f));
 	mSpotLight->Range(6.f);
-	pLightRender->AddLight(mSpotLight);
+	pRender->AddLight(mSpotLight);
 }
 void ClearLight() {
-	pLightRender.reset(nullptr);
 }
 
 void BuildRes(std::pair<leo::uint16, leo::uint16> size)
@@ -328,11 +325,12 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 
 	mGBufferPS = sm.CreatePixelShader(mGBufferBlob);
 
-	BuildLight(leo::DeviceMgr().GetDevice());
 
 
 	//pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(), L"Resource/Test.Terrain");
 	pRender = std::make_unique<leo::DeferredRender>(device, size);
+
+	BuildLight(leo::DeviceMgr().GetDevice());
 }
 
 void ClearRes() {
@@ -447,8 +445,8 @@ void Render()
 			pRender->LinearizeDepth(devicecontext, *leo::global::globalDepthStencil, pCamera->mNear, pCamera->mFar);
 		}
 		//Light Pass
-		if (pRender && pLightRender) {
-			pLightRender->Draw(devicecontext, *pRender, *pCamera);
+		if (pRender) {
+			pRender->LightPass(devicecontext, *leo::global::globalDepthStencil,*pCamera);
 		}
 		//Shader Pass
 		if (pRender) {

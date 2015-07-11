@@ -201,6 +201,9 @@
     <ClInclude Include="..\All\Core\EffectQuad.hpp">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\All\RenderSystem\DRLightImpl.inl">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\All\Shader\LightBuffer.hlsli">
