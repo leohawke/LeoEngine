@@ -245,7 +245,6 @@
       <Filter>Shader\HLSL\Line</Filter>
     </FxCompile>
     <FxCompile Include="..\All\Shader\SSAOPS.hlsl" />
-    <FxCompile Include="..\All\Shader\DeferredVS.hlsl" />
     <FxCompile Include="..\All\Shader\GBufferPass.hlsl" />
     <FxCompile Include="Shader\PointLightPS.hlsl">
       <Filter>Shader\HLSL</Filter>
@@ -278,6 +277,12 @@
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="Shader\DRDepthOnlyPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\DirectionalLightQuadPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\QUADVS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>

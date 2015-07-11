@@ -273,6 +273,8 @@ void BuildLight(ID3D11Device* device) {
 	mSpotLight->Position(leo::float3(0.f, 0.f, -3.f));
 	mSpotLight->Range(6.f);
 	pRender->AddLight(mSpotLight);
+
+	auto mDirLight = std::make_shared<leo::DirectionalLightSource>();
 }
 void ClearLight() {
 }
@@ -439,18 +441,10 @@ void Render()
 
 		if (pRender) {
 			pRender->UnBind(devicecontext, *leo::global::globalDepthStencil);
-		}
-
-		if (pRender) {
 			pRender->LinearizeDepth(devicecontext, *leo::global::globalDepthStencil, pCamera->mNear, pCamera->mFar);
-		}
-		//Light Pass
-		if (pRender) {
-			pRender->LightPass(devicecontext, *leo::global::globalDepthStencil,*pCamera);
-		}
-		//Shader Pass
-		if (pRender) {
+			pRender->LightPass(devicecontext, *leo::global::globalDepthStencil, *pCamera);
 			pRender->ShadingPass(devicecontext, leo::global::globalD3DRenderTargetView);
+
 		}
 
 		/*

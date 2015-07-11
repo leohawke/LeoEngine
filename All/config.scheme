@@ -41,7 +41,7 @@
 			(shader (v GenGBufferVS.cso) (p GenGBufferPS.cso))
 		)
 		(effect	(name quad)
-			(shader (v DeferredVS.cso))
+			(shader (v QUADVS.cso))
 		)
 		(effect (name pointlight)
 			(shader (v LightVolumeVS.cso) (p PointLightVolumePS.cso))

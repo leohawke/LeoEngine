@@ -245,16 +245,60 @@ public:
 	UINT mIndexCount = 0;
 };
 
+class DirectionalVolumeImpl :public leo::Singleton<PointLightVolumeImpl, false> {
+public:
+	DirectionalVolumeImpl(ID3D11Device* device) {
+		leo::ShaderMgr sm;
+
+		mDirectionalLightQuadPS = sm.CreatePixelShader(
+			leo::FileSearch::Search(L"DirectionalLightQuadPS.cso"));
+
+		CD3D11_BUFFER_DESC pscbDesc{ sizeof(leo::DirectionalLight),D3D11_BIND_CONSTANT_BUFFER };
+
+		leo::dxcall(device->CreateBuffer(&pscbDesc, nullptr, &mPSCB));
+	}
+
+	~DirectionalVolumeImpl() {
+	}
+
+	void Apply(ID3D11DeviceContext * context, DirectionalLightSource& light_source, const Camera& camera) {
+		EffectQuad::GetInstance().Apply(context);
+	}
+
+	void Draw(ID3D11DeviceContext * context, DirectionalLightSource& light_source, const Camera& camera) {
+		DirectionalLight mPSCBParams;
+		mPSCBParams.Diffuse = light_source.Diffuse();
+		mPSCBParams.Directional = light_source.Directional();
+		context->UpdateSubresource(mPSCB, 0, 0, &mPSCBParams, 0, 0);
+		context->PSSetShader(mDirectionalLightQuadPS, nullptr, 0);
+		context->PSSetConstantBuffers(0, 1, &mPSCB);
+		//Important ,Disable z-write
+		EffectQuad::GetInstance().Draw(context);
+	}
+
+	static DirectionalVolumeImpl& GetInstance(ID3D11Device* device = nullptr) {
+		static DirectionalVolumeImpl mInstance{ device };
+		return mInstance;
+	}
+
+private:
+	ID3D11PixelShader* mDirectionalLightQuadPS = nullptr;
+
+	leo::win::unique_com<ID3D11Buffer>  mPSCB = nullptr;
+};
+
 void leo::DeferredRender::LightSourcesRender::Init(ID3D11Device * device)
 {
 	PointLightVolumeImpl::GetInstance(device);
 	SpotLightVolumeImpl::GetInstance(device);
+	DirectionalVolumeImpl::GetInstance(device);
 }
 
 void leo::DeferredRender::LightSourcesRender::Destroy()
 {
 	PointLightVolumeImpl::GetInstance().~PointLightVolumeImpl();
 	SpotLightVolumeImpl::GetInstance().~SpotLightVolumeImpl();
+	DirectionalVolumeImpl::GetInstance().~DirectionalVolumeImpl();
 }
 
 void leo::DeferredRender::LightPass(ID3D11DeviceContext * context, DepthStencil& depthstencil, const Camera & camera) noexcept
@@ -270,22 +314,29 @@ void leo::DeferredRender::LightPass(ID3D11DeviceContext * context, DepthStencil&
 	for (auto &light_source : mLightSourceList) {
 		switch (light_source->Type())
 		{
-		case LightSource::point_light:{
+		case LightSource::point_light: {
 			auto & point_light = dynamic_cast<PointLightSource&>(*light_source);
 			auto & pointImpl = PointLightVolumeImpl::GetInstance();
 			pointImpl.Apply(context, point_light, camera);
 			LightVolumePass(context, pointImpl.GetIndexCount());
 			pointImpl.Draw(context, point_light, camera);
 		}
-			break;
-		case LightSource::spot_light:{
+									   break;
+		case LightSource::spot_light: {
 			auto & spot_light = dynamic_cast<SpotLightSource&>(*light_source);
 			auto & spotImpl = SpotLightVolumeImpl::GetInstance();
 			spotImpl.Apply(context, spot_light, camera);
 			LightVolumePass(context, spotImpl.GetIndexCount());
-			spotImpl.Draw(context,spot_light,camera);
+			spotImpl.Draw(context, spot_light, camera);
 		}
-			break;
+									  break;
+		case LightSource::directional_light: {
+			auto & dir_light = dynamic_cast<DirectionalLightSource&>(*light_source);
+			auto & dirImpl = DirectionalVolumeImpl::GetInstance();
+			dirImpl.Apply(context, dir_light, camera);
+			dirImpl.Draw(context, dir_light, camera);
+		}
+											 break;
 		default:
 			break;
 		}

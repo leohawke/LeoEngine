@@ -150,4 +150,10 @@ void leo::SpotLightSource::FallOff(const float3& falloff) {
 	mFallOff = falloff;
 }
 
+leo::DirectionalLightSource::DirectionalLightSource()
+	:LightSource(directional_light)
+{
+}
+
+
 

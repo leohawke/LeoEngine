@@ -20,7 +20,7 @@
 #include <leomathutility.hpp>
 
 namespace leo {
-	
+
 	class Camera;
 
 	//windows_system
@@ -29,7 +29,7 @@ namespace leo {
 #ifdef LEO_MEMORY_LIMIT
 	class LB_API LightSource :LightAlloc {
 #else
-	class LB_API LightSource{
+	class LB_API LightSource {
 #endif
 	public:
 		enum light_type {
@@ -37,14 +37,16 @@ namespace leo {
 
 			spot_light,
 
+			directional_light,
+
 			type_count
 		};
 
 	public:
 		explicit LightSource(light_type type);
 
-		virtual ~LightSource(){}
-		
+		virtual ~LightSource() {}
+
 		light_type Type() const;
 
 		const float3 & Position() const;
@@ -62,7 +64,7 @@ namespace leo {
 
 		//Spot,Directional
 		virtual void Directional(const float3& dir) = 0;
-		
+
 		//Spot
 		virtual float CosInnerAngle() const = 0;
 		//Spot
@@ -90,18 +92,18 @@ namespace leo {
 
 		void FallOff(const float3& falloff);
 
-		
+
 	protected:
 		//Spot,Directional
 		const float3& Directional() const {
 			DebugPrintf("Error: Call Error Function");
 			return mFallOff;
 		}
-	
+
 		//Spot,Directional
 		void Directional(const float3& dir) {
 		}
-		
+
 		//Spot
 		float CosInnerAngle() const {
 			return 0;
@@ -135,7 +137,7 @@ namespace leo {
 		void FallOff(const float3& falloff);
 
 		//Spot,Directional
-		const float3& Directional() const{
+		const float3& Directional() const {
 			return  *reinterpret_cast<const float3*>(&Directional_Outer);
 		}
 		//Spot
@@ -147,7 +149,7 @@ namespace leo {
 			return Outer_Sin;
 		}
 		//Spot
-		float CosInnerAngle() const{
+		float CosInnerAngle() const {
 			return Inner;
 		}
 		//Spot,Directional
@@ -156,7 +158,7 @@ namespace leo {
 		}
 		//Spot
 		void OuterAngle(float angle) {
-			Outer_Sin = sincosr(&Directional_Outer.a,angle);
+			Outer_Sin = sincosr(&Directional_Outer.a, angle);
 		}
 
 		//Spot
@@ -169,19 +171,49 @@ namespace leo {
 		float Inner;
 		float Outer_Sin;
 	};
+
+	class LB_API DirectionalLightSource :public LightSource {
+	public:
+		DirectionalLightSource();
+
+		const float3& Directional() const {
+			return mDirectional;
+		}
+
+		void Directional(const float3& dir){
+			mDirectional = dir;
+		}
+	protected:
+		float CosInnerAngle() const {
+			return 0.f;
+		}
+		void InnerAngle(float angle) {
+		}
+		float CosOuterAngle() const {
+			return 0.f;
+		}
+		float SinOuterAngle() const {
+			return 0.f;
+		}
+		void OuterAngle(float angle) {
+		}
+
+	private:
+		float3 mDirectional;
+	};
 }
 
 namespace std {
 	//make_shared overload for PointLightSource
-	template<> 
+	template<>
 	inline shared_ptr<leo::PointLightSource> make_shared()
 	{	// make a shared_ptr
 #ifdef LEO_MEMORY_LIMIT
 		shared_ptr<leo::PointLightSource> _Ret;
 		_Ret.reset(new leo::PointLightSource());
 #else
-		auto _Ret = std::allocate_shared<
-			leo::PointLightSource, leo::aligned_alloc<leo::PointLightSource, 16>>
+		auto _Ret = std::allocate_shared <
+			leo::PointLightSource, leo::aligned_alloc < leo::PointLightSource, 16 >>
 			(leo::aligned_alloc<leo::PointLightSource, 16>());
 #endif
 		return (_Ret);
@@ -195,9 +227,24 @@ namespace std {
 		shared_ptr<leo::SpotLightSource> _Ret;
 		_Ret.reset(new leo::SpotLightSource());
 #else
-		auto _Ret = std::allocate_shared<
-			leo::SpotLightSource, leo::aligned_alloc<leo::SpotLightSource, 16 >>
+		auto _Ret = std::allocate_shared <
+			leo::SpotLightSource, leo::aligned_alloc < leo::SpotLightSource, 16 >>
 			(leo::aligned_alloc<leo::SpotLightSource, 16>());
+#endif
+		return (_Ret);
+	}
+
+	//make_shared overload for DirectionalLightSource
+	template<>
+	inline shared_ptr<leo::DirectionalLightSource> make_shared()
+	{	// make a shared_ptr
+#ifdef LEO_MEMORY_LIMIT
+		shared_ptr<leo::DirectionalLightSource> _Ret;
+		_Ret.reset(new leo::DirectionalLightSource());
+#else
+		auto _Ret = std::allocate_shared <
+			leo::DirectionalLightSource, leo::aligned_alloc < leo::DirectionalLightSource, 16 >>
+			(leo::aligned_alloc<leo::DirectionalLightSource, 16>());
 #endif
 		return (_Ret);
 	}
