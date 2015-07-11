@@ -49,7 +49,7 @@ namespace leo {
 
 		void SetSSAOParams(bool enable, uint8 level) noexcept;
 
-		void ApplyLightPass(ID3D11DeviceContext* context) noexcept;
+		void ApplyLightPass(ID3D11DeviceContext* context, DepthStencil& depthstencil) noexcept;
 
 		//Todo :Remove this Get*** function
 		ID3D11ShaderResourceView* GetLinearDepthSRV() const noexcept;

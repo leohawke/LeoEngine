@@ -112,14 +112,8 @@ public:
 		shaderPassDesc.BackFace = shaderPassDesc.FrontFace;
 		device->CreateDepthStencilState(&shaderPassDesc, &mShaderPassDepthStenciState);
 
-		CD3D11_BLEND_DESC lightPassBDesc{ D3D11_DEFAULT };
-		lightPassBDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
-		lightPassBDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
-		lightPassBDesc.RenderTarget[0].BlendEnable = true;
-		device->CreateBlendState(&lightPassBDesc, &mLightPassBlendState);
-
 		BuildDRLightStencil_StateObject(device);
-
+		BuildDRRendingVolume_StateObject(device);
 		ShaderMgr sm;
 		mShaderPS = sm.CreatePixelShader(FileSearch::Search(L"ShaderPS.cso"));
 	}
@@ -153,24 +147,59 @@ public:
 		blend_desc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
 		blend_desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
 		blend_desc.RenderTarget[0].BlendEnable = true;
-		device->CreateBlendState(&blend_desc, &mLightPassBlendState);
+		device->CreateBlendState(&blend_desc, &mDRLightStenci_BlendState);
+
+		ShaderMgr sm;
+		mmDRLightStenci_VS = sm.CreateVertexShader(FileSearch::Search(L"DRDepthOnlyVS.cso"));
+		mmDRLightStenci_PS = sm.CreatePixelShader(FileSearch::Search(L"DRDepthOnlyPS.cso"));
+
+	}
+
+	void BuildDRRendingVolume_StateObject(ID3D11Device* device) {
+		CD3D11_BLEND_DESC blend_desc{ D3D11_DEFAULT };
+		blend_desc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+		blend_desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+		blend_desc.RenderTarget[0].BlendEnable = true;
+		device->CreateBlendState(&blend_desc, &mDRRenderingVolume_BlendState);
+
+		CD3D11_RASTERIZER_DESC rasterizer_desc{ D3D11_DEFAULT };
+		rasterizer_desc.CullMode = D3D11_CULL_FRONT;
+		rasterizer_desc.DepthClipEnable = false;
+		device->CreateRasterizerState(&rasterizer_desc, &mDRRenderingVolume_RasterizerState);
+
+		//diable z-test/zwrite,enbale stencil_test,depth_func less
+		CD3D11_DEPTH_STENCIL_DESC depth_stencil_desc{ D3D11_DEFAULT };
+		depth_stencil_desc.DepthEnable = false;
+		depth_stencil_desc.StencilEnable = true;
+		depth_stencil_desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+		depth_stencil_desc.BackFace.StencilFunc = D3D11_COMPARISON_LESS;
+		depth_stencil_desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+		depth_stencil_desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+		depth_stencil_desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
+		depth_stencil_desc.BackFace = depth_stencil_desc.FrontFace;
+
+		device->CreateDepthStencilState(&depth_stencil_desc, &mDRRenderingVolume_DepthStenciState);
 	}
 
 	win::unique_com<ID3D11DepthStencilState> mGBufferPassDepthStenciState = nullptr;
 	win::unique_com<ID3D11DepthStencilState> mShaderPassDepthStenciState = nullptr;
 
+	//光源体填充模板的渲染状态
 	win::unique_com<ID3D11BlendState> mDRLightStenci_BlendState = nullptr;
 	win::unique_com<ID3D11DepthStencilState> mDRLightStenci_DepthStenciState = nullptr;
 	win::unique_com<ID3D11RasterizerState> mDRLightStenci_RasterizerState = nullptr;
 	ID3D11VertexShader* mmDRLightStenci_VS = nullptr;
 	ID3D11PixelShader* mmDRLightStenci_PS = nullptr;
 
+	//实际绘制光源体的渲染状态
+	win::unique_com<ID3D11BlendState> mDRRenderingVolume_BlendState = nullptr;
+	win::unique_com<ID3D11DepthStencilState> mDRRenderingVolume_DepthStenciState = nullptr;
+	win::unique_com<ID3D11RasterizerState> mDRRenderingVolume_RasterizerState = nullptr;
 
 	//着色阶段
 	ID3D11PixelShader* mShaderPS = nullptr;
 
 	//光照阶段BlendState
-	win::unique_com<ID3D11BlendState> mLightPassBlendState = nullptr;
 };
 
 class LinearizeDepthImpl : public leo::Singleton<LinearizeDepthImpl, false>
@@ -308,20 +337,12 @@ void leo::DeferredRender::SetSSAOParams(bool enable, uint8 level) noexcept
 {
 }
 
-void leo::DeferredRender::ApplyLightPass(ID3D11DeviceContext * context) noexcept
+void leo::DeferredRender::ApplyLightPass(ID3D11DeviceContext * context,DepthStencil& depthstencil) noexcept
 {
 	const static float factor[] = { 0.f,0.f,0.f,0.f };
-	context->OMSetBlendState(pStateImpl->mLightPassBlendState,factor, 0xffffffff);
 
 	context->ClearRenderTargetView(pResImpl->mLightRTV, factor);
-	//TODO:read-only dsv
-	context->OMSetRenderTargets(1, &pResImpl->mLightRTV, nullptr);
-
-	//光栅设置，不裁剪,this is error!
-	//Todo :remove this
-	//Todo :Ligth maiantian state
-	//context->RSSetState(pStateImpl->mLigthPassRasterizeState);
-	//忽略模板测试,忽略模板
+	context->OMSetRenderTargets(1, &pResImpl->mLightRTV, depthstencil);
 	ID3D11ShaderResourceView* srvs[] = { GetLinearDepthSRV(),GetNormalAlphaSRV() };
 	context->PSSetSamplers(0, 1, &LinearizeDepthImpl::GetInstance().mSamPoint);
 
