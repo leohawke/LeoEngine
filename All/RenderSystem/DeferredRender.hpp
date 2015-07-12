@@ -68,6 +68,8 @@ namespace leo {
 		ID3D11ShaderResourceView* GetNormalAlphaSRV() const noexcept;
 	protected:
 		void LightVolumePass(ID3D11DeviceContext* context,unsigned int index_count);
+
+		void LightQuadPass(ID3D11DeviceContext* context);
 	public:
 		class SSAO {
 			class DeferredSSAOImpl;

@@ -334,7 +334,7 @@ void leo::DeferredRender::LightPass(ID3D11DeviceContext * context, DepthStencil&
 			auto & dir_light = dynamic_cast<DirectionalLightSource&>(*light_source);
 			auto & dirImpl = DirectionalVolumeImpl::GetInstance();
 			dirImpl.Apply(context, dir_light, camera);
-			context->OMSetDepthStencilState(pStateImpl->mDRRenderingQuad_DepthStenciState, 0);
+			LightQuadPass(context);
 			dirImpl.Draw(context, dir_light, camera);
 		}
 											 break;
