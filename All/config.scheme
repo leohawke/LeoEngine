@@ -22,5 +22,8 @@
 		(effect (name spotlight)
 			(shader  (p SpotLightVolumePS.cso))
 		)
+		(effect (name terrain)
+			(shader (v TerrainVS.cso) (p TerrainPS.cso) (c TerrainCHMCS.cso))
+		)
 	)
 )

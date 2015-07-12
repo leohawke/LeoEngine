@@ -28,10 +28,8 @@ namespace leo
 
 			mLinearRepeat = SS.GetSamplerState(L"LinearRepeat");
 
-			normalSampler = SS.GetSamplerState(L"trilinearSampler");
-
 			leo::TextureMgr texmgr;
-			texNormals = texmgr.LoadTextureSRV(FileSearch::Search(L"NormalsFitting.dds"));
+			
 		}
 		void Apply(ID3D11DeviceContext* con)
 		{
@@ -49,12 +47,10 @@ namespace leo
 
 			context.PSSetConstantBuffers(0, 1, &mPSCBPerLodColor.mBuffer);
 
-			
+			ID3D11SamplerState* mPSSSs[] = { mLinearRepeat,mLinearClamp };
 
-			ID3D11SamplerState* mPSSSs[] = { mLinearRepeat,normalSampler,mLinearClamp };
-
-			context.PSSetSamplers(0, 3, mPSSSs);
-			ID3D11ShaderResourceView* mArray[] = { mWeightSRV, mPSSRVArray,texNormals,mHeightSRV };
+			context.PSSetSamplers(0, 2, mPSSSs);
+			ID3D11ShaderResourceView* mArray[] = { mWeightSRV, mPSSRVArray,mHeightSRV };
 			context.PSSetShaderResources(0,arrlen(mArray), mArray);
 		}
 		bool SetLevel(EffectConfig::EffectLevel l) lnothrow
@@ -157,7 +153,6 @@ namespace leo
 
 		ID3D11SamplerState* mLinearRepeat = nullptr;
 
-		ID3D11ShaderResourceView *texNormals = nullptr;
 
 		ID3D11SamplerState* normalSampler = nullptr;
 	};

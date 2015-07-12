@@ -1,13 +1,7 @@
 half2 encode(half3 normal)
 {
-	return normalize(normal.xy) * sqrt(normal.z * 0.5 + 0.5);
-}
-half3 decode(half2 n)
-{
-	float3 normal;
-	normal.z = dot(n, n) * 2 - 1;
-	normal.xy = normalize(n) * sqrt(1 - normal.z * normal.z);
-	return normal;
+	float p = sqrt(-normal.z * 8 + 8);
+	return normal.xy/p+0.5f;
 }
 
 half3 encode(half2 enc_spheremap) {
@@ -26,5 +20,12 @@ half3 CompressionNormal(half3 n) {
 }
 
 half3 DeCompressionNormal(half3 n) {
-	return decode(decode(n));
+	half2 mrt0 = decode(n);
+	half2 fenc = mrt0.xy * 4 - 2;
+	half f = dot(fenc, fenc);
+	float g = sqrt(1 - f / 4);
+	float3 normal;
+	normal.xy = fenc*g;
+	normal.z = f / 2 - 1;
+	return normal;
 }

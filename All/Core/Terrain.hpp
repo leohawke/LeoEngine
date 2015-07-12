@@ -96,12 +96,14 @@ namespace leo
 				D3D11_SUBRESOURCE_DATA vbDataDesc = { vbDataDesc.pSysMem = mVertexs.data(), 0, 0 };
 
 				dxcall(device->CreateBuffer(&vbDesc, &vbDataDesc, &mCommonVertexBuffer));
-
+				DebugDXCOM(mCommonVertexBuffer);
 				CD3D11_BUFFER_DESC sovbDesc(8*(MAXEDGE + 1)*(MAXEDGE + 1), D3D11_BIND_STREAM_OUTPUT, D3D11_USAGE_DEFAULT);
 				dxcall(device->CreateBuffer(&sovbDesc, nullptr, &mSOTargetBuffer));
+				DebugDXCOM(mSOTargetBuffer);
 
 				CD3D11_BUFFER_DESC readvbDesc(8*(MAXEDGE + 1)*(MAXEDGE + 1),0, D3D11_USAGE_STAGING, D3D11_CPU_ACCESS_READ);
 				dxcall(device->CreateBuffer(&readvbDesc, nullptr, &mReadBuffer));
+				DebugDXCOM(mReadBuffer);
 			}
 			Catch_DX_Exception
 
@@ -220,6 +222,7 @@ namespace leo
 				D3D11_SUBRESOURCE_DATA ibDataDesc = { mIndexs.data(), 0, 0 };
 
 				dxcall(device->CreateBuffer(&ibDesc, &ibDataDesc, &mCommonIndexBuffer));
+				DebugDXCOM(mCommonIndexBuffer);
 			}
 			Catch_DX_Exception
 			leo::TextureMgr tm;
@@ -316,10 +319,10 @@ namespace leo
 	public:
 		void Render(ID3D11DeviceContext* context, const Camera& camera)
 		{
-			static bool has_normal_map = false;
-			if (!has_normal_map) {
-				ComputerNormalMap(context);
-				//has_normal_map = true;
+			static bool has_height_map = false;
+			if (!has_height_map) {
+				ComputerHeightMap(context);
+				has_height_map = true;
 			}
 
 			context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -376,19 +379,19 @@ namespace leo
 
 				if (slotX > 0)//Left
 				{
-					DrawCrack(*chunk, Chunk(slotX - 1, slotY), DIRECTION_2D_TYPE::DIRECTION_LEFT, context);
+					//DrawCrack(*chunk, Chunk(slotX - 1, slotY), DIRECTION_2D_TYPE::DIRECTION_LEFT, context);
 				}
 				if (slotX < mHorChunkNum - 1)//Right
 				{
-					DrawCrack(*chunk, Chunk(slotX + 1, slotY), DIRECTION_2D_TYPE::DIRECTION_RIGHT, context);
+					//DrawCrack(*chunk, Chunk(slotX + 1, slotY), DIRECTION_2D_TYPE::DIRECTION_RIGHT, context);
 				}
 				if (slotY > 0)//Top
 				{
-					DrawCrack(*chunk, Chunk(slotX, slotY - 1), DIRECTION_2D_TYPE::DIRECTION_TOP, context);
+					//DrawCrack(*chunk, Chunk(slotX, slotY - 1), DIRECTION_2D_TYPE::DIRECTION_TOP, context);
 				}
 				if (slotY < mVerChunkNum - 1)//Bottom
 				{
-					DrawCrack(*chunk, Chunk(slotX, slotY + 1), DIRECTION_2D_TYPE::DIRECTION_BOTTOM, context);
+					//DrawCrack(*chunk, Chunk(slotX, slotY + 1), DIRECTION_2D_TYPE::DIRECTION_BOTTOM, context);
 				}
 			}
 		}
@@ -398,7 +401,7 @@ namespace leo
 			//Todo
 			//GS生成,绘制阴影
 		}
-
+		/*
 		float GetHeight(const float2& xz) const{
 			//初始化一些东西
 			static auto mScreenSize = DeviceMgr().GetClientSize();
@@ -494,6 +497,7 @@ namespace leo
 				xt),
 				yt);
 		}
+		*/
 	private:
 		struct SOOutput {
 			union
@@ -716,7 +720,7 @@ namespace leo
 			return float2((mHorChunkNum - 1)*mChunkSize / -2.f + slotX*mChunkSize, +(mVerChunkNum - 1)*mChunkSize / 2 - slotY*mChunkSize);
 		}
 
-		void ComputerNormalMap(ID3D11DeviceContext* context) {
+		void ComputerHeightMap(ID3D11DeviceContext* context) {
 			ID3D11ShaderResourceView* nullSRV = nullptr;
 			context->VSSetShaderResources(0, 1, &nullSRV);
 			context->PSSetShaderResources(3, 1, &nullSRV);
@@ -732,7 +736,6 @@ namespace leo
 			ID3D11UnorderedAccessView* mNullptrUAV = nullptr;
 			context->CSSetUnorderedAccessViews(0, 1, &mNullptrUAV, nullptr);
 			context->CSSetShader(nullptr, nullptr, 0);
-
 		}
 	};
 }

@@ -273,7 +273,7 @@ void BuildLight(ID3D11Device* device) {
 	//pRender->AddLight(mSpotLight);
 
 	auto mDirLight = std::make_shared<leo::DirectionalLightSource>();
-	mDirLight->Directional(leo::float3(0.f, 0.f, 1.f));
+	mDirLight->Directional(leo::float3(0.f, -1.f, 0.f));
 	mDirLight->Diffuse(leo::float3(0.9f, 0.9f, 0.1f));
 	pRender->AddLight(mDirLight);
 }
@@ -291,6 +291,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	leo::EffectGBuffer::GetInstance(device);
 	leo::EffectQuad::GetInstance(device);
 	leo::EffectSky::GetInstance(device);
+	leo::EffectTerrain::GetInstance(device);
 #endif
 
 
@@ -309,7 +310,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pos.x = -pos.x;
 	pos.z = -pos.z;
 
-	pCamera->LookAt(float3(0.f, 0.f, -7.f), float3(0.f, 0.f, 0.f), float3(0.f, 1.f, 0.f));
+	pCamera->LookAt(float3(0.f, 19.f, -19.f), float3(0.f, 0.f, 0.f), float3(0.f, 1.f, 0.f));
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 
 	leo::EffectQuad::GetInstance().SetFrustum(device, *pCamera);
@@ -318,6 +319,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pRender = std::make_unique<leo::DeferredRender>(device, size);
 
 	pSky = std::make_unique<leo::Sky>(device, L"Resource\\snowcube1024.dds");
+	pTerrain = std::make_unique<leo::Terrain<>>(device, L"Resource\\Test.Terrain");
 	BuildLight(leo::DeviceMgr().GetDevice());
 }
 
@@ -326,6 +328,7 @@ void ClearRes() {
 	for (auto& prt : Models)
 		prt.reset(nullptr);
 	pTerrain.reset(nullptr);
+	pSky.reset(nullptr);
 	pRender.reset(nullptr);
 
 	ClearLight();
@@ -392,6 +395,7 @@ void Render()
 		for (auto & pModelMesh : Models) {
 			pModelMesh->Render(devicecontext, *pCamera);
 		}
+		pTerrain->Render(devicecontext, *pCamera);
 
 		if (pRender) {
 			pRender->UnBind(devicecontext, *leo::global::globalDepthStencil);
@@ -403,7 +407,6 @@ void Render()
 		devicecontext->OMSetRenderTargets(1, &leo::global::globalD3DRenderTargetView, *leo::global::globalDepthStencil);
 		devicecontext->ClearRenderTargetView(leo::global::globalD3DRenderTargetView, rgba);
 		pSky->Render(devicecontext, *pCamera);
-
 		if (pRender) {
 			pRender->ShadingPass(devicecontext);
 		}

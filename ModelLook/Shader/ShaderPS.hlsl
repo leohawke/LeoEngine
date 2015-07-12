@@ -47,7 +47,7 @@ float4 main(VertexOut pin) : SV_TARGET
 {
 	float4 NormalAlpha = texNormalAlpha.Sample(samPoint, pin.Tex);
 	float3 v = pin.ViewDir;
-	float3 n = decode(decode(half3(NormalAlpha.rgb)));
+	float3 n = DeCompressionNormal(half3(NormalAlpha.rgb));
 	float4 light = texLighting.Sample(samPoint,pin.Tex);
 	float4 diffuse_spec = texDiffuseSpec.Sample(samPoint, pin.Tex);
 	half ao = 1.f; //texAmbient.Sample(samPoint, pin.Tex);

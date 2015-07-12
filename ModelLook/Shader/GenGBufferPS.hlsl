@@ -27,7 +27,7 @@ void GBufferMRTPS(VertexOut pin,
 	out half4 NormalSpecPow: SV_TARGET0,
 	out half4 DiffuseSpec : SV_TARGET1)
 {
-	NormalSpecPow.xyz = encode(encode(pin.NormalV));
+	NormalSpecPow.xyz = CompressionNormal(pin.NormalV);
 	NormalSpecPow.w = Object.SpecularPow/256.f;
 
 	DiffuseSpec.rgb = texDiffuse.Sample(samAniso, pin.Tex).rgb;
