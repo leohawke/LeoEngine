@@ -49,10 +49,6 @@ std::atomic<bool> renderThreadRun = true;
 std::mutex mSizeMutex;
 std::mutex mRenderMutex;
 
-//用于显示GBuffer
-ID3D11PixelShader* mGBufferPS = nullptr;
-
-
 void DeviceEvent()
 {
 	while (!leo::DeviceMgr().GetDevice())
@@ -292,14 +288,6 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	event.Wait();
 	//Effect,Staic Instance	
 #if 1
-	//leo::EffectNormalLine::GetInstance(leo::DeviceMgr().GetDevice());
-	//leo::ShadowMap::GetInstance(leo::DeviceMgr().GetDevice(), std::make_pair(2048u, 2048u));
-	//leo::EffectPack::GetInstance(leo::DeviceMgr().GetDevice());
-
-	//leo::EffectShadowMap::GetInstance(leo::DeviceMgr().GetDevice());
-	//leo::EffectLine::GetInstance(leo::DeviceMgr().GetDevice());
-
-	//leo::DeferredResources::GetInstance();
 	leo::EffectGBuffer::GetInstance(device);
 	leo::EffectQuad::GetInstance(device);
 	leo::EffectSky::GetInstance(device);
@@ -325,16 +313,8 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 
 	leo::EffectQuad::GetInstance().SetFrustum(device, *pCamera);
-	//leo::DeferredResources::GetInstance().SetFrustum(*pCamera);
 #endif
-	leo::ShaderMgr sm;
-	auto mGBufferBlob = sm.CreateBlob(leo::FileSearch::Search(L"GBufferPS.cso"));
 
-	mGBufferPS = sm.CreatePixelShader(mGBufferBlob);
-
-
-
-	//pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(), L"Resource/Test.Terrain");
 	pRender = std::make_unique<leo::DeferredRender>(device, size);
 
 	pSky = std::make_unique<leo::Sky>(device, L"Resource\\snowcube1024.dds");
@@ -371,10 +351,6 @@ void Update() {
 		const float cosb = std::cos(1.f / leo::LM_DPR);
 		const float sinb = std::sin(1.f / leo::LM_DPR);
 
-		//cos(a+b) = cos(a) cos(b) - sin(a) sin(b) 
-		//sin(a + b) = sin(a) cos(b) + sin(b) cos(a)
-		//cosa = x ,sina = y
-		//sinb = sin(pi/180)
 		auto total_mesh = Models.size();
 		auto theta = leo::LM_TWOPI / total_mesh;
 		auto i = 0u;
@@ -384,9 +360,6 @@ void Update() {
 			++i;
 		}
 
-		//leo::DeviceMgr().GetDeviceContext()->UpdateSubresource(mPointLightPSCB, 0, nullptr, &pl, 0, 0);
-
-
 		static auto mBegin = leo::clock::now();
 
 		auto mRunTime = leo::clock::duration_to<>(leo::clock::now() - mBegin);
@@ -394,16 +367,6 @@ void Update() {
 		if (mRunTime < 1 / 30.f)
 			std::this_thread::sleep_for(leo::clock::to_duration<>(1 / 30.f - mRunTime));
 	}
-}
-
-void DrawSSAO(ID3D11DeviceContext* context) {
-
-
-	ID3D11ShaderResourceView* srv = nullptr;
-
-	context->PSSetShader(mGBufferPS, nullptr, 0);
-	context->PSSetShaderResources(0, 1, &srv);
-	context->Draw(4, 0);
 }
 
 
@@ -421,20 +384,6 @@ void Render()
 		std::lock_guard<std::mutex> lock(mRenderMutex);
 
 		auto devicecontext = dm.GetDeviceContext();
-
-#if 0
-		//Build Shadow Map
-
-		//leo::ShadowMap::GetInstance().BeginShadowMap(devicecontext,*pShaderCamera);
-		if (renderAble)
-			pModelMesh->CastShadow(devicecontext);
-
-		//pTerrainMesh->CastShadow(devicecontext);
-		//pBoxMesh->CastShadow(devicecontext);
-		//pSphereMesh->CastShadow(devicecontext);
-
-		//leo::ShadowMap::GetInstance().EndShadowMap(devicecontext);
-#endif
 
 		if (pRender) {
 			pRender->OMSet(devicecontext, *leo::global::globalDepthStencil);
@@ -458,44 +407,6 @@ void Render()
 		if (pRender) {
 			pRender->ShadingPass(devicecontext);
 		}
-
-		/*
-		BlurSSAO(devicecontext, unsigned int(prevVP.Width), unsigned int(prevVP.Height));
-		//绘制延迟Buff
-		{
-			//右下,最终图像
-			currvp.TopLeftX += currvp.Width;
-			currvp.TopLeftY += currvp.Height;
-			devicecontext->RSSetViewports(1, &currvp);
-			DrawLight(devicecontext);
-
-			//
-			auto srvs = defereed.GetSRVs();
-			devicecontext->PSSetShader(mGBufferPS, nullptr, 0);
-			//左上,法线
-			currvp.TopLeftX -= currvp.Width;
-			currvp.TopLeftY -= currvp.Height;
-			devicecontext->RSSetViewports(1, &currvp);
-			devicecontext->PSSetShaderResources(0, 1, &srvs[0]);
-			devicecontext->Draw(4, 0);
-
-			//右上 绘制颜色
-			currvp.TopLeftX += currvp.Width;
-			devicecontext->RSSetViewports(1, &currvp);
-			devicecontext->PSSetShaderResources(0, 1, &srvs[1]);
-			devicecontext->Draw(4, 0);
-
-
-			//左下绘制SSAO
-			currvp.TopLeftY += currvp.Height;
-			currvp.TopLeftX -= currvp.Width;
-			devicecontext->RSSetViewports(1, &currvp);
-
-			DrawSSAO(devicecontext);
-
-
-		}
-		*/
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 

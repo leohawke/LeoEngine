@@ -1,3 +1,0 @@
-copy /Y %(RootDir)%(Directory) $(OutDir)%(RelativeDir)
-¸´ÖÆ %(RootDir)%(Directory) µ½ $(OutDir)%(RelativeDir)
-$(OutDir)\copy.log

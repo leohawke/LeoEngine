@@ -21,17 +21,8 @@
     <Filter Include="Shader\HLSL">
       <UniqueIdentifier>{e20a3409-4cdf-4df4-b05d-0601f69c05e9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shader\HLSL\NormalMap">
-      <UniqueIdentifier>{094a4d48-5286-4d58-b926-fd5a4638e8c9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shader\HLSL\NormalLine">
-      <UniqueIdentifier>{f0695efa-48bf-4c9c-85b0-300f194e65b3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="头文件">
       <UniqueIdentifier>{3741c472-42c0-410e-99ce-f2aabb5fa4c3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shader\HLSL\Line">
-      <UniqueIdentifier>{cbbf3604-f506-406b-86a5-602df3aa4d7c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Sexp">
       <UniqueIdentifier>{c6e1c770-4f87-4bc7-966d-72398c0428b2}</UniqueIdentifier>
@@ -209,12 +200,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\All\Shader\LightBuffer.hlsli">
-      <Filter>Shader\HLSL</Filter>
-    </None>
-    <None Include="..\All\Shader\LightHelper.hlsli">
-      <Filter>Shader\HLSL</Filter>
-    </None>
     <None Include="The LeoEngine Terrain File.tpl">
       <Filter>Support Tool Config</Filter>
     </None>
@@ -226,35 +211,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\All\Shader\NormalMapPS.hlsl">
-      <Filter>Shader\HLSL\NormalMap</Filter>
-    </FxCompile>
-    <FxCompile Include="..\All\Shader\NormalMapVS.hlsl">
-      <Filter>Shader\HLSL\NormalMap</Filter>
-    </FxCompile>
-    <FxCompile Include="..\All\Shader\NormalLineGS.hlsl">
-      <Filter>Shader\HLSL\NormalLine</Filter>
-    </FxCompile>
-    <FxCompile Include="..\All\Shader\NormalLinePS.hlsl">
-      <Filter>Shader\HLSL\NormalLine</Filter>
-    </FxCompile>
-    <FxCompile Include="..\All\Shader\NormalLineVS.hlsl">
-      <Filter>Shader\HLSL\NormalLine</Filter>
-    </FxCompile>
-    <FxCompile Include="..\All\Shader\LineVS.hlsl">
-      <Filter>Shader\HLSL\Line</Filter>
-    </FxCompile>
-    <FxCompile Include="..\All\Shader\LinePS.hlsl">
-      <Filter>Shader\HLSL\Line</Filter>
-    </FxCompile>
     <FxCompile Include="..\All\Shader\SSAOPS.hlsl" />
     <FxCompile Include="..\All\Shader\GBufferPass.hlsl" />
-    <FxCompile Include="Shader\PointLightPS.hlsl">
-      <Filter>Shader\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Shader\BilateralFilterCS.hlsl">
-      <Filter>Shader\HLSL</Filter>
-    </FxCompile>
     <FxCompile Include="Shader\LinearizeDepthPS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
@@ -288,10 +246,10 @@
     <FxCompile Include="Shader\QUADVS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
-    <FxCompile Include="..\All\Shader\SkyPS.hlsl">
+    <FxCompile Include="Shader\SkyPS.hlsl">
       <Filter>Shader\HLSL\Sky</Filter>
     </FxCompile>
-    <FxCompile Include="..\All\Shader\SkyVS.hlsl">
+    <FxCompile Include="Shader\SkyVS.hlsl">
       <Filter>Shader\HLSL\Sky</Filter>
     </FxCompile>
   </ItemGroup>
