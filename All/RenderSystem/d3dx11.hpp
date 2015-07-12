@@ -7,7 +7,6 @@
 #include "leoint.hpp"
 
 #include "platform.h"
-#include <leo2DMath.hpp>
 #include "Core\COM.hpp"
 #include <comdef.h>
 #include <d3d11.h>
@@ -147,6 +146,10 @@ namespace leo
 #endif
 	}
 	
+	namespace ops {
+		struct Rect;
+	}
+
 	//helper function
 	namespace dx
 	{
@@ -256,14 +259,7 @@ namespace leo
 			return cbsize;
 		}
 	
-		inline D3D11_RECT ScissorRectFromNDCRect(const ops::Rect& ndcRect,const std::pair<uint16,uint16>& size) {
-			auto Top =static_cast<LONG>(ndcRect.tlbr.x * size.second);
-			auto Left = static_cast<LONG>( ndcRect.tlbr.y * size.first);
-			auto Bottom = static_cast<LONG>( ndcRect.tlbr.z * size.second);
-			auto Right = static_cast<LONG>(ndcRect.tlbr.w * size.first);
-
-			return CD3D11_RECT{ Left,Top,Right,Bottom };
-		}
+		D3D11_RECT ScissorRectFromNDCRect(const ops::Rect& ndcRect, const std::pair<uint16, uint16>& size);
 	}
 
 	//computer shader

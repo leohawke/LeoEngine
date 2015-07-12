@@ -262,7 +262,7 @@ void BuildLight(ID3D11Device* device) {
 	mPointLight->Range(5.f);
 	mPointLight->Diffuse(leo::float3(0.8f, 0.7f, 0.6f));
 	mPointLight->FallOff(leo::float3(0.f, 0.1f, 0.1f));
-	pRender->AddLight(mPointLight);
+	//pRender->AddLight(mPointLight);
 
 	auto mSpotLight = std::make_shared<leo::SpotLightSource>();
 	mSpotLight->InnerAngle(leo::LM_RPD * 10);
@@ -272,9 +272,12 @@ void BuildLight(ID3D11Device* device) {
 	mSpotLight->FallOff(leo::float3(0.f, 0.1f, 0.1f));
 	mSpotLight->Position(leo::float3(0.f, 0.f, -3.f));
 	mSpotLight->Range(6.f);
-	pRender->AddLight(mSpotLight);
+	//pRender->AddLight(mSpotLight);
 
 	auto mDirLight = std::make_shared<leo::DirectionalLightSource>();
+	mDirLight->Directional(leo::float3(0.f, 0.f, 1.f));
+	mSpotLight->Diffuse(leo::float3(0.9f, 0.9f, 0.1f));
+	pRender->AddLight(mDirLight);
 }
 void ClearLight() {
 }

@@ -268,7 +268,7 @@ public:
 	void Draw(ID3D11DeviceContext * context, DirectionalLightSource& light_source, const Camera& camera) {
 		DirectionalLight mPSCBParams;
 		mPSCBParams.Diffuse = light_source.Diffuse();
-		mPSCBParams.Directional = light_source.Directional();
+		mPSCBParams.Directional = -light_source.Directional();
 		context->UpdateSubresource(mPSCB, 0, 0, &mPSCBParams, 0, 0);
 		context->PSSetShader(mDirectionalLightQuadPS, nullptr, 0);
 		context->PSSetConstantBuffers(0, 1, &mPSCB);
@@ -334,6 +334,7 @@ void leo::DeferredRender::LightPass(ID3D11DeviceContext * context, DepthStencil&
 			auto & dir_light = dynamic_cast<DirectionalLightSource&>(*light_source);
 			auto & dirImpl = DirectionalVolumeImpl::GetInstance();
 			dirImpl.Apply(context, dir_light, camera);
+			context->OMSetDepthStencilState(pStateImpl->mDRRenderingQuad_DepthStenciState, 0);
 			dirImpl.Draw(context, dir_light, camera);
 		}
 											 break;

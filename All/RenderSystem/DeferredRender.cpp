@@ -112,6 +112,19 @@ public:
 		shaderPassDesc.BackFace = shaderPassDesc.FrontFace;
 		device->CreateDepthStencilState(&shaderPassDesc, &mShaderPassDepthStenciState);
 
+		//diable z-test/zwrite,enbale stencil_test,depth_func less
+		CD3D11_DEPTH_STENCIL_DESC depth_stencil_desc{ D3D11_DEFAULT };
+		depth_stencil_desc.DepthEnable = false;
+		depth_stencil_desc.StencilEnable = false;
+		depth_stencil_desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+		depth_stencil_desc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+		depth_stencil_desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+		depth_stencil_desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+		depth_stencil_desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+		depth_stencil_desc.BackFace = depth_stencil_desc.FrontFace;
+
+		device->CreateDepthStencilState(&depth_stencil_desc, &mDRRenderingQuad_DepthStenciState);
+
 		BuildDRLightStencil_StateObject(device);
 		BuildDRRendingVolume_StateObject(device);
 		ShaderMgr sm;
@@ -148,6 +161,7 @@ public:
 		blend_desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
 		blend_desc.RenderTarget[0].BlendEnable = false;
 		device->CreateBlendState(&blend_desc, &mDRLightStenci_BlendState);
+
 
 		ShaderMgr sm;
 		mDRLightStenci_VS = sm.CreateVertexShader(FileSearch::Search(L"DRDepthOnlyVS.cso"));
@@ -196,6 +210,8 @@ public:
 	win::unique_com<ID3D11DepthStencilState> mDRRenderingVolume_DepthStenciState = nullptr;
 	win::unique_com<ID3D11RasterizerState> mDRRenderingVolume_RasterizerState = nullptr;
 
+	//绘制QUAD的渲染状态
+	win::unique_com<ID3D11DepthStencilState> mDRRenderingQuad_DepthStenciState = nullptr;
 	//着色阶段
 	ID3D11PixelShader* mShaderPS = nullptr;
 

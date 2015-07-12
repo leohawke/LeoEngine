@@ -108,6 +108,9 @@ namespace leo {
 			struct {
 				scalar u, v,w;
 			};
+			struct {
+				scalar r, g, b;
+			};
 			scalar data[3];
 		};
 
@@ -213,10 +216,13 @@ namespace leo {
 			return *this;
 		}
 
-		template<typename T>
 		float* operator&() noexcept
 		{
 			return data;
+		}
+
+		float2 operator-() const noexcept {
+			return float2(-x, -y);
 		}
 	};
 	
@@ -260,6 +266,10 @@ namespace leo {
 		float* operator &() noexcept
 		{
 			return data;
+		}
+
+		float3 operator-() const noexcept {
+			return float3(-x, -y,-z);
 		}
 		
 	};
@@ -327,6 +337,10 @@ namespace leo {
 		float* operator &() noexcept
 		{
 			return data;
+		}
+
+		float4 operator-() const noexcept {
+			return float4(-x, -y,-z,-w);
 		}
 		
 	};
