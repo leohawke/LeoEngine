@@ -23,7 +23,7 @@ SamplerState RepeatLinear:register(s0)
 	AddressV = Wrap;
 };
 
-Texture2D<float> gHeightMap : register(t3);
+Texture2D<float> gHeightMap : register(t2);
 
 SamplerState ClampPoint:register(s1);
 

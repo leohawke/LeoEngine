@@ -21,7 +21,9 @@
 #include <string>
 #include <memory>
 
+
 enum D3D11_SHADER_TYPE;
+
 struct D3D11_RASTERIZER_DESC;
 struct D3D11_DEPTH_STENCIL_DESC;
 struct D3D11_BLEND_DESC;

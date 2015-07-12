@@ -580,7 +580,7 @@ namespace leo
 		std::pair<uint16, uint16> mScreenSize;
 
 		QuadTree<Chunk> mChunksQuadTree;
-		std::vector<Chunk*> mNeedDrawChunks;
+		std::list<Chunk*> mNeedDrawChunks;
 
 		std::vector<float3, aligned_alloc<float3, 16>> mVersInfo;
 
@@ -695,7 +695,7 @@ namespace leo
 
 		void DetermineDrawChunk(const Camera& camera)
 		{
-			static auto value_function = [](const Chunk& chunk, std::vector<Chunk*>& mNeedDrawChunks) {
+			static auto value_function = [](const Chunk& chunk, std::list<Chunk*>& mNeedDrawChunks) {
 				mNeedDrawChunks.push_back(const_cast<Chunk*>(&chunk));
 			};
 			static auto clip_function = [](const float4& rect, const Camera& camera) {
@@ -714,6 +714,20 @@ namespace leo
 				clip_function,
 				std::make_tuple(std::cref(camera))
 				);
+
+			
+			for (auto iter = mNeedDrawChunks.begin();iter != mNeedDrawChunks.end();) {
+				float4 rect;
+				auto offset = Offset((*iter)->mSlotX, (*iter)->mSlotY);
+				rect.x = offset.x;
+				rect.y = offset.y;
+				rect.z = rect.w = mChunkSize;
+				if (clip_function(rect,camera))
+					++iter;
+				else
+					iter = mNeedDrawChunks.erase(iter);
+			}
+
 		}
 
 		float2 Offset(uint32 slotX, uint32 slotY) const{

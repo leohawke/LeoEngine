@@ -41,7 +41,21 @@ namespace leo {
 #elif defined(DEBUG_TO_STD)
 	leo::details::debug_helper::global_debug.which = leo::details::debug_helper::output_type::std;
 #endif
+#else
+	namespace details {
+		//todo : impl this
+		struct  record_helper
+		{
 
+			void operator()(const wchar_t* format, ...);
+
+			void operator()(const char* format, ...);
+
+			void operator()(record_level level, const char* format, ...);
+
+			static record_helper global_debug;
+		};
+	}
 #endif
 }
 
@@ -58,7 +72,7 @@ namespace leo {
 #if defined(DEBUG)
 #define RecordPrintf DebugPrintf
 #else
-#define RecordPrintf wprintf
+#define RecordPrintf(...) {__VA_ARGS__;}
 #endif
 #endif
 

@@ -44,7 +44,7 @@ namespace leo
 			context->VSSetSamplers(0, 1, &mLinearClamp);
 
 			context.PSSetShader(mPS, nullptr, 0);
-
+			mPSCBPerLodColor.Update(con);
 			context.PSSetConstantBuffers(0, 1, &mPSCBPerLodColor.mBuffer);
 
 			ID3D11SamplerState* mPSSSs[] = { mLinearRepeat,mLinearClamp };

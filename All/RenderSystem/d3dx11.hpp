@@ -17,7 +17,7 @@
 #include <D3D11ShaderTracing.h>
 #include <d3d11sdklayers.h> //for D3D11Debug
 #else
-typedef enum D3D11_SHADER_TYPE : leo::uint8 {
+typedef enum D3D11_SHADER_TYPE{
 	D3D11_VERTEX_SHADER = 1,
 	D3D11_HULL_SHADER = 2,
 	D3D11_DOMAIN_SHADER = 3,
