@@ -619,7 +619,7 @@ namespace leo
 			pContext.VSSetConstantBuffers(mVertexConstantBufferPerCamera.slot, 1, &mVertexConstantBufferPerCamera.mBuffer);
 			pContext.PSSetShader(mPixelShader, nullptr, 0);
 			pContext.PSSetSamplers(0, 1, &mPixelShaderSampleState);
-			pContext.OMSetDepthStencilState(mNoDepthLessDSS, 0);
+			context->OMSetDepthStencilState(mNoDepthLessDSS, 0);
 		}
 
 		void EyePos(const float3& pos, ID3D11DeviceContext* context)

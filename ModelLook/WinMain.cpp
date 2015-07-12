@@ -19,6 +19,7 @@
 #include <Core\RenderSync.hpp>
 #include <Core\EffectQuad.hpp>
 #include <Core\Light.hpp>
+#include <Core\Sky.hpp>
 #include <Input.h>//to core!
 //Effect header
 #include <Core\EffectGBuffer.hpp>
@@ -40,6 +41,7 @@ std::unique_ptr<leo::UVNCamera> pCamera = nullptr;
 std::unique_ptr<leo::CastShadowCamera> pShaderCamera;
 std::unique_ptr<leo::DeferredRender> pRender = nullptr;
 std::unique_ptr<leo::Terrain<>> pTerrain = nullptr;
+std::unique_ptr<leo::Sky> pSky = nullptr;
 
 std::atomic<bool> renderAble = false;
 std::atomic<bool> renderThreadRun = true;
@@ -258,7 +260,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 void BuildLight(ID3D11Device* device) {
 
 	auto mPointLight = std::make_shared<leo::PointLightSource>();
-	mPointLight->Position(leo::float3(0.f, 0.f,1.f));
+	mPointLight->Position(leo::float3(0.f, 0.f, 1.f));
 	mPointLight->Range(5.f);
 	mPointLight->Diffuse(leo::float3(0.8f, 0.7f, 0.6f));
 	mPointLight->FallOff(leo::float3(0.f, 0.1f, 0.1f));
@@ -268,7 +270,7 @@ void BuildLight(ID3D11Device* device) {
 	mSpotLight->InnerAngle(leo::LM_RPD * 10);
 	mSpotLight->OuterAngle(leo::LM_RPD * 55);
 	mSpotLight->Diffuse(leo::float3(0.9f, 0.2f, 0.2f));
-	mSpotLight->Directional(leo::float3(0.f,0.707f,0.707f));
+	mSpotLight->Directional(leo::float3(0.f, 0.707f, 0.707f));
 	mSpotLight->FallOff(leo::float3(0.f, 0.1f, 0.1f));
 	mSpotLight->Position(leo::float3(0.f, 0.f, -3.f));
 	mSpotLight->Range(6.f);
@@ -298,9 +300,9 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	//leo::EffectLine::GetInstance(leo::DeviceMgr().GetDevice());
 
 	//leo::DeferredResources::GetInstance();
-	leo::EffectGBuffer::GetInstance(leo::DeviceMgr().GetDevice());
+	leo::EffectGBuffer::GetInstance(device);
 	leo::EffectQuad::GetInstance(device);
-	//leo::EffectTerrain::GetInstance(leo::DeviceMgr().GetDevice());
+	leo::EffectSky::GetInstance(device);
 #endif
 
 
@@ -335,6 +337,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	//pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(), L"Resource/Test.Terrain");
 	pRender = std::make_unique<leo::DeferredRender>(device, size);
 
+	pSky = std::make_unique<leo::Sky>(device, L"Resource\\snowcube1024.dds");
 	BuildLight(leo::DeviceMgr().GetDevice());
 }
 
@@ -373,14 +376,14 @@ void Update() {
 		//cosa = x ,sina = y
 		//sinb = sin(pi/180)
 		auto total_mesh = Models.size();
-		auto theta = leo::LM_TWOPI/total_mesh;
+		auto theta = leo::LM_TWOPI / total_mesh;
 		auto i = 0u;
 		for (auto & pModelMesh : Models) {
 			leo::float3 pos(2 * leo::sinr(theta*i), 2 * leo::cosr(theta*i), 3);
 			pModelMesh->t = pos;
 			++i;
 		}
-	
+
 		//leo::DeviceMgr().GetDeviceContext()->UpdateSubresource(mPointLightPSCB, 0, nullptr, &pl, 0, 0);
 
 
@@ -433,12 +436,11 @@ void Render()
 		//leo::ShadowMap::GetInstance().EndShadowMap(devicecontext);
 #endif
 
-
 		if (pRender) {
 			pRender->OMSet(devicecontext, *leo::global::globalDepthStencil);
 		}
 
-		for(auto & pModelMesh:Models){
+		for (auto & pModelMesh : Models) {
 			pModelMesh->Render(devicecontext, *pCamera);
 		}
 
@@ -446,8 +448,15 @@ void Render()
 			pRender->UnBind(devicecontext, *leo::global::globalDepthStencil);
 			pRender->LinearizeDepth(devicecontext, *leo::global::globalDepthStencil, pCamera->mNear, pCamera->mFar);
 			pRender->LightPass(devicecontext, *leo::global::globalDepthStencil, *pCamera);
-			pRender->ShadingPass(devicecontext, leo::global::globalD3DRenderTargetView);
+		}
 
+		static const float rgba[4] = { 0.0f, 0.25f, 0.25f, 0.8f };
+		devicecontext->OMSetRenderTargets(1, &leo::global::globalD3DRenderTargetView, *leo::global::globalDepthStencil);
+		devicecontext->ClearRenderTargetView(leo::global::globalD3DRenderTargetView, rgba);
+		pSky->Render(devicecontext, *pCamera);
+
+		if (pRender) {
+			pRender->ShadingPass(devicecontext);
 		}
 
 		/*

@@ -97,20 +97,13 @@ private:
 class leo::DeferredRender::DeferredStateImpl {
 public:
 	DeferredStateImpl(ID3D11Device* device) {
-		//light :stencil-ref : 0x10
-		//no-light:stencil-ref: 0x01
-		CD3D11_DEPTH_STENCIL_DESC gBufferPassDSDesc{ D3D11_DEFAULT };
-		gBufferPassDSDesc.StencilEnable = true;
-		gBufferPassDSDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
-		device->CreateDepthStencilState(&gBufferPassDSDesc, &mGBufferPassDepthStenciState);
-
 		CD3D11_DEPTH_STENCIL_DESC shaderPassDesc{ D3D11_DEFAULT };
-		shaderPassDesc.DepthEnable = false;
-		shaderPassDesc.StencilEnable = true;
-		shaderPassDesc.FrontFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
-		shaderPassDesc.StencilReadMask = 0x11;
-		shaderPassDesc.BackFace = shaderPassDesc.FrontFace;
+		shaderPassDesc.DepthFunc = D3D11_COMPARISON_GREATER;
+		shaderPassDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+		shaderPassDesc.DepthEnable = true;
+		shaderPassDesc.StencilEnable = false;
 		device->CreateDepthStencilState(&shaderPassDesc, &mShaderPassDepthStenciState);
+
 
 		BuildDRLightStencil_StateObject(device);
 		BuildDRRendingVolume_StateObject(device);
@@ -172,17 +165,18 @@ public:
 		CD3D11_DEPTH_STENCIL_DESC depth_stencil_desc{ D3D11_DEFAULT };
 		depth_stencil_desc.DepthEnable = false;
 		depth_stencil_desc.StencilEnable = true;
+		depth_stencil_desc.StencilReadMask = 127;
+		depth_stencil_desc.StencilWriteMask = 127;
 		depth_stencil_desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 		depth_stencil_desc.BackFace.StencilFunc = D3D11_COMPARISON_LESS;
 		depth_stencil_desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
 		depth_stencil_desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 		depth_stencil_desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
-		depth_stencil_desc.BackFace = depth_stencil_desc.FrontFace;
+		depth_stencil_desc.FrontFace = depth_stencil_desc.BackFace;
 
 		device->CreateDepthStencilState(&depth_stencil_desc, &mDRRenderingVolume_DepthStenciState);
 	}
 
-	win::unique_com<ID3D11DepthStencilState> mGBufferPassDepthStenciState = nullptr;
 	win::unique_com<ID3D11DepthStencilState> mShaderPassDepthStenciState = nullptr;
 
 	//光源体填充模板的渲染状态
@@ -263,7 +257,7 @@ void leo::DeferredRender::OMSet(ID3D11DeviceContext * context, DepthStencil& dep
 {
 	ID3D11RenderTargetView* mRTVs[] = { pResImpl->mGBuffRTVs[0], pResImpl->mGBuffRTVs[1] };
 	context->OMSetRenderTargets(arrlen(pResImpl->mGBuffRTVs), mRTVs, depthstencil);
-	context->OMSetDepthStencilState(pStateImpl->mGBufferPassDepthStenciState, 0x10);
+	context->OMSetDepthStencilState(nullptr, 0);
 	//切换回默认光栅
 	context->RSSetState(nullptr);
 	const static float rgba[] = { 0.f,0.f,0.f,0.f };
@@ -307,16 +301,15 @@ void leo::DeferredRender::LinearizeDepth(ID3D11DeviceContext * context, DepthSte
 	context->PSSetShaderResources(0, 1, &srv);
 }
 
-void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context, ID3D11RenderTargetView * finally_rtv) noexcept
+void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context) noexcept
 {
 
 	auto & effectQuad = leo::EffectQuad::GetInstance();
 
 
-	static const float rgba[4] = { 0.0f, 0.25f, 0.25f, 0.8f };
-	context->OMSetRenderTargets(1, &finally_rtv, nullptr);
-	context->ClearRenderTargetView(finally_rtv, rgba);
+	
 	context->OMSetBlendState(nullptr, nullptr, 0xffffffff);
+	context->OMSetDepthStencilState(pStateImpl->mShaderPassDepthStenciState, 0);
 	effectQuad.Apply(context);
 	context->PSSetShader(pStateImpl->mShaderPS, nullptr, 0);
 
@@ -328,7 +321,7 @@ void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context, ID3D11Rende
 
 	context->PSSetShaderResources(0,arrlen(srvs),srvs);
 	context->PSSetSamplers(0, 1, &(LinearizeDepthImpl::GetInstance().mSamPoint));
-
+	//TODO-Z greate opt
 	effectQuad.Draw(context);
 
 	for (auto & s : srvs)
@@ -353,14 +346,8 @@ void leo::DeferredRender::LightVolumePass(ID3D11DeviceContext* context, unsigned
 }
 
 void leo::DeferredRender::LightQuadPass(ID3D11DeviceContext* context) {
-	context->OMSetDepthStencilState(pStateImpl->mDRLightStenci_DepthStenciState, 0);
-	context->OMSetBlendState(pStateImpl->mDRLightStenci_BlendState, nullptr, 0);
-	context->RSSetState(nullptr);
-	context->PSSetShader(pStateImpl->mDRLightStenci_PS, nullptr, 0);
-	context->Draw(4, 0);
-
 	context->OMSetBlendState(pStateImpl->mDRRenderingVolume_BlendState, nullptr, 0xffffffff);
-	context->OMSetDepthStencilState(pStateImpl->mDRRenderingVolume_DepthStenciState, 0);
+	context->OMSetDepthStencilState(pStateImpl->mShaderPassDepthStenciState,0);
 }
 
 ID3D11ShaderResourceView * leo::DeferredRender::GetLinearDepthSRV() const noexcept

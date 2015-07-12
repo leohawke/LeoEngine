@@ -42,6 +42,9 @@
     <Filter Include="Support Tool Config">
       <UniqueIdentifier>{1c924059-add0-4ad9-99af-740975ac8ac1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader\HLSL\Sky">
+      <UniqueIdentifier>{8017c0e6-2039-44d9-913f-79492f8a1a9f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -284,6 +287,12 @@
     </FxCompile>
     <FxCompile Include="Shader\QUADVS.hlsl">
       <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\All\Shader\SkyPS.hlsl">
+      <Filter>Shader\HLSL\Sky</Filter>
+    </FxCompile>
+    <FxCompile Include="..\All\Shader\SkyVS.hlsl">
+      <Filter>Shader\HLSL\Sky</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
