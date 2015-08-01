@@ -1,11 +1,5 @@
 #include "DeferredRender.hpp"
-#include <platform.h>
-#include <Core\COM.hpp>
-#include <Core\FileSearch.h>
-#include <Core\Camera.hpp>
-#include <Core\BilateralFilter.hpp>
-#include <Core\EffectQuad.hpp>
-#include "d3dx11.hpp"
+#include "HDRImpl.inl"
 #include "ShaderMgr.h"
 #include "RenderStates.hpp"
 #include <leomathutility.hpp>
@@ -13,6 +7,8 @@
 
 #include <DirectXPackedVector.h>
 //TODO :Support MSAA
+
+
 
 class LinearizeDepthImpl;
 
@@ -240,15 +236,20 @@ public:
 	}
 };
 
+std::unique_ptr<HDRImpl> pHDRImpl;
+
 leo::DeferredRender::DeferredRender(ID3D11Device * device, size_type size)
 	:pResImpl(std::make_unique<DeferredResImpl>(device, size)),
 	pStateImpl(std::make_unique<DeferredStateImpl>(device))
 {
 	LinearizeDepthImpl::GetInstance(device);
 	LightSourcesRender::Init(device);
+
+	pHDRImpl = std::make_unique<HDRImpl>(device, global::globalD3DRenderTargetTexture2D, global::globalD3DRenderTargetView);
 }
 
 leo::DeferredRender::~DeferredRender() {
+	pHDRImpl.reset(nullptr);
 	LinearizeDepthImpl::GetInstance().~LinearizeDepthImpl();
 	LightSourcesRender::Destroy();
 }
@@ -279,6 +280,7 @@ void leo::DeferredRender::ReSize(ID3D11Device * device, size_type size) noexcept
 {
 	pResImpl.reset(nullptr);
 	pResImpl = std::make_unique<DeferredResImpl>(device, size);
+	pHDRImpl->ReSize(device, global::globalD3DRenderTargetTexture2D, global::globalD3DRenderTargetView);
 }
 
 void leo::DeferredRender::LinearizeDepth(ID3D11DeviceContext * context, DepthStencil& depthstencil, float near_z, float far_z) noexcept

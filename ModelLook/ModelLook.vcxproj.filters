@@ -212,6 +212,9 @@
     <None Include="Shader\Lighting.hlsli">
       <Filter>Shader</Filter>
     </None>
+    <None Include="..\All\RenderSystem\HDRImpl.inl">
+      <Filter>RenderSystem</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\LinearizeDepthPS.hlsl">
