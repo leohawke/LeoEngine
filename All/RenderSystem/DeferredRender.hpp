@@ -3,7 +3,7 @@
 //  Leo Engine Source File.
 //  Copyright (C), FNS Studios, 2014-2015.
 // -------------------------------------------------------------------------
-//  File name:   ShaderSystem/DeferredRender.h
+//  File name:   RenderSystem/DeferredRender.hpp
 //  Version:     v1.00
 //  Created:     05/16/2015 by leo hawke.
 //  Compilers:   Visual Studio.NET 2015

@@ -4,7 +4,7 @@
 //  Copyright (C), FNS Studios, 2014-2015.
 // -------------------------------------------------------------------------
 //  File name:   IndePlatform/ldef.hpp
-//  Version:     v1.02
+//  Version:     v1.03
 //  Created:     02/06/2014 by leo hawke.
 //  Compilers:   Visual Studio.NET 2015
 //  Description: 
@@ -12,6 +12,7 @@
 //  History:
 //		2014-9-27 11:02: 强制要求编译器支持alignas以及noexcept(以VS14 CTP1支持特性为主)
 //		2015-3-9  11:22  新增要求编译器支持noexcept(以VS14 CTP5支持特性为主),并格式化注释
+//		2015-8-8  10:48  新增两个宏LEO_BEGIN和LEO_END
 //
 ////////////////////////////////////////////////////////////////////////////
 #ifndef IndePlatform_ldef_h
@@ -375,6 +376,23 @@
 #	define LB_USE_EXCEPTION_SPECIFICATION 1
 #endif
 
+/*!
+\def LEO_BEGIN
+\brief 定义为 namespace leo {
+\since build 1.03
+*/
+#ifndef LEO_BEGIN
+#define LEO_BEGIN namespace leo{
+#endif
+
+/*!
+\def LEO_END
+\brief 定义为 }
+\since build 1.03
+*/
+#ifndef LEO_END
+#define LEO_END	}
+#endif
 
 //@}
 

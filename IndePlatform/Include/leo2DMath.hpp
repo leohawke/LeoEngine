@@ -36,7 +36,9 @@ namespace leo {
 	namespace ops{
 		enum class axis_system {
 			cartesian_system,
-			windows_system
+			windows_system,
+			dx_texture_system,
+			gl_texture_system
 		};
 
 

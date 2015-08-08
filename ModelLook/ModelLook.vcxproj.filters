@@ -164,6 +164,9 @@
     <ClCompile Include="..\All\Core\EffectQuad.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\PostProcess.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -199,6 +202,9 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\All\RenderSystem\DRLightImpl.inl">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\RenderSystem\PostProcess.hpp">
       <Filter>RenderSystem</Filter>
     </ClInclude>
   </ItemGroup>

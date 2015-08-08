@@ -372,7 +372,7 @@ void Update() {
 	}
 }
 
-
+//TODO ,验证为什么Space Coored,1 不可行
 void Render()
 {
 	event.Wait();

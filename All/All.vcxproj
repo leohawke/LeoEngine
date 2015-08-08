@@ -222,7 +222,6 @@
     <ClInclude Include="Notation.hpp" />
     <ClInclude Include="d3dx11.hpp" />
     <ClInclude Include="declara.hpp" />
-    <ClInclude Include="exception.hpp" />
     <ClInclude Include="file.hpp" />
     <ClInclude Include="raii.hpp" />
     <ClInclude Include="RenderSystem\Deferred.h" />
