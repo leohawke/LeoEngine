@@ -32,7 +32,7 @@ bool leo::PostProcess::BindProcess(ID3D11Device* device, const std::string& psfi
 	return BindProcess(device, psfilename.c_str());
 }
 bool leo::PostProcess::BindProcess(ID3D11Device* device, const char* psfilename) {
-
+	return false;
 }
 
 namespace {
@@ -43,7 +43,7 @@ namespace {
 }
 
 bool leo::PostProcess::BindRect(ops::Rect& src, ops::Rect& dst) {
-
+	return false;
 }
 
 void leo::PostProcess::Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) {
