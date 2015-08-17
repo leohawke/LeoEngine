@@ -4,6 +4,8 @@
 
 using namespace leo;
 
+decltype(PostProcess::mCommonThunk) PostProcess::mCommonThunk;
+
 leo::PostProcess::PostProcess(ID3D11Device*) {
 	++mCommonThunk.mRefCount;
 	if (mCommonThunk.mRefCount && !mCommonThunk.mVertexShader) {

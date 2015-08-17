@@ -13,8 +13,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LeoScheme", "LeoScheme\LeoS
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IndePlatform", "IndePlatform\IndePlatform.vcxproj", "{B8A92299-1C60-42C9-B77D-47F317497131}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3ds_Max_Plugin_Export_l3d", "3ds_Max_Plugin_Export_l3d\3ds_Max_Plugin_Export_l3d.vcxproj", "{6671F0BA-6FB8-4F35-8392-0676D05113A8}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -111,23 +109,6 @@ Global
 		{B8A92299-1C60-42C9-B77D-47F317497131}.Release|Win32.ActiveCfg = Release|Win32
 		{B8A92299-1C60-42C9-B77D-47F317497131}.Release|Win32.Build.0 = Release|Win32
 		{B8A92299-1C60-42C9-B77D-47F317497131}.Release|x64.ActiveCfg = Release|Win32
-		{6671F0BA-6FB8-4F35-8392-0676D05113A8}.Debug|Mixed Platforms.ActiveCfg = Release|x64
-		{6671F0BA-6FB8-4F35-8392-0676D05113A8}.Debug|Mixed Platforms.Build.0 = Release|x64
-		{6671F0BA-6FB8-4F35-8392-0676D05113A8}.Debug|Win32.ActiveCfg = Release|x64
-		{6671F0BA-6FB8-4F35-8392-0676D05113A8}.Debug|Win32.Build.0 = Release|x64
-		{6671F0BA-6FB8-4F35-8392-0676D05113A8}.Debug|x64.ActiveCfg = Release|x64
-		{6671F0BA-6FB8-4F35-8392-0676D05113A8}.Debug|x64.Build.0 = Release|x64
-		{6671F0BA-6FB8-4F35-8392-0676D05113A8}.Profile|Mixed Platforms.ActiveCfg = Release|x64
-		{6671F0BA-6FB8-4F35-8392-0676D05113A8}.Profile|Mixed Platforms.Build.0 = Release|x64
-		{6671F0BA-6FB8-4F35-8392-0676D05113A8}.Profile|Win32.ActiveCfg = Release|x64
-		{6671F0BA-6FB8-4F35-8392-0676D05113A8}.Profile|Win32.Build.0 = Release|x64
-		{6671F0BA-6FB8-4F35-8392-0676D05113A8}.Profile|x64.ActiveCfg = Release|x64
-		{6671F0BA-6FB8-4F35-8392-0676D05113A8}.Profile|x64.Build.0 = Release|x64
-		{6671F0BA-6FB8-4F35-8392-0676D05113A8}.Release|Mixed Platforms.ActiveCfg = Release|x64
-		{6671F0BA-6FB8-4F35-8392-0676D05113A8}.Release|Mixed Platforms.Build.0 = Release|x64
-		{6671F0BA-6FB8-4F35-8392-0676D05113A8}.Release|Win32.ActiveCfg = Release|x64
-		{6671F0BA-6FB8-4F35-8392-0676D05113A8}.Release|x64.ActiveCfg = Release|x64
-		{6671F0BA-6FB8-4F35-8392-0676D05113A8}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
