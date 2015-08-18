@@ -12,7 +12,7 @@ DepthStencil::DepthStencil(std::pair<uint16, uint16> size,ID3D11Device * device)
 
 DepthStencil::DepthStencil(std::pair<uint16, uint16> size,ID3D11Device * device, DXGI_SAMPLE_DESC sampleDesc)
 {
-	CD3D11_TEXTURE2D_DESC depthTexDesc{ DXGI_FORMAT_R24G8_TYPELESS,size.first,size.second };
+	CD3D11_TEXTURE2D_DESC depthTexDesc{ DXGI_FORMAT_R24G8_TYPELESS,size.first,size.second};
 
 	depthTexDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	depthTexDesc.SampleDesc = sampleDesc;

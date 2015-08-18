@@ -217,10 +217,11 @@ namespace leo
 		// All Direct3D 11 capable devices support 4X MSAA for all render 
 		// target formats, so we only need to check quality support.
 		UINT m4xMsaaQuality = 0;
-		dxcall(global::globalD3DDevice->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, 4, &m4xMsaaQuality));
+		dxcall(global::globalD3DDevice->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, 1, &m4xMsaaQuality));
 
 		//Warning: if not use MSAA,the VSGraphicDebug will throw thre exceptions
-		sd.SampleDesc.Count = 4;
+		//Note: deferred shading doesn't match size
+		sd.SampleDesc.Count = 1;
 		sd.SampleDesc.Quality = m4xMsaaQuality-1;
 
 		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
