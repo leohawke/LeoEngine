@@ -406,6 +406,8 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)copy.log</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)copy.log</Outputs>
     </CustomBuild>
+    <None Include="Resource\Sphere.l3d" />
+    <None Include="Resource\Test.Terrain" />
     <None Include="Shader\common.hlsli" />
     <None Include="Shader\Gaussian_color.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
@@ -534,6 +536,18 @@
     <Text Include="一个渲染对象需求.txt" />
     <Text Include="宏说明.txt" />
     <Text Include="近期目标.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resource\blend.dds" />
+    <Image Include="Resource\darkdirt.dds" />
+    <Image Include="Resource\DefaultDiffuse.dds" />
+    <Image Include="Resource\DefaultNormalMap.dds" />
+    <Image Include="Resource\GaussianNoise256.jpg" />
+    <Image Include="Resource\grass.dds" />
+    <Image Include="Resource\lightdirt.dds" />
+    <Image Include="Resource\snow.dds" />
+    <Image Include="Resource\snowcube1024.dds" />
+    <Image Include="Resource\stone.dds" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

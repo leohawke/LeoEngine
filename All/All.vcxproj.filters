@@ -482,6 +482,12 @@
     <None Include="Shader\common.hlsli">
       <Filter>Shader\HLSL</Filter>
     </None>
+    <None Include="Resource\Sphere.l3d">
+      <Filter>Binary\Resource\Model</Filter>
+    </None>
+    <None Include="Resource\Test.Terrain">
+      <Filter>Binary\Resource\Model</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Core\接口说明.txt">
@@ -501,5 +507,37 @@
     <CustomBuild Include="Resource\build_config.txt">
       <Filter>Binary\Resource</Filter>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resource\snowcube1024.dds">
+      <Filter>Binary\Resource\Texture</Filter>
+    </Image>
+    <Image Include="Resource\blend.dds">
+      <Filter>Binary\Resource\Texture</Filter>
+    </Image>
+    <Image Include="Resource\darkdirt.dds">
+      <Filter>Binary\Resource\Texture</Filter>
+    </Image>
+    <Image Include="Resource\GaussianNoise256.jpg">
+      <Filter>Binary\Resource\Texture</Filter>
+    </Image>
+    <Image Include="Resource\DefaultDiffuse.dds">
+      <Filter>Binary\Resource\Texture</Filter>
+    </Image>
+    <Image Include="Resource\DefaultNormalMap.dds">
+      <Filter>Binary\Resource\Texture</Filter>
+    </Image>
+    <Image Include="Resource\grass.dds">
+      <Filter>Binary\Resource\Texture</Filter>
+    </Image>
+    <Image Include="Resource\lightdirt.dds">
+      <Filter>Binary\Resource\Texture</Filter>
+    </Image>
+    <Image Include="Resource\snow.dds">
+      <Filter>Binary\Resource\Texture</Filter>
+    </Image>
+    <Image Include="Resource\stone.dds">
+      <Filter>Binary\Resource\Texture</Filter>
+    </Image>
   </ItemGroup>
 </Project>
