@@ -220,7 +220,7 @@ namespace leo
 		dxcall(global::globalD3DDevice->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, 4, &m4xMsaaQuality));
 
 		//Warning: if not use MSAA,the VSGraphicDebug will throw thre exceptions
-		sd.SampleDesc.Count = 1;
+		sd.SampleDesc.Count = 4;
 		sd.SampleDesc.Quality = m4xMsaaQuality-1;
 
 		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;

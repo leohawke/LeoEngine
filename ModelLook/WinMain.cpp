@@ -305,6 +305,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 
 
 
+
 	leo::float3 pos;
 	save(pos, leo::Multiply(leo::Splat(-2.f*mSphere.GetRadius()), leo::load(dir)));
 	pos.x = -pos.x;
@@ -319,7 +320,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pRender = std::make_unique<leo::DeferredRender>(device, size);
 
 	pSky = std::make_unique<leo::Sky>(device, L"Resource\\snowcube1024.dds");
-	pTerrain = std::make_unique<leo::Terrain<>>(device, L"Resource\\Test.Terrain");
+	//pTerrain = std::make_unique<leo::Terrain<>>(device, L"Resource\\Test.Terrain");
 	BuildLight(leo::DeviceMgr().GetDevice());
 }
 
@@ -395,7 +396,7 @@ void Render()
 		for (auto & pModelMesh : Models) {
 			pModelMesh->Render(devicecontext, *pCamera);
 		}
-		pTerrain->Render(devicecontext, *pCamera);
+		//pTerrain->Render(devicecontext, *pCamera);
 
 		if (pRender) {
 			pRender->UnBind(devicecontext, *leo::global::globalDepthStencil);
