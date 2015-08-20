@@ -507,6 +507,9 @@
     <CustomBuild Include="Resource\build_config.txt">
       <Filter>Binary\Resource</Filter>
     </CustomBuild>
+    <CustomBuild Include="Resource\TerrainCHMCS.cso">
+      <Filter>Binary\Resource</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resource\snowcube1024.dds">

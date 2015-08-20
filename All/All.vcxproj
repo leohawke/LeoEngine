@@ -407,6 +407,11 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)copy.log</Outputs>
     </CustomBuild>
     <None Include="Resource\Sphere.l3d" />
+    <CustomBuild Include="Resource\TerrainCHMCS.cso">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy /Y   $(SolutionDir)All\Resource\%(Filename)%(Extension)  $(OutDir)Shader\%(Filename)%(Extension)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)\copy.log</Outputs>
+    </CustomBuild>
     <None Include="Resource\Test.Terrain" />
     <None Include="Shader\common.hlsli" />
     <None Include="Shader\Gaussian_color.hlsl">
