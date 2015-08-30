@@ -67,9 +67,9 @@ public:
 	\note  axis_system::dx_texture_system
 	\since build 1.00
 	*/
-	bool BindRect(ops::Rect& src, ops::Rect& dst);
+	bool BindRect(ID3D11Device*,const ops::Rect& src,const ops::Rect& dst);
 
-	virtual bool Apply();
+	virtual bool Apply(ID3D11DeviceContext*);
 
 
 	void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst);

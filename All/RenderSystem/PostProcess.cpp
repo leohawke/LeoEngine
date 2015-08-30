@@ -69,19 +69,78 @@ bool leo::PostProcess::BindProcess(ID3D11Device* device, const std::string& psfi
 	return BindProcess(device, psfilename.c_str());
 }
 bool leo::PostProcess::BindProcess(ID3D11Device* device, const char* psfilename) {
-	return false;
+	mPixelShader = ShaderMgr().CreatePixelShader(psfilename);
+	return true;
 }
 
 
-bool leo::PostProcess::BindRect(ops::Rect& src, ops::Rect& dst) {
+bool leo::PostProcess::BindRect(ID3D11Device* device,const ops::Rect& src,const ops::Rect& dst) {
+
+	using leo::ops::axis_system;
+
+	auto dst_ndc = ops::Convert<axis_system::dx_texture_system, axis_system::normalize_device_system>(dst);
+
+	auto rb = dst_ndc.GetRightBottomCornet();
+	mVertexs[0].PosH.x = rb.x;
+	mVertexs[1].PosH.x = rb.x;
+	mVertexs[1].PosH.y = rb.y;
+	mVertexs[3].PosH.y = rb.y;
+
+	auto lt = dst_ndc.GetLeftTopCornet();
+	mVertexs[2].PosH.x = lt.x;
+	mVertexs[3].PosH.x = lt.x;
+	mVertexs[2].PosH.y = lt.y;
+	mVertexs[0].PosH.y = lt.y;
+
+	rb = src.GetRightBottomCornet();
+	lt = src.GetLeftTopCornet();
+	mVertexs[0].Tex.x = rb.x;
+	mVertexs[1].Tex.x = rb.x;
+	mVertexs[1].Tex.y = rb.y;
+	mVertexs[3].Tex.y = rb.y;
+	mVertexs[2].Tex.x = lt.x;
+	mVertexs[3].Tex.x = lt.x;
+	mVertexs[2].Tex.y = lt.y;
+	mVertexs[0].Tex.y = lt.y;
+
+	CD3D11_BUFFER_DESC vb;
+	vb.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vb.ByteWidth = sizeof(mVertexs);
+	vb.CPUAccessFlags = 0;
+	vb.MiscFlags = 0;
+	vb.StructureByteStride = 0;
+	vb.Usage = D3D11_USAGE_IMMUTABLE;
+
+	D3D11_SUBRESOURCE_DATA vbsubResData;
+	vbsubResData.pSysMem = mVertexs;
+
+	try {
+		mVertexBuffer->Release();
+		dxcall(device->CreateBuffer(&vb, &vbsubResData, &mVertexBuffer));
+		return true;
+	}
+	Catch_DX_Exception
 	return false;
 }
 
-bool leo::PostProcess::Apply()
+bool leo::PostProcess::Apply(ID3D11DeviceContext* context)
 {
-	return false;
+	context->IASetInputLayout(mCommonThunk.mLayout);
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+	UINT offsets[] = { 0 };
+	UINT strides[] = { sizeof(Vertex) };
+
+	context->IASetVertexBuffers(0, 1, mVertexBuffer, strides, offsets);
+
+	context->VSSetShader(mCommonThunk.mVertexShader, nullptr, 0);
+	context->PSSetShader(mPixelShader, nullptr, 0);
+	
+	return true;
 }
 
 void leo::PostProcess::Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) {
-
+	context->PSSetShaderResources(0, 1, &src);
+	context->OMSetRenderTargets(1, &dst, nullptr);
+	context->Draw(4, 0);
 }

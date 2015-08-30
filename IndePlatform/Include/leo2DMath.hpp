@@ -38,15 +38,20 @@ namespace leo {
 			cartesian_system,
 			windows_system,
 			dx_texture_system,
-			gl_texture_system
+			gl_texture_system,
+			normalize_device_system
 		};
 
 
 		struct Rect {
 			//top-left(x,y)
 			//bottom-right(z,w)
-			float4 tlbr;
-
+			union{
+				float4 tlbr;
+				struct {
+					float x, y, z, w;
+				};
+			};
 			Rect(const float4& TopLeftBottomRight)
 				:tlbr(TopLeftBottomRight) {
 			}
@@ -67,6 +72,20 @@ namespace leo {
 				return *(float2*)(tlbr.begin()+2);
 			}
 		};
+
+		template<axis_system src_system, axis_system dst_system>
+		Rect Convert(const Rect& rect);
+
+		template<>
+		Rect Convert<axis_system::dx_texture_system,axis_system::normalize_device_system>(const Rect& rect)
+		{
+			Rect o;
+			o.x = rect.x * 2 - 1;
+			o.z = rect.z * 2 - 1;
+
+			o.y = 1 - rect.y * 2;
+			o.w = 1 - rect.w * 2;
+		}
 	}
 }
 
