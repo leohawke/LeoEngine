@@ -1,22 +1,57 @@
 #include <platform.h>
+#include <exception.hpp>
+
+#include <Core\EngineConfig.h>
+#include <Core\FileSearch.h>
+
+
 #include "d3dx11.hpp"
+#include "ShaderMgr.h"
 #include "PostProcess.hpp"
 
-using namespace leo;
+decltype(leo::PostProcess::mCommonThunk) leo::PostProcess::mCommonThunk;
 
-decltype(PostProcess::mCommonThunk) PostProcess::mCommonThunk;
+namespace {
+	
+	D3D11_INPUT_ELEMENT_DESC elements_Desc[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,loffsetof(leo::PostProcess::Vertex,PosH), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,loffsetof(leo::PostProcess::Vertex,Tex), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+}
 
-leo::PostProcess::PostProcess(ID3D11Device*) {
+leo::PostProcess::PostProcess(ID3D11Device* device){
 	++mCommonThunk.mRefCount;
 	if (mCommonThunk.mRefCount && !mCommonThunk.mVertexShader) {
-
+		mCommonThunk.mVertexShader = ShaderMgr().CreateVertexShader(
+			FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"postprocess", D3D11_VERTEX_SHADER)),
+			nullptr,
+			elements_Desc,
+			2, &mCommonThunk.mLayout
+			);
 	}
+
+	CD3D11_BUFFER_DESC vb;
+	vb.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vb.ByteWidth = sizeof(mVertexs);
+	vb.CPUAccessFlags = 0;
+	vb.MiscFlags = 0;
+	vb.StructureByteStride = 0;
+	vb.Usage = D3D11_USAGE_IMMUTABLE;
+
+	D3D11_SUBRESOURCE_DATA vbsubResData;
+	vbsubResData.pSysMem = mVertexs;
+
+	try {
+		dxcall(device->CreateBuffer(&vb, &vbsubResData, &mVertexBuffer));
+	}
+	Catch_DX_Exception
 }
 
 leo::PostProcess::~PostProcess() {
 	--mCommonThunk.mRefCount;
 	if (!mCommonThunk.mRefCount && mCommonThunk.mVertexShader) {
-
+		//do nothing
 	}
 }
 
@@ -37,14 +72,13 @@ bool leo::PostProcess::BindProcess(ID3D11Device* device, const char* psfilename)
 	return false;
 }
 
-namespace {
-	struct Vertex {
-		float4 PosH;
-		float2 Tex;
-	};
-}
 
 bool leo::PostProcess::BindRect(ops::Rect& src, ops::Rect& dst) {
+	return false;
+}
+
+bool leo::PostProcess::Apply()
+{
 	return false;
 }
 

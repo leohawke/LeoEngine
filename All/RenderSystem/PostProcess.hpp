@@ -17,6 +17,7 @@
 
 #include <leo2DMath.hpp> //ops::Rect
 #include <Core\COM.hpp>  //win::unique_com
+#include <Core\Vertex.hpp> //Cord::NDCtoUV
 #include <utility.hpp>
 /*!	\defgroupRenderSystem Library
 \brief 渲染系统库。
@@ -31,6 +32,7 @@ struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct ID3D11ShaderResourceView;
 struct ID3D11RenderTargetView;
+struct ID3D11InputLayout;
 LEO_BEGIN
 /*!
 \ingroup RenderSystem
@@ -48,6 +50,12 @@ public:
 	PostProcess(PostProcess && rvalue);
 	void operator=(PostProcess&& rvalue);
 
+	/*!
+	\def BindProcess
+	\brief 绑定PixelShader。
+	\param psfilename 指定PixelShader二进制文件名
+	\since build 1.00
+	*/
 	bool BindProcess(ID3D11Device*,const std::string& psfilename);
 	bool BindProcess(ID3D11Device*,const char* psfilename);
 
@@ -61,13 +69,41 @@ public:
 	*/
 	bool BindRect(ops::Rect& src, ops::Rect& dst);
 
+	virtual bool Apply();
+
+
 	void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst);
+public:
+	struct Vertex {
+		float4 PosH;
+		float2 Tex;
+
+		//笛卡尔坐标系 映射至 UV坐标
+		Vertex(const float4& pos)
+			:PosH(pos), Tex(leo::Coord::NDCtoUV(pos.x, pos.y))
+		{}
+	};
 private:
 	win::unique_com<ID3D11PixelShader> mPixelShader;
 	win::unique_com<ID3D11Buffer> mVertexBuffer;
 
+	//TRIANGLESTRIP
+	/*
+	2-----0
+	|     |
+	|     |
+	3-----1
+	*/
+	Vertex mVertexs[4] = {
+		{ float4(+1.f, +1.f, 1.f, 1.f) },
+		{ float4(+1.f, -1.f, 1.f, 1.f) },
+		{ float4(-1.f, +1.f, 1.f, 1.f) },
+		{ float4(-1.f, -1.f, 1.f, 1.f) },
+	};
+
 	static struct {
 		ID3D11VertexShader* mVertexShader = nullptr;
+		ID3D11InputLayout*  mLayout = nullptr;
 		std::size_t			mRefCount = 0;
 	} mCommonThunk;
 };

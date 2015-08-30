@@ -271,6 +271,9 @@
     <FxCompile Include="Shader\TerrainCHMCS.hlsl">
       <Filter>Shader\HLSL\Terrain</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\PostProcessVS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ModelLook.rc">
