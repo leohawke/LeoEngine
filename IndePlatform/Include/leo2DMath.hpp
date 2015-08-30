@@ -52,6 +52,9 @@ namespace leo {
 					float x, y, z, w;
 				};
 			};
+
+			Rect() = default;
+
 			Rect(const float4& TopLeftBottomRight)
 				:tlbr(TopLeftBottomRight) {
 			}
@@ -85,6 +88,8 @@ namespace leo {
 
 			o.y = 1 - rect.y * 2;
 			o.w = 1 - rect.w * 2;
+
+			return o;
 		}
 	}
 }

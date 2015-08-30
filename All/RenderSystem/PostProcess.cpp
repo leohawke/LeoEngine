@@ -59,17 +59,19 @@ leo::PostProcess::PostProcess(PostProcess && rvalue)
 :mPixelShader(std::move(rvalue.mPixelShader)),mVertexBuffer(std::move(rvalue.mVertexBuffer)){
 	assert(mCommonThunk.mRefCount);
 	++mCommonThunk.mRefCount;
+
+	std::copy_n(rvalue.mVertexs, 4, mVertexs);
 }
 
 void leo::PostProcess::operator=(PostProcess&& rvalue) {
 	PostProcess(std::move(rvalue));
 }
 
-bool leo::PostProcess::BindProcess(ID3D11Device* device, const std::string& psfilename) {
+bool leo::PostProcess::BindProcess(ID3D11Device* device, const std::wstring& psfilename) {
 	return BindProcess(device, psfilename.c_str());
 }
-bool leo::PostProcess::BindProcess(ID3D11Device* device, const char* psfilename) {
-	mPixelShader = ShaderMgr().CreatePixelShader(psfilename);
+bool leo::PostProcess::BindProcess(ID3D11Device* device, const wchar_t* psfilename) {
+	mPixelShader.reset(ShaderMgr().CreatePixelShader(psfilename));
 	return true;
 }
 
@@ -131,7 +133,7 @@ bool leo::PostProcess::Apply(ID3D11DeviceContext* context)
 	UINT offsets[] = { 0 };
 	UINT strides[] = { sizeof(Vertex) };
 
-	context->IASetVertexBuffers(0, 1, mVertexBuffer, strides, offsets);
+	context->IASetVertexBuffers(0, 1, &mVertexBuffer, strides, offsets);
 
 	context->VSSetShader(mCommonThunk.mVertexShader, nullptr, 0);
 	context->PSSetShader(mPixelShader, nullptr, 0);
@@ -143,4 +145,55 @@ void leo::PostProcess::Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceVi
 	context->PSSetShaderResources(0, 1, &src);
 	context->OMSetRenderTargets(1, &dst, nullptr);
 	context->Draw(4, 0);
+}
+
+
+class leo::details::ScalaerProcessDelegate {
+
+};
+
+leo::ScalaerProcess<2>::ScalaerProcess(ID3D11Device * device)
+	:PostProcess(device)
+{
+}
+
+leo::ScalaerProcess<2>::~ScalaerProcess()
+{
+}
+
+bool leo::ScalaerProcess<2>::Apply(ID3D11DeviceContext * context)
+{
+	PostProcess::Apply(context);
+	return false;
+}
+
+leo::ScalaerProcess<4>::ScalaerProcess(ID3D11Device * device)
+	:PostProcess(device)
+{
+}
+
+leo::ScalaerProcess<4>::~ScalaerProcess()
+{
+}
+
+bool leo::ScalaerProcess<4>::Apply(ID3D11DeviceContext * context)
+{
+	PostProcess::Apply(context);
+	return false;
+}
+
+
+leo::ScalaerProcess<8>::ScalaerProcess(ID3D11Device * device)
+	:PostProcess(device)
+{
+}
+
+leo::ScalaerProcess<8>::~ScalaerProcess()
+{
+}
+
+bool leo::ScalaerProcess<8>::Apply(ID3D11DeviceContext * context)
+{
+	PostProcess::Apply(context);
+	return false;
 }

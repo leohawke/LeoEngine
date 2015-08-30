@@ -418,6 +418,25 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
     </FxCompile>
+    <CustomBuild Include="Shader\ScalaerProcessPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc /Zi /E"main_2" /Od /Fo"$(OutDir)Shader\%(Filename)_2.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
+fxc /Zi /E"main_4" /Od /Fo"$(OutDir)Shader\%(Filename)_4.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
+fxc /Zi /E"main_8" /Od /Fo"$(OutDir)Shader\%(Filename)_8.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc.log</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxc /E"main_2"  /Fo"$(OutDir)Shader\%(Filename)_2.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
+fxc /E"main_4"  /Fo"$(OutDir)Shader\%(Filename)_4.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
+fxc /E"main_8"  /Fo"$(OutDir)Shader\%(Filename)_8.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxc.log</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compilation %(Filename).hlsl</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compilation %(Filename).hlsl</Message>
+    </CustomBuild>
     <FxCompile Include="Shader\ShaderPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

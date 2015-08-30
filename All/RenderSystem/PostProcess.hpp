@@ -45,7 +45,7 @@ LEO_BEGIN
 class PostProcess : noncopyable {
 public:
 	PostProcess(ID3D11Device*);
-	~PostProcess();
+	virtual ~PostProcess();
 
 	PostProcess(PostProcess && rvalue);
 	void operator=(PostProcess&& rvalue);
@@ -56,8 +56,8 @@ public:
 	\param psfilename 指定PixelShader二进制文件名
 	\since build 1.00
 	*/
-	bool BindProcess(ID3D11Device*,const std::string& psfilename);
-	bool BindProcess(ID3D11Device*,const char* psfilename);
+	bool BindProcess(ID3D11Device*,const std::wstring& psfilename);
+	bool BindProcess(ID3D11Device*,const wchar_t* psfilename);
 
 	/*!
 	\def BindRect
@@ -107,6 +107,50 @@ private:
 		std::size_t			mRefCount = 0;
 	} mCommonThunk;
 };
+
+template<uint16 scalaer> 
+class ScalaerProcess;
+
+namespace details {
+	class ScalaerProcessDelegate;
+}
+
+template<>
+class ScalaerProcess<2> :PostProcess {
+public:
+	ScalaerProcess(ID3D11Device*);
+	~ScalaerProcess();
+
+	bool Apply(ID3D11DeviceContext*);
+
+private:
+	std::unique_ptr<details::ScalaerProcessDelegate> mImpl;
+};
+
+template<>
+class ScalaerProcess<4> :PostProcess {
+public:
+	ScalaerProcess(ID3D11Device*);
+	~ScalaerProcess();
+
+	bool Apply(ID3D11DeviceContext*);
+
+private:
+	std::unique_ptr<details::ScalaerProcessDelegate> mImpl;
+};
+
+template<>
+class ScalaerProcess<8> :PostProcess {
+public:
+	ScalaerProcess(ID3D11Device*);
+	~ScalaerProcess();
+
+	bool Apply(ID3D11DeviceContext*);
+
+private:
+	std::unique_ptr<details::ScalaerProcessDelegate> mImpl;
+};
+
 LEO_END
 //@}
 

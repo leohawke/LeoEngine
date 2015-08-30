@@ -295,5 +295,8 @@
     <CustomBuild Include="..\All\config.scheme">
       <Filter>WinMain</Filter>
     </CustomBuild>
+    <CustomBuild Include="Shader\ScalaerProcessPS.hlsl">
+      <Filter>Shader</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>
