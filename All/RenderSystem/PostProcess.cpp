@@ -184,14 +184,41 @@ public:
 		context->PSSetConstantBuffers(0, 1, &mOffsetsBuffer);
 	}
 
-	ops::Rect GetTextureRect(ID3D11Texture2D* texure, int level)
+	ops::Rect GetTextureRect(D3D11_TEXTURE2D_DESC desc, int level)
 	{
-		return ops::IRect<ops::axis_system::dx_texture_system>();
+		auto rect =  ops::IRect<ops::axis_system::dx_texture_system>();
+
+		float du = 1.f / desc.Width;
+		float dv = 1.f / desc.Height;
+		level /= 2;
+
+		auto & tl = rect.GetLeftTopCornet();
+		tl.x += du*level;
+		tl.y += dv*level;
+
+		auto & br = rect.GetRightBottomCornet();
+		br.x -= du*level;
+		br.y -= dv*level;
+
+		return rect;
 	}
 
-	void GetSampleOffset(ID3D11Texture2D* texure, const std::array<float4, 32>& offset, int level)
+	void GetSampleOffset(D3D11_TEXTURE2D_DESC desc, const std::array<float4, 32>& offset, int level)
 	{
+		float du = 1.f / desc.Width;
+		float dv = 1.f / desc.Height;
 
+		auto index = 0u;
+		for (auto y = 0u; y != level, ++y)
+			for (auto x = 0u;x != level/2;++x)
+			{
+				offset[index].x = (x*2- (level/2-0.5f))*du;
+				offset[index].y = (y - (level/2-0.5f))*dv;
+
+				offset[index].z = offset[index].x+du;
+				offset[index].w = offset[index].y;
+				++index;
+			}
 	}
 
 	void DrawBegin(ID3D11DeviceContext* context, PostProcess* container,ID3D11ShaderResourceView* src,int level)
@@ -203,12 +230,15 @@ public:
 			throw std::runtime_error("leo::ScalaerProcess<2>::Draw Error: Invalid Argument src(Please Check ViewDimension)");
 
 		auto tex = win::make_scope_com<ID3D11Texture2D>(nullptr);
-		auto src_rect = GetTextureRect(tex, level);
+		src->QueryInterface(&tex);
+		D3D11_TEXTURE2D_DESC desc;
+		tex->GetDesc(&desc);
+		auto src_rect = GetTextureRect(desc, level);
 		auto& dst_rect = ops::IRect<ops::axis_system::dx_texture_system>();
 		container->BindRect(context, src_rect, dst_rect);
 
 		std::array<float4, 32> sampleoffset;
-		GetSampleOffset(tex, sampleoffset,level);
+		GetSampleOffset(desc, sampleoffset,level);
 		SetSampleOffset(sampleoffset);
 		Update(context);
 	}
