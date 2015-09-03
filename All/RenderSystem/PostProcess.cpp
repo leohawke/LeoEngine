@@ -15,7 +15,7 @@
 decltype(leo::PostProcess::mCommonThunk) leo::PostProcess::mCommonThunk;
 
 namespace {
-	
+
 	D3D11_INPUT_ELEMENT_DESC elements_Desc[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,loffsetof(leo::PostProcess::Vertex,PosH), D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -23,7 +23,7 @@ namespace {
 	};
 }
 
-leo::PostProcess::PostProcess(ID3D11Device* device){
+leo::PostProcess::PostProcess(ID3D11Device* device) {
 	++mCommonThunk.mRefCount;
 	if (mCommonThunk.mRefCount && !mCommonThunk.mVertexShader) {
 		mCommonThunk.mVertexShader = ShaderMgr().CreateVertexShader(
@@ -40,7 +40,7 @@ leo::PostProcess::PostProcess(ID3D11Device* device){
 	vb.CPUAccessFlags = 0;
 	vb.MiscFlags = 0;
 	vb.StructureByteStride = 0;
-	vb.Usage = D3D11_USAGE_IMMUTABLE;
+	vb.Usage = D3D11_USAGE_DEFAULT;
 
 	D3D11_SUBRESOURCE_DATA vbsubResData;
 	vbsubResData.pSysMem = mVertexs;
@@ -59,7 +59,7 @@ leo::PostProcess::~PostProcess() {
 }
 
 leo::PostProcess::PostProcess(PostProcess && rvalue)
-:mPixelShader(std::move(rvalue.mPixelShader)),mVertexBuffer(std::move(rvalue.mVertexBuffer)){
+	:mPixelShader(std::move(rvalue.mPixelShader)), mVertexBuffer(std::move(rvalue.mVertexBuffer)) {
 	assert(mCommonThunk.mRefCount);
 	++mCommonThunk.mRefCount;
 
@@ -79,7 +79,7 @@ bool leo::PostProcess::BindProcess(ID3D11Device* device, const wchar_t* psfilena
 }
 
 
-bool leo::PostProcess::BindRect(ID3D11Device* device,const ops::Rect& src,const ops::Rect& dst) {
+bool leo::PostProcess::BindRect(ID3D11DeviceContext* context, const ops::Rect& src, const ops::Rect& dst) {
 
 	using leo::ops::axis_system;
 
@@ -108,24 +108,9 @@ bool leo::PostProcess::BindRect(ID3D11Device* device,const ops::Rect& src,const 
 	mVertexs[2].Tex.y = lt.y;
 	mVertexs[0].Tex.y = lt.y;
 
-	CD3D11_BUFFER_DESC vb;
-	vb.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vb.ByteWidth = sizeof(mVertexs);
-	vb.CPUAccessFlags = 0;
-	vb.MiscFlags = 0;
-	vb.StructureByteStride = 0;
-	vb.Usage = D3D11_USAGE_IMMUTABLE;
+	context->UpdateSubresource(mVertexBuffer, 0, nullptr, mVertexs, 0, 0);
 
-	D3D11_SUBRESOURCE_DATA vbsubResData;
-	vbsubResData.pSysMem = mVertexs;
-
-	try {
-		mVertexBuffer->Release();
-		dxcall(device->CreateBuffer(&vb, &vbsubResData, &mVertexBuffer));
-		return true;
-	}
-	Catch_DX_Exception
-	return false;
+	return true;
 }
 
 bool leo::PostProcess::Apply(ID3D11DeviceContext* context)
@@ -140,7 +125,7 @@ bool leo::PostProcess::Apply(ID3D11DeviceContext* context)
 
 	context->VSSetShader(mCommonThunk.mVertexShader, nullptr, 0);
 	context->PSSetShader(mPixelShader, nullptr, 0);
-	
+
 	return true;
 }
 
@@ -151,9 +136,9 @@ void leo::PostProcess::Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceVi
 }
 
 
-class leo::details::ScalaerProcessDelegate:public leo::PassAlloc {
+class leo::details::ScalaerProcessDelegate :public leo::PassAlloc {
 public:
-	ScalaerProcessDelegate(ID3D11Device* device,int level,PostProcess* container)
+	ScalaerProcessDelegate(ID3D11Device* device, int level, PostProcess* container)
 	{
 		//TODO: 需要进行设备检查
 		auto filename = EngineConfig::ShaderConfig::GetShaderFileName(L"ScalaerProcessPS", D3D11_PIXEL_SHADER);
@@ -161,7 +146,7 @@ public:
 		if (pos == std::wstring::npos)
 			throw std::runtime_error("ScalaerProcessPS Error:Invalid FileName");
 
-		filename.replace(pos,2, std::wstring(L"_") + std::to_wstring(level));
+		filename.replace(pos, 2, std::wstring(L"_") + std::to_wstring(level));
 		filename = FileSearch::Search(filename);
 		(container)->BindProcess(device, filename);
 
@@ -183,17 +168,49 @@ public:
 	}
 
 	template<uint16 Len>
-	void SetSampleOffset(const std::array<float4,Len>& offset)
+	void SetSampleOffset(const std::array<float4, Len>& offset)
 	{
-
+		std::copy(offset.begin(), offset.end(), mOffsets.begin());
 	}
 
-
+	void Update(ID3D11DeviceContext* context)
+	{
+		context->UpdateSubresource(mOffsetsBuffer, 0, nullptr, mOffsets.data(), 0, 0);
+	}
 
 	void Apply(ID3D11DeviceContext* context)
 	{
 		context->PSSetSamplers(0, 1, &mSamplerState);
 		context->PSSetConstantBuffers(0, 1, &mOffsetsBuffer);
+	}
+
+	ops::Rect GetTextureRect(ID3D11Texture2D* texure, int level)
+	{
+		return ops::IRect<ops::axis_system::dx_texture_system>();
+	}
+
+	void GetSampleOffset(ID3D11Texture2D* texure, const std::array<float4, 32>& offset, int level)
+	{
+
+	}
+
+	void DrawBegin(ID3D11DeviceContext* context, PostProcess* container,ID3D11ShaderResourceView* src,int level)
+	{
+		D3D11_SHADER_RESOURCE_VIEW_DESC resDesc;
+		src->GetDesc(&resDesc);
+
+		if (resDesc.ViewDimension != D3D11_SRV_DIMENSION_TEXTURE2D || resDesc.ViewDimension != D3D11_SRV_DIMENSION_TEXTURE2DMS)
+			throw std::runtime_error("leo::ScalaerProcess<2>::Draw Error: Invalid Argument src(Please Check ViewDimension)");
+
+		auto tex = win::make_scope_com<ID3D11Texture2D>(nullptr);
+		auto src_rect = GetTextureRect(tex, level);
+		auto& dst_rect = ops::IRect<ops::axis_system::dx_texture_system>();
+		container->BindRect(context, src_rect, dst_rect);
+
+		std::array<float4, 32> sampleoffset;
+		GetSampleOffset(tex, sampleoffset,level);
+		SetSampleOffset(sampleoffset);
+		Update(context);
 	}
 
 private:
@@ -203,7 +220,7 @@ private:
 };
 
 leo::ScalaerProcess<2>::ScalaerProcess(ID3D11Device * device)
-	:PostProcess(device),mImpl(std::make_unique<leo::details::ScalaerProcessDelegate>(device,2,this))
+	:PostProcess(device), mImpl(std::make_unique<leo::details::ScalaerProcessDelegate>(device, 2, this))
 {
 }
 
@@ -214,9 +231,14 @@ leo::ScalaerProcess<2>::~ScalaerProcess()
 bool leo::ScalaerProcess<2>::Apply(ID3D11DeviceContext * context)
 {
 	PostProcess::Apply(context);
-	//mImpl->SetSampleOffset
 	mImpl->Apply(context);
-	return false;
+	return true;
+}
+
+void leo::ScalaerProcess<2>::Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst)
+{
+	mImpl->DrawBegin(context,this, src, 2);
+	PostProcess::Draw(context, src, dst);
 }
 
 leo::ScalaerProcess<4>::ScalaerProcess(ID3D11Device * device)
@@ -231,14 +253,18 @@ leo::ScalaerProcess<4>::~ScalaerProcess()
 bool leo::ScalaerProcess<4>::Apply(ID3D11DeviceContext * context)
 {
 	PostProcess::Apply(context);
-	//mImpl->SetSampleOffset
 	mImpl->Apply(context);
-	return false;
+	return true;
 }
 
+void leo::ScalaerProcess<4>::Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst)
+{
+	mImpl->DrawBegin(context, this, src, 4);
+	PostProcess::Draw(context, src, dst);
+}
 
 leo::ScalaerProcess<8>::ScalaerProcess(ID3D11Device * device)
-	:PostProcess(device), mImpl(std::make_unique<leo::details::ScalaerProcessDelegate>(device, 8,this))
+	:PostProcess(device), mImpl(std::make_unique<leo::details::ScalaerProcessDelegate>(device, 8, this))
 {
 }
 
@@ -249,7 +275,12 @@ leo::ScalaerProcess<8>::~ScalaerProcess()
 bool leo::ScalaerProcess<8>::Apply(ID3D11DeviceContext * context)
 {
 	PostProcess::Apply(context);
-	//mImpl->SetSampleOffset
 	mImpl->Apply(context);
-	return false;
+	return true;
+}
+
+void leo::ScalaerProcess<8>::Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst)
+{
+	mImpl->DrawBegin(context, this, src, 8);
+	PostProcess::Draw(context, src, dst);
 }

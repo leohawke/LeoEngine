@@ -42,7 +42,12 @@ namespace leo {
 			normalize_device_system
 		};
 
-
+		/*!
+		\def Rect
+		\brief	矩形区域。
+		\construct  float4(float2(左上角坐标),float2(右下角坐标))
+		\since build 1.00
+		*/
 		struct Rect {
 			//top-left(x,y)
 			//bottom-right(z,w)
@@ -77,10 +82,13 @@ namespace leo {
 		};
 
 		template<axis_system src_system, axis_system dst_system>
-		Rect Convert(const Rect& rect);
+		Rect Convert(const Rect& rect) noexcept;
+
+		template<axis_system system>
+		const Rect& IRect() noexcept;
 
 		template<>
-		inline Rect Convert<axis_system::dx_texture_system,axis_system::normalize_device_system>(const Rect& rect)
+		inline Rect Convert<axis_system::dx_texture_system,axis_system::normalize_device_system>(const Rect& rect) noexcept
 		{
 			Rect o;
 			o.x = rect.x * 2 - 1;
@@ -90,6 +98,13 @@ namespace leo {
 			o.w = 1 - rect.w * 2;
 
 			return o;
+		}
+
+		template<>
+		inline const Rect& IRect<axis_system::dx_texture_system>() noexcept
+		{
+			static Rect irect(float4(0.f, 0.f, 1.f, 1.f));
+			return irect;
 		}
 	}
 }
