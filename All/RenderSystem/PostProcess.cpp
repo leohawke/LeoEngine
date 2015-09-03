@@ -1,5 +1,6 @@
 #include <platform.h>
 #include <exception.hpp>
+#include <memory.hpp>
 
 #include <Core\EngineConfig.h>
 #include <Core\FileSearch.h>
@@ -7,7 +8,9 @@
 
 #include "d3dx11.hpp"
 #include "ShaderMgr.h"
+#include "RenderStates.hpp"
 #include "PostProcess.hpp"
+
 
 decltype(leo::PostProcess::mCommonThunk) leo::PostProcess::mCommonThunk;
 
@@ -148,12 +151,59 @@ void leo::PostProcess::Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceVi
 }
 
 
-class leo::details::ScalaerProcessDelegate {
+class leo::details::ScalaerProcessDelegate:public leo::PassAlloc {
+public:
+	ScalaerProcessDelegate(ID3D11Device* device,int level,PostProcess* container)
+	{
+		//TODO: 需要进行设备检查
+		auto filename = EngineConfig::ShaderConfig::GetShaderFileName(L"ScalaerProcessPS", D3D11_PIXEL_SHADER);
+		auto pos = filename.find(L"_2");
+		if (pos == std::wstring::npos)
+			throw std::runtime_error("ScalaerProcessPS Error:Invalid FileName");
 
+		filename.replace(pos,2, std::wstring(L"_") + std::to_wstring(level));
+		filename = FileSearch::Search(filename);
+		(container)->BindProcess(device, filename);
+
+		//TODO:计算坐标
+
+		D3D11_BUFFER_DESC Desc;
+		Desc.Usage = D3D11_USAGE_DEFAULT;
+		Desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		Desc.CPUAccessFlags = 0;
+		Desc.MiscFlags = 0;
+		Desc.StructureByteStride = 0;
+		Desc.ByteWidth = sizeof(mOffsets);
+
+		dxcall(device->CreateBuffer(&Desc, nullptr, &mOffsetsBuffer));
+
+		CD3D11_SAMPLER_DESC mSampleDesc{ D3D11_DEFAULT };
+		mSampleDesc.Filter = D3D11_FILTER_MIN_POINT_MAG_MIP_LINEAR;
+		mSamplerState = RenderStates().CreateSamplerState(L"ScalaerProcessDelegate", mSampleDesc);
+	}
+
+	template<uint16 Len>
+	void SetSampleOffset(const std::array<float4,Len>& offset)
+	{
+
+	}
+
+
+
+	void Apply(ID3D11DeviceContext* context)
+	{
+		context->PSSetSamplers(0, 1, &mSamplerState);
+		context->PSSetConstantBuffers(0, 1, &mOffsetsBuffer);
+	}
+
+private:
+	ID3D11SamplerState* mSamplerState = nullptr;
+	win::unique_com<ID3D11Buffer> mOffsetsBuffer = nullptr;
+	std::array<float4, 32> mOffsets;
 };
 
 leo::ScalaerProcess<2>::ScalaerProcess(ID3D11Device * device)
-	:PostProcess(device)
+	:PostProcess(device),mImpl(std::make_unique<leo::details::ScalaerProcessDelegate>(device,2,this))
 {
 }
 
@@ -164,11 +214,13 @@ leo::ScalaerProcess<2>::~ScalaerProcess()
 bool leo::ScalaerProcess<2>::Apply(ID3D11DeviceContext * context)
 {
 	PostProcess::Apply(context);
+	//mImpl->SetSampleOffset
+	mImpl->Apply(context);
 	return false;
 }
 
 leo::ScalaerProcess<4>::ScalaerProcess(ID3D11Device * device)
-	:PostProcess(device)
+	:PostProcess(device), mImpl(std::make_unique<leo::details::ScalaerProcessDelegate>(device, 4, this))
 {
 }
 
@@ -179,12 +231,14 @@ leo::ScalaerProcess<4>::~ScalaerProcess()
 bool leo::ScalaerProcess<4>::Apply(ID3D11DeviceContext * context)
 {
 	PostProcess::Apply(context);
+	//mImpl->SetSampleOffset
+	mImpl->Apply(context);
 	return false;
 }
 
 
 leo::ScalaerProcess<8>::ScalaerProcess(ID3D11Device * device)
-	:PostProcess(device)
+	:PostProcess(device), mImpl(std::make_unique<leo::details::ScalaerProcessDelegate>(device, 8,this))
 {
 }
 
@@ -195,5 +249,7 @@ leo::ScalaerProcess<8>::~ScalaerProcess()
 bool leo::ScalaerProcess<8>::Apply(ID3D11DeviceContext * context)
 {
 	PostProcess::Apply(context);
+	//mImpl->SetSampleOffset
+	mImpl->Apply(context);
 	return false;
 }

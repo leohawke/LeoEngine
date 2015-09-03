@@ -116,7 +116,7 @@ namespace details {
 }
 
 template<>
-class ScalaerProcess<2> :PostProcess {
+class ScalaerProcess<2> :public PostProcess {
 public:
 	ScalaerProcess(ID3D11Device*);
 	~ScalaerProcess();
@@ -128,7 +128,7 @@ private:
 };
 
 template<>
-class ScalaerProcess<4> :PostProcess {
+class ScalaerProcess<4> :public PostProcess {
 public:
 	ScalaerProcess(ID3D11Device*);
 	~ScalaerProcess();
@@ -140,7 +140,7 @@ private:
 };
 
 template<>
-class ScalaerProcess<8> :PostProcess {
+class ScalaerProcess<8> :public PostProcess {
 public:
 	ScalaerProcess(ID3D11Device*);
 	~ScalaerProcess();

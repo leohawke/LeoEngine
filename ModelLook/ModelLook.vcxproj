@@ -428,7 +428,7 @@
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc /Zi /E"main_2" /Od /Fo"$(OutDir)Shader\%(Filename)_2.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
 fxc /Zi /E"main_4" /Od /Fo"$(OutDir)Shader\%(Filename)_4.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
-fxc /Zi /E"main_8" /Od /Fo"$(OutDir)Shader\%(Filename)_8.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl</Command>
+fxc /Zi /E"main_8" /Od /Fo"$(OutDir)Shader\%(Filename)_8.cso" /T "ps_5_0" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc.log</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxc /E"main_2"  /Fo"$(OutDir)Shader\%(Filename)_2.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
 fxc /E"main_4"  /Fo"$(OutDir)Shader\%(Filename)_4.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl

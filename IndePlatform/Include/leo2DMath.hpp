@@ -80,7 +80,7 @@ namespace leo {
 		Rect Convert(const Rect& rect);
 
 		template<>
-		Rect Convert<axis_system::dx_texture_system,axis_system::normalize_device_system>(const Rect& rect)
+		inline Rect Convert<axis_system::dx_texture_system,axis_system::normalize_device_system>(const Rect& rect)
 		{
 			Rect o;
 			o.x = rect.x * 2 - 1;
