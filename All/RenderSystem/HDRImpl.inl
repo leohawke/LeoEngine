@@ -9,10 +9,11 @@
 #include <Core\EffectQuad.hpp>
 #include <exception.hpp>
 #include "d3dx11.hpp"
-
+#include "PostProcess.hpp"
 class HDRImpl {
 public:
-	HDRImpl(ID3D11Device* create, ID3D11Texture2D* src, ID3D11RenderTargetView* dst) {
+	HDRImpl(ID3D11Device* create, ID3D11Texture2D* src, ID3D11RenderTargetView* dst)
+	:mScalerProcess(std::make_unique<leo::ScalaerProcess<4>>(create)){
 		std::thread create_thread(&HDRImpl::create_method, this, create, src, dst);
 		create_thread.detach();
 	}
@@ -92,4 +93,6 @@ private:
 	leo::win::unique_com<ID3D11Texture2D> mSrcCopyTex = nullptr;
 	leo::win::unique_com<ID3D11ShaderResourceView> mSrcCopy = nullptr;
 	leo::win::unique_com<ID3D11ShaderResourceView> mScaleCopy = nullptr;
+
+	std::unique_ptr<leo::PostProcess> mScalerProcess = nullptr;
 };

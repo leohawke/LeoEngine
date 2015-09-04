@@ -42,7 +42,7 @@ LEO_BEGIN
 \note  生成资源mPixelShader，mVertexBuffer
 \since build 1.00
 */
-class PostProcess : noncopyable {
+class PostProcess : noncopyable,public PassAlloc {
 public:
 	PostProcess(ID3D11Device*);
 	virtual ~PostProcess();
@@ -84,7 +84,7 @@ public:
 		{}
 	};
 private:
-	win::unique_com<ID3D11PixelShader> mPixelShader;
+	ID3D11PixelShader* mPixelShader;
 	win::unique_com<ID3D11Buffer> mVertexBuffer;
 
 	//TRIANGLESTRIP

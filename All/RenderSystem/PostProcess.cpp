@@ -74,7 +74,7 @@ bool leo::PostProcess::BindProcess(ID3D11Device* device, const std::wstring& psf
 	return BindProcess(device, psfilename.c_str());
 }
 bool leo::PostProcess::BindProcess(ID3D11Device* device, const wchar_t* psfilename) {
-	mPixelShader.reset(ShaderMgr().CreatePixelShader(psfilename));
+	mPixelShader = (ShaderMgr().CreatePixelShader(psfilename));
 	return true;
 }
 
