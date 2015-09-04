@@ -203,13 +203,13 @@ public:
 		return rect;
 	}
 
-	void GetSampleOffset(D3D11_TEXTURE2D_DESC desc, const std::array<float4, 32>& offset, int level)
+	void GetSampleOffset(D3D11_TEXTURE2D_DESC desc,std::array<float4, 32>& offset, int level)
 	{
 		float du = 1.f / desc.Width;
 		float dv = 1.f / desc.Height;
 
 		auto index = 0u;
-		for (auto y = 0u; y != level, ++y)
+		for (auto y = 0u; y != level; ++y)
 			for (auto x = 0u;x != level/2;++x)
 			{
 				offset[index].x = (x*2- (level/2-0.5f))*du;
