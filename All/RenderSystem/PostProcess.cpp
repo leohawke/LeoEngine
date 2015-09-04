@@ -226,11 +226,13 @@ public:
 		D3D11_SHADER_RESOURCE_VIEW_DESC resDesc;
 		src->GetDesc(&resDesc);
 
-		if (resDesc.ViewDimension != D3D11_SRV_DIMENSION_TEXTURE2D || resDesc.ViewDimension != D3D11_SRV_DIMENSION_TEXTURE2DMS)
+		if (resDesc.ViewDimension != D3D11_SRV_DIMENSION_TEXTURE2D && resDesc.ViewDimension != D3D11_SRV_DIMENSION_TEXTURE2DMS)
 			throw std::runtime_error("leo::ScalaerProcess<2>::Draw Error: Invalid Argument src(Please Check ViewDimension)");
 
 		auto tex = win::make_scope_com<ID3D11Texture2D>(nullptr);
-		src->QueryInterface(&tex);
+		auto res = win::make_scope_com<ID3D11Resource>();
+		src->GetResource(&res);
+		dxcall(res->QueryInterface(&tex));
 		D3D11_TEXTURE2D_DESC desc;
 		tex->GetDesc(&desc);
 		auto src_rect = GetTextureRect(desc, level);

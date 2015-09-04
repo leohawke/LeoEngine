@@ -33,6 +33,7 @@ public:
 	void Draw(ID3D11DeviceContext* context) {
 		while (!ready)
 			;
+		//TODO:SUPPORT MSAA
 		context->CopyResource(mSrcCopyTex, mSrcPtr);
 		context->ExecuteCommandList(mCommandList, false);
 	}
@@ -63,6 +64,17 @@ protected:
 			leo::dxcall(create->CreateTexture2D(&texDesc, nullptr, &mSrcCopyTex));
 			leo::dxcall(create->CreateShaderResourceView(mSrcCopyTex, nullptr, &mSrcCopy));
 			mSrcPtr = src;
+
+			D3D11_RENDER_TARGET_VIEW_DESC rtDesc;
+			dst->GetDesc(&rtDesc);
+			
+			texDesc.Width /= 4;
+			texDesc.Height /= 4;
+			texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+			auto mScaleTex = leo::win::make_scope_com<ID3D11Texture2D>(nullptr);
+			leo::dxcall(create->CreateTexture2D(&texDesc, nullptr, &mScaleTex));
+			leo::dxcall(create->CreateShaderResourceView(mScaleTex, nullptr, &mScaleCopy));
+			leo::dxcall(create->CreateRenderTargetView(mScaleTex, nullptr, &mScaleRT));
 		}
 
 		//some resourecr don't need resize
@@ -76,6 +88,9 @@ protected:
 	void once_method(ID3D11Device* create) {
 		ID3D11DeviceContext* deferredcontext;
 		leo::dxcall(create->CreateDeferredContext(0, &deferredcontext));
+
+		mScalerProcess->Apply(deferredcontext);
+		mScalerProcess->Draw(deferredcontext, mSrcCopy, mScaleRT);
 
 		mCommandList.reset(nullptr);
 		leo::dxcall(deferredcontext->FinishCommandList(false, &mCommandList));
@@ -91,7 +106,9 @@ private:
 	ID3D11Texture2D* mSrcPtr = nullptr;
 	leo::win::unique_com<ID3D11Texture2D> mSrcCopyTex = nullptr;
 	leo::win::unique_com<ID3D11ShaderResourceView> mSrcCopy = nullptr;
+
 	leo::win::unique_com<ID3D11ShaderResourceView> mScaleCopy = nullptr;
+	leo::win::unique_com<ID3D11RenderTargetView> mScaleRT = nullptr;
 
 	std::unique_ptr<leo::PostProcess> mScalerProcess = nullptr;
 };

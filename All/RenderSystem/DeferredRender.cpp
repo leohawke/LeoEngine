@@ -329,6 +329,8 @@ void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context) noexcept
 	for (auto & s : srvs)
 		s = nullptr;
 	context->PSSetShaderResources(0, arrlen(srvs), srvs);
+
+	pHDRImpl->Draw(context);
 }
 
 void leo::DeferredRender::SetSSAOParams(bool enable, uint8 level) noexcept
