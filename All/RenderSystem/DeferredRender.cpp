@@ -245,7 +245,7 @@ leo::DeferredRender::DeferredRender(ID3D11Device * device, size_type size)
 	LinearizeDepthImpl::GetInstance(device);
 	LightSourcesRender::Init(device);
 
-	//pHDRImpl = std::make_unique<HDRImpl>(device, global::globalD3DRenderTargetTexture2D, global::globalD3DRenderTargetView);
+	pHDRImpl = std::make_unique<HDRImpl>(device, global::globalD3DRenderTargetTexture2D, global::globalD3DRenderTargetView);
 }
 
 leo::DeferredRender::~DeferredRender() {
@@ -280,7 +280,7 @@ void leo::DeferredRender::ReSize(ID3D11Device * device, size_type size) noexcept
 {
 	pResImpl.reset(nullptr);
 	pResImpl = std::make_unique<DeferredResImpl>(device, size);
-	//pHDRImpl->ReSize(device, global::globalD3DRenderTargetTexture2D, global::globalD3DRenderTargetView);
+	pHDRImpl->ReSize(device, global::globalD3DRenderTargetTexture2D, global::globalD3DRenderTargetView);
 }
 
 void leo::DeferredRender::LinearizeDepth(ID3D11DeviceContext * context, DepthStencil& depthstencil, float near_z, float far_z) noexcept

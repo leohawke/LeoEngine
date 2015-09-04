@@ -33,6 +33,7 @@ public:
 	void Draw(ID3D11DeviceContext* context) {
 		while (!ready)
 			;
+		context->CopyResource(mSrcCopyTex, mSrcPtr);
 		context->ExecuteCommandList(mCommandList, false);
 	}
 protected:
@@ -75,8 +76,6 @@ protected:
 	void once_method(ID3D11Device* create) {
 		ID3D11DeviceContext* deferredcontext;
 		leo::dxcall(create->CreateDeferredContext(0, &deferredcontext));
-
-		deferredcontext->CopyResource(mSrcCopyTex, mSrcPtr);
 
 		mCommandList.reset(nullptr);
 		leo::dxcall(deferredcontext->FinishCommandList(false, &mCommandList));
