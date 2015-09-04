@@ -35,7 +35,9 @@ public:
 			;
 		//TODO:SUPPORT MSAA
 		context->CopyResource(mSrcCopyTex, mSrcPtr);
-		context->ExecuteCommandList(mCommandList, false);
+		/*context->ExecuteCommandList(mCommandList, false);*/
+		mScalerProcess->Apply(context);
+		mScalerProcess->Draw(context, mSrcCopy, mScaleRT);
 	}
 protected:
 	void create_method(ID3D11Device* create, ID3D11Texture2D* src, ID3D11RenderTargetView* dst) {
