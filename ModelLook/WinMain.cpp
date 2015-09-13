@@ -387,7 +387,9 @@ void Render()
 		std::lock_guard<std::mutex> lock(mRenderMutex);
 
 		auto devicecontext = dm.GetDeviceContext();
-
+		D3D11_VIEWPORT lastVp;
+		UINT numVP = 1;
+		devicecontext->RSGetViewports(&numVP, &lastVp);
 		if (pRender) {
 			pRender->OMSet(devicecontext, *leo::global::globalDepthStencil);
 		}
@@ -410,7 +412,7 @@ void Render()
 		if (pRender) {
 			pRender->ShadingPass(devicecontext);
 		}
-
+		devicecontext->RSSetViewports(1, &lastVp);
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 
 		leo::RenderSync::GetInstance()->Present();

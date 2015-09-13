@@ -129,7 +129,7 @@ public:
 	UINT mIndexCount = 0;
 };
 
-class SpotLightVolumeImpl :public leo::Singleton<PointLightVolumeImpl, false> {
+class SpotLightVolumeImpl :public leo::Singleton<SpotLightVolumeImpl, false> {
 public:
 	SpotLightVolumeImpl(ID3D11Device* device) {
 		leo::ShaderMgr sm;
@@ -245,7 +245,7 @@ public:
 	UINT mIndexCount = 0;
 };
 
-class DirectionalVolumeImpl :public leo::Singleton<PointLightVolumeImpl, false> {
+class DirectionalVolumeImpl :public leo::Singleton<DirectionalVolumeImpl, false> {
 public:
 	DirectionalVolumeImpl(ID3D11Device* device) {
 		leo::ShaderMgr sm;

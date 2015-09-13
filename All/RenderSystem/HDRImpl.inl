@@ -35,9 +35,9 @@ public:
 			;
 		//TODO:SUPPORT MSAA
 		context->CopyResource(mSrcCopyTex, mSrcPtr);
-		/*context->ExecuteCommandList(mCommandList, false);*/
-		mScalerProcess->Apply(context);
-		mScalerProcess->Draw(context, mSrcCopy, mScaleRT);
+		context->ExecuteCommandList(mCommandList, false);
+		/*mScalerProcess->Apply(context);
+		mScalerProcess->Draw(context, mSrcCopy, mScaleRT);*/
 	}
 protected:
 	void create_method(ID3D11Device* create, ID3D11Texture2D* src, ID3D11RenderTargetView* dst) {
@@ -52,11 +52,14 @@ protected:
 			mSrcCopy->Release();
 			mSrcCopyTex->Release();
 		}
-
+		UINT height, width;
 		{
 		//first create scale tex res
 			D3D11_TEXTURE2D_DESC texDesc;
 			src->GetDesc(&texDesc);
+
+			height = texDesc.Height;
+			width = texDesc.Width;
 
 			texDesc.MipLevels = 1;
 			texDesc.ArraySize = 1;
@@ -79,17 +82,24 @@ protected:
 			leo::dxcall(create->CreateRenderTargetView(mScaleTex, nullptr, &mScaleRT));
 		}
 
-		//some resourecr don't need resize
-		static std::once_flag once_flag;
-		std::call_once(once_flag, &HDRImpl::once_method, this, create);
+		once_method(create, width, height);
 
 		ready = true;
 		mutex.unlock();
 	}
 
-	void once_method(ID3D11Device* create) {
+	void once_method(ID3D11Device* create,UINT width,UINT height) {
 		ID3D11DeviceContext* deferredcontext;
 		leo::dxcall(create->CreateDeferredContext(0, &deferredcontext));
+
+		D3D11_VIEWPORT vp;
+		vp.Height = height*1.f;
+		vp.Width =  width*1.f;
+		vp.TopLeftX = 0;
+		vp.TopLeftY = 0;
+		vp.MaxDepth = 1.0f;
+		vp.MinDepth = 0.0f;
+		deferredcontext->RSSetViewports(1, &vp);
 
 		mScalerProcess->Apply(deferredcontext);
 		mScalerProcess->Draw(deferredcontext, mSrcCopy, mScaleRT);
