@@ -230,7 +230,7 @@ public:
 			throw std::runtime_error("leo::ScalaerProcess<2>::Draw Error: Invalid Argument src(Please Check ViewDimension)");
 
 		auto tex = win::make_scope_com<ID3D11Texture2D>(nullptr);
-		auto res = win::make_scope_com<ID3D11Resource>();
+		auto res = win::make_scope_com<ID3D11Resource>(nullptr);
 		src->GetResource(&res);
 		dxcall(res->QueryInterface(&tex));
 		D3D11_TEXTURE2D_DESC desc;
