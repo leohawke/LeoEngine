@@ -10,6 +10,49 @@
 #include <exception.hpp>
 #include "d3dx11.hpp"
 #include "PostProcess.hpp"
+
+
+class HDRLuminanceImpl :public leo::PostProcess
+{
+public:
+	HDRLuminanceImpl(ID3D11Device* device)
+		:PostProcess(device)
+	{
+
+	}
+
+	bool Apply(ID3D11DeviceContext * context) override
+	{
+		PostProcess::Apply(context);
+	}
+
+	void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) override
+	{
+		auto curr_level = tone_level_count - 1;
+		PostProcess::Draw(context, src, mRTVToneMap[tone_level_four]);
+
+		curr_level--;
+
+		while (curr_level > 0) {
+			PostProcess::Draw(context, mSRVToneMap[curr_level + 1], mRTVToneMap[curr_level]);
+			curr_level--;
+		}
+	}
+private:
+	enum tone_level :leo::uint8 {
+		tone_level_one = 0,
+		tone_level_two = 1,
+		tone_level_three = 2,
+		tone_level_four = 3,
+		tone_level_count
+	};
+	leo::win::unique_com<ID3D11ShaderResourceView> mSRVToneMap[tone_level_count];
+	leo::win::unique_com<ID3D11Texture2D> mLastTomeMap;
+	leo::win::unique_com<ID3D11RenderTargetView> mRTVToneMap[tone_level_count];
+
+	std::pair<UINT, UINT> mToneSize[tone_level_count];
+};
+
 class HDRImpl {
 public:
 	HDRImpl(ID3D11Device* create, ID3D11Texture2D* src, ID3D11RenderTargetView* dst)
@@ -58,9 +101,6 @@ protected:
 			D3D11_TEXTURE2D_DESC texDesc;
 			src->GetDesc(&texDesc);
 
-			height = texDesc.Height;
-			width = texDesc.Width;
-
 			texDesc.MipLevels = 1;
 			texDesc.ArraySize = 1;
 			texDesc.SampleDesc.Count = 1;
@@ -75,6 +115,13 @@ protected:
 			
 			texDesc.Width /= 4;
 			texDesc.Height /= 4;
+
+			texDesc.Width -= (texDesc.Width % 8);
+			texDesc.Height -= (texDesc.Height % 8);
+
+			height = texDesc.Height;
+			width = texDesc.Width;
+
 			texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 			auto mScaleTex = leo::win::make_scope_com<ID3D11Texture2D>(nullptr);
 			leo::dxcall(create->CreateTexture2D(&texDesc, nullptr, &mScaleTex));
