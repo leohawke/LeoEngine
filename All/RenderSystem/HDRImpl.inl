@@ -46,15 +46,18 @@ public:
 		//tone_level_count res
 		#ifdef NO_SINGLE_CHANNEL_FLOAT
 		texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		BindProcess(device, "Shader/LumLogIntialPS_multiple.cso");
+		#else
+		BindProcess(device, "Shader/LumLogIntialPS_single.cso");
 		#endif
 		for (auto i = 0u; i < tone_level_count;++i) {
-			texDesc.Height = texDesc.Width = 1 << (2 * i);
+			texDesc.Height = texDesc.Width = 1 << (2 * i)<<2;
 			auto tempTex = leo::win::make_scope_com<ID3D11Texture2D>();
 			leo::dxcall(device->CreateTexture2D(&texDesc, nullptr, &tempTex));
 			leo::dxcall(device->CreateRenderTargetView(tempTex, nullptr, &mRTVToneMap[i]));
 			leo::dxcall(device->CreateShaderResourceView(tempTex, nullptr, &mSRVToneMap[i]));
 			if (i == 0)
-				mLastTomeMap = leo::win::unique_com<ID3D11Texture2D>(tempTex.release());
+				mLastToneMap = leo::win::unique_com<ID3D11Texture2D>(tempTex.release());
 		}
 		#else
 		//one res
@@ -123,7 +126,40 @@ public:
 			PostProcess::Draw(context, mSRVToneMap[curr_level + 1], mRTVToneMap[curr_level]);
 			curr_level--;
 		}
+		D3D11_MAPPED_SUBRESOURCE subRes;
+		context->Map(mLastToneMap, 0, D3D11_MAP_READ, 0, &subRes);
+		float* texData = subRes.pData;
+		#ifndef NO_SINGLE_CHANNEL_FLOAT
+		float fResampleSum = 0.f;
+		for (auto iSample = 0u; iSample < 16;++iSample)
+		{	
+			fResampleSum += texData[iSample*subRes.RowPitch / 4];
+		}
+		fResampleSum = exp(fResampleSum / 16.f);
+		#else
+		float fResampleSum = 0.f;
+		for (auto iSample = 0u; iSample < 16;++iSample)
+		{
+			byte* xyzw = (byte*)texData[iSample*subRes.RowPitch / 4];
+
+			float rgba[4];
+
+			rgba[0] = xyzw[0] / 255.f * 1.f;
+			rgba[1] = xyzw[1] / 255.f * 1/255.f;
+			rgba[2] = xyzw[2] / 255.f * 1/65025.f;
+			rgba[3] = xyzw[3] / 255.f * 1/ 16581375.f;
+
+			fResampleSum += rgba[0];
+			fResampleSum += rgba[1];
+			fResampleSum += rgba[2];
+			fResampleSum += rgba[3];
+		}
+		fResampleSum = exp(fResampleSum / 16.f);
+		#endif
+		context->Unmap(mLastTomeMap, 0);
+#else
 #endif
+		auto mCurrLum = fResampleSum;
 	}
 private:
 	void CalcSampleOffset(std::pair<UINT,UINT> size)
@@ -146,14 +182,13 @@ private:
 private:
 	#ifdef NO_GENMIP
 	enum tone_level :leo::uint8 {
-		tone_level_one = 0,
-		tone_level_two = 1,
-		tone_level_three = 2,
-		tone_level_four = 3,
+		tone_level_two = 0,
+		tone_level_three = 1,
+		tone_level_four = 2,
 		tone_level_count
 	};
 	leo::win::unique_com<ID3D11ShaderResourceView> mSRVToneMap[tone_level_count];
-	leo::win::unique_com<ID3D11Texture2D> mLastTomeMap;
+	leo::win::unique_com<ID3D11Texture2D> mLastToneMap;
 	leo::win::unique_com<ID3D11RenderTargetView> mRTVToneMap[tone_level_count];
 	#else
 	leo::win::unique_com<ID3D11ShaderResourceView> mSRVToneMap;
@@ -163,6 +198,8 @@ private:
 	std::array<leo::float4, 32> mOffsets;
 
 	std::pair<UINT, UINT> mToneSize[tone_level_count];
+
+	float mLastLum;
 };
 
 class HDRImpl {
