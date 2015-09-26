@@ -72,7 +72,7 @@ public:
 
 	bool Apply(ID3D11DeviceContext * context) override
 	{
-		PostProcess::Apply(context);
+		return PostProcess::Apply(context);
 	}
 
 	void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) override
@@ -132,13 +132,19 @@ public:
 			PostProcess::Draw(context, mSRVToneMap[curr_level + 1], mRTVToneMap[curr_level]);
 			curr_level--;
 		}
+#else
+#endif
+	}
+
+	float GetLumFactor(ID3D11DeviceContext* context, float lumAdapt,float dt)
+	{
 		D3D11_MAPPED_SUBRESOURCE subRes;
 		context->Map(mLastToneMap, 0, D3D11_MAP_READ, 0, &subRes);
 		float* texData = reinterpret_cast<float*>(subRes.pData);
 		#ifndef NO_SINGLE_CHANNEL_FLOAT
 		float fResampleSum = 0.f;
 		for (auto iSample = 0u; iSample < 16;++iSample)
-		{	
+		{
 			fResampleSum += texData[iSample*subRes.RowPitch / 4];
 		}
 		fResampleSum = exp(fResampleSum / 16.f);
@@ -151,9 +157,9 @@ public:
 			float rgba[4];
 
 			rgba[0] = xyzw[0] / 255.f * 1.f;
-			rgba[1] = xyzw[1] / 255.f * 1/255.f;
-			rgba[2] = xyzw[2] / 255.f * 1/65025.f;
-			rgba[3] = xyzw[3] / 255.f * 1/ 16581375.f;
+			rgba[1] = xyzw[1] / 255.f * 1 / 255.f;
+			rgba[2] = xyzw[2] / 255.f * 1 / 65025.f;
+			rgba[3] = xyzw[3] / 255.f * 1 / 16581375.f;
 
 			fResampleSum += rgba[0];
 			fResampleSum += rgba[1];
@@ -163,9 +169,9 @@ public:
 		fResampleSum = exp(fResampleSum / 16.f);
 		#endif
 		context->Unmap(mLastToneMap, 0);
-#else
-#endif
+
 		auto mCurrLum = fResampleSum;
+		return lumAdapt + (mCurrLum - lumAdapt) * (1 - pow(0.98f, 30 * dt));
 	}
 private:
 	void CalcSampleOffset(std::pair<UINT,UINT> size)
@@ -205,15 +211,15 @@ private:
 
 	std::pair<UINT, UINT> mToneSize[tone_level_count];
 
-	float mLastLum;
-
 	ID3D11PixelShader* mLumIterativePS = nullptr;
 };
 
 class HDRImpl {
 public:
 	HDRImpl(ID3D11Device* create, ID3D11Texture2D* src, ID3D11RenderTargetView* dst)
-	:mScalerProcess(std::make_unique<leo::ScalaerProcess<4>>(create)){
+	:mScalerProcess(std::make_unique<leo::ScalaerProcess<4>>(create)),
+		mMeasureLumProcess(std::make_unique<HDRLuminanceImpl>(create))
+	{
 		std::thread create_thread(&HDRImpl::create_method, this, create, src, dst);
 		create_thread.detach();
 	}
@@ -230,12 +236,14 @@ public:
 		//do nothing
 	}
 
-	void Draw(ID3D11DeviceContext* context) {
+	void Draw(ID3D11DeviceContext* context, float dt) {
 		while (!ready)
 			;
 		//TODO:SUPPORT MSAA
 		context->CopyResource(mSrcCopyTex, mSrcPtr);
 		context->ExecuteCommandList(mCommandList, false);
+		//TODO:do by GPU
+		mLumAdapt = mMeasureLumProcess->GetLumFactor(context, mLumAdapt, dt);
 		/*mScalerProcess->Apply(context);
 		mScalerProcess->Draw(context, mSrcCopy, mScaleRT);*/
 	}
@@ -307,7 +315,7 @@ protected:
 
 		mScalerProcess->Apply(deferredcontext);
 		mScalerProcess->Draw(deferredcontext, mSrcCopy, mScaleRT);
-
+		mMeasureLumProcess->Draw(deferredcontext, mScaleCopy, nullptr);
 		mCommandList.reset(nullptr);
 		leo::dxcall(deferredcontext->FinishCommandList(false, &mCommandList));
 		deferredcontext->Release();
@@ -327,4 +335,7 @@ private:
 	leo::win::unique_com<ID3D11RenderTargetView> mScaleRT = nullptr;
 
 	std::unique_ptr<leo::PostProcess> mScalerProcess = nullptr;
+	std::unique_ptr<HDRLuminanceImpl> mMeasureLumProcess = nullptr;
+
+	float mLumAdapt = 0.f;
 };

@@ -303,7 +303,7 @@ void leo::DeferredRender::LinearizeDepth(ID3D11DeviceContext * context, DepthSte
 	context->PSSetShaderResources(0, 1, &srv);
 }
 
-void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context) noexcept
+void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context,float dt) noexcept
 {
 
 	auto & effectQuad = leo::EffectQuad::GetInstance();
@@ -330,7 +330,7 @@ void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context) noexcept
 		s = nullptr;
 	context->PSSetShaderResources(0, arrlen(srvs), srvs);
 
-	pHDRImpl->Draw(context);
+	pHDRImpl->Draw(context,dt);
 }
 
 void leo::DeferredRender::SetSSAOParams(bool enable, uint8 level) noexcept

@@ -376,9 +376,12 @@ void Update() {
 void Render()
 {
 	event.Wait();
-
+	static auto mBegin = leo::clock::now();
 	while (renderThreadRun)
 	{
+		auto mRunTime = leo::clock::duration_to<>(leo::clock::now() - mBegin);
+		mBegin = leo::clock::now();
+		float dt = mRunTime;
 		leo::DeviceMgr dm;
 
 		pCamera->UpdateViewMatrix();
@@ -410,7 +413,7 @@ void Render()
 		devicecontext->ClearRenderTargetView(leo::global::globalD3DRenderTargetView, rgba);
 		pSky->Render(devicecontext, *pCamera);
 		if (pRender) {
-			pRender->ShadingPass(devicecontext);
+			pRender->ShadingPass(devicecontext,dt);
 		}
 		devicecontext->RSSetViewports(1, &lastVp);
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
