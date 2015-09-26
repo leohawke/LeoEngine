@@ -274,9 +274,6 @@
     <FxCompile Include="Shader\PostProcessVS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
-    <FxCompile Include="Shader\LumIterativePS.hlsl">
-      <Filter>Shader</Filter>
-    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ModelLook.rc">
@@ -302,6 +299,9 @@
       <Filter>Shader</Filter>
     </CustomBuild>
     <CustomBuild Include="Shader\LumLogInitialPS.hlsl">
+      <Filter>Shader</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Shader\LumIterativePS.hlsl">
       <Filter>Shader</Filter>
     </CustomBuild>
   </ItemGroup>

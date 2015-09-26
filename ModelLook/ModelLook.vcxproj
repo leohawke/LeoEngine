@@ -347,12 +347,23 @@ fxc /Zi /E"LumLogInitial"  /Fo "$(OutDir)Shader\%(Filename)_multiple.cso" /D "NO
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
-    <FxCompile Include="Shader\LumIterativePS.hlsl">
+    <CustomBuild Include="Shader\LumIterativePS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-    </FxCompile>
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc /Zi /E"LumIterative" /Od /Fo"$(OutDir)Shader\%(Filename)_single.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
+fxc /Zi /E"LumIterative" /Od /Fo "$(OutDir)Shader\%(Filename)_multiple.cso" /D "NO_SINGLE_CHANNEL_FLOAT"  /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compilation %(Filename).hlsl</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc.log</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxc /Zi /E"LumIterative"  /Fo"$(OutDir)Shader\%(Filename)_single.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
+fxc /Zi /E"LumIterative"  /Fo "$(OutDir)Shader\%(Filename)_multiple.cso" /D "NO_SINGLE_CHANNEL_FLOAT"  /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compilation %(Filename).hlsl</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxc.log </Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </CustomBuild>
     <FxCompile Include="Shader\PostProcessVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
@@ -463,11 +474,12 @@ fxc /Zi /E"main_8" /Od /Fo"$(OutDir)Shader\%(Filename)_8.cso" /T "ps_5_0" /nolog
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc.log</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxc /E"main_2"  /Fo"$(OutDir)Shader\%(Filename)_2.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
 fxc /E"main_4"  /Fo"$(OutDir)Shader\%(Filename)_4.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
-fxc /E"main_8"  /Fo"$(OutDir)Shader\%(Filename)_8.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl</Command>
+fxc /E"main_8"  /Fo"$(OutDir)Shader\%(Filename)_8.cso" /T "ps_5_0" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxc.log</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compilation %(Filename).hlsl</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compilation %(Filename).hlsl</Message>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
     <FxCompile Include="Shader\ShaderPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>

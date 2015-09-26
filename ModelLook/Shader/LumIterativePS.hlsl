@@ -26,7 +26,7 @@ float4 LumIterative(
 	) : SV_TARGET
 {
 	float fResampleSum = 0.0f;
-
+	float2 avSampleOffsets[MAX_SAMPLES] = g_avSampleOffsets;
 	for (int iSample = 0; iSample < 16; iSample++)
 	{
 		// Compute the sum of luminance throughout the sample points

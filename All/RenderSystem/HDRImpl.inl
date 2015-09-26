@@ -42,16 +42,22 @@ public:
 			1,0,//ARRAT & MIP
 			D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE  //BindFlag
 		};
+		
 		#ifdef NO_GENMIP
 		//tone_level_count res
 		#ifdef NO_SINGLE_CHANNEL_FLOAT
 		texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		BindProcess(device, "Shader/LumIterativePS_multiple.cso");
+		mLumIterativePS = mPixelShader;
 		BindProcess(device, "Shader/LumLogIntialPS_multiple.cso");
 		#else
-		BindProcess(device, "Shader/LumLogIntialPS_single.cso");
+		BindProcess(device, L"Shader/LumIterativePS_single.cso");
+		mLumIterativePS = mPixelShader;
+		BindProcess(device, L"Shader/LumLogIntialPS_single.cso");
 		#endif
 		for (auto i = 0u; i < tone_level_count;++i) {
 			texDesc.Height = texDesc.Width = 1 << (2 * i)<<2;
+			mToneSize[i] = std::make_pair(texDesc.Width, texDesc.Height);
 			auto tempTex = leo::win::make_scope_com<ID3D11Texture2D>();
 			leo::dxcall(device->CreateTexture2D(&texDesc, nullptr, &tempTex));
 			leo::dxcall(device->CreateRenderTargetView(tempTex, nullptr, &mRTVToneMap[i]));
@@ -119,8 +125,8 @@ public:
 
 #ifdef NO_GENMIP
 		curr_level--;
-
-		while (curr_level > 0) {
+		context->PSSetShader(mLumIterativePS, nullptr, 0);
+		while (curr_level > -1) {
 			CalcSampleOffset(mToneSize[curr_level + 1]);
 			context->UpdateSubresource(mOffsetsBuffer, 0, nullptr, mOffsets.data(), 0, 0);
 			PostProcess::Draw(context, mSRVToneMap[curr_level + 1], mRTVToneMap[curr_level]);
@@ -128,7 +134,7 @@ public:
 		}
 		D3D11_MAPPED_SUBRESOURCE subRes;
 		context->Map(mLastToneMap, 0, D3D11_MAP_READ, 0, &subRes);
-		float* texData = subRes.pData;
+		float* texData = reinterpret_cast<float*>(subRes.pData);
 		#ifndef NO_SINGLE_CHANNEL_FLOAT
 		float fResampleSum = 0.f;
 		for (auto iSample = 0u; iSample < 16;++iSample)
@@ -156,7 +162,7 @@ public:
 		}
 		fResampleSum = exp(fResampleSum / 16.f);
 		#endif
-		context->Unmap(mLastTomeMap, 0);
+		context->Unmap(mLastToneMap, 0);
 #else
 #endif
 		auto mCurrLum = fResampleSum;
@@ -200,6 +206,8 @@ private:
 	std::pair<UINT, UINT> mToneSize[tone_level_count];
 
 	float mLastLum;
+
+	ID3D11PixelShader* mLumIterativePS = nullptr;
 };
 
 class HDRImpl {

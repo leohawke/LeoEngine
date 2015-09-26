@@ -83,8 +83,9 @@ public:
 			:PosH(pos), Tex(leo::Coord::NDCtoUV(pos.x, pos.y))
 		{}
 	};
-private:
+protected:
 	ID3D11PixelShader* mPixelShader;
+private:
 	win::unique_com<ID3D11Buffer> mVertexBuffer;
 
 	//TRIANGLESTRIP

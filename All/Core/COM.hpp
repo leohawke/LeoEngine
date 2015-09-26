@@ -186,7 +186,7 @@ namespace leo
 
 			Myt& operator=(Myt&& Right)
 			{	// assign by moving Right
-				if (this != &Right)
+				if (this != std::addressof(Right))
 				{	// different, do the move
 					reset(Right.release());
 					this->get_deleter() = std::move(Right.get_deleter());
@@ -196,7 +196,7 @@ namespace leo
 
 			void swap(Myt&& Right)
 			{	// swap elements
-				if (this != &Right)
+				if (this != std::addressof(Right))
 				{	// different, do the swap
 					std::swap(this->Myptr, Right.Myptr);
 					std::swap(this->get_deleter(),
