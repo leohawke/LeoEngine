@@ -337,5 +337,6 @@ private:
 	std::unique_ptr<leo::PostProcess> mScalerProcess = nullptr;
 	std::unique_ptr<HDRLuminanceImpl> mMeasureLumProcess = nullptr;
 
-	float mLumAdapt = 0.f;
+	//dot(float3(0.0f, 0.25f, 0.25f),float3(0.2125f, 0.7154f, 0.0721f));
+	float mLumAdapt = 0.196875f;
 };
