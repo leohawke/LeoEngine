@@ -10,6 +10,19 @@ SamplerState s0 : register(s0);
 // The per-color weighting to be used for luminance calculations in RGB order.
 static const float3 LUMINANCE_VECTOR = float3(0.2125f, 0.7154f, 0.0721f);
 
+float4 EncodeFloatRGBA(float v)
+{
+	float4 enc = float4(1.0f, 255.0f, 65025.0f, 16581375.0f) * v;
+	enc = frac(enc);
+	enc -= enc.yzww * float4(1 / 255.0f, 1 / 255.0f, 1 / 255.0f, 0);
+	return enc;
+}
+
+float DecodeFloatRGBA(float4 rgba)
+{
+	return dot(rgba, float4(1, 1 / 255.0f, 1 / 65025.0f, 1 / 16581375.0f));
+}
+
 //-----------------------------------------------------------------------------                                
 // Desc: Sample the luminance of the source image using a kernal of sample
 //       points, and return a scaled image containing the log() of averages
@@ -32,6 +45,9 @@ float4 LumLogInitial
 
 	// Divide the sum to complete the average
 	fLogLumSum /= 9;
-
-	return float4(fLogLumSum, fLogLumSum, fLogLumSum, 1.0f);
+	#ifdef NO_SINGLE_CHANNEL_FLOAT
+	return EncodeFloatRGBA(fLogLumSum);
+	#else
+	return fLogLumSum;
+	#endif
 }

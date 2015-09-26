@@ -326,7 +326,7 @@
     <None Include="The LeoEngine Terrain File.tpl" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shader\LumLogInitialPS.hlsl">
+    <CustomBuild Include="Shader\LumLogInitialPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
@@ -335,7 +335,17 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">LumLogInitial</EntryPointName>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">LumLogInitial</EntryPointName>
-    </FxCompile>
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc /Zi /E"LumLogInitial" /Od /Fo"$(OutDir)Shader\%(Filename)_single.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
+fxc /Zi /E"LumLogInitial" /Od /Fo "$(OutDir)Shader\%(Filename)_multiple.cso" /D "NO_SINGLE_CHANNEL_FLOAT"  /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl </Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc.log</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxc /Zi /E"LumLogInitial"  /Fo"$(OutDir)Shader\%(Filename)_single.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
+fxc /Zi /E"LumLogInitial"  /Fo "$(OutDir)Shader\%(Filename)_multiple.cso" /D "NO_SINGLE_CHANNEL_FLOAT"  /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compilation %(Filename).hlsl</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxc.log</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compilation %(Filename).hlsl</Message>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </CustomBuild>
     <FxCompile Include="Shader\PostProcessVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
@@ -379,6 +389,8 @@
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">DeferredRenderingDepthOnlyVS</EntryPointName>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PreprocessorDefinitions>
     </FxCompile>
     <FxCompile Include="Shader\GenGBufferPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -409,6 +421,8 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PreprocessorDefinitions>
     </FxCompile>
     <FxCompile Include="Shader\PointLightVolumePS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
