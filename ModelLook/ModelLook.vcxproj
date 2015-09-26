@@ -90,7 +90,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>MULTI_THREAD;PLATFORM_WIN32;DEBUG;LEO_MEMORY_TRACKER;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MULTI_THREAD;PLATFORM_WIN32;DEBUG;LEO_MEMORY_TRACKER;NO_GENMIP;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -345,6 +345,7 @@ fxc /Zi /E"LumLogInitial"  /Fo "$(OutDir)Shader\%(Filename)_multiple.cso" /D "NO
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxc.log</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compilation %(Filename).hlsl</Message>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
     <FxCompile Include="Shader\PostProcessVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>

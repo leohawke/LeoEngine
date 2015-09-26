@@ -12,7 +12,14 @@
 #include "d3dx11.hpp"
 #include "PostProcess.hpp"
 
-
+//NOTE: ifndef NO_GENMIP,the GPU must support SINGLE_CHANNEL_FLOAT,that's mean 
+//ifdef NO_SINGLE_CHANNEL_FLOAT ,then NO_GENMIP will be defined
+//but not mean ifdef NO_GENMIP,the NO_SINGLE_CHANNEL_FLOAT will be defined
+#ifdef NO_SINGLE_CHANNEL_FLOAT
+#ifndef NO_GENMIP
+#define NO_GENMIP
+#endif
+#endif
 class HDRLuminanceImpl :public leo::PostProcess
 {
 public:
@@ -28,6 +35,30 @@ public:
 		Desc.ByteWidth = sizeof(mOffsets);
 
 		leo::dxcall(device->CreateBuffer(&Desc, nullptr, &mOffsetsBuffer));
+
+		CD3D11_TEXTURE2D_DESC texDesc{ 
+			DXGI_FORMAT_R32_FLOAT,//FORMAT
+			1,1,//SIZE
+			1,0,//ARRAT & MIP
+			D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE  //BindFlag
+		};
+		#ifdef NO_GENMIP
+		//tone_level_count res
+		#ifdef NO_SINGLE_CHANNEL_FLOAT
+		texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		#endif
+		for (auto i = 0u; i < tone_level_count;++i) {
+			texDesc.Height = texDesc.Width = 1 << (2 * i);
+			auto tempTex = leo::win::make_scope_com<ID3D11Texture2D>();
+			leo::dxcall(device->CreateTexture2D(&texDesc, nullptr, &tempTex));
+			leo::dxcall(device->CreateRenderTargetView(tempTex, nullptr, &mRTVToneMap[i]));
+			leo::dxcall(device->CreateShaderResourceView(tempTex, nullptr, &mSRVToneMap[i]));
+			if (i == 0)
+				mLastTomeMap = leo::win::unique_com<ID3D11Texture2D>(tempTex.release());
+		}
+		#else
+		//one res
+		#endif
 	}
 
 	bool Apply(ID3D11DeviceContext * context) override
@@ -76,10 +107,14 @@ public:
 			context->UpdateSubresource(mOffsetsBuffer, 0, nullptr, mOffsets.data(), 0, 0);
 			context->PSSetConstantBuffers(0, 1, &mOffsetsBuffer);
 		}
-
+		#ifdef NO_GENMIP
 		auto curr_level = tone_level_count - 1;
 		PostProcess::Draw(context, src, mRTVToneMap[curr_level]);
+		#else
+		PostProcess::Draw(context, src, mRTVToneMap);
+		#endif
 
+#ifdef NO_GENMIP
 		curr_level--;
 
 		while (curr_level > 0) {
@@ -88,6 +123,7 @@ public:
 			PostProcess::Draw(context, mSRVToneMap[curr_level + 1], mRTVToneMap[curr_level]);
 			curr_level--;
 		}
+#endif
 	}
 private:
 	void CalcSampleOffset(std::pair<UINT,UINT> size)
@@ -108,6 +144,7 @@ private:
 			}
 	}
 private:
+	#ifdef NO_GENMIP
 	enum tone_level :leo::uint8 {
 		tone_level_one = 0,
 		tone_level_two = 1,
@@ -118,7 +155,10 @@ private:
 	leo::win::unique_com<ID3D11ShaderResourceView> mSRVToneMap[tone_level_count];
 	leo::win::unique_com<ID3D11Texture2D> mLastTomeMap;
 	leo::win::unique_com<ID3D11RenderTargetView> mRTVToneMap[tone_level_count];
-
+	#else
+	leo::win::unique_com<ID3D11ShaderResourceView> mSRVToneMap;
+	leo::win::unique_com<ID3D11RenderTargetView> mRTVToneMap;
+	#endif
 	leo::win::unique_com<ID3D11Buffer> mOffsetsBuffer = nullptr;
 	std::array<leo::float4, 32> mOffsets;
 

@@ -2,7 +2,7 @@ static const int    MAX_SAMPLES = 64;    // Maximum texture grabs
 Texture2D mSrc;
 
 cbuffer SampleCB :register(c0) {
-	float2 g_avSampleOffsets[MAX_SAMPLES];
+	float4 g_avSampleOffsets[MAX_SAMPLES/2];
 }
 
 SamplerState s0 : register(s0);
@@ -35,11 +35,11 @@ float4 LumLogInitial
 {
 	float3 vSample = 0.0f;
 	float  fLogLumSum = 0.0f;
-
+	float2 avSampleOffsets[MAX_SAMPLES] = g_avSampleOffsets;
 	for (int iSample = 0; iSample < 9; iSample++)
 	{
 		// Compute the sum of log(luminance) throughout the sample points
-		vSample = mSrc.Sample(s0, Tex + g_avSampleOffsets[iSample]).xyz;
+		vSample = mSrc.Sample(s0, Tex + avSampleOffsets[iSample]).xyz;
 		fLogLumSum += log(dot(vSample, LUMINANCE_VECTOR) + 0.0001f);
 	}
 
