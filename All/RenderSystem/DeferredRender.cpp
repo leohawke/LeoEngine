@@ -305,11 +305,8 @@ void leo::DeferredRender::LinearizeDepth(ID3D11DeviceContext * context, DepthSte
 
 void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context,float dt) noexcept
 {
-
 	auto & effectQuad = leo::EffectQuad::GetInstance();
 
-
-	
 	context->OMSetBlendState(nullptr, nullptr, 0xffffffff);
 	context->OMSetDepthStencilState(pStateImpl->mShaderPassDepthStenciState, 0);
 	effectQuad.Apply(context);

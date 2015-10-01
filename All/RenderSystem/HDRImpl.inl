@@ -11,6 +11,7 @@
 #include <exception.hpp>
 #include "d3dx11.hpp"
 #include "PostProcess.hpp"
+#include "RenderStates.hpp"
 
 //NOTE: ifndef NO_GENMIP,the GPU must support SINGLE_CHANNEL_FLOAT,that's mean 
 //ifdef NO_SINGLE_CHANNEL_FLOAT ,then NO_GENMIP will be defined
@@ -211,6 +212,7 @@ private:
 	leo::win::unique_com<ID3D11Texture2D> mLastToneMap;
 	leo::win::unique_com<ID3D11Texture2D> mToneTex_0;
 	leo::win::unique_com<ID3D11RenderTargetView> mRTVToneMap[tone_level_count];
+	std::pair<UINT, UINT> mToneSize[tone_level_count];
 	#else
 	leo::win::unique_com<ID3D11ShaderResourceView> mSRVToneMap;
 	leo::win::unique_com<ID3D11RenderTargetView> mRTVToneMap;
@@ -218,7 +220,6 @@ private:
 	leo::win::unique_com<ID3D11Buffer> mOffsetsBuffer = nullptr;
 	std::array<leo::float4, 32> mOffsets;
 
-	std::pair<UINT, UINT> mToneSize[tone_level_count];
 
 	ID3D11PixelShader* mLumIterativePS = nullptr;
 };
@@ -227,10 +228,30 @@ private:
 // Star Effect and Bloom Effect
 // BlueShift and ToneMap impl in GPU ,can't be control
 class HDRToneImpl :public leo::PostProcess {
+
 public:
 	HDRToneImpl(ID3D11Device* device,ID3D11ShaderResourceView* mScale,float lumAdapt,bool use_bloom = true,bool use_star= false)
-		:PostProcess(device),mEffectControl(use_bloom,use_star)
-	{}
+		:PostProcess(device),mEffectControl(use_bloom,use_star),mParams(lumAdapt,0.18f,0.5f,1.f)
+	{
+		D3D11_BUFFER_DESC Desc;
+		Desc.Usage = D3D11_USAGE_DEFAULT;
+		Desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		Desc.CPUAccessFlags = 0;
+		Desc.MiscFlags = 0;
+		Desc.StructureByteStride = 0;
+		Desc.ByteWidth = sizeof(mParams);
+
+		leo::dxcall(device->CreateBuffer(&Desc, nullptr, &mParamsBuffer));
+
+		BindProcess(device, L"Shader/HDRFinalPS.cso");
+
+		CD3D11_SAMPLER_DESC mSampleDesc{ D3D11_DEFAULT };
+		mSampleDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;;
+		mLinearSS = leo::RenderStates().CreateSamplerState(L"HDRToneImpls1", mSampleDesc);
+		
+		mSampleDesc.Filter = D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+		mPointSS = leo::RenderStates().CreateSamplerState(L"HDRToneImpls0", mSampleDesc);
+	}
 
 	//NOTE : this function will be create/destory res in another thread
 	std::pair<bool, bool> ControlEffect(bool use_bloom, bool use_star)
@@ -256,6 +277,21 @@ public:
 		}
 	}
 
+	void SetLumAdapt(float lumAdapt) {
+		mParams.x = lumAdapt;
+	}
+
+	bool Apply(ID3D11DeviceContext * context) override {
+		PostProcess::Apply(context);
+		context->PSSetConstantBuffers(0, 1, &mParamsBuffer);
+		context->UpdateSubresource(mParamsBuffer, 0, nullptr, &mParams, 0, 0);
+		ID3D11ShaderResourceView* srvs[] = { mStarResAsIn,mBloomResAsIn };
+		context->PSSetShaderResources(1, 2, srvs);
+		ID3D11SamplerState* sss[] = { mPointSS,mLinearSS };
+		context->PSSetSamplers(0, 2, sss);
+		return true;
+	}
+
 	void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) override
 	{
 		//Bright-pass filtered
@@ -279,14 +315,13 @@ public:
 
 		}
 
-		Apply(context);
 		PostProcess::Draw(context, src, dst);
 	}
 private:
 	std::pair<bool, bool> mEffectControl;
 
-	win::unique_com<ID3D11RenderTargetView> mBrightResAsOut;
-	win::unique_com<ID3D11ShaderResourceView> mBrightResAsIn;
+	leo::win::unique_com<ID3D11RenderTargetView> mBrightResAsOut;
+	leo::win::unique_com<ID3D11ShaderResourceView> mBrightResAsIn;
 
 	//defualt = mBrightResAsOut
 	//Todo: if(all(mEffectControl) new res;
@@ -294,18 +329,30 @@ private:
 
 	//Todo:
 	//#define NUM_STAR_TEXTURES 12
-	win::unique_com<ID3D11RenderTargetView> mStarResAsOut;
-	win::unique_com<ID3D11ShaderResourceView> mStarResAsIn;
+	leo::win::unique_com<ID3D11RenderTargetView> mStarResAsOut;
+	leo::win::unique_com<ID3D11ShaderResourceView> mStarResAsIn;
 
-	win::unique_com<ID3D11RenderTargetView> mBloomResAsOut;
-	win::unique_com<ID3D11ShaderResourceView> mBloomResAsIn;
-}
+	leo::win::unique_com<ID3D11RenderTargetView> mBloomResAsOut;
+	leo::win::unique_com<ID3D11ShaderResourceView> mBloomResAsIn;
+
+	//float fAdaptedLum;
+	//float g_fMiddleGray;//default=0.18f
+	//float g_fStarScale;//default=0.5f
+	//float g_fBloomScale;//default=1.f
+	leo::float4 mParams;
+	leo::win::unique_com<ID3D11Buffer> mParamsBuffer = nullptr;
+
+	ID3D11SamplerState* mLinearSS = nullptr;
+	ID3D11SamplerState* mPointSS = nullptr;
+
+};
 
 class HDRImpl {
 public:
 	HDRImpl(ID3D11Device* create, ID3D11Texture2D* src, ID3D11RenderTargetView* dst)
 	:mScalerProcess(std::make_unique<leo::ScalaerProcess<4>>(create)),
-		mMeasureLumProcess(std::make_unique<HDRLuminanceImpl>(create))
+		mMeasureLumProcess(std::make_unique<HDRLuminanceImpl>(create)),
+		mToneProcess(std::make_unique<HDRToneImpl>(create,mSrcCopy,mLumAdapt))
 	{
 		std::thread create_thread(&HDRImpl::create_method, this, create, src, dst);
 		create_thread.detach();
@@ -331,6 +378,7 @@ public:
 		context->ExecuteCommandList(mCommandList, false);
 		//TODO:do by GPU
 		mLumAdapt = mMeasureLumProcess->GetLumFactor(context, mLumAdapt, dt);
+		mToneProcess->SetLumAdapt(mLumAdapt);
 		/*mScalerProcess->Apply(context);
 		mScalerProcess->Draw(context, mSrcCopy, mScaleRT);*/
 	}
@@ -381,13 +429,13 @@ protected:
 			leo::dxcall(create->CreateRenderTargetView(mScaleTex, nullptr, &mScaleRT));
 		}
 
-		once_method(create, width, height);
+		once_method(create, width, height,dst);
 
 		ready = true;
 		mutex.unlock();
 	}
 
-	void once_method(ID3D11Device* create,UINT width,UINT height) {
+	void once_method(ID3D11Device* create,UINT width,UINT height, ID3D11RenderTargetView* dst) {
 		ID3D11DeviceContext* deferredcontext;
 		leo::dxcall(create->CreateDeferredContext(0, &deferredcontext));
 
@@ -402,7 +450,10 @@ protected:
 
 		mScalerProcess->Apply(deferredcontext);
 		mScalerProcess->Draw(deferredcontext, mSrcCopy, mScaleRT);
+		mMeasureLumProcess->Apply(deferredcontext);
 		mMeasureLumProcess->Draw(deferredcontext, mScaleCopy, nullptr);
+		mToneProcess->Apply(deferredcontext);
+		mToneProcess->Draw(deferredcontext, mSrcCopy, dst);
 		mCommandList.reset(nullptr);
 		leo::dxcall(deferredcontext->FinishCommandList(false, &mCommandList));
 		deferredcontext->Release();
@@ -423,6 +474,7 @@ private:
 
 	std::unique_ptr<leo::PostProcess> mScalerProcess = nullptr;
 	std::unique_ptr<HDRLuminanceImpl> mMeasureLumProcess = nullptr;
+	std::unique_ptr<HDRToneImpl> mToneProcess = nullptr;
 
 	//dot(float3(0.0f, 0.25f, 0.25f),float3(0.2125f, 0.7154f, 0.0721f));
 	float mLumAdapt = exp(log(0.196875f));
