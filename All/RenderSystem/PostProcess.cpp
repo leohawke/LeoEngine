@@ -130,8 +130,8 @@ bool leo::PostProcess::Apply(ID3D11DeviceContext* context)
 }
 
 void leo::PostProcess::Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) {
-	context->PSSetShaderResources(0, 1, &src);
 	context->OMSetRenderTargets(1, &dst, nullptr);
+	context->PSSetShaderResources(0, 1, &src);
 	context->Draw(4, 0);
 }
 

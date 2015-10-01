@@ -39,7 +39,7 @@ public:
 		CD3D11_TEXTURE2D_DESC texDesc{ 
 			DXGI_FORMAT_R32_FLOAT,//FORMAT
 			1,1,//SIZE
-			1,0,//ARRAT & MIP
+			1,1,//ARRAT & MIP
 			D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE  //BindFlag
 		};
 		
@@ -49,11 +49,11 @@ public:
 		texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		BindProcess(device, "Shader/LumIterativePS_multiple.cso");
 		mLumIterativePS = mPixelShader;
-		BindProcess(device, "Shader/LumLogIntialPS_multiple.cso");
+		BindProcess(device, "Shader/LumLogInitialPS_multiple.cso");
 		#else
 		BindProcess(device, L"Shader/LumIterativePS_single.cso");
 		mLumIterativePS = mPixelShader;
-		BindProcess(device, L"Shader/LumLogIntialPS_single.cso");
+		BindProcess(device, L"Shader/LumLogInitialPS_single.cso");
 		#endif
 		for (auto i = 0u; i < tone_level_count;++i) {
 			texDesc.Height = texDesc.Width = 1 << (2 * i)<<2;
@@ -62,9 +62,16 @@ public:
 			leo::dxcall(device->CreateTexture2D(&texDesc, nullptr, &tempTex));
 			leo::dxcall(device->CreateRenderTargetView(tempTex, nullptr, &mRTVToneMap[i]));
 			leo::dxcall(device->CreateShaderResourceView(tempTex, nullptr, &mSRVToneMap[i]));
-			if (i == 0)
-				mLastToneMap = leo::win::unique_com<ID3D11Texture2D>(tempTex.release());
+
+			if (i == 0) {
+				mToneTex_0 = leo::win::unique_com<ID3D11Texture2D>(tempTex.release());
+			}
 		}
+		texDesc.Height = texDesc.Width = mToneSize[0].first;
+		texDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+		texDesc.Usage = D3D11_USAGE_STAGING;
+		texDesc.BindFlags = 0;
+		leo::dxcall(device->CreateTexture2D(&texDesc, nullptr, &mLastToneMap));
 		#else
 		//one res
 		#endif
@@ -139,6 +146,7 @@ public:
 	float GetLumFactor(ID3D11DeviceContext* context, float lumAdapt,float dt)
 	{
 		D3D11_MAPPED_SUBRESOURCE subRes;
+		context->CopyResource(mLastToneMap, mToneTex_0);
 		context->Map(mLastToneMap, 0, D3D11_MAP_READ, 0, &subRes);
 		float* texData = reinterpret_cast<float*>(subRes.pData);
 		#ifndef NO_SINGLE_CHANNEL_FLOAT
@@ -201,6 +209,7 @@ private:
 	};
 	leo::win::unique_com<ID3D11ShaderResourceView> mSRVToneMap[tone_level_count];
 	leo::win::unique_com<ID3D11Texture2D> mLastToneMap;
+	leo::win::unique_com<ID3D11Texture2D> mToneTex_0;
 	leo::win::unique_com<ID3D11RenderTargetView> mRTVToneMap[tone_level_count];
 	#else
 	leo::win::unique_com<ID3D11ShaderResourceView> mSRVToneMap;
@@ -338,5 +347,5 @@ private:
 	std::unique_ptr<HDRLuminanceImpl> mMeasureLumProcess = nullptr;
 
 	//dot(float3(0.0f, 0.25f, 0.25f),float3(0.2125f, 0.7154f, 0.0721f));
-	float mLumAdapt = 0.196875f;
+	float mLumAdapt = exp(log(0.196875f));
 };
