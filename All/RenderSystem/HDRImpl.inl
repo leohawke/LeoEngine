@@ -223,6 +223,84 @@ private:
 	ID3D11PixelShader* mLumIterativePS = nullptr;
 };
 
+//this class can control
+// Star Effect and Bloom Effect
+// BlueShift and ToneMap impl in GPU ,can't be control
+class HDRToneImpl :public leo::PostProcess {
+public:
+	HDRToneImpl(ID3D11Device* device,ID3D11ShaderResourceView* mScale,float lumAdapt,bool use_bloom = true,bool use_star= false)
+		:PostProcess(device),mEffectControl(use_bloom,use_star)
+	{}
+
+	//NOTE : this function will be create/destory res in another thread
+	std::pair<bool, bool> ControlEffect(bool use_bloom, bool use_star)
+	{
+		if (mEffectControl.first || mEffectControl.second) {
+
+		}
+
+		//Todo
+		//Star effect
+		if (mEffectControl.second) {
+
+
+			//Todo
+			//because star effect can change bloom behaviour
+			if (mEffectControl.first) {
+
+			}
+		}
+		//Bloom effect
+		if (mEffectControl.first) {
+
+		}
+	}
+
+	void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) override
+	{
+		//Bright-pass filtered
+		if (mEffectControl.first || mEffectControl.second) {
+
+		}
+
+		//Todo
+		//Star effect
+		if (mEffectControl.second) {
+
+
+			//Todo
+			//because star effect can change bloom behaviour
+			if (mEffectControl.first) {
+
+			}
+		}
+		//Bloom effect
+		if (mEffectControl.first) {
+
+		}
+
+		Apply(context);
+		PostProcess::Draw(context, src, dst);
+	}
+private:
+	std::pair<bool, bool> mEffectControl;
+
+	win::unique_com<ID3D11RenderTargetView> mBrightResAsOut;
+	win::unique_com<ID3D11ShaderResourceView> mBrightResAsIn;
+
+	//defualt = mBrightResAsOut
+	//Todo: if(all(mEffectControl) new res;
+	ID3D11ShaderResourceView* mBloomIn;
+
+	//Todo:
+	//#define NUM_STAR_TEXTURES 12
+	win::unique_com<ID3D11RenderTargetView> mStarResAsOut;
+	win::unique_com<ID3D11ShaderResourceView> mStarResAsIn;
+
+	win::unique_com<ID3D11RenderTargetView> mBloomResAsOut;
+	win::unique_com<ID3D11ShaderResourceView> mBloomResAsIn;
+}
+
 class HDRImpl {
 public:
 	HDRImpl(ID3D11Device* create, ID3D11Texture2D* src, ID3D11RenderTargetView* dst)
