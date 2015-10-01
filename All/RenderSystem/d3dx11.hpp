@@ -70,6 +70,12 @@ namespace leo
 		void DebugCOM(DXCOM* &com, const wchar_t * objectname)
 		{
 #if defined(DEBUG) || defined(PROFILE)
+			if (com) {
+				UINT DataSize = 0;
+				com->GetPrivateData(::WKPDID_D3DDebugObjectName,&DataSize, nullptr);
+				if (DataSize != 0)
+					return;
+			}
 			if (com)
 				com->SetPrivateData(::WKPDID_D3DDebugObjectName, static_cast<win::UINT>(std::wcslen(objectname) * 2), objectname);
 #endif

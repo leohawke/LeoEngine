@@ -59,10 +59,10 @@ namespace leo
 			Raise_Win32_Exception("MakeOutputWindow Failed:RegisterClassEx return false");
 
 		RECT r{ 0, 0, clientSize.first, clientSize.second };
-		AdjustWindowRectEx(&r, style, false, exStyle);
+		AdjustWindowRectEx(&r, style, true, exStyle);
 
 		// Create the application's window
-		global::globalHwnd = ::CreateWindowEx(exStyle,
+		global::globalHwnd = ::CreateWindowExW(exStyle,
 			classname,
 			classname,
 			style,

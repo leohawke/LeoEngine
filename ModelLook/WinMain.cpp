@@ -109,7 +109,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 	auto clientSize = leo::EngineConfig::ClientSize();
 	if (!win.Create(GetModuleHandle(nullptr), clientSize, L"Model LooK",
-		WS_BORDER | WS_SIZEBOX, 0,
+		WS_BORDER | WS_SYSMENU, 0,
 		MAKEINTRESOURCE(IDI_ICON1)))
 	{
 		return 0;

@@ -56,6 +56,12 @@ public:
 		mLumIterativePS = mPixelShader;
 		BindProcess(device, L"Shader/LumLogInitialPS_single.cso");
 		#endif
+
+		mToneViewPort[0].TopLeftX = 0;
+		mToneViewPort[0].TopLeftY = 0;
+		mToneViewPort[0].MaxDepth = 1.0f;
+		mToneViewPort[0].MinDepth = 0.0f;
+
 		for (auto i = 0u; i < tone_level_count;++i) {
 			texDesc.Height = texDesc.Width = 1 << (2 * i)<<2;
 			mToneSize[i] = std::make_pair(texDesc.Width, texDesc.Height);
@@ -64,6 +70,9 @@ public:
 			leo::dxcall(device->CreateRenderTargetView(tempTex, nullptr, &mRTVToneMap[i]));
 			leo::dxcall(device->CreateShaderResourceView(tempTex, nullptr, &mSRVToneMap[i]));
 
+			mToneViewPort[i] = mToneViewPort[0];
+			mToneViewPort[i].Width = static_cast<float>(texDesc.Width);
+			mToneViewPort[i].Height =static_cast<float>(texDesc.Height);
 			if (i == 0) {
 				mToneTex_0 = leo::win::unique_com<ID3D11Texture2D>(tempTex.release());
 			}
@@ -126,6 +135,7 @@ public:
 		}
 		#ifdef NO_GENMIP
 		auto curr_level = tone_level_count - 1;
+		context->RSSetViewports(1, &mToneViewPort[curr_level]);
 		PostProcess::Draw(context, src, mRTVToneMap[curr_level]);
 		#else
 		PostProcess::Draw(context, src, mRTVToneMap);
@@ -136,6 +146,7 @@ public:
 		context->PSSetShader(mLumIterativePS, nullptr, 0);
 		while (curr_level > -1) {
 			CalcSampleOffset(mToneSize[curr_level + 1]);
+			context->RSSetViewports(1, &mToneViewPort[curr_level]);
 			context->UpdateSubresource(mOffsetsBuffer, 0, nullptr, mOffsets.data(), 0, 0);
 			PostProcess::Draw(context, mSRVToneMap[curr_level + 1], mRTVToneMap[curr_level]);
 			curr_level--;
@@ -213,6 +224,8 @@ private:
 	leo::win::unique_com<ID3D11Texture2D> mToneTex_0;
 	leo::win::unique_com<ID3D11RenderTargetView> mRTVToneMap[tone_level_count];
 	std::pair<UINT, UINT> mToneSize[tone_level_count];
+	
+	D3D11_VIEWPORT mToneViewPort[tone_level_count];
 	#else
 	leo::win::unique_com<ID3D11ShaderResourceView> mSRVToneMap;
 	leo::win::unique_com<ID3D11RenderTargetView> mRTVToneMap;
@@ -251,6 +264,11 @@ public:
 		
 		mSampleDesc.Filter = D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR;
 		mPointSS = leo::RenderStates().CreateSamplerState(L"HDRToneImpls0", mSampleDesc);
+
+		mViewPort.TopLeftX = 0;
+		mViewPort.TopLeftY = 0;
+		mViewPort.MaxDepth = 1.0f;
+		mViewPort.MinDepth = 0.0f;
 	}
 
 	//NOTE : this function will be create/destory res in another thread
@@ -314,7 +332,17 @@ public:
 		if (mEffectControl.first) {
 
 		}
-
+		{
+			auto mRes = leo::win::make_scope_com<ID3D11Resource>();
+			dst->GetResource(&mRes);
+			auto mTex = leo::win::make_scope_com<ID3D11Texture2D>();
+			mRes->QueryInterface(&mTex);
+			D3D11_TEXTURE2D_DESC desc;
+			mTex->GetDesc(&desc);
+			mViewPort.Height = desc.Height *1.f;
+			mViewPort.Width = desc.Width *1.f;
+		}
+		context->RSSetViewports(1, &mViewPort);
 		PostProcess::Draw(context, src, dst);
 	}
 private:
@@ -345,6 +373,7 @@ private:
 	ID3D11SamplerState* mLinearSS = nullptr;
 	ID3D11SamplerState* mPointSS = nullptr;
 
+	D3D11_VIEWPORT mViewPort;
 };
 
 class HDRImpl {
@@ -439,19 +468,18 @@ protected:
 		ID3D11DeviceContext* deferredcontext;
 		leo::dxcall(create->CreateDeferredContext(0, &deferredcontext));
 
-		D3D11_VIEWPORT vp;
-		vp.Height = height*1.f;
-		vp.Width =  width*1.f;
-		vp.TopLeftX = 0;
-		vp.TopLeftY = 0;
-		vp.MaxDepth = 1.0f;
-		vp.MinDepth = 0.0f;
-		deferredcontext->RSSetViewports(1, &vp);
-
+		mViewPort.Height = height*1.f;
+		mViewPort.Width =  width*1.f;
+		mViewPort.TopLeftX = 0;
+		mViewPort.TopLeftY = 0;
+		mViewPort.MaxDepth = 1.0f;
+		mViewPort.MinDepth = 0.0f;
+		deferredcontext->RSSetViewports(1, &mViewPort);
 		mScalerProcess->Apply(deferredcontext);
 		mScalerProcess->Draw(deferredcontext, mSrcCopy, mScaleRT);
 		mMeasureLumProcess->Apply(deferredcontext);
 		mMeasureLumProcess->Draw(deferredcontext, mScaleCopy, nullptr);
+
 		mToneProcess->Apply(deferredcontext);
 		mToneProcess->Draw(deferredcontext, mSrcCopy, dst);
 		mCommandList.reset(nullptr);
@@ -478,4 +506,6 @@ private:
 
 	//dot(float3(0.0f, 0.25f, 0.25f),float3(0.2125f, 0.7154f, 0.0721f));
 	float mLumAdapt = exp(log(0.196875f));
+
+	D3D11_VIEWPORT mViewPort;
 };
