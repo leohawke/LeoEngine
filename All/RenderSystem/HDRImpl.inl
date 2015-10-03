@@ -85,10 +85,15 @@ public:
 		#else
 		//one res
 		#endif
+
+		CD3D11_SAMPLER_DESC mSampleDesc{ D3D11_DEFAULT };
+		mSampleDesc.Filter = D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+		mPointSS = leo::RenderStates().CreateSamplerState(L"PointSample", mSampleDesc);
 	}
 
 	bool Apply(ID3D11DeviceContext * context) override
 	{
+		context->PSSetSamplers(0, 1, &mPointSS);
 		return PostProcess::Apply(context);
 	}
 
@@ -235,6 +240,8 @@ private:
 
 
 	ID3D11PixelShader* mLumIterativePS = nullptr;
+
+	ID3D11SamplerState* mPointSS = nullptr;
 };
 
 //this class can control
@@ -244,7 +251,7 @@ class HDRToneImpl :public leo::PostProcess {
 
 public:
 	HDRToneImpl(ID3D11Device* device,ID3D11ShaderResourceView* mScale,float lumAdapt,bool use_bloom = true,bool use_star= false)
-		:PostProcess(device),mEffectControl(use_bloom,use_star),mParams(lumAdapt,0.18f,0.5f,1.f)
+		:PostProcess(device),mEffectControl(use_bloom,use_star),mParams(lumAdapt,0.78f,0.5f,1.f)
 	{
 		D3D11_BUFFER_DESC Desc;
 		Desc.Usage = D3D11_USAGE_DEFAULT;
@@ -263,7 +270,7 @@ public:
 		mLinearSS = leo::RenderStates().CreateSamplerState(L"HDRToneImpls1", mSampleDesc);
 		
 		mSampleDesc.Filter = D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR;
-		mPointSS = leo::RenderStates().CreateSamplerState(L"HDRToneImpls0", mSampleDesc);
+		mPointSS = leo::RenderStates().CreateSamplerState(L"PointSample", mSampleDesc);
 
 		mViewPort.TopLeftX = 0;
 		mViewPort.TopLeftY = 0;
@@ -405,9 +412,16 @@ public:
 		//TODO:SUPPORT MSAA
 		context->CopyResource(mSrcCopyTex, mSrcPtr);
 		context->ExecuteCommandList(mCommandList, false);
+		
+		mMeasureLumProcess->Apply(context);
+		mMeasureLumProcess->Draw(context, mScaleCopy, nullptr);
+
 		//TODO:do by GPU
 		mLumAdapt = mMeasureLumProcess->GetLumFactor(context, mLumAdapt, dt);
 		mToneProcess->SetLumAdapt(mLumAdapt);
+
+		mToneProcess->Apply(context);
+		mToneProcess->Draw(context, mSrcCopy, leo::global::globalD3DRenderTargetView);
 		/*mScalerProcess->Apply(context);
 		mScalerProcess->Draw(context, mSrcCopy, mScaleRT);*/
 	}
@@ -477,11 +491,6 @@ protected:
 		deferredcontext->RSSetViewports(1, &mViewPort);
 		mScalerProcess->Apply(deferredcontext);
 		mScalerProcess->Draw(deferredcontext, mSrcCopy, mScaleRT);
-		mMeasureLumProcess->Apply(deferredcontext);
-		mMeasureLumProcess->Draw(deferredcontext, mScaleCopy, nullptr);
-
-		mToneProcess->Apply(deferredcontext);
-		mToneProcess->Draw(deferredcontext, mSrcCopy, dst);
 		mCommandList.reset(nullptr);
 		leo::dxcall(deferredcontext->FinishCommandList(false, &mCommandList));
 		deferredcontext->Release();

@@ -1,4 +1,5 @@
 #include "DeferredRender.hpp"
+#include "..\Mgr.hpp"
 #include "HDRImpl.inl"
 #include "ShaderMgr.h"
 #include "RenderStates.hpp"

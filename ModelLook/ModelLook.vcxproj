@@ -174,9 +174,6 @@
     <ProjectReference Include="..\IndePlatform\IndePlatform.vcxproj">
       <Project>{b8a92299-1c60-42c9-b77d-47f317497131}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\LeoScheme\LeoScheme.vcxproj">
-      <Project>{9c92e335-fb4d-4185-8a8e-4ddb0fc12378}</Project>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\All\Core\BilaterFilter.cpp" />
