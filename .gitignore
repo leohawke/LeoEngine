@@ -45,6 +45,7 @@ build/
 *.pidb
 *.log
 *.scc
+*.cd
 
 # Visual C++ cache files
 ipch/
@@ -157,6 +158,7 @@ $RECYCLE.BIN/
 
 DirectXTex\Bin\
 DirectXTex\ipch\
+DirectXTex\Lib\
 fns\
 lib\
 MCF-master\
