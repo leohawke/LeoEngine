@@ -251,7 +251,7 @@ class HDRToneImpl :public leo::PostProcess {
 
 public:
 	HDRToneImpl(ID3D11Device* device,ID3D11ShaderResourceView* mScale,float lumAdapt,bool use_bloom = true,bool use_star= false)
-		:PostProcess(device),mEffectControl(use_bloom,use_star),mParams(lumAdapt,0.78f,0.5f,1.f)
+		:PostProcess(device),mEffectControl(use_bloom,use_star),mParams(lumAdapt,1.f,0.25f,1.f)
 	{
 		D3D11_BUFFER_DESC Desc;
 		Desc.Usage = D3D11_USAGE_DEFAULT;

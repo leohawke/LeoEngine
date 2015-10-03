@@ -8,7 +8,7 @@ cbuffer SampleCB :register(c0) {
 SamplerState s0 : register(s0);
 
 // The per-color weighting to be used for luminance calculations in RGB order.
-static const float3 LUMINANCE_VECTOR = float3(0.2125f, 0.7154f, 0.0721f);
+static const float3 LUMINANCE_VECTOR = float3(0.2126f, 0.7152f, 0.0722f);
 
 float4 EncodeFloatRGBA(float v)
 {
