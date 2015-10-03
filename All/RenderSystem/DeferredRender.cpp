@@ -28,8 +28,10 @@ public:
 	win::unique_com<ID3D11RenderTargetView> mGBuffRTVs[2];
 	//R32_FLOAT,linear depth
 	win::unique_com<ID3D11RenderTargetView> mDepthRTV = nullptr;
-	//R8G8B8A8<,light RT,diffuse,specPow
+	//R11G11B10F，light RT<diffuse,specPow>
 	win::unique_com<ID3D11RenderTargetView> mLightRTV = nullptr;
+	//R16G16B16A16F，shading RT<color,LUM>
+	win::unique_com<ID3D11RenderTargetView*> mShadingRTV = nullptr;
 	//RT0
 	win::unique_com<ID3D11ShaderResourceView> mNormalSpecPowSRV = nullptr;
 	//RT1
@@ -38,6 +40,8 @@ public:
 	win::unique_com<ID3D11ShaderResourceView> mDepthSRV = nullptr;
 	//light RT
 	win::unique_com<ID3D11ShaderResourceView> mLightSRV = nullptr;
+	//shading RT
+	win::unique_com<ID3D11ShaderResourceView> mShadingSRV = nullptr;
 
 	//TODO:格式检查支持,替换格式
 	DeferredResImpl(ID3D11Device* device, std::pair<uint16, uint16> size) {
@@ -79,7 +83,7 @@ private:
 		}
 		//mLightSRV
 		{
-			CD3D11_TEXTURE2D_DESC lightTexDesc{ DXGI_FORMAT_R8G8B8A8_UNORM,size.first,size.second };
+			CD3D11_TEXTURE2D_DESC lightTexDesc{ DXGI_FORMAT_R16G16B16A16_FLOAT,size.first,size.second };
 			lightTexDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 
 			auto mLightTex = win::make_scope_com<ID3D11Texture2D>();
