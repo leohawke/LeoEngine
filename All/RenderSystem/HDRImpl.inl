@@ -250,8 +250,8 @@ private:
 class HDRToneImpl :public leo::PostProcess {
 
 public:
-	HDRToneImpl(ID3D11Device* device,ID3D11ShaderResourceView* mScale,float lumAdapt,bool use_bloom = true,bool use_star= false)
-		:PostProcess(device),mEffectControl(use_bloom,use_star),mParams(lumAdapt,1.f,0.25f,1.f)
+	HDRToneImpl(ID3D11Device* device,ID3D11ShaderResourceView* mScale,float lumAdapt)
+		:PostProcess(device),mParams(lumAdapt,1.f,0.25f,1.f)
 	{
 		D3D11_BUFFER_DESC Desc;
 		Desc.Usage = D3D11_USAGE_DEFAULT;
@@ -266,40 +266,16 @@ public:
 		BindProcess(device, L"Shader/HDRFinalPS.cso");
 
 		CD3D11_SAMPLER_DESC mSampleDesc{ D3D11_DEFAULT };
-		mSampleDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;;
-		mLinearSS = leo::RenderStates().CreateSamplerState(L"HDRToneImpls1", mSampleDesc);
+		mSampleDesc.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;;
+		mLinearSS = leo::RenderStates().CreateSamplerState(L"linear_sampler", mSampleDesc);
 		
-		mSampleDesc.Filter = D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR;
-		mPointSS = leo::RenderStates().CreateSamplerState(L"PointSample", mSampleDesc);
+		mSampleDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+		mPointSS = leo::RenderStates().CreateSamplerState(L"point_sampler", mSampleDesc);
 
 		mViewPort.TopLeftX = 0;
 		mViewPort.TopLeftY = 0;
 		mViewPort.MaxDepth = 1.0f;
 		mViewPort.MinDepth = 0.0f;
-	}
-
-	//NOTE : this function will be create/destory res in another thread
-	std::pair<bool, bool> ControlEffect(bool use_bloom, bool use_star)
-	{
-		if (mEffectControl.first || mEffectControl.second) {
-
-		}
-
-		//Todo
-		//Star effect
-		if (mEffectControl.second) {
-
-
-			//Todo
-			//because star effect can change bloom behaviour
-			if (mEffectControl.first) {
-
-			}
-		}
-		//Bloom effect
-		if (mEffectControl.first) {
-
-		}
 	}
 
 	void SetLumAdapt(float lumAdapt) {
@@ -310,8 +286,8 @@ public:
 		PostProcess::Apply(context);
 		context->PSSetConstantBuffers(0, 1, &mParamsBuffer);
 		context->UpdateSubresource(mParamsBuffer, 0, nullptr, &mParams, 0, 0);
-		ID3D11ShaderResourceView* srvs[] = { mStarResAsIn,mBloomResAsIn };
-		context->PSSetShaderResources(1, 2, srvs);
+		ID3D11ShaderResourceView* srvs[] = { mBloomResAsIn };
+		context->PSSetShaderResources(1, 1, srvs);
 		ID3D11SamplerState* sss[] = { mPointSS,mLinearSS };
 		context->PSSetSamplers(0, 2, sss);
 		return true;
@@ -320,25 +296,8 @@ public:
 	void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) override
 	{
 		//Bright-pass filtered
-		if (mEffectControl.first || mEffectControl.second) {
-
-		}
-
-		//Todo
-		//Star effect
-		if (mEffectControl.second) {
-
-
-			//Todo
-			//because star effect can change bloom behaviour
-			if (mEffectControl.first) {
-
-			}
-		}
+		
 		//Bloom effect
-		if (mEffectControl.first) {
-
-		}
 		{
 			auto mRes = leo::win::make_scope_com<ID3D11Resource>();
 			dst->GetResource(&mRes);
@@ -353,7 +312,6 @@ public:
 		PostProcess::Draw(context, src, dst);
 	}
 private:
-	std::pair<bool, bool> mEffectControl;
 
 	leo::win::unique_com<ID3D11RenderTargetView> mBrightResAsOut;
 	leo::win::unique_com<ID3D11ShaderResourceView> mBrightResAsIn;
@@ -362,18 +320,12 @@ private:
 	//Todo: if(all(mEffectControl) new res;
 	ID3D11ShaderResourceView* mBloomIn;
 
-	//Todo:
-	//#define NUM_STAR_TEXTURES 12
-	leo::win::unique_com<ID3D11RenderTargetView> mStarResAsOut;
-	leo::win::unique_com<ID3D11ShaderResourceView> mStarResAsIn;
-
 	leo::win::unique_com<ID3D11RenderTargetView> mBloomResAsOut;
 	leo::win::unique_com<ID3D11ShaderResourceView> mBloomResAsIn;
 
 	//float fAdaptedLum;
-	//float g_fMiddleGray;//default=0.18f
-	//float g_fStarScale;//default=0.5f
-	//float g_fBloomScale;//default=1.f
+	//float g_fMiddleGray;//default=1.0f
+	//float g_fBloomScale;//default=0.25f
 	leo::float4 mParams;
 	leo::win::unique_com<ID3D11Buffer> mParamsBuffer = nullptr;
 
@@ -385,20 +337,20 @@ private:
 
 class HDRImpl {
 public:
-	HDRImpl(ID3D11Device* create, ID3D11Texture2D* src, ID3D11RenderTargetView* dst)
+	HDRImpl(ID3D11Device* create, ID3D11Texture2D* src)
 	:mScalerProcess(std::make_unique<leo::ScalaerProcess<4>>(create)),
 		mMeasureLumProcess(std::make_unique<HDRLuminanceImpl>(create)),
 		mToneProcess(std::make_unique<HDRToneImpl>(create,mSrcCopy,mLumAdapt))
 	{
-		std::thread create_thread(&HDRImpl::create_method, this, create, src, dst);
+		std::thread create_thread(&HDRImpl::create_method, this, create, src);
 		create_thread.detach();
 	}
 
 	~HDRImpl() {
 	}
 
-	void ReSize(ID3D11Device* create, ID3D11Texture2D* src, ID3D11RenderTargetView* dst) {
-		std::thread resize_thread(&HDRImpl::resize_method, this, create, src, dst, true);
+	void ReSize(ID3D11Device* create, ID3D11Texture2D* src) {
+		std::thread resize_thread(&HDRImpl::resize_method, this, create, src, true);
 		resize_thread.detach();
 	}
 
@@ -406,7 +358,7 @@ public:
 		//do nothing
 	}
 
-	void Draw(ID3D11DeviceContext* context, float dt) {
+	void Draw(ID3D11DeviceContext* context,ID3D11RenderTargetView* rtv, float dt) {
 		while (!ready)
 			;
 		//TODO:SUPPORT MSAA
@@ -421,16 +373,16 @@ public:
 		mToneProcess->SetLumAdapt(mLumAdapt);
 
 		mToneProcess->Apply(context);
-		mToneProcess->Draw(context, mSrcCopy, leo::global::globalD3DRenderTargetView);
+		mToneProcess->Draw(context, mSrcCopy,rtv);
 		/*mScalerProcess->Apply(context);
 		mScalerProcess->Draw(context, mSrcCopy, mScaleRT);*/
 	}
 protected:
-	void create_method(ID3D11Device* create, ID3D11Texture2D* src, ID3D11RenderTargetView* dst) {
-		resize_method(create, src, dst, false);
+	void create_method(ID3D11Device* create, ID3D11Texture2D* src) {
+		resize_method(create, src, false);
 	}
 
-	void resize_method(ID3D11Device* create, ID3D11Texture2D* src, ID3D11RenderTargetView* dst, bool release = true) {
+	void resize_method(ID3D11Device* create, ID3D11Texture2D* src, bool release = true) {
 		if (!mutex.try_lock())
 			return;//无视两个连续的resize调用中的后一个
 		ready = false;
@@ -453,9 +405,6 @@ protected:
 			leo::dxcall(create->CreateShaderResourceView(mSrcCopyTex, nullptr, &mSrcCopy));
 			mSrcPtr = src;
 
-			D3D11_RENDER_TARGET_VIEW_DESC rtDesc;
-			dst->GetDesc(&rtDesc);
-			
 			texDesc.Width /= 4;
 			texDesc.Height /= 4;
 
@@ -472,13 +421,13 @@ protected:
 			leo::dxcall(create->CreateRenderTargetView(mScaleTex, nullptr, &mScaleRT));
 		}
 
-		once_method(create, width, height,dst);
+		once_method(create, width, height);
 
 		ready = true;
 		mutex.unlock();
 	}
 
-	void once_method(ID3D11Device* create,UINT width,UINT height, ID3D11RenderTargetView* dst) {
+	void once_method(ID3D11Device* create,UINT width,UINT height) {
 		ID3D11DeviceContext* deferredcontext;
 		leo::dxcall(create->CreateDeferredContext(0, &deferredcontext));
 

@@ -23,6 +23,7 @@ struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct ID3D11RenderTargetView;
 struct ID3D11ShaderResourceView;
+class HDRImpl;
 namespace leo {
 	
 	class LB_API DeferredRender {
@@ -31,6 +32,7 @@ namespace leo {
 		class DeferredStateImpl;
 		std::unique_ptr<DeferredResImpl> pResImpl;
 		std::unique_ptr<DeferredStateImpl> pStateImpl;
+		std::unique_ptr<HDRImpl> pHDRImpl;
 		std::list<std::shared_ptr<LightSource>> mLightSourceList;
 	public:
 		class LightSourcesRender {
@@ -53,7 +55,9 @@ namespace leo {
 
 		void LinearizeDepth(ID3D11DeviceContext* context, DepthStencil& depthstencil,float near_z,float far_z) noexcept;
 		
-		void ShadingPass(ID3D11DeviceContext* context,float dt) noexcept;
+		void ShadingPass(ID3D11DeviceContext* context, DepthStencil& depthstencil) noexcept;
+
+		void PostProcess(ID3D11DeviceContext* context, ID3D11RenderTargetView* rtv, float dt);
 
 		void SetSSAOParams(bool enable, uint8 level) noexcept;
 

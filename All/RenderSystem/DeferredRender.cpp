@@ -31,7 +31,7 @@ public:
 	//R11G11B10F，light RT<diffuse,specPow>
 	win::unique_com<ID3D11RenderTargetView> mLightRTV = nullptr;
 	//R16G16B16A16F，shading RT<color,LUM>
-	win::unique_com<ID3D11RenderTargetView*> mShadingRTV = nullptr;
+	win::unique_com<ID3D11RenderTargetView> mShadingRTV = nullptr;
 	//RT0
 	win::unique_com<ID3D11ShaderResourceView> mNormalSpecPowSRV = nullptr;
 	//RT1
@@ -42,6 +42,8 @@ public:
 	win::unique_com<ID3D11ShaderResourceView> mLightSRV = nullptr;
 	//shading RT
 	win::unique_com<ID3D11ShaderResourceView> mShadingSRV = nullptr;
+
+	win::unique_com<ID3D11Texture2D> mShadingTex = nullptr;
 
 	//TODO:格式检查支持,替换格式
 	DeferredResImpl(ID3D11Device* device, std::pair<uint16, uint16> size) {
@@ -91,6 +93,16 @@ private:
 
 			device->CreateShaderResourceView(mLightTex, nullptr, &mLightSRV);
 			device->CreateRenderTargetView(mLightTex, nullptr, &mLightRTV);
+		}
+		//mShadingSRV
+		{
+			CD3D11_TEXTURE2D_DESC shadingTexDesc{ DXGI_FORMAT_R16G16B16A16_FLOAT,size.first,size.second };
+			shadingTexDesc.MipLevels = 1;
+			shadingTexDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+
+			device->CreateTexture2D(&shadingTexDesc, nullptr, &mShadingTex);
+			device->CreateShaderResourceView(mShadingTex, nullptr, &mShadingSRV);
+			device->CreateRenderTargetView(mShadingTex, nullptr, &mShadingRTV);
 		}
 	}
 };
@@ -241,16 +253,13 @@ public:
 	}
 };
 
-std::unique_ptr<HDRImpl> pHDRImpl;
-
 leo::DeferredRender::DeferredRender(ID3D11Device * device, size_type size)
 	:pResImpl(std::make_unique<DeferredResImpl>(device, size)),
-	pStateImpl(std::make_unique<DeferredStateImpl>(device))
+	pStateImpl(std::make_unique<DeferredStateImpl>(device)),
+	pHDRImpl(std::make_unique<HDRImpl>(device,pResImpl->mShadingTex))
 {
 	LinearizeDepthImpl::GetInstance(device);
 	LightSourcesRender::Init(device);
-
-	pHDRImpl = std::make_unique<HDRImpl>(device, global::globalD3DRenderTargetTexture2D, global::globalD3DRenderTargetView);
 }
 
 leo::DeferredRender::~DeferredRender() {
@@ -285,7 +294,7 @@ void leo::DeferredRender::ReSize(ID3D11Device * device, size_type size) noexcept
 {
 	pResImpl.reset(nullptr);
 	pResImpl = std::make_unique<DeferredResImpl>(device, size);
-	pHDRImpl->ReSize(device, global::globalD3DRenderTargetTexture2D, global::globalD3DRenderTargetView);
+	pHDRImpl->ReSize(device, pResImpl->mShadingTex);
 }
 
 void leo::DeferredRender::LinearizeDepth(ID3D11DeviceContext * context, DepthStencil& depthstencil, float near_z, float far_z) noexcept
@@ -308,10 +317,11 @@ void leo::DeferredRender::LinearizeDepth(ID3D11DeviceContext * context, DepthSte
 	context->PSSetShaderResources(0, 1, &srv);
 }
 
-void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context,float dt) noexcept
+void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context, DepthStencil& depthstencil) noexcept
 {
 	auto & effectQuad = leo::EffectQuad::GetInstance();
 
+	context->OMSetRenderTargets(1, &pResImpl->mShadingRTV,depthstencil);
 	context->OMSetBlendState(nullptr, nullptr, 0xffffffff);
 	context->OMSetDepthStencilState(pStateImpl->mShaderPassDepthStenciState, 0);
 	effectQuad.Apply(context);
@@ -331,8 +341,11 @@ void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context,float dt) no
 	for (auto & s : srvs)
 		s = nullptr;
 	context->PSSetShaderResources(0, arrlen(srvs), srvs);
+}
 
-	pHDRImpl->Draw(context,dt);
+void leo::DeferredRender::PostProcess(ID3D11DeviceContext * context, ID3D11RenderTargetView * rtv, float dt)
+{
+	//pHDRImpl->Draw(context,rtv,dt);
 }
 
 void leo::DeferredRender::SetSSAOParams(bool enable, uint8 level) noexcept

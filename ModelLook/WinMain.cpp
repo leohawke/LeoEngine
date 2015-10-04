@@ -413,7 +413,10 @@ void Render()
 		devicecontext->ClearRenderTargetView(leo::global::globalD3DRenderTargetView, rgba);
 		pSky->Render(devicecontext, *pCamera);
 		if (pRender) {
-			pRender->ShadingPass(devicecontext,dt);
+			pRender->ShadingPass(devicecontext, *leo::global::globalDepthStencil);
+		}
+		if (pRender) {
+			pRender->PostProcess(devicecontext, leo::global::globalD3DRenderTargetView, dt);
 		}
 		devicecontext->RSSetViewports(1, &lastVp);
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
