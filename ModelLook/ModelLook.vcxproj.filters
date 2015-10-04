@@ -39,6 +39,9 @@
     <Filter Include="Shader\HLSL\Terrain">
       <UniqueIdentifier>{6d270f2d-3e5e-4f20-a730-d9ce4f315f18}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Res">
+      <UniqueIdentifier>{29e7e3d5-7180-4f86-807d-1b9f94eaaf20}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -221,6 +224,9 @@
     <None Include="..\All\RenderSystem\HDRImpl.inl">
       <Filter>RenderSystem</Filter>
     </None>
+    <None Include="Shader\utility">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\LinearizeDepthPS.hlsl">
@@ -277,6 +283,9 @@
     <FxCompile Include="Shader\HDRFinalPS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\LumVS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ModelLook.rc">
@@ -293,6 +302,9 @@
     <Image Include="ModelLook.ico">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="..\All\Resource\snowcube1024.dds">
+      <Filter>Res</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\All\config.scheme">
@@ -305,6 +317,9 @@
       <Filter>Shader</Filter>
     </CustomBuild>
     <CustomBuild Include="Shader\LumIterativePS.hlsl">
+      <Filter>Shader</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Shader\LumAdaptedPS.hlsl">
       <Filter>Shader</Filter>
     </CustomBuild>
   </ItemGroup>

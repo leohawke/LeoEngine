@@ -7,7 +7,7 @@ cbuffer SampleCB :register(c0){
 
 SamplerState s0 : register(s0);
 
-float4 main_2(in float4 PosH :SV_POSITION, in float2 Tex :TEXCOORD) : SV_TARGET
+float4 main_2(in float2 Tex :TEXCOORD) : SV_TARGET
 {
 	float4 sample = 0.0f;
 
@@ -20,7 +20,7 @@ float4 main_2(in float4 PosH :SV_POSITION, in float2 Tex :TEXCOORD) : SV_TARGET
 	return sample / 4;
 }
 
-float4 main_4(in float4 PosH :SV_POSITION,in float2 Tex :TEXCOORD) : SV_TARGET
+float4 main_4(in float2 Tex :TEXCOORD) : SV_TARGET
 {
 	float4 sample = 0.0f;
 
@@ -33,7 +33,7 @@ float4 main_4(in float4 PosH :SV_POSITION,in float2 Tex :TEXCOORD) : SV_TARGET
 	return sample / 16;
 }
 
-float4 main_8(in float4 PosH :SV_POSITION,in float2 Tex :TEXCOORD) : SV_TARGET
+float4 main_8(in float2 Tex :TEXCOORD) : SV_TARGET
 {
 	float4 sample = 0.0f;
 	float2 avSampleOffsets[MAX_SAMPLES] = g_avSampleOffsets;

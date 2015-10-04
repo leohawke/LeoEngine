@@ -5,9 +5,9 @@ Texture2D lum_tex:register(t2);
 //filtering = min_mag_linear_mip_point
 //address_u = clamp
 //address_v = clamp
-SamplerState point_sampler : register(s0);//POINT
+SamplerState point_sampler : register(s0);
 
-//filtering = min_mag_linear_mip_point
+//filtering = min_mag_mip_point
 //address_u = clamp
 //address_v = clamp
 SamplerState linear_sampler : register(s1);

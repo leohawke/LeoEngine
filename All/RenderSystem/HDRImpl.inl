@@ -309,6 +309,7 @@ public:
 			mViewPort.Width = desc.Width *1.f;
 		}
 		context->RSSetViewports(1, &mViewPort);
+		context->OMSetBlendState(nullptr, nullptr, 0xffffffff);
 		PostProcess::Draw(context, src, dst);
 	}
 private:

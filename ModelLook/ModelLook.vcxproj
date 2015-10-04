@@ -323,6 +323,7 @@
     <None Include="..\All\RenderSystem\HDRImpl.inl" />
     <None Include="Shader\Lighting.hlsli" />
     <None Include="Shader\NormalUti.hlsli" />
+    <None Include="Shader\utility" />
     <None Include="The LeoEngine Terrain File.tpl" />
   </ItemGroup>
   <ItemGroup>
@@ -374,6 +375,33 @@ fxc /Zi /E"LumIterative"  /Fo "$(OutDir)Shader\%(Filename)_multiple.cso" /D "NO_
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">HDRFinal</EntryPointName>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">HDRFinal</EntryPointName>
     </FxCompile>
+    <CustomBuild Include="Shader\LumAdaptedPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc /Zi /E"LumAdapted"  /Od /Fo  "$(OutDir)Shader\%(Filename)_single.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
+fxc /Zi /E"LumAdapted"  /Od /Fo  "$(OutDir)Shader\%(Filename)_multiple.cso" /D "NO_SINGLE_CHANNEL_FLOAT"  /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxc /Zi /E"LumAdapted"  /Fo"$(OutDir)Shader\%(Filename)_single.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
+fxc /Zi /E"LumAdapted"  /Fo "$(OutDir)Shader\%(Filename)_multiple.cso" /D "NO_SINGLE_CHANNEL_FLOAT"  /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compilation %(Filename).hlsl</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc.log</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compilation %(Filename).hlsl</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxc.log</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </CustomBuild>
+    <FxCompile Include="Shader\LumVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">LumVS</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">LumVS</EntryPointName>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
     <FxCompile Include="Shader\PostProcessVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
@@ -381,6 +409,8 @@ fxc /Zi /E"LumIterative"  /Fo "$(OutDir)Shader\%(Filename)_multiple.cso" /D "NO_
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">PostProcessVS</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">PostProcessVS</EntryPointName>
     </FxCompile>
     <FxCompile Include="Shader\QUADVS.hlsl">
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
@@ -554,6 +584,7 @@ fxc /E"main_8"  /Fo"$(OutDir)Shader\%(Filename)_8.cso" /T "ps_5_0" /nologo $(Pro
     <Text Include="需求.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\All\Resource\snowcube1024.dds" />
     <Image Include="icon1.ico" />
     <Image Include="ModelLook.ico" />
   </ItemGroup>

@@ -1,17 +1,8 @@
-struct Vertex {
-	float4 PosH : POSITION;
-	float2 Tex :TEXCOORD;
-};
-
-struct Pixel {
-	float4 PosH : SV_POSITION;
-	float2 Tex :TEXCOORD;
-};
-
-Pixel main(Vertex vin)
+void PostProcessVS(float4 pos : POSITION,
+	float2 tex: TEXCOORD0,
+	out float2 Tex : TEXCOORD0,
+	out float4 PosH : SV_Position)
 {
-	Pixel o;
-	o.PosH = vin.PosH;
-	o.Tex = vin.Tex;
-	return o;
+	PosH = pos;
+	Tex = tex;
 }

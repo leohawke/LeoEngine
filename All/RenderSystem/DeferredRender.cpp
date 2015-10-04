@@ -152,7 +152,6 @@ public:
 		blend_desc.RenderTarget[0].RenderTargetWriteMask = 0;
 		blend_desc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
 		blend_desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
-		blend_desc.RenderTarget[0].BlendEnable = false;
 		device->CreateBlendState(&blend_desc, &mDRLightStenci_BlendState);
 
 
@@ -321,7 +320,9 @@ void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context, DepthStenci
 {
 	auto & effectQuad = leo::EffectQuad::GetInstance();
 
+	const float rgba[4] = { 0.0f, 0.25f, 0.25f, 0.8f };
 	context->OMSetRenderTargets(1, &pResImpl->mShadingRTV,depthstencil);
+	context->ClearRenderTargetView(pResImpl->mShadingRTV,rgba);
 	context->OMSetBlendState(nullptr, nullptr, 0xffffffff);
 	context->OMSetDepthStencilState(pStateImpl->mShaderPassDepthStenciState, 0);
 	effectQuad.Apply(context);
@@ -345,7 +346,9 @@ void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context, DepthStenci
 
 void leo::DeferredRender::PostProcess(ID3D11DeviceContext * context, ID3D11RenderTargetView * rtv, float dt)
 {
-	//pHDRImpl->Draw(context,rtv,dt);
+	pHDRImpl->Draw(context,rtv,dt);
+
+	//need a post process copy res...
 }
 
 void leo::DeferredRender::SetSSAOParams(bool enable, uint8 level) noexcept

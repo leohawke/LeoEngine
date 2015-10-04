@@ -408,13 +408,13 @@ void Render()
 			pRender->LightPass(devicecontext, *leo::global::globalDepthStencil, *pCamera);
 		}
 
-		static const float rgba[4] = { 0.0f, 0.25f, 0.25f, 0.8f };
-		devicecontext->OMSetRenderTargets(1, &leo::global::globalD3DRenderTargetView, *leo::global::globalDepthStencil);
-		devicecontext->ClearRenderTargetView(leo::global::globalD3DRenderTargetView, rgba);
-		pSky->Render(devicecontext, *pCamera);
+		static const float rgba[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+		
 		if (pRender) {
 			pRender->ShadingPass(devicecontext, *leo::global::globalDepthStencil);
 		}
+		devicecontext->OMSetRenderTargets(1, &leo::global::globalD3DRenderTargetView, *leo::global::globalDepthStencil);
+		devicecontext->ClearRenderTargetView(leo::global::globalD3DRenderTargetView, rgba);
 		if (pRender) {
 			pRender->PostProcess(devicecontext, leo::global::globalD3DRenderTargetView, dt);
 		}
