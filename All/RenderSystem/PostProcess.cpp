@@ -113,7 +113,7 @@ bool leo::PostProcess::BindRect(ID3D11DeviceContext* context, const ops::Rect& s
 	return true;
 }
 
-bool leo::PostProcess::Apply(ID3D11DeviceContext* context)
+void leo::PostProcess::Apply(ID3D11DeviceContext* context)
 {
 	context->IASetInputLayout(mCommonThunk.mLayout);
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
@@ -126,7 +126,6 @@ bool leo::PostProcess::Apply(ID3D11DeviceContext* context)
 	context->VSSetShader(mCommonThunk.mVertexShader, nullptr, 0);
 	context->PSSetShader(mPixelShader, nullptr, 0);
 
-	return true;
 }
 
 void leo::PostProcess::Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) {
@@ -260,11 +259,10 @@ leo::ScalaerProcess<2>::~ScalaerProcess()
 {
 }
 
-bool leo::ScalaerProcess<2>::Apply(ID3D11DeviceContext * context)
+void leo::ScalaerProcess<2>::Apply(ID3D11DeviceContext * context)
 {
 	PostProcess::Apply(context);
 	mImpl->Apply(context);
-	return true;
 }
 
 void leo::ScalaerProcess<2>::Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst)
@@ -282,11 +280,10 @@ leo::ScalaerProcess<4>::~ScalaerProcess()
 {
 }
 
-bool leo::ScalaerProcess<4>::Apply(ID3D11DeviceContext * context)
+void leo::ScalaerProcess<4>::Apply(ID3D11DeviceContext * context)
 {
 	PostProcess::Apply(context);
 	mImpl->Apply(context);
-	return true;
 }
 
 void leo::ScalaerProcess<4>::Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst)
@@ -304,11 +301,10 @@ leo::ScalaerProcess<8>::~ScalaerProcess()
 {
 }
 
-bool leo::ScalaerProcess<8>::Apply(ID3D11DeviceContext * context)
+void leo::ScalaerProcess<8>::Apply(ID3D11DeviceContext * context)
 {
 	PostProcess::Apply(context);
 	mImpl->Apply(context);
-	return true;
 }
 
 void leo::ScalaerProcess<8>::Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst)

@@ -170,6 +170,9 @@
     <ClCompile Include="..\All\RenderSystem\PostProcess.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\HDRProcess.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -208,6 +211,9 @@
       <Filter>RenderSystem</Filter>
     </ClInclude>
     <ClInclude Include="..\All\RenderSystem\PostProcess.hpp">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\RenderSystem\HDRProcess.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
   </ItemGroup>

@@ -91,7 +91,7 @@ public:
 		mPointSS = leo::RenderStates().CreateSamplerState(L"PointSample", mSampleDesc);
 	}
 
-	bool Apply(ID3D11DeviceContext * context) override
+	void Apply(ID3D11DeviceContext * context) override
 	{
 		context->PSSetSamplers(0, 1, &mPointSS);
 		return PostProcess::Apply(context);
@@ -282,7 +282,7 @@ public:
 		mParams.x = lumAdapt;
 	}
 
-	bool Apply(ID3D11DeviceContext * context) override {
+	void Apply(ID3D11DeviceContext * context) override {
 		PostProcess::Apply(context);
 		context->PSSetConstantBuffers(0, 1, &mParamsBuffer);
 		context->UpdateSubresource(mParamsBuffer, 0, nullptr, &mParams, 0, 0);
@@ -290,7 +290,6 @@ public:
 		context->PSSetShaderResources(1, 1, srvs);
 		ID3D11SamplerState* sss[] = { mPointSS,mLinearSS };
 		context->PSSetSamplers(0, 2, sss);
-		return true;
 	}
 
 	void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) override

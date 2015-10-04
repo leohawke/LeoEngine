@@ -267,6 +267,7 @@
     <ClInclude Include="..\All\RenderSystem\DRLightImpl.inl">
       <FileType>CppCode</FileType>
     </ClInclude>
+    <ClCompile Include="..\All\RenderSystem\HDRProcess.cpp" />
     <ClCompile Include="..\All\RenderSystem\PostProcess.cpp" />
     <ClCompile Include="..\All\RenderSystem\RenderStates.cpp" />
     <ClCompile Include="..\All\RenderSystem\ShaderMgr.cpp" />
@@ -295,6 +296,7 @@
     <ClInclude Include="..\All\RenderSystem\Deferred.h" />
     <ClInclude Include="..\All\RenderSystem\DeferredRender.hpp" />
     <ClInclude Include="..\All\RenderSystem\DepthStencil.hpp" />
+    <ClInclude Include="..\All\RenderSystem\HDRProcess.h" />
     <ClInclude Include="..\All\RenderSystem\PostProcess.hpp" />
     <ClInclude Include="..\All\RenderSystem\RenderStates.hpp" />
     <ClInclude Include="..\All\RenderSystem\ShaderMgr.h" />

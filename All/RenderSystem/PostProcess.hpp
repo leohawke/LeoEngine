@@ -69,7 +69,7 @@ public:
 	*/
 	bool BindRect(ID3D11DeviceContext *context,const ops::Rect& src,const ops::Rect& dst);
 
-	virtual bool Apply(ID3D11DeviceContext*);
+	virtual void Apply(ID3D11DeviceContext*);
 
 
 	virtual void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst);
@@ -122,9 +122,9 @@ public:
 	ScalaerProcess(ID3D11Device*);
 	~ScalaerProcess();
 
-	bool Apply(ID3D11DeviceContext*);
+	void Apply(ID3D11DeviceContext*) override;
 
-	void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst);
+	void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) override;
 private:
 	std::unique_ptr<details::ScalaerProcessDelegate> mImpl;
 };
@@ -135,9 +135,9 @@ public:
 	ScalaerProcess(ID3D11Device*);
 	~ScalaerProcess();
 
-	bool Apply(ID3D11DeviceContext*);
+	void Apply(ID3D11DeviceContext*) override;
 
-	void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst);
+	void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) override;
 private:
 	std::unique_ptr<details::ScalaerProcessDelegate> mImpl;
 };
@@ -148,9 +148,9 @@ public:
 	ScalaerProcess(ID3D11Device*);
 	~ScalaerProcess();
 
-	bool Apply(ID3D11DeviceContext*);
+	void Apply(ID3D11DeviceContext*) override;
 
-	void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst);
+	void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) override;
 private:
 	std::unique_ptr<details::ScalaerProcessDelegate> mImpl;
 };
