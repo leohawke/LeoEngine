@@ -17,8 +17,8 @@ float CalcAdaptedLum(float adapted_lum, float current_lum)
 }
 
 float4 LumAdapted(
-	in float4 PosH:SV_POSITION,
-	in float2 Tex : TEXCOORD
+	float4 iTex0 : TEXCOORD0,
+	float4 iTex1 : TEXCOORD1
 	) : SV_TARGET
 {
 	float adapted_lum = ReadAFloat(last_lum_tex.Sample(last_lum_sampler, 0.5f.xx), 16);

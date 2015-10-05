@@ -50,15 +50,24 @@ namespace leo {
 		public:
 			LumIterativeProcess(ID3D11Device* create,unsigned level);
 
-			void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) override;
+			ID3D11ShaderResourceView* Output() const;
+
+			void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView*) override;
 		private:
+			win::unique_com<ID3D11RenderTargetView> mLumIterRTV = nullptr;
+			win::unique_com<ID3D11ShaderResourceView> mLumIterOutput = nullptr;
 		};
 		class LumAdaptedProcess : public HDRCommon {
 		public:
 			LumAdaptedProcess(ID3D11Device* create);
 
+			ID3D11ShaderResourceView* Output() const;
+
 			void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) override;
 		private:
+			bool mIndex = false;
+			win::unique_com<ID3D11RenderTargetView> mLumAdaptedSwapRTV[2] = {nullptr,nullptr};
+			win::unique_com<ID3D11ShaderResourceView> mLumAdaptedSwapOutput[2] = { nullptr,nullptr };
 		};
 
 		

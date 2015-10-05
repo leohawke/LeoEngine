@@ -5,8 +5,8 @@ SamplerState src_sampler : register(s0);
 
 
 float4 LumIterative(
-	in float4 PosH:SV_POSITION,
-	in float2 Tex : TEXCOORD
+	float4 iTex0 : TEXCOORD0,
+	float4 iTex1 : TEXCOORD1
 	) : SV_TARGET
 {
 	float4 tex[2] = { iTex0, iTex1 };
