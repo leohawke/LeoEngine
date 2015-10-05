@@ -10,41 +10,55 @@
 #include "PostProcess.hpp"
 
 namespace leo {
-	class HDRProcess :PostProcess {
+	class HDRProcess :public PostProcess {
 	private:
-		class HDRCommon:PostProcess{
+		class HDRCommon:public PostProcess{
 		public:
 			HDRCommon(ID3D11Device* create);
 
 			void Apply(ID3D11DeviceContext* context) override;
 		protected:
 			void GetSampleOffset(UINT width,UINT height);
+
+			std::array<float4, 2> mCpuParams;
+
+			D3D11_VIEWPORT mViewPort;
+
+			CD3D11_TEXTURE2D_DESC mTexDesc;
+
+			static ID3D11Buffer* mGpuParams;//sizeof = float4[2]
 		private:
-			static ID3D11Buffer* mGpuParams ;//sizeof = float4[2]
+			
 			static ID3D11VertexShader* mLumVS;
 
 			static ID3D11SamplerState* src_sampler;
 			static ID3D11SamplerState* last_lum_sampler;
 
-			std::array<float4, 2> mCpuParams;
 		};
 		class LumLogProcess : public HDRCommon {
 		public:
-			void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) override;
+			LumLogProcess(ID3D11Device* create,unsigned level);
+
+			ID3D11ShaderResourceView* Output() const;
+
+			void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView*) override;
 		private:
-			ID3D11PixelShader* mLumLogPS = nullptr;
+			win::unique_com<ID3D11RenderTargetView> mLumLogRTV = nullptr;
+			win::unique_com<ID3D11ShaderResourceView> mLumLogOutput = nullptr;
 		};
 		class LumIterativeProcess : public HDRCommon {
 		public:
+			LumIterativeProcess(ID3D11Device* create,unsigned level);
+
 			void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) override;
 		private:
-			ID3D11PixelShader* mLumIterativePS = nullptr;
 		};
 		class LumAdaptedProcess : public HDRCommon {
 		public:
+			LumAdaptedProcess(ID3D11Device* create);
+
 			void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) override;
 		private:
-			ID3D11PixelShader* mLumAdaptedPS = nullptr;
 		};
 
 		
