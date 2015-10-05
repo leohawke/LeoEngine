@@ -9,6 +9,7 @@
 
  ID3D11SamplerState* leo::HDRProcess::HDRCommon::src_sampler = nullptr;
  ID3D11SamplerState* leo::HDRProcess::HDRCommon::last_lum_sampler = nullptr;
+ std::size_t leo::HDRProcess::HDRCommon::mRefCount = 0;
 
 leo::HDRProcess::HDRCommon::HDRCommon(ID3D11Device * create)
 	:PostProcess(create),mTexDesc(DXGI_FORMAT_R32_FLOAT,//FORMAT
@@ -17,6 +18,8 @@ leo::HDRProcess::HDRCommon::HDRCommon(ID3D11Device * create)
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE  //BindFlag)
 		)
 {
+	++mRefCount;
+
 	#ifdef NO_SINGLE_CHANNEL_FLOAT
 	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	#endif
@@ -31,6 +34,7 @@ leo::HDRProcess::HDRCommon::HDRCommon(ID3D11Device * create)
 		Desc.ByteWidth = sizeof(mCpuParams);
 
 		leo::dxcall(create->CreateBuffer(&Desc, nullptr, &mGpuParams));
+		leo::dx::DebugCOM(mGpuParams, "tex_coord_offset");
 	}
 
 	if (!mLumVS) {
@@ -55,6 +59,13 @@ leo::HDRProcess::HDRCommon::HDRCommon(ID3D11Device * create)
 	mViewPort.TopLeftY = 0;
 	mViewPort.MaxDepth = 1.0f;
 	mViewPort.MinDepth = 0.0f;
+}
+
+leo::HDRProcess::HDRCommon::~HDRCommon()
+{
+	--mRefCount;
+	if (!mRefCount)
+		win::ReleaseCOM(mGpuParam);
 }
 
 void leo::HDRProcess::HDRCommon::Apply(ID3D11DeviceContext * context)
@@ -150,6 +161,18 @@ void leo::HDRProcess::LumIterativeProcess::Draw(ID3D11DeviceContext * context, I
 leo::HDRProcess::LumAdaptedProcess::LumAdaptedProcess(ID3D11Device * create)
 	:HDRCommon(create)
 {
+	D3D11_BUFFER_DESC Desc;
+	Desc.Usage = D3D11_USAGE_DEFAULT;
+	Desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	Desc.CPUAccessFlags = 0;
+	Desc.MiscFlags = 0;
+	Desc.StructureByteStride = 0;
+	Desc.ByteWidth = sizeof(mDeltaCpuParams);
+
+	leo::dxcall(create->CreateBuffer(&Desc, nullptr, &mDeltaGpuParams));
+	leo::dx::DebugCOM(mGpuParams, "frame_delta");
+
+
 	#ifdef NO_SINGLE_CHANNEL_FLOAT
 	BindProcess(create, "Shader/LumAdaptedPS_multiple.cso");
 	#else
@@ -176,9 +199,24 @@ ID3D11ShaderResourceView * leo::HDRProcess::LumAdaptedProcess::Output() const
 	return mLumAdaptedSwapOutput[mIndex];
 }
 
+void leo::HDRProcess::LumAdaptedProcess::SetFrameDelta(float dt)
+{
+	mDeltaCpuParams.x = dt;
+}
+
 void leo::HDRProcess::LumAdaptedProcess::Draw(ID3D11DeviceContext * context, ID3D11ShaderResourceView * src, ID3D11RenderTargetView * dst)
 {
+	context->UpdateSubresource(mDeltaGpuParams, 0, nullptr, &mDeltaCpuParams, 0, 0);
+	context->PSSetConstantBuffers(0, 1, &mDeltaGpuParams);
 	context->PSSetShaderResources(1, 1, &mLumAdaptedSwapOutput[mIndex]);
 	PostProcess::Draw(context, src, mLumAdaptedSwapRTV[!mIndex]);
 	mIndex = !mIndex;
+}
+
+leo::HDRProcess::HDRBundleProcess::HDRBundleProcess(ID3D11Device * create)
+{
+}
+
+void leo::HDRProcess::HDRBundleProcess::Apply(ID3D11DeviceContext *,float)
+{
 }

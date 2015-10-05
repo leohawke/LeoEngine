@@ -16,6 +16,8 @@ namespace leo {
 		public:
 			HDRCommon(ID3D11Device* create);
 
+			~HDRCommon();
+
 			void Apply(ID3D11DeviceContext* context) override;
 		protected:
 			void GetSampleOffset(UINT width,UINT height);
@@ -27,6 +29,8 @@ namespace leo {
 			CD3D11_TEXTURE2D_DESC mTexDesc;
 
 			static ID3D11Buffer* mGpuParams;//sizeof = float4[2]
+
+			static std::size_t	mRefCount;
 		private:
 			
 			static ID3D11VertexShader* mLumVS;
@@ -62,22 +66,42 @@ namespace leo {
 			LumAdaptedProcess(ID3D11Device* create);
 
 			ID3D11ShaderResourceView* Output() const;
+			
+			void SetFrameDelta(float dt);
 
 			void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) override;
 		private:
 			bool mIndex = false;
 			win::unique_com<ID3D11RenderTargetView> mLumAdaptedSwapRTV[2] = {nullptr,nullptr};
 			win::unique_com<ID3D11ShaderResourceView> mLumAdaptedSwapOutput[2] = { nullptr,nullptr };
+
+			win::unique_com<ID3D11Buffer> mDeltaGpuParams;
+			float4 mDeltaCpuParams;
 		};
 
 		
 		class IHDRBundleProcess {
-
+		public:
+			virtual void Apply(ID3D11DeviceContext*,float dt) = 0;
 		};
 
-		//note:this class create/update/set LumAdaptedProcess pixel shader constants
 		class HDRBundleProcess :public IHDRBundleProcess {
+		public:
+			HDRBundleProcess(ID3D11Device* create);
 
+			void Apply(ID3D11DeviceContext*,float dt) override;
+		private:
+			leo::win::unique_com<ID3D11Texture2D> mSrcCopyTex = nullptr;
+			leo::win::unique_com<ID3D11ShaderResourceView> mSrcCopy = nullptr;
+
+			leo::win::unique_com<ID3D11ShaderResourceView> mScaleCopy = nullptr;
+			leo::win::unique_com<ID3D11RenderTargetView> mScaleRT = nullptr;
+
+			std::unique_ptr<leo::PostProcess> mScalerProcess = nullptr;
+
+			std::unique_ptr<LumLogProcess> pLumFirst;
+		  	std::vector<std::unique_ptr<LumIterativeProcess>> pLumIterVec;
+			std::unique_ptr<LumAdaptedProcess> mLumFinal;
 		};
 
 		//TODO :impl this
