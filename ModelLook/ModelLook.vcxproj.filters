@@ -227,9 +227,6 @@
     <None Include="Shader\Lighting.hlsli">
       <Filter>Shader</Filter>
     </None>
-    <None Include="..\All\RenderSystem\HDRImpl.inl">
-      <Filter>RenderSystem</Filter>
-    </None>
     <None Include="Shader\utility">
       <Filter>Shader</Filter>
     </None>
@@ -286,9 +283,6 @@
     <FxCompile Include="Shader\PostProcessVS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
-    <FxCompile Include="Shader\HDRFinalPS.hlsl">
-      <Filter>Shader</Filter>
-    </FxCompile>
     <FxCompile Include="Shader\LumVS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
@@ -326,6 +320,9 @@
       <Filter>Shader</Filter>
     </CustomBuild>
     <CustomBuild Include="Shader\LumAdaptedPS.hlsl">
+      <Filter>Shader</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Shader\HDRFinalPS.hlsl">
       <Filter>Shader</Filter>
     </CustomBuild>
   </ItemGroup>

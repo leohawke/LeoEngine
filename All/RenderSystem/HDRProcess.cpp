@@ -65,7 +65,13 @@ leo::HDRProcess::HDRCommon::~HDRCommon()
 {
 	--mRefCount;
 	if (!mRefCount)
-		win::ReleaseCOM(mGpuParam);
+		win::ReleaseCOM(mGpuParams);
+}
+
+void leo::HDRProcess::HDRCommon::Input(UINT width, UINT height)
+{
+	mWidth = width;
+	mHeight = height;
 }
 
 void leo::HDRProcess::HDRCommon::Apply(ID3D11DeviceContext * context)
@@ -116,14 +122,17 @@ leo::HDRProcess::LumLogProcess::LumLogProcess(ID3D11Device * create, unsigned le
 	leo::dxcall(create->CreateShaderResourceView(tempTex, nullptr, &mLumLogOutput));
 }
 
-ID3D11ShaderResourceView * leo::HDRProcess::LumLogProcess::Output() const
+ID3D11ShaderResourceView * leo::HDRProcess::LumLogProcess::Output(UINT& width, UINT& height) const
 {
+	width = mTexDesc.Width;
+	height = mTexDesc.Height;
 	return mLumLogOutput;
 }
 
 void leo::HDRProcess::LumLogProcess::Draw(ID3D11DeviceContext * context, ID3D11ShaderResourceView * src, ID3D11RenderTargetView *)
 {
-	GetSampleOffset(mTexDesc.Width, mTexDesc.Height);
+	context->RSSetViewports(1, &mViewPort);
+	GetSampleOffset(mWidth, mHeight);
 	context->UpdateSubresource(mGpuParams, 0, nullptr, &mCpuParams, 0, 0);
 	PostProcess::Draw(context, src, mLumLogRTV);
 }
@@ -146,14 +155,21 @@ leo::HDRProcess::LumIterativeProcess::LumIterativeProcess(ID3D11Device * create,
 	leo::dxcall(create->CreateShaderResourceView(tempTex, nullptr, &mLumIterOutput));
 }
 
-ID3D11ShaderResourceView * leo::HDRProcess::LumIterativeProcess::Output() const
+leo::HDRProcess::LumIterativeProcess::~LumIterativeProcess()
 {
+}
+
+ID3D11ShaderResourceView * leo::HDRProcess::LumIterativeProcess::Output(UINT& width, UINT& height) const
+{
+	width = mTexDesc.Width;
+	height = mTexDesc.Height;
 	return mLumIterOutput;
 }
 
 void leo::HDRProcess::LumIterativeProcess::Draw(ID3D11DeviceContext * context, ID3D11ShaderResourceView * src, ID3D11RenderTargetView *)
 {
-	GetSampleOffset(mTexDesc.Width, mTexDesc.Height);
+	context->RSSetViewports(1, &mViewPort);
+	GetSampleOffset(mWidth,mHeight);
 	context->UpdateSubresource(mGpuParams, 0, nullptr, &mCpuParams, 0, 0);
 	PostProcess::Draw(context, src, mLumIterRTV);
 }
@@ -170,7 +186,7 @@ leo::HDRProcess::LumAdaptedProcess::LumAdaptedProcess(ID3D11Device * create)
 	Desc.ByteWidth = sizeof(mDeltaCpuParams);
 
 	leo::dxcall(create->CreateBuffer(&Desc, nullptr, &mDeltaGpuParams));
-	leo::dx::DebugCOM(mGpuParams, "frame_delta");
+	leo::dx::DebugCOM(mDeltaGpuParams, "frame_delta");
 
 
 	#ifdef NO_SINGLE_CHANNEL_FLOAT
@@ -206,6 +222,7 @@ void leo::HDRProcess::LumAdaptedProcess::SetFrameDelta(float dt)
 
 void leo::HDRProcess::LumAdaptedProcess::Draw(ID3D11DeviceContext * context, ID3D11ShaderResourceView * src, ID3D11RenderTargetView * dst)
 {
+	context->RSSetViewports(1, &mViewPort);
 	context->UpdateSubresource(mDeltaGpuParams, 0, nullptr, &mDeltaCpuParams, 0, 0);
 	context->PSSetConstantBuffers(0, 1, &mDeltaGpuParams);
 	context->PSSetShaderResources(1, 1, &mLumAdaptedSwapOutput[mIndex]);
@@ -213,10 +230,106 @@ void leo::HDRProcess::LumAdaptedProcess::Draw(ID3D11DeviceContext * context, ID3
 	mIndex = !mIndex;
 }
 
-leo::HDRProcess::HDRBundleProcess::HDRBundleProcess(ID3D11Device * create)
+leo::HDRProcess::HDRBundleProcess::HDRBundleProcess(ID3D11Device * create, ID3D11Texture2D* src)
+	:mScalerProcess(std::make_unique<leo::ScalaerProcess<4>>(create)),mMaxLevel(4)
+{
+	{
+		//first create scale tex res
+		D3D11_TEXTURE2D_DESC texDesc;
+		src->GetDesc(&texDesc);
+
+		texDesc.MipLevels = 1;
+		texDesc.ArraySize = 1;
+		texDesc.SampleDesc.Count = 1;
+		texDesc.SampleDesc.Quality = 0;
+		texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		leo::dxcall(create->CreateTexture2D(&texDesc, nullptr, &mSrcCopyTex));
+		leo::dxcall(create->CreateShaderResourceView(mSrcCopyTex, nullptr, &mSrcCopy));
+		mSrcPtr = src;
+
+		texDesc.Width /= 4;
+		texDesc.Height /= 4;
+
+		texDesc.Width -= (texDesc.Width % 8);
+		texDesc.Height -= (texDesc.Height % 8);
+
+		mWidth = texDesc.Width;
+		mHeight = texDesc.Height;
+
+		texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+		auto mScaleTex = leo::win::make_scope_com<ID3D11Texture2D>(nullptr);
+		leo::dxcall(create->CreateTexture2D(&texDesc, nullptr, &mScaleTex));
+		leo::dxcall(create->CreateShaderResourceView(mScaleTex, nullptr, &mScale));
+		leo::dxcall(create->CreateRenderTargetView(mScaleTex, nullptr, &mScaleRT));
+	}
+
+	mViewPort.Height = mHeight*1.f;
+	mViewPort.Width = mWidth*1.f;
+	mViewPort.TopLeftX = 0;
+	mViewPort.TopLeftY = 0;
+	mViewPort.MaxDepth = 1.0f;
+	mViewPort.MinDepth = 0.0f;
+
+	pLumFirst = std::make_unique<LumLogProcess>(create, mMaxLevel);
+	
+	for (int i = mMaxLevel-1;i != -1;--i)
+		pLumIterVec.emplace_back(std::make_unique<LumIterativeProcess>(create,i));
+
+	pLumFinal = std::make_unique<LumAdaptedProcess>(create);
+}
+
+void leo::HDRProcess::HDRBundleProcess::Apply(ID3D11DeviceContext * context,float dt)
+{
+	context->CopyResource(mSrcCopyTex, mSrcPtr);
+	mScalerProcess->Apply(context);
+	mScalerProcess->Draw(context, mSrcCopy, mScaleRT);
+
+	pLumFirst->Apply(context);
+	auto width = mWidth;
+	auto height = mHeight;
+
+	//Note,this code can do by a for in all prt containter
+	//Because this class's base is HDRCommon
+	pLumFirst->Input(width, height);
+	pLumFirst->Draw(context, mScale, nullptr);
+	auto src = pLumFirst->Output(width, height);
+
+	auto i = 0;
+	while (i != mMaxLevel) {
+		pLumIterVec[i]->Input(width, height);
+		pLumIterVec[i]->Draw(context, src, nullptr);
+		src = pLumIterVec[i]->Output(width, height);
+		++i;
+	}
+	pLumFinal->SetFrameDelta(dt);
+	pLumFinal->Input(width,height);
+	pLumFinal->Draw(context, src, nullptr);
+}
+
+ID3D11ShaderResourceView * leo::HDRProcess::HDRBundleProcess::Output()
+{
+	return pLumFinal->Output();
+}
+
+leo::HDRProcess::HDRProcess(ID3D11Device * create,ID3D11Texture2D* src)
+	:PostProcess(create),
+	mBundleProcess(std::make_unique<HDRBundleProcess>(create,src))
 {
 }
 
-void leo::HDRProcess::HDRBundleProcess::Apply(ID3D11DeviceContext *,float)
+void leo::HDRProcess::SetFrameDelta(float dt)
+{
+	mDt = dt;
+}
+
+void leo::HDRProcess::Apply(ID3D11DeviceContext * context)
+{
+	mBundleProcess->Apply(context, mDt);
+	auto src = mBundleProcess->Output();
+	context->PSSetShaderResources(2, 1, &src);
+	PostProcess::Apply(context);
+}
+
+void leo::HDRProcess::ReSize(ID3D11Device * create, ID3D11Texture2D * src)
 {
 }

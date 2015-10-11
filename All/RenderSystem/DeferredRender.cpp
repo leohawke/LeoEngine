@@ -1,10 +1,18 @@
-#include "DeferredRender.hpp"
 #include "..\Mgr.hpp"
-#include "HDRImpl.inl"
-#include "ShaderMgr.h"
-#include "RenderStates.hpp"
+
+#include <Core\COM.hpp>
+#include <Core\FileSearch.h>
+#include <Core\Camera.hpp>
+#include <Core\BilateralFilter.hpp>
+#include <Core\EffectQuad.hpp>
+
 #include <leomathutility.hpp>
 #include <exception.hpp>
+
+#include "DeferredRender.hpp"
+#include "ShaderMgr.h"
+#include "HDRProcess.h"
+#include "RenderStates.hpp"
 
 #include <DirectXPackedVector.h>
 //TODO :Support MSAA
@@ -255,14 +263,14 @@ public:
 leo::DeferredRender::DeferredRender(ID3D11Device * device, size_type size)
 	:pResImpl(std::make_unique<DeferredResImpl>(device, size)),
 	pStateImpl(std::make_unique<DeferredStateImpl>(device)),
-	pHDRImpl(std::make_unique<HDRImpl>(device,pResImpl->mShadingTex))
+	pHDRProcess(std::make_unique<HDRProcess>(device,pResImpl->mShadingTex))
 {
 	LinearizeDepthImpl::GetInstance(device);
 	LightSourcesRender::Init(device);
 }
 
 leo::DeferredRender::~DeferredRender() {
-	pHDRImpl.reset(nullptr);
+	pHDRProcess.reset(nullptr);
 	LinearizeDepthImpl::GetInstance().~LinearizeDepthImpl();
 	LightSourcesRender::Destroy();
 }
@@ -293,7 +301,7 @@ void leo::DeferredRender::ReSize(ID3D11Device * device, size_type size) noexcept
 {
 	pResImpl.reset(nullptr);
 	pResImpl = std::make_unique<DeferredResImpl>(device, size);
-	pHDRImpl->ReSize(device, pResImpl->mShadingTex);
+	pHDRProcess->ReSize(device, pResImpl->mShadingTex);
 }
 
 void leo::DeferredRender::LinearizeDepth(ID3D11DeviceContext * context, DepthStencil& depthstencil, float near_z, float far_z) noexcept
@@ -346,7 +354,9 @@ void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context, DepthStenci
 
 void leo::DeferredRender::PostProcess(ID3D11DeviceContext * context, ID3D11RenderTargetView * rtv, float dt)
 {
-	pHDRImpl->Draw(context,rtv,dt);
+	pHDRProcess->SetFrameDelta(dt);
+	pHDRProcess->Apply(context);
+	pHDRProcess->Draw(context,pResImpl->mShadingSRV,rtv);
 
 	//need a post process copy res...
 }

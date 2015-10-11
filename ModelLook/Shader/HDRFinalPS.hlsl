@@ -17,9 +17,8 @@ static const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);
 
 
 cbuffer Params :register(c0) {
-	float fAdaptedLum;
-	float g_fMiddleGray;//default=1.f
-	float g_fBloomScale;//default=0.25f
+	float g_fMiddleGray = 1.f;//default=1.f
+	float g_fBloomScale = 0.25f;//default=0.25f
 }
 
 float EyeAdaption(float lum){
@@ -57,13 +56,18 @@ float3 ToneMapping(float3 color, float3 blur, float adapted_lum) {
 // The per-color weighting to be used for blue shift under low light.
 static const float3 BLUE_SHIFT_VECTOR = float3(1.05f, 0.97f, 1.27f);
 
+#include <utility>
+
 float4 HDRFinal
 (
-	in float4 PosH:SV_POSITION,
 	in float2 Tex : TEXCOORD
 	) : SV_TARGET
 {
 	//note FXAA use the lum result in w channel;
-	float3 ldr_rgb = saturate(ToneMapping(src_tex.Sample(linear_sampler,Tex).rgb, bloom_tex.Sample(linear_sampler,Tex).rgb,fAdaptedLum));
+	float3 ldr_rgb = saturate(
+		ToneMapping(
+			src_tex.Sample(linear_sampler,Tex).rgb, 
+			bloom_tex.Sample(linear_sampler,Tex).rgb,
+			ReadAFloat(lum_tex.Sample(point_sampler, 0.5f.xx),16)));
 	return float4(ldr_rgb, dot(ldr_rgb, RGB_TO_LUM));
 }

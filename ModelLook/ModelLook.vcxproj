@@ -322,7 +322,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     </CustomBuild>
-    <None Include="..\All\RenderSystem\HDRImpl.inl" />
     <None Include="Shader\Lighting.hlsli" />
     <None Include="Shader\NormalUti.hlsli" />
     <None Include="Shader\utility" />
@@ -367,7 +366,7 @@ fxc /Zi /E"LumIterative"  /Fo "$(OutDir)Shader\%(Filename)_multiple.cso" /D "NO_
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
-    <FxCompile Include="Shader\HDRFinalPS.hlsl">
+    <CustomBuild Include="Shader\HDRFinalPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
@@ -376,7 +375,18 @@ fxc /Zi /E"LumIterative"  /Fo "$(OutDir)Shader\%(Filename)_multiple.cso" /D "NO_
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">HDRFinal</EntryPointName>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">HDRFinal</EntryPointName>
-    </FxCompile>
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc /Zi /E"HDRFinal"  /Od /Fo  "$(OutDir)Shader\%(Filename)_single.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
+fxc /Zi /E"HDRFinal"  /Od /Fo  "$(OutDir)Shader\%(Filename)_multiple.cso" /D "NO_SINGLE_CHANNEL_FLOAT"  /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxc /Zi /E"HDRFinal"   /Fo  "$(OutDir)Shader\%(Filename)_single.cso" /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
+fxc /Zi /E"HDRFinal"   /Fo  "$(OutDir)Shader\%(Filename)_multiple.cso" /D "NO_SINGLE_CHANNEL_FLOAT"  /T "ps_4_0_level_9_3" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compilation %(Filename).hlsl</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc.log</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compilation %(Filename).hlsl</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxc.log</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </CustomBuild>
     <CustomBuild Include="Shader\LumAdaptedPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

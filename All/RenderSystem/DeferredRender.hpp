@@ -23,16 +23,17 @@ struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct ID3D11RenderTargetView;
 struct ID3D11ShaderResourceView;
-class HDRImpl;
 namespace leo {
 	
+	class HDRProcess;
+
 	class LB_API DeferredRender {
 	private:
 		class DeferredResImpl;
 		class DeferredStateImpl;
 		std::unique_ptr<DeferredResImpl> pResImpl;
 		std::unique_ptr<DeferredStateImpl> pStateImpl;
-		std::unique_ptr<HDRImpl> pHDRImpl;
+		std::unique_ptr<HDRProcess> pHDRProcess;
 		std::list<std::shared_ptr<LightSource>> mLightSourceList;
 	public:
 		class LightSourcesRender {

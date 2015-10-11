@@ -1,3 +1,5 @@
+#ifndef ShaderSystem_HDRProcess_Hpp
+#define ShaderSystem_HDRProcess_Hpp
 #include <atomic>
 #include <thread>
 #include <mutex>
@@ -17,6 +19,8 @@ namespace leo {
 			HDRCommon(ID3D11Device* create);
 
 			~HDRCommon();
+			
+			void Input(UINT width, UINT height);
 
 			void Apply(ID3D11DeviceContext* context) override;
 		protected:
@@ -27,6 +31,8 @@ namespace leo {
 			D3D11_VIEWPORT mViewPort;
 
 			CD3D11_TEXTURE2D_DESC mTexDesc;
+
+			UINT mWidth, mHeight;
 
 			static ID3D11Buffer* mGpuParams;//sizeof = float4[2]
 
@@ -43,7 +49,7 @@ namespace leo {
 		public:
 			LumLogProcess(ID3D11Device* create,unsigned level);
 
-			ID3D11ShaderResourceView* Output() const;
+			ID3D11ShaderResourceView* Output(UINT& width, UINT& height) const;
 
 			void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView*) override;
 		private:
@@ -54,7 +60,9 @@ namespace leo {
 		public:
 			LumIterativeProcess(ID3D11Device* create,unsigned level);
 
-			ID3D11ShaderResourceView* Output() const;
+			~LumIterativeProcess();
+
+			ID3D11ShaderResourceView* Output(UINT& width, UINT& height) const;
 
 			void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView*) override;
 		private:
@@ -82,30 +90,56 @@ namespace leo {
 		
 		class IHDRBundleProcess {
 		public:
-			virtual void Apply(ID3D11DeviceContext*,float dt) = 0;
+			virtual void Apply(ID3D11DeviceContext*, float dt) = 0;
+
+			virtual ID3D11ShaderResourceView* Output() = 0;
 		};
 
 		class HDRBundleProcess :public IHDRBundleProcess {
 		public:
-			HDRBundleProcess(ID3D11Device* create);
+			HDRBundleProcess(ID3D11Device* create, ID3D11Texture2D* src);
 
 			void Apply(ID3D11DeviceContext*,float dt) override;
+
+			ID3D11ShaderResourceView* Output() override;
 		private:
+			ID3D11Texture2D* mSrcPtr = nullptr;
+
 			leo::win::unique_com<ID3D11Texture2D> mSrcCopyTex = nullptr;
 			leo::win::unique_com<ID3D11ShaderResourceView> mSrcCopy = nullptr;
 
-			leo::win::unique_com<ID3D11ShaderResourceView> mScaleCopy = nullptr;
+			leo::win::unique_com<ID3D11ShaderResourceView> mScale = nullptr;
 			leo::win::unique_com<ID3D11RenderTargetView> mScaleRT = nullptr;
 
 			std::unique_ptr<leo::PostProcess> mScalerProcess = nullptr;
 
 			std::unique_ptr<LumLogProcess> pLumFirst;
 		  	std::vector<std::unique_ptr<LumIterativeProcess>> pLumIterVec;
-			std::unique_ptr<LumAdaptedProcess> mLumFinal;
+			std::unique_ptr<LumAdaptedProcess> pLumFinal;
+
+			D3D11_VIEWPORT mViewPort;
+
+			UINT mWidth, mHeight;
+
+			UINT mMaxLevel;
 		};
 
 		//TODO :impl this
 		class HDRBundleCSProcess :public IHDRBundleProcess {
 		};
+	public:
+		HDRProcess(ID3D11Device* create,ID3D11Texture2D* src);
+
+		void SetFrameDelta(float dt);
+
+		void Apply(ID3D11DeviceContext* context) override;
+
+		void ReSize(ID3D11Device* create, ID3D11Texture2D* src);
+	private:
+		std::unique_ptr<IHDRBundleProcess> mBundleProcess;
+
+		float mDt;
 	};
 }
+
+#endif
