@@ -21,10 +21,10 @@ extern const D3D11_INPUT_ELEMENT_DESC QUADIA[3]
 
 
 static QUADVertex vertexs[4] = {
-	{ float4(+1.f, +1.f, 0.9999999f, 1.f),float3(0.f,0.f,0.f),float2(1.f,0.f) },
-	{ float4(+1.f, -1.f, 0.9999999f, 1.f),float3(0.f,0.f,0.f),float2(1.f,1.f) },
-	{ float4(-1.f, +1.f, 0.9999999f, 1.f),float3(0.f,0.f,0.f),float2(0.f,0.f) },
-	{ float4(-1.f, -1.f, 0.9999999f, 1.f),float3(0.f,0.f,0.f),float2(0.f,1.f) }
+	{ float4(+1.f, +1.f, 1.f, 1.f),float3(0.f,0.f,0.f),float2(1.f,0.f) },
+	{ float4(+1.f, -1.f, 1.f, 1.f),float3(0.f,0.f,0.f),float2(1.f,1.f) },
+	{ float4(-1.f, +1.f, 1.f, 1.f),float3(0.f,0.f,0.f),float2(0.f,0.f) },
+	{ float4(-1.f, -1.f, 1.f, 1.f),float3(0.f,0.f,0.f),float2(0.f,1.f) }
 };
 
 class EffectQuadDelegate : CONCRETE(EffectQuad), public leo::Singleton < EffectQuadDelegate >

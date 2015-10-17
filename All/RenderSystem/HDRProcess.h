@@ -77,6 +77,7 @@ namespace leo {
 			
 			void SetFrameDelta(float dt);
 
+			//!note this function will clear rt
 			void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) override;
 		private:
 			bool mIndex = false;

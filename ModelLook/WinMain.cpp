@@ -241,9 +241,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	leo::EngineConfig::Write();
 	leo::global::Destroy();
 	ClearRes();
-#ifdef DEBUG
+	#ifdef DEBUG
 	leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
-#endif
+	#endif
 	leo::SingletonManger::GetInstance()->UnInstallAllSingleton();
 	DeviceMgr.DestroyDevice();
 
@@ -287,16 +287,16 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 
 	event.Wait();
 	//Effect,Staic Instance	
-#if 1
+	#if 1
 	leo::EffectGBuffer::GetInstance(device);
 	leo::EffectQuad::GetInstance(device);
 	leo::EffectSky::GetInstance(device);
 	leo::EffectTerrain::GetInstance(device);
-#endif
+	#endif
 
 
-	//Camera Set	
-#if 1
+		//Camera Set	
+	#if 1
 	leo::Sphere mSphere{ leo::float3(0.0f, 0.0f, 0.0f),sqrtf(10.0f*10.0f + 15.0f*15.0f) };
 	float3 dir{ -0.5773f, -0.57735f,0.57735f };
 	pCamera = std::make_unique<leo::UVNCamera>();
@@ -315,7 +315,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 
 	leo::EffectQuad::GetInstance().SetFrustum(device, *pCamera);
-#endif
+	#endif
 
 	pRender = std::make_unique<leo::DeferredRender>(device, size);
 
@@ -390,35 +390,39 @@ void Render()
 		std::lock_guard<std::mutex> lock(mRenderMutex);
 
 		auto devicecontext = dm.GetDeviceContext();
+
+		static const float rgba[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+		devicecontext->ClearRenderTargetView(leo::global::globalD3DRenderTargetView, rgba);
+
 		D3D11_VIEWPORT lastVp;
 		UINT numVP = 1;
 		devicecontext->RSGetViewports(&numVP, &lastVp);
-		if (pRender) {
-			pRender->OMSet(devicecontext, *leo::global::globalDepthStencil);
-		}
+		//DeferredRender
+		{
+			if (pRender) {
+				pRender->OMSet(devicecontext, *leo::global::globalDepthStencil);
+			}
 
-		for (auto & pModelMesh : Models) {
-			pModelMesh->Render(devicecontext, *pCamera);
-		}
-		//pTerrain->Render(devicecontext, *pCamera);
+			for (auto & pModelMesh : Models) {
+				pModelMesh->Render(devicecontext, *pCamera);
+			}
 
-		if (pRender) {
-			pRender->UnBind(devicecontext, *leo::global::globalDepthStencil);
-			pRender->LinearizeDepth(devicecontext, *leo::global::globalDepthStencil, pCamera->mNear, pCamera->mFar);
-			pRender->LightPass(devicecontext, *leo::global::globalDepthStencil, *pCamera);
-		}
-
-		static const float rgba[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-		
-		if (pRender) {
-			pRender->ShadingPass(devicecontext, *leo::global::globalDepthStencil);
-		}
-		devicecontext->OMSetRenderTargets(1, &leo::global::globalD3DRenderTargetView, *leo::global::globalDepthStencil);
-		devicecontext->ClearRenderTargetView(leo::global::globalD3DRenderTargetView, rgba);
-		if (pRender) {
-			pRender->PostProcess(devicecontext, leo::global::globalD3DRenderTargetView, dt);
+			if (pRender) {
+				pRender->UnBind(devicecontext, *leo::global::globalDepthStencil);
+				pRender->LinearizeDepth(devicecontext, *leo::global::globalDepthStencil, pCamera->mNear, pCamera->mFar);
+				pRender->LightPass(devicecontext, *leo::global::globalDepthStencil, *pCamera);
+				pRender->ShadingPass(devicecontext, *leo::global::globalDepthStencil);
+				pRender->PostProcess(devicecontext, leo::global::globalD3DRenderTargetView, dt);
+			}
 		}
 		devicecontext->RSSetViewports(1, &lastVp);
+
+		//forward render
+		devicecontext->OMSetRenderTargets(1, &leo::global::globalD3DRenderTargetView, *leo::global::globalDepthStencil);
+		if (pSky) {
+			pSky->Render(devicecontext, *pCamera);
+		}
+		
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 
 		leo::RenderSync::GetInstance()->Present();

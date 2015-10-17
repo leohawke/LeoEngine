@@ -358,7 +358,7 @@ void leo::DeferredRender::PostProcess(ID3D11DeviceContext * context, ID3D11Rende
 	pHDRProcess->Apply(context);
 	pHDRProcess->Draw(context,pResImpl->mShadingSRV,rtv);
 
-	//need a post process copy res...
+	//merege shading result to rtv...
 }
 
 void leo::DeferredRender::SetSSAOParams(bool enable, uint8 level) noexcept

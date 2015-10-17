@@ -606,7 +606,6 @@ namespace leo
 
 			RenderStates rss;
 			mPixelShaderSampleState = rss.GetSamplerState(L"LinearRepeat");
-			mNoDepthLessDSS = rss.GetDepthStencilState(L"NoDepthDSS");
 		}
 		~EffectSkyDelegate() = default;
 	public:
@@ -619,7 +618,7 @@ namespace leo
 			pContext.VSSetConstantBuffers(mVertexConstantBufferPerCamera.slot, 1, &mVertexConstantBufferPerCamera.mBuffer);
 			pContext.PSSetShader(mPixelShader, nullptr, 0);
 			pContext.PSSetSamplers(0, 1, &mPixelShaderSampleState);
-			context->OMSetDepthStencilState(mNoDepthLessDSS, 0);
+			context->OMSetDepthStencilState(nullptr, 0);
 		}
 
 		void EyePos(const float3& pos, ID3D11DeviceContext* context)
@@ -654,8 +653,6 @@ namespace leo
 		ShaderConstantBuffer<VScbPerCamera> mVertexConstantBufferPerCamera;
 
 		ID3D11SamplerState* mPixelShaderSampleState = nullptr;
-
-		ID3D11DepthStencilState* mNoDepthLessDSS = nullptr;
 	};
 
 	const std::unique_ptr<EffectSky>& EffectSky::GetInstance(ID3D11Device* device)

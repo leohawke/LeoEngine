@@ -16,10 +16,10 @@ namespace leo
 		//NVDIA SDK中QuadScreen坐标不是1,坐标区间扩大了[2/w,2/h]
 		float4 Vertices[4] =
 		{
-			float4(+1.f, +1.f, 1.f, 1.f),
-			float4(+1.f, -1.f, 1.f, 1.f),
-			float4(-1.f, +1.f, 1.f, 1.f),
-			float4(-1.f, -1.f, 1.f, 1.f),
+			float4(+1.f, +1.f, 0.99999f, 1.f),
+			float4(+1.f, -1.f, 0.99999f, 1.f),
+			float4(-1.f, +1.f, 0.99999f, 1.f),
+			float4(-1.f, -1.f, 0.99999f, 1.f),
 		};
 		//TRIANGLESTRIP
 		/*

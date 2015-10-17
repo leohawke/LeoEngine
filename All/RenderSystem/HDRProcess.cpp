@@ -39,7 +39,7 @@ leo::HDRProcess::HDRCommon::HDRCommon(ID3D11Device * create)
 
 	if (!mLumVS) {
 		mLumVS = ShaderMgr().CreateVertexShader(
-			FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"postprocess", D3D11_VERTEX_SHADER))
+			FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"tonemapping", D3D11_VERTEX_SHADER))
 			);
 	}
 
@@ -228,6 +228,9 @@ void leo::HDRProcess::LumAdaptedProcess::Draw(ID3D11DeviceContext * context, ID3
 	context->PSSetShaderResources(1, 1, &mLumAdaptedSwapOutput[mIndex]);
 	PostProcess::Draw(context, src, mLumAdaptedSwapRTV[!mIndex]);
 	mIndex = !mIndex;
+
+	ID3D11RenderTargetView* rt = nullptr;
+	context->OMSetRenderTargets(1, &rt, nullptr);
 }
 
 leo::HDRProcess::HDRBundleProcess::HDRBundleProcess(ID3D11Device * create, ID3D11Texture2D* src)
