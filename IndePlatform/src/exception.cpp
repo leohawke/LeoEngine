@@ -61,13 +61,14 @@ namespace leo
 			try
 			{
 				LPVOID msgbuff;
-				::FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+				if (!::FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
 					nullptr,
 					ec,
 					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 					(LPSTR)&msgbuff,
 					0,
-					nullptr);
+					nullptr))
+					return std::to_string(GetLastError());
 				return std::string((char*)msgbuff);
 			}
 			catch (...)
