@@ -124,13 +124,12 @@ void leo::PostProcess::Apply(ID3D11DeviceContext* context)
 	context->IASetVertexBuffers(0, 1, &mVertexBuffer, strides, offsets);
 
 	context->VSSetShader(mCommonThunk.mVertexShader, nullptr, 0);
-	context->PSSetShader(mPixelShader, nullptr, 0);
-
 }
 
 void leo::PostProcess::Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) {
 	context->OMSetRenderTargets(1, &dst, nullptr);
 	context->PSSetShaderResources(0, 1, &src);
+	context->PSSetShader(mPixelShader, nullptr, 0);
 	context->Draw(4, 0);
 }
 
@@ -237,7 +236,7 @@ public:
 		auto src_rect = GetTextureRect(desc, level);
 		auto& dst_rect = ops::IRect<ops::axis_system::dx_texture_system>();
 		container->BindRect(context, src_rect, dst_rect);
-
+		
 		std::array<float4, 32> sampleoffset;
 		GetSampleOffset(desc, sampleoffset,level);
 		SetSampleOffset(sampleoffset);

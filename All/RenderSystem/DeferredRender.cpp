@@ -117,7 +117,7 @@ private:
 
 class leo::DeferredRender::DeferredStateImpl {
 public:
-	DeferredStateImpl(ID3D11Device* device) {
+	DeferredStateImpl(ID3D11Device* device,size_type size) {
 		CD3D11_DEPTH_STENCIL_DESC shaderPassDesc{ D3D11_DEFAULT };
 		shaderPassDesc.DepthFunc = D3D11_COMPARISON_GREATER;
 		shaderPassDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
@@ -130,6 +130,13 @@ public:
 		BuildDRRendingVolume_StateObject(device);
 		ShaderMgr sm;
 		mShaderPS = sm.CreatePixelShader(FileSearch::Search(L"ShaderPS.cso"));
+
+		mViewPort.Height = size.second*1.f;
+		mViewPort.Width = size.first*1.f;
+		mViewPort.TopLeftX = 0;
+		mViewPort.TopLeftY = 0;
+		mViewPort.MaxDepth = 1.0f;
+		mViewPort.MinDepth = 0.0f;
 	}
 
 	void BuildDRLightStencil_StateObject(ID3D11Device* device) {
@@ -215,6 +222,9 @@ public:
 	ID3D11PixelShader* mShaderPS = nullptr;
 
 	//光照阶段BlendState
+
+	//ViewPort = 最终大小
+	D3D11_VIEWPORT mViewPort;
 };
 
 class LinearizeDepthImpl : public leo::Singleton<LinearizeDepthImpl, false>
@@ -262,7 +272,7 @@ public:
 
 leo::DeferredRender::DeferredRender(ID3D11Device * device, size_type size)
 	:pResImpl(std::make_unique<DeferredResImpl>(device, size)),
-	pStateImpl(std::make_unique<DeferredStateImpl>(device)),
+	pStateImpl(std::make_unique<DeferredStateImpl>(device,size)),
 	pHDRProcess(std::make_unique<HDRProcess>(device,pResImpl->mShadingTex))
 {
 	LinearizeDepthImpl::GetInstance(device);
@@ -356,9 +366,9 @@ void leo::DeferredRender::PostProcess(ID3D11DeviceContext * context, ID3D11Rende
 {
 	pHDRProcess->SetFrameDelta(dt);
 	pHDRProcess->Apply(context);
+	context->RSSetViewports(1, &pStateImpl->mViewPort);
 	pHDRProcess->Draw(context,pResImpl->mShadingSRV,rtv);
 
-	//merege shading result to rtv...
 }
 
 void leo::DeferredRender::SetSSAOParams(bool enable, uint8 level) noexcept

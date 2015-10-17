@@ -229,13 +229,15 @@ void leo::HDRProcess::LumAdaptedProcess::Draw(ID3D11DeviceContext * context, ID3
 	PostProcess::Draw(context, src, mLumAdaptedSwapRTV[!mIndex]);
 	mIndex = !mIndex;
 
-	ID3D11RenderTargetView* rt = nullptr;
-	context->OMSetRenderTargets(1, &rt, nullptr);
+	context->OMSetRenderTargets(1, &dst, nullptr);
 }
 
 leo::HDRProcess::HDRBundleProcess::HDRBundleProcess(ID3D11Device * create, ID3D11Texture2D* src)
 	:mScalerProcess(std::make_unique<leo::ScalaerProcess<4>>(create)),mMaxLevel(4)
 {
+	
+
+
 	{
 		//first create scale tex res
 		D3D11_TEXTURE2D_DESC texDesc;
@@ -285,6 +287,7 @@ void leo::HDRProcess::HDRBundleProcess::Apply(ID3D11DeviceContext * context,floa
 {
 	context->CopyResource(mSrcCopyTex, mSrcPtr);
 	mScalerProcess->Apply(context);
+	context->RSSetViewports(1, &mViewPort);
 	mScalerProcess->Draw(context, mSrcCopy, mScaleRT);
 
 	pLumFirst->Apply(context);
@@ -318,6 +321,11 @@ leo::HDRProcess::HDRProcess(ID3D11Device * create,ID3D11Texture2D* src)
 	:PostProcess(create),
 	mBundleProcess(std::make_unique<HDRBundleProcess>(create,src))
 {
+	#ifdef NO_SINGLE_CHANNEL_FLOAT
+	BindProcess(create, "Shader/HDRFinalPS_multiple.cso");
+	#else
+	BindProcess(create, L"Shader/HDRFinalPS_single.cso");
+	#endif
 }
 
 void leo::HDRProcess::SetFrameDelta(float dt)

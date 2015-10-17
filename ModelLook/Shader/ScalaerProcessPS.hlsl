@@ -30,7 +30,7 @@ float4 main_4(in float2 Tex :TEXCOORD) : SV_TARGET
 		sample += mSrc.Sample(s0, Tex + avSampleOffsets[i]);
 	}
 
-	return sample / 16;
+	return sample/16;
 }
 
 float4 main_8(in float2 Tex :TEXCOORD) : SV_TARGET
