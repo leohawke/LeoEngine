@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////////////////
+ï»¿////////////////////////////////////////////////////////////////////////////
 //
 //  Leo Engine Source File.
 //  Copyright (C), FNS Studios, 2014-2015.
@@ -10,7 +10,7 @@
 //  Description: 
 // -------------------------------------------------------------------------
 //  History:
-//		2014-3-9 14:54 ¼ÓÈëĞÂµÄ¹¤¾ßÀà{ÁÙÊ±×´Ì¬Ôİ´æ¶ÔÏóµÄ scope guard}
+//		2014-3-9 14:54 åŠ å…¥æ–°çš„å·¥å…·ç±»{ä¸´æ—¶çŠ¶æ€æš‚å­˜å¯¹è±¡çš„ scope guard}
 //
 ////////////////////////////////////////////////////////////////////////////
 #ifndef IndePlatform_utility_hpp
@@ -23,9 +23,9 @@
 
 namespace leo
 {
-	//²»Âú×ã´Ë¶ÏÑÔµÄĞĞÎªÊÇ½Ó¿ÚÃ÷È·µØÎ´¶¨ÒåµÄ£¬ĞĞÎª²»¿ÉÔ¤²â
+	//ä¸æ»¡è¶³æ­¤æ–­è¨€çš„è¡Œä¸ºæ˜¯æ¥å£æ˜ç¡®åœ°æœªå®šä¹‰çš„ï¼Œè¡Œä¸ºä¸å¯é¢„æµ‹
 #define lconstraint assert
-//ÔËĞĞÊ±¼ì²éµÄ»·¾³Ìõ¼şÔ¼Êø¶ÏÑÔ¡£ÓÃÓÚÃ÷È·µØ·Ç yconstraint ÊÊÓÃµÄÇéĞÎ
+//è¿è¡Œæ—¶æ£€æŸ¥çš„ç¯å¢ƒæ¡ä»¶çº¦æŸæ–­è¨€ã€‚ç”¨äºæ˜ç¡®åœ°é yconstraint é€‚ç”¨çš„æƒ…å½¢
 #define lassume assert
 
 	class LB_API unsupported : public std::logic_error
@@ -98,8 +98,8 @@ namespace leo
 
 
 	/*
-	\see ISO WG21/N3797 20.2.3[utility.exchange] ¡£
-	\see http://www.open-std.org/JTC1/sc22/WG21/docs/papers/2013/n3668.html ¡£
+	\see ISO WG21/N3797 20.2.3[utility.exchange] ã€‚
+	\see http://www.open-std.org/JTC1/sc22/WG21/docs/papers/2013/n3668.html ã€‚
 	*/
 	template<typename _type, typename _type2 = _type>
 	_type
@@ -113,8 +113,8 @@ namespace leo
 
 
 	/*!
-	\see ISO C++11 30.2.6[thread.decaycopy] ¡£
-	\see http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2011/n3255.html ¡£
+	\see ISO C++11 30.2.6[thread.decaycopy] ã€‚
+	\see http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2011/n3255.html ã€‚
 	*/
 	template<typename _type>
 	decay_t<_type>
@@ -124,8 +124,8 @@ namespace leo
 	}
 
 	/*!
-	\brief ÍË»¯´«µİ¡£
-	\note ÀàËÆ decay_copy £¬µ«½ö¶Ôº¯Êı»òÊı×é¼°ÆäÒıÓÃÀàĞÍÍË»¯£¬²»¸´ÖÆÆäËüÖµ¡£
+	\brief é€€åŒ–ä¼ é€’ã€‚
+	\note ç±»ä¼¼ decay_copy ï¼Œä½†ä»…å¯¹å‡½æ•°æˆ–æ•°ç»„åŠå…¶å¼•ç”¨ç±»å‹é€€åŒ–ï¼Œä¸å¤åˆ¶å…¶å®ƒå€¼ã€‚
 	*/
 	template<typename _type>
 	typename qualified_decay<_type>::type
@@ -136,7 +136,7 @@ namespace leo
 
 
 	/*!
-	\brief ¼ÆËãÖ¸¶¨Êı×éÀàĞÍ¶ÔÏóµÄ³¤¶È¡£
+	\brief è®¡ç®—æŒ‡å®šæ•°ç»„ç±»å‹å¯¹è±¡çš„é•¿åº¦ã€‚
 	*/
 	template<typename _type, size_t _vN>
 	lconstfn size_t
@@ -153,8 +153,8 @@ namespace leo
 
 
 	/*!
-	\brief °ü×°ÀàÀàĞÍµÄÖµµÄ¶ÔÏó¡£
-	\warning ·ÇĞéÎö¹¹¡£
+	\brief åŒ…è£…ç±»ç±»å‹çš„å€¼çš„å¯¹è±¡ã€‚
+	\warning éè™šææ„ã€‚
 	*/
 	template<typename _type>
 	struct boxed_value
@@ -180,7 +180,7 @@ namespace leo
 
 
 	/*!
-	\brief °ü×°·ÇÀàÀàĞÍÎªÀàÀàĞÍ¡£
+	\brief åŒ…è£…éç±»ç±»å‹ä¸ºç±»ç±»å‹ã€‚
 	*/
 	template<typename _type>
 	using classify_value_t = conditional_t < std::is_class<_type>::value, _type,
@@ -188,12 +188,12 @@ namespace leo
 
 
 	/*!
-	\brief °´±êÊ¶µ÷ÓÃº¯Êı£¬±£Ö¤µ÷ÓÃÒ»´Î¡£
-	\note ÀàËÆ std::call_once £¬µ«²»±£Ö¤Ïß³Ì°²È«ĞÔ¡£
-	\note ISO C++11£¨ÖÁ N3691 £© 30.4 synopsis ´¦µÄÉùÃ÷´æÔÚ´íÎó¡£
-	\see https://github.com/cplusplus/draft/issues/151 ¡£
+	\brief æŒ‰æ ‡è¯†è°ƒç”¨å‡½æ•°ï¼Œä¿è¯è°ƒç”¨ä¸€æ¬¡ã€‚
+	\note ç±»ä¼¼ std::call_once ï¼Œä½†ä¸ä¿è¯çº¿ç¨‹å®‰å…¨æ€§ã€‚
+	\note ISO C++11ï¼ˆè‡³ N3691 ï¼‰ 30.4 synopsis å¤„çš„å£°æ˜å­˜åœ¨é”™è¯¯ã€‚
+	\see https://github.com/cplusplus/draft/issues/151 ã€‚
 
-	µ±±êÊ¶Îª true Ê±ºòÎŞ×÷ÓÃ£¬·ñÔòµ÷ÓÃº¯Êı¡£
+	å½“æ ‡è¯†ä¸º true æ—¶å€™æ— ä½œç”¨ï¼Œå¦åˆ™è°ƒç”¨å‡½æ•°ã€‚
 	*/
 	template<typename _fCallable, typename... _tParams>
 	inline void
@@ -208,9 +208,9 @@ namespace leo
 
 
 	/*!
-	\brief ÀàĞÍ²ÎÊı»¯¾²Ì¬¶ÔÏó¡£
-	\warning ²»¿ÉÖØÈë¡£
-	\warning ·ÇÏß³Ì°²È«¡£
+	\brief ç±»å‹å‚æ•°åŒ–é™æ€å¯¹è±¡ã€‚
+	\warning ä¸å¯é‡å…¥ã€‚
+	\warning éçº¿ç¨‹å®‰å…¨ã€‚
 	\since build 303
 	*/
 	template<typename _type, typename, typename...>
@@ -222,9 +222,9 @@ namespace leo
 		return obj;
 	}
 	/*!
-	\brief ·ÇÀàĞÍ²ÎÊı»¯¾²Ì¬¶ÔÏó¡£
-	\warning ²»¿ÉÖØÈë¡£
-	\warning ·ÇÏß³Ì°²È«¡£
+	\brief éç±»å‹å‚æ•°åŒ–é™æ€å¯¹è±¡ã€‚
+	\warning ä¸å¯é‡å…¥ã€‚
+	\warning éçº¿ç¨‹å®‰å…¨ã€‚
 	\since build 301
 	*/
 	template<typename _type, size_t...>
@@ -238,12 +238,12 @@ namespace leo
 
 
 	/*!
-	\brief È¡ÀàĞÍ±êÊ¶ºÍ³õÊ¼»¯µ÷ÓÃÖ¸¶¨µÄ¶ÔÏó¡£
-	\tparam _tKey ÆğÊ¼ÀàĞÍ²ÎÊı»¯±êÊ¶¡£
-	\tparam _tKeys ·ÇÆğÊ¼ÀàĞÍ²ÎÊı»¯±êÊ¶¡£
-	\tparam _fInit ³õÊ¼»¯µ÷ÓÃÀàĞÍ¡£
-	\tparam _tParams ³õÊ¼»¯²ÎÊıÀàĞÍ¡£
-	\return ³õÊ¼»¯ºóµÄ¶ÔÏóµÄ×óÖµÒıÓÃ¡£
+	\brief å–ç±»å‹æ ‡è¯†å’Œåˆå§‹åŒ–è°ƒç”¨æŒ‡å®šçš„å¯¹è±¡ã€‚
+	\tparam _tKey èµ·å§‹ç±»å‹å‚æ•°åŒ–æ ‡è¯†ã€‚
+	\tparam _tKeys éèµ·å§‹ç±»å‹å‚æ•°åŒ–æ ‡è¯†ã€‚
+	\tparam _fInit åˆå§‹åŒ–è°ƒç”¨ç±»å‹ã€‚
+	\tparam _tParams åˆå§‹åŒ–å‚æ•°ç±»å‹ã€‚
+	\return åˆå§‹åŒ–åçš„å¯¹è±¡çš„å·¦å€¼å¼•ç”¨ã€‚
 	\since build 327
 	*/
 	template<typename _tKey, typename... _tKeys, typename _fInit,
@@ -260,11 +260,11 @@ namespace leo
 		return *p;
 	}
 	/*!
-	\brief È¡·ÇÀàĞÍ±êÊ¶ºÍ³õÊ¼»¯µ÷ÓÃÖ¸¶¨µÄ¶ÔÏó¡£
-	\tparam _vKeys ·ÇÀàĞÍ²ÎÊı»¯±êÊ¶¡£
-	\tparam _fInit ³õÊ¼»¯µ÷ÓÃÀàĞÍ¡£
-	\tparam _tParams ³õÊ¼»¯²ÎÊıÀàĞÍ¡£
-	\return ³õÊ¼»¯ºóµÄ¶ÔÏóµÄ×óÖµÒıÓÃ¡£
+	\brief å–éç±»å‹æ ‡è¯†å’Œåˆå§‹åŒ–è°ƒç”¨æŒ‡å®šçš„å¯¹è±¡ã€‚
+	\tparam _vKeys éç±»å‹å‚æ•°åŒ–æ ‡è¯†ã€‚
+	\tparam _fInit åˆå§‹åŒ–è°ƒç”¨ç±»å‹ã€‚
+	\tparam _tParams åˆå§‹åŒ–å‚æ•°ç±»å‹ã€‚
+	\return åˆå§‹åŒ–åçš„å¯¹è±¡çš„å·¦å€¼å¼•ç”¨ã€‚
 	\since build 327
 	*/
 	template<size_t... _vKeys, typename _fInit, typename... _tParams>
@@ -282,25 +282,25 @@ namespace leo
 
 
 	/*!	\defgroup init_mgr Initialization Managers
-	\brief ³õÊ¼»¯¹ÜÀíÆ÷¡£
+	\brief åˆå§‹åŒ–ç®¡ç†å™¨ã€‚
 	\since build 328
 
-	ÊµÏÖ±£´æ³õÊ¼»¯ºÍ·´³õÊ¼»¯µÄ×´Ì¬µÄ¶ÔÏó¡£²»Ö±½Ó³õÊ¼»¯¶ÔÏó£¬¿ÉÒÔÔÚÍ·ÎÄ¼şÖĞÖ±½Ó¶¨Òå¡£
-	±£Ö¤³õÊ¼»¯Âú×ãÌØ¶¨Ìõ¼ş¡£
+	å®ç°ä¿å­˜åˆå§‹åŒ–å’Œååˆå§‹åŒ–çš„çŠ¶æ€çš„å¯¹è±¡ã€‚ä¸ç›´æ¥åˆå§‹åŒ–å¯¹è±¡ï¼Œå¯ä»¥åœ¨å¤´æ–‡ä»¶ä¸­ç›´æ¥å®šä¹‰ã€‚
+	ä¿è¯åˆå§‹åŒ–æ»¡è¶³ç‰¹å®šæ¡ä»¶ã€‚
 	*/
 
 	/*!
 	\ingroup init_mgr
-	\brief Ê¹ÓÃÒıÓÃ¼ÆÊıµÄ¾²Ì¬³õÊ¼»¯¹ÜÀíÆ÷¡£
-	\pre _type Âú×ã Destructible ¡£
-	\note µ±ÊµÏÖÖ§³Ö¾²Ì¬ TLS Ê±ÎªÃ¿Ïß³Ìµ¥Àı£¬·ñÔòÎªÈ«¾Ö¾²Ì¬µ¥Àı¡£
-	\warning ¶ÔÓÚ²»Ö§³Ö TLS µÄÊµÏÖ·ÇÏß³Ì°²È«¡£
+	\brief ä½¿ç”¨å¼•ç”¨è®¡æ•°çš„é™æ€åˆå§‹åŒ–ç®¡ç†å™¨ã€‚
+	\pre _type æ»¡è¶³ Destructible ã€‚
+	\note å½“å®ç°æ”¯æŒé™æ€ TLS æ—¶ä¸ºæ¯çº¿ç¨‹å•ä¾‹ï¼Œå¦åˆ™ä¸ºå…¨å±€é™æ€å•ä¾‹ã€‚
+	\warning å¯¹äºä¸æ”¯æŒ TLS çš„å®ç°éçº¿ç¨‹å®‰å…¨ã€‚
 	\sa ythread
-	\see http://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Nifty_Counter ¡£
+	\see http://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Nifty_Counter ã€‚
 	\since build 425
 
-	¾²Ì¬³õÊ¼»¯£¬Í¨¹ıÒıÓÃ¼ÆÊı±£Ö¤ËùÓĞÔÚ¶¨Òå±¾ÀàĞÍµÄ¶ÔÏóºóÒÑÓĞ¾²Ì¬¶ÔÏó±»³õÊ¼»¯¡£
-	ÔÚËùÓĞ·­Òëµ¥ÔªµÄ±¾ÀàĞÍ¶ÔÏóÎö¹¹ºó×Ô¶¯·´³õÊ¼»¯¡£
+	é™æ€åˆå§‹åŒ–ï¼Œé€šè¿‡å¼•ç”¨è®¡æ•°ä¿è¯æ‰€æœ‰åœ¨å®šä¹‰æœ¬ç±»å‹çš„å¯¹è±¡åå·²æœ‰é™æ€å¯¹è±¡è¢«åˆå§‹åŒ–ã€‚
+	åœ¨æ‰€æœ‰ç¿»è¯‘å•å…ƒçš„æœ¬ç±»å‹å¯¹è±¡ææ„åè‡ªåŠ¨ååˆå§‹åŒ–ã€‚
 	*/
 	template<class _type>
 	class nifty_counter
@@ -357,23 +357,23 @@ namespace leo
 
 	/*!
 	\ingroup init_mgr
-	\brief Ê¹ÓÃ call_once µÄ¾²Ì¬³õÊ¼»¯¹ÜÀíÆ÷¡£
-	\tparam _tOnceFlag ³õÊ¼»¯µ÷ÓÃ±êÊ¶¡£
-	\note Ïß³Ì°²È«È¡¾öÓÚ call_once ¶Ô _tOnceFlag µÄÖ§³Ö¡£
-	Èô¶ÔÓÚÖ§³Ö <tt><mutex></tt> µÄÊµÏÖ£¬Ê¹ÓÃ std::once_flag £¬
-	¶ÔÓ¦ std::call_once £¬ÔòÊÇÏß³Ì°²È«µÄ£»
-	ÈôÊ¹ÓÃ bool £¬¶ÔÓ¦ leo::call_once £¬²»±£Ö¤Ïß³Ì°²È«¡£
-	ÆäËüÀàĞÍ¿ÉÊ¹ÓÃÓÃ»§×ÔĞĞ¶¨Òå call_once ¡£
+	\brief ä½¿ç”¨ call_once çš„é™æ€åˆå§‹åŒ–ç®¡ç†å™¨ã€‚
+	\tparam _tOnceFlag åˆå§‹åŒ–è°ƒç”¨æ ‡è¯†ã€‚
+	\note çº¿ç¨‹å®‰å…¨å–å†³äº call_once å¯¹ _tOnceFlag çš„æ”¯æŒã€‚
+	è‹¥å¯¹äºæ”¯æŒ <tt><mutex></tt> çš„å®ç°ï¼Œä½¿ç”¨ std::once_flag ï¼Œ
+	å¯¹åº” std::call_once ï¼Œåˆ™æ˜¯çº¿ç¨‹å®‰å…¨çš„ï¼›
+	è‹¥ä½¿ç”¨ bool ï¼Œå¯¹åº” leo::call_once ï¼Œä¸ä¿è¯çº¿ç¨‹å®‰å…¨ã€‚
+	å…¶å®ƒç±»å‹å¯ä½¿ç”¨ç”¨æˆ·è‡ªè¡Œå®šä¹‰ call_once ã€‚
 	\since build 1.02
-	\todo Ê¹ÓÃÖ§³Ö lambda pack Õ¹¿ªµÄÊµÏÖ¹¹ÔìÄ£°å¡£
-	\todo Ö§³Ö·ÖÅäÆ÷¡£
+	\todo ä½¿ç”¨æ”¯æŒ lambda pack å±•å¼€çš„å®ç°æ„é€ æ¨¡æ¿ã€‚
+	\todo æ”¯æŒåˆ†é…å™¨ã€‚
 
-	¾²Ì¬³õÊ¼»¯£¬Ê¹ÓÃ _tOnceFlag ÀàĞÍµÄ¾²Ì¬¶ÔÏó±íÊ¾³õÊ¼»¯ºÍ·´³õÊ¼»¯×´Ì¬£¬
-	±£Ö¤ËùÓĞÔÚ¶¨Òå±¾ÀàĞÍµÄ¶ÔÏóºóÒÑÓĞ¾²Ì¬¶ÔÏó±»³õÊ¼»¯¡£
-	ÔÚËùÓĞ·­Òëµ¥ÔªµÄ±¾ÀàĞÍ¶ÔÏóÎö¹¹ºó×Ô¶¯·´³õÊ¼»¯¡£
-	³õÊ¼»¯ºÍ·´³õÊ¼»¯µ÷ÓÃÃ»ÓĞÏŞ¶¨·ûĞŞÊÎµÄ call_once ³õÊ¼»¯ºÍ·´³õÊ¼»¯¡£
-	ÓÃ»§¿ÉÒÔ×Ô¶¨Òå _tOnceFlag Êµ¼Ê²ÎÊı¶ÔÓ¦µÄ call_once £¬µ«ÉùÃ÷
-	Ó¦Óë std::call_once ºÍ leo::call_once ĞÎÊ½Ò»ÖÂ¡£
+	é™æ€åˆå§‹åŒ–ï¼Œä½¿ç”¨ _tOnceFlag ç±»å‹çš„é™æ€å¯¹è±¡è¡¨ç¤ºåˆå§‹åŒ–å’Œååˆå§‹åŒ–çŠ¶æ€ï¼Œ
+	ä¿è¯æ‰€æœ‰åœ¨å®šä¹‰æœ¬ç±»å‹çš„å¯¹è±¡åå·²æœ‰é™æ€å¯¹è±¡è¢«åˆå§‹åŒ–ã€‚
+	åœ¨æ‰€æœ‰ç¿»è¯‘å•å…ƒçš„æœ¬ç±»å‹å¯¹è±¡ææ„åè‡ªåŠ¨ååˆå§‹åŒ–ã€‚
+	åˆå§‹åŒ–å’Œååˆå§‹åŒ–è°ƒç”¨æ²¡æœ‰é™å®šç¬¦ä¿®é¥°çš„ call_once åˆå§‹åŒ–å’Œååˆå§‹åŒ–ã€‚
+	ç”¨æˆ·å¯ä»¥è‡ªå®šä¹‰ _tOnceFlag å®é™…å‚æ•°å¯¹åº”çš„ call_once ï¼Œä½†å£°æ˜
+	åº”ä¸ std::call_once å’Œ leo::call_once å½¢å¼ä¸€è‡´ã€‚
 	*/
 	template<typename _type, typename _tOnceFlag>
 	class call_once_init
@@ -465,7 +465,7 @@ namespace leo
 		template<typename _type, typename _tToken>
 		struct state_guard_traits<_type, _tToken, true>
 		{
-			//! \todo °´ ISO C++ [utility.swap] ÒªÇóÈ·¶¨Òì³£¹æ·¶¡£
+			//! \todo æŒ‰ ISO C++ [utility.swap] è¦æ±‚ç¡®å®šå¼‚å¸¸è§„èŒƒã€‚
 			static void
 				save(_tToken t, _type& val)
 			{
@@ -474,7 +474,7 @@ namespace leo
 				swap(val, static_cast<_type&>(t));
 			}
 
-			//! \todo °´ ISO C++ [utility.swap] ÒªÇóÈ·¶¨Òì³£¹æ·¶¡£
+			//! \todo æŒ‰ ISO C++ [utility.swap] è¦æ±‚ç¡®å®šå¼‚å¸¸è§„èŒƒã€‚
 			static void
 				restore(_tToken t, _type& val)
 			{
@@ -548,10 +548,10 @@ namespace leo
 	} // namespace details;
 
 	 /*!
-	 \brief Ê¹ÓÃÁÙÊ±×´Ì¬Ôİ´æ¶ÔÏóµÄ scope guard ¡£
+	 \brief ä½¿ç”¨ä¸´æ—¶çŠ¶æ€æš‚å­˜å¯¹è±¡çš„ scope guard ã€‚
 	 \since build 1.01
-	 \todo Ö§³Ö·ÖÅäÆ÷¡£
-	 \todo Ö§³ÖÓĞÏŞµÄ¸´ÖÆºÍ×ªÒÆ¡£
+	 \todo æ”¯æŒåˆ†é…å™¨ã€‚
+	 \todo æ”¯æŒæœ‰é™çš„å¤åˆ¶å’Œè½¬ç§»ã€‚
 	 */
 	 //@{
 	template<typename _type, typename _tCond = bool,
@@ -625,17 +625,17 @@ namespace leo
 	//@}
 
 	/*!
-	\brief Ê¹ÓÃ ADL swap µ÷ÓÃÔİ´æ¶ÔÏóµÄ scope guard ¡£
+	\brief ä½¿ç”¨ ADL swap è°ƒç”¨æš‚å­˜å¯¹è±¡çš„ scope guard ã€‚
 	\since build 1.01
-	\todo Ö§³Ö·ÖÅäÆ÷¡£
-	\todo Ö§³ÖÓĞÏŞµÄ¸´ÖÆºÍ×ªÒÆ¡£
-	\todo µÈ´ıµÛÇòÍê³É
+	\todo æ”¯æŒåˆ†é…å™¨ã€‚
+	\todo æ”¯æŒæœ‰é™çš„å¤åˆ¶å’Œè½¬ç§»ã€‚
+	\todo ç­‰å¾…å¸çƒå®Œæˆ
 	*/
 	template<typename _type, typename _tCond = bool, typename _tRef = _type&>
 	using swap_guard = state_guard<_type, _tCond, _tRef>;
 
 	/*!
-	\brief ÉÚ±ø¶ÔÏó sentry¡£
+	\brief å“¨å…µå¯¹è±¡ sentryã€‚
 	\since build 1.01
 	*/
 	template<typename T>
@@ -677,7 +677,7 @@ namespace leo {
 				}
 			}
 			inline std::size_t hash(const wchar_t* str) {
-#ifdef LB_IMPL_MSCPP
+#ifdef VC_STL
 				auto sid = std::_Hash_seq((unsigned char*)str, wcslen(str)*sizeof(wchar_t) / sizeof(char));
 #else
 				auto sid = std::_Fnv_hash_impl::hash((void*)str, wcslen(str)*sizeof(wchar_t) / sizeof(char));
@@ -711,11 +711,11 @@ namespace leo {
 		return details::mTable.hash(str);
 	}
 
-	inline const wchar_t* unhash(std::size_t sid) {
+	inline const wchar_t* unhash(std::size_t sid) noexcept(false){
 		if (auto str = details::mTable.unhash(sid))
 			return str;
 		else
-			throw std::invalid_argument("¸Ã×ÊÔ´²»´æÔÚ");
+			throw std::invalid_argument("è¯¥èµ„æºä¸å­˜åœ¨");
 	}
 }
 #if !LB_HAS_BUILTIN_NULLPTR

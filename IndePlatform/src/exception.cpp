@@ -40,11 +40,15 @@ namespace leo
 		win32_exception::win32_exception(error_code_type ec, const std::string& s, level_type l)
 			lnothrow
 			: host_exception([&]{
+#ifndef LB_IMPL_CLANGPP
 			try
+#endif
 			{
 				return s + ": " + formatmessage(ec);
 			}
+#ifndef LB_IMPL_CLANGPP
 			catch (...)
+#endif
 			{
 			}
 			return std::string(s);
@@ -58,8 +62,11 @@ namespace leo
 			win32_exception::formatmessage(error_code_type ec) lnothrow
 		{
 #ifdef PLATFORM_WIN32
+#ifndef LB_IMPL_CLANGPP
 			try
+#endif
 			{
+
 				LPVOID msgbuff;
 				if (!::FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
 					nullptr,
@@ -71,7 +78,9 @@ namespace leo
 					return std::to_string(GetLastError());
 				return std::string((char*)msgbuff);
 			}
+#ifndef LB_IMPL_CLANGPP
 			catch (...)
+#endif
 			{
 			}
 #endif

@@ -448,11 +448,13 @@ namespace leo {
 		half& operator=(float f) noexcept
 		{
 			*this = half(f);
+			return *this;
 		}
 
 		half& operator=(uint16 i) noexcept
 		{
 			*this = half(i);
+			return *this;
 		}
 
 		explicit operator float() const noexcept
@@ -521,6 +523,7 @@ namespace leo {
 		half3& operator=(const float3& XYZ) noexcept
 		{
 			*this = half3(XYZ);
+			return *this;
 		}
 
 		explicit operator float3() const noexcept
@@ -594,6 +597,7 @@ namespace leo {
 		half4& operator=(const float4& XYZW) noexcept
 		{
 			*this = half4(XYZW);
+			return *this;
 		}
 
 		explicit operator float4() const noexcept
