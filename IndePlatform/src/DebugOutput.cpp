@@ -1,3 +1,4 @@
+#include "ldef.h"
 #include "platform.h"
 #include "DebugOutput.hpp"
 #include <stdio.h>

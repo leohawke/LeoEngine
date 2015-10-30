@@ -92,14 +92,14 @@ namespace leo
 	{
 		if (FAILED(hr))
 		{
-			Raise_DX_Exception(hr);
+			Raise_DX_Exception(hr,"DX ERROR");
 		}
 	}
 	void win32call(win::BOOL retval)
 	{
 		if (!retval)
 		{
-			Raise_Win32_Exception();
+			Raise_Win32_Exception("WIN32 ERROR");
 		}
 	}
 

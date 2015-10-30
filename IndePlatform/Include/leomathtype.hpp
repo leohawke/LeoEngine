@@ -482,6 +482,7 @@ namespace leo {
 		half2& operator=(const float2& XY) noexcept
 		{
 			*this = half2(XY);
+			return *this;
 		}
 
 		explicit operator float2() const noexcept
