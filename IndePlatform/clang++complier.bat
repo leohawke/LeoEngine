@@ -1,0 +1,1 @@
+clang++ -c -fno-ms-compatibility -std=c++11 F:\LeoEngine\LeoEngine\IndePlatform\src/* -DMULTI_THREAD=1 -DPLATFORM_WIN32=1 -masm=intel -msse2 -I F:\LeoEngine\LeoEngine\IndePlatform\Include/

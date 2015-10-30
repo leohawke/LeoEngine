@@ -186,4 +186,7 @@
   <ItemGroup>
     <CustomBuild Include="g++compiler.bat" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="clang++complier.bat" />
+  </ItemGroup>
 </Project>
