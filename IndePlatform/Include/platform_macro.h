@@ -1,5 +1,5 @@
 #ifndef IndePlatform_platform_macro_h
-#define IndePlatform_platform_maco_h
+#define IndePlatform_platform_macro_h
 
 #ifdef XENON
 #undef ARCH_XENON

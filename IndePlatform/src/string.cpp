@@ -1,3 +1,4 @@
+#include "ldef.h"
 #include "platform.h"
 #include "string.hpp"
 

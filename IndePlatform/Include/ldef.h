@@ -65,6 +65,7 @@
 #ifdef _MSC_VER
 #	undef LB_IMPL_MSCPP
 #	define LB_IMPL_MSCPP _MSC_VER
+#define VC_STL 1
 #elif __clang__
 #	undef LB_IMPL_CLANGPP
 #	define LB_IMPL_CLANGPP (__clang__ * 10000 + __clang_minor__ * 100 \
@@ -75,16 +76,26 @@
 			+ __GNUC_PATCHLEVEL__)
 #endif
 
+#ifdef __clang__
+#ifdef LB_IMPL_MSCPP
+#undef LB_IMPL_MSCPP
+#define VC_STL 1
+#endif
+#	undef LB_IMPL_CLANGPP
+#	define LB_IMPL_CLANGPP (__clang__ * 10000 + __clang_minor__ * 100 \
+			+ __clang_patchlevel__)
+#endif
+
 //禁止CL编译器的安全警告
-#if LB_IMPL_MSCPP >= 1400
+#if VC_STL
 //将指针用作迭代器引发的error C4996
 //See doucumentation on how to use Visual C++ 'Checked Iterators'
 #undef _SCL_SECURE_NO_WARNINGS
-#define _SCL_SECURE_NO_WARNINGS
+#define _SCL_SECURE_NO_WARNINGS 1
 
 //使用不安全的缓存区函数引发的error C4996
 #undef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS 1
 #endif
 //@}
 

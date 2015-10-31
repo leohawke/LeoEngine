@@ -1,0 +1,1 @@
+clang++ -c -fexceptions -fno-ms-compatibility -std=c++11 src/* -D_CRT_SECURE_NO_WARNINGS -DMULTI_THREAD=1 -DPLATFORM_WIN32=1 -masm=intel -msse2 -I Include/
