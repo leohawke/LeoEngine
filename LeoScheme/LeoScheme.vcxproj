@@ -90,11 +90,13 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="LeoScheme.h" />
     <ClInclude Include="scheme.h" />
     <ClInclude Include="SchemeMath.h" />
     <ClInclude Include="Sexp\Sexp.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="LeoScheme.cpp" />
     <ClCompile Include="scheme.cpp" />
     <ClCompile Include="SchemeIO.cpp" />
     <ClCompile Include="SchemeMath.cpp" />

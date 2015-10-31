@@ -30,6 +30,9 @@
     <ClInclude Include="SchemeMath.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="LeoScheme.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sexp\Sexp.cpp">
@@ -42,6 +45,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="SchemeMath.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LeoScheme.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
