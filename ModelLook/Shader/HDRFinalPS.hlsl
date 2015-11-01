@@ -5,12 +5,12 @@ Texture2D lum_tex:register(t2);
 //filtering = min_mag_linear_mip_point
 //address_u = clamp
 //address_v = clamp
-SamplerState point_sampler : register(s0);
+SamplerState linear_sampler : register(s0);
 
 //filtering = min_mag_mip_point
 //address_u = clamp
 //address_v = clamp
-SamplerState linear_sampler : register(s1);
+SamplerState point_sampler : register(s1);
 
 // The per-color weighting to be used for luminance calculations in RGB order.
 static const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);

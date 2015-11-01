@@ -173,6 +173,9 @@
     <ClCompile Include="..\All\RenderSystem\HDRProcess.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\CopyProcess.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -214,6 +217,9 @@
       <Filter>RenderSystem</Filter>
     </ClInclude>
     <ClInclude Include="..\All\RenderSystem\HDRProcess.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\RenderSystem\CopyProcess.hpp">
       <Filter>RenderSystem</Filter>
     </ClInclude>
   </ItemGroup>
@@ -284,6 +290,12 @@
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="Shader\LumVS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\Copy.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\BilinearCopy.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>
