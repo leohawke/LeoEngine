@@ -139,6 +139,9 @@ namespace leo {
 	private:
 		std::unique_ptr<IHDRBundleProcess> mBundleProcess;
 
+		win::unique_com<ID3D11Buffer> mToneGpuParams;
+		float2 mToneCpuParams;
+
 		float mDt;
 	};
 }

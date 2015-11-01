@@ -25,16 +25,7 @@ leo::HDRProcess::HDRCommon::HDRCommon(ID3D11Device * create)
 	#endif
 
 	if (!mGpuParams) {
-		D3D11_BUFFER_DESC Desc;
-		Desc.Usage = D3D11_USAGE_DEFAULT;
-		Desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		Desc.CPUAccessFlags = 0;
-		Desc.MiscFlags = 0;
-		Desc.StructureByteStride = 0;
-		Desc.ByteWidth = sizeof(mCpuParams);
-
-		leo::dxcall(create->CreateBuffer(&Desc, nullptr, &mGpuParams));
-		leo::dx::DebugCOM(mGpuParams, "tex_coord_offset");
+		leo::dx::CreateGPUCBuffer<decltype(mCpuParams)>(create,mGpuParams,"tex_coord_offset");
 	}
 
 	if (!mLumVS) {
@@ -177,16 +168,7 @@ void leo::HDRProcess::LumIterativeProcess::Draw(ID3D11DeviceContext * context, I
 leo::HDRProcess::LumAdaptedProcess::LumAdaptedProcess(ID3D11Device * create)
 	:HDRCommon(create)
 {
-	D3D11_BUFFER_DESC Desc;
-	Desc.Usage = D3D11_USAGE_DEFAULT;
-	Desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	Desc.CPUAccessFlags = 0;
-	Desc.MiscFlags = 0;
-	Desc.StructureByteStride = 0;
-	Desc.ByteWidth = sizeof(mDeltaCpuParams);
-
-	leo::dxcall(create->CreateBuffer(&Desc, nullptr, &mDeltaGpuParams));
-	leo::dx::DebugCOM(mDeltaGpuParams, "frame_delta");
+	leo::dx::CreateGPUCBuffer<leo::float4>(create,mDeltaGpuParams,"frame_delta");
 
 
 	#ifdef NO_SINGLE_CHANNEL_FLOAT
@@ -319,13 +301,16 @@ ID3D11ShaderResourceView * leo::HDRProcess::HDRBundleProcess::Output()
 
 leo::HDRProcess::HDRProcess(ID3D11Device * create,ID3D11Texture2D* src)
 	:PostProcess(create),
-	mBundleProcess(std::make_unique<HDRBundleProcess>(create,src))
+	mBundleProcess(std::make_unique<HDRBundleProcess>(create,src)),
+	mToneCpuParams(1.f,0.25f)
 {
 	#ifdef NO_SINGLE_CHANNEL_FLOAT
 	BindProcess(create, "Shader/HDRFinalPS_multiple.cso");
 	#else
 	BindProcess(create, L"Shader/HDRFinalPS_single.cso");
 	#endif
+
+	leo::dx::CreateGPUCBuffer(create, mToneCpuParams, mToneGpuParams, "tone_params");
 }
 
 void leo::HDRProcess::SetFrameDelta(float dt)
@@ -338,6 +323,7 @@ void leo::HDRProcess::Apply(ID3D11DeviceContext * context)
 	mBundleProcess->Apply(context, mDt);
 	auto src = mBundleProcess->Output();
 	context->PSSetShaderResources(2, 1, &src);
+	context->PSSetConstantBuffers(0, 1, &mToneGpuParams);
 	PostProcess::Apply(context);
 }
 

@@ -153,7 +153,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 	auto pModelMesh = std::make_unique<leo::Mesh>();
 	pModelMesh->Load(L"Resource/Sphere.l3d", leo::DeviceMgr().GetDevice());
-	pModelMesh->Translation(leo::float3(0.f,0.f,-3.f));
+	pModelMesh->Translation(leo::float3(0.f,0.f,3.f));
+	pModelMesh->Scale(2.f);
 	Models.push_back(std::move(pModelMesh));
 
 	auto cmdmsgproc = [&](HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)-> LRESULT
@@ -265,7 +266,7 @@ void BuildLight(ID3D11Device* device) {
 	mPointLight->Position(leo::float3(0.f, 0.f,0.f));
 	mPointLight->Range(6.f);
 	mPointLight->Diffuse(leo::float3(0.8f, 0.7f, 0.6f));
-	mPointLight->FallOff(leo::float3(0.f, 0.1f, 0.1f));
+	mPointLight->FallOff(leo::float3(1.f, 0.05f, 0.01f));
 	pRender->AddLight(mPointLight);
 
 	auto mSpotLight = std::make_shared<leo::SpotLightSource>();
@@ -317,7 +318,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pos.x = -pos.x;
 	pos.z = -pos.z;
 
-	pCamera->LookAt(float3(0.f, 0.f, -24.f), float3(0.f, 0.f, 0.f), float3(0.f, 1.f, 0.f));
+	pCamera->LookAt(float3(0.f, 12.f, -24.f), float3(0.f, 0.f, 0.f), float3(0.f, 1.f, 0.f));
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 
 	leo::EffectQuad::GetInstance().SetFrustum(device, *pCamera);

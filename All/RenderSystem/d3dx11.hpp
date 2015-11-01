@@ -266,6 +266,85 @@ namespace leo
 		}
 	
 		D3D11_RECT ScissorRectFromNDCRect(const ops::Rect& ndcRect, const std::pair<uint16, uint16>& size);
+
+		template<typename CPUDATA>
+		void CreateGPUCBuffer(ID3D11Device* device, const CPUDATA& data,
+			ID3D11Buffer* & gpu_buffer,
+			const char * debug_info = typeid(CPUDATA).name())
+		{
+			static_assert(sizeof(CPUDATA) % 16 == 0, "D3D11_BIND_CONSTANT_BUFFER::ByteWidth must %16 == 0");
+			D3D11_BUFFER_DESC Desc;
+			Desc.Usage = D3D11_USAGE_DEFAULT;
+			Desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+			Desc.CPUAccessFlags = 0;
+			Desc.MiscFlags = 0;
+			Desc.StructureByteStride = 0;
+			Desc.ByteWidth = sizeof(CPUDATA);
+
+			D3D11_SUBRESOURCE_DATA subData;
+			subData.pSysMem = &data;
+
+			leo::dxcall(device->CreateBuffer(&Desc, &subData, &gpu_buffer));
+			leo::dx::DebugCOM(gpu_buffer, debug_info);
+		}
+
+		template<typename CPUDATA>
+		void CreateGPUCBuffer(ID3D11Device* device,
+			ID3D11Buffer* & gpu_buffer,
+			const char * debug_info = typeid(CPUDATA).name())
+		{
+			static_assert(sizeof(CPUDATA) % 16 == 0, "D3D11_BIND_CONSTANT_BUFFER::ByteWidth must %16 == 0");
+			D3D11_BUFFER_DESC Desc;
+			Desc.Usage = D3D11_USAGE_DEFAULT;
+			Desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+			Desc.CPUAccessFlags = 0;
+			Desc.MiscFlags = 0;
+			Desc.StructureByteStride = 0;
+			Desc.ByteWidth = sizeof(CPUDATA);
+
+			leo::dxcall(device->CreateBuffer(&Desc, nullptr, &gpu_buffer));
+			leo::dx::DebugCOM(gpu_buffer, debug_info);
+		}
+
+
+		template<typename CPUDATA>
+		void CreateGPUCBuffer(ID3D11Device* device,const CPUDATA& data,
+									win::unique_com<ID3D11Buffer>& gpu_buffer,
+									const char * debug_info =  typeid(CPUDATA).name()) 
+		{
+			static_assert(sizeof(CPUDATA) % 16 == 0, "D3D11_BIND_CONSTANT_BUFFER::ByteWidth must %16 == 0");
+			D3D11_BUFFER_DESC Desc;
+			Desc.Usage = D3D11_USAGE_DEFAULT;
+			Desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+			Desc.CPUAccessFlags = 0;
+			Desc.MiscFlags = 0;
+			Desc.StructureByteStride = 0;
+			Desc.ByteWidth = sizeof(CPUDATA);
+
+			D3D11_SUBRESOURCE_DATA subData;
+			subData.pSysMem = &data;
+
+			leo::dxcall(device->CreateBuffer(&Desc, &subData, &gpu_buffer));
+			leo::dx::DebugCOM(gpu_buffer, debug_info);
+		}
+
+		template<typename CPUDATA>
+		void CreateGPUCBuffer(ID3D11Device* device,
+			win::unique_com<ID3D11Buffer>& gpu_buffer,
+			const char * debug_info = typeid(CPUDATA).name())
+		{
+			static_assert(sizeof(CPUDATA) % 16 == 0, "D3D11_BIND_CONSTANT_BUFFER::ByteWidth must %16 == 0");
+			D3D11_BUFFER_DESC Desc;
+			Desc.Usage = D3D11_USAGE_DEFAULT;
+			Desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+			Desc.CPUAccessFlags = 0;
+			Desc.MiscFlags = 0;
+			Desc.StructureByteStride = 0;
+			Desc.ByteWidth = sizeof(CPUDATA);
+
+			leo::dxcall(device->CreateBuffer(&Desc,nullptr, &gpu_buffer));
+			leo::dx::DebugCOM(gpu_buffer, debug_info);
+		}
 	}
 
 	//computer shader

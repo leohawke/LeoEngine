@@ -21,7 +21,7 @@ float DecodeFloatRGBA(float4 rgba)
 
 float4 WriteAFloat(float v, float scale = 1, float bias = 0)
 {
-	#if NO_SINGLE_CHANNEL_FLOAT
+	#ifdef NO_SINGLE_CHANNEL_FLOAT
 	return EncodeFloatRGBA(clamp(v * scale + bias, 0, 0.999f));
 	#else
 	return v;
@@ -30,7 +30,7 @@ float4 WriteAFloat(float v, float scale = 1, float bias = 0)
 
 float ReadAFloat(float4 v, float scale = 1, float bias = 0)
 {
-	#if NO_SINGLE_CHANNEL_FLOAT
+	#ifdef NO_SINGLE_CHANNEL_FLOAT
 	return DecodeFloatRGBA(v) * scale + bias;
 	#else
 	return v.r;

@@ -155,6 +155,7 @@ public:
 		depth_stencil_desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
 		depth_stencil_desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 		depth_stencil_desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+
 		depth_stencil_desc.BackFace.StencilFunc = D3D11_COMPARISON_EQUAL;
 		depth_stencil_desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
 		depth_stencil_desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
@@ -192,8 +193,8 @@ public:
 		CD3D11_DEPTH_STENCIL_DESC depth_stencil_desc{ D3D11_DEFAULT };
 		depth_stencil_desc.DepthEnable = false;
 		depth_stencil_desc.StencilEnable = true;
-		depth_stencil_desc.StencilReadMask = 127;
-		depth_stencil_desc.StencilWriteMask = 127;
+		depth_stencil_desc.StencilReadMask = 0x7f;
+		depth_stencil_desc.StencilWriteMask = 0x7f;
 		depth_stencil_desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 		depth_stencil_desc.BackFace.StencilFunc = D3D11_COMPARISON_LESS;
 		depth_stencil_desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
@@ -376,14 +377,14 @@ void leo::DeferredRender::SetSSAOParams(bool enable, uint8 level) noexcept
 }
 
 void leo::DeferredRender::LightVolumePass(ID3D11DeviceContext* context, unsigned int index_count) {
-	context->OMSetBlendState(pStateImpl->mDRLightStenci_BlendState,nullptr,0);
-	context->OMSetDepthStencilState(pStateImpl->mDRLightStenci_DepthStenciState, 0);
+	context->OMSetBlendState(pStateImpl->mDRLightStenci_BlendState,nullptr, 0xffffffff);
+	context->OMSetDepthStencilState(pStateImpl->mDRLightStenci_DepthStenciState,0);
 	context->RSSetState(pStateImpl->mDRLightStenci_RasterizerState);
 	context->VSSetShader(pStateImpl->mDRLightStenci_VS, nullptr, 0);
 	context->PSSetShader(pStateImpl->mDRLightStenci_PS, nullptr, 0);
 	context->DrawIndexed(index_count, 0, 0);
 	context->OMSetBlendState(pStateImpl->mDRRenderingVolume_BlendState, nullptr,0xffffffff);
-	context->OMSetDepthStencilState(pStateImpl->mDRRenderingVolume_DepthStenciState, 0);
+	context->OMSetDepthStencilState(pStateImpl->mDRRenderingVolume_DepthStenciState,0);
 	context->RSSetState(pStateImpl->mDRRenderingVolume_RasterizerState);
 }
 
