@@ -239,7 +239,7 @@ void leo::HDRProcess::HDRStatProcess::Apply(ID3D11DeviceContext * context, float
 {
 	mCopyProcess->Apply(context);
 	context->RSSetViewports(1, &mViewPort);
-	mCopyProcess->Draw(context,nullptr, mScaleRT);
+	mCopyProcess->Draw(context, mSrcSRV, mScaleRT);
 
 	pLumFirst->Apply(context);
 	auto width = mWidth;
@@ -290,6 +290,7 @@ void leo::HDRProcess::HDRStatProcess::Input(ID3D11Device * create, ID3D11Texture
 	leo::dxcall(create->CreateShaderResourceView(mScaleTex, nullptr, &mScale));
 	leo::dxcall(create->CreateRenderTargetView(mScaleTex, nullptr, &mScaleRT));
 
+	leo::dxcall(create->CreateShaderResourceView(tex, nullptr, &mSrcSRV));
 }
 
 leo::HDRProcess::HDRProcess(ID3D11Device * create, ID3D11Texture2D* src)
@@ -321,5 +322,22 @@ void leo::HDRProcess::Apply(ID3D11DeviceContext * context)
 }
 
 void leo::HDRProcess::ReSize(ID3D11Device * create, ID3D11Texture2D * src)
+{
+}
+
+leo::HDRProcess::HDRLensProcess::HDRLensProcess(ID3D11Device * create, ID3D11Texture2D * tex)
+{
+}
+
+void leo::HDRProcess::HDRLensProcess::Apply(ID3D11DeviceContext *)
+{
+}
+
+ID3D11ShaderResourceView * leo::HDRProcess::HDRLensProcess::Output()
+{
+	return nullptr;
+}
+
+void leo::HDRProcess::HDRLensProcess::Input(ID3D11Device *, ID3D11Texture2D * tex)
 {
 }

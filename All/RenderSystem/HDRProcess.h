@@ -91,7 +91,7 @@ namespace leo {
 		
 		class IHDRStatProcess {
 		public:
-			virtual void Apply(ID3D11DeviceContext*, float dt) = 0;
+			virtual void Apply(ID3D11DeviceContext*,float dt) = 0;
 
 			virtual void Input(ID3D11Device*,ID3D11Texture2D* tex) = 0;
 
@@ -108,6 +108,7 @@ namespace leo {
 
 			void Input(ID3D11Device*, ID3D11Texture2D* tex) override;
 		private:
+			leo::win::unique_com<ID3D11ShaderResourceView> mSrcSRV = nullptr;
 
 			leo::win::unique_com<ID3D11ShaderResourceView> mScale = nullptr;
 			leo::win::unique_com<ID3D11RenderTargetView> mScaleRT = nullptr;
@@ -129,13 +130,20 @@ namespace leo {
 		class HDRStatCSProcess :public IHDRStatProcess {
 		};
 
-		using IHDRLensPorcess = IHDRStatProcess;
+		class IHDRLensPorcess {
+		public:
+			virtual void Apply(ID3D11DeviceContext*) = 0;
+
+			virtual void Input(ID3D11Device*, ID3D11Texture2D* tex) = 0;
+
+			virtual ID3D11ShaderResourceView* Output() = 0;
+		};
 
 		class HDRLensProcess : public IHDRLensPorcess {
 		public:
 			HDRLensProcess(ID3D11Device* create, ID3D11Texture2D* tex);
 
-			void Apply(ID3D11DeviceContext*, float dt) override;
+			void Apply(ID3D11DeviceContext*) override;
 
 			ID3D11ShaderResourceView* Output() override;
 
