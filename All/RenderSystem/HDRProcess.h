@@ -130,6 +130,14 @@ namespace leo {
 		class HDRStatCSProcess :public IHDRStatProcess {
 		};
 
+		class SqrBright {
+
+		};
+
+		class GlowMerger {
+
+		};
+
 		class IHDRLensPorcess {
 		public:
 			virtual void Apply(ID3D11DeviceContext*) = 0;
@@ -148,6 +156,11 @@ namespace leo {
 			ID3D11ShaderResourceView* Output() override;
 
 			void Input(ID3D11Device*, ID3D11Texture2D* tex) override;
+		private:
+			std::unique_ptr<SqrBright> bright_pass_downsampler;
+			std::shared_ptr<PostProcess> downsamplers[2];
+			std::shared_ptr<PostProcess> blurs[3];
+			std::unique_ptr<GlowMerger> glow_merger;
 		};
 
 		//TODO :impl this

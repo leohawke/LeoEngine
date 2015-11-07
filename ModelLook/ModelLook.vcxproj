@@ -265,11 +265,14 @@
     </ClCompile>
     <ClCompile Include="..\All\RenderSystem\DeferredRender.cpp" />
     <ClCompile Include="..\All\RenderSystem\DepthStencil.cpp" />
+    <ClInclude Include="..\All\RenderSystem\BlurProcess.h" />
     <ClInclude Include="..\All\RenderSystem\CopyProcess.hpp" />
     <ClInclude Include="..\All\RenderSystem\DRLightImpl.inl">
       <FileType>CppCode</FileType>
     </ClInclude>
+    <ClCompile Include="..\All\RenderSystem\HDRLensProcess.cpp" />
     <ClCompile Include="..\All\RenderSystem\HDRProcess.cpp" />
+    <ClCompile Include="..\All\RenderSystem\HDRStatProcess.cpp" />
     <ClCompile Include="..\All\RenderSystem\PostProcess.cpp" />
     <ClCompile Include="..\All\RenderSystem\RenderStates.cpp" />
     <ClCompile Include="..\All\RenderSystem\ShaderMgr.cpp" />

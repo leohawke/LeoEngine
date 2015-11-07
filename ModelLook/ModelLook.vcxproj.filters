@@ -176,6 +176,12 @@
     <ClCompile Include="..\All\RenderSystem\CopyProcess.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\HDRStatProcess.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\HDRLensProcess.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -220,6 +226,9 @@
       <Filter>RenderSystem</Filter>
     </ClInclude>
     <ClInclude Include="..\All\RenderSystem\CopyProcess.hpp">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\RenderSystem\BlurProcess.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
   </ItemGroup>
