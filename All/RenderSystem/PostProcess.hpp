@@ -40,6 +40,7 @@ LEO_BEGIN
 \brief 用于各类图形操作的基础类。
 \note  不用于DeferredShading
 \note  生成资源mPixelShader，mVertexBuffer
+\note  SetVierPort不是PostProcess的职责
 \since build 1.00
 */
 class PostProcess : noncopyable,public PassAlloc {
