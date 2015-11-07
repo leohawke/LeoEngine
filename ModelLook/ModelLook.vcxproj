@@ -625,6 +625,9 @@ fxc /E"main_8"  /Fo"$(OutDir)Shader\%(Filename)_8.cso" /T "ps_5_0" /nologo $(Pro
     <Image Include="icon1.ico" />
     <Image Include="ModelLook.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="namespace_leo.natvis" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

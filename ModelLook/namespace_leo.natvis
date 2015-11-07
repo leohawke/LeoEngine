@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010"> 
+  <Type Name="leo::float4">
+    <DisplayString>ptr={data,H}</DisplayString>
+  </Type>
+  <Type Name="leo::float3">
+    <DisplayString>ptr={data,H}</DisplayString>
+  </Type>
+<Type Name="leo::float2">
+    <DisplayString>ptr={data,H}</DisplayString>
+  </Type>
+<Type Name="leo::float4x4">
+  <DisplayString>ptr={r,!}</DisplayString>
+  <Expand>
+    <Item Name="[0]">r[0]</Item>
+  <Item Name="[1]">r[1]</Item>
+<Item Name="[2]">r[2]</Item>
+  <Item Name="[3]">r[3]</Item>
+  </Expand>
+</Type>
+<Type Name="leo::float3x3">
+  <DisplayString>ptr={r,!}</DisplayString>
+  <Expand>
+    <Item Name="[0]">r[0]</Item>
+  <Item Name="[1]">r[1]</Item>
+<Item Name="[2]">r[2]</Item>
+  </Expand>
+</Type>
+</AutoVisualizer>

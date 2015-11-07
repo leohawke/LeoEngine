@@ -347,4 +347,9 @@
       <Filter>Shader</Filter>
     </CustomBuild>
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="namespace_leo.natvis">
+      <Filter>Support Tool Config</Filter>
+    </Natvis>
+  </ItemGroup>
 </Project>

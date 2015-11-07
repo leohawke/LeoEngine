@@ -329,6 +329,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pSky = std::make_unique<leo::Sky>(device, L"Resource\\snowcube1024.dds");
 	//pTerrain = std::make_unique<leo::Terrain<>>(device, L"Resource\\Test.Terrain");
 	BuildLight(leo::DeviceMgr().GetDevice());
+
 }
 
 void ClearRes() {
