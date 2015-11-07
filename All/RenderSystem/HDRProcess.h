@@ -91,6 +91,8 @@ namespace leo {
 		
 		class IHDRStatProcess {
 		public:
+			virtual ~IHDRStatProcess();
+
 			virtual void Apply(ID3D11DeviceContext*,float dt) = 0;
 
 			virtual void Input(ID3D11Device*,ID3D11Texture2D* tex) = 0;
@@ -140,6 +142,8 @@ namespace leo {
 
 		class IHDRLensPorcess {
 		public:
+			virtual ~IHDRLensPorcess();
+
 			virtual void Apply(ID3D11DeviceContext*) = 0;
 
 			virtual void Input(ID3D11Device*, ID3D11Texture2D* tex) = 0;

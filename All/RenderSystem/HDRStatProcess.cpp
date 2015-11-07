@@ -218,7 +218,7 @@ void leo::HDRProcess::LumAdaptedProcess::Draw(ID3D11DeviceContext * context, ID3
 leo::HDRProcess::HDRStatProcess::HDRStatProcess(ID3D11Device * create, ID3D11Texture2D* tex)
 	:mCopyProcess(leo::Make_CopyProcess(create, leo::bilinear_process)), mMaxLevel(4)
 {
-
+	Input(create, tex);
 
 	mViewPort.Height = mHeight*1.f;
 	mViewPort.Width = mWidth*1.f;
@@ -231,8 +231,12 @@ leo::HDRProcess::HDRStatProcess::HDRStatProcess(ID3D11Device * create, ID3D11Tex
 
 	for (int i = mMaxLevel - 1; i != -1; --i)
 		pLumIterVec.emplace_back(std::make_unique<LumIterativeProcess>(create, i));
-
+		;
 	pLumFinal = std::make_unique<LumAdaptedProcess>(create);
+}
+
+leo::HDRProcess::IHDRStatProcess::~IHDRStatProcess()
+{
 }
 
 void leo::HDRProcess::HDRStatProcess::Apply(ID3D11DeviceContext * context, float dt)

@@ -9,6 +9,10 @@ leo::HDRProcess::HDRLensProcess::HDRLensProcess(ID3D11Device * create, ID3D11Tex
 {
 }
 
+leo::HDRProcess::IHDRLensPorcess::~IHDRLensPorcess()
+{
+}
+
 void leo::HDRProcess::HDRLensProcess::Apply(ID3D11DeviceContext *)
 {
 }
