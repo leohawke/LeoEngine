@@ -89,30 +89,30 @@ namespace leo {
 		};
 
 		
-		class IHDRBundleProcess {
+		class IHDRStatProcess {
 		public:
 			virtual void Apply(ID3D11DeviceContext*, float dt) = 0;
+
+			virtual void Input(ID3D11Device*,ID3D11Texture2D* tex) = 0;
 
 			virtual ID3D11ShaderResourceView* Output() = 0;
 		};
 
-		class HDRBundleProcess :public IHDRBundleProcess {
+		class HDRStatProcess :public IHDRStatProcess {
 		public:
-			HDRBundleProcess(ID3D11Device* create, ID3D11Texture2D* src);
+			HDRStatProcess(ID3D11Device* create, ID3D11Texture2D* tex);
 
 			void Apply(ID3D11DeviceContext*,float dt) override;
 
 			ID3D11ShaderResourceView* Output() override;
-		private:
-			ID3D11Texture2D* mSrcPtr = nullptr;
 
-			leo::win::unique_com<ID3D11Texture2D> mSrcCopyTex = nullptr;
-			leo::win::unique_com<ID3D11ShaderResourceView> mSrcCopy = nullptr;
+			void Input(ID3D11Device*, ID3D11Texture2D* tex) override;
+		private:
 
 			leo::win::unique_com<ID3D11ShaderResourceView> mScale = nullptr;
 			leo::win::unique_com<ID3D11RenderTargetView> mScaleRT = nullptr;
-
-			std::unique_ptr<leo::PostProcess> mScalerProcess = nullptr;
+			
+			std::shared_ptr<PostProcess> mCopyProcess;
 
 			std::unique_ptr<LumLogProcess> pLumFirst;
 		  	std::vector<std::unique_ptr<LumIterativeProcess>> pLumIterVec;
@@ -126,7 +126,24 @@ namespace leo {
 		};
 
 		//TODO :impl this
-		class HDRBundleCSProcess :public IHDRBundleProcess {
+		class HDRStatCSProcess :public IHDRStatProcess {
+		};
+
+		using IHDRLensPorcess = IHDRStatProcess;
+
+		class HDRLensProcess : public IHDRLensPorcess {
+		public:
+			HDRLensProcess(ID3D11Device* create, ID3D11Texture2D* tex);
+
+			void Apply(ID3D11DeviceContext*, float dt) override;
+
+			ID3D11ShaderResourceView* Output() override;
+
+			void Input(ID3D11Device*, ID3D11Texture2D* tex) override;
+		};
+
+		//TODO :impl this
+		class HDRFFTLensProcess : public IHDRLensPorcess {
 		};
 	public:
 		HDRProcess(ID3D11Device* create,ID3D11Texture2D* src);
@@ -137,7 +154,8 @@ namespace leo {
 
 		void ReSize(ID3D11Device* create, ID3D11Texture2D* src);
 	private:
-		std::unique_ptr<IHDRBundleProcess> mBundleProcess;
+		std::unique_ptr<IHDRStatProcess> mStatProcess;
+		std::unique_ptr<IHDRLensPorcess> mLensProcess;
 
 		win::unique_com<ID3D11Buffer> mToneGpuParams;
 		float2 mToneCpuParams;
