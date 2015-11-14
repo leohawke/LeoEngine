@@ -23,7 +23,7 @@ namespace leo
 	{
 		namespace details {
 			template<typename COM,typename = decltype(&COM::SetPrivateData)>
-			void Print(COM* &com, decltype(&COM::SetPrivateData)) {
+			void Print(COM* com, decltype(&COM::SetPrivateData)) {
 				UINT DataSize;
 				com->GetPrivateData(::WKPDID_D3DDebugObjectName, &DataSize, nullptr);
 				if (DataSize != 0) {
@@ -44,12 +44,12 @@ namespace leo
 			}
 
 			template<typename COM>
-			void Print(COM* &com,...) {
+			void Print(COM* com,...) {
 				DebugPrintf("UNKNOWN address: %p,refcount: ", com);
 			}
 
 			template<typename COM>
-			void PrintAndRelease(COM* &com) {
+			void PrintAndRelease(COM* com) {
 				Print(com,nullptr);
 				DebugPrintf("%u\n", com->Release());
 			}
@@ -289,6 +289,7 @@ namespace leo
 		decltype(auto) make_scope_com(std::nullptr_t = nullptr) {
 			return unique_com<COM>(nullptr);
 		}
+
 	}
 }
 

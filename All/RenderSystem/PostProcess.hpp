@@ -109,7 +109,36 @@ private:
 		std::size_t			mRefCount = 0;
 	} mCommonThunk;
 };
+using PostProcessPtr = std::shared_ptr<PostProcess>;
+/*!
+\ingroup RenderSystem
+\def PostProcess
+\brief 图形操作基础类的集合类。
+\note  主要用于多Pass的PostProcess
+\note  SetVierPort是PostProcessChain的职责
+\since build 1.00
+*/
+class PostProcessChain {
+public:
+	PostProcessChain();
 
+	virtual ~PostProcessChain();
+
+	void Append(const PostProcessPtr& pp);
+	uint32  NumPostProcesses() const;
+	PostProcessPtr const & GetPostProcess(uint32 index) const;
+
+	void OutputPin(uint32 index, uint32 width, uint32 height, uint32 format);
+
+	void Apply(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst);
+protected:
+	std::vector<PostProcessPtr> mProcessPtrChain;
+
+	std::vector<leo::win::unique_com<ID3D11ShaderResourceView>> mChainInputTemp;
+	std::vector<leo::win::unique_com<ID3D11RenderTargetView>> mChaninOutputTemp;
+
+	std::vector<std::pair<uint32, uint32>> mChainSize;
+};
 template<uint16 scalaer> 
 class ScalaerProcess;
 

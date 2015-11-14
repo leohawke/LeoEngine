@@ -311,3 +311,33 @@ void leo::ScalaerProcess<8>::Draw(ID3D11DeviceContext* context, ID3D11ShaderReso
 	mImpl->DrawBegin(context, this, src, 8);
 	PostProcess::Draw(context, src, dst);
 }
+
+leo::PostProcessChain::PostProcessChain()
+{
+}
+
+leo::PostProcessChain::~PostProcessChain()
+{
+}
+
+void leo::PostProcessChain::Append(const leo::PostProcessPtr & pp)
+{
+}
+
+leo::uint32 leo::PostProcessChain::NumPostProcesses() const
+{
+	return uint32();
+}
+
+leo::PostProcessPtr const & leo::PostProcessChain::GetPostProcess(uint32 index) const
+{
+	return mProcessPtrChain.at(index);
+}
+
+void leo::PostProcessChain::OutputPin(uint32 index, uint32 width, uint32 height, uint32 format)
+{
+}
+
+void leo::PostProcessChain::Apply(ID3D11DeviceContext * context, ID3D11ShaderResourceView * src, ID3D11RenderTargetView * dst)
+{
+}

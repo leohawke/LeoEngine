@@ -143,7 +143,11 @@ namespace leo {
 
 		class GlowMerger:public PostProcess {
 		public:
+			GlowMerger(ID3D11Device* create);
+
 			void Apply(ID3D11DeviceContext* context) override;
+		private:
+			ID3D11SamplerState* bilinear_sampler;
 		};
 
 		class IHDRLensPorcess {
@@ -169,21 +173,17 @@ namespace leo {
 		private:
 			std::unique_ptr<SqrBright> bright_pass_downsampler;
 			std::shared_ptr<PostProcess> downsamplers[2];
-			std::shared_ptr<PostProcess> blurs[3];
+			std::shared_ptr<PostProcessChain> blurs[3];
 			std::unique_ptr<GlowMerger> glow_merger;
 		private:
 			leo::win::unique_com<ID3D11ShaderResourceView> bright_pass_input;
 
-			//bring_pass_output & downsampler_inputs[0]
-			//downsampler_output[0] & downsampler_inputs[1]
 			leo::win::unique_com<ID3D11RenderTargetView> bring_pass_output;
-			leo::win::unique_com<ID3D11ShaderResourceView> downsampler_inputs[2];
 			leo::win::unique_com<ID3D11RenderTargetView> downsampler_output[2];
-
 			leo::win::unique_com<ID3D11ShaderResourceView> blur_inputs[3];
-			leo::win::unique_com<ID3D11RenderTargetView> blur_outputs[3];
 
-			leo::win::unique_com<ID3D11ShaderResourceView> glow_input;
+			leo::win::unique_com<ID3D11RenderTargetView> blur_outputs[3];
+			leo::win::unique_com<ID3D11ShaderResourceView> glow_input[3];
 
 			leo::win::unique_com<ID3D11RenderTargetView> glow_output;
 			leo::win::unique_com<ID3D11ShaderResourceView> lens_output;

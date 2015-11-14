@@ -182,6 +182,9 @@
     <ClCompile Include="..\All\RenderSystem\HDRLensProcess.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\BlurProcess.cpp">
+      <Filter>WinMain</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -308,6 +311,9 @@
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="Shader\SqrBright.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\GlowMerger.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>
