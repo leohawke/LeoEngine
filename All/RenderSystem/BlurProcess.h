@@ -9,6 +9,8 @@ namespace leo
 	public:
 		SeparableGaussianFilterProcess(ID3D11Device* create, int kernel_radius, float multiplier,bool x_dir);
 
+		void InputPin(ID3D11DeviceContext* context, uint32 width, uint32 height, uint32 format) override;
+
 		void Apply(ID3D11DeviceContext*) override;
 	protected:
 		float GaussianDistribution(float x, float y, float rho);
@@ -18,9 +20,15 @@ namespace leo
 		float mMuliplier;
 		bool mXDir;
 
-		//src_tex_size_ep_;
-		//color_weight_ep;
-		//tex_coord_offset_ep;
+		ID3D11VertexShader* mBlurVS;
+		ID3D11SamplerState* bilinear_sampler;
+
+
+		//[0,1] src_tex_size
+		//[4,11] color_weight
+		//[12,19] tex_coord_offset;
+		float cpu_params[20];
+		ID3D11Buffer* gpu_params;
 	};
 
 	template<typename T>

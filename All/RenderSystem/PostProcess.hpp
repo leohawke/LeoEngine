@@ -33,6 +33,7 @@ struct ID3D11DeviceContext;
 struct ID3D11ShaderResourceView;
 struct ID3D11RenderTargetView;
 struct ID3D11InputLayout;
+struct ID3D11SamplerState;
 LEO_BEGIN
 /*!
 \ingroup RenderSystem
@@ -69,6 +70,12 @@ public:
 	\since build 1.00
 	*/
 	bool BindRect(ID3D11DeviceContext *context,const ops::Rect& src,const ops::Rect& dst);
+
+	/*!
+	\def InputPin
+	\brief 指定源贴图的大小和格式
+	*/
+	virtual void InputPin(ID3D11DeviceContext* context, uint32 width, uint32 hight, uint32 format){}
 
 	virtual void Apply(ID3D11DeviceContext*);
 
@@ -128,7 +135,9 @@ public:
 	uint32  NumPostProcesses() const;
 	PostProcessPtr const & GetPostProcess(uint32 index) const;
 
-	void OutputPin(uint32 index, uint32 width, uint32 height, uint32 format);
+	void OutputPin(ID3D11Device* create,uint32 index, uint32 width, uint32 height, uint32 format);
+
+	void InputPin(ID3D11DeviceContext* context, uint32 width, uint32 height, uint32 format);
 
 	void Apply(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst);
 protected:

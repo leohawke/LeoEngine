@@ -90,7 +90,12 @@ leo::HDRProcess::HDRLensProcess::HDRLensProcess(ID3D11Device * create, ID3D11Tex
 			desc.Height = height / (2 << i);
 			leo::dxcall(create->CreateTexture2D(&desc, nullptr, &glow_tex[i]));
 
-			blurs[i]->OutputPin(0, desc.Width, desc.Height, desc.Format); 
+			blurs[i]->OutputPin(create,0, desc.Width, desc.Height, desc.Format); 
+			blurs[i]->OutputPin(create,1, desc.Width, desc.Height, desc.Format);
+
+			auto context = leo::win::make_scope_com<ID3D11DeviceContext>();
+			create->GetImmediateContext(&context);
+			blurs[i]->InputPin(context, desc.Width, desc.Height, desc.Format);
 		}
 
 		for (size_t i = 0; i != 3; ++i) {

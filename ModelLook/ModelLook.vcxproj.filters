@@ -183,7 +183,7 @@
       <Filter>RenderSystem</Filter>
     </ClCompile>
     <ClCompile Include="..\All\RenderSystem\BlurProcess.cpp">
-      <Filter>WinMain</Filter>
+      <Filter>RenderSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -353,6 +353,9 @@
       <Filter>Shader</Filter>
     </CustomBuild>
     <CustomBuild Include="Shader\HDRFinalPS.hlsl">
+      <Filter>Shader</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Shader\Blur.hlsl">
       <Filter>Shader</Filter>
     </CustomBuild>
   </ItemGroup>

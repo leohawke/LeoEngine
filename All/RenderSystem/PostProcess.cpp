@@ -322,11 +322,15 @@ leo::PostProcessChain::~PostProcessChain()
 
 void leo::PostProcessChain::Append(const leo::PostProcessPtr & pp)
 {
+	mProcessPtrChain.push_back(pp);
+	mChainSize.reserve(mProcessPtrChain.size());
+	mChainInputTemp.reserve(mProcessPtrChain.size());
+	mChaninOutputTemp.reserve(mProcessPtrChain.size());
 }
 
 leo::uint32 leo::PostProcessChain::NumPostProcesses() const
 {
-	return uint32();
+	return  static_cast<uint32>(mProcessPtrChain.size());
 }
 
 leo::PostProcessPtr const & leo::PostProcessChain::GetPostProcess(uint32 index) const
@@ -334,10 +338,47 @@ leo::PostProcessPtr const & leo::PostProcessChain::GetPostProcess(uint32 index) 
 	return mProcessPtrChain.at(index);
 }
 
-void leo::PostProcessChain::OutputPin(uint32 index, uint32 width, uint32 height, uint32 format)
+void leo::PostProcessChain::OutputPin(ID3D11Device* create,uint32 index, uint32 width, uint32 height, uint32 format)
 {
+	mChainSize[index].first = width;
+	mChainSize[index].second = height;
+	if (index == mProcessPtrChain.size() - 1) {
+		return;
+	}
+
+	auto tex = leo::win::make_scope_com<ID3D11Texture2D>();
+	auto srv = leo::win::make_scope_com<ID3D11ShaderResourceView>();
+	auto rtv = leo::win::make_scope_com<ID3D11RenderTargetView>();
+
+	CD3D11_TEXTURE2D_DESC desc{static_cast<DXGI_FORMAT>(format),width,height,1,1,D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET };
+	leo::dxcall(create->CreateTexture2D(&desc, nullptr, &tex));
+	leo::dxcall(create->CreateShaderResourceView(tex, nullptr, &srv));
+	leo::dxcall(create->CreateRenderTargetView(tex, nullptr, &rtv));
+
+	mChainInputTemp.at(index).swap(srv);
+	mChaninOutputTemp.at(index).swap(rtv);
+
+	auto context = leo::win::make_scope_com<ID3D11DeviceContext>();
+	create->GetImmediateContext(&context);
+	mProcessPtrChain.at(index + 1)->InputPin(context, width, height,format);
+}
+
+void leo::PostProcessChain::InputPin(ID3D11DeviceContext * context, uint32 width, uint32 height, uint32 format)
+{
+	mProcessPtrChain.at(0)->InputPin(context, width, height, format);
 }
 
 void leo::PostProcessChain::Apply(ID3D11DeviceContext * context, ID3D11ShaderResourceView * src, ID3D11RenderTargetView * dst)
 {
+	mProcessPtrChain.at(0)->Apply(context);
+	mProcessPtrChain.at(0)->Draw(context, src, mChaninOutputTemp.at(0));
+
+
+	for (auto i = 1; i < mProcessPtrChain.size() - 1; ++i) {
+		mProcessPtrChain[i]->Apply(context);
+		mProcessPtrChain[i]->Draw(context, mChainInputTemp.at(i - 1), mChaninOutputTemp.at(i));
+	}
+
+	mProcessPtrChain.at(mProcessPtrChain.size()-1)->Apply(context);
+	mProcessPtrChain.at(mProcessPtrChain.size() - 1)->Draw(context,mChainInputTemp.at(mProcessPtrChain.size() - 1),dst);
 }

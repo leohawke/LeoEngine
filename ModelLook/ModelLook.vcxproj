@@ -420,6 +420,27 @@ fxc /Zi /E"LumAdapted"  /Fo "$(OutDir)Shader\%(Filename)_multiple.cso" /D "NO_SI
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">BilinearCopyPS</EntryPointName>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">BilinearCopyPS</EntryPointName>
     </FxCompile>
+    <CustomBuild Include="Shader\Blur.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc /Zi /E"BlurXVS" /Od /Fo"$(OutDir)Shader\%(Filename)XVS.cso" /T "vs_4_0_level_9_1" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
+fxc /Zi /E"BlurYVS" /Od /Fo"$(OutDir)Shader\%(Filename)YVS.cso" /T "vs_4_0_level_9_1" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
+fxc /Zi /E"BlurXPS" /Od /Fo"$(OutDir)Shader\%(Filename)XPS.cso" /T "ps_4_0_level_9_1" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
+fxc /Zi /E"BlurYPS" /Od /Fo"$(OutDir)Shader\%(Filename)YPS.cso" /T  "ps_4_0_level_9_1" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compilation %(Filename).hlsl</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc.log</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxc /Zi /E"BlurXVS" /Fo"$(OutDir)Shader\%(Filename)VSX.cso" /T "vs_4_0_level_9_1" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
+fxc /Zi /E"BlurYVS" /Fo"$(OutDir)Shader\%(Filename)VSY.cso" /T "vs_4_0_level_9_1" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
+fxc /Zi /E"BlurXPS" /Fo"$(OutDir)Shader\%(Filename)PSX.cso" /T "ps_4_0_level_9_1" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl
+fxc /Zi /E"BlurYPS" /Fo"$(OutDir)Shader\%(Filename)PSY.cso" /T "ps_4_0_level_9_1" /nologo $(ProjectDir)%(RelativeDir)%(Filename).hlsl</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compilation %(Filename).hlsl</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxc.log</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </CustomBuild>
     <FxCompile Include="Shader\Copy.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
