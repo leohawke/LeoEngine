@@ -179,6 +179,36 @@ namespace leo
 	};
 
 #endif
+
+	template<class... Args>
+	struct type_list
+	{
+		template<std::size_t N>
+		using type = typename std::tuple_element < N, std::tuple<Args...>>::type;
+	};
+
+	namespace details
+	{
+		template<std::size_t N,class C, class R, class... Args>
+		decltype(auto) paras_f(R (C::*)(Args...)) {
+			using type = typename type_list<Args...>::type<N>;
+			return type();
+		}
+
+		template<std::size_t N, class C, class R, class... Args>
+		decltype(auto) paras_f(R(__stdcall C::*)(Args...)) {
+			using type = typename type_list<Args...>::type<N>;
+			return type();
+		}
+	}
+
+
+	template<std::size_t N,class P>
+	struct paras_index
+	{
+		using type = decltype(details::paras_f<N>(P()));
+	};
+
 }
 
 #endif

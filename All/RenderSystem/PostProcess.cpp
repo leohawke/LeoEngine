@@ -374,7 +374,7 @@ void leo::PostProcessChain::Apply(ID3D11DeviceContext * context, ID3D11ShaderRes
 	mProcessPtrChain.at(0)->Draw(context, src, mChaninOutputTemp.at(0));
 
 
-	for (auto i = 1; i < mProcessPtrChain.size() - 1; ++i) {
+	for (auto i = 1u; i < mProcessPtrChain.size() - 1; ++i) {
 		mProcessPtrChain[i]->Apply(context);
 		mProcessPtrChain[i]->Draw(context, mChainInputTemp.at(i - 1), mChaninOutputTemp.at(i));
 	}

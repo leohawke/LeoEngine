@@ -9,6 +9,7 @@
 leo::HDRProcess::HDRProcess(ID3D11Device * create, ID3D11Texture2D* src)
 	:PostProcess(create),
 	mStatProcess(std::make_unique<HDRStatProcess>(create, src)),
+	mLensProcess(std::make_unique<HDRLensProcess>(create,src)),
 	mToneCpuParams(1.f, 0.25f)
 {
 #ifdef NO_SINGLE_CHANNEL_FLOAT
@@ -28,8 +29,10 @@ void leo::HDRProcess::SetFrameDelta(float dt)
 void leo::HDRProcess::Apply(ID3D11DeviceContext * context)
 {
 	mStatProcess->Apply(context, mDt);
-	auto src = mStatProcess->Output();
-	context->PSSetShaderResources(2, 1, &src);
+	mLensProcess->Apply(context);
+
+	(leo::dx::SetShaderResourceView<D3D11_PIXEL_SHADER>(context))(1, mLensProcess->Output(), mStatProcess->Output());
+
 	context->PSSetConstantBuffers(0, 1, &mToneGpuParams);
 	PostProcess::Apply(context);
 }

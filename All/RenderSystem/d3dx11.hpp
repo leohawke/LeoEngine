@@ -2,10 +2,10 @@
 //must compiler by cl
 #pragma once
 
-
+#include <type_traits>
 
 #include "leoint.hpp"
-
+#include <tuple.hpp>
 #include "platform.h"
 #include "Core\COM.hpp"
 #include <comdef.h>
@@ -345,6 +345,62 @@ namespace leo
 			leo::dxcall(device->CreateBuffer(&Desc,nullptr, &gpu_buffer));
 			leo::dx::DebugCOM(gpu_buffer, debug_info);
 		}
+
+		template<typename P,typename... S>
+		void ContextSet(P&& f, S... args) {
+			typename type_list<S...>::type<0>  ss[] = {args...};
+			f(0, ss);
+		}
+
+	
+		template<typename P, typename... S>
+		void ContextApply(ID3D11DeviceContext* _this, P&& f, UINT start_slot, S... args) {
+			using type = typename leo::type_list<S...>::type<0>;
+			static_assert(std::is_same<std::remove_cv_t<std::remove_pointer_t<typename paras_index<2, P>::type>>, type>::value, "Type Check Failed");
+
+			auto lambda_f = [&](UINT size, type const* p) {
+				(_this->*f)(start_slot, size, p);
+			};
+
+			ContextSet(lambda_f, args...);
+		}
+	
+
+		template<D3D11_SHADER_TYPE>
+		struct SetSampleState;
+
+		template<>
+		struct SetSampleState<D3D11_PIXEL_SHADER>
+		{
+			SetSampleState(ID3D11DeviceContext* _context)
+				:context(_context)
+			{}
+
+			template<typename... S>
+			void operator()(UINT start_slot, S... args) {
+				ContextApply(context, &ID3D11DeviceContext::PSSetSamplers, start_slot, args...);
+			}
+
+			ID3D11DeviceContext* context;
+		};
+
+		template<D3D11_SHADER_TYPE>
+		struct SetShaderResourceView;
+
+		template<>
+		struct SetShaderResourceView<D3D11_PIXEL_SHADER>
+		{
+			SetShaderResourceView(ID3D11DeviceContext* _context)
+				:context(_context)
+			{}
+
+			template<typename... S>
+			void operator()(UINT start_slot, S... args) {
+				ContextApply(context, &ID3D11DeviceContext::PSSetShaderResources, start_slot, args...);
+			}
+
+			ID3D11DeviceContext* context;
+		};
 	}
 
 	//computer shader
