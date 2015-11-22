@@ -41,12 +41,13 @@ void leo::HDRProcess::GlowMerger::Apply(ID3D11DeviceContext * context)
 
 
 leo::HDRProcess::HDRLensProcess::HDRLensProcess(ID3D11Device * create, ID3D11Texture2D * tex)
-	:bright_pass_downsampler(std::make_unique<SqrBright>(create))
+	:bright_pass_downsampler(std::make_unique<SqrBright>(create)),glow_merger(std::make_unique<GlowMerger>(create))
 {
 	for (auto i = 0; i != 2; ++i) {
 		downsamplers[i] = leo::Make_CopyProcess(create, leo::bilinear_process);
 		blurs[i] = std::make_shared<leo::BlurPorcess<leo::SeparableGaussianFilterProcess>>(create, 8,1.f);
 	}
+	blurs[2] = std::make_shared<leo::BlurPorcess<leo::SeparableGaussianFilterProcess>>(create, 8, 1.f);
 
 	//bright_pass_input
 	Input(create, tex);
@@ -72,6 +73,8 @@ leo::HDRProcess::HDRLensProcess::HDRLensProcess(ID3D11Device * create, ID3D11Tex
 			leo::dxcall(create->CreateTexture2D(&desc, nullptr, &downsample_tex[i]));
 		}
 
+		bright_pass_output_size.first = width / 2;
+		bright_pass_output_size.second = height / 2;
 		leo::dxcall(create->CreateRenderTargetView(downsample_tex[0], nullptr, &bring_pass_output));
 		leo::dxcall(create->CreateShaderResourceView(downsample_tex[0], nullptr, &blur_inputs[0]));
 
@@ -120,9 +123,11 @@ void leo::HDRProcess::HDRLensProcess::Apply(ID3D11DeviceContext * context)
 {
 	//note,the downsamplers use some bilinear_sampler
 	bright_pass_downsampler->Apply(context);
-
+	leo::dx::SetViewPort(context, bright_pass_output_size.first, bright_pass_output_size.second);
 	bright_pass_downsampler->Draw(context, bright_pass_input, bring_pass_output);
+	leo::dx::SetViewPort(context, bright_pass_output_size.first/2, bright_pass_output_size.second/2);
 	downsamplers[0]->Draw(context, blur_inputs[0], downsampler_output[0]);
+	leo::dx::SetViewPort(context, bright_pass_output_size.first/4, bright_pass_output_size.second/4);
 	downsamplers[1]->Draw(context, blur_inputs[1], downsampler_output[1]);
 
 	blurs[0]->Apply(context, blur_inputs[0],blur_outputs[0]);

@@ -1,7 +1,7 @@
 cbuffer BlurParam :register(b0) {
-	float2 src_tex_size;
-	float color_weight[8];
-	float tex_coord_offset[8];
+	float4 src_tex_size;
+	float4 pack_color_weight[2];
+	float4 pack_tex_coord_offset[2];
 };
 
 
@@ -17,6 +17,9 @@ void BlurXVS(float4 pos : POSITION,
 	oPos = pos;
 
 	float4 tex[4];
+	
+	float tex_coord_offset[8] = pack_tex_coord_offset;
+
 	[unroll]
 	for (int i = 0; i < 4; ++i)
 	{
@@ -41,6 +44,9 @@ void BlurYVS(float4 pos : POSITION,
 	oPos = pos;
 
 	float4 tex[4];
+
+	float tex_coord_offset[8] = pack_tex_coord_offset;
+
 	[unroll]
 	for (int i = 0; i < 4; ++i)
 	{
@@ -63,6 +69,8 @@ float4 CalcBlur(float4 iTex0, float4 iTex1, float4 iTex2, float4 iTex3, float2 o
 {
 	float4 color = float4(0, 0, 0, 1);
 	float4 tex[4] = { iTex0, iTex1, iTex2, iTex3 };
+
+	float color_weight[8] = pack_color_weight;
 
 	[unroll]
 	for (int i = 0; i < 4; ++i)

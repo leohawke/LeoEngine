@@ -171,13 +171,14 @@ namespace leo {
 
 			void Input(ID3D11Device*, ID3D11Texture2D* tex) override;
 		private:
+			
 			std::unique_ptr<SqrBright> bright_pass_downsampler;
 			std::shared_ptr<PostProcess> downsamplers[2];
 			std::shared_ptr<PostProcessChain> blurs[3];
 			std::unique_ptr<GlowMerger> glow_merger;
 		private:
 			leo::win::unique_com<ID3D11ShaderResourceView> bright_pass_input;
-
+			std::pair<uint16, uint16> bright_pass_output_size;
 			leo::win::unique_com<ID3D11RenderTargetView> bring_pass_output;
 			leo::win::unique_com<ID3D11RenderTargetView> downsampler_output[2];
 			leo::win::unique_com<ID3D11ShaderResourceView> blur_inputs[3];
