@@ -324,8 +324,8 @@ void leo::PostProcessChain::Append(const leo::PostProcessPtr & pp)
 {
 	mProcessPtrChain.push_back(pp);
 	mChainSize.resize(mProcessPtrChain.size());
-	mChainInputTemp.resize(mProcessPtrChain.size());
-	mChaninOutputTemp.resize(mProcessPtrChain.size());
+	mChainInputTemp.resize(mProcessPtrChain.size()-1);
+	mChaninOutputTemp.resize(mProcessPtrChain.size()-1);
 }
 
 leo::uint32 leo::PostProcessChain::NumPostProcesses() const
@@ -384,5 +384,5 @@ void leo::PostProcessChain::Apply(ID3D11DeviceContext * context, ID3D11ShaderRes
 	auto index = mProcessPtrChain.size() - 1;
 	mProcessPtrChain.at(index)->Apply(context);
 	leo::dx::SetViewPort(context, mChainSize[index].first, mChainSize[index].second);
-	mProcessPtrChain.at(index)->Draw(context,mChainInputTemp.at(index),dst);
+	mProcessPtrChain.at(index)->Draw(context,mChainInputTemp.at(index-1),dst);
 }

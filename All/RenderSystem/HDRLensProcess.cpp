@@ -103,7 +103,7 @@ leo::HDRProcess::HDRLensProcess::HDRLensProcess(ID3D11Device * create, ID3D11Tex
 
 		for (size_t i = 0; i != 3; ++i) {
 			leo::dxcall(create->CreateRenderTargetView(glow_tex[i], nullptr, &blur_outputs[i]));
-			leo::dxcall(create->CreateShaderResourceView(glow_tex[i], nullptr, &glow_input[i + 1]));
+			leo::dxcall(create->CreateShaderResourceView(glow_tex[i], nullptr, &glow_input[i]));
 		}
 	}
 
@@ -135,6 +135,8 @@ void leo::HDRProcess::HDRLensProcess::Apply(ID3D11DeviceContext * context)
 	blurs[2]->Apply(context, blur_inputs[2], blur_outputs[2]);
 
 	glow_merger->Apply(context);
+	ID3D11RenderTargetView* rt = nullptr;
+	context->OMSetRenderTargets(1, &rt, nullptr);
 	context->PSSetShaderResources(1, 1, &glow_input[1]);
 	context->PSSetShaderResources(2, 1, &glow_input[2]);
 	glow_merger->Draw(context, glow_input[0], glow_output);
