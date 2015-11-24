@@ -292,6 +292,7 @@
     <ClCompile Include="Axis.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="HUD\Widget.cpp" />
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -307,6 +308,9 @@
     <ClInclude Include="..\All\RenderSystem\RenderStates.hpp" />
     <ClInclude Include="..\All\RenderSystem\ShaderMgr.h" />
     <ClInclude Include="Axis.hpp" />
+    <ClInclude Include="HUD\HUD.h" />
+    <ClInclude Include="HUD\Label.h" />
+    <ClInclude Include="HUD\Widget.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Rubbishmemory.h" />
   </ItemGroup>

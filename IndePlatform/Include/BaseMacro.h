@@ -295,6 +295,8 @@ public: \
 //@}
 
 
+#define DefIEntryImpl(_sig) virtual _sig override; 
+
 /*!
 \brief 定义直接派生类。
 \note 仅构造函数。不定义成员，避免对象切片或其它成员存储泄漏问题。

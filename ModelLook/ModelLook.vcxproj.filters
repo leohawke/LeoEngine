@@ -42,6 +42,9 @@
     <Filter Include="Res">
       <UniqueIdentifier>{29e7e3d5-7180-4f86-807d-1b9f94eaaf20}</UniqueIdentifier>
     </Filter>
+    <Filter Include="HUD">
+      <UniqueIdentifier>{e0bb6683-52d6-4e7a-805e-e2f41089eef3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -185,6 +188,9 @@
     <ClCompile Include="..\All\RenderSystem\BlurProcess.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
+    <ClCompile Include="HUD\Widget.cpp">
+      <Filter>HUD</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -234,6 +240,13 @@
     <ClInclude Include="..\All\RenderSystem\BlurProcess.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
+    <ClInclude Include="HUD\Label.h">
+      <Filter>HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="HUD\HUD.h">
+      <Filter>HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="HUD\Widget.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="The LeoEngine Terrain File.tpl">
