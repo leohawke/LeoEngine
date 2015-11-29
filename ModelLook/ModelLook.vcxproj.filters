@@ -247,6 +247,9 @@
       <Filter>HUD</Filter>
     </ClInclude>
     <ClInclude Include="HUD\Widget.h" />
+    <ClInclude Include="HUD\HUDRenderer.h">
+      <Filter>HUD</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="The LeoEngine Terrain File.tpl">

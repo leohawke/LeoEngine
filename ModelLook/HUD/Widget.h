@@ -21,7 +21,6 @@ LEO_BEGIN
 
 HUD_BEGIN
 
-struct IWidget;
 using WidgetIterator = any_input_iterator<IWidget>;
 using WidgetRange = std::pair<WidgetIterator, WidgetIterator>;
 

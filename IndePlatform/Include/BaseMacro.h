@@ -109,11 +109,17 @@ _t type
 #define DefDelMoveCtor(_t) \
 	_t(_t&&) = delete;
 
+//! \since build v1.3
+#define DefDeCopyMoveCtor(_t) \
+	DefDeCopyCtor(_t) \
+	DefDeMoveCtor(_t)
+
 #define DefDeDtor(_t) \
 	~_t() = default;
 #define DefDelDtor(_t) \
 	~_t() = delete;
-
+#define DefVrDtor(_t) \
+	virtual ~_t() = default;
 #define ImplEmptyDtor(_t) \
 	inline _t::DefDeDtor(_t)
 
@@ -127,6 +133,17 @@ _t type
 #define DefDelMoveAssignment(_t) \
 	_t& operator=(_t&&) = delete;
 
+
+//! \since build v1.3
+#define DefDeCopyMoveAssignment(_t) \
+	DefDeCopyAssignment(_t) \
+	DefDeMoveAssignment(_t)
+
+//! \since build v1.3
+#define DefDeCopyMoveCtorAssignment(_t) \
+	DefDeCopyMoveCtor(_t) \
+	DefDeCopyMoveAssignment(_t)
+
 #define DefCvt(_q, _t, ...) \
 	operator _t() _q \
 	ImplRet(__VA_ARGS__)
@@ -134,6 +151,24 @@ _t type
 	DefCvt(_q, _t, _b::operator _t())
 #define DefCvtMem(_q, _t, _m) \
 	DefCvt(_q, _t, (_m).operator _t())
+
+/*!
+\brief 定义表示否定的 \c operator! 。
+\pre 表达式 <tt>bool(*this)</tt> 合式且无异常抛出。
+\since build v1.3
+*/
+#define DefNeg \
+	PDefHOp(bool, !, ) const lnothrow \
+		ImplRet(!bool(*this))
+
+/*!
+\brief 定义表示显式转换 bool 操作符及其否定的 \c operator! 。
+\pre 表达式合式且无异常抛出。
+\since build v1.3
+*/
+#define DefBoolNeg(_spec, ...) \
+	DefNeg \
+	_spec DefCvt(const lnothrow, bool, __VA_ARGS__)
 
 #define DefPred(_q, _n, ...) \
 	bool LPP_Concat(Is, _n)() _q \
