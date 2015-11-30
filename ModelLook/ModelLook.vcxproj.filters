@@ -191,6 +191,9 @@
     <ClCompile Include="HUD\Widget.cpp">
       <Filter>HUD</Filter>
     </ClCompile>
+    <ClCompile Include="HUD\Rect.cpp">
+      <Filter>HUD</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -250,6 +253,10 @@
     <ClInclude Include="HUD\HUDRenderer.h">
       <Filter>HUD</Filter>
     </ClInclude>
+    <ClInclude Include="HUD\HUDBase.h">
+      <Filter>HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="HUD\HUDUtilities.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="The LeoEngine Terrain File.tpl">

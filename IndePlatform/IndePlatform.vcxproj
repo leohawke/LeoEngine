@@ -108,6 +108,7 @@
     <ClInclude Include="Include\Geometry.hpp" />
     <ClInclude Include="Include\Geometry_impl.hpp" />
     <ClInclude Include="Include\iterator.hpp" />
+    <ClInclude Include="Include\LAssert.h" />
     <ClInclude Include="Include\ldef.h" />
     <ClInclude Include="Include\leo2DMath.hpp" />
     <ClInclude Include="Include\leoint.hpp" />
