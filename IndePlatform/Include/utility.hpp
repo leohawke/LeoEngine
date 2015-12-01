@@ -82,12 +82,6 @@ namespace leo
 	class LB_API cloneable
 	{
 	public:
-#if LB_IMPL_MSCPP
-		cloneable() = default;
-		cloneable(const cloneable&) = default;
-		cloneable(cloneable&&)
-		{}
-#endif
 		virtual cloneable*
 			clone() const = 0;
 

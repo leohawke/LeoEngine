@@ -266,26 +266,13 @@ namespace leo
 		lconstfn
 			pseudo_iterator(const pseudo_iterator&) = default;
 		lconstfn
-#if LB_IMPL_MSCPP
-			pseudo_iterator(pseudo_iterator&& i)
-			: value(std::move(i.value))
-		{}
-#else
 			pseudo_iterator(pseudo_iterator&&) = default;
-#endif
+
 
 		pseudo_iterator&
 			operator=(const pseudo_iterator&) = default;
 		pseudo_iterator&
-#if LB_IMPL_MSCPP
-			operator=(pseudo_iterator&& i)
-		{
-			value = std::move(i.value);
-			return *this;
-		}
-#else
 			operator=(pseudo_iterator&&) = default;
-#endif
 
 		pseudo_iterator&
 			operator+=(difference_type)

@@ -54,11 +54,7 @@ namespace leo
 	};
 
 	template<size_t _vN, typename... _tParams>
-#if LB_IMPL_MSCPP != 1900
 	lconstexpr
-#else
-	lconstfn
-#endif
 	auto varg(_tParams&&... args) -> decltype(variadic_param<_vN>::get(lforward(args)...))
 	{
 		static_assert(_vN < sizeof...(args),

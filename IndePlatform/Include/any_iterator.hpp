@@ -203,26 +203,15 @@ namespace leo
 			handler::init(storage, yforward(i));
 		}
 		any_input_iterator(const any_input_iterator&) = default;
-#if LB_IMPL_MSCPP
-		any_input_iterator(any_input_iterator&& i)
-			: any(static_cast<any&&>(i))
-		{}
-#else
+
 		any_input_iterator(any_input_iterator&&) = default;
-#endif
 
 		any_input_iterator&
 			operator=(const any_input_iterator&) = default;
 		any_input_iterator&
-#if LB_IMPL_MSCPP
-			operator=(any_input_iterator&& i)
-		{
-			static_cast<any&>(*this) = static_cast<any&&>(i);
-			return *this;
-		}
-#else
-			operator=(any_input_iterator&&) = default;
-#endif
+
+		operator=(any_input_iterator&&) = default;
+
 
 		reference
 			operator*() const
@@ -311,27 +300,16 @@ namespace leo
 			: any_input_iterator<_type, _tPointer, _tReference>(lforward(i))
 		{}
 		any_forward_iterator(const any_forward_iterator&) = default;
-#if LB_IMPL_MSCPP
-		any_forward_iterator(any_forward_iterator&& i)
-			: any_input_iterator(static_cast<any_input_iterator&&>(i))
-		{}
-#else
+
 		any_forward_iterator(any_forward_iterator&&) = default;
-#endif
+
 
 		any_forward_iterator&
 			operator=(const any_forward_iterator&) = default;
 		any_forward_iterator&
-#if LB_IMPL_MSCPP
-			operator=(any_forward_iterator&& i)
-		{
-			static_cast<any_input_iterator&>(*this)
-				= static_cast<any_input_iterator&&>(i);
-			return *this;
-		}
-#else
-			operator=(any_forward_iterator&&) = default;
-#endif
+
+		operator=(any_forward_iterator&&) = default;
+
 
 		any_forward_iterator&
 			operator++()
@@ -380,16 +358,9 @@ namespace leo
 		any_bidirectional_iterator&
 			operator=(const any_bidirectional_iterator&) = default;
 		any_bidirectional_iterator&
-#if LB_IMPL_MSCPP
-			operator=(any_bidirectional_iterator&& i)
-		{
-			static_cast<any_forward_iterator&>(*this)
-				= static_cast<any_forward_iterator&&>(i);
-			return *this;
-		}
-#else
-			operator=(any_bidirectional_iterator&&) = default;
-#endif
+
+		operator=(any_bidirectional_iterator&&) = default;
+
 
 		any_bidirectional_iterator&
 			operator++()

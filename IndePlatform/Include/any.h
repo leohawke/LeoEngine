@@ -47,13 +47,8 @@ namespace leo
 			new(access()) decay_t<_type>(lforward(x));
 		}
 
-#ifdef LB_IMPL_MSCPP
-		pod_storage(pod_storage&& p)
-			:object(std::move(p.object))
-		{}
-#else
 		pod_storage(pod_storage&& p) = default;
-#endif
+
 		pod_storage&
 			operator=(const pod_storage&) = default;
 		

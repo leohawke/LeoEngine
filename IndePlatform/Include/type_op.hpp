@@ -216,9 +216,7 @@ namespace leo
 	public: \
 		static lconstexpr bool value = decltype(test<_type>(nullptr))::value; \
 				};
-#if !LB_IMPL_MSCPP
 		LB_HAS_MEMBER(value)
-#endif
 
 #define LB_TYPE_OP_TEST_2(_n, _expr) \
 	template<typename _type1, typename _type2> \
@@ -305,12 +303,12 @@ namespace leo
 	}// namespace details
 
 
-#if !LB_IMPL_MSCPP
+
 	template<class _type>
 	struct has_mem_value : std::integral_constant<bool,
 		details::has_mem_value<remove_cv_t<_type>>::value>
 	{};
-#endif
+
 
 	template<typename _type1, typename _type2>
 	struct has_subscription : details::has_subscription < _type1, _type2 >

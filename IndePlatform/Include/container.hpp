@@ -41,13 +41,9 @@ namespace leo
 			: base(std::move(first), std::move(last))
 		{}
 		container_adaptor(const container_adaptor&) = default;
-#if LB_IMPL_MSCPP
-		container_adaptor(container_adaptor&& con)
-			: base(static_cast<base&&>(con))
-		{}
-#else
+
 		container_adaptor(container_adaptor&&) = default;
-#endif
+
 		container_adaptor(std::initializer_list<value_type> il)
 			: base(il)
 		{};
@@ -55,15 +51,9 @@ namespace leo
 		container_adaptor&
 			operator=(const container_adaptor&) = default;
 		container_adaptor&
-#if LB_IMPL_MSCPP
-			operator=(container_adaptor&& con)
-		{
-			static_cast<base&>(*this) = static_cast<base&&>(con);
-			return *this;
-		}
-#else
-			operator=(container_adaptor&&) = default;
-#endif
+
+		operator=(container_adaptor&&) = default;
+
 		container_adaptor&
 			operator=(std::initializer_list<value_type> il)
 		{
@@ -155,15 +145,8 @@ namespace leo
 		sequence_container_adaptor&
 			operator=(const sequence_container_adaptor&) = default;
 		sequence_container_adaptor&
-#if LB_IMPL_MSCPP
-			operator=(sequence_container_adaptor&& con)
-		{
-			static_cast<base&>(*this) = static_cast<base&&>(con);
-			return *this;
-		}
-#else
 			operator=(sequence_container_adaptor&&) = default;
-#endif
+
 		sequence_container_adaptor&
 			operator=(std::initializer_list<value_type> il)
 		{

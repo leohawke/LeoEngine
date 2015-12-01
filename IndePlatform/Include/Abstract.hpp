@@ -20,11 +20,7 @@ namespace leo
 		protected:
 			template<typename ...BaseParams>
 			explicit ConcreteBase(BaseParams &&...vBaseParams)
-#if !LB_IMPL_MSCPP
 				lnoexcept(std::is_nothrow_constructible<RealBase, BaseParams &&...>::value)
-#else
-				//lnoexcept(std::is_nothrow_constructible<RealBase, BaseParams &&...>::value)
-#endif
 				: RealBase(std::forward<BaseParams>(vBaseParams)...)
 			{
 			}
