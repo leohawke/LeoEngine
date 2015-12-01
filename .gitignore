@@ -168,3 +168,7 @@ yin_Interpreter\
 All\Core\·ÏÆú´úÂë\
 All\Core\remove_code\
 *.zip
+*.opendb
+*.diagsession
+/LANFileTransmission
+/IndePlatform
