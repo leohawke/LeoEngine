@@ -499,6 +499,7 @@
 #	define lnothrow lthrow()
 #endif
 
+#define lnoexcept_spec(...) lnoexcept(noexcept(__VA_ARGS__))
 
 /*!
 \ingroup pseudo_keyword

@@ -126,6 +126,7 @@
     <ClInclude Include="Include\platform_macro.h" />
     <ClInclude Include="Include\raii.hpp" />
     <ClInclude Include="Include\ray.hpp" />
+    <ClInclude Include="Include\ref.hpp" />
     <ClInclude Include="Include\script_type.hpp" />
     <ClInclude Include="Include\Singleton.hpp" />
     <ClInclude Include="Include\string.hpp" />

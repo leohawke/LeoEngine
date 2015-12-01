@@ -282,32 +282,6 @@ namespace leo
 		}
 	};
 
-	template<typename _type>
-	struct wrapped_traits : false_type
-	{
-		using type = _type;
-	};
-
-	template<typename _tWrapped>
-	struct wrapped_traits<std::reference_wrapper<_tWrapped>> : true_type
-	{
-		using type = _tWrapped;
-	};
-
-	template<typename _type>
-	_type&
-		unref(_type&& x) lnothrow
-	{
-		return x;
-	}
-		template<typename _type>
-	_type&
-		//解引用包装
-		unref(const std::reference_wrapper<_type>& x) lnothrow
-	{
-		return x.get();
-	}
-
 	//散列扩展接口
 	//ref http://www.boost.org/doc/libs/1_54_0/doc/html/hash/reference.html#boost.hash_combine
 	//重复计算散列(1UL<<31)/((1+std::sqrt(5)/4) == 0X9E3779B9
@@ -551,5 +525,17 @@ namespace leo
 				::length(x), y, y + traits_type::length(y), _fCompare());
 		}
 	};
+
+	/*!
+	\ingroup helper_functions
+	\brief 构造接受冗余参数的可调用对象。
+	\relates expanded_caller
+	*/
+	template<typename _fHandler, typename _fCallable>
+	lconstfn expanded_caller<_fHandler, decay_t<_fCallable>>
+		make_expanded(_fCallable&& f)
+	{
+		return expanded_caller<_fHandler, decay_t<_fCallable>>(lforward(f));
+	}
 }
 #endif

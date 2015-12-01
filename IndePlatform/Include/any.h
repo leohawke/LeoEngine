@@ -2,6 +2,7 @@
 #define IndePlatform_any_h
 
 #include "utility.hpp"
+#include "ref.hpp"
 #include <memory> //std::addressof,std::unique_ptr
 #include <typeinfo>//typeid,std::bad_cast
 
@@ -116,32 +117,6 @@ namespace leo
 	{
 		x.swap(y);
 	}
-
-	class void_ref
-	{
-	private:
-		const volatile void* ptr;
-
-	public:
-		template<typename _type>
-		lconstfn
-			void_ref(_type& obj)
-			: ptr(&obj)
-		{}
-
-		template<typename _type>
-		lconstfn LB_PURE
-			operator _type&() const
-		{
-			return *static_cast<_type*>(&*this);
-		}
-
-		LB_PURE void*
-			operator&() const volatile
-		{
-			return const_cast<void*>(ptr);
-		}
-	};
 
 	namespace any_ops
 	{
