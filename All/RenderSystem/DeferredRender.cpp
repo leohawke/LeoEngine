@@ -273,8 +273,8 @@ public:
 
 leo::DeferredRender::DeferredRender(ID3D11Device * device, size_type size)
 	:pResImpl(std::make_unique<DeferredResImpl>(device, size)),
-	pStateImpl(std::make_unique<DeferredStateImpl>(device,size)),
-	pHDRProcess(std::make_unique<HDRProcess>(device,pResImpl->mShadingTex))
+	pStateImpl(std::make_unique<DeferredStateImpl>(device,size))
+	,pHDRProcess(std::make_unique<HDRProcess>(device,pResImpl->mShadingTex))
 {
 	LinearizeDepthImpl::GetInstance(device);
 	LightSourcesRender::Init(device);
@@ -369,7 +369,6 @@ void leo::DeferredRender::PostProcess(ID3D11DeviceContext * context, ID3D11Rende
 	pHDRProcess->Apply(context);
 	context->RSSetViewports(1, &pStateImpl->mViewPort);
 	pHDRProcess->Draw(context,pResImpl->mShadingSRV,rtv);
-
 }
 
 void leo::DeferredRender::SetSSAOParams(bool enable, uint8 level) noexcept

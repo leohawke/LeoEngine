@@ -7,10 +7,10 @@
 
 
 leo::HDRProcess::HDRProcess(ID3D11Device * create, ID3D11Texture2D* src)
-	:PostProcess(create),
-	mStatProcess(std::make_unique<HDRStatProcess>(create, src)),
-	mLensProcess(std::make_unique<HDRLensProcess>(create,src)),
-	mToneCpuParams(1.f, 0.25f)
+	:PostProcess(create)
+	,mStatProcess(std::make_unique<HDRStatProcess>(create, src))
+	,mLensProcess(std::make_unique<HDRLensProcess>(create,src))
+	,mToneCpuParams(1.f, 0.25f)
 {
 #ifdef NO_SINGLE_CHANNEL_FLOAT
 	BindProcess(create, "Shader/HDRFinalPS_multiple.cso");

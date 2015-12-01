@@ -28,7 +28,7 @@ namespace leo
 		//[4,11] color_weight
 		//[12,19] tex_coord_offset;
 		float cpu_params[20];
-		ID3D11Buffer* gpu_params;
+		win::unique_com<ID3D11Buffer> gpu_params;
 	};
 
 	template<typename T>
