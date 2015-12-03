@@ -292,6 +292,7 @@
     <ClCompile Include="Axis.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="HUD\HUDRenderer.cpp" />
     <ClCompile Include="HUD\Rect.cpp" />
     <ClCompile Include="HUD\Widget.cpp" />
     <ClCompile Include="HUD\WidgetEvent.cpp" />
@@ -596,8 +597,8 @@ fxc /E"main_8"  /Fo"$(OutDir)Shader\%(Filename)_8.cso" /T "ps_5_0" /nologo $(Pro
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxc.log</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compilation %(Filename).hlsl</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compilation %(Filename).hlsl</Message>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     </CustomBuild>
     <FxCompile Include="Shader\ShaderPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>

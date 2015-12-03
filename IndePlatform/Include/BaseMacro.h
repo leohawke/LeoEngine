@@ -118,6 +118,10 @@ _t type
 	~_t() = default;
 #define DefDelDtor(_t) \
 	~_t() = delete;
+
+#define ImplDeDtor(_t) \
+	_t::DefDeDtor(_t)
+
 #define DefVrDtor(_t) \
 	virtual ~_t() = default;
 #define ImplEmptyDtor(_t) \

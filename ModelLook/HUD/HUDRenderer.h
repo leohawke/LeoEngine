@@ -17,7 +17,7 @@
 #define HUD_RENDERER_H
 
 #include <utility.hpp>
-#include "HUD.h"
+#include "WidgetEvent.h"
 
 LEO_BEGIN
 HUD_BEGIN
@@ -41,7 +41,7 @@ public:
 	/*
 	\brief 按参数绘制部件
 	*/
-	virtual Rect Paint(IWidget& wgt);
+	virtual Rect Paint(IWidget& wgt,PaintEventArgs&&);
 };
 
 /*!
@@ -50,7 +50,7 @@ public:
 class LB_API HUDPseudoRenderer : public HUDRenderer
 {
 	~HUDPseudoRenderer() override;
-	PDefH(Rect,Paint,IWidget&) override
+	PDefH(Rect,Paint,IWidget&,PaintEventArgs&&) override
 		ImplRet({})
 };
 
@@ -69,7 +69,7 @@ public:
 	/*
 	\brief 按参数绘制部件
 	*/
-	Rect Paint(IWidget& wgt) override;
+	Rect Paint(IWidget& wgt, PaintEventArgs&&) override;
 };
 
 HUD_END

@@ -15,7 +15,6 @@ namespace HUD
 {
 	/*!
 	\brief 用户界面绘制优先级。
-	\since build 294
 	*/
 	//@{
 	lconstexpr const EventPriority BackgroundPriority(0xC0);
@@ -25,7 +24,6 @@ namespace HUD
 
 	/*!
 	\brief 用户界面事件参数基类。
-	\since build 255
 	*/
 	struct LB_API UIEventArgs
 	{
@@ -58,6 +56,21 @@ namespace HUD
 			PDefH(void, SetSender, IWidget& wgt)
 			ImplExpr(pSender = &wgt)
 	};
+
+	/*!
+	\brief 部件绘制参数。
+	*/
+	struct LB_API PaintEventArgs : public UIEventArgs
+	{
+		PaintEventArgs(IWidget&);
+		DefDeCopyCtor(PaintEventArgs)
+			/*!
+			\brief 虚析构：类定义外默认实现。
+			*/
+			~PaintEventArgs() override;
+	};
+
+	using HPaintEvent = GHEvent<void(PaintEventArgs&&)>;
 }
 LEO_END
 

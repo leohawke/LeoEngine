@@ -197,6 +197,9 @@
     <ClCompile Include="HUD\WidgetEvent.cpp">
       <Filter>HUD</Filter>
     </ClCompile>
+    <ClCompile Include="HUD\HUDRenderer.cpp">
+      <Filter>HUD</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
