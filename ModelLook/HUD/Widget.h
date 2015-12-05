@@ -15,7 +15,7 @@
 #ifndef HUD_WIDGET_H
 #define HUD_WIDGET_H
 
-#include "HUD.h"
+#include "WidgetEvent.h"
 
 LEO_BEGIN
 
@@ -30,7 +30,6 @@ DeclIEntry(WidgetRange GetChildren())
 /*
 视图接口<未抽象视图>
 */
-
 DeclIEntry(bool IsVisible() const) //判断是否可见
 DeclIEntry(bool Contains(platform::unit_type, platform::unit_type) const) //判断点是否在部件的可视区域内
 DeclIEntry(Size GetSizeOf() const) //取部件大小
@@ -40,6 +39,12 @@ DeclIEntry(Point GetLocationOf() const) //取部件大小
 DeclIEntry(void SetLocationOf(const Point&)) //设置部件左上角位置
 DeclIEntry(void SetSizeOf(const Size&)) //设置部件大小
 DeclIEntry(void SetVisible(bool b)) //设置部件可见性
+
+/*!
+\brief 取控制器。
+\note 引用有效性由派生类约定。
+*/
+DeclIEntry(AController& GetController() const)
 EndDecl
 
 LB_API void SetBox(IWidget&, const Box&);

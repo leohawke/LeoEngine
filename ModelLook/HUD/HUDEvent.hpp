@@ -565,6 +565,11 @@ namespace HUD
 			std::tuple_element_t<0, std::tuple<_tParams...>>>;
 	};
 
+
+	template<typename... _tParams>
+	struct EventArgsHead<std::tuple<_tParams...>> : EventArgsHead<_tParams...>
+	{};
+
 	/*!
 	\brief 事件项类型。
 	\warning 非虚析构。

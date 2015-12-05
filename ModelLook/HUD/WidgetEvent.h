@@ -128,18 +128,27 @@ HUD_BEGIN
 	};
 
 
-	template<class _tEventHandler>
-	size_t
-		DoEvent(IWidget& wgt, VisualEvent id,
-			typename EventArgsHead<typename _tEventHandler::TupleType>::type&& e)
-	{
-		TryRet(dynamic_cast<GEvent<typename _tEventHandler::FuncType>&>(
-			controller.GetItem(id))(std::move(e)))
-			CatchIgnore(std::out_of_range&)
-			CatchIgnore(std::bad_cast&)
-			return 0;
-	}
 
+	
+
+HUD_END
+LEO_END
+
+#include "HUDControl.h"
+
+LEO_BEGIN
+HUD_BEGIN
+template<class _tEventHandler>
+size_t
+DoEvent(AController& controller, VisualEvent id,
+	typename EventArgsHead<typename _tEventHandler::TupleType>::type&& e)
+{
+	TryRet(dynamic_cast<GEvent<typename _tEventHandler::FuncType>&>(
+		controller.GetItem(id))(std::move(e)))
+		CatchIgnore(std::out_of_range&)
+		CatchIgnore(std::bad_cast&)
+		return 0;
+}
 HUD_END
 LEO_END
 

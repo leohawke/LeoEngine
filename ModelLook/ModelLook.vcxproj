@@ -292,6 +292,7 @@
     <ClCompile Include="Axis.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="HUD\HUDControl.cpp" />
     <ClCompile Include="HUD\HUDRenderer.cpp" />
     <ClCompile Include="HUD\Rect.cpp" />
     <ClCompile Include="HUD\Widget.cpp" />
