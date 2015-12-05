@@ -276,6 +276,9 @@
     <ClInclude Include="HUD\HUDGraphics.h">
       <Filter>HUD</Filter>
     </ClInclude>
+    <ClInclude Include="HUD\HUDControl.h">
+      <Filter>HUD</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="The LeoEngine Terrain File.tpl">

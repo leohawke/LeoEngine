@@ -313,6 +313,7 @@
     <ClInclude Include="Axis.hpp" />
     <ClInclude Include="HUD\HUD.h" />
     <ClInclude Include="HUD\HUDBase.h" />
+    <ClInclude Include="HUD\HUDControl.h" />
     <ClInclude Include="HUD\HUDEvent.hpp" />
     <ClInclude Include="HUD\HUDGraphics.h" />
     <ClInclude Include="HUD\HUDRenderer.h" />

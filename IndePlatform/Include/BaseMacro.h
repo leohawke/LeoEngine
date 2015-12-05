@@ -75,6 +75,35 @@ _t type
 		lunused(lunseq(__VA_ARGS__)); \
 		}
 
+//!
+//@{
+//! \brief 指定表达式在 \c try 块中求值。
+#define TryExpr(...) \
+	try \
+	ImplExpr(__VA_ARGS__)
+//! \brief 指定表达式在 \c try 块中求值并返回。
+#define TryRet(...) \
+	try \
+	ImplRet(__VA_ARGS__)
+
+//! \brief 指定表达式作为异常处理器。
+#define CatchExpr(_ex, ...) \
+	catch(_ex) \
+	ImplExpr(__VA_ARGS__)
+//! \brief 指定异常处理器忽略指定异常。
+#define CatchIgnore(_ex) \
+	catch(_ex) \
+	{}
+//! \brief 指定返回语句作为异常处理器。
+#define CatchRet(_ex, ...) \
+	catch(_ex) \
+	ImplRet(__VA_ARGS__)
+//! \brief 指定抛出指定异常作为异常处理器。
+#define CatchThrow(_ex, ...) \
+	catch(_ex) \
+	ImplThrow(__VA_ARGS__)
+//@}
+
 //基类同名函数映射和成员同名函数映射实现。
 //prefix "Impl" = Implement;
 #define ImplBodyBase(_b, _n, ...) \
@@ -272,7 +301,7 @@ _t type
 */
 //@{
 
-#define _lInterface struct
+#define LInterface struct
 
 #define implements public
 
@@ -281,12 +310,12 @@ _t type
 \brief 定义接口类型头部。
 \sa ImplEmptyDtor
 */
-#define _lInterfaceHead(_n) { \
+#define YInterfaceHead(_n) { \
 protected: \
 	DefDeCtor(_n) \
+	DefDeCopyCtor(_n) \
 \
-public: \
-	virtual DefDeDtor(_n)
+public:
 
 #define FwdDeclI(_n) _lInterface _n;
 
@@ -296,8 +325,9 @@ public: \
 \since build 362
 */
 #define DeclI(_attr, _n) \
-	_lInterface _attr _n \
-	_lInterfaceHead(_n)
+	LInterface _attr _n \
+	YInterfaceHead(_n) \
+	virtual ~_n();
 
 /*
 \def DeclDerivedI
@@ -306,11 +336,12 @@ public: \
 \since build 362
 */
 #define DeclDerivedI(_attr, _n, ...) \
-	_lInterface _attr _n : __VA_ARGS__ \
-	_lInterfaceHead(_n)
+	LInterface _attr _n : __VA_ARGS__ \
+	YInterfaceHead(_n) \
+	~_n() ImplI(__VA_ARGS__);
 
 // ImplI = Implements Interface;
-#define ImplI(...) virtual
+#define ImplI(...) override
 
 //抽象实现：保留接口供派生类实现（可以提供接口函数的默认实现）。
 // ImplA = Implements Abstractly;

@@ -15,6 +15,18 @@ LEO_BEGIN
 
 namespace HUD
 {
+	/*!
+	\brief 事件处理器接口模板。
+	*/
+	template<typename... _tParams>
+	DeclDerivedI(,GIHEvent,cloneable)
+		DeclIEntry(size_t operator()(_tParams...) const)
+		DeclIEntry(GIHEvent* clone() const ImplI(cloneable))
+	EndDecl
+
+		template<typename... _tParams>
+	GIHEvent<_tParams...>::DefDeDtor(GIHEvent)
+
 
 	/*!
 	\brief 标准事件处理器模板。
@@ -544,6 +556,49 @@ namespace HUD
 		{
 			Event.get() -= Handler;
 		}
+	};
+
+	template<typename... _tParams>
+	struct EventArgsHead
+	{
+		using type = std::conditional_t<sizeof...(_tParams) == 0, void,
+			std::tuple_element_t<0, std::tuple<_tParams...>>>;
+	};
+
+	/*!
+	\brief 事件项类型。
+	\warning 非虚析构。
+	\since build 242
+	*/
+	template<typename _tBaseArgs>
+	class GEventPointerWrapper
+	{
+	public:
+		using ItemType = GIHEvent<_tBaseArgs>;
+		using PointerType = std::unique_ptr<ItemType>;
+
+	private:
+		PointerType ptr;
+
+	public:
+		//! \since build 586
+		template<typename _type, limpl(
+			typename = exclude_self_ctor_t<GEventPointerWrapper, _type>)>
+			inline
+			GEventPointerWrapper(_type&& p)
+			lnoexcept(std::is_nothrow_constructible<PointerType, _type>())
+			: ptr(Nonnull(p))
+		{}
+		/*!
+		\brief 复制构造：深复制。
+		*/
+		GEventPointerWrapper(const GEventPointerWrapper& item)
+			: ptr(ClonePolymorphic(item.ptr))
+		{}
+		DefDeMoveCtor(GEventPointerWrapper)
+
+		lconstfn DefCvt(const lnothrow, const ItemType&, *ptr)
+		lconstfn DefCvt(const lnothrow, ItemType&, *ptr)
 	};
 }
 

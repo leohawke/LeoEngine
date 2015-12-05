@@ -73,6 +73,73 @@ HUD_BEGIN
 
 	using HPaintEvent = GHEvent<void(PaintEventArgs&&)>;
 
+#define DefEventTypeMapping(_name, _tEventHandler) \
+	template<> \
+	struct EventTypeMapping<_name> \
+	{ \
+		using HandlerType = _tEventHandler; \
+	};
+
+	/*!
+	\brief 标准控件事件空间。
+	*/
+	enum VisualEvent {
+		Paint,
+	};
+
+	template<VisualEvent>
+	struct EventTypeMapping
+	{
+		//定义 HandlerType 的默认值可能会导致运行期 dynamic_cast 失败。
+		//	using HandlerType = HEvent;
+	};
+
+	DefEventTypeMapping(Paint, HPaintEvent)
+
+	/*!
+	\brief 事件映射命名空间。
+	*/
+	namespace EventMapping
+	{
+		using MappedType = GEventPointerWrapper<UIEventArgs&&>; //!< 映射项类型。
+		using ItemType = GIHEvent<UIEventArgs&&>;
+		using PairType = std::pair<VisualEvent, MappedType>;
+		using MapType = std::map<VisualEvent, MappedType>; //!< 映射表类型。
+		using SearchResult = std::pair<typename MapType::iterator, bool>; //!< 搜索表结果类型。
+	}
+
+	using VisualEventMap = EventMapping::MapType;
+
+	/*!
+	\ingroup exception_types
+	\brief 错误或不存在的部件事件异常。
+	*/
+	class LB_API BadEvent : public logged_event
+	{
+	public:
+		using logged_event::logged_event;
+
+		//@{
+		DefDeCtor(BadEvent)
+			DefDeCopyCtor(BadEvent)
+			//! \brief 虚析构：类定义外默认实现。
+			~BadEvent() override;
+		//@}
+	};
+
+
+	template<class _tEventHandler>
+	size_t
+		DoEvent(IWidget& wgt, VisualEvent id,
+			typename EventArgsHead<typename _tEventHandler::TupleType>::type&& e)
+	{
+		TryRet(dynamic_cast<GEvent<typename _tEventHandler::FuncType>&>(
+			controller.GetItem(id))(std::move(e)))
+			CatchIgnore(std::out_of_range&)
+			CatchIgnore(std::bad_cast&)
+			return 0;
+	}
+
 HUD_END
 LEO_END
 

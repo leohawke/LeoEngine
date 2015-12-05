@@ -50,12 +50,12 @@ namespace
 bool
 Rect::Contains(PPos px, PPos py) const lnothrow
 {
-	return !IsUnstrictlyEmpty() && RectContainsRaw(*this, px, py);
+	return !IsUnStrictlyEmpty() && RectContainsRaw(*this, px, py);
 }
 bool
 Rect::Contains(const Rect& r) const lnothrow
 {
-	return !IsUnstrictlyEmpty() && RectContainsRaw(*this, r.GetPoint())
+	return !IsUnStrictlyEmpty() && RectContainsRaw(*this, r.GetPoint())
 		&& RectContainsRaw(*this, r.GetPoint() + r.GetSize() - Vec(1, 1));
 }
 
@@ -67,7 +67,7 @@ Rect::ContainsStrict(PPos px, PPos py) const lnothrow
 bool
 Rect::ContainsStrict(const Rect& r) const lnothrow
 {
-	return Width > 1 && Height > 1 && !r.IsUnstrictlyEmpty()
+	return Width > 1 && Height > 1 && !r.IsUnStrictlyEmpty()
 		&& RectContainsStrictRaw(*this, r.GetPoint())
 		&& RectContainsStrictRaw(*this, r.GetPoint() + r.GetSize() - Vec(1, 1));
 }

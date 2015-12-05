@@ -16,6 +16,7 @@ PaintEventArgs::PaintEventArgs(IWidget & wgt, const PaintContext & pc)
 {}
 ImplDeDtor(PaintEventArgs)
 
+ImplDeDtor(BadEvent)
 
 HUD_END
 
