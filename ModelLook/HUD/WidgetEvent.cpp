@@ -9,7 +9,10 @@ UIEventArgs::~UIEventArgs()
 {}
 
 HUD::PaintEventArgs::PaintEventArgs(IWidget & wgt)
-	:UIEventArgs(wgt)
+	:UIEventArgs(wgt),PaintContext()
+{}
+PaintEventArgs::PaintEventArgs(IWidget & wgt, const PaintContext & pc)
+	:UIEventArgs(wgt),PaintContext(pc)
 {}
 ImplDeDtor(PaintEventArgs)
 

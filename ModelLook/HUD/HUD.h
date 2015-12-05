@@ -36,10 +36,7 @@ namespace platform
 }
 
 
-#ifndef HUD_BEGIN
-#define HUD_BEGIN namespace HUD {
-#define HUD_END }
-#endif
+
 
 LEO_BEGIN
 
@@ -104,7 +101,7 @@ struct LB_API Size
 		*/
 		lconstfn DefPred(const lnothrow,LineSegment,!((Width == 0) ^ (Height == 0)))
 
-		lconstfn DefPred(const lnothrow, UnstrictlyEmpty,Width == 0 || Height == 0)
+		lconstfn DefPred(const lnothrow, UnStrictlyEmpty,Width == 0 || Height == 0)
 };
 
 lconstfn PDefHOp(bool,==,const Size& x,const Size& y) lnothrow
@@ -296,7 +293,7 @@ struct LB_API Rect :private Point, private Size
 	*/
 	using Size::IsLineSegment;
 
-	using Size::IsUnstrictlyEmpty;
+	using Size::IsUnStrictlyEmpty;
 
 	// XXX: Conversion to 'platform::unit_type' might be implementation-defined.
 	lconstfn DefGetter(const lnothrow, platform::unit_type, Bottom, Y + platform::unit_type(Height))

@@ -7,12 +7,12 @@
 #ifndef HUD_WIDGETEVENT_HPP
 #define HUD_WIDGETEVENT_HPP
 
-#include "HUD.h"
+#include "HUDGraphics.h"
 #include "HUDEvent.hpp"
 
 LEO_BEGIN
-namespace HUD
-{
+
+HUD_BEGIN
 	/*!
 	\brief 用户界面绘制优先级。
 	*/
@@ -60,9 +60,10 @@ namespace HUD
 	/*!
 	\brief 部件绘制参数。
 	*/
-	struct LB_API PaintEventArgs : public UIEventArgs
+	struct LB_API PaintEventArgs : public UIEventArgs,public PaintContext
 	{
 		PaintEventArgs(IWidget&);
+		PaintEventArgs(IWidget&, const PaintContext&);
 		DefDeCopyCtor(PaintEventArgs)
 			/*!
 			\brief 虚析构：类定义外默认实现。
@@ -71,7 +72,8 @@ namespace HUD
 	};
 
 	using HPaintEvent = GHEvent<void(PaintEventArgs&&)>;
-}
+
+HUD_END
 LEO_END
 
 #endif

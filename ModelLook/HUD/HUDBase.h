@@ -1,12 +1,21 @@
+#ifndef HUD_Base_H
+#define HUD_Base_H
+
+#include <ldef.h>
 #include <BaseMacro.h>
+#include <LAssert.h>
+#include <exception.hpp>
 #include <limits>
 
 
-namespace  leo
-{
+#ifndef HUD_BEGIN
+#define HUD_BEGIN namespace HUD {
+#define HUD_END }
+#endif
 
-	namespace HUD
-	{
+LEO_BEGIN
+
+HUD_BEGIN
 
 		struct Size;
 		struct Rect;
@@ -174,5 +183,7 @@ namespace  leo
 
 			return _vIdx == 0 ? val.X : val.Y;
 		}
-	}
-}
+	HUD_END
+LEO_END
+
+#endif

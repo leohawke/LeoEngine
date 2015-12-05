@@ -8,7 +8,7 @@ HUD_BEGIN
 Rect HUDRenderer::Paint(IWidget & wgt, PaintEventArgs && e)
 {
 	LAssert(&e.GetSender() == &wgt, "Invalid widget found.");
-	if (LB_LIKELY(!e.ClipArea.IsUnStrictEmpty()))
+	if (LB_LIKELY(!e.ClipArea.IsUnStrictlyEmpty()))
 		CallEvent<HUD::Paint>(wgt, e);
 	return e.ClipArea;
 }
