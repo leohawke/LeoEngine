@@ -333,6 +333,7 @@ struct LB_API Box :public Rect
 
 
 struct IWidget;
+class AController;
 
 HUD_END
 

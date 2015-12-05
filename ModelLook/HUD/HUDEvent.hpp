@@ -265,7 +265,7 @@ namespace HUD
 		inline GEvent&
 			operator+=(_type&& _arg)
 		{
-			return Add(HandlerType(forward(_arg)));
+			return Add(HandlerType(lforward(_arg)));
 		}
 
 		/*!
@@ -325,7 +325,7 @@ namespace HUD
 		inline GEvent&
 			Add(_type&& _arg, EventPriority prior = DefaultEventPriority)
 		{
-			return Add(HandlerType(forward(_arg)), prior);
+			return Add(HandlerType(lforward(_arg)), prior);
 		}
 		/*!
 		\note 使用对象引用、成员函数指针和优先级。
@@ -570,10 +570,35 @@ namespace HUD
 	struct EventArgsHead<std::tuple<_tParams...>> : EventArgsHead<_tParams...>
 	{};
 
+
+	/*!
+	\brief 事件包装类模板。
+	*/
+	template<class _tEvent, typename _tBaseArgs>
+	class GEventWrapper : public _tEvent, implements GIHEvent<_tBaseArgs>
+	{
+	public:
+		using EventType = _tEvent;
+		using BaseArgsType = _tBaseArgs;
+		using EventArgsType
+			= typename EventArgsHead<typename _tEvent::TupleType>::type;
+
+		/*!
+		\brief 委托调用。
+		\warning 需要确保 BaseArgsType 引用的对象能够转换至 EventArgsType 。
+		*/
+		size_t
+			operator()(BaseArgsType e) const ImplI(GIHEvent<_tBaseArgs>)
+		{
+			return EventType::operator()(EventArgsType(lforward(e)));
+		}
+
+		DefClone(const ImplI(GIHEvent<_tBaseArgs>), GEventWrapper)
+	};
+
 	/*!
 	\brief 事件项类型。
 	\warning 非虚析构。
-	\since build 242
 	*/
 	template<typename _tBaseArgs>
 	class GEventPointerWrapper
@@ -586,12 +611,11 @@ namespace HUD
 		PointerType ptr;
 
 	public:
-		//! \since build 586
 		template<typename _type, limpl(
 			typename = exclude_self_ctor_t<GEventPointerWrapper, _type>)>
 			inline
 			GEventPointerWrapper(_type&& p)
-			lnoexcept(std::is_nothrow_constructible<PointerType, _type>())
+			lnoexcept(std::is_nothrow_constructible<PointerType, _type>::value)
 			: ptr(Nonnull(p))
 		{}
 		/*!

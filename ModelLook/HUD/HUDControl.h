@@ -73,6 +73,22 @@ public:
 
 
 /*!
+\ingroup helper_functions
+\brief 取部件事件。
+\tparam _vID 指定事件类型。
+\param wgt 指定部件。
+\exception BadEvent 异常中立：由控制器抛出。
+\note 需要确保 EventTypeMapping 中有对应的 EventType ，否则无法匹配此函数模板。
+\note 若控件事件不存在则自动添加空事件。
+*/
+template<VisualEvent _vID>
+inline GEvent<typename EventTypeMapping<_vID>::HandlerType::FuncType>&
+FetchEvent(IWidget& wgt)
+{
+	return FetchEvent<_vID>(wgt.GetController());
+}
+
+/*!
 \brief 调用部件事件，并忽略 BadEvent 异常。
 \pre 事件参数需可转换为 EventTypeMapping 的 EventType 。
 \note 若控件事件不存在则忽略。
@@ -91,6 +107,29 @@ CallEvent(IWidget& wgt, _tEventArgs&& e)
 		CatchIgnore(BadEvent&)
 		return 0;
 }
+
+/*!
+\brief 部件控制器。
+\since build 236
+*/
+class LB_API WidgetController : public AController
+{
+public:
+	//! \since build 581
+	mutable GEventWrapper<GEvent<void(PaintEventArgs&&)>, UIEventArgs&&> Paint;
+
+	/*!
+	\brief 构造：使用指定可用性。
+	*/
+	explicit
+		WidgetController(bool = {});
+
+	EventMapping::ItemType&
+		GetItem(VisualEvent) const ImplI(AController);
+
+	DefClone(const ImplI(AController), WidgetController)
+};
+
 
 HUD_END
 

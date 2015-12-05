@@ -26,7 +26,7 @@ HUD_BEGIN
 \brief HUD部件渲染器
 \note 无状态
 */
-class LB_API HUDRenderer {
+class LB_API HUDRenderer : public cloneable {
 public:
 	DefDeCtor(HUDRenderer)
 	DefDeCopyMoveCtorAssignment(HUDRenderer)
@@ -37,6 +37,14 @@ public:
 	*/
 	virtual void SetSize(const Size&)
 	{}
+
+	DefClone(const ImplI(cloneable), HUDRenderer)
+
+	/*!
+	\brief 提交无效区域。
+	*/
+	virtual PDefH(Rect, CommitInvalidation, const Rect& r)
+	ImplRet(r)
 
 	/*
 	\brief 按参数绘制部件

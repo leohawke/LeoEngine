@@ -84,6 +84,8 @@ HUD_BEGIN
 	\brief 标准控件事件空间。
 	*/
 	enum VisualEvent {
+		Move,
+		ReSize,
 		Paint,
 	};
 
@@ -128,9 +130,27 @@ HUD_BEGIN
 	};
 
 
-
+	using HBrush = std::function<void(PaintEventArgs&&)>;
 	
 
+	/*!
+	\brief 构造指针指向的 VisualEvent 指定的事件对象。
+	*/
+	template<VisualEvent _vID>
+	EventMapping::MappedType
+		NewEvent()
+	{
+		return EventMapping::MappedType(new GEventWrapper<GEvent<typename
+			EventTypeMapping<_vID>::HandlerType::FuncType>, UIEventArgs&&>());
+	}
+
+	template<VisualEvent _vID>
+	GEvent<typename EventTypeMapping<_vID>::HandlerType::FuncType>&
+		FetchEvent(AController& controller)
+	{
+		return dynamic_cast<GEvent<typename EventTypeMapping<_vID>::HandlerType
+			::FuncType>&>(controller.GetItemRef(_vID, NewEvent<_vID>));
+	}
 HUD_END
 LEO_END
 
