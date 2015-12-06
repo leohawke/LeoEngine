@@ -4,6 +4,8 @@ LEO_BEGIN
 
 HUD_BEGIN
 
+ImplDeDtor(IWidget)
+
 void SetBoundsOf(IWidget& wgt, const Rect& r)
 {
 	SetLocationOf(wgt, r.GetPoint());
@@ -27,6 +29,30 @@ SetSizeOf(IWidget& wgt, const Size& s)
 	wgt.GetRenderer().SetSize(s);
 	wgt.SetSizeOf(s);
 	//CallEvent<Resize>(wgt, UIEventArgs(wgt));
+}
+
+void
+PaintChild(IWidget& wgt, PaintEventArgs&& e)
+{
+	auto& sender(e.GetSender());
+
+	if (Clip(e.ClipArea, Rect(e.Location += GetLocationOf(sender),
+		GetSizeOf(sender))))
+		wgt.GetRenderer().Paint(sender, std::move(e));
+}
+Rect
+PaintChild(IWidget& wgt, const PaintContext& pc)
+{
+	PaintEventArgs e(wgt, pc);
+
+	PaintChild(wgt, std::move(e));
+	return e.ClipArea;
+}
+
+void
+PaintChildAndCommit(IWidget& wgt, PaintEventArgs& e)
+{
+	e.ClipArea |= PaintChild(wgt, e);
 }
 
 Widget::Widget(const Rect & r)
@@ -69,9 +95,9 @@ Widget::MakeAlphaBrush()
 
 
 void
-Widget::SetRenderer(std::unique_ptr<HUDRenderer> p)
+Widget::SetRenderer(std::shared_ptr<HUDRenderer> p)
 {
-	renderer_ptr = p ? std::move(p) : std::make_unique<HUDRenderer>();
+	renderer_ptr = p ? std::move(p) : std::make_shared<HUDRenderer>();
 	renderer_ptr->SetSize(GetSizeOf());
 }
 

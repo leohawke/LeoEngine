@@ -19,6 +19,12 @@ struct Pixel<C48888> {
 	stdex::byte r, g, b, a;
 };
 
+//2D纹理包装
+//warning，一般不会直接使用该类型,using std::share_ptr<texture2d_wrapper>
+//warning, HUD的格式一定是R8G8B8A8(not A8B8...)，DYNAMIC,NOMIP,ARRAYSIZE = 1
+//warning, R8G8B8A8,某些显卡效果可能不对
+class texture2d_wrapper;
+
 HUD_BEGIN
 
 using BitmapPtr = Pixel<>*;
@@ -134,20 +140,33 @@ public:
 using ConstGraphics = GGraphics<ConstBitmapPtr>;
 using Graphics = GGraphics<BitmapPtr>;
 
+/*!
+\brief 图像接口。
+\warning 该类底层实现一定是一个leo::texture2d_wrapper对象
+*/
+DeclDerivedI(LB_API, IImage,cloneable)
+DeclIEntry(Graphics GetContext() const lnothrow)
+DeclIEntry(void SetSize(const Size&))
+
+DeclIEntry(IImage* clone() const ImplI(cloneable))
+EndDecl
+
+
 /*
 \brief 绘制上下文。
 \warning 非虚析构。
-\since build 255
 */
 struct LB_API PaintContext
 {
+	//todo:modify it
+	//maybe GDI impl
 	Graphics Target; //!< 渲染目标：图形接口上下文。
-					 /*!
-					 \brief 参考位置。
+	/*!
+	\brief 参考位置。
 
-					 指定渲染目标关联的参考点的位置的偏移坐标。
-					 除非另行约定，选取渲染目标左上角为原点的屏幕坐标系。
-					 */
+	指定渲染目标关联的参考点的位置的偏移坐标。
+	除非另行约定，选取渲染目标左上角为原点的屏幕坐标系。
+	*/
 	Point Location;
 	/*!
 	\brief 剪切区域。

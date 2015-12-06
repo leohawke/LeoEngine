@@ -61,6 +61,10 @@ struct LB_API Size
 	using PDst = platform::unitlength_type;
 	platform::unitlength_type Width, Height;
 
+	DefGetter(const lnothrow, platform::unitlength_type,Height,Height)
+	DefGetter(const lnothrow, platform::unitlength_type, Width, Width)
+	DefSetter(platform::unitlength_type, Height, Height)
+	DefSetter(platform::unitlength_type, Width, Width)
 	/*!
 	\brief 无参数构造
 	\warning 零初始化。
@@ -330,6 +334,13 @@ struct LB_API Box :public Rect
 {
 
 };
+
+/*!
+\brief 剪切操作：取标准矩形交集并判断是否严格非空。
+\since build 372
+*/
+inline PDefH(bool, Clip, Rect& x, const Rect& y)
+ImplRet(x &= y, !x.IsUnStrictlyEmpty())
 
 
 struct IWidget;

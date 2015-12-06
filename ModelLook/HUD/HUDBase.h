@@ -89,12 +89,12 @@ HUD_BEGIN
 				\brief 加法赋值。
 				*/
 				PDefHOp(GBinaryGroup&, +=, const GBinaryGroup& val) lnothrow
-				ImplRet(yunseq(X += val.X, Y += val.Y), *this)
+				ImplRet(lunseq(X += val.X, Y += val.Y), *this)
 				/*!
 				\brief 减法赋值。
 				*/
 				PDefHOp(GBinaryGroup&, -=, const GBinaryGroup& val) lnothrow
-				ImplRet(yunseq(X -= val.X, Y -= val.Y), *this)
+				ImplRet(lunseq(X -= val.X, Y -= val.Y), *this)
 
 				lconstfn DefGetter(const lnothrow, _type, X, X)
 				lconstfn DefGetter(const lnothrow, _type, Y, Y)

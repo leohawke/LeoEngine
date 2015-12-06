@@ -77,6 +77,20 @@ SetLocationOf(IWidget&, const Point&);
 LB_API void
 SetSizeOf(IWidget&, const Size&);
 
+/*!
+\ingroup helper_functions
+\brief 取部件位置。
+*/
+inline PDefH(Point, GetLocationOf, const IWidget& wgt)
+ImplRet(wgt.GetLocationOf())
+
+/*!
+\ingroup helper_functions
+\brief 取部件大小。
+*/
+inline PDefH(Size, GetSizeOf, const IWidget& wgt)
+ImplRet(wgt.GetSizeOf())
+
 
 /*!
 \brief 调用指定子部件的 Paint 事件绘制参数指定的事件发送者。
@@ -117,7 +131,7 @@ ImplExpr(IsVisible(wgt) ? PaintChildAndCommit(wgt, e) : void())
 class LB_API Widget : implements IWidget
 {
 private:
-	std::unique_ptr<HUDRenderer> renderer_ptr;//渲染器指针。
+	std::shared_ptr<HUDRenderer> renderer_ptr;//渲染器指针。
 	std::unique_ptr<AController> controller_ptr;//控制器指针。
 
 public:
@@ -138,7 +152,7 @@ public:
 	*/
 	template<typename _tRenderer, typename _tController>
 	explicit inline
-		Widget(_tRenderer&& pRenderer_ = std::make_unique<HUDRenderer>(),
+		Widget(_tRenderer&& pRenderer_ = std::make_shared<HUDRenderer>(),
 			_tController&& pController_ = {})
 		: renderer_ptr(lforward(pRenderer_)),
 		controller_ptr(lforward(pController_)), Background()
@@ -151,14 +165,14 @@ public:
 	*/
 	Widget(const Widget&);
 	DefDelMoveCtor(Widget)
-		/*!
-		\brief 析构：虚实现。
+	/*!
+	\brief 析构：虚实现。
 
-		自动释放焦点后释放部件资源。
-		\note 由于不完整类型 WidgetController 的依赖性无法使用 inline 实现。
-		*/
-		virtual
-		~Widget();
+	自动释放焦点后释放部件资源。
+	\note 由于不完整类型 WidgetController 的依赖性无法使用 inline 实现。
+	*/
+	virtual
+	~Widget();
 
 private:
 	/*!
@@ -178,13 +192,24 @@ public:
 	MakeAlphaBrush();
 	DefGetter(const ImplI(IWidget), AController&, Controller,
 		Deref(controller_ptr))
+	DefGetter(const ImplI(IWidget), HUDRenderer&, Renderer, Deref(renderer_ptr))
+
+	DefGetterMem(const lnothrow, platform::unitlength_type, Height, GetSizeOf())
+	DefGetterMem(const lnothrow, platform::unitlength_type, Width, GetSizeOf())
+	DefGetterMem(const lnothrow, platform::unit_type, X, GetLocationOf())
+	DefGetterMem(const lnothrow, platform::unit_type, Y, GetLocationOf())
+
+	DefSetterMem( platform::unitlength_type, Height, GetSizeOf())
+	DefSetterMem(platform::unitlength_type, Width, GetSizeOf())
+	DefSetterMem(platform::unit_type, X, GetLocationOf())
+	DefSetterMem(platform::unit_type, Y, GetLocationOf())
 
 	/*!
 	\brief 设置渲染器为指定指针指向的对象，同时更新渲染器状态。
 	\note 若指针为空，则使用以当前部件边界新建的 HUDRenderer 对象。
 	*/
 	void
-	SetRenderer(std::unique_ptr<HUDRenderer>);
+	SetRenderer(std::shared_ptr<HUDRenderer>);
 
 
 	/*!

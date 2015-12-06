@@ -22,10 +22,11 @@ namespace leo
 	private:
 		level_type level;
 	public:
-		logged_event(const std::string&, level_type);
-		logged_event(const general_event&, level_type);
+		logged_event(const std::string& = {}, level_type = level_type::Emergent);
+		logged_event(const general_event&, level_type = level_type::Emergent);
 
 		DefGetter(const lnothrow, level_type, Level, level);
+		DefDeCopyCtor(logged_event)
 
 		friend std::string format_logged_event(const logged_event& e);
 	};
