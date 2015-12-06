@@ -30,6 +30,10 @@ private:
 	*/
 	FontStyle style;
 public:
+	Font()
+		:Font(DefaultSize, FontStyle::Regular)
+	{}
+
 	explicit
 	Font(FontSize = DefaultSize,
 			FontStyle = FontStyle::Regular);
