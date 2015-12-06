@@ -45,6 +45,9 @@
     <Filter Include="HUD">
       <UniqueIdentifier>{e0bb6683-52d6-4e7a-805e-e2f41089eef3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{0449c545-f102-4a16-9140-edd9281b60a9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -203,6 +206,15 @@
     <ClCompile Include="HUD\HUDControl.cpp">
       <Filter>HUD</Filter>
     </ClCompile>
+    <ClCompile Include="UI\Font.cpp">
+      <Filter>WinMain</Filter>
+    </ClCompile>
+    <ClCompile Include="HUD\Label.cpp">
+      <Filter>HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="HUD\HUDImpl.cpp">
+      <Filter>WinMain</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -280,6 +292,15 @@
       <Filter>HUD</Filter>
     </ClInclude>
     <ClInclude Include="HUD\HUDControl.h">
+      <Filter>HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\Font.hpp">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\UI.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="HUD\HUDImpl.h">
       <Filter>HUD</Filter>
     </ClInclude>
   </ItemGroup>

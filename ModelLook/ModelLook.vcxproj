@@ -293,11 +293,17 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="HUD\HUDControl.cpp" />
+    <ClCompile Include="HUD\HUDImpl.cpp" />
     <ClCompile Include="HUD\HUDRenderer.cpp" />
+    <ClCompile Include="HUD\Label.cpp" />
     <ClCompile Include="HUD\Rect.cpp" />
     <ClCompile Include="HUD\Widget.cpp" />
     <ClCompile Include="HUD\WidgetEvent.cpp" />
+    <ClCompile Include="UI\Font.cpp" />
     <ClCompile Include="WinMain.cpp" />
+    <ClInclude Include="HUD\HUDImpl.h" />
+    <ClInclude Include="UI\Font.hpp" />
+    <ClInclude Include="UI\UI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\All\Core\BilateralFilter.hpp" />
