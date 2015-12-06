@@ -335,6 +335,52 @@ struct LB_API Box :public Rect
 
 };
 
+//! \relates Rect
+//@{
+/*!
+\brief 比较：屏幕标准矩形相等关系。
+\since build 319
+*/
+lconstfn PDefHOp(bool, == , const Rect& x, const Rect& y) lnothrow
+ImplRet(x.GetPoint() == y.GetPoint() && x.GetSize() == y.GetSize())
+
+/*!
+\brief 比较：屏幕标准矩形不等关系。
+\since build 319
+*/
+lconstfn PDefHOp(bool, != , const Rect& x, const Rect& y) lnothrow
+ImplRet(!(x == y))
+
+/*!
+\brief 加法：使用标准矩形 r 和偏移向量 v 构造屏幕标准矩形。
+\since build 319
+*/
+lconstfn PDefHOp(Rect, +, const Rect& r, const Vec& v) lnothrow
+ImplRet({ r.GetPoint() + v, r.GetSize() })
+
+/*!
+\brief 减法：使用标准矩形 r 和偏移向量的加法逆元 v 构造屏幕标准矩形。
+\since build 319
+*/
+lconstfn PDefHOp(Rect, -, const Rect& r, const Vec& v) lnothrow
+ImplRet({ r.GetPoint() - v, r.GetSize() })
+
+/*!
+\brief 求两个屏幕标准矩形的交。
+\sa Rect::operator&=
+\since build 555
+*/
+inline PDefHOp(Rect, &, const Rect& x, const Rect& y) lnothrow
+ImplRet(Rect(x) &= y)
+
+/*!
+\brief 求两个屏幕标准矩形的并。
+\sa Rect::operator|=
+\since build 555
+*/
+inline PDefHOp(Rect, | , const Rect& x, const Rect& y) lnothrow
+ImplRet(Rect(x) |= y)
+
 /*!
 \brief 剪切操作：取标准矩形交集并判断是否严格非空。
 \since build 372

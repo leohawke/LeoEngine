@@ -83,7 +83,7 @@ Widget::~Widget()
 void
 Widget::InitializeEvents()
 {
-	(FetchEvent<Paint>(*this).Add(std::ref(Background), BackgroundPriority))
+	(FetchEvent<VisualEvent::Paint>(*this).Add(std::ref(Background), BackgroundPriority))
 		+= std::bind(&Widget::Refresh, this, std::placeholders::_1);
 }
 

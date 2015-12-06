@@ -95,6 +95,7 @@ public:
 	\note 当指针为空时新建缓冲区。
 	*/
 	BufferedRenderer(bool = {},std::shared_ptr<IImage> = {});
+	//note 会copy一份IImage
 	BufferedRenderer(const BufferedRenderer&);
 	DefDeMoveCtor(BufferedRenderer)
 
@@ -124,7 +125,7 @@ public:
 	void
 	SetSize(const Size&) override;
 	void
-	SetImageBuffer(std::shared_ptr<IImage>);
+	SetImageBuffer(std::shared_ptr<IImage>,bool clone = false);
 
 	DefClone(const override, BufferedRenderer)
 

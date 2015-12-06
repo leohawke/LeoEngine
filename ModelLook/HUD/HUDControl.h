@@ -38,7 +38,7 @@ public:
 		\since build 581
 		*/
 		virtual PDefH(bool, IsEventEnabled, VisualEvent id) const
-		ImplRet(id == Paint)
+		ImplRet(id == VisualEvent::Paint)
 
 		/*!
 		\brief 取事件项。

@@ -83,7 +83,7 @@ HUD_BEGIN
 	/*!
 	\brief 标准控件事件空间。
 	*/
-	enum VisualEvent {
+	enum class VisualEvent {
 		Move,
 		ReSize,
 		Paint,
@@ -96,7 +96,7 @@ HUD_BEGIN
 		//	using HandlerType = HEvent;
 	};
 
-	DefEventTypeMapping(Paint, HPaintEvent)
+	DefEventTypeMapping(VisualEvent::Paint, HPaintEvent)
 
 	/*!
 	\brief 事件映射命名空间。

@@ -91,6 +91,30 @@ namespace leo
 	};
 
 
+	/*!
+	\brief 使用 new 复制指定指针指向的对象。
+	*/
+	template<typename _type>
+	lconstfn auto
+		CloneNonpolymorphic(const _type& p) -> decltype(&*p)
+	{
+		return new typename std::remove_reference_t<decltype(*p)>(*p);
+	}
+
+	/*!
+	\brief 使用 clone 成员函数复制指定指针指向的多态类类型对象。
+	\pre 断言： std::is_polymorphic<decltype(*p)>::value 。
+	*/
+	template<class _type>
+	auto
+		ClonePolymorphic(const _type& p) -> decltype(&*p)
+	{
+		static_assert(std::is_polymorphic<std::remove_reference_t<decltype(*p)>>
+			::value, "Non-polymorphic class type found.");
+
+		return p->clone();
+	}
+
 	/*
 	\see ISO WG21/N3797 20.2.3[utility.exchange] 。
 	\see http://www.open-std.org/JTC1/sc22/WG21/docs/papers/2013/n3668.html 。

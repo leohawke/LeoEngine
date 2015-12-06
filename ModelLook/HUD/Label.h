@@ -15,7 +15,7 @@
 #ifndef HUD_LABEL_H
 #define HUD_LABEL_H
 
-#include "HUD.h"
+#include "Widget.h"
 
 LEO_BEGIN
 
