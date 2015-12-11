@@ -303,6 +303,12 @@
     <ClInclude Include="HUD\HUDImpl.h">
       <Filter>HUD</Filter>
     </ClInclude>
+    <ClInclude Include="HUD\HostRenderer.h">
+      <Filter>HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\Core\HUDPseudoWindow.h.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="The LeoEngine Terrain File.tpl">
