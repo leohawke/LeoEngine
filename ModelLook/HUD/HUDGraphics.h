@@ -142,7 +142,7 @@ using Graphics = GGraphics<BitmapPtr>;
 
 /*!
 \brief 图像接口。
-\warning 该类底层实现一定是一个leo::texture2d_wrapper对象
+\warning 该类底层实现一定是一个leo::HUD::details::hud_tex_wrapper对象
 */
 DeclDerivedI(LB_API, IImage,cloneable)
 DeclIEntry(Graphics GetContext() const lnothrow)

@@ -339,14 +339,12 @@ struct LB_API Box :public Rect
 //@{
 /*!
 \brief 比较：屏幕标准矩形相等关系。
-\since build 319
 */
 lconstfn PDefHOp(bool, == , const Rect& x, const Rect& y) lnothrow
 ImplRet(x.GetPoint() == y.GetPoint() && x.GetSize() == y.GetSize())
 
 /*!
 \brief 比较：屏幕标准矩形不等关系。
-\since build 319
 */
 lconstfn PDefHOp(bool, != , const Rect& x, const Rect& y) lnothrow
 ImplRet(!(x == y))

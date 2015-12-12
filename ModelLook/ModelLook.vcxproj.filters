@@ -221,6 +221,9 @@
     <ClCompile Include="HUD\HUDImpl.cpp">
       <Filter>HUD</Filter>
     </ClCompile>
+    <ClCompile Include="HUD\HUDGraphics.cpp">
+      <Filter>HUD</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -320,6 +323,12 @@
     </ClInclude>
     <ClInclude Include="HUD\HUDContainer.h">
       <Filter>HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\RenderSystem\Texture.hpp">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\RenderSystem\TextureX.hpp">
+      <Filter>RenderSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
