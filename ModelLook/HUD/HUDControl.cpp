@@ -1,3 +1,4 @@
+#include "Widget.h"
 #include "WidgetEvent.h"
 
 LEO_BEGIN
@@ -19,6 +20,25 @@ WidgetController::GetItem(VisualEvent id) const
 	throw BadEvent();
 }
 
+Control::Control(const Rect& r)
+	:Widget(r,new HUDRenderer(),new Controller(true, parameterize_static_object<const ControlEventMap>()))
+{}
+
+Control::Control(const Rect & r, HBrush b)
+	:Control(r)
+{
+	Background = b;
+}
+
+Control::Control(const Control & ctl)
+	:Widget(ctl)
+{
+}
+
+ImplDeDtor(Control)
+
 HUD_END
 
 LEO_END
+
+

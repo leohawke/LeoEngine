@@ -5,6 +5,7 @@
 #include <type_traits>
 
 #include "leoint.hpp"
+#include <utility.hpp>
 #include <tuple.hpp>
 #include "platform.h"
 #include "Core\COM.hpp"
@@ -349,7 +350,7 @@ namespace leo
 		template<typename P,typename... S>
 		void ContextSet(P&& f, S... args) {
 			typename type_list<S...>::type<0>  ss[] = {args...};
-			f(0, ss);
+			f(leo::arrlen(ss) , ss);
 		}
 
 	

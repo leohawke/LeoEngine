@@ -3,7 +3,7 @@
 //  Leo Engine Source File.
 //  Copyright (C), FNS Studios, 2014-2015.
 // -------------------------------------------------------------------------
-//  File name:   HUD/Label.hpp
+//  File name:   HUD/Widget.hpp
 //  Version:     v1.00
 //  Created:     11/24/2015 by leo hawke.
 //  Compilers:   Visual Studio.NET 2015
@@ -152,9 +152,9 @@ public:
 	*/
 	template<typename _tRenderer, typename _tController>
 	explicit inline
-		Widget(_tRenderer&& pRenderer_ = std::make_shared<HUDRenderer>(),
+		Widget(const Rect& r = {},_tRenderer&& pRenderer_ = std::make_shared<HUDRenderer>(),
 			_tController&& pController_ = {})
-		: renderer_ptr(lforward(pRenderer_)),
+		:Widget(r),renderer_ptr(lforward(pRenderer_)),
 		controller_ptr(lforward(pController_)), Background()
 	{
 		LAssertNonnull(renderer_ptr);

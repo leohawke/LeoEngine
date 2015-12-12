@@ -212,8 +212,14 @@
     <ClCompile Include="HUD\Label.cpp">
       <Filter>HUD</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\Core\HUDPseudoWindow.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="HUD\HUDHostRenderer.cpp">
+      <Filter>HUD</Filter>
+    </ClCompile>
     <ClCompile Include="HUD\HUDImpl.cpp">
-      <Filter>WinMain</Filter>
+      <Filter>HUD</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -303,11 +309,17 @@
     <ClInclude Include="HUD\HUDImpl.h">
       <Filter>HUD</Filter>
     </ClInclude>
-    <ClInclude Include="HUD\HostRenderer.h">
+    <ClInclude Include="HUD\HUDHostRenderer.h">
       <Filter>HUD</Filter>
     </ClInclude>
-    <ClInclude Include="..\All\Core\HUDPseudoWindow.h.h">
+    <ClInclude Include="..\All\Core\HUDPseudoWindow.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="HUD\HUDPanel.h">
+      <Filter>HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="HUD\HUDContainer.h">
+      <Filter>HUD</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

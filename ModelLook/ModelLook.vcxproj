@@ -215,6 +215,7 @@
     <ClCompile Include="..\All\Core\FileSearch.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\All\Core\HUDPseudoWindow.cpp" />
     <ClCompile Include="..\All\Core\Light.cpp" />
     <ClCompile Include="..\All\Core\Mesh.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
@@ -266,7 +267,7 @@
     </ClCompile>
     <ClCompile Include="..\All\RenderSystem\DeferredRender.cpp" />
     <ClCompile Include="..\All\RenderSystem\DepthStencil.cpp" />
-    <ClInclude Include="..\All\Core\HUDPseudoWindow.h.h" />
+    <ClInclude Include="..\All\Core\HUDPseudoWindow.h" />
     <ClInclude Include="..\All\RenderSystem\BlurProcess.h" />
     <ClInclude Include="..\All\RenderSystem\CopyProcess.hpp" />
     <ClInclude Include="..\All\RenderSystem\DRLightImpl.inl">
@@ -294,6 +295,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="HUD\HUDControl.cpp" />
+    <ClCompile Include="HUD\HUDHostRenderer.cpp" />
     <ClCompile Include="HUD\HUDImpl.cpp" />
     <ClCompile Include="HUD\HUDRenderer.cpp" />
     <ClCompile Include="HUD\Label.cpp" />
@@ -302,8 +304,10 @@
     <ClCompile Include="HUD\WidgetEvent.cpp" />
     <ClCompile Include="UI\Font.cpp" />
     <ClCompile Include="WinMain.cpp" />
-    <ClInclude Include="HUD\HostRenderer.h" />
+    <ClInclude Include="HUD\HUDContainer.h" />
+    <ClInclude Include="HUD\HUDHostRenderer.h" />
     <ClInclude Include="HUD\HUDImpl.h" />
+    <ClInclude Include="HUD\HUDPanel.h" />
     <ClInclude Include="UI\Font.hpp" />
     <ClInclude Include="UI\UI.h" />
   </ItemGroup>

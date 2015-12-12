@@ -2,7 +2,7 @@
 #define HUD_Control_H
 
 #include <type_traits>
-
+#include <bitset>
 LEO_BEGIN
 
 HUD_BEGIN
@@ -72,6 +72,53 @@ public:
 };
 
 
+class LB_API Controller : public AController
+{
+public:
+	/*!
+	\brief 事件映射表。
+	*/
+	mutable EventMapping::MapType EventMap;
+
+private:
+	/*!
+	\brief 指定是否启用的掩码。
+	*/
+	std::bitset<static_cast<std::size_t>(VisualEvent::MaxEvent)> event_mask;
+
+public:
+	explicit
+		Controller(bool b)
+		: AController(b), EventMap()
+	{}
+	//! \since build 368
+	template<typename... _tParams>
+	Controller(bool b, _tParams&&... args)
+		: AController(b), EventMap(lforward(args)...)
+	{}
+
+	//! \since build 581
+	//@{
+	PDefH(bool, IsEventEnabled, VisualEvent id) const ImplI(AController)
+		ImplRet(AController::IsEnabled() && !event_mask[static_cast<std::size_t>(id)])
+
+		PDefH(EventMapping::ItemType&, GetItem, VisualEvent id) const
+		ImplI(AController)
+		ImplRet(EventMap.at(id))
+		EventMapping::ItemType&
+		GetItemRef(VisualEvent, EventMapping::MappedType(&)()) const override;
+	//@}
+	//! \brief 取事件映射表。
+	DefGetter(const lnothrow, EventMapping::MapType&, EventMap, EventMap)
+
+		PDefH(void, SetEventEnabled, VisualEvent id, bool b) ImplI(AController)
+		ImplExpr(event_mask[static_cast<std::size_t>(id)] = !b)
+
+		//! \since build 409
+		DefClone(const ImplI(AController), Controller)
+};
+
+
 /*!
 \ingroup helper_functions
 \brief 取部件事件。
@@ -130,6 +177,30 @@ public:
 	DefClone(const ImplI(AController), WidgetController)
 };
 
+
+class LB_API Control :public Widget
+{
+protected:
+	DefExtendEventMap(LB_API ControlEventMap,VisualEventMap)
+public:
+	explicit
+		Control(const Rect& = {});
+	/*!
+	\brief 构造：使用指定边界和背景画刷。
+	\sa Control::Control
+	*/
+	explicit
+		Control(const Rect&, HBrush);
+	/*!
+	\brief 复制构造：除容器为空外深复制。
+	*/
+	Control(const Control&);
+	DefDeMoveCtor(Control)
+	/*!
+	\brief 虚析构：类定义外默认实现。
+	*/
+	~Control() override;
+};
 
 HUD_END
 

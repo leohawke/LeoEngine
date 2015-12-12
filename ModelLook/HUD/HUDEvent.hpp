@@ -629,6 +629,10 @@ namespace HUD
 		lconstfn DefCvt(const lnothrow, const ItemType&, *ptr)
 		lconstfn DefCvt(const lnothrow, ItemType&, *ptr)
 	};
+
+
+#define DefExtendEventMap(_n, _b) \
+	DefExtendClass(LB_API, _n, public _b)
 }
 
 LEO_END

@@ -83,10 +83,12 @@ HUD_BEGIN
 	/*!
 	\brief 标准控件事件空间。
 	*/
-	enum class VisualEvent {
+	enum class VisualEvent:std::size_t {
 		Move,
 		ReSize,
 		Paint,
+
+		MaxEvent,
 	};
 
 	template<VisualEvent>
