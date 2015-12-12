@@ -53,9 +53,6 @@ float3 ToneMapping(float3 color, float3 blur, float adapted_lum) {
 	return F(g_fMiddleGray * 1.6f * adapted_lum_dest * color) / F(White);
 }
 
-// The per-color weighting to be used for blue shift under low light.
-static const float3 BLUE_SHIFT_VECTOR = float3(1.05f, 0.97f, 1.27f);
-
 #include <utility>
 
 float4 HDRFinal

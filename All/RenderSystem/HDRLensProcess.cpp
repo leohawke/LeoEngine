@@ -107,7 +107,10 @@ leo::HDRProcess::HDRLensProcess::HDRLensProcess(ID3D11Device * create, ID3D11Tex
 		}
 	}
 
+	//fix tex_size error
 	{
+		desc.Width = width / 2 ;
+		desc.Height = height / 2 ;
 		leo::win::unique_com<ID3D11Texture2D> lens_tex;
 		leo::dxcall(create->CreateTexture2D(&desc, nullptr, &lens_tex));
 		leo::dxcall(create->CreateRenderTargetView(lens_tex, nullptr, &glow_output));
