@@ -24,6 +24,10 @@ WidgetController::GetItem(VisualEvent id) const
 	throw BadEvent();
 }
 
+Control::ControlEventMap::ControlEventMap()
+{
+}
+
 Control::Control(const Rect& r)
 	:Widget(r,new HUDRenderer(),new Controller(true, parameterize_static_object<const ControlEventMap>()))
 {}

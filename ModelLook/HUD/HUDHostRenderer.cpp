@@ -16,7 +16,7 @@ void HostRenderer::SetSize(const Size & s)
 
 void HostRenderer::Render()
 {
-	if(!window->IsMinimized())
+	if(!window->IsMined())
 	{
 		//AdjustSize();
 

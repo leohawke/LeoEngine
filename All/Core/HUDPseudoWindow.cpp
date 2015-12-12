@@ -41,7 +41,7 @@ void HUDPseudoWindow::Render()
 	pImpl->Render();
 }
 
-bool HUDPseudoWindow::IsMinimized()
+bool HUDPseudoWindow::IsMined()
 {
 	return false;
 }

@@ -28,10 +28,10 @@ class LB_API HostRenderer : public BufferedRenderer
 private:
 	lref<IWidget> widget;
 	std::unique_ptr<HUDPseudoWindow> window;
-
+public:
 	template<typename... Args>
 	HostRenderer(IWidget& wgt,Args&&... args)
-		:BufferedRenderer(),widget(wgt),window(std::make_unique<HUDPseudoWindow>(*this,lforward(args))){
+		:BufferedRenderer(),widget(wgt),window(std::make_unique<HUDPseudoWindow>(*this,lforward(args)...)){
 		InitWidgetView();
 	}
 

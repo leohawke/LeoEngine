@@ -38,7 +38,7 @@ public:
 
 	void Render();
 
-	bool IsMinimized();
+	bool IsMined();
 
 	~HUDPseudoWindow();
 

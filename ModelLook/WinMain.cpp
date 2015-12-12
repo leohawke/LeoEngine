@@ -21,6 +21,11 @@
 #include <Core\Light.hpp>
 #include <Core\Sky.hpp>
 #include <Input.h>//to core!
+
+//third,HUD
+#include "HUD\HUDHostRenderer.h"
+#include "HUD\HUDPanel.h"
+
 //Effect header
 #include <Core\EffectGBuffer.hpp>
 #include <RenderSystem\DeferredRender.hpp>
@@ -42,6 +47,9 @@ std::unique_ptr<leo::CastShadowCamera> pShaderCamera;
 std::unique_ptr<leo::DeferredRender> pRender = nullptr;
 std::unique_ptr<leo::Terrain<>> pTerrain = nullptr;
 std::unique_ptr<leo::Sky> pSky = nullptr;
+
+std::unique_ptr<leo::HUD::HostRenderer> pHUDHostRender = nullptr;
+std::unique_ptr<leo::HUD::Panel> pPanel = nullptr;
 
 std::atomic<bool> renderAble = false;
 std::atomic<bool> renderThreadRun = true;
@@ -330,6 +338,8 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	//pTerrain = std::make_unique<leo::Terrain<>>(device, L"Resource\\Test.Terrain");
 	BuildLight(leo::DeviceMgr().GetDevice());
 
+	pPanel = std::make_unique<leo::HUD::Panel>();
+	pHUDHostRender = std::make_unique<leo::HUD::HostRenderer>(*pPanel);
 }
 
 void ClearRes() {
@@ -339,6 +349,9 @@ void ClearRes() {
 	pTerrain.reset(nullptr);
 	pSky.reset(nullptr);
 	pRender.reset(nullptr);
+
+	pHUDHostRender.reset(nullptr);
+	pPanel.reset(nullptr);
 
 	ClearLight();
 }
@@ -431,6 +444,8 @@ void Render()
 			pSky->Render(devicecontext, *pCamera);
 		}
 		
+		//pHUDHostRender->Render();
+
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 
 		leo::RenderSync::GetInstance()->Present();

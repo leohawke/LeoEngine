@@ -16,6 +16,7 @@
 #define HUD_WIDGETCCV_H
 
 #include "Widget.h"
+#include "HUDControl.h"
 #include "HUDContainer.h"
 LEO_BEGIN
 

@@ -140,6 +140,7 @@ void leo::HDRProcess::HDRLensProcess::Apply(ID3D11DeviceContext * context)
 	context->PSSetShaderResources(1, 1, &glow_input[1]);
 	context->PSSetShaderResources(2, 1, &glow_input[2]);
 	glow_merger->Draw(context, glow_input[0], glow_output);
+	context->OMSetRenderTargets(1, &rt, nullptr);
 }
 
 ID3D11ShaderResourceView * leo::HDRProcess::HDRLensProcess::Output()
