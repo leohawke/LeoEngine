@@ -48,6 +48,12 @@
     <Filter Include="UI">
       <UniqueIdentifier>{0449c545-f102-4a16-9140-edd9281b60a9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="RenderSystem\D3D11">
+      <UniqueIdentifier>{7bc9d987-f7a1-4167-a879-7c5f760ae7de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RenderSystem\OpenGL">
+      <UniqueIdentifier>{b8ab8338-2910-4143-bcf9-f8114c406082}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -224,6 +230,18 @@
     <ClCompile Include="HUD\HUDGraphics.cpp">
       <Filter>HUD</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\Texture.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\TextureX.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\RenderSystem.cpp">
+      <Filter>WinMain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\D3D11\D3D11Texture.cpp">
+      <Filter>RenderSystem\D3D11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -329,6 +347,12 @@
     </ClInclude>
     <ClInclude Include="..\All\RenderSystem\TextureX.hpp">
       <Filter>RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\RenderSystem\RenderSystem.h">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\RenderSystem\D3D11\D3D11Texture.hpp">
+      <Filter>RenderSystem\D3D11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

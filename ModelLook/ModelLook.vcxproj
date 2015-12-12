@@ -261,6 +261,7 @@
     </ClCompile>
     <ClCompile Include="..\All\RenderSystem\BlurProcess.cpp" />
     <ClCompile Include="..\All\RenderSystem\CopyProcess.cpp" />
+    <ClCompile Include="..\All\RenderSystem\D3D11\D3D11Texture.cpp" />
     <ClCompile Include="..\All\RenderSystem\d3dx11.cpp" />
     <ClCompile Include="..\All\RenderSystem\Deferred.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
@@ -270,6 +271,7 @@
     <ClInclude Include="..\All\Core\HUDPseudoWindow.h" />
     <ClInclude Include="..\All\RenderSystem\BlurProcess.h" />
     <ClInclude Include="..\All\RenderSystem\CopyProcess.hpp" />
+    <ClInclude Include="..\All\RenderSystem\D3D11\D3D11Texture.hpp" />
     <ClInclude Include="..\All\RenderSystem\DRLightImpl.inl">
       <FileType>CppCode</FileType>
     </ClInclude>
@@ -278,7 +280,10 @@
     <ClCompile Include="..\All\RenderSystem\HDRStatProcess.cpp" />
     <ClCompile Include="..\All\RenderSystem\PostProcess.cpp" />
     <ClCompile Include="..\All\RenderSystem\RenderStates.cpp" />
+    <ClCompile Include="..\All\RenderSystem\RenderSystem.cpp" />
     <ClCompile Include="..\All\RenderSystem\ShaderMgr.cpp" />
+    <ClCompile Include="..\All\RenderSystem\Texture.cpp" />
+    <ClCompile Include="..\All\RenderSystem\TextureX.cpp" />
     <ClCompile Include="..\All\TextureMgr.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
@@ -305,6 +310,7 @@
     <ClCompile Include="HUD\WidgetEvent.cpp" />
     <ClCompile Include="UI\Font.cpp" />
     <ClCompile Include="WinMain.cpp" />
+    <ClInclude Include="..\All\RenderSystem\RenderSystem.h" />
     <ClInclude Include="..\All\RenderSystem\Texture.hpp" />
     <ClInclude Include="..\All\RenderSystem\TextureX.hpp" />
     <ClInclude Include="HUD\HUDContainer.h" />
