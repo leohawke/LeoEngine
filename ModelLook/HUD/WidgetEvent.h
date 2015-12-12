@@ -153,13 +153,74 @@ HUD_BEGIN
 		return dynamic_cast<GEvent<typename EventTypeMapping<_vID>::HandlerType
 			::FuncType>&>(controller.GetItemRef(_vID, NewEvent<_vID>));
 	}
-HUD_END
-LEO_END
 
-#include "HUDControl.h"
 
-LEO_BEGIN
-HUD_BEGIN
+	/*!
+	\brief 抽象控制器。
+	\since build 243
+	*/
+	class LB_API AController : public cloneable
+	{
+	private:
+		bool enabled; //!< 控件可用性。
+
+	public:
+		/*!
+		\brief 构造：使用指定可用性。
+		*/
+		AController(bool b = true)
+			: enabled(b)
+		{}
+		//! \since build 586
+		DefDeCopyCtor(AController)
+			/*!
+			\brief 虚析构：类定义外默认实现。
+			\since build 295
+			*/
+			~AController() override;
+
+		DefPred(const lnothrow, Enabled, enabled)
+			/*!
+			\brief 判断指定事件是否启用。
+			\note 默认实现：仅启用 Paint 事件。
+			\since build 581
+			*/
+			virtual PDefH(bool, IsEventEnabled, VisualEvent id) const
+			ImplRet(id == VisualEvent::Paint)
+
+			/*!
+			\brief 取事件项。
+			\since build 581
+			*/
+			DeclIEntry(EventMapping::ItemType& GetItem(VisualEvent) const)
+			/*!
+			\brief 取事件项，若不存在则用指定函数指针添加。
+			\note 派生类的实现可能抛出异常并忽略加入任何事件项。
+			\since build 581
+			*/
+			virtual PDefH(EventMapping::ItemType&, GetItemRef, VisualEvent id,
+				EventMapping::MappedType(&)()) const
+			ImplRet(GetItem(id))
+
+			DefSetter(bool, Enabled, enabled)
+			/*!
+			\brief 设置指定事件是否启用。
+			\throw ystdex::unsupported 不支持设置事件启用操作。
+			\note 默认实现：总是抛出异常。
+			\since build 581
+			*/
+			virtual PDefH(void, SetEventEnabled, VisualEvent, bool)
+			ImplThrow(unsupported("AController::SetEventEnabled"))
+
+			/*
+			\brief 复制实例。
+			\since build 409
+			*/
+			DeclIEntry(AController* clone() const ImplI(cloneable))
+	};
+
+
+
 template<class _tEventHandler>
 size_t
 DoEvent(AController& controller, VisualEvent id,
@@ -171,6 +232,13 @@ DoEvent(AController& controller, VisualEvent id,
 		CatchIgnore(std::bad_cast&)
 		return 0;
 }
+
+/*!
+\brief 在事件映射表中取指定 id 对应的事件。
+*/
+LB_API EventMapping::ItemType&
+GetEvent(EventMapping::MapType&, VisualEvent, EventMapping::MappedType(&)());
+
 HUD_END
 LEO_END
 

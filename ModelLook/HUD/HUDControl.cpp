@@ -1,11 +1,15 @@
-#include "Widget.h"
-#include "WidgetEvent.h"
+#include "HUDControl.h"
 
 LEO_BEGIN
 
 HUD_BEGIN
 
 ImplDeDtor(AController)
+EventMapping::ItemType&
+Controller::GetItemRef(VisualEvent id, EventMapping::MappedType(&f)()) const
+{
+	return GetEvent(EventMap, id, f);
+}
 
 WidgetController::WidgetController(bool b)
 	: AController(b),

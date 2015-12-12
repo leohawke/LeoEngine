@@ -62,6 +62,8 @@ inline PDefH(bool, IsVisible, const IWidget& wgt)
 ImplRet(wgt.IsVisible())
 
 LB_API void SetBox(IWidget&, const Box&);
+LB_API void SetBoundsOf(IWidget& wgt, const Rect& r);
+
 
 /*!
 \brief 设置部件左上角所在位置（相对容器的偏移坐标）。
@@ -154,10 +156,11 @@ public:
 	explicit inline
 		Widget(const Rect& r = {},_tRenderer&& pRenderer_ = std::make_shared<HUDRenderer>(),
 			_tController&& pController_ = {})
-		:Widget(r),renderer_ptr(lforward(pRenderer_)),
+		:renderer_ptr(lforward(pRenderer_)),
 		controller_ptr(lforward(pController_)), Background()
 	{
 		LAssertNonnull(renderer_ptr);
+		SetBoundsOf(*this, r);
 		InitializeEvents();
 	}
 	/*!

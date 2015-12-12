@@ -1,3 +1,4 @@
+
 #include "HUDHostRenderer.h"
 
 LEO_BEGIN
@@ -10,7 +11,7 @@ HostRenderer::~HostRenderer()
 void HostRenderer::SetSize(const Size & s)
 {
 	BufferedRenderer::SetSize(s);
-	window->Resize({ s.GetWidth(),s.GetHeight() });
+	window->Resize({ static_cast<uint16>(s.GetWidth()),static_cast<uint16>(s.GetHeight())});
 }
 
 void HostRenderer::Render()

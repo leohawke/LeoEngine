@@ -43,7 +43,7 @@ public:
 	~HUDPseudoWindow();
 
 private:
-	class HUDPseudoWindowImpl;
+	struct HUDPseudoWindowImpl;
 	std::unique_ptr<HUDPseudoWindowImpl> pImpl;
 };
 

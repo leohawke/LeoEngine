@@ -1,4 +1,5 @@
 #include "Widget.h"
+#include "HUDControl.h"
 #include "HUDUtilities.h"
 LEO_BEGIN
 

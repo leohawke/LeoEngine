@@ -1,8 +1,8 @@
 #include <LAssert.h>
 #include "Widget.h"
 #include "HUDRenderer.h"
-#include "HUDControl.h"
 #include "HUDUtilities.h"
+#include "HUDControl.h"
 
 LEO_BEGIN
 
