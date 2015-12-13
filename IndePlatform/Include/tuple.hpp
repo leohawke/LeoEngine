@@ -178,6 +178,8 @@ namespace leo
 		using type = variadic_sequence<>;
 	};
 
+	template<typename... _types>
+	using index_sequence_for = make_index_sequence<sizeof...(_types)>;
 #endif
 
 	template<class... Args>

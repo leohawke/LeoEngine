@@ -107,6 +107,8 @@
     <ClInclude Include="Include\functional.hpp" />
     <ClInclude Include="Include\Geometry.hpp" />
     <ClInclude Include="Include\Geometry_impl.hpp" />
+    <ClInclude Include="Include\id.hpp" />
+    <ClInclude Include="Include\intrusive_ptr.hpp" />
     <ClInclude Include="Include\iterator.hpp" />
     <ClInclude Include="Include\LAssert.h" />
     <ClInclude Include="Include\ldef.h" />
