@@ -17,15 +17,15 @@ namespace leo{
 				return name;
 			}
 
-			uint32_t Width(uint32_t /*level*/) const override
+			uint16 Width(uint8 /*level*/) const override
 			{
 				return 0;
 			}
-			uint32_t Height(uint32_t /*level*/) const override
+			uint16 Height(uint8 /*level*/) const override
 			{
 				return 0;
 			}
-			uint32_t Depth(uint32_t /*level*/) const override
+			uint16 Depth(uint8 /*level*/) const override
 			{
 				return 0;
 			}
@@ -35,18 +35,17 @@ namespace leo{
 	TexturePtr Texture::NullTexture = std::make_shared<details::NullTexture>(Texture::DT_2D, 0,SampleDesc());
 
 	
-
 	Texture::Texture(Dis_Type type, uint32 access, SampleDesc sample_info)
 	{
 	}
 	ImplDeDtor(Texture)
 
-	uint32_t Texture::NumMipMaps() const
+	uint8 Texture::NumMipMaps() const
 	{
 		return mNumMipMaps;
 	}
 
-	uint32_t Texture::ArraySize() const
+	uint8 Texture::ArraySize() const
 	{
 		return mArraySize;
 	}

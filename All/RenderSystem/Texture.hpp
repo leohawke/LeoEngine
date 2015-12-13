@@ -18,9 +18,11 @@
 #include <ldef.h>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <utility.hpp>
 #include <leoint.hpp>
 #include <BaseMacro.h>
+#include <LAssert.h>
 
 namespace leo {
 	//Todo,define in a common header file
@@ -28,6 +30,30 @@ namespace leo {
 	\brief ElementFormat：元素数据及类型格式。
 	*/
 	enum class EFormat;
+
+	/*
+	\brief ElementAccess元素访问方式
+	*/
+	//C = CPU
+	//G = GPU
+	//R = Read
+	//W = Write
+	//U = Unordered
+	//S = Structured
+	//I = Immutable
+	//R = Raw
+	//A = Append
+	//M = Generate_Mips
+	//S= Counter
+	//D = DrawIndirectArgs
+	enum EAccess:uint32 {
+		EA_C_R = 1U << 0,//ElementAccess_CPU_READ
+		EA_C_W = 1U << 1,//ElementAccess_CPU_Write
+		EA_G_R = 1U << 2,//ElementAccess_GPU_Read
+		EA_G_W = 1U << 3,//ElementAccess_GPU_Write
+		EA_G_U = 1U << 4,//ElementAccess_GPU_Unordered
+		EA_I = 1U << 7,//ElementAccess_Immutable
+	};
 
 	struct SampleDesc {
 		uint32 Count = 1;
@@ -83,16 +109,16 @@ namespace leo {
 		virtual std::string const & Name() const = 0;
 
 		// Gets the number of mipmaps to be used for this texture.
-		uint32_t NumMipMaps() const;
+		uint8 NumMipMaps() const;
 		// Gets the size of texture array
-		uint32_t ArraySize() const;
+		uint8 ArraySize() const;
 
 		// Returns the width of the texture.
-		virtual uint32_t Width(uint32_t level) const = 0;
+		virtual uint16 Width(uint8 level) const = 0;
 		// Returns the height of the texture.
-		virtual uint32_t Height(uint32_t level) const = 0;
+		virtual uint16 Height(uint8 level) const = 0;
 		// Returns the depth of the texture (only for 3D texture).
-		virtual uint32_t Depth(uint32_t level) const = 0;
+		virtual uint16 Depth(uint8 level) const = 0;
 
 		// Returns the pixel format for the texture surface.
 		EFormat Format() const;
@@ -105,8 +131,8 @@ namespace leo {
 		uint32_t Access() const;
 
 	private:
-		uint32_t		mNumMipMaps;
-		uint32_t		mArraySize;
+		uint8		mNumMipMaps;
+		uint8		mArraySize;
 
 		EFormat	mFormat;
 		Dis_Type		mDimension;

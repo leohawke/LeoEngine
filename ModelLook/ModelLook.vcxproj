@@ -271,6 +271,7 @@
     <ClInclude Include="..\All\Core\HUDPseudoWindow.h" />
     <ClInclude Include="..\All\RenderSystem\BlurProcess.h" />
     <ClInclude Include="..\All\RenderSystem\CopyProcess.hpp" />
+    <ClInclude Include="..\All\RenderSystem\D3D11\d3d11.min.h" />
     <ClInclude Include="..\All\RenderSystem\D3D11\D3D11Texture.hpp" />
     <ClInclude Include="..\All\RenderSystem\DRLightImpl.inl">
       <FileType>CppCode</FileType>
