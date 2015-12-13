@@ -3,6 +3,7 @@
 
 #include "type_op.hpp"
 #include "tuple.hpp"
+#include "id.hpp"
 #include <functional>
 #include <string>
 
@@ -277,103 +278,6 @@ namespace leo
 				std::forward_as_tuple(lforward(args)...));
 		}
 	};
-
-	//散列扩展接口
-	//ref http://www.boost.org/doc/libs/1_54_0/doc/html/hash/reference.html#boost.hash_combine
-	//重复计算散列(1UL<<31)/((1+std::sqrt(5)/4) == 0X9E3779B9
-	template<typename _type>
-	inline void
-		hash_combine(size_t& seed, const _type& val)
-	{
-		seed ^= std::hash<_type>()(val)+0x9E3779B9 + (seed << 6) + (seed >> 2);
-	}
-
-	template<typename _type>
-	lconstfn size_t
-		hash_combine_seq(size_t seed, const _type& val)
-	{
-		return leo::hash_combine(seed, val), seed;
-	}
-	template<typename _type, typename... _tParams>
-	lconstfn size_t
-		hash_combine_seq(size_t seed, const _type& x, const _tParams&... args)
-	{
-		return leo::hash_combine_seq(leo::hash_combine_seq(seed, x), args...);
-	}
-
-	template<typename _tIn>
-	inline size_t
-		hash_range(_tIn first, _tIn last)
-	{
-		size_t seed(0);
-
-		for (; first != last; ++first)
-			hash_combine(seed, *first);
-		return seed;
-	}
-	template<typename _tIn>
-	inline size_t
-		hash_range(size_t& seed, _tIn first, _tIn last)
-	{
-		for (; first != last; ++first)
-			hash_combine(seed, *first);
-		return seed;
-	}
-
-	template<typename...>
-	struct combined_hash;
-
-	template<typename _type>
-	struct combined_hash<_type> : std::hash<_type>
-	{};
-
-	namespace details
-	{
-
-		template<bool, class, class>
-		struct combined_hash_tuple;
-
-		template<bool _bNoExcept, typename _type, size_t... _vSeq>
-		struct combined_hash_tuple<_bNoExcept, _type, variadic_sequence<_vSeq...>>
-		{
-			static lconstfn size_t
-				call(const _type& tp) lnoexcept(_bNoExcept)
-			{
-				return leo::hash_combine_seq(0, std::get<_vSeq>(tp)...);
-			}
-		};
-
-	} // namespace details;
-
-	template<typename... _types>
-	struct combined_hash<std::tuple<_types...>>
-	{
-	public:
-		using type = std::tuple<_types...>;
-
-#if LB_HAS_NOEXCEPT
-	private:
-		//! \brief 判断使用 noexcept 并避免 constexpr 失败。
-		static lconstexpr bool is_noexcept_v = noexcept(
-			leo::hash_combine_seq(0, std::declval<const _types&>()...));
-#else
-	private:
-		static lconstexpr bool is_noexcept_v = false;
-#endif
-
-	public:
-		lconstfn size_t
-			operator()(const type& tp) const lnoexcept(is_noexcept_v)
-		{
-			return details::combined_hash_tuple<is_noexcept_v, type,
-				make_natural_sequence_t<sizeof...(_types) >> ::call(tp);
-		}
-	};
-
-	template<typename _type1, typename _type2>
-	struct combined_hash<std::pair<_type1, _type2>>
-		: combined_hash<std::tuple<_type1, _type2>>
-	{};
 
 	//仿函数
 	struct is_equal

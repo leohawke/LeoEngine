@@ -357,6 +357,9 @@
     <ClInclude Include="..\All\RenderSystem\D3D11\d3d11.min.h">
       <Filter>RenderSystem\D3D11</Filter>
     </ClInclude>
+    <ClInclude Include="..\All\RenderSystem\EFormat.hpp">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="The LeoEngine Terrain File.tpl">

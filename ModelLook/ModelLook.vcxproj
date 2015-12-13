@@ -311,6 +311,7 @@
     <ClCompile Include="HUD\WidgetEvent.cpp" />
     <ClCompile Include="UI\Font.cpp" />
     <ClCompile Include="WinMain.cpp" />
+    <ClInclude Include="..\All\RenderSystem\EFormat.hpp" />
     <ClInclude Include="..\All\RenderSystem\RenderSystem.h" />
     <ClInclude Include="..\All\RenderSystem\Texture.hpp" />
     <ClInclude Include="..\All\RenderSystem\TextureX.hpp" />

@@ -15,50 +15,21 @@
 #ifndef ShaderSystem_Texture_Hpp
 #define ShaderSystem_Texture_Hpp
 
-#include <ldef.h>
 #include <memory>
 #include <string>
 #include <unordered_map>
+
+#include <ldef.h>
 #include <utility.hpp>
 #include <leoint.hpp>
 #include <BaseMacro.h>
 #include <LAssert.h>
+#include <id.hpp>
+
+#include "EFormat.hpp"
 
 namespace leo {
-	//Todo,define in a common header file
-	/*
-	\brief ElementFormat：元素数据及类型格式。
-	*/
-	enum class EFormat;
 
-	/*
-	\brief ElementAccess元素访问方式
-	*/
-	//C = CPU
-	//G = GPU
-	//R = Read
-	//W = Write
-	//U = Unordered
-	//S = Structured
-	//I = Immutable
-	//R = Raw
-	//A = Append
-	//M = Generate_Mips
-	//S= Counter
-	//D = DrawIndirectArgs
-	enum EAccess:uint32 {
-		EA_C_R = 1U << 0,//ElementAccess_CPU_READ
-		EA_C_W = 1U << 1,//ElementAccess_CPU_Write
-		EA_G_R = 1U << 2,//ElementAccess_GPU_Read
-		EA_G_W = 1U << 3,//ElementAccess_GPU_Write
-		EA_G_U = 1U << 4,//ElementAccess_GPU_Unordered
-		EA_I = 1U << 7,//ElementAccess_Immutable
-	};
-
-	struct SampleDesc {
-		uint32 Count = 1;
-		uint32 Quality = 0;
-	};
 
 	class Texture;
 

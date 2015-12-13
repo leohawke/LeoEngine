@@ -21,7 +21,7 @@
 namespace leo {
 	namespace X {
 		TexturePtr MakeTexture2D(uint16 width, uint16 height, uint8 numMipMaps, uint8 array_size,
-			EFormat format, SampleDesc sample_info, uint32 access, uint8 const * init_data);
+			EFormat format, SampleDesc sample_info, uint32 access,ElementInitData init_data);
 
 		std::unique_ptr<HUD::IImage> MakeIImage(uint16, uint16);
 	}
