@@ -546,7 +546,7 @@ namespace leo {
 			return iter->second;
 		}
 		win::unique_com<COM> ptr;
-		(device()->*f)(texture->Resource(), &desc, &ptr);
+		std::invoke(f, device(), texture->Resource(), &desc, &ptr);
 		auto ret = container.emplace(std::make_pair(hash_val, std::move(ptr)));
 		return ret.first->second.get();
 	}
