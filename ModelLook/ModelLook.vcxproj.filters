@@ -351,9 +351,6 @@
     <ClInclude Include="..\All\RenderSystem\TextureX.hpp">
       <Filter>RenderSystem</Filter>
     </ClInclude>
-    <ClInclude Include="..\All\RenderSystem\RenderSystem.h">
-      <Filter>RenderSystem</Filter>
-    </ClInclude>
     <ClInclude Include="..\All\RenderSystem\D3D11\D3D11Texture.hpp">
       <Filter>RenderSystem\D3D11</Filter>
     </ClInclude>
@@ -361,6 +358,12 @@
       <Filter>RenderSystem\D3D11</Filter>
     </ClInclude>
     <ClInclude Include="..\All\RenderSystem\EFormat.hpp">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\RenderSystem\D3D11\D3D11RenderSystem.hpp">
+      <Filter>RenderSystem\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\All\RenderSystem\RenderSystem.hpp">
       <Filter>RenderSystem</Filter>
     </ClInclude>
   </ItemGroup>
