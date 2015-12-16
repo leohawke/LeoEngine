@@ -29,6 +29,8 @@ namespace leo{
 			{
 				return 0;
 			}
+
+			void ReclaimHWResource(ElementInitData const *) override{}
 		};
 	}
 

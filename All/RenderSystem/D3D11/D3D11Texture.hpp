@@ -160,6 +160,8 @@ namespace leo {
 		ID3D11DepthStencilView* DepthStencilView();
 
 		ID3D11Texture2D* D3DTexture() const;
+
+		void ReclaimHWResource(ElementInitData const * init_data) override;
 	private:
 		D3D11_TEXTURE2D_DESC mDesc;
 		win::unique_com<ID3D11Texture2D> mTex;

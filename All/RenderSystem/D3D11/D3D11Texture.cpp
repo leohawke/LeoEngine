@@ -571,5 +571,5 @@ namespace leo {
 		return CreateInMap(this, d3d_dsv_maps, &ID3D11Device::CreateDepthStencilView, desc);
 	}
 
-	ImplDeDtor(D3D11Texture2D)
+	
 }
