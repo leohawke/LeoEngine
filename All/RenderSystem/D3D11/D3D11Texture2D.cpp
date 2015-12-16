@@ -1,6 +1,25 @@
 #include "D3D11Texture.hpp"
+#include "D3D11RenderSystem.hpp"
+#include "..\..\DeviceMgr.h"
 
-leo::D3D11Texture2D::D3D11Texture2D(uint16 width, uint16 height, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, ElementInitData)
+auto device = [] {return leo::DeviceMgr().GetDevice(); };
+
+
+
+namespace {
+
+	template<unsigned N>
+	leo::uint16& get(std::pair<leo::uint16, leo::uint16>& pair) {
+		return N == 0 ? pair.first : pair.second;
+	}
+
+	enum select {
+		width = 0,
+		height = 1,
+	};
+}
+
+leo::D3D11Texture2D::D3D11Texture2D(uint16 width, uint16 height, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, ElementInitData init_data)
 	:D3D11Texture(DT_2D,access,sample_info)
 {
 	if (0 == numMipMaps)
@@ -16,23 +35,23 @@ leo::D3D11Texture2D::D3D11Texture2D(uint16 width, uint16 height, uint8 numMipMap
 			h = std::max<uint32_t>(1U, h / 2);
 		}
 	}
-	num_mip_maps_ = numMipMaps;
+	mNumMipMaps = numMipMaps;
 
-	D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	if (re.DeviceFeatureLevel() <= D3D_FEATURE_LEVEL_9_3)
+	auto & re = dynamic_cast<leo::D3D11Engine&>(leo::GetRenderEngine());
+	if (re.GetCoreFeatureLevel() <= D3D_FEATURE_LEVEL_9_3)
 	{
 		if (!re.DeviceCaps().full_npot_texture_support
-			&& (num_mip_maps_ > 1) && (((width & (width - 1)) != 0) || ((height & (height - 1)) != 0)))
+			&& (NumMipMaps() > 1) && (((width & (width - 1)) != 0) || ((height & (height - 1)) != 0)))
 		{
 			// height or width is not a power of 2 and multiple mip levels are specified. This is not supported at feature levels below 10.0.
-			num_mip_maps_ = 1;
+			mNumMipMaps = 1;
 		}
 
-		if ((num_mip_maps_ > 1) && IsCompressedFormat(format))
+		if ((NumMipMaps() > 1) && IsCompressedFormat(format))
 		{
 			// height or width is not a multiply of 4 and multiple mip levels are specified. This is not supported at feature levels below 10.0.
 			uint32_t clamped_num_mip_maps;
-			for (clamped_num_mip_maps = 0; clamped_num_mip_maps < num_mip_maps_; ++clamped_num_mip_maps)
+			for (clamped_num_mip_maps = 0; clamped_num_mip_maps < NumMipMaps(); ++clamped_num_mip_maps)
 			{
 				uint32_t w = std::max<uint32_t>(1U, width >> clamped_num_mip_maps);
 				uint32_t h = std::max<uint32_t>(1U, height >> clamped_num_mip_maps);
@@ -41,50 +60,49 @@ leo::D3D11Texture2D::D3D11Texture2D(uint16 width, uint16 height, uint8 numMipMap
 					break;
 				}
 			}
-			num_mip_maps_ = clamped_num_mip_maps;
+			mNumMipMaps = clamped_num_mip_maps;
 		}
 	}
 
-	array_size_ = array_size;
-	format_ = format;
+	mArraySize = array_size;
+	mFormat = format;
 
-	widths_.resize(num_mip_maps_);
-	heights_.resize(num_mip_maps_);
-	widths_[0] = width;
-	heights_[0] = height;
-	for (uint32_t level = 1; level < num_mip_maps_; ++level)
+	mSize.resize(NumMipMaps());
+	get<select::width>(mSize[0]) = width;
+	get<select::height>(mSize[0]) = height;
+	for (uint32_t level = 1; level < NumMipMaps(); ++level)
 	{
-		widths_[level] = std::max<uint32_t>(1U, widths_[level - 1] / 2);
-		heights_[level] = std::max<uint32_t>(1U, heights_[level - 1] / 2);
+		get<select::width>(mSize[level]) = std::max<uint32_t>(1U, width >> level);
+		get<select::height>(mSize[level]) = std::max<uint32_t>(1U, height >>level);
 	}
 
-	desc_.Width = width;
-	desc_.Height = height;
-	desc_.MipLevels = num_mip_maps_;
-	desc_.ArraySize = array_size_;
-	switch (format_)
+	mDesc.Width = width;
+	mDesc.Height = height;
+	mDesc.MipLevels = NumMipMaps();
+	mDesc.ArraySize = ArraySize();
+	switch (Format())
 	{
 	case EF_D16:
-		desc_.Format = DXGI_FORMAT_R16_TYPELESS;
+		mDesc.Format = DXGI_FORMAT_R16_TYPELESS;
 		break;
 
 	case EF_D24S8:
-		desc_.Format = DXGI_FORMAT_R24G8_TYPELESS;
+		mDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
 		break;
 
 	case EF_D32F:
-		desc_.Format = DXGI_FORMAT_R32_TYPELESS;
+		mDesc.Format = DXGI_FORMAT_R32_TYPELESS;
 		break;
 
 	default:
-		desc_.Format = D3D11Mapping::MappingFormat(format_);
+		mDesc.Format = D3D11Mapping::MappingFormat(Format());
 		break;
 	}
-	desc_.SampleDesc.Count = sample_count;
-	desc_.SampleDesc.Quality = sample_quality;
+	mDesc.SampleDesc.Count = sample_info.Count;
+	mDesc.SampleDesc.Quality = sample_info.Quality;
 
-	this->GetD3DFlags(desc_.Usage, desc_.BindFlags, desc_.CPUAccessFlags, desc_.MiscFlags);
-	this->ReclaimHWResource(init_data);
+	D3DFlags(mDesc.Usage, mDesc.BindFlags, mDesc.CPUAccessFlags, mDesc.MiscFlags);
+	ReclaimHWResource(init_data.data == nullptr? nullptr:&init_data);
 }
 
 leo::D3D11Texture2D::~D3D11Texture2D()

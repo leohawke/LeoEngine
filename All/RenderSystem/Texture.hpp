@@ -102,7 +102,7 @@ namespace leo {
 		uint32_t Access() const;
 
 		virtual void ReclaimHWResource(ElementInitData const * init_data) = 0;
-	private:
+	protected:
 		uint8		mNumMipMaps;
 		uint8		mArraySize;
 

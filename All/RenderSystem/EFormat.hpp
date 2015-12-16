@@ -316,6 +316,12 @@ namespace leo {
 		return (EC_S == Channel<1>(format));
 	}
 
+	inline bool
+		IsCompressedFormat(EFormat format)
+	{
+		return (EC_BC == Channel<0>(format)) || (EC_ETC == Channel<0>(format));
+	}
+
 	/*
 	\brief ElementAccess元素访问方式
 	*/

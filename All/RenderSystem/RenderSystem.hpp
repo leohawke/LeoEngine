@@ -20,14 +20,18 @@
 //PreDe
 namespace leo {
 
-	class LB_API RenderEngine : noncopyable {
+	class RenderFactory;
+
+	class LB_API RenderEngine {
 	public:
 		virtual ~RenderEngine();
 
 		virtual std::string const & Name() const = 0;
+
+		virtual RenderFactory& GetFactory() = 0;
 	};
 
-	class LB_API RenderFactory : noncopyable {
+	class LB_API RenderFactory{
 	public:
 		virtual ~RenderFactory();
 
@@ -38,7 +42,7 @@ namespace leo {
 	};
 
 
-	LB_API RenderFactory&  GetRenderFactory();
+	LB_API RenderEngine&  GetRenderEngine();
 
 
 }

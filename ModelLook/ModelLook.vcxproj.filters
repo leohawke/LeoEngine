@@ -236,13 +236,19 @@
     <ClCompile Include="..\All\RenderSystem\TextureX.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
-    <ClCompile Include="..\All\RenderSystem\RenderSystem.cpp">
-      <Filter>WinMain</Filter>
-    </ClCompile>
     <ClCompile Include="..\All\RenderSystem\D3D11\D3D11Texture.cpp">
       <Filter>RenderSystem\D3D11</Filter>
     </ClCompile>
     <ClCompile Include="..\All\RenderSystem\D3D11\D3D11Texture2D.cpp">
+      <Filter>RenderSystem\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\RenderSystem.cpp">
+      <Filter>RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\D3D11\D3D11RenderSystem.cpp">
+      <Filter>RenderSystem\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\D3D11\D3D11Mapping.cpp">
       <Filter>RenderSystem\D3D11</Filter>
     </ClCompile>
   </ItemGroup>

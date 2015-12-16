@@ -166,8 +166,7 @@ namespace leo {
 		D3D11_TEXTURE2D_DESC mDesc;
 		win::unique_com<ID3D11Texture2D> mTex;
 
-		std::vector<uint16> mWidths;
-		std::vector<uint16> mHeights;
+		std::vector<std::pair<uint16,uint16>> mSize;
 	};
 }
 

@@ -261,6 +261,8 @@
     </ClCompile>
     <ClCompile Include="..\All\RenderSystem\BlurProcess.cpp" />
     <ClCompile Include="..\All\RenderSystem\CopyProcess.cpp" />
+    <ClCompile Include="..\All\RenderSystem\D3D11\D3D11Mapping.cpp" />
+    <ClCompile Include="..\All\RenderSystem\D3D11\D3D11RenderSystem.cpp" />
     <ClCompile Include="..\All\RenderSystem\D3D11\D3D11Texture.cpp" />
     <ClCompile Include="..\All\RenderSystem\D3D11\D3D11Texture2D.cpp" />
     <ClCompile Include="..\All\RenderSystem\d3dx11.cpp" />
