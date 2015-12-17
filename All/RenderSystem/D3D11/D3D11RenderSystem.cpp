@@ -1,6 +1,6 @@
 #include "D3D11RenderSystem.hpp"
 
-leo::TexturePtr leo::D3D11RenderFactory::MakeTexture2D(uint16 width, uint16 height, uint8 numMipMaps, uint8 array_size, EFormat format, SampleDesc sample_info, uint32 access, uint8 const * init_data)
+leo::TexturePtr leo::D3D11RenderFactory::MakeTexture2D(uint16 width, uint16 height, uint8 numMipMaps, uint8 array_size, EFormat format, SampleDesc sample_info, uint32 access, ElementInitData init_data)
 {
 	return TexturePtr();
 }

@@ -1,6 +1,7 @@
 #include "D3D11Texture.hpp"
 #include "D3D11RenderSystem.hpp"
 #include "..\..\DeviceMgr.h"
+#include <exception.hpp>
 
 auto device = [] {return leo::DeviceMgr().GetDevice(); };
 
@@ -105,50 +106,228 @@ leo::D3D11Texture2D::D3D11Texture2D(uint16 width, uint16 height, uint8 numMipMap
 	ReclaimHWResource(init_data.data == nullptr? nullptr:&init_data);
 }
 
-leo::D3D11Texture2D::~D3D11Texture2D()
+using leo::D3D11Texture2D;
+ImplDeDtor(D3D11Texture2D)
+
+leo::uint16 leo::D3D11Texture2D::Width(uint8 level) const
 {
+	LAssert(level < NumMipMaps(), "level out of NumMipMaps range");
+	return get<select::width>(mSize[level]);
 }
 
-leo::uint16 leo::D3D11Texture2D::Width(uint8) const
+leo::uint16 leo::D3D11Texture2D::Height(uint8 level) const
 {
-	return uint16();
-}
-
-leo::uint16 leo::D3D11Texture2D::Height(uint8) const
-{
-	return uint16();
+	LAssert(level < NumMipMaps(), "level out of NumMipMaps range");
+	return get<select::height>(mSize[level]);
 }
 
 ID3D11Resource * leo::D3D11Texture2D::Resource() const
 {
-	return nullptr;
+	return mTex.get();
 }
 
 ID3D11ShaderResourceView * leo::D3D11Texture2D::ResouceView()
 {
-	return nullptr;
+	LAssert(Access() & EA_G_R,"ShaderResourceView means GPU_Read");
+	//LAssert(first_array_index < ArraySize());
+	//LAssert(first_array_index + array_size <= ArraySize());
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC desc;
+	memset(&desc, 0, sizeof(desc));
+	switch (Format())
+	{
+	case EF_D16:
+		desc.Format = DXGI_FORMAT_R16_UNORM;
+		break;
+
+	case EF_D24S8:
+		desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+		break;
+
+	case EF_D32F:
+		desc.Format = DXGI_FORMAT_R32_FLOAT;
+		break;
+
+	default:
+		desc.Format = mDesc.Format;
+		break;
+	}
+
+	if (ArraySize() > 1)
+	{
+		if (mSampleInfo.Count > 1)
+		{
+			desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;
+		}
+		else
+		{
+			desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+		}
+		desc.Texture2DArray.MostDetailedMip = 0;
+		desc.Texture2DArray.MipLevels = NumMipMaps();
+		desc.Texture2DArray.ArraySize = ArraySize();
+		desc.Texture2DArray.FirstArraySlice = 0;
+	}
+	else
+	{
+		if (mSampleInfo.Count > 1)
+		{
+			desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+		}
+		else
+		{
+			desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		}
+		desc.Texture2D.MostDetailedMip = 0;
+		desc.Texture2D.MipLevels = NumMipMaps();
+	}
+
+	return CreateD3DSRV(desc);
 }
 
 ID3D11UnorderedAccessView * leo::D3D11Texture2D::AccessView()
 {
-	return nullptr;
+	LAssert(Access() & EA_G_U, "UnorderedAccessView means GPU_Unordered");
+	//LAssert(first_array_index < ArraySize());
+	//LAssert(first_array_index + array_size <= ArraySize());
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
+	memset(&desc, 0, sizeof(desc));
+	desc.Format = mDesc.Format;
+	if (ArraySize() > 1)
+	{
+		desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
+		desc.Texture2DArray.MipSlice = 0;
+		desc.Texture2DArray.ArraySize = ArraySize();
+		desc.Texture2DArray.FirstArraySlice = 0;
+	}
+	else
+	{
+		desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
+		desc.Texture2D.MipSlice = 0;
+	}
+
+	return CreateD3DUAV(desc);
 }
 
 ID3D11RenderTargetView * leo::D3D11Texture2D::TargetView()
 {
-	return nullptr;
+	LAssert(Access() & EA_G_W, "UnorderedAccessView means GPU_Write");
+	//LAssert(first_array_index < ArraySize());
+	//LAssert(first_array_index + array_size <= ArraySize());
+
+	D3D11_RENDER_TARGET_VIEW_DESC desc;
+	memset(&desc, 0, sizeof(desc));
+	desc.Format = D3D11Mapping::MappingFormat(Format());
+	if (mSampleInfo.Count > 1)
+	{
+		if (ArraySize() > 1)
+		{
+			desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;
+		}
+		else
+		{
+			desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
+		}
+	}
+	else
+	{
+		if (ArraySize() > 1)
+		{
+			desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+		}
+		else
+		{
+			desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+		}
+	}
+	if (ArraySize() > 1)
+	{
+		desc.Texture2DArray.MipSlice = 0;
+		desc.Texture2DArray.ArraySize = ArraySize();
+		desc.Texture2DArray.FirstArraySlice = 0;
+	}
+	else
+	{
+		desc.Texture2D.MipSlice = 0;
+	}
+
+	return CreateD3DRTV(desc);
 }
 
 ID3D11DepthStencilView * leo::D3D11Texture2D::DepthStencilView()
 {
-	return nullptr;
+	LAssert(Access() & EA_G_W,"DepthStencilView means GPU_Write");
+	//LAssert(first_array_index < ArraySize());
+	//LAssert(first_array_index + array_size <= ArraySize());
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC desc;
+	memset(&desc, 0, sizeof(desc));
+	desc.Format = D3D11Mapping::MappingFormat(Format());
+	desc.Flags = 0;
+	if (mSampleInfo.Count > 1)
+	{
+		if (ArraySize() > 1)
+		{
+			desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY;
+		}
+		else
+		{
+			desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
+		}
+	}
+	else
+	{
+		if (ArraySize() > 1)
+		{
+			desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+		}
+		else
+		{
+			desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+		}
+	}
+	if (ArraySize() > 1)
+	{
+		desc.Texture2DArray.MipSlice = 0;
+		desc.Texture2DArray.ArraySize = ArraySize();
+		desc.Texture2DArray.FirstArraySlice = 0;
+	}
+	else
+	{
+		desc.Texture2D.MipSlice = 0;
+	}
+
+	return CreateD3DDSV(desc);
 }
 
 ID3D11Texture2D * leo::D3D11Texture2D::D3DTexture() const
 {
-	return nullptr;
+	return mTex.get();
 }
 
 void leo::D3D11Texture2D::ReclaimHWResource(ElementInitData const * init_data)
 {
+	std::vector<D3D11_SUBRESOURCE_DATA> subres_data(ArraySize() * NumMipMaps());
+	if (init_data != nullptr)
+	{
+		for (uint32_t j = 0; j < ArraySize(); ++j)
+		{
+			for (uint32_t i = 0; i < NumMipMaps(); ++i)
+			{
+				subres_data[j * NumMipMaps() + i].pSysMem = init_data[j * NumMipMaps() + i].data;
+				subres_data[j * NumMipMaps() + i].SysMemPitch = init_data[j * NumMipMaps() + i].row_pitch;
+				subres_data[j * NumMipMaps() + i].SysMemSlicePitch = init_data[j * NumMipMaps() + i].slice_pitch;
+			}
+		}
+	}
+
+	auto d3d_tex = win::make_scope_com<ID3D11Texture2D>();
+	dxcall(device()->CreateTexture2D(&mDesc, (init_data != nullptr) ? &subres_data[0] : nullptr, &d3d_tex));
+	mTex.swap(d3d_tex);
+
+	if ((Access() & (EA_G_R | EA_M)) && (NumMipMaps() > 1))
+	{
+		ResourceView();
+	}
 }
