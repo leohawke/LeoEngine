@@ -48,6 +48,7 @@ namespace leo{
 
 	
 	Texture::Texture(Dis_Type type, uint32 access, SampleDesc sample_info)
+		:mDimension(type),mAccess(access),mSampleInfo(sample_info)
 	{
 	}
 	ImplDeDtor(Texture)

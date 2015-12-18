@@ -4,6 +4,7 @@
 #include "type_op.hpp"
 #include "tuple.hpp"
 #include "id.hpp"
+#include "ref.hpp"
 #include <functional>
 #include <string>
 
@@ -283,10 +284,32 @@ namespace leo
 	struct is_equal
 	{
 		template<typename _type1, typename _type2>
-		lconstfn bool
-			operator()(const _type1& x, const _type2& y) const
+		lconstfn limpl(std::enable_if_t)<!wrapped_traits<_type1>::value
+			&& !wrapped_traits<_type2>::value, bool>
+			operator()(const _type1& x, const _type2& y) const lnoexcept_spec(x == y)
 		{
 			return x == y;
+		}
+		template<typename _type1, typename _type2>
+		lconstfn limpl(std::enable_if_t)<wrapped_traits<_type1>::value
+			&& !wrapped_traits<_type2>::value, bool>
+			operator()(const _type1& x, const _type2& y) const lnothrow
+		{
+			return std::addressof(x.get()) == std::addressof(y);
+		}
+		template<typename _type1, typename _type2>
+		lconstfn limpl(std::enable_if_t) < !wrapped_traits<_type1>::value
+			&& wrapped_traits<_type2>::value, bool >
+			operator()(const _type1& x, const _type2& y) const lnothrow
+		{
+			return std::addressof(x) == std::addressof(y.get());
+		}
+		template<typename _type1, typename _type2>
+		lconstfn limpl(std::enable_if_t) < wrapped_traits<_type1>::value
+			&& wrapped_traits<_type2>::value, bool >
+			operator()(const _type1& x, const _type2& y) const lnothrow
+		{
+			return std::addressof(x.get()) == std::addressof(y.get());
 		}
 	};
 

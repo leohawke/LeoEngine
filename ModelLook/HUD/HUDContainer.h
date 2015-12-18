@@ -15,9 +15,6 @@ const ZOrder DefaultZOrder(64);
 const ZOrder DefaultWindowZOrder(128);
 //@}
 
-lconstfn PDefHOp(bool, == , const IWidget& x, const IWidget& y) lnothrow
-ImplRet(&x == &y)
-
 class LB_API MUIContainer {
 public:
 	/*!

@@ -48,7 +48,7 @@ std::unique_ptr<leo::DeferredRender> pRender = nullptr;
 std::unique_ptr<leo::Terrain<>> pTerrain = nullptr;
 std::unique_ptr<leo::Sky> pSky = nullptr;
 
-std::unique_ptr<leo::HUD::HostRenderer> pHUDHostRender = nullptr;
+std::shared_ptr<leo::HUD::HostRenderer> pHUDHostRender = nullptr;
 std::unique_ptr<leo::HUD::Panel> pPanel = nullptr;
 
 std::atomic<bool> renderAble = false;
@@ -338,8 +338,9 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	//pTerrain = std::make_unique<leo::Terrain<>>(device, L"Resource\\Test.Terrain");
 	BuildLight(leo::DeviceMgr().GetDevice());
 
-	pPanel = std::make_unique<leo::HUD::Panel>();
-	pHUDHostRender = std::make_unique<leo::HUD::HostRenderer>(*pPanel);
+	pPanel = std::make_unique<leo::HUD::Panel>(leo::HUD::Size(size.first,size.second));
+	pHUDHostRender = std::make_shared<leo::HUD::HostRenderer>(*pPanel);
+	pPanel->SetRenderer(pHUDHostRender);
 }
 
 void ClearRes() {
@@ -350,8 +351,8 @@ void ClearRes() {
 	pSky.reset(nullptr);
 	pRender.reset(nullptr);
 
-	pHUDHostRender.reset(nullptr);
-	pPanel.reset(nullptr);
+	pHUDHostRender.reset();
+	pPanel.reset();
 
 	ClearLight();
 }

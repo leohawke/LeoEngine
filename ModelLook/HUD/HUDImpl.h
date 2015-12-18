@@ -37,7 +37,7 @@ namespace leo {
 				std::unique_ptr<Graphics> GetContext() const lnothrow override {
 					return std::make_unique<GraphicsWrap>(*tex,
 						0,0,//array_index,level
-						Texture::MapAccess::MA_RO,0,0,//tma,x_offset,y_offset
+						Texture::MapAccess::MA_WO,0,0,//tma,x_offset,y_offset
 						tex->Width(0),tex->Height(0));
 				}
 

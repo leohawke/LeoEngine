@@ -82,6 +82,11 @@ struct LB_API Size
 		:Width(static_cast<PDst>(w)),Height(static_cast<PDst>(h))
 	{}
 
+	template<typename Scalar1, typename Scalar2>
+	lconstfn Size(std::pair<Scalar1, Scalar1> s) lnothrow
+		: Width(static_cast<PDst>(s.first)), Height(static_cast<PDst>(s.second))
+	{}
+
 	DefDeCopyAssignment(Size)
 
 	lconstfn DefBoolNeg(lconstfn explicit,Width != 0 || Height != 0)
