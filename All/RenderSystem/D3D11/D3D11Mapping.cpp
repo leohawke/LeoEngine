@@ -211,5 +211,32 @@ namespace leo {
 				throw leo::unimplemented();
 			}
 		}
+
+		D3D11_MAP Mapping(Texture::MapAccess tma, Texture::Dis_Type type, uint32 access, uint8 numMipMaps)
+		{
+			switch (tma)
+			{
+			case Texture::MA_RO:
+				return D3D11_MAP_READ;
+
+			case Texture::MA_WO:
+				if (((EA_C_W | EA_G_R) == access)
+					|| ((EA_C_W == access) && (1 == numMipMaps) && (type != Texture::DT_Cube)))
+				{
+					return D3D11_MAP_WRITE_DISCARD;
+				}
+				else
+				{
+					return D3D11_MAP_WRITE;
+				}
+
+			case Texture::MA_RW:
+				return D3D11_MAP_READ_WRITE;
+
+			default:
+				assert(false);
+				return D3D11_MAP_READ;
+			};
+		}
 	}
 }

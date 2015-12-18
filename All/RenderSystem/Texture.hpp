@@ -66,8 +66,103 @@ namespace leo {
 		};
 
 	public:
-		class Mapper:noncopyable{
+		//Only Support DT_2D Map
+		class Mapper : noncopyable
+		{
 			friend class Texture;
+
+		public:
+			/*Mapper(Texture& tex, uint8 array_index, uint8 level, MapAccess tma,
+				uint16 x_offset, uint16 width)
+				: TexRef(tex),
+				MappedArrayIndex(array_index),
+				MappedLevel(level)
+			{
+				TexRef.Map1D(array_index, level, tma, x_offset, width, pSysMem);
+				RowPitch = SlicePitch = width * NumFormatBytes(tex.Format());
+			}*/
+			Mapper(Texture& tex, uint8 array_index, uint8 level, MapAccess tma,
+				uint16 x_offset, uint16 y_offset,
+				uint16 width, uint16 height)
+				: TexRef(tex),
+				MappedArrayIndex(array_index),
+				MappedLevel(level)
+			{
+				TexRef.Map2D(array_index, level, tma, x_offset, y_offset, width, height, pSysMem, RowPitch);
+				SlicePitch = RowPitch * height;
+			}
+			/*Mapper(Texture& tex, uint8 array_index, uint8 level, TextureMapAccess tma,
+				uint16 x_offset, uint16 y_offset, uint32_t z_offset,
+				uint16 width, uint16 height, uint32_t depth)
+				: TexRef(tex),
+				MappedArrayIndex(array_index),
+				MappedLevel(level)
+			{
+				TexRef.Map3D(array_index, level, tma, x_offset, y_offset, z_offset, width, height, depth, pSysMem, RowPitch, SlicePitch);
+			}*/
+			/*Mapper(Texture& tex, uint8 array_index, CubeFaces face, uint8 level, TextureMapAccess tma,
+				uint16 x_offset, uint16 y_offset,
+				uint16 width, uint16 height)
+				: TexRef(tex),
+				MappedArrayIndex(array_index),
+				MappedFace(face),
+				MappedLevel(level)
+			{
+				TexRef.MapCube(array_index, face, level, tma, x_offset, y_offset, width, height, pSysMem, RowPitch);
+				SlicePitch = RowPitch * height;
+			}*/
+
+			~Mapper()
+			{
+				switch (TexRef.Type())
+				{
+				/*case TT_1D:
+					TexRef.Unmap1D(MappedArrayIndex, MappedLevel);
+					break;*/
+
+				case DT_2D:
+					TexRef.Unmap2D(MappedArrayIndex, MappedLevel);
+					break;
+
+				/*case TT_3D:
+					TexRef.Unmap3D(MappedArrayIndex, MappedLevel);
+					break;*/
+
+				/*case TT_Cube:
+					TexRef.UnmapCube(MappedArrayIndex, MappedFace, MappedLevel);
+					break;*/
+				}
+			}
+
+			template <typename T>
+			const T* Pointer() const
+			{
+				return static_cast<T*>(pSysMem);
+			}
+			template <typename T>
+			T* Pointer()
+			{
+				return static_cast<T*>(pSysMem);
+			}
+
+			uint32_t GetRowPitch() const
+			{
+				return RowPitch;
+			}
+
+			uint32_t GetSlicePitch() const
+			{
+				return SlicePitch;
+			}
+		public:
+			void* pSysMem;
+			uint32_t RowPitch, SlicePitch;
+		private:
+			Texture& TexRef;
+
+			uint8 MappedArrayIndex;
+			CubeFaces MappedFace;
+			uint8 MappedLevel;
 		};
 
 	public:
@@ -100,6 +195,12 @@ namespace leo {
 		SampleDesc SampleInfo() const;
 
 		uint32_t Access() const;
+
+		virtual void Map2D(uint8 array_index, uint8 level, MapAccess tma,
+			uint16 x_offset, uint16 y_offset, uint16 width, uint16 height,
+			void*& data, uint32_t& row_pitch) = 0;
+
+		virtual void Unmap2D(uint8 array_index, uint8 level) = 0;
 
 		virtual void ReclaimHWResource(ElementInitData const * init_data) = 0;
 	protected:

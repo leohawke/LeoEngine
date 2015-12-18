@@ -59,18 +59,7 @@ BufferedRenderer::Paint(IWidget& wgt, PaintEventArgs&& e)
 {
 	const Rect& r(Validate(wgt, e.GetSender(), e));
 
-	UpdateTo(e);
 	return r;
-}
-
-void
-BufferedRenderer::UpdateTo(const PaintContext& pc) const
-{
-	const auto& g(pc.Target);
-	const Rect& bounds(pc.ClipArea);
-
-	//CopyTo(g.GetBufferPtr(), GetContext(), g.GetSize(), bounds.GetPoint(),
-		//bounds.GetPoint() - pc.Location, bounds.GetSize());
 }
 
 Rect
@@ -80,33 +69,40 @@ BufferedRenderer::Validate(IWidget& wgt, IWidget& sender,
 	LAssert(&sender.GetRenderer() == this, "Invalid widget found.");
 	if (RequiresRefresh())
 	{
-		//if (!IgnoreBackground && FetchContainerPtr(sender))
-			//Invalidate(sender);
-
 		const Rect& clip(pc.ClipArea & (rInvalidated + pc.Location));
 
 		if (!clip.IsUnStrictlyEmpty())
 		{
-			const auto& g(GetContext());
+			if (LB_UNLIKELY(&wgt != &sender)) {
+				const auto& g(GetContext());
 
-			//if (!IgnoreBackground && FetchContainerPtr(sender))
-			//{
-			//	const auto dst(g.GetBufferPtr());
-			//	const auto& src(pc.Target);
+				//if (!IgnoreBackground && FetchContainerPtr(sender))
+				//{
+				//	const auto dst(g.GetBufferPtr());
+				//	const auto& src(pc.Target);
+						//CopyTo(g.GetBufferPtr(), src, g.GetSize(), clip.GetPoint()
+							//- pc.Location, clip.GetPoint(), clip.GetSize());
+				//}
 
-			//	if (dst != src.GetBufferPtr())
-					//CopyTo(g.GetBufferPtr(), src, g.GetSize(), clip.GetPoint()
-						//- pc.Location, clip.GetPoint(), clip.GetSize());
-			//}
+				PaintEventArgs e(sender,
+				{ *g, Point(), (clip - pc.Location) & Rect(g->GetSize()) });
 
-			PaintEventArgs e(sender,
-			{ g, Point(), (clip - pc.Location) & Rect(g.GetSize()) });
+				CallEvent<VisualEvent::Paint>(wgt, e);
+				// NOTE: To keep %CommitInvalidation result correct, both
+				//	components of the size shall be reset.
+				rInvalidated.GetSizeRef() = {};
+				return e.ClipArea;
+			}
+			else {
+				PaintEventArgs e(sender,
+				{ pc.Target, Point(), (clip - pc.Location) & Rect(pc.Target.GetSize()) });
 
-			CallEvent<VisualEvent::Paint>(wgt, e);
-			// NOTE: To keep %CommitInvalidation result correct, both
-			//	components of the size shall be reset.
-			rInvalidated.GetSizeRef() = {};
-			return e.ClipArea;
+				CallEvent<VisualEvent::Paint>(wgt, e);
+				// NOTE: To keep %CommitInvalidation result correct, both
+				//	components of the size shall be reset.
+				rInvalidated.GetSizeRef() = {};
+				return e.ClipArea;
+			}
 		}
 	}
 	return{};

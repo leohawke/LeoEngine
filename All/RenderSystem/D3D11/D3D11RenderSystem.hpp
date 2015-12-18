@@ -61,6 +61,8 @@ namespace leo {
 
 	namespace D3D11Mapping {
 		DXGI_FORMAT MappingFormat(EFormat format);
+
+		D3D11_MAP Mapping(Texture::MapAccess tma, Texture::Dis_Type type, uint32 access, uint8 numMipMaps);
 	}
 }
 

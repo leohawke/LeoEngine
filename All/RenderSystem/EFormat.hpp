@@ -303,6 +303,23 @@ namespace leo {
 		return static_cast<EFormat>(ef64);
 	}
 
+	template <int c>
+	inline uint8_t
+		ChannelBits(EFormat ef)
+	{
+		return (static_cast<uint64_t>(ef) >> (16 + 6 * c)) & 0x3F;
+	}
+
+	template <int c>
+	inline EFormat
+		ChannelBits(EFormat ef, uint64_t new_c)
+	{
+		uint64_t ef64 = static_cast<uint64_t>(ef);
+		ef64 &= ~(0x3FULL << (16 + 6 * c));
+		ef64 |= (new_c << (16 + 6 * c));
+		return static_cast<EFormat>(ef64);
+	}
+
 
 	inline bool
 		IsDepthFormat(EFormat format)
@@ -321,6 +338,58 @@ namespace leo {
 	{
 		return (EC_BC == Channel<0>(format)) || (EC_ETC == Channel<0>(format));
 	}
+
+	inline uint8_t
+		NumFormatBits(EFormat format)
+	{
+		switch (format)
+		{
+		case EF_BC1:
+		case EF_SIGNED_BC1:
+		case EF_BC1_SRGB:
+		case EF_BC4:
+		case EF_SIGNED_BC4:
+		case EF_BC4_SRGB:
+		case EF_ETC2_R11:
+		case EF_SIGNED_ETC2_R11:
+		case EF_ETC2_BGR8:
+		case EF_ETC2_BGR8_SRGB:
+		case EF_ETC2_A1BGR8:
+		case EF_ETC2_A1BGR8_SRGB:
+		case EF_ETC1:
+			return 16;
+
+		case EF_BC2:
+		case EF_SIGNED_BC2:
+		case EF_BC2_SRGB:
+		case EF_BC3:
+		case EF_SIGNED_BC3:
+		case EF_BC3_SRGB:
+		case EF_BC5:
+		case EF_SIGNED_BC5:
+		case EF_BC5_SRGB:
+		case EF_BC6:
+		case EF_SIGNED_BC6:
+		case EF_BC7:
+		case EF_BC7_SRGB:
+		case EF_ETC2_GR11:
+		case EF_SIGNED_ETC2_GR11:
+		case EF_ETC2_ABGR8:
+		case EF_ETC2_ABGR8_SRGB:
+			return 32;
+
+		default:
+			assert(!IsCompressedFormat(format));
+			return ChannelBits<0>(format) + ChannelBits<1>(format) + ChannelBits<2>(format) + ChannelBits<3>(format);
+		}
+	}
+
+	inline uint8_t
+		NumFormatBytes(EFormat format)
+	{
+		return NumFormatBits(format) / 8;
+	}
+
 
 	/*
 	\brief ElementAccess元素访问方式

@@ -24,7 +24,7 @@ void HostRenderer::Render()
 		const auto& g(GetContext());
 		const auto r(GetInvalidatedArea());
 
-		if (Validate(wgt, wgt, { g,{},r }))
+		if (Validate(wgt, wgt, { *g,{},r }))
 			window->Render();
 	}
 }

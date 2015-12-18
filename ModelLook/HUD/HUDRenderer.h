@@ -116,7 +116,7 @@ public:
 	\warning 非GDI实现可能为空。
 	\return 缓冲区图形接口上下文。
 	*/
-	DefGetterMem(const lnothrow, Graphics, Context, GetImageBuffer())
+	DefGetterMem(const lnothrow,std::unique_ptr<Graphics>, Context, GetImageBuffer())
 
 	/*!
 	\brief 设置缓冲区大小。
@@ -144,13 +144,6 @@ public:
 	\note 不检查部件可见性。
 	*/
 	Rect Paint(IWidget& wgt, PaintEventArgs&&) override;
-
-	/*!
-	\brief 更新至指定图形设备上下文的指定点。
-	\note 复制显示缓冲区内容。
-	*/
-	void
-	UpdateTo(const PaintContext&) const;
 
 	/*!
 	\brief 验证并按需绘制。

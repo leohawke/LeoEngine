@@ -64,6 +64,9 @@ protected:
 	SizeType sGraphics{};
 
 public:
+	virtual ~GGraphics()
+	{}
+
 	//! \brief 默认构造：使用空指针和大小。
 	DefDeCtor(GGraphics)
 		//! \brief 构造：使用指定位图指针和大小。
@@ -145,7 +148,7 @@ using Graphics = GGraphics<BitmapPtr>;
 \warning 该类底层实现一定是一个leo::HUD::details::hud_tex_wrapper对象
 */
 DeclDerivedI(LB_API, IImage,cloneable)
-DeclIEntry(Graphics GetContext() const lnothrow)
+DeclIEntry(std::unique_ptr<Graphics> GetContext() const lnothrow)
 DeclIEntry(void SetSize(const Size&))
 
 DeclIEntry(IImage* clone() const ImplI(cloneable))

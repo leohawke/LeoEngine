@@ -43,6 +43,11 @@ namespace leo {
 		uint16 Height(uint8 /*level*/) const override;
 		uint16 Depth(uint8 /*level*/) const override;
 
+		virtual void Map2D(uint8 array_index, uint8 level, MapAccess tma,
+			uint16 width, uint16 height, uint16 x_offset, uint16 y_offset,
+			void*& data, uint32_t& row_pitch) override;
+		virtual void Unmap2D(uint8 array_index, uint8 level) override;
+
 		virtual ID3D11Resource* Resource() const = 0;
 
 		virtual ID3D11ShaderResourceView* ResourceView();
@@ -151,6 +156,12 @@ namespace leo {
 
 		uint16 Width(uint8 /*level*/) const override;
 		uint16 Height(uint8 /*level*/) const override;
+
+
+		void Map2D(uint8 array_index, uint8 level, MapAccess tma,
+			uint16 width, uint16 height, uint16 x_offset, uint16 y_offset,
+			void*& data, uint32_t& row_pitch) override;
+		void Unmap2D(uint8 array_index, uint8 level) override;
 
 		ID3D11Resource* Resource() const;
 

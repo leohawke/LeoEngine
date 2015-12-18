@@ -4,7 +4,7 @@
 #include <exception.hpp>
 
 auto device = [] {return leo::DeviceMgr().GetDevice(); };
-
+auto context = [] {return leo::DeviceMgr().GetDeviceContext(); };
 
 
 namespace {
@@ -71,7 +71,7 @@ leo::D3D11Texture2D::D3D11Texture2D(uint16 width, uint16 height, uint8 numMipMap
 	mSize.resize(NumMipMaps());
 	get<select::width>(mSize[0]) = width;
 	get<select::height>(mSize[0]) = height;
-	for (uint32_t level = 1; level < NumMipMaps(); ++level)
+	for (uint8 level = 1; level < NumMipMaps(); ++level)
 	{
 		get<select::width>(mSize[level]) = std::max<uint32_t>(1U, width >> level);
 		get<select::height>(mSize[level]) = std::max<uint32_t>(1U, height >>level);
@@ -119,6 +119,20 @@ leo::uint16 leo::D3D11Texture2D::Height(uint8 level) const
 {
 	LAssert(level < NumMipMaps(), "level out of NumMipMaps range");
 	return get<select::height>(mSize[level]);
+}
+
+void leo::D3D11Texture2D::Map2D(uint8 array_index, uint8 level, MapAccess tma, uint16 width, uint16 height, uint16 x_offset, uint16 y_offset, void *& data, uint32_t & row_pitch)
+{
+	D3D11_MAPPED_SUBRESOURCE MapSubRes;
+	dxcall(context()->Map(mTex.get(), D3D11CalcSubresource(level, array_index, NumMipMaps()), D3D11Mapping::Mapping(tma, Type(), Access(), NumMipMaps()), 0, &MapSubRes));
+	uint8_t* p = static_cast<uint8_t*>(MapSubRes.pData);
+	data = p + y_offset * MapSubRes.RowPitch + x_offset * NumFormatBytes(Format());
+	row_pitch = MapSubRes.RowPitch;
+}
+
+void leo::D3D11Texture2D::Unmap2D(uint8 array_index, uint8 level)
+{
+	context()->Unmap(mTex.get(), D3D11CalcSubresource(level, array_index, NumMipMaps()));
 }
 
 ID3D11Resource * leo::D3D11Texture2D::Resource() const
