@@ -444,7 +444,7 @@ void Render()
 			pSky->Render(devicecontext, *pCamera);
 		}
 		
-		//pHUDHostRender->Render();
+		pHUDHostRender->Render();
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 

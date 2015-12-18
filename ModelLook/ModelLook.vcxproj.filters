@@ -251,6 +251,12 @@
     <ClCompile Include="..\All\RenderSystem\D3D11\D3D11Mapping.cpp">
       <Filter>RenderSystem\D3D11</Filter>
     </ClCompile>
+    <ClCompile Include="HUD\HUDContainer.cpp">
+      <Filter>HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="HUD\HUDPanel.cpp">
+      <Filter>HUD</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />

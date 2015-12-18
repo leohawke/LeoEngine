@@ -200,7 +200,7 @@ namespace leo
 				"Wrong target iterator type found.");
 
 			manager = handler::manage;
-			handler::init(storage, yforward(i));
+			handler::init(storage, lforward(i));
 		}
 		any_input_iterator(const any_input_iterator&) = default;
 

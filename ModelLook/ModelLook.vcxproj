@@ -304,10 +304,12 @@
     <ClCompile Include="Axis.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="HUD\HUDContainer.cpp" />
     <ClCompile Include="HUD\HUDControl.cpp" />
     <ClCompile Include="HUD\HUDGraphics.cpp" />
     <ClCompile Include="HUD\HUDHostRenderer.cpp" />
     <ClCompile Include="HUD\HUDImpl.cpp" />
+    <ClCompile Include="HUD\HUDPanel.cpp" />
     <ClCompile Include="HUD\HUDRenderer.cpp" />
     <ClCompile Include="HUD\Label.cpp" />
     <ClCompile Include="HUD\Rect.cpp" />

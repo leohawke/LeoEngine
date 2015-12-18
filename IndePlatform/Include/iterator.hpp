@@ -557,6 +557,14 @@ namespace leo
 		{
 			return i->second;
 		}
+
+		template<typename _tIter>
+		static lconstfn auto
+			get(const _tIter& i) -> decltype(((*i).get()))
+		{
+			return (*i).get();
+		}
+
 		template<typename _tIter>
 		static lconstfn auto
 			indirect(const _tIter& i) -> decltype((**i))
@@ -568,6 +576,7 @@ namespace leo
 	lconstexpr first_tag get_first{}, get_key{};
 	lconstexpr second_tag get_second{}, get_value{};
 	lconstexpr struct indirect_tag{} get_indirect{};
+	lconstexpr const struct get_tag {} get_get{};
 
 	template<typename _tIter>
 	inline auto
@@ -594,6 +603,15 @@ namespace leo
 		typename array_ref_decay<_tIter>::type>))
 	{
 		return make_transform(lforward(i), iterator_transformation::indirect<
+			typename array_ref_decay<_tIter>::type>);
+	}
+	template<typename _tIter>
+	inline auto
+		operator|(_tIter&& i, get_tag)
+		-> decltype(make_transform(lforward(i), iterator_transformation::get<
+			typename array_ref_decay<_tIter>::type>))
+	{
+		return make_transform(lforward(i), iterator_transformation::get<
 			typename array_ref_decay<_tIter>::type>);
 	}
 

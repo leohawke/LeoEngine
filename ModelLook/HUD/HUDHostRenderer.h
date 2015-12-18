@@ -17,6 +17,7 @@
 #define HUD_HostRenderer_H
 
 #include "HUDRenderer.h"
+#include "RenderSystem/TextureX.hpp"
 #include <Core\HUDPseudoWindow.h>
 
 LEO_BEGIN
@@ -31,7 +32,7 @@ private:
 public:
 	template<typename... Args>
 	HostRenderer(IWidget& wgt,Args&&... args)
-		:BufferedRenderer(),widget(wgt),window(std::make_unique<HUDPseudoWindow>(*this,lforward(args)...)){
+		:BufferedRenderer(false, X::MakeIImage(GetSizeOf(wgt))),widget(wgt),window(std::make_unique<HUDPseudoWindow>(*this,lforward(args)...)){
 		InitWidgetView();
 	}
 

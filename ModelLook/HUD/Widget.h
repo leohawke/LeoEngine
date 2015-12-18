@@ -63,7 +63,7 @@ ImplRet(wgt.IsVisible())
 
 LB_API void SetBox(IWidget&, const Box&);
 LB_API void SetBoundsOf(IWidget& wgt, const Rect& r);
-
+LB_API void SetInvalidationOf(IWidget& wgt);
 
 /*!
 \brief 设置部件左上角所在位置（相对容器的偏移坐标）。
@@ -92,6 +92,14 @@ ImplRet(wgt.GetLocationOf())
 */
 inline PDefH(Size, GetSizeOf, const IWidget& wgt)
 ImplRet(wgt.GetSizeOf())
+
+LB_API void
+Invalidate(IWidget&, const Rect&);
+/*!
+\brief 无效化：使部件区域在直接和间接的窗口缓冲区中无效。
+*/
+inline PDefH(void, Invalidate, IWidget& wgt)
+ImplExpr(Invalidate(wgt, GetSizeOf(wgt)))
 
 
 /*!

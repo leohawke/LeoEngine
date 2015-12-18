@@ -33,6 +33,24 @@ SetSizeOf(IWidget& wgt, const Size& s)
 }
 
 void
+SetInvalidationOf(IWidget& wgt)
+{
+	wgt.GetRenderer().CommitInvalidation(Rect(GetSizeOf(wgt)));
+}
+
+void
+Invalidate(IWidget& wgt, const Rect& bounds)
+{
+	Rect r(bounds);
+
+	for (auto p_wgt(&wgt); p_wgt; p_wgt = nullptr/*FetchContainerPtr(*p_wgt)*/)
+	{
+		r = p_wgt->GetRenderer().CommitInvalidation(r);
+		r.GetPointRef() += GetLocationOf(*p_wgt);
+	}
+}
+
+void
 PaintChild(IWidget& wgt, PaintEventArgs&& e)
 {
 	auto& sender(e.GetSender());

@@ -2,7 +2,7 @@
 
 #include "Widget.h"
 #include "HUDGraphics.h"
-#include "RenderSystem/Texture.hpp"
+#include "RenderSystem/TextureX.hpp"
 
 namespace leo {
 	namespace HUD {
@@ -26,7 +26,10 @@ namespace leo {
 			class hud_tex_wrapper : implements IImage {
 			public:
 				hud_tex_wrapper(const Size& s= {}) {
-
+					tex = leo::X::MakeTexture2D(static_cast<uint16>(s.Width), static_cast<uint16>(s.Height)
+						, 1, 1, 
+						EFormat::EF_ARGB8, SampleDesc(), 
+						EAccess::EA_C_W | EAccess::EA_G_R, ElementInitData());
 				}
 
 				~hud_tex_wrapper() {}
@@ -39,10 +42,12 @@ namespace leo {
 				}
 
 				void SetSize(const Size& s) override {
-
+					//need to impl
 				}
 
 				hud_tex_wrapper* clone() const override {
+					//error impl
+					//need copy data
 					return new hud_tex_wrapper(Size(tex->Width(0), tex->Height(0)));
 				}
 			private:
