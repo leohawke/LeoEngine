@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LeoScheme", "LeoScheme\LeoS
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IndePlatform", "IndePlatform\IndePlatform.vcxproj", "{B8A92299-1C60-42C9-B77D-47F317497131}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LeoFont", "LeoFont\LeoFont.vcxproj", "{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -92,6 +94,24 @@ Global
 		{B8A92299-1C60-42C9-B77D-47F317497131}.Release|Win32.ActiveCfg = Release|Win32
 		{B8A92299-1C60-42C9-B77D-47F317497131}.Release|Win32.Build.0 = Release|Win32
 		{B8A92299-1C60-42C9-B77D-47F317497131}.Release|x64.ActiveCfg = Release|Win32
+		{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}.Debug|Win32.Build.0 = Debug|Win32
+		{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}.Debug|x64.ActiveCfg = Debug|x64
+		{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}.Debug|x64.Build.0 = Debug|x64
+		{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}.Profile|Mixed Platforms.ActiveCfg = Release|Win32
+		{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}.Profile|Mixed Platforms.Build.0 = Release|Win32
+		{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}.Profile|Win32.ActiveCfg = Release|Win32
+		{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}.Profile|Win32.Build.0 = Release|Win32
+		{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}.Profile|x64.ActiveCfg = Release|x64
+		{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}.Profile|x64.Build.0 = Release|x64
+		{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}.Release|Win32.ActiveCfg = Release|Win32
+		{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}.Release|Win32.Build.0 = Release|Win32
+		{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}.Release|x64.ActiveCfg = Release|x64
+		{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

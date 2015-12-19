@@ -212,9 +212,6 @@
     <ClCompile Include="HUD\HUDControl.cpp">
       <Filter>HUD</Filter>
     </ClCompile>
-    <ClCompile Include="UI\Font.cpp">
-      <Filter>WinMain</Filter>
-    </ClCompile>
     <ClCompile Include="HUD\Label.cpp">
       <Filter>HUD</Filter>
     </ClCompile>
@@ -259,6 +256,9 @@
     </ClCompile>
     <ClCompile Include="HUD\HUDBrush.cpp">
       <Filter>HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\Font.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
