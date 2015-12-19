@@ -714,6 +714,19 @@ fxc /E"main_8"  /Fo"$(OutDir)Shader\%(Filename)_8.cso" /T "ps_5_0" /nologo $(Pro
   <ItemGroup>
     <Natvis Include="namespace_leo.natvis" />
   </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\All\Resource\SourceHanSans-Regular.otf">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy /Y   $(SolutionDir)All\Resource\%(Filename)%(Extension)  $(OutDir)Fonts\%(Filename)%(Extension)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">复制 %(Filename)%(Extension) 到 $(OutDir)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)copy.log</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy /Y   $(SolutionDir)All\Resource\%(Filename)%(Extension)  $(OutDir)Fonts\%(Filename)%(Extension)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">复制 %(Filename)%(Extension) 到 $(OutDir)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)copy.log</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </CustomBuild>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -508,6 +508,9 @@
     <CustomBuild Include="Shader\Blur.hlsl">
       <Filter>Shader</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\All\Resource\SourceHanSans-Regular.otf">
+      <Filter>Res</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="namespace_leo.natvis">
