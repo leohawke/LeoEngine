@@ -23,7 +23,11 @@
 
 #include <RenderSystem\DeferredRender.hpp>
 #include <RenderSystem\ShaderMgr.h>
+#include <RenderSystem\RenderStates.hpp>
+#include <RenderSystem\D3D11\D3D11Texture.hpp>
 #include "DeviceMgr.h"
+
+#include "FreeTypeTest.h"
 
 leo::Event event;
 std::mutex mRenderMutex;
@@ -39,6 +43,8 @@ std::unique_ptr<leo::DeferredRender> pRender = nullptr;
 leo::TexturePtr pTex;
 
 ID3D11PixelShader* pFontGenPs = nullptr;
+ID3D11DepthStencilState* pNoDepthStencil = nullptr;
+ID3D11SamplerState* pLinearSampler = nullptr;
 
 void DeviceEvent()
 {
@@ -194,6 +200,8 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	leo::EffectQuad::GetInstance().SetFrustum(device, *pCamera);
 #endif
 
+	using namespace leo;
+
 	pRender = std::make_unique<leo::DeferredRender>(device, size);
 
 	pPanel = std::make_unique<leo::HUD::Panel>(leo::HUD::Size(size.first, size.second));
@@ -204,7 +212,14 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pLabel->SetVisible(true);
 	*pPanel += *pLabel;
 
-	pFontGenPs = leo::ShaderMgr().CreatePixelShader(L"./Shader/FontGenPs.cso");
+	pFontGenPs = ShaderMgr().CreatePixelShader(L"./Shader/FontGenPs.cso");
+	pNoDepthStencil = RenderStates().GetDepthStencilState(L"NoDepthDSS");
+	pLinearSampler = RenderStates().GetSamplerState(L"LinearRepeat");
+
+
+	pTex = X::MakeTexture2D(4096,4096, 1, 1, EFormat::EF_R8, {}, EAccess::EA_C_W | EAccess::EA_G_R, {});
+
+	FillTexture(pTex, L'‡å');
 }
 
 void ClearRes() {
@@ -214,7 +229,7 @@ void ClearRes() {
 
 	pHUDHostRender.reset();
 	pPanel.reset();
-
+	pTex.reset();
 }
 
 void ReSize(std::pair<leo::uint16, leo::uint16> size) {
@@ -229,7 +244,7 @@ void Update() {
 	while (renderThreadRun)
 	{
 
-		std::lock_guard<std::mutex> lock(mRenderMutex);
+		//std::lock_guard<std::mutex> lock(mRenderMutex);
 		
 		static auto mBegin = leo::clock::now();
 
@@ -283,7 +298,13 @@ void Render()
 		//forward render
 		devicecontext->OMSetRenderTargets(1, &leo::global::globalD3DRenderTargetView, *leo::global::globalDepthStencil);
 		leo::EffectQuad::GetInstance().Apply(devicecontext);
+		if (auto p = dynamic_cast<leo::D3D11Texture2D*>(pTex.get())) {
+			auto srv = p->ResouceView();
+			devicecontext->PSSetShaderResources(0, 1, &srv);
+		}
 		devicecontext->PSSetShader(pFontGenPs, nullptr, 0);
+		devicecontext->PSSetSamplers(0, 1, &pLinearSampler);
+		devicecontext->OMSetDepthStencilState(pNoDepthStencil,0xff);
 		leo::EffectQuad::GetInstance().Draw(devicecontext);
 
 		pHUDHostRender->Render();

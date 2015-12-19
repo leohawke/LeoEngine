@@ -71,8 +71,9 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)LeoScheme\Sexp;$(SolutionDir)All\;$(SolutionDir)Indeplatform\include;$(SolutionDir)DirectXTex;$(SolutionDir)ModelLook\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)LeoScheme\Sexp;$(SolutionDir)All\;$(SolutionDir)Indeplatform\include;$(SolutionDir)DirectXTex;$(SolutionDir)ModelLook\;E:\SDKs\freetype-2.5.3\include;$(IncludePath)</IncludePath>
     <ReferencePath>$(SolutionDir)LeoScheme\;$(SolutionDir)DirectXTex;$(ReferencePath)</ReferencePath>
+    <LibraryPath>E:\SDKs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -98,6 +99,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>freetype-2.5.3/lib/x86/freetyped.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -277,6 +279,7 @@
     <ClCompile Include="..\ModelLook\HUD\Widget.cpp" />
     <ClCompile Include="..\ModelLook\HUD\WidgetEvent.cpp" />
     <ClCompile Include="..\ModelLook\UI\Font.cpp" />
+    <ClCompile Include="FreeTypeTest.cpp" />
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -286,6 +289,15 @@
     <ProjectReference Include="..\IndePlatform\IndePlatform.vcxproj">
       <Project>{b8a92299-1c60-42c9-b77d-47f317497131}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="FontGenPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="FreeTypeTest.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

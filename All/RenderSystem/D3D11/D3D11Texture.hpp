@@ -44,7 +44,8 @@ namespace leo {
 		uint16 Depth(uint8 /*level*/) const override;
 
 		virtual void Map2D(uint8 array_index, uint8 level, MapAccess tma,
-			uint16 width, uint16 height, uint16 x_offset, uint16 y_offset,
+			uint16 x_offset, uint16 y_offset,
+			uint16 width, uint16 height,
 			void*& data, uint32_t& row_pitch) override;
 		virtual void Unmap2D(uint8 array_index, uint8 level) override;
 
@@ -159,7 +160,8 @@ namespace leo {
 
 
 		void Map2D(uint8 array_index, uint8 level, MapAccess tma,
-			uint16 width, uint16 height, uint16 x_offset, uint16 y_offset,
+			uint16 x_offset, uint16 y_offset,
+			uint16 width, uint16 height,
 			void*& data, uint32_t& row_pitch) override;
 		void Unmap2D(uint8 array_index, uint8 level) override;
 

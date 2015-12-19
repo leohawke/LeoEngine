@@ -518,7 +518,8 @@ namespace leo {
 		return 1;
 	}
 
-	void D3D11Texture::Map2D(uint8 array_index, uint8 level, MapAccess tma, uint16 width, uint16 height, uint16 x_offset, uint16 y_offset, void *& data, uint32_t & row_pitch)
+	void D3D11Texture::Map2D(uint8 array_index, uint8 level, MapAccess tma, uint16 x_offset, uint16 y_offset,
+		uint16 width, uint16 height, void *& data, uint32_t & row_pitch)
 	{
 		assert(false);
 	}

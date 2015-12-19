@@ -6,7 +6,10 @@ struct VertexOut
 };
 
 
+Texture2D alpha;
+SamplerState s;
+
 float4 main(VertexOut pin) : SV_TARGET
 {
-	return float4(1.0f, 1.0f, 1.0f, 1.0f);
+	return alpha.Sample(s,pin.Tex).rrrr;
 }

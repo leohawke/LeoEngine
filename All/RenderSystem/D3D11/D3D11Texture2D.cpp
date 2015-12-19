@@ -121,7 +121,8 @@ leo::uint16 leo::D3D11Texture2D::Height(uint8 level) const
 	return get<select::height>(mSize[level]);
 }
 
-void leo::D3D11Texture2D::Map2D(uint8 array_index, uint8 level, MapAccess tma, uint16 width, uint16 height, uint16 x_offset, uint16 y_offset, void *& data, uint32_t & row_pitch)
+void leo::D3D11Texture2D::Map2D(uint8 array_index, uint8 level, MapAccess tma, uint16 x_offset, uint16 y_offset,
+	uint16 width, uint16 height, void *& data, uint32_t & row_pitch)
 {
 	D3D11_MAPPED_SUBRESOURCE MapSubRes;
 	dxcall(context()->Map(mTex.get(), D3D11CalcSubresource(level, array_index, NumMipMaps()), D3D11Mapping::Mapping(tma, Type(), Access(), NumMipMaps()), 0, &MapSubRes));

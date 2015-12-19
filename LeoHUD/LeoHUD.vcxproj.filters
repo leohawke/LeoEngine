@@ -186,5 +186,16 @@
     <ClCompile Include="WinMain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="FreeTypeTest.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="FontGenPS.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="FreeTypeTest.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
