@@ -19,11 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{0169CE83-0710-4FC6-A8A2-CC71F00C75B7}</ProjectGuid>
+    <ProjectGuid>{9C53982F-46B2-4AF1-B720-0898B929ABBA}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>LeoFont</RootNamespace>
+    <RootNamespace>LeoHUD</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
-    <ProjectName>LeoHUD</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -92,6 +91,9 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>MULTI_THREAD;PLATFORM_WIN32;DEBUG;LEO_MEMORY_TRACKER;NO_GENMIP;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <DisableSpecificWarnings>4800</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -283,9 +285,6 @@
     </ProjectReference>
     <ProjectReference Include="..\IndePlatform\IndePlatform.vcxproj">
       <Project>{b8a92299-1c60-42c9-b77d-47f317497131}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\ModelLook\ModelLook.vcxproj">
-      <Project>{5d8849a5-a8d1-4b24-a85c-b95c93b30253}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

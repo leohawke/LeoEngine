@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
     <Filter Include="头文件">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
@@ -10,33 +14,29 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="依赖源文件">
-      <UniqueIdentifier>{9d268b74-e394-41a8-b412-6acfa5160c2e}</UniqueIdentifier>
+      <UniqueIdentifier>{fd5d99c5-4bb8-47e4-b581-66262a2a8200}</UniqueIdentifier>
     </Filter>
     <Filter Include="依赖源文件\HUD">
-      <UniqueIdentifier>{b11be803-8578-4a0e-92a6-3b8332d5fe02}</UniqueIdentifier>
+      <UniqueIdentifier>{527aeea9-ad8c-48b0-a9a1-7c4b30235406}</UniqueIdentifier>
     </Filter>
     <Filter Include="依赖源文件\RenderSystem">
-      <UniqueIdentifier>{2e08ec5c-9f5d-4e43-8ac2-3da749923d7a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="依赖源文件\Core">
-      <UniqueIdentifier>{8df2805c-ac94-4798-9390-e98691a96226}</UniqueIdentifier>
+      <UniqueIdentifier>{15d4e896-f646-4f2b-bb8b-6e49eb1b1697}</UniqueIdentifier>
     </Filter>
     <Filter Include="依赖源文件\RenderSystem\D3D11">
-      <UniqueIdentifier>{a3dfeb21-21ca-4f3b-8490-1306fd7cff05}</UniqueIdentifier>
+      <UniqueIdentifier>{9824a910-3385-4fd8-a20b-e03834b70a2d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="依赖源文件\Core">
+      <UniqueIdentifier>{e61d4aea-7098-4a1c-9081-8d6d39e10820}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="WinMain.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\All\Core\RenderSync.cpp">
       <Filter>依赖源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\All\DeviceManger.cpp">
+      <Filter>依赖源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\File.cpp">
       <Filter>依赖源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\All\Mgr.cpp">
@@ -45,14 +45,20 @@
     <ClCompile Include="..\All\OutputWindow.cpp">
       <Filter>依赖源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\All\window.cpp">
+    <ClCompile Include="..\All\RenderSystem\ShaderMgr.cpp">
       <Filter>依赖源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\All\RenderSystem\ShaderMgr.cpp">
+    <ClCompile Include="..\All\TextureMgr.cpp">
+      <Filter>依赖源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\window.cpp">
       <Filter>依赖源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\ModelLook\UI\Font.cpp">
       <Filter>依赖源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\Core\HUDPseudoWindow.cpp">
+      <Filter>依赖源文件\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\ModelLook\HUD\HUDBrush.cpp">
       <Filter>依赖源文件\HUD</Filter>
@@ -90,9 +96,6 @@
     <ClCompile Include="..\ModelLook\HUD\WidgetEvent.cpp">
       <Filter>依赖源文件\HUD</Filter>
     </ClCompile>
-    <ClCompile Include="..\All\Core\HUDPseudoWindow.cpp">
-      <Filter>依赖源文件\HUD</Filter>
-    </ClCompile>
     <ClCompile Include="..\All\RenderSystem\BlurProcess.cpp">
       <Filter>依赖源文件\RenderSystem</Filter>
     </ClCompile>
@@ -126,6 +129,24 @@
     <ClCompile Include="..\All\RenderSystem\RenderSystem.cpp">
       <Filter>依赖源文件\RenderSystem</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\Texture.cpp">
+      <Filter>依赖源文件\RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\TextureX.cpp">
+      <Filter>依赖源文件\RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\D3D11\D3D11Mapping.cpp">
+      <Filter>依赖源文件\RenderSystem\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\D3D11\D3D11RenderSystem.cpp">
+      <Filter>依赖源文件\RenderSystem\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\D3D11\D3D11Texture.cpp">
+      <Filter>依赖源文件\RenderSystem\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\D3D11\D3D11Texture2D.cpp">
+      <Filter>依赖源文件\RenderSystem\D3D11</Filter>
+    </ClCompile>
     <ClCompile Include="..\All\Core\BilaterFilter.cpp">
       <Filter>依赖源文件\Core</Filter>
     </ClCompile>
@@ -141,26 +162,20 @@
     <ClCompile Include="..\All\Core\effect.cpp">
       <Filter>依赖源文件\Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\All\Core\FileSearch.cpp">
-      <Filter>依赖源文件\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\Core\EngineConfig.cpp">
+    <ClCompile Include="..\All\Core\EffectGBuffer.cpp">
       <Filter>依赖源文件\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\All\Core\EffectQuad.cpp">
       <Filter>依赖源文件\Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\All\Core\EffectGBuffer.cpp">
+    <ClCompile Include="..\All\Core\EngineConfig.cpp">
       <Filter>依赖源文件\Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\All\File.cpp">
-      <Filter>依赖源文件</Filter>
+    <ClCompile Include="..\All\Core\FileSearch.cpp">
+      <Filter>依赖源文件\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\All\Core\Light.cpp">
       <Filter>依赖源文件\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\TextureMgr.cpp">
-      <Filter>依赖源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\All\Core\Vertex.cpp">
       <Filter>依赖源文件\Core</Filter>
@@ -168,23 +183,8 @@
     <ClCompile Include="..\LeoScheme\Sexp\Sexp.cpp">
       <Filter>依赖源文件\Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\All\RenderSystem\TextureX.cpp">
-      <Filter>依赖源文件\RenderSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\RenderSystem\Texture.cpp">
-      <Filter>依赖源文件\RenderSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\RenderSystem\D3D11\D3D11Mapping.cpp">
-      <Filter>依赖源文件\RenderSystem\D3D11</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\RenderSystem\D3D11\D3D11RenderSystem.cpp">
-      <Filter>依赖源文件\RenderSystem\D3D11</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\RenderSystem\D3D11\D3D11Texture.cpp">
-      <Filter>依赖源文件\RenderSystem\D3D11</Filter>
-    </ClCompile>
-    <ClCompile Include="..\All\RenderSystem\D3D11\D3D11Texture2D.cpp">
-      <Filter>依赖源文件\RenderSystem\D3D11</Filter>
+    <ClCompile Include="WinMain.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

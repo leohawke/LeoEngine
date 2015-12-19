@@ -22,6 +22,7 @@
 #include "HUD\Label.h"
 
 #include <RenderSystem\DeferredRender.hpp>
+#include <RenderSystem\ShaderMgr.h>
 #include "DeviceMgr.h"
 
 leo::Event event;
@@ -34,6 +35,10 @@ std::unique_ptr<leo::HUD::Panel> pPanel = nullptr;
 
 std::unique_ptr<leo::HUD::Label> pLabel = nullptr;
 std::unique_ptr<leo::DeferredRender> pRender = nullptr;
+
+leo::TexturePtr pTex;
+
+ID3D11PixelShader* pFontGenPs = nullptr;
 
 void DeviceEvent()
 {
@@ -136,7 +141,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 		}
 		else
 			::WaitMessage();
-
 	}
 	renderThreadRun = false;
 	updateThread.join();
@@ -199,6 +203,8 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pLabel = leo::HUD::MakeLabel("xiaxian baka");
 	pLabel->SetVisible(true);
 	*pPanel += *pLabel;
+
+	pFontGenPs = leo::ShaderMgr().CreatePixelShader(L"./Shader/FontGenPs.cso");
 }
 
 void ClearRes() {
@@ -276,6 +282,9 @@ void Render()
 
 		//forward render
 		devicecontext->OMSetRenderTargets(1, &leo::global::globalD3DRenderTargetView, *leo::global::globalDepthStencil);
+		leo::EffectQuad::GetInstance().Apply(devicecontext);
+		devicecontext->PSSetShader(pFontGenPs, nullptr, 0);
+		leo::EffectQuad::GetInstance().Draw(devicecontext);
 
 		pHUDHostRender->Render();
 
