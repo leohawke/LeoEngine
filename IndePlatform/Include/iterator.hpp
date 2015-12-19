@@ -381,13 +381,8 @@ namespace leo
 			: iterator_type(lforward(i)), transformer(f)
 		{}
 		transformed_iterator(const transformed_iterator&) = default;
-#if LB_IMPL_MSCPP
-		transformed_iterator(transformed_iterator&& i)
-			: transformer(std::move(i.transformer))
-		{}
-#else
+
 		transformed_iterator(transformed_iterator&&) = default;
-#endif
 
 		inline reference
 			operator*() const

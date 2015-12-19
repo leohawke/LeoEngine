@@ -257,6 +257,9 @@
     <ClCompile Include="HUD\HUDPanel.cpp">
       <Filter>HUD</Filter>
     </ClCompile>
+    <ClCompile Include="HUD\HUDBrush.cpp">
+      <Filter>HUD</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -377,6 +380,9 @@
     </ClInclude>
     <ClInclude Include="..\All\RenderSystem\RenderSystem.hpp">
       <Filter>RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="HUD\HUDBrush.h">
+      <Filter>HUD</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

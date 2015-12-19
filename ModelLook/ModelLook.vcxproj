@@ -95,7 +95,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MinimalRebuild>false</MinimalRebuild>
-      <DisableSpecificWarnings>4458</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4458;4800</DisableSpecificWarnings>
       <BrowseInformation>false</BrowseInformation>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -304,6 +304,7 @@
     <ClCompile Include="Axis.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="HUD\HUDBrush.cpp" />
     <ClCompile Include="HUD\HUDContainer.cpp" />
     <ClCompile Include="HUD\HUDControl.cpp" />
     <ClCompile Include="HUD\HUDGraphics.cpp" />
@@ -321,6 +322,7 @@
     <ClInclude Include="..\All\RenderSystem\RenderSystem.hpp" />
     <ClInclude Include="..\All\RenderSystem\Texture.hpp" />
     <ClInclude Include="..\All\RenderSystem\TextureX.hpp" />
+    <ClInclude Include="HUD\HUDBrush.h" />
     <ClInclude Include="HUD\HUDContainer.h" />
     <ClInclude Include="HUD\HUDHostRenderer.h" />
     <ClInclude Include="HUD\HUDImpl.h" />

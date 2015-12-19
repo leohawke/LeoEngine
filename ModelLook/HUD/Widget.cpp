@@ -1,6 +1,7 @@
 #include "Widget.h"
 #include "HUDControl.h"
 #include "HUDUtilities.h"
+#include "HUDBrush.h"
 LEO_BEGIN
 
 HUD_BEGIN
@@ -109,7 +110,7 @@ Widget::InitializeEvents()
 HBrush
 Widget::MakeAlphaBrush()
 {
-	return HBrush();
+	return SolidBrush(float4(0.f,0.f,0.f,0.f));
 }
 
 

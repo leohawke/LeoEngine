@@ -21,7 +21,7 @@ void HostRenderer::Render()
 		//AdjustSize();
 
 		auto& wgt(widget.get());
-		const auto& g(GetContext());
+		const auto g(GetContext());
 		const auto r(GetInvalidatedArea());
 
 		if (Validate(wgt, wgt, { *g,{},r }))

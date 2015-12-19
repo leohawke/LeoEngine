@@ -25,6 +25,7 @@
 //third,HUD
 #include "HUD\HUDHostRenderer.h"
 #include "HUD\HUDPanel.h"
+#include "HUD\Label.h"
 
 //Effect header
 #include <Core\EffectGBuffer.hpp>
@@ -50,6 +51,8 @@ std::unique_ptr<leo::Sky> pSky = nullptr;
 
 std::shared_ptr<leo::HUD::HostRenderer> pHUDHostRender = nullptr;
 std::unique_ptr<leo::HUD::Panel> pPanel = nullptr;
+
+std::unique_ptr<leo::HUD::Label> pLabel = nullptr;
 
 std::atomic<bool> renderAble = false;
 std::atomic<bool> renderThreadRun = true;
@@ -341,6 +344,10 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pPanel = std::make_unique<leo::HUD::Panel>(leo::HUD::Size(size.first,size.second));
 	pHUDHostRender = std::make_shared<leo::HUD::HostRenderer>(*pPanel);
 	pPanel->SetRenderer(pHUDHostRender);
+
+	pLabel = leo::HUD::MakeLabel("xiaxian baka");
+	pLabel->SetVisible(true);
+	*pPanel += *pLabel;
 }
 
 void ClearRes() {
