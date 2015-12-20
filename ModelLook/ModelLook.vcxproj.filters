@@ -260,6 +260,9 @@
     <ClCompile Include="UI\Rect.cpp">
       <Filter>UI</Filter>
     </ClCompile>
+    <ClCompile Include="UI\GUI.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -391,6 +394,9 @@
       <Filter>UI</Filter>
     </ClInclude>
     <ClInclude Include="UI\GUIBase.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\Color.h">
       <Filter>UI</Filter>
     </ClInclude>
   </ItemGroup>

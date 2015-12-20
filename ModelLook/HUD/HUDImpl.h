@@ -14,7 +14,7 @@ namespace leo {
 					uint16 width, uint16 height)
 					:delegate(tex,array_index,level,tma,x_offset,y_offset,width,height)
 				{
-					pBuffer = reinterpret_cast<Pixel<>*>(delegate.pSysMem);
+					pBuffer = reinterpret_cast<Drawing::Pixel<>*>(delegate.pSysMem);
 					sGraphics.Height = height;
 					sGraphics.Width = width;
 				}

@@ -11,13 +11,10 @@ HUD_BEGIN
 class LB_API SolidBrush
 {
 public:
-	Pixel<> Color;
+	Drawing::Color Color;
 
-	SolidBrush(const float4& c)
-		:Color({ static_cast<stdex::byte>(c.x*255),
-			static_cast<stdex::byte>(c.y*255),
-			static_cast<stdex::byte>(c.z*255),
-			static_cast<stdex::byte>(c.w*255) })
+	SolidBrush(const Drawing::Color c)
+		:Color(c)
 	{}
 
 	void

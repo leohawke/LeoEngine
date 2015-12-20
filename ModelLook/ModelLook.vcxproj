@@ -316,6 +316,7 @@
     <ClCompile Include="HUD\Widget.cpp" />
     <ClCompile Include="HUD\WidgetEvent.cpp" />
     <ClCompile Include="UI\Font.cpp" />
+    <ClCompile Include="UI\GUI.cpp" />
     <ClCompile Include="UI\Rect.cpp" />
     <ClCompile Include="WinMain.cpp" />
     <ClInclude Include="..\All\RenderSystem\EFormat.hpp" />
@@ -327,6 +328,7 @@
     <ClInclude Include="HUD\HUDHostRenderer.h" />
     <ClInclude Include="HUD\HUDImpl.h" />
     <ClInclude Include="HUD\HUDPanel.h" />
+    <ClInclude Include="UI\Color.h" />
     <ClInclude Include="UI\Font.hpp" />
     <ClInclude Include="UI\GUI.h" />
     <ClInclude Include="UI\GUIBase.h" />

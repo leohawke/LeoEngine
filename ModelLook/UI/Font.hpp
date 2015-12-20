@@ -13,6 +13,14 @@ enum class FontStyle : std::uint8_t
 	Regular = 0, //!< 常规字体。
 };
 
+namespace {
+
+	class LB_API FontFamily final : private noncopyable{
+	} nullFontFamily;
+
+	class LB_API FontCache final : private noncopyable{
+	} nullFontCache;
+}
 /*!
 \brief 字体：字模，包含样式和大小。
 \todo 字型
@@ -29,6 +37,7 @@ private:
 	\brief 字体样式。
 	*/
 	FontStyle style;
+
 public:
 	Font()
 		:Font(DefaultSize, FontStyle::Regular)
@@ -40,6 +49,32 @@ public:
 
 	DefGetter(const lnothrow, FontSize, Size, font_size)
 	DefGetter(const lnothrow, FontStyle, Style, style)
+
+	DefGetter(const lnothrow, FontCache&, Cache, nullFontCache)
+	DefGetter(const lnothrow, const FontFamily&, FontFamily, nullFontFamily)
+
+		/*!
+		\brief 取跨距。
+		*/
+		std::int8_t
+		GetAdvance(char32_t) const;
+	/*!
+	\brief 取升部。
+	*/
+	std::int8_t
+		GetAscender() const;
+	/*!
+	\brief 取降部。
+	*/
+	std::int8_t
+		GetDescender() const;
+
+
+	/*!
+	\brief 取字体对应的字符高度。
+	*/
+	FontSize
+		GetHeight() const lnothrow;
 public:
 	/*!
 	\brief 设置字体大小。

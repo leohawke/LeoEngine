@@ -110,7 +110,7 @@ Widget::InitializeEvents()
 HBrush
 Widget::MakeAlphaBrush()
 {
-	return SolidBrush(float4(0.f,0.f,0.f,0.f));
+	return SolidBrush(Drawing::ColorSpace::Trans);
 }
 
 

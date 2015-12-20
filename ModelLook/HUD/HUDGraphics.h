@@ -5,19 +5,6 @@
 
 LEO_BEGIN
 
-/*!
-\warning 为兼容YSLIB存在,兼容DXGI_FORMAT格式
-*/
-enum PixelFormat {
-	C48888,//4个通道，每通道8bit
-};
-template<PixelFormat = C48888>
-struct Pixel;
-
-template<>
-struct Pixel<C48888> {
-	stdex::byte r, g, b, a;
-};
 
 //2D纹理包装
 //warning，一般不会直接使用该类型,using std::share_ptr<texture2d_wrapper>
@@ -27,8 +14,8 @@ class texture2d_wrapper;
 
 HUD_BEGIN
 
-using BitmapPtr = Pixel<>*;
-using ConstBitmapPtr = const Pixel<>*;
+using BitmapPtr = Drawing::Pixel<>*;
+using ConstBitmapPtr = const Drawing::Pixel<>*;
 
 template<typename _tOut, typename _tIn>
 void
@@ -179,6 +166,17 @@ struct LB_API PaintContext
 	*/
 	Rect ClipArea;
 };
+
+
+/*!
+\brief 根据指定边距和源的大小优化绘制上下文的剪切区域。
+\return 若边距决定不足以被渲染则为 Point() ，否则为源的起始偏移位置。
+\note 当不需要绘制时，不修改偏移坐标。
+
+检查边距限制下需要保留绘制的区域，结果保存至绘制上下文的除渲染目标外的其它成员。
+*/
+LB_API Point
+ClipMargin(PaintContext&, const Drawing::Padding&, const Size&);
 
 HUD_END
 

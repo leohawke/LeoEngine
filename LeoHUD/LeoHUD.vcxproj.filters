@@ -28,6 +28,9 @@
     <Filter Include="依赖源文件\Core">
       <UniqueIdentifier>{e61d4aea-7098-4a1c-9081-8d6d39e10820}</UniqueIdentifier>
     </Filter>
+    <Filter Include="依赖源文件\UI">
+      <UniqueIdentifier>{9f1c8dee-4e50-487b-8a83-9f6ca44f8645}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\All\Core\RenderSync.cpp">
@@ -85,9 +88,6 @@
       <Filter>依赖源文件\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\ModelLook\HUD\Label.cpp">
-      <Filter>依赖源文件\HUD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ModelLook\HUD\Rect.cpp">
       <Filter>依赖源文件\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\ModelLook\HUD\Widget.cpp">
@@ -188,6 +188,9 @@
     </ClCompile>
     <ClCompile Include="FreeTypeTest.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ModelLook\UI\Rect.cpp">
+      <Filter>依赖源文件\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

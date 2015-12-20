@@ -3,7 +3,9 @@
 
 #include <ldef.h>
 #include <BaseMacro.h>
+#include <leoint.hpp>
 #include <LAssert.h>
+#include <utility.hpp>
 #include <algorithm>
 
 #ifndef UI_BEGIN
@@ -25,6 +27,7 @@ class Font;
 struct Padding;
 struct Size;
 struct Rect;
+class Color;
 
 LEO_DRAW_END
 
