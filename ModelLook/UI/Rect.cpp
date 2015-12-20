@@ -1,7 +1,6 @@
-#include "HUD.h"
-#include "HUDUtilities.h"
-LEO_BEGIN
-HUD_BEGIN
+#include "GUIBase.h"
+
+LEO_DRAW_BEGIN
 
 using std::max;
 using std::min;
@@ -96,5 +95,4 @@ Rect::operator|=(const Rect& r) lnothrow
 		- mx), PDst(max(GetBottom(), r.GetBottom()) - my));
 }
 
-HUD_END
-LEO_END
+LEO_DRAW_END

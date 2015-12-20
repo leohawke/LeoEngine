@@ -200,9 +200,6 @@
     <ClCompile Include="HUD\Widget.cpp">
       <Filter>HUD</Filter>
     </ClCompile>
-    <ClCompile Include="HUD\Rect.cpp">
-      <Filter>HUD</Filter>
-    </ClCompile>
     <ClCompile Include="HUD\WidgetEvent.cpp">
       <Filter>HUD</Filter>
     </ClCompile>
@@ -258,6 +255,9 @@
       <Filter>HUD</Filter>
     </ClCompile>
     <ClCompile Include="UI\Font.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\Rect.cpp">
       <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
@@ -383,6 +383,15 @@
     </ClInclude>
     <ClInclude Include="HUD\HUDBrush.h">
       <Filter>HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\TextBase.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\GUI.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\GUIBase.h">
+      <Filter>UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

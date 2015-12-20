@@ -3,6 +3,8 @@
 
 #include <ldef.h>
 #include <BaseMacro.h>
+#include <LAssert.h>
+#include <algorithm>
 
 #ifndef UI_BEGIN
 //UI包括2D UI和3D UI，主要用于游戏特定UI
@@ -20,6 +22,9 @@
 LEO_DRAW_BEGIN
 
 class Font;
+struct Padding;
+struct Size;
+struct Rect;
 
 LEO_DRAW_END
 
