@@ -312,6 +312,7 @@
     <ClCompile Include="HUD\HUDImpl.cpp" />
     <ClCompile Include="HUD\HUDPanel.cpp" />
     <ClCompile Include="HUD\HUDRenderer.cpp" />
+    <ClCompile Include="HUD\HUDRenderSystem.cpp" />
     <ClCompile Include="HUD\Label.cpp" />
     <ClCompile Include="HUD\Widget.cpp" />
     <ClCompile Include="HUD\WidgetEvent.cpp" />
@@ -328,6 +329,7 @@
     <ClInclude Include="HUD\HUDHostRenderer.h" />
     <ClInclude Include="HUD\HUDImpl.h" />
     <ClInclude Include="HUD\HUDPanel.h" />
+    <ClInclude Include="HUD\HUDRenderSystem.h" />
     <ClInclude Include="UI\Color.h" />
     <ClInclude Include="UI\Font.hpp" />
     <ClInclude Include="UI\GUI.h" />

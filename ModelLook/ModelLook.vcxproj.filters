@@ -263,6 +263,9 @@
     <ClCompile Include="UI\GUI.cpp">
       <Filter>UI</Filter>
     </ClCompile>
+    <ClCompile Include="HUD\HUDRenderSystem.cpp">
+      <Filter>HUD</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -398,6 +401,9 @@
     </ClInclude>
     <ClInclude Include="UI\Color.h">
       <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="HUD\HUDRenderSystem.h">
+      <Filter>HUD</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

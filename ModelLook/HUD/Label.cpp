@@ -1,5 +1,6 @@
 #include "Label.h"
 #include "HUDImpl.h"
+#include "..\UI\TextBase.h"
 
 LEO_BEGIN
 HUD_BEGIN
@@ -85,10 +86,11 @@ Point MLabel::GetAlignedPenOffset(const Size & s) const
 void MLabel::DrawText(const Size & s, const PaintContext & pc) const
 {
 	const auto r(RectAddMargin(Rect(pc.Location, s),Margin));
+	Drawing::TextState ts(Font, Drawing::FetchMargin(r, pc.Target.GetSize()));
+	ts.Color = ForeColor;
+	ts.Pen += GetAlignedPenOffset(s);
 
-	auto offset = GetAlignedPenOffset(s);
-
-	details::DrawText(Text, { pc.Target,pc.Location,pc.ClipArea&r }, offset);
+	details::DrawText({ pc.Target,pc.Location,pc.ClipArea&r },ts, Text);
 }
 
 Rect Label::CalculateBounds(const std::string & text, Rect r, const Drawing::Font & fnt)

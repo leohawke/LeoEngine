@@ -40,6 +40,8 @@ public:
 
 	std::string Text{};
 
+	Drawing::Color ForeColor{ Drawing::ColorSpace::Black };
+
 	explicit
 	MLabel(const Drawing::Font& = {},
 			TextAlignment = TextAlignment::Left);

@@ -3,6 +3,7 @@
 #include "Widget.h"
 #include "HUDGraphics.h"
 #include "RenderSystem/TextureX.hpp"
+#include "..\UI\TextBase.h"
 
 namespace leo {
 	namespace HUD {
@@ -59,7 +60,7 @@ namespace leo {
 
 	namespace HUD {
 		namespace details {
-			void DrawText(const std::string& Text, const PaintContext& pc, const Point& offset);
+			void DrawText(const PaintContext& pc, const Drawing::TextState& state, const std::string& Text);
 		}
 	}
 }
