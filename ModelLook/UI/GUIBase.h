@@ -476,7 +476,7 @@ struct LB_API Rect :private Point, private Size
 
 struct LB_API Box :public Rect
 {
-
+	using Rect::Rect;
 };
 
 //! \relates Rect

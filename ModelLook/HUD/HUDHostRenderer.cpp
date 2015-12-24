@@ -1,5 +1,6 @@
 
 #include "HUDHostRenderer.h"
+#include "Widget.h"
 
 LEO_BEGIN
 HUD_BEGIN
@@ -18,13 +19,21 @@ void HostRenderer::Render()
 {
 	if(!window->IsMined())
 	{
+		auto& wgt(widget.get());
+
+ 		CommitInvalidation(wgt.GetBox());
 		//AdjustSize();
 
-		auto& wgt(widget.get());
-		const auto g(GetContext());
-		const auto r(GetInvalidatedArea());
+		auto b = false;
+		{
+			
+			//context must have this local scope
+			const auto g(GetContext());
+			const auto r(GetInvalidatedArea());
 
-		if (Validate(wgt, wgt, { *g,{},r }))
+			b = bool(Validate(wgt, wgt, { *g,{},r }));
+		}
+		if(b)
 			window->Render();
 	}
 }

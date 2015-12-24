@@ -145,7 +145,7 @@ Size Widget::GetSizeOf() const {
 }
 
 Box Widget::GetBox() const {
-	return Box();
+	return Box(mLocation,mSize);
 }
 
 Point Widget::GetLocationOf() const {
