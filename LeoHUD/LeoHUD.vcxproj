@@ -274,11 +274,14 @@
     <ClCompile Include="..\ModelLook\HUD\HUDImpl.cpp" />
     <ClCompile Include="..\ModelLook\HUD\HUDPanel.cpp" />
     <ClCompile Include="..\ModelLook\HUD\HUDRenderer.cpp" />
+    <ClCompile Include="..\ModelLook\HUD\HUDRenderSystem.cpp" />
     <ClCompile Include="..\ModelLook\HUD\Label.cpp" />
     <ClCompile Include="..\ModelLook\HUD\Widget.cpp" />
     <ClCompile Include="..\ModelLook\HUD\WidgetEvent.cpp" />
     <ClCompile Include="..\ModelLook\UI\Font.cpp" />
+    <ClCompile Include="..\ModelLook\UI\GUI.cpp" />
     <ClCompile Include="..\ModelLook\UI\Rect.cpp" />
+    <ClCompile Include="..\ModelLook\UI\TextBase.cpp" />
     <ClCompile Include="FreeTypeTest.cpp" />
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>

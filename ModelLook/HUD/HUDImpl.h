@@ -51,7 +51,7 @@ namespace leo {
 					//need copy data
 					return new hud_tex_wrapper(Size(tex->Width(0), tex->Height(0)));
 				}
-			private:
+			public:
 				TexturePtr tex;
 			};
 		}

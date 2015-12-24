@@ -1,15 +1,24 @@
 #include "HUDPseudoWindow.h"
-
+#include "HUD\HUDRenderSystem.h"
+#include "HUD\HUDImpl.h"
+#include <ref.hpp>
 LEO_BEGIN
 
 struct HUDPseudoWindow::HUDPseudoWindowImpl {
 
-	HUDPseudoWindowImpl(){}
+public:
+	lref<HUD::HostRenderer> ref;
+
+	size_type window_size;
+
+	HUDPseudoWindowImpl(HUD::HostRenderer & host)
+		:ref(host)
+	{}
 
 	~HUDPseudoWindowImpl(){}
 
 	void Resize(const size_type& size) {
-
+		window_size = size;
 	}
 
 	void Update(float t) {
@@ -17,12 +26,32 @@ struct HUDPseudoWindow::HUDPseudoWindowImpl {
 	}
 
 	void Render() {
+		auto& rs = HUD::HUDRenderSystem::GetInstance();
 
+		auto vbdata = rs.LockVB(4);
+
+		vbdata.vertex[vbdata.vertex_start] = leo::float4(0.f,0.f,0.f,0.f) ;
+		vbdata.vertex[vbdata.vertex_start+2] = leo::float4(window_size.first, window_size.second,1.f,1.f);
+		vbdata.vertex[vbdata.vertex_start+1] = leo::float4(window_size.first, 0.f, 1.f, 0.f);
+		vbdata.vertex[vbdata.vertex_start +3] = leo::float4(0.f, window_size.second,0.f, 1.f);
+
+		auto ibdata = rs.LockIB(6);
+
+		rs.FillQuadIBByVB(vbdata, ibdata);
+
+		rs.PushRenderCommand(
+			rs.MakeCommand(
+				vbdata,ibdata, 
+				(dynamic_cast<HUD::details::hud_tex_wrapper&>(ref.get().GetImageBuffer())).tex)
+			);
+
+		//this function code can push into excetue
+		rs.ExceuteCommand(window_size);
 	}
 };
 
-HUDPseudoWindow::HUDPseudoWindow(HUD::HostRenderer &)
-	:pImpl(new HUDPseudoWindowImpl())
+HUDPseudoWindow::HUDPseudoWindow(HUD::HostRenderer & host)
+	:pImpl(new HUDPseudoWindowImpl(host))
 {
 }
 

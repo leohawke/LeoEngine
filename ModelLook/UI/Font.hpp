@@ -43,8 +43,7 @@ public:
 		:Font(DefaultSize, FontStyle::Regular)
 	{}
 
-	explicit
-	Font(FontSize = DefaultSize,
+	Font(FontSize,
 			FontStyle = FontStyle::Regular);
 
 	DefGetter(const lnothrow, FontSize, Size, font_size)

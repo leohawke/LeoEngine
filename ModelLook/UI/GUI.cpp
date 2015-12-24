@@ -13,7 +13,7 @@ operator+(const Rect& r, const Padding& m)
 
 
 Padding
-FetchMargin(const Rect& r, const Size& s)
+leo::Drawing::FetchMargin(const Rect& r, const Size& s)
 {
 	// XXX: Conversion to 'SPos' might be implementation-defined.
 	return Padding(r.X, SPos(s.Width) - r.X - SPos(r.Width),

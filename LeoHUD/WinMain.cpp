@@ -40,11 +40,6 @@ std::unique_ptr<leo::HUD::Panel> pPanel = nullptr;
 std::unique_ptr<leo::HUD::Label> pLabel = nullptr;
 std::unique_ptr<leo::DeferredRender> pRender = nullptr;
 
-leo::TexturePtr pTex;
-
-ID3D11PixelShader* pFontGenPs = nullptr;
-ID3D11DepthStencilState* pNoDepthStencil = nullptr;
-ID3D11SamplerState* pLinearSampler = nullptr;
 
 void DeviceEvent()
 {
@@ -212,15 +207,10 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pLabel->SetVisible(true);
 	*pPanel += *pLabel;
 
-	pFontGenPs = ShaderMgr().CreatePixelShader(L"./Shader/FontGenPs.cso");
-	pNoDepthStencil = RenderStates().GetDepthStencilState(L"NoDepthDSS");
-	pLinearSampler = RenderStates().GetSamplerState(L"LinearRepeat");
+	
 
-
-	pTex = X::MakeTexture2D(4096,4096, 1, 1, EFormat::EF_R8, {}, EAccess::EA_C_W | EAccess::EA_G_R, {});
-
-	FillTexture(pTex, L'‡å');
 }
+
 
 void ClearRes() {
 
@@ -229,7 +219,6 @@ void ClearRes() {
 
 	pHUDHostRender.reset();
 	pPanel.reset();
-	pTex.reset();
 }
 
 void ReSize(std::pair<leo::uint16, leo::uint16> size) {
@@ -297,16 +286,7 @@ void Render()
 
 		//forward render
 		devicecontext->OMSetRenderTargets(1, &leo::global::globalD3DRenderTargetView, *leo::global::globalDepthStencil);
-		leo::EffectQuad::GetInstance().Apply(devicecontext);
-		if (auto p = dynamic_cast<leo::D3D11Texture2D*>(pTex.get())) {
-			auto srv = p->ResouceView();
-			devicecontext->PSSetShaderResources(0, 1, &srv);
-		}
-		devicecontext->PSSetShader(pFontGenPs, nullptr, 0);
-		devicecontext->PSSetSamplers(0, 1, &pLinearSampler);
-		devicecontext->OMSetDepthStencilState(pNoDepthStencil,0xff);
-		leo::EffectQuad::GetInstance().Draw(devicecontext);
-
+	
 		pHUDHostRender->Render();
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);

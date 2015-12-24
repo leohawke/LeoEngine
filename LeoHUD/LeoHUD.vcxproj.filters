@@ -57,9 +57,6 @@
     <ClCompile Include="..\All\window.cpp">
       <Filter>依赖源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\ModelLook\UI\Font.cpp">
-      <Filter>依赖源文件</Filter>
-    </ClCompile>
     <ClCompile Include="..\All\Core\HUDPseudoWindow.cpp">
       <Filter>依赖源文件\HUD</Filter>
     </ClCompile>
@@ -190,6 +187,18 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\ModelLook\UI\Rect.cpp">
+      <Filter>依赖源文件\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ModelLook\HUD\HUDRenderSystem.cpp">
+      <Filter>依赖源文件\HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ModelLook\UI\GUI.cpp">
+      <Filter>依赖源文件\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ModelLook\UI\Font.cpp">
+      <Filter>依赖源文件\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ModelLook\UI\TextBase.cpp">
       <Filter>依赖源文件\UI</Filter>
     </ClCompile>
   </ItemGroup>

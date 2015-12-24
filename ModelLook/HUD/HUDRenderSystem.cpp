@@ -11,12 +11,23 @@ HUDRenderSystem::~HUDRenderSystem()
 {
 }
 
+//ID3D11PixelShader* pFontGenPs = nullptr;
+//ID3D11DepthStencilState* pNoDepthStencil = nullptr;
+//ID3D11SamplerState* pLinearSampler = nullptr;
+
+//pFontGenPs = ShaderMgr().CreatePixelShader(L"./Shader/FontGenPs.cso");
+//pNoDepthStencil = RenderStates().GetDepthStencilState(L"NoDepthDSS");
+//pLinearSampler = RenderStates().GetSamplerState(L"LinearRepeat");
+
 class HUDRenderSystemImpl : public HUDRenderSystem
 {
 public:
 	TexturePtr big_tb;
 	win::unique_com<ID3D11Buffer> big_vb;
 	win::unique_com<ID3D11Buffer> big_ib;
+
+	uint16 vb_offset = 0;
+	uint16 ib_offset = 0;
 
 	std::list<Rect> able_rect;
 	std::list<Rect> unable_rect;
@@ -32,7 +43,7 @@ public:
 	HUDRenderSystemImpl() {
 		big_tb = X::MakeTexture2D(4096, 4096, 1, 1, EFormat::EF_ABGR8, {}, EAccess::EA_C_W | EAccess::EA_G_R, {});
 		
-		CD3D11_BUFFER_DESC vbDesc{ vertex_num* sizeof(float2),D3D11_BIND_VERTEX_BUFFER,D3D11_USAGE_DYNAMIC,D3D11_CPU_ACCESS_READ};
+		CD3D11_BUFFER_DESC vbDesc{ vertex_num* sizeof(float4),D3D11_BIND_VERTEX_BUFFER,D3D11_USAGE_DYNAMIC,D3D11_CPU_ACCESS_READ};
 
 		device->CreateBuffer(&vbDesc, nullptr, &big_vb);
 
@@ -40,23 +51,40 @@ public:
 
 	}
 
-	void PushRenderCommand(hud_command  c) {
+	void PushRenderCommand(hud_command  c) override{
 		commands.emplace_back(c);
 	}
 
-	//thread safe
-	vb_data LockVB(uint32 num) {
+	vb_data LockVB(uint16 num) override {
+		D3D11_MAPPED_SUBRESOURCE subRes;
+		context->Map(big_vb, 0, D3D11_MAP_WRITE, 0, &subRes);
 
+		vb_offset += num;
+
+		return{ static_cast<uint16>(vb_offset - num),num,reinterpret_cast<float4*>(subRes.pData) };
 	}
-	void UnLockVB(const vb_data&)
-	{}
-	ib_data LockIB(uint16)
-	{}
-	void UnLockIB(const ib_data&)
-	{}
-	Texture::Mapper Map2D(Size)
-	{}
-	void ExceuteCommand()
+	void UnLockVB(const vb_data&) override
+	{
+		context->Unmap(big_vb, 0);
+	}
+	ib_data LockIB(uint16 num) override
+	{
+		D3D11_MAPPED_SUBRESOURCE subRes;
+		context->Map(big_ib, 0, D3D11_MAP_WRITE, 0, &subRes);
+
+		ib_offset += num;
+
+		return{ static_cast<uint16>(ib_offset - num),num,reinterpret_cast<uint16*>(subRes.pData) };
+	}
+	void UnLockIB(const ib_data&) override
+	{
+		context->Unmap(big_ib, 0);
+	}
+	std::unique_ptr<Texture::Mapper> Map2D(Size s) override
+	{
+		return std::make_unique<Texture::Mapper>(*big_tb, 0, 0, Texture::MapAccess::MA_WO, 0, 0,static_cast<uint16>(s.GetWidth()), static_cast<uint16>(s.GetHeight()));
+	}
+	void ExceuteCommand(std::pair<uint16, uint16> windows_size) override
 	{
 		std::sort(commands.begin(),commands.end(),
 			[](const hud_command& x,const hud_command& y)

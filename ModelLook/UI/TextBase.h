@@ -52,27 +52,22 @@ public:
 class LB_API TextState : protected PenStyle
 {
 public:
-	//! \since build 371
 	using PenStyle::Font;
-	//! \since build 371
 	using PenStyle::Color;
 	Padding Margin; //!< 边距：文本区域到显示区域的距离。
 					/*!
 					\brief 笔坐标。
-					\since build 371
 					*/
 	Point Pen{};
 	std::uint8_t LineGap = 0; //!< 行距。
 
 							  /*!
 							  \brief 构造：使用指定字体和边距。
-							  \since build 515
 							  */
 	explicit
 		TextState(const Drawing::Font& = {}, const Padding& = DefaultMargin);
 	/*!
 	\brief 构造：使用指定字体缓存和边距。
-	\since build 515
 	*/
 	explicit
 		TextState(FontCache&, const Padding& = DefaultMargin);
@@ -91,7 +86,6 @@ public:
 		/*!
 		\brief 取当前状态下继续在行内打印指定字符占据的边界。
 		\note 不考虑换行。
-		\since build 486
 		*/
 		PDefH(Rect, GetCharBounds, char32_t c) const lnothrow
 		ImplRet(Rect(Pen.X, Pen.Y - Font.GetAscender(),
@@ -111,7 +105,6 @@ public:
 		ResetPen();
 	/*!
 	\brief 按指定显示区域左上角位置和附加边距重新设置笔位置。
-	\since build 372
 
 	通过已有的区域左上角坐标和附加边距的左和上分量约束新和笔位置。
 	*/

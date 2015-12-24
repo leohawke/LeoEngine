@@ -319,6 +319,7 @@
     <ClCompile Include="UI\Font.cpp" />
     <ClCompile Include="UI\GUI.cpp" />
     <ClCompile Include="UI\Rect.cpp" />
+    <ClCompile Include="UI\TextBase.cpp" />
     <ClCompile Include="WinMain.cpp" />
     <ClInclude Include="..\All\RenderSystem\EFormat.hpp" />
     <ClInclude Include="..\All\RenderSystem\RenderSystem.hpp" />
