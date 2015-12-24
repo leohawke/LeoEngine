@@ -39,6 +39,9 @@ public:
 
 		rs.FillQuadIBByVB(vbdata, ibdata);
 
+		rs.UnLockIB(ibdata);
+		rs.UnLockVB(vbdata);
+
 		rs.PushRenderCommand(
 			rs.MakeCommand(
 				vbdata,ibdata, 
