@@ -2,6 +2,7 @@
 #define IndePlatform_Abstract_hpp
 
 #include "ldef.h"
+#include "LAssert.h" //AbstractBase depend lassume
 
 namespace leo
 {

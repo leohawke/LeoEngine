@@ -1,8 +1,23 @@
+//基于freetype的字体渲染实现
 #ifndef UI_Font_h
 #define UI_Font_h
 
 #include "UI.h"
 #include <leoint.hpp>
+#include <id.hpp>
+#include <cache.hpp>
+
+struct FT_SizeRec_;
+using FT_Size = ::FT_SizeRec_*;
+using FT_SizeRec = ::FT_SizeRec_;
+struct FT_FaceRec_;
+using FT_FaceRec = ::FT_FaceRec_;
+struct FT_GlyphSlotRec_;
+using FT_GlyphSlot = ::FT_GlyphSlotRec_*;
+struct FT_LibraryRec_;
+using FT_Library = ::FT_LibraryRec_*;
+struct FT_Size_Metrics_;
+using FT_Size_Metrics = FT_Size_Metrics_;
 
 LEO_DRAW_BEGIN
 

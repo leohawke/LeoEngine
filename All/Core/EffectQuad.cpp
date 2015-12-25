@@ -2,6 +2,7 @@
 #include "Camera.hpp"
 #include "FileSearch.h"
 #include "EngineConfig.h"
+#include <LAssert.h>
 #include <RenderSystem\ShaderMgr.h>
 using namespace leo;
 

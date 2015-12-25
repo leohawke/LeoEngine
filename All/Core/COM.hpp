@@ -240,7 +240,7 @@ namespace leo
 				return (this->Myptr != pointer() ? true : false);
 			}
 
-			template<typename base_com_pointer, typename = std::enable_if_t<std::is_base_of<leo::remove_pointer_t<base_com_pointer>, COM>::value, void>>
+			template<typename base_com_pointer, typename = std::enable_if_t<is_base_of<remove_pointer_t<base_com_pointer>, COM>::value, void>>
 			operator base_com_pointer() const {
 				return get();
 			}

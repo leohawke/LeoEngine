@@ -154,7 +154,7 @@ namespace leo
 		using iterator = typename used_list_type::iterator;
 
 		static_assert(and_<is_same<size_type, typename used_list_type::size_type>,
-			is_same<size_type, typename used_cache_type::size_type >> (),
+			is_same<size_type, typename used_cache_type::size_type >>::value,
 			"Invalid size found.");
 
 	private:
