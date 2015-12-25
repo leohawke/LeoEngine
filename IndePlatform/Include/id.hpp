@@ -135,6 +135,22 @@ namespace leo {
 	struct combined_hash<std::pair<_type1, _type2>>
 		: combined_hash<std::tuple<_type1, _type2>>
 	{};
+
+
+	using ucs2_t = char16_t; //!< UCS-2 字符类型。
+	using ucs4_t = char32_t; //!< UCS-4 字符类型。
+	using ucsint_t = std::char_traits<ucs4_t>::int_type; //!< UCS 整数类型。
+}
+
+//Object Model
+namespace leo
+{
+	/*!
+	\brief 指定对参数指定类型的成员具有所有权的标签。
+	*/
+	template<typename>
+	struct OwnershipTag
+	{};
 }
 
 #endif
