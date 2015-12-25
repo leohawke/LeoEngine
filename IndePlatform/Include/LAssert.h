@@ -1,8 +1,7 @@
 #ifndef IndePlatform_LAssert_h
 #define IndePlatform_LAssert_h
 
-#include "ldef.h"
-#include "iterator.hpp"
+#include "deref_op.hpp"
 #include <assert.h>
 
 #pragma warning(push)
@@ -14,6 +13,11 @@
 #ifndef LAssertNonnull
 #define LAssertNonnull(_expr) LAssert(bool(_expr), "Null reference found.")
 #endif
+
+//不满足此断言的行为是接口明确地未定义的，行为不可预测
+#define lconstraint assert
+//运行时检查的环境条件约束断言。用于明确地非 yconstraint 适用的情形
+#define lassume assert
 
 namespace leo {
 

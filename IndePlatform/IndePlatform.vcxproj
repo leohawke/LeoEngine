@@ -97,10 +97,12 @@
     <ClInclude Include="Include\any_iterator.hpp" />
     <ClInclude Include="Include\BaseMacro.h" />
     <ClInclude Include="Include\bitseg.hpp" />
+    <ClInclude Include="Include\cache.hpp" />
     <ClInclude Include="Include\clock.hpp" />
     <ClInclude Include="Include\ConstexprMath.hpp" />
     <ClInclude Include="Include\container.hpp" />
     <ClInclude Include="Include\DebugOutput.hpp" />
+    <ClInclude Include="Include\deref_op.hpp" />
     <ClInclude Include="Include\EndianSwap.hpp" />
     <ClInclude Include="Include\exception.hpp" />
     <ClInclude Include="Include\experimental\string_view.hpp" />

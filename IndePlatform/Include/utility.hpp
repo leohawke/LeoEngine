@@ -23,11 +23,6 @@
 
 namespace leo
 {
-	//不满足此断言的行为是接口明确地未定义的，行为不可预测
-#define lconstraint assert
-//运行时检查的环境条件约束断言。用于明确地非 yconstraint 适用的情形
-#define lassume assert
-
 	class LB_API unsupported : public std::logic_error
 	{
 	public:

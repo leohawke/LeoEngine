@@ -3,10 +3,9 @@
 
 #include "ldef.h" // type_traits.std::delval
 
-namespace leo
-{
-	using stdex::nullptr_t;
 
+inline namespace cpp2011
+{
 	using std::integral_constant;
 	using std::true_type;
 	using std::false_type;
@@ -48,6 +47,44 @@ namespace leo
 	using std::is_unsigned;
 
 	using std::is_constructible;
+	//@{
+	using std::is_default_constructible;
+	using std::is_copy_constructible;
+	using std::is_move_constructible;
+
+	using std::is_assignable;
+	using std::is_copy_assignable;
+	using std::is_move_assignable;
+
+	using std::is_destructible;
+	//@}
+
+#	if !LB_IMPL_GNUC || LB_IMPL_GNUCPP >= 50000
+	//@{
+	using std::is_trivially_constructible;
+	using std::is_trivially_default_constructible;
+	using std::is_trivially_copy_constructible;
+	using std::is_trivially_move_constructible;
+
+	using std::is_trivially_assignable;
+	using std::is_trivially_copy_assignable;
+	using std::is_trivially_move_assignable;
+	//@}
+#	endif
+	using std::is_trivially_destructible;
+
+	//@{
+	using std::is_nothrow_constructible;
+	using std::is_nothrow_default_constructible;
+	using std::is_nothrow_copy_constructible;
+	using std::is_nothrow_move_constructible;
+
+	using std::is_nothrow_assignable;
+	using std::is_nothrow_copy_assignable;
+	using std::is_nothrow_move_assignable;
+
+	using std::is_nothrow_destructible;
+	//@}
 
 	using std::has_virtual_destructor;
 
@@ -80,15 +117,62 @@ namespace leo
 	using std::add_pointer;
 
 	using std::aligned_storage;
-	//using std::aligned_union;
+#	if !LB_IMPL_GNUC || LB_IMPL_GNUCPP >= 50000
+	using std::aligned_union;
+#	endif
 	using std::decay;
 	using std::enable_if;
 	using std::conditional;
 	using std::common_type;
-
 	using std::underlying_type;
 	using std::result_of;
+	//@}
+}
 
+/*!
+\brief 包含 ISO C++ 2014 引入的名称的命名空间。
+*/
+inline namespace cpp2014
+{
+
+	/*!
+	\ingroup transformation_traits
+	\brief ISO C++ 14 兼容类型操作别名。
+	*/
+	//@{
+#if __cpp_lib_transformation_trait_aliases >= 201304 || __cplusplus > 201103L
+	using std::remove_const_t;
+	using std::remove_volatile_t;
+	using std::remove_cv_t;
+	using std::add_const_t;
+	using std::add_volatile_t;
+	using std::add_cv_t;
+
+	using std::remove_reference_t;
+	using std::add_lvalue_reference_t;
+	using std::add_rvalue_reference_t;
+
+	using std::make_signed_t;
+	using std::make_unsigned_t;
+
+	using std::remove_extent_t;
+	using std::remove_all_extents_t;
+
+	using std::remove_pointer_t;
+	using std::add_pointer_t;
+
+	using std::aligned_storage_t;
+#	if !YB_IMPL_GNUC || YB_IMPL_GNUCPP >= 50000
+	using std::aligned_union_t;
+#	endif
+	using std::decay_t;
+	using std::enable_if_t;
+	using std::conditional_t;
+	using std::common_type_t;
+	using std::underlying_type_t;
+	using std::result_of_t;
+#else
+	//@{
 	template<typename _type>
 	using remove_const_t = typename remove_const<_type>::type;
 
@@ -107,6 +191,7 @@ namespace leo
 	template<typename _type>
 	using add_cv_t = typename add_cv<_type>::type;
 
+
 	template<typename _type>
 	using remove_reference_t = typename remove_reference<_type>::type;
 
@@ -116,11 +201,13 @@ namespace leo
 	template<typename _type>
 	using add_rvalue_reference_t = typename add_rvalue_reference<_type>::type;
 
+
 	template<typename _type>
 	using make_signed_t = typename make_signed<_type>::type;
 
 	template<typename _type>
 	using make_unsigned_t = typename make_unsigned<_type>::type;
+
 
 	template<typename _type>
 	using remove_extent_t = typename remove_extent<_type>::type;
@@ -128,15 +215,24 @@ namespace leo
 	template<typename _type>
 	using remove_all_extents_t = typename remove_all_extents<_type>::type;
 
+
 	template<typename _type>
 	using remove_pointer_t = typename remove_pointer<_type>::type;
 
 	template<typename _type>
 	using add_pointer_t = typename add_pointer<_type>::type;
 
+
 	template<size_t _vLen,
 		size_t _vAlign = lalignof(typename aligned_storage<_vLen>::type)>
 		using aligned_storage_t = typename aligned_storage<_vLen, _vAlign>::type;
+	//@}
+
+	//@{
+#	if !LB_IMPL_GNUC || LB_IMPL_GNUCPP >= 50000
+	template<size_t _vLen, typename... _types>
+	using aligned_union_t = typename aligned_union<_vLen, _types...>::type;
+#	endif
 
 	template<typename _type>
 	using decay_t = typename decay<_type>::type;
@@ -155,6 +251,17 @@ namespace leo
 
 	template<typename _type>
 	using result_of_t = typename result_of<_type>::type;
+	//@}
+#endif
+	//@}
+
+} // inline namespace cpp2014;
+
+//兼容性保留
+//todo remove it
+namespace leo {
+
+	using stdex::nullptr_t;
 
 	template<typename _type>
 	struct is_returnable : integral_constant < bool, !is_array<_type>::value
@@ -225,7 +332,7 @@ namespace leo
 	private: \
 		template<typename _type> \
 		static std::true_type \
-		test(leo::enable_if_t<(_expr), int>); \
+		test(enable_if_t<(_expr), int>); \
 		template<typename> \
 		static std::false_type \
 		test(...); \
@@ -236,13 +343,13 @@ namespace leo
 
 
 			LB_TYPE_OP_TEST_2(have_equality_operator, (is_convertible<decltype(std::declval<
-			_type>() == std::declval<_type2>()), bool>::value))
+				_type>() == std::declval<_type2>()), bool>::value))
 
 
 			LB_TYPE_OP_TEST_2(has_subscription, !is_void < decltype(std::declval<_type>()[
 				std::declval<_type2>()]) > ::value)
 
-					template<class _type>
+			template<class _type>
 				struct have_nonempty_virtual_base
 				{
 					static_assert(std::is_class<_type>::value,
@@ -342,7 +449,7 @@ namespace leo
 	\see http://msdn.microsoft.com/en-us/library/vstudio/bb531344%28v=vs.120%29.aspx
 	\see http://lists.cs.uiuc.edu/pipermail/cfe-commits/Week-of-Mon-20131007/090403.html
 	*/
-	
+
 	template<typename _type>
 	struct identity
 	{
@@ -363,7 +470,7 @@ namespace leo
 	{
 		using type = remove_pointer_t<remove_reference_t<_type>>;
 	};
-	
+
 	template<typename _type>
 	struct remove_rpcv
 	{
@@ -427,4 +534,57 @@ namespace leo
 
 	using second_tag = n_tag<1>;
 }
+
+
+/*!
+\ingroup metafunctions
+\brief 逻辑操作元函数。
+\note 和 libstdc++ 实现以及 Boost.MPL 兼容。
+*/
+//@{
+template<typename...>
+struct and_;
+
+template<>
+struct and_<> : true_type
+{};
+
+template<typename _b1>
+struct and_<_b1> : _b1
+{};
+
+template<typename _b1, typename _b2>
+struct and_<_b1, _b2> : conditional_t<_b1::value, _b2, _b1>
+{};
+
+template<typename _b1, typename _b2, typename _b3, typename... _bn>
+struct and_<_b1, _b2, _b3, _bn...>
+	: conditional_t<_b1::value, and_<_b2, _b3, _bn...>, _b1>
+{};
+
+
+template<typename...>
+struct or_;
+
+template<>
+struct or_<> : false_type
+{};
+
+template<typename _b1>
+struct or_<_b1> : _b1
+{};
+
+template<typename _b1, typename _b2>
+struct or_<_b1, _b2> : conditional_t<_b1::value, _b1, _b2>
+{};
+
+template<typename _b1, typename _b2, typename _b3, typename... _bn>
+struct or_<_b1, _b2, _b3, _bn...>
+	: conditional_t<_b1::value, _b1, or_<_b2, _b3, _bn...>>
+{};
+
+
+template<typename _b>
+struct not_ : integral_constant<bool, !_b::value>
+{};
 #endif
