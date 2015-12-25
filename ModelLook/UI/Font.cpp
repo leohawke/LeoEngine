@@ -16,6 +16,10 @@
 #	include FT_INTERNAL_TRUETYPE_TYPES_H // for TT_Face, TT_FaceRec_;
 #endif
 
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+
+
 LEO_DRAW_BEGIN
 
 using std::pair;
@@ -488,14 +492,29 @@ void
 InitializeSystemFontCache(FontCache& fc, const std::string& fong_file,
 	const std::string& font_dir)
 {
-	fc.LoadTypefaces(fong_file);
+	try {
+		fc.LoadTypefaces(fong_file);
+		if(!font_dir.empty())
+		try
+		{
+			for (auto &p : fs::directory_iterator(font_dir))
+			{
+				FontPath path(font_dir + p.path().filename().string());
+
+				if (path != fong_file)
+					fc.LoadTypefaces(path);
+			}
+		}
+		catch(...)
+		{ }
+	}
+	catch(...)
+	{ }
 }
 
 FontCache&
 FetchDefaultFontCache()
 {
-	auto p = new FontCache();
-	return *p;
 	if (LB_UNLIKELY(!p_font_cache))
 	{
 		p_font_cache.reset(new FontCache());
@@ -504,6 +523,7 @@ FetchDefaultFontCache()
 			"./Fonts/SourceHanSans-Regular.otf",
 			"./Fonts/");
 	}
+	return *p_font_cache;
 }
 
 LEO_DRAW_END
