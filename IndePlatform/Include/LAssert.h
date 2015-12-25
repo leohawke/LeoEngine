@@ -57,6 +57,21 @@ namespace leo {
 	{
 		return *CheckIter(lforward(p));
 	}
+
+	struct delete_obj_ndebug
+	{
+		/*!
+		\brief 删除指针指向的对象。
+		*/
+		template<typename _type>
+		inline void
+			operator()(_type* _ptr) lnothrow
+		{
+			delete _ptr;
+		}
+	};
+
+#	define delete_obj delete_obj_ndebug
 }
 
 #pragma warning(pop)

@@ -10,6 +10,8 @@
 #include <cache.hpp>
 #include <ref.hpp>
 #include <exception.hpp>
+#include <container.hpp>
+#include <string.hpp>
 #include <functional.hpp>
 
 struct FT_SizeRec_;
@@ -573,6 +575,15 @@ public:
 	bool
 		SetStyle(FontStyle);
 };
+
+/*!
+\brief 取默认字体缓存。
+\exception FatalError 字体缓存初始化失败。
+\todo Initialization.h
+*/
+LB_API Drawing::FontCache&
+FetchDefaultFontCache();
+
 
 LEO_DRAW_END
 

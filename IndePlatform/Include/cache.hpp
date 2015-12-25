@@ -325,7 +325,7 @@ namespace leo
 		{
 			const auto pr(cache.emplace(key, init(lforward(args)...)));
 
-			if (YB_UNLIKELY(!pr.second))
+			if (LB_UNLIKELY(!pr.second))
 				throw std::runtime_error("Cache insertion failed.");
 			i = pr.first;
 		}

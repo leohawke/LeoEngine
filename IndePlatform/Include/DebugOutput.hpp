@@ -76,4 +76,8 @@ namespace leo {
 #endif
 #endif
 
+#ifndef LTraceDe
+#define LTraceDe(level,...) DebugPrintf(__VA_ARGS__)
+#endif
+
 #endif
