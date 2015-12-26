@@ -278,6 +278,9 @@
     <ClCompile Include="UI\UIImpl.cpp">
       <Filter>UI</Filter>
     </ClCompile>
+    <ClCompile Include="UI\Blend.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -424,6 +427,9 @@
       <Filter>UI</Filter>
     </ClInclude>
     <ClInclude Include="UI\UIImpl.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\Blend.h">
       <Filter>UI</Filter>
     </ClInclude>
   </ItemGroup>

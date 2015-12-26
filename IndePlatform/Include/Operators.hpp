@@ -8,9 +8,15 @@ namespace leo
 	using stdex::empty_base;
 	using stdex::raw_tag;
 
+#ifdef LB_IMPL_MSCPP
+#define LB_OP_FRIEND(_op, _tRet, _expr, ...) \
+	friend _tRet \
+	operator _op (__VA_ARGS__) {return (_expr);}
+#else
 #define LB_OP_FRIEND(_op, _tRet, _expr, ...) \
 	friend lconstfn _tRet \
 	operator _op (__VA_ARGS__) {return (_expr);}
+#endif
 #define LB_OP_TEMPLATE_HEADER2(_name) \
 	template<class _type, class _type2, class _tBase = empty_base<_type>> \
 	struct _name

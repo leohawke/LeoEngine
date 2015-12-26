@@ -15,8 +15,14 @@ namespace details
 			:delegate(tex, array_index, level, tma, x_offset, y_offset, width, height)
 		{
 			pBuffer = reinterpret_cast<Drawing::Pixel<>*>(delegate.pSysMem);
-			sGraphics.Height = height;
-			sGraphics.Width = width;
+
+			//”¶∏√ÃÓ≥‰–È÷µ
+			//BGRA8
+			//sGraphics.Height = height;
+			sGraphics.Width = delegate.RowPitch / 4;
+			//sGraphics.Width = width;
+			sGraphics.Height = delegate.SlicePitch / delegate.RowPitch;
+			
 		}
 	private:
 		Texture::Mapper delegate;

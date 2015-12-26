@@ -164,6 +164,62 @@ namespace leo
 				), scanner, _1, _2, _3, _4, _5, _6), dst, src, ds, ss, dp, sp, sc);
 		}
 
+		/*!
+		\ingroup BlitLineScanner
+		\brief 块传输扫描点循环操作。
+		\tparam _bPositiveScan 正向扫描。
+		\warning 不检查迭代器有效性。
+		*/
+		template<bool _bDec>
+		struct BlitLineLoop
+		{
+			template<typename _tOut, typename _tIn, typename _fPixelShader>
+			void
+				operator()(_fPixelShader shader, _tOut& dst_iter, _tIn& src_iter,
+					SDst delta_x)
+			{
+				for (SDst x(0); x < delta_x; ++x)
+				{
+					shader(dst_iter, src_iter);
+					++src_iter;
+					xcrease<_bDec>(dst_iter);
+				}
+			}
+		};
+
+
+		/*!
+		\brief 像素块传输函数模板。
+		\tparam _bSwapLR 水平翻转镜像（关于水平中轴对称）。
+		\tparam _bSwapUD 竖直翻转镜像（关于竖直中轴对称）。
+		\tparam _tOut 输出迭代器类型（需要支持 + 操作，一般应是随机迭代器）。
+		\tparam _tIn 输入迭代器类型（需要支持 + 操作，一般应是随机迭代器）。
+		\tparam _fPixelShader 像素着色器类型。
+		\param shader 像素着色器。
+		\param dst 目标迭代器。
+		\param src 源迭代器。
+		\param ds 目标迭代器所在缓冲区大小。
+		\param ss 源迭代器所在缓冲区大小。
+		\param dp 目标迭代器起始点所在缓冲区偏移。
+		\param sp 源迭代器起始点所在缓冲区偏移。
+		\param sc 源迭代器需要复制的区域大小。
+		\sa Drawing::Blit
+		\sa BlitScannerLoop
+		\sa BlitLineLoop
+
+		对一块矩形区域逐（水平）扫描线批量操作。
+		*/
+		template<bool _bSwapLR, bool _bSwapUD, typename _tOut, typename _tIn,
+			typename _fPixelShader>
+			inline void
+			BlitPixels(_fPixelShader shader, _tOut dst, _tIn src, const Size& ds,
+				const Size& ss, const Point& dp, const Point& sp, const Size& sc)
+		{
+			BlitLines<_bSwapLR, _bSwapUD, _tOut, _tIn>(
+				[shader](_tOut& dst_iter, _tIn& src_iter, SDst delta_x) {
+				BlitLineLoop<!_bSwapLR>()(shader, dst_iter, src_iter, delta_x);
+			}, dst, src, ds, ss, dp, sp, sc);
+		}
 
 		/*!
 		\tparam _tOut 输出迭代器类型（需要支持 + 操作，一般应是随机迭代器）。
@@ -251,6 +307,21 @@ namespace leo
 				lforward(args)...);
 		}
 
+
+		//! \sa Drawing::BlitPixels
+		template<typename _tOut, typename _tIn, typename _fPixelShader,
+			typename... _tParams>
+			inline void
+			BlitRectPixels(_fPixelShader shader, _tOut dst, _tIn src, _tParams&&... args)
+		{
+			using namespace std::placeholders;
+
+			BlitRect(std::bind(Drawing::BlitPixels<false, false, _tOut, _tIn,
+				_fPixelShader>, shader, _1, _2, _3, _4, _5, _6, _7), dst, src,
+				lforward(args)...);
+		}
+		//@}
+		//@}
 
 		/*!
 		\ingroup BlitScanner

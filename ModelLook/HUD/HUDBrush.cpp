@@ -4,6 +4,10 @@
 
 void leo::HUD::SolidBrush::operator()(const leo::Drawing::PaintContext & pc) const
 {
-	LAssert(bool(pc.Target), "Invalid graphics context found.");
 	FillRect(pc.Target, pc.ClipArea, Color);
+}
+
+void leo::HUD::SolidBlendBrush::operator()(const PaintContext & pc) const
+{
+	BlendRect(pc.Target, pc.ClipArea, Color);
 }

@@ -15,6 +15,9 @@ HUDRenderSystem::~HUDRenderSystem()
 {
 }
 
+//beacuse dtor list twice will be crash
+std::list<Rect> able_rect;
+std::list<Rect> unable_rect;
 
 class HUDRenderSystemImpl : public HUDRenderSystem
 {
@@ -38,9 +41,6 @@ public:
 
 	uint16 vb_offset = 0;
 	uint16 ib_offset = 0;
-
-	std::list<Rect> able_rect;
-	std::list<Rect> unable_rect;
 
 	std::vector<hud_command> commands;
 

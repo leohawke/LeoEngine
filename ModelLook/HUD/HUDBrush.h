@@ -21,6 +21,19 @@ public:
 		operator()(const PaintContext&) const;
 };
 
+class LB_API SolidBlendBrush
+{
+public:
+	Drawing::Color Color;
+
+	SolidBlendBrush(Drawing::Color c)
+		: Color(c)
+	{}
+
+	void
+		operator()(const PaintContext&) const;
+};
+
 HUD_END
 
 LEO_END

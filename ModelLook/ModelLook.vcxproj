@@ -316,6 +316,7 @@
     <ClCompile Include="HUD\Label.cpp" />
     <ClCompile Include="HUD\Widget.cpp" />
     <ClCompile Include="HUD\WidgetEvent.cpp" />
+    <ClCompile Include="UI\Blend.cpp" />
     <ClCompile Include="UI\Blit.cpp" />
     <ClCompile Include="UI\Draw.cpp" />
     <ClCompile Include="UI\Font.cpp" />
@@ -335,6 +336,7 @@
     <ClInclude Include="HUD\HUDImpl.h" />
     <ClInclude Include="HUD\HUDPanel.h" />
     <ClInclude Include="HUD\HUDRenderSystem.h" />
+    <ClInclude Include="UI\Blend.h" />
     <ClInclude Include="UI\Blit.h" />
     <ClInclude Include="UI\Color.h" />
     <ClInclude Include="UI\Draw.h" />

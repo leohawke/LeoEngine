@@ -45,6 +45,8 @@ namespace leo {
 
 LEO_DRAW_BEGIN
 
+using AlphaType = stdex::byte;
+
 /*!
 \warning 为兼容YSLIB存在,兼容DXGI_FORMAT格式
 */
@@ -96,6 +98,19 @@ union lalignas(lalignof(typename XYZATrait<8,8,8,8>::IntegerType)) Pixel<C48888>
 		lconstfn DefGetter(const lnothrow, typename Trait::RType, R,
 			(Integer & MaskTrait::ZMask) >> MaskTrait::XYMaskN)
 };
+
+/*!
+\brief 取像素 Alpha 值。
+*/
+lconstfn PDefH(AlphaType, FetchAlpha, Pixel<> px) lnothrow
+ImplRet(px.GetA())
+
+/*!
+\brief 取不透明像素。
+\relates Pixel
+*/
+lconstfn PDefH(Pixel<>, FetchOpaque, Pixel<> px) lnothrow
+ImplRet({ px.GetB(), px.GetG(), px.GetR(), 0xFF })
 
 
 lconstfn PDefH(std::uint32_t, FetchPixel,

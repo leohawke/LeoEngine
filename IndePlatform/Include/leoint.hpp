@@ -106,6 +106,33 @@ namespace leo
 		using unsigned_least_type = std::uint_least64_t;
 	};
 
+	/*!
+	\ingroup metafunctions
+	\brief 位加倍扩展。
+	\note 可用于定点数乘除法中间类型。
+	\todo 使用扩展整数类型保持 64 位类型精度。
+	*/
+	//@{
+	template<typename _type, bool _bSigned = is_signed<_type>::value>
+	struct make_widen_int
+	{
+		using type = typename make_signed_c<typename
+			make_width_int<integer_width<_type>::value << 1>::type, _bSigned>::type;
+	};
+
+	template<bool _bSigned>
+	struct make_widen_int<std::int64_t, _bSigned>
+	{
+		using type = std::int64_t;
+	};
+
+	template<bool _bSigned>
+	struct make_widen_int<std::uint64_t, _bSigned>
+	{
+		using type = std::uint64_t;
+	};
+	//@}
+
 	template<typename _type>
 	struct modular_arithmetic
 	{

@@ -129,6 +129,7 @@
     <ClInclude Include="Include\platform.h" />
     <ClInclude Include="Include\platform_macro.h" />
     <ClInclude Include="Include\raii.hpp" />
+    <ClInclude Include="Include\rational.hpp" />
     <ClInclude Include="Include\ray.hpp" />
     <ClInclude Include="Include\ref.hpp" />
     <ClInclude Include="Include\script_type.hpp" />
