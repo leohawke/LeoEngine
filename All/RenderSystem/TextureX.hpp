@@ -16,14 +16,14 @@
 #define ShaderSystem_TextureX_Hpp
 
 #include "Texture.hpp"
-#include "HUD/HUDGraphics.h"
+#include "UI/Graphics.h"
 
 namespace leo {
 	namespace X {
 		TexturePtr MakeTexture2D(uint16 width, uint16 height, uint8 numMipMaps, uint8 array_size,
 			EFormat format, SampleDesc sample_info, uint32 access,ElementInitData init_data);
 
-		std::shared_ptr<HUD::IImage> MakeIImage(HUD::Size);
+		std::shared_ptr<Drawing::IImage> MakeIImage(Drawing::Size);
 	}
 }
 

@@ -308,7 +308,6 @@
     <ClCompile Include="HUD\HUDBrush.cpp" />
     <ClCompile Include="HUD\HUDContainer.cpp" />
     <ClCompile Include="HUD\HUDControl.cpp" />
-    <ClCompile Include="HUD\HUDGraphics.cpp" />
     <ClCompile Include="HUD\HUDHostRenderer.cpp" />
     <ClCompile Include="HUD\HUDImpl.cpp" />
     <ClCompile Include="HUD\HUDPanel.cpp" />
@@ -317,10 +316,14 @@
     <ClCompile Include="HUD\Label.cpp" />
     <ClCompile Include="HUD\Widget.cpp" />
     <ClCompile Include="HUD\WidgetEvent.cpp" />
+    <ClCompile Include="UI\Blit.cpp" />
+    <ClCompile Include="UI\Draw.cpp" />
     <ClCompile Include="UI\Font.cpp" />
+    <ClCompile Include="UI\Graphics.cpp" />
     <ClCompile Include="UI\GUI.cpp" />
     <ClCompile Include="UI\Rect.cpp" />
     <ClCompile Include="UI\TextBase.cpp" />
+    <ClCompile Include="UI\UIImpl.cpp" />
     <ClCompile Include="WinMain.cpp" />
     <ClInclude Include="..\All\RenderSystem\EFormat.hpp" />
     <ClInclude Include="..\All\RenderSystem\RenderSystem.hpp" />
@@ -332,12 +335,16 @@
     <ClInclude Include="HUD\HUDImpl.h" />
     <ClInclude Include="HUD\HUDPanel.h" />
     <ClInclude Include="HUD\HUDRenderSystem.h" />
+    <ClInclude Include="UI\Blit.h" />
     <ClInclude Include="UI\Color.h" />
+    <ClInclude Include="UI\Draw.h" />
     <ClInclude Include="UI\Font.hpp" />
+    <ClInclude Include="UI\Graphics.h" />
     <ClInclude Include="UI\GUI.h" />
     <ClInclude Include="UI\GUIBase.h" />
     <ClInclude Include="UI\TextBase.h" />
     <ClInclude Include="UI\UI.h" />
+    <ClInclude Include="UI\UIImpl.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\All\Core\BilateralFilter.hpp" />
@@ -356,7 +363,6 @@
     <ClInclude Include="HUD\HUDBase.h" />
     <ClInclude Include="HUD\HUDControl.h" />
     <ClInclude Include="HUD\HUDEvent.hpp" />
-    <ClInclude Include="HUD\HUDGraphics.h" />
     <ClInclude Include="HUD\HUDRenderer.h" />
     <ClInclude Include="HUD\HUDUtilities.h" />
     <ClInclude Include="HUD\Label.h" />

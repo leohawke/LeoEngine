@@ -221,9 +221,6 @@
     <ClCompile Include="HUD\HUDImpl.cpp">
       <Filter>HUD</Filter>
     </ClCompile>
-    <ClCompile Include="HUD\HUDGraphics.cpp">
-      <Filter>HUD</Filter>
-    </ClCompile>
     <ClCompile Include="..\All\RenderSystem\Texture.cpp">
       <Filter>RenderSystem</Filter>
     </ClCompile>
@@ -267,6 +264,18 @@
       <Filter>HUD</Filter>
     </ClCompile>
     <ClCompile Include="UI\TextBase.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\Blit.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\Draw.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\Graphics.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\UIImpl.cpp">
       <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
@@ -342,9 +351,6 @@
     <ClInclude Include="HUD\WidgetEvent.h">
       <Filter>HUD</Filter>
     </ClInclude>
-    <ClInclude Include="HUD\HUDGraphics.h">
-      <Filter>HUD</Filter>
-    </ClInclude>
     <ClInclude Include="HUD\HUDControl.h">
       <Filter>HUD</Filter>
     </ClInclude>
@@ -407,6 +413,18 @@
     </ClInclude>
     <ClInclude Include="HUD\HUDRenderSystem.h">
       <Filter>HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\Blit.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\Draw.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\Graphics.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\UIImpl.h">
+      <Filter>UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

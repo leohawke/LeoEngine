@@ -1,7 +1,7 @@
 #ifndef HUD_Brush_H
 #define HUD_Brush_H
 
-#include "HUDGraphics.h"
+#include "HUDBase.h"
 #include <leomathtype.hpp>
 
 LEO_BEGIN

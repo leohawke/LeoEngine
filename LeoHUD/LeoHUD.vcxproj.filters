@@ -69,9 +69,6 @@
     <ClCompile Include="..\ModelLook\HUD\HUDControl.cpp">
       <Filter>依赖源文件\HUD</Filter>
     </ClCompile>
-    <ClCompile Include="..\ModelLook\HUD\HUDGraphics.cpp">
-      <Filter>依赖源文件\HUD</Filter>
-    </ClCompile>
     <ClCompile Include="..\ModelLook\HUD\HUDHostRenderer.cpp">
       <Filter>依赖源文件\HUD</Filter>
     </ClCompile>
@@ -201,9 +198,24 @@
     <ClCompile Include="..\ModelLook\UI\TextBase.cpp">
       <Filter>依赖源文件\UI</Filter>
     </ClCompile>
+    <ClCompile Include="..\ModelLook\UI\Graphics.cpp">
+      <Filter>依赖源文件\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ModelLook\UI\Blit.cpp">
+      <Filter>依赖源文件\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ModelLook\UI\Draw.cpp">
+      <Filter>依赖源文件\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="FontGenPS.hlsl" />
+    <FxCompile Include="..\ModelLook\Shader\UIPS.hlsl">
+      <Filter>源文件</Filter>
+    </FxCompile>
+    <FxCompile Include="..\ModelLook\Shader\UIVS.hlsl">
+      <Filter>源文件</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FreeTypeTest.h">

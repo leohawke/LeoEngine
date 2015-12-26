@@ -370,7 +370,7 @@ namespace leo
 	//加法复合赋值运算仿函数
 	struct delta_assignment
 	{
-		lconstfn _tScalar1&
+		_tScalar1&
 			operator()(_tScalar1& x, _tScalar2 y) const
 		{
 			return x += y;
@@ -380,7 +380,7 @@ namespace leo
 	//减法复合赋值运算仿函数
 	struct delta_assignment<false, _tScalar1, _tScalar2>
 	{
-		lconstfn _tScalar1&
+		_tScalar1&
 			operator()(_tScalar1& x, _tScalar2 y) const
 		{
 			return x -= y;

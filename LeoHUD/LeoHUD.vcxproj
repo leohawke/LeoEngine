@@ -270,7 +270,6 @@
     <ClCompile Include="..\ModelLook\HUD\HUDBrush.cpp" />
     <ClCompile Include="..\ModelLook\HUD\HUDContainer.cpp" />
     <ClCompile Include="..\ModelLook\HUD\HUDControl.cpp" />
-    <ClCompile Include="..\ModelLook\HUD\HUDGraphics.cpp" />
     <ClCompile Include="..\ModelLook\HUD\HUDHostRenderer.cpp" />
     <ClCompile Include="..\ModelLook\HUD\HUDImpl.cpp" />
     <ClCompile Include="..\ModelLook\HUD\HUDPanel.cpp" />
@@ -279,7 +278,10 @@
     <ClCompile Include="..\ModelLook\HUD\Label.cpp" />
     <ClCompile Include="..\ModelLook\HUD\Widget.cpp" />
     <ClCompile Include="..\ModelLook\HUD\WidgetEvent.cpp" />
+    <ClCompile Include="..\ModelLook\UI\Blit.cpp" />
+    <ClCompile Include="..\ModelLook\UI\Draw.cpp" />
     <ClCompile Include="..\ModelLook\UI\Font.cpp" />
+    <ClCompile Include="..\ModelLook\UI\Graphics.cpp" />
     <ClCompile Include="..\ModelLook\UI\GUI.cpp" />
     <ClCompile Include="..\ModelLook\UI\Rect.cpp" />
     <ClCompile Include="..\ModelLook\UI\TextBase.cpp" />
@@ -295,6 +297,26 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="..\ModelLook\Shader\UIPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="..\ModelLook\Shader\UIVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
     <FxCompile Include="FontGenPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>

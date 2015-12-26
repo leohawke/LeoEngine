@@ -1,7 +1,8 @@
-#ifndef HUD_Graphics_H
-#define HUD_Graphics_H
+#ifndef UI_Graphics_H
+#define UI_Graphics_H
 
-#include "HUD.h"
+#include "GUIBase.h"
+#include "Color.h"
 
 LEO_BEGIN
 
@@ -12,7 +13,7 @@ LEO_BEGIN
 //warning, R8G8B8A8,某些显卡效果可能不对
 class texture2d_wrapper;
 
-HUD_BEGIN
+DRAW_BEGIN
 
 using BitmapPtr = Drawing::Pixel<>*;
 using ConstBitmapPtr = const Drawing::Pixel<>*;
@@ -178,7 +179,7 @@ struct LB_API PaintContext
 LB_API Point
 ClipMargin(PaintContext&, const Drawing::Padding&, const Size&);
 
-HUD_END
+DRAW_END
 
 LEO_END
 

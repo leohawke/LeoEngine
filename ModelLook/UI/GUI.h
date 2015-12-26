@@ -3,6 +3,7 @@
 
 #include "GUIBase.h"
 #include "Color.h"
+#include "Graphics.h"
 
 LEO_DRAW_BEGIN
 

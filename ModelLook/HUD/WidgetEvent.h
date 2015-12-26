@@ -7,7 +7,7 @@
 #ifndef HUD_WIDGETEVENT_HPP
 #define HUD_WIDGETEVENT_HPP
 
-#include "HUDGraphics.h"
+#include "HUD.h"
 #include "HUDEvent.hpp"
 
 LEO_BEGIN

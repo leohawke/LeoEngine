@@ -1,6 +1,6 @@
 #include "HUDPseudoWindow.h"
 #include "HUD\HUDRenderSystem.h"
-#include "HUD\HUDImpl.h"
+#include "UI\UIImpl.h"
 #include <ref.hpp>
 LEO_BEGIN
 
@@ -35,6 +35,8 @@ public:
 		vbdata.vertex[vbdata.vertex_start+1] = leo::float4(window_size.first, 0.f, 1.f, 0.f);
 		vbdata.vertex[vbdata.vertex_start +3] = leo::float4(0.f, window_size.second,0.f, 1.f);
 
+
+
 		auto ibdata = rs.LockIB(6);
 
 		rs.FillQuadIBByVB(vbdata, ibdata);
@@ -45,7 +47,7 @@ public:
 		rs.PushRenderCommand(
 			rs.MakeCommand(
 				vbdata,ibdata, 
-				(dynamic_cast<HUD::details::hud_tex_wrapper&>(ref.get().GetImageBuffer())).tex)
+				(dynamic_cast<Drawing::details::hud_tex_wrapper&>(ref.get().GetImageBuffer())).tex)
 			);
 
 		//this function code can push into excetue

@@ -140,6 +140,7 @@ public:
 
 		context->IASetIndexBuffer(big_ib, DXGI_FORMAT_R16_UINT, 0);
 		context->IASetVertexBuffers(0, 1, &big_vb, strides, offsets);
+		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		context->PSSetShader(ui_ps, nullptr, 0);
 		context->VSSetShader(ui_vs, nullptr, 0);
@@ -168,9 +169,15 @@ public:
 			color.w = iter->mat.color.GetA() / 255.f;
 
 			context->UpdateSubresource(ps_params, 0, nullptr, &color, 0, 0);
-			context->DrawIndexed(iter->index_num, iter->index_start, iter->vertex_start);
+			context->DrawIndexed(iter->index_num/2, iter->index_start, iter->vertex_start);
 			++iter;
 		}
+
+		//状态clear
+		ib_offset = 0;
+		vb_offset = 0;
+		commands.clear();
+		//需要对tb有一定的cache策略[内部实现]
 	}
 };
 

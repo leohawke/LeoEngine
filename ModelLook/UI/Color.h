@@ -1,7 +1,47 @@
 #ifndef UI_COLOR_H
 #define UI_COLOR_H
 
-#include "GUI.h"
+#include "UI.h"
+
+namespace leo {
+	template<size_t _vX, size_t _vY, size_t _vZ, size_t _vA>
+	struct XYZATrait
+	{
+		static lconstexpr const size_t ABitsN = _vA;
+		static lconstexpr const size_t XBitsN = _vX;
+		static lconstexpr const size_t YBitsN = _vY;
+		static lconstexpr const size_t ZBitsN = _vZ;
+		static lconstexpr const size_t XYBitsN = XBitsN + YBitsN;
+		static lconstexpr const size_t XYZBitsN = XBitsN + YBitsN + ZBitsN;
+		static lconstexpr const size_t BitsN = XBitsN + YBitsN + ZBitsN + ABitsN;
+		static lconstexpr const size_t BytesN = (BitsN + CHAR_BIT - 1) / CHAR_BIT;
+
+		using AType = typename make_width_int<ABitsN>::unsigned_least_type;
+		using BType = typename make_width_int<XBitsN>::unsigned_least_type;
+		using GType = typename make_width_int<YBitsN>::unsigned_least_type;
+		using RType = typename make_width_int<ZBitsN>::unsigned_least_type;
+		using IntegerType
+			= typename make_width_int<BitsN>::unsigned_least_type;
+		using ArrayType = stdex::byte[BytesN];
+
+		static_assert(BitsN <= 64, "Width larger than 64 unimplemented");
+	};
+
+	template<size_t _vX, size_t _vY, size_t _vZ, size_t _vA>
+	struct XYZAMaskTrait
+	{
+		using IntegerType = typename XYZATrait<_vX, _vY, _vZ, _vA>::IntegerType;
+
+		static lconstexpr const IntegerType XMaskN = _vX;
+		static lconstexpr const IntegerType XYMaskN = XMaskN + _vY;
+		static lconstexpr const IntegerType XYZMaskN = XYMaskN + _vZ;
+		static lconstexpr const IntegerType AMask = ((1U << _vA) - 1) << XYZMaskN;
+		static lconstexpr const IntegerType XMask = (1U << _vX) - 1;
+		static lconstexpr const IntegerType YMask = ((1U << _vY) - 1) << XMaskN;
+		static lconstexpr const IntegerType ZMask = ((1U << _vZ) - 1) << XYMaskN;
+	};
+}
+
 
 LEO_DRAW_BEGIN
 
@@ -12,11 +52,49 @@ enum PixelFormat {
 	C48888,//4个通道，每通道8bit
 };
 template<PixelFormat = C48888>
-struct Pixel;
+union Pixel;
 
 template<>
-struct Pixel<C48888> {
-	stdex::byte r, g, b, a;
+union lalignas(lalignof(typename XYZATrait<8,8,8,8>::IntegerType)) Pixel<C48888> {
+	static lconstexpr const size_t _vB = 8;
+	static lconstexpr const size_t _vG = 8;
+	static lconstexpr const size_t _vR = 8;
+	static lconstexpr const size_t _vA = 8;
+
+	using Trait = XYZATrait<_vB, _vG, _vR, _vA>;
+	//! \since build 507
+	using MaskTrait = XYZAMaskTrait<_vB, _vG, _vR, _vA>;
+	//! \since build 555
+	using ArrayType = typename Trait::ArrayType;
+	//! \since build 555
+	using IntegerType = typename Trait::IntegerType;
+
+	ArrayType Bytes;
+	IntegerType Integer;
+
+	DefDeDtor(Pixel)
+		lconstfn
+		Pixel(typename Trait::IntegerType i)
+		: Integer(i)
+	{}
+	lconstfn
+		Pixel(typename Trait::BType b, typename Trait::GType g,
+			typename Trait::RType r, typename Trait::AType a)
+		: Integer(IntegerType(b) | IntegerType(g) << MaskTrait::XMaskN
+			| IntegerType(r) << MaskTrait::XYMaskN
+			| IntegerType(a) << MaskTrait::XYZMaskN)
+	{}
+
+	lconstfn DefCvt(const lnothrow, typename Trait::IntegerType, Integer)
+
+		lconstfn DefGetter(const lnothrow, typename Trait::AType, A,
+			(Integer & MaskTrait::AMask) >> MaskTrait::XYZMaskN)
+		lconstfn DefGetter(const lnothrow, typename Trait::BType, B,
+			Integer & MaskTrait::XMask)
+		lconstfn DefGetter(const lnothrow, typename Trait::GType, G,
+			(Integer & MaskTrait::YMask) >> MaskTrait::XMaskN)
+		lconstfn DefGetter(const lnothrow, typename Trait::RType, R,
+			(Integer & MaskTrait::ZMask) >> MaskTrait::XYMaskN)
 };
 
 
@@ -94,7 +172,7 @@ public:
 	*/
 	lconstfn
 		Color(Pixel<> px) lnothrow
-		: r(px.r), g(px.g), b(px.b), a(px.a)
+		: r(px.GetR()), g(px.GetG()), b(px.GetB()), a(px.GetA())
 	{}
 	/*!
 	\brief 构造：使用默认颜色。

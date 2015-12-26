@@ -271,6 +271,12 @@ namespace leo
 			return *this;
 		}
 
+		reference
+			operator*() lnothrow
+		{
+			return value;
+		}
+
 		lconstfn reference
 			operator*() const
 		{

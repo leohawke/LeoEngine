@@ -61,7 +61,7 @@ namespace leo
 		void PrintAllSingletonInfo();
 #endif
 
-		static const std::unique_ptr<SingletonManger>& GetInstance()
+		static std::unique_ptr<SingletonManger>& GetInstance()
 		{
 			static auto mInstance = unique_raw(new SingletonManger());
 			return mInstance;

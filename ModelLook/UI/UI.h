@@ -6,7 +6,12 @@
 #include <leoint.hpp>
 #include <LAssert.h>
 #include <utility.hpp>
+#include <functional.hpp>
+#include <leoint.hpp>
+#include <iterator.hpp>
+
 #include <algorithm>
+
 
 #ifndef UI_BEGIN
 //UI包括2D UI和3D UI，主要用于游戏特定UI

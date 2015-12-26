@@ -351,7 +351,7 @@ FontCache::FontCache(size_t /*cache_size*/)
 	::FT_Error error;
 
 	if (LB_LIKELY((error = ::FT_Init_FreeType(&library)) == 0))
-		LTraceDe(Informative, "FreeType library instance initialized.");
+		LTraceDe(Informative, "FreeType library instance initialized.\n");
 	else
 	{
 		// TODO: Format without allocating memory.
@@ -434,7 +434,7 @@ FontCache::LoadTypefaces(const FontPath& path)
 		const auto face_num(face->num_faces);
 
 		::FT_Done_Face(face);
-		LTraceDe(Informative, "Loaded faces num '%ld' from path '%s'.",
+		LTraceDe(Informative, "Loaded faces num '%ld' from path '%s'.\n",
 			face_num, path.c_str());
 		if (face_num < 0)
 			return 0;
@@ -507,6 +507,7 @@ InitializeSystemFontCache(FontCache& fc, const std::string& fong_file,
 		}
 		catch(...)
 		{ }
+		fc.InitializeDefaultTypeface();
 	}
 	catch(...)
 	{ }

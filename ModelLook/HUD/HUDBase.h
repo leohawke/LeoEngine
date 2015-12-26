@@ -21,6 +21,10 @@ using Drawing::Size;
 using Drawing::Rect;
 using Drawing::Point;
 using Drawing::Box;
+using Drawing::Graphics;
+using Drawing::PaintContext;
+using Drawing::IImage;
+
 
 HUD_END
 LEO_END

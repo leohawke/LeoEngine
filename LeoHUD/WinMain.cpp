@@ -20,6 +20,7 @@
 #include "HUD\HUDHostRenderer.h"
 #include "HUD\HUDPanel.h"
 #include "HUD\Label.h"
+#include "HUD\HUDBrush.h"
 
 #include <RenderSystem\DeferredRender.hpp>
 #include <RenderSystem\ShaderMgr.h>
@@ -152,11 +153,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	leo::EngineConfig::Write();
 	leo::global::Destroy();
 	ClearRes();
-#ifdef DEBUG
-	leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
-#endif
-	leo::SingletonManger::GetInstance()->UnInstallAllSingleton();
-	DeviceMgr.DestroyDevice();
+
 
 	return 0;
 }
@@ -164,7 +161,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 {
-	using leo::float3;
 	auto device = leo::DeviceMgr().GetDevice();
 
 	event.Wait();
@@ -178,7 +174,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	//Camera Set	
 #if 1
 	leo::Sphere mSphere{ leo::float3(0.0f, 0.0f, 0.0f),sqrtf(10.0f*10.0f + 15.0f*15.0f) };
-	float3 dir{ -0.5773f, -0.57735f,0.57735f };
+	leo::float3 dir{ -0.5773f, -0.57735f,0.57735f };
 	pCamera = std::make_unique<leo::UVNCamera>();
 
 
@@ -189,17 +185,16 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pos.x = -pos.x;
 	pos.z = -pos.z;
 
-	pCamera->LookAt(float3(0.f, 12.f, -24.f), float3(0.f, 0.f, 0.f), float3(0.f, 1.f, 0.f));
+	pCamera->LookAt(leo::float3(0.f, 12.f, -24.f), leo::float3(0.f, 0.f, 0.f), leo::float3(0.f, 1.f, 0.f));
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 
 	leo::EffectQuad::GetInstance().SetFrustum(device, *pCamera);
 #endif
 
-	using namespace leo;
-
 	pRender = std::make_unique<leo::DeferredRender>(device, size);
 
 	pPanel = std::make_unique<leo::HUD::Panel>(leo::HUD::Size(size.first, size.second));
+	pPanel->Background = leo::HUD::SolidBrush(leo::Drawing::ColorSpace::Yellow);
 	pHUDHostRender = std::make_shared<leo::HUD::HostRenderer>(*pPanel);
 	pPanel->SetRenderer(pHUDHostRender);
 
@@ -207,19 +202,10 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pLabel->SetVisible(true);
 	*pPanel += *pLabel;
 
-	
-
 }
 
 
-void ClearRes() {
 
-
-	pRender.reset(nullptr);
-
-	pHUDHostRender.reset();
-	pPanel.reset();
-}
 
 void ReSize(std::pair<leo::uint16, leo::uint16> size) {
 	//do many thing ,but ÎÒ²»ÏëÐ´
@@ -293,4 +279,17 @@ void Render()
 
 		leo::RenderSync::GetInstance()->Present();
 	}
+}
+
+void ClearRes() {
+	pRender.reset(nullptr);
+
+	pHUDHostRender.reset();
+	pPanel.reset();
+
+#ifdef DEBUG
+	leo::SingletonManger::GetInstance()->PrintAllSingletonInfo();
+#endif
+	leo::SingletonManger::GetInstance()->UnInstallAllSingleton();
+	leo::DeviceMgr().DestroyDevice();
 }

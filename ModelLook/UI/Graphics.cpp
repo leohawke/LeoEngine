@@ -1,12 +1,10 @@
 #include "RenderSystem/TextureX.hpp"
-#include "HUDImpl.h"
+#include "UIImpl.h"
+#include "GUI.h"
 
 namespace leo {
-	namespace HUD {
+	namespace Drawing {
 		ImplDeDtor(IImage)
-
-		using Drawing::SPos;
-		using Drawing::SDst;
 
 		Point
 		ClipMargin(PaintContext& pc, const Drawing::Padding& m, const Size& ss)
@@ -35,8 +33,8 @@ namespace leo {
 	}
 
 	namespace X {
-		std::shared_ptr<HUD::IImage>  MakeIImage(HUD::Size s) {
-			return std::make_shared<HUD::details::hud_tex_wrapper>(s);
+		std::shared_ptr<Drawing::IImage>  MakeIImage(Drawing::Size s) {
+			return std::make_shared<Drawing::details::hud_tex_wrapper>(s);
 		}
 	}
 }
