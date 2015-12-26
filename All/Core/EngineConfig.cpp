@@ -64,7 +64,7 @@ using namespace std::experimental::string_view_literals;
 	void EngineConfig::Write(const std::wstring& configScheme) {
 		using namespace scheme;
 		
-		Save("/config/window/width",int64(ClientSize().first));
+		Save("/config/window/height",int64(ClientSize().first));
 		Save("/config/window/width", int64(ClientSize().second));
 
 		auto dirs_sexp = sexp::make_sexp_word(S("search-dirs"));

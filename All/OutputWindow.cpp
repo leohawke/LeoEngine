@@ -59,7 +59,9 @@ namespace leo
 			Raise_Win32_Exception("MakeOutputWindow Failed:RegisterClassEx return false");
 
 		RECT r{ 0, 0, clientSize.first, clientSize.second };
-		AdjustWindowRectEx(&r, style, false, exStyle);
+		AdjustWindowRectEx(&r, style, false,exStyle);
+
+
 
 		// Create the application's window
 		global::globalHwnd = ::CreateWindowExW(exStyle,
@@ -68,8 +70,8 @@ namespace leo
 			style,
 			CW_USEDEFAULT,
 			CW_USEDEFAULT,
-			r.right - r.left,
-			r.bottom - r.top,
+			r.right-r.left,
+			r.bottom-r.top,
 			NULL,
 			NULL,
 			hInstance,
@@ -82,6 +84,7 @@ namespace leo
 		ShowWindow(global::globalHwnd, SW_SHOW);
 		UpdateWindow(global::globalHwnd);
 
+		FixedSize(clientSize);
 		clientSize = ClientSize();
 		return true;
 	}
@@ -100,6 +103,19 @@ namespace leo
 	{
 		::DestroyWindow(this->GetHwnd());
 		::UnregisterClass(m_regName.c_str(), GetModuleHandle(nullptr));
+	}
+
+	void OutputWindow::FixedSize(std::pair<leo::uint16, leo::uint16>& clientSize)
+	{
+		RECT r;
+		GetWindowRect(this->GetHwnd(), &r);
+		RECT cr;
+		GetClientRect(this->GetHwnd(), &cr);
+
+		auto dx = (r.right - r.left) - (cr.right - cr.left);
+		auto dy = (r.bottom - r.top) - (cr.bottom - cr.top);
+
+		MoveWindow(this->GetHwnd(), r.left, r.top, clientSize.first + dx, clientSize.second + dy, false);
 	}
 
 	std::pair<leo::uint16, leo::uint16> OutputWindow::ClientSize() const lnothrow

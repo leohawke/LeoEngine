@@ -78,7 +78,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
 	auto clientSize = leo::EngineConfig::ClientSize();
 	if (!win.Create(GetModuleHandle(nullptr), clientSize, L"Leo HUD",
-		WS_BORDER | WS_SYSMENU, 0
+		WS_BORDER|WS_SYSMENU, 0
 		))
 	{
 		return 0;

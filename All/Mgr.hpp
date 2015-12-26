@@ -81,6 +81,8 @@ namespace leo
 	public:
 		virtual		LRESULT	WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	private:
+		void FixedSize(std::pair<leo::uint16, leo::uint16>& clientSize);
+
 		std::unordered_map<UINT, MsgFunction>	m_userMessages;			// User message map
 		std::wstring m_regName;
 	};
