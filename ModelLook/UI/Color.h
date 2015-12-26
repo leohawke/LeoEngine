@@ -202,7 +202,7 @@ public:
 	\brief 构造：使用 RGB 值和 alpha 位。
 	*/
 	lconstfn
-		Color(stdex::byte r_, stdex::byte g_, stdex::byte b_, stdex::byte a_ = 0xFF) lnothrow
+		Color(stdex::byte r_, stdex::byte g_, stdex::byte b_, AlphaType a_ = 0xFF) lnothrow
 		: r(r_), g(g_), b(b_), a(a_)
 	{}
 	/*!
@@ -211,7 +211,7 @@ public:
 	*/
 	template<typename _tScalar>
 	lconstfn
-		Color(_tScalar r_, _tScalar g_, _tScalar b_, stdex::byte a_ = 0xFF) lnothrow
+		Color(_tScalar r_, _tScalar g_, _tScalar b_, AlphaType a_ = 0xFF) lnothrow
 		: Color(stdex::byte(r_), stdex::byte(g_), stdex::byte(b_), a_)
 	{}
 

@@ -10,8 +10,6 @@ namespace leo
 	{
 		void
 			LB_API FillRect(const Graphics& g, const Rect& r, Color c);
-
-		
 	}
 }
 

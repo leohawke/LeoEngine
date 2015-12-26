@@ -1,5 +1,5 @@
-#ifndef UI_Draw_H
-#define UI_Draw_H
+#ifndef UI_Blend_H
+#define UI_Blend_H
 
 #include "GUI.h"
 #include "Blit.h"
@@ -79,7 +79,6 @@ namespace leo
 			/*!
 			\brief 像素分量混合。
 			\sa GPixelCompositor
-			\since build 442
 			\todo 支持浮点数。
 			*/
 			template<size_t _vSrcAlphaBits, typename _tDstInt, typename _tSrcInt,
@@ -95,8 +94,8 @@ namespace leo
 					"Invalid integer source alpha type found.");
 				using pix = make_fixed_t<_vSrcAlphaBits>;
 
-				return GPixelCompositor<1, _vSrcAlphaBits>::CompositeComponentOver(
-					pix(d, raw_tag()), pix(s, raw_tag()), pix(sa, raw_tag()), pix(1)).get();
+				return static_cast<_tDstInt>(GPixelCompositor<1, _vSrcAlphaBits>::CompositeComponentOver(
+					pix(d, raw_tag()), pix(s, raw_tag()), pix(sa, raw_tag()), pix(1)).get());
 			}
 
 
@@ -121,8 +120,8 @@ namespace leo
 				return Color(BlendComponent<_vSrcAlphaBits>(d.GetR(), s.GetR(), sa),
 					BlendComponent<_vSrcAlphaBits>(d.GetG(), s.GetG(), sa), BlendComponent<
 					_vSrcAlphaBits>(d.GetB(), s.GetB(), sa),
-					GPixelCompositor<_vDstAlphaBits, _vSrcAlphaBits>::CompositeAlphaOver(
-						pixd(d.GetA(), raw_tag()), pix(sa, raw_tag())).get());
+					static_cast<AlphaType>(GPixelCompositor<_vDstAlphaBits, _vSrcAlphaBits>::CompositeAlphaOver(
+						pixd(d.GetA(), raw_tag()), pix(sa, raw_tag())).get()));
 			}
 
 			/*!

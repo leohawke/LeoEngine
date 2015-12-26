@@ -169,7 +169,7 @@ public:
 			color.w = iter->mat.color.GetA() / 255.f;
 
 			context->UpdateSubresource(ps_params, 0, nullptr, &color, 0, 0);
-			context->DrawIndexed(iter->index_num/2, iter->index_start, iter->vertex_start);
+			context->DrawIndexed(iter->index_num, iter->index_start, iter->vertex_start);
 			++iter;
 		}
 

@@ -5,6 +5,9 @@
 #include "Operators.hpp"
 #include "type_op.hpp"
 
+#pragma warning(push)
+#pragma warning(disable:4554)
+
 namespace leo
 {
 
@@ -738,5 +741,6 @@ namespace std {
 #undef YB_Impl_Rational_fp_T
 }
 
+#pragma warning(pop)
 
 #endif
