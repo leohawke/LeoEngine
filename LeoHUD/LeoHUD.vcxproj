@@ -278,6 +278,7 @@
     <ClCompile Include="..\ModelLook\HUD\Label.cpp" />
     <ClCompile Include="..\ModelLook\HUD\Widget.cpp" />
     <ClCompile Include="..\ModelLook\HUD\WidgetEvent.cpp" />
+    <ClCompile Include="..\ModelLook\UI\Blend.cpp" />
     <ClCompile Include="..\ModelLook\UI\Blit.cpp" />
     <ClCompile Include="..\ModelLook\UI\Draw.cpp" />
     <ClCompile Include="..\ModelLook\UI\Font.cpp" />
