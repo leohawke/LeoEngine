@@ -1,6 +1,6 @@
 #include "GUI.h"
 
-using namespace leo::Drawing;
+LEO_DRAW_BEGIN
 
 Rect
 operator+(const Rect& r, const Padding& m)
@@ -13,7 +13,7 @@ operator+(const Rect& r, const Padding& m)
 
 
 Padding
-leo::Drawing::FetchMargin(const Rect& r, const Size& s)
+FetchMargin(const Rect& r, const Size& s)
 {
 	// XXX: Conversion to 'SPos' might be implementation-defined.
 	return Padding(r.X, SPos(s.Width) - r.X - SPos(r.Width),
@@ -29,3 +29,5 @@ ClipBounds(Rect& clip, const Rect& bounds)
 	clip.GetSizeRef() = {};
 	return{};
 }
+
+LEO_DRAW_END

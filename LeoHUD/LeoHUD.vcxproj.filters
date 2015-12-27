@@ -210,6 +210,15 @@
     <ClCompile Include="..\ModelLook\UI\Blend.cpp">
       <Filter>依赖源文件\UI</Filter>
     </ClCompile>
+    <ClCompile Include="..\ModelLook\UI\CharRenderer.cpp">
+      <Filter>依赖源文件\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ModelLook\UI\TextLayout.cpp">
+      <Filter>依赖源文件\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ModelLook\UI\TextRenderer.cpp">
+      <Filter>依赖源文件\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="FontGenPS.hlsl" />

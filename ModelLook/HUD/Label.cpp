@@ -1,31 +1,16 @@
 #include "Label.h"
 #include "HUDImpl.h"
-#include "..\UI\TextBase.h"
+#include "../UI/TextLayout.h"
+#include "../UI/TextRenderer.h"
 
 LEO_BEGIN
 HUD_BEGIN
 
-using SPos = platform::unit_type;
-using SDst = platform::unitlength_type;
-using std::max;
+using Drawing::SDst;
+using Drawing::SPos;
 
-#define Margin 1
-#define GetHorizontalOf(Margin) Margin
-#define GetVerticalOf(Margin) Margin
-
-#define RectAddMargin(r,m) Rect(r.X + m, r.Y + m, \
-	SDst(max<SPos>(0, SPos(r.Width) - m - m)), \
-	SDst(max<SPos>(0, SPos(r.Height) - m - m)))
-
-#define RectSubMargin(r,m) RectAddMargin(r,-(m))
-
-#define FetchStringWidth(Font,Text) (Font.GetSize()+1)*Text.size()
-#define Font_GetHeight(Font) Font.GetSize()+1
-
-
-
-MLabel::MLabel(const Drawing::Font & fnt, TextAlignment a)
-	:Font(fnt),HorizontalAlignment(a)
+MLabel::MLabel(const Drawing::Font & fnt,Drawing::Color c,TextAlignment a)
+	:ForeColor(c), Font(fnt),HorizontalAlignment(a)
 {
 }
 
@@ -65,7 +50,7 @@ Point MLabel::GetAlignedPenOffset(const Size & s) const
 		case TextAlignment::Down:
 		{
 			SPos vertical_offset(SPos(s.Height - GetVerticalOf(Margin)
-				- Font_GetHeight(Font)));
+				- Font.GetHeight()));
 
 			if (vertical_offset > 0)
 			{
@@ -85,20 +70,29 @@ Point MLabel::GetAlignedPenOffset(const Size & s) const
 
 void MLabel::DrawText(const Size & s, const PaintContext & pc) const
 {
-	const auto r(RectAddMargin(Rect(pc.Location, s),Margin));
+	const auto r((Rect(pc.Location, s) + Margin));
 	Drawing::TextState ts(Font, Drawing::FetchMargin(r, pc.Target.GetSize()));
 	ts.Color = ForeColor;
 	ts.Pen += GetAlignedPenOffset(s);
 
-	details::DrawText({ pc.Target,pc.Location,pc.ClipArea&r },ts, Text);
+	UpdateClippedText({ pc.Target, pc.Location, pc.ClipArea & r }, ts, Text,
+		AutoWrapLine);
 }
 
-Rect Label::CalculateBounds(const std::string & text, Rect r, const Drawing::Font & fnt)
+void
+MLabel::DefaultUpdateClippedText(const PaintContext& pc,Drawing::TextState& ts,
+	const String& text, bool auto_wrap_line)
+{
+	DrawClippedText(pc.Target, pc.ClipArea, ts, text, auto_wrap_line);
+}
+
+Rect Label::CalculateBounds(const std::string & text, Rect r, const Drawing::Font & fnt,
+	const Drawing::Padding& m)
 {
 	if (r.GetSize() == Size::Invalid)
 	{
-		r.GetSizeRef() = { FetchStringWidth(fnt, text),Font_GetHeight(fnt)};
-		r = RectSubMargin(r,Margin);
+		r.GetSizeRef() = { FetchStringWidth(fnt, text),fnt.GetHeight()};
+		r = r -m;
 	}
 	return r;
 }
@@ -108,9 +102,9 @@ void Label::Refresh(PaintEventArgs && e)
 	(*this)(std::move(e));
 }
 
-LB_API std::unique_ptr<Label> MakeLabel(const std::string &text, const Rect & r, const Drawing::Font & fnt)
+LB_API std::unique_ptr<Label> MakeLabel(const std::string &text, const Rect & r, const Drawing::Font & fnt,const Drawing::Padding& m)
 {
-	auto p(std::make_unique<Label>(Label::CalculateBounds(text, r, fnt), fnt));
+	auto p(std::make_unique<Label>(Label::CalculateBounds(text, r, fnt,m), fnt));
 
 	lunseq(p->Text = text);
 	return p;

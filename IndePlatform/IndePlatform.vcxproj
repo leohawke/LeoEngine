@@ -80,6 +80,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\any.cpp" />
+    <ClCompile Include="src\cwctype.cpp" />
     <ClCompile Include="src\DebugOutput.cpp" />
     <ClCompile Include="src\exception.cpp" />
     <ClCompile Include="src\Geometry.cpp" />
@@ -98,9 +99,11 @@
     <ClInclude Include="Include\BaseMacro.h" />
     <ClInclude Include="Include\bitseg.hpp" />
     <ClInclude Include="Include\cache.hpp" />
+    <ClInclude Include="Include\cctype.h" />
     <ClInclude Include="Include\clock.hpp" />
     <ClInclude Include="Include\ConstexprMath.hpp" />
     <ClInclude Include="Include\container.hpp" />
+    <ClInclude Include="Include\cwctype.h" />
     <ClInclude Include="Include\DebugOutput.hpp" />
     <ClInclude Include="Include\deref_op.hpp" />
     <ClInclude Include="Include\EndianSwap.hpp" />
@@ -112,6 +115,7 @@
     <ClInclude Include="Include\id.hpp" />
     <ClInclude Include="Include\intrusive_ptr.hpp" />
     <ClInclude Include="Include\iterator.hpp" />
+    <ClInclude Include="Include\iterator_op.hpp" />
     <ClInclude Include="Include\LAssert.h" />
     <ClInclude Include="Include\ldef.h" />
     <ClInclude Include="Include\leo2DMath.hpp" />

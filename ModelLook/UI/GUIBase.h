@@ -601,6 +601,57 @@ IsInOpenInterval(_type i, _type a, _type b) lnothrow
 	return a < i && i < b;
 }
 
+/*!
+\throw LoggedEvent 范围检查失败。
+*/
+//@{
+//! \brief 检查标量数值在指定类型的范围内。
+template<typename _tDst, typename _type>
+inline _tDst
+CheckScalar(_type val, const std::string& name = {},
+	record_level lv = record_level::Err)
+{
+	using common_t = common_type_t<_tDst, _type>;
+
+	if (LB_UNLIKELY(common_t(val) > common_t(std::numeric_limits<_tDst>::max())))
+		throw logged_event(name + " value out of range.", lv);
+	return _tDst(val);
+}
+
+//! \brief 检查非负标量数值在指定类型的范围内。
+template<typename _tDst, typename _type>
+inline _tDst
+CheckNonnegativeScalar(_type val, const std::string& name = {},
+	record_level lv = record_level::Err)
+{
+	if (val < 0)
+		// XXX: Use more specified exception type.
+		throw logged_event("Failed getting nonnegative " + name + " value.", lv);
+	return CheckScalar<_tDst>(val, name, lv);
+}
+
+
+/*!
+\brief 清除指定的连续对象。
+\pre 设类型 T 为 <tt>ystdex::remove_reference_t<decltype(*dst)></tt>， 则应满足
+<tt>std::is_pod<T> || (std::is_nothrow_default_constructible<T>::value
+&& std::is_nothrow_assignable<T, T>::value)</tt> 。
+\note 忽略空指针和零长度。
+*/
+template<typename _tOut>
+inline void
+ClearSequence(_tOut dst, size_t n) lnothrow
+{
+	using _type = remove_reference_t<decltype(*dst)>;
+	static_assert(std::is_pod<_type>::value
+		|| (std::is_nothrow_default_constructible<_type>::value
+			&& std::is_nothrow_assignable<_type, _type>::value),
+		"Invalid type found.");
+
+	if (LB_LIKELY(dst && n))
+		std::fill_n(dst, n, _type());
+}
+
 LEO_END
 
 

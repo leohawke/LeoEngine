@@ -74,7 +74,7 @@ union lalignas(lalignof(typename XYZATrait<8,8,8,8>::IntegerType)) Pixel<C48888>
 	ArrayType Bytes;
 	IntegerType Integer;
 
-	DefDeDtor(Pixel)
+	DefDeCtor(Pixel)
 		lconstfn
 		Pixel(typename Trait::IntegerType i)
 		: Integer(i)

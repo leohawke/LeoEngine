@@ -512,7 +512,7 @@ public:
 		\brief È¡¿ç¾à¡£
 		*/
 		std::int8_t
-		GetAdvance(char32_t) const;
+		GetAdvance(ucs4_t, CharBitmap = {}) const;
 
 	/*!
 	\brief È¡Éý²¿¡£

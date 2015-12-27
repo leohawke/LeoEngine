@@ -11,67 +11,6 @@
 
 namespace leo
 {
-	//类型选择,cl编译器可能在此有错误
-	template<typename _tParam, typename = limpl(std::pair<
-		decltype(*std::declval<_tParam&>()), decltype(++std::declval<_tParam&>())>)>
-		using enable_for_iterator_t = enable_if_t<
-		is_same<decltype(++std::declval<_tParam&>()), _tParam&>::value, int>;
-
-	/*
-	迭代器指向的值满足条件取邻接迭代器,否则取原值
-	*/
-	template<typename _tIn, typename _fPred>
-	_tIn
-		next_if(_tIn i, _fPred f,
-		typename std::iterator_traits<_tIn>::difference_type n = 1)
-	{
-		lconstraint(!is_undereferenceable(i));
-		return f(*i) ? std::next(i, n) : i;
-	}
-	template<typename _tIn, typename _type>
-	_tIn
-		next_if_eq(_tIn i, const _type& val,
-		typename std::iterator_traits<_tIn>::difference_type n = 1)
-	{
-		lconstraint(!is_undereferenceable(i));
-		return *i == val ? std::next(i, n) : i;
-	}
-
-	/*
-	迭代器指向的值满足条件时取反向邻接迭代器,否则取原值
-	*/
-	template<typename _tBi, typename _fPred>
-	_tBi
-		prev_if(_tBi i, _fPred f,
-		typename std::iterator_traits<_tBi>::difference_type n = 1)
-	{
-		return f(*i) ? std::prev(i, n) : i;
-	}
-	template<typename _tBi, typename _type>
-	_tBi
-		prev_if_eq(_tBi i, const _type& val,
-		typename std::iterator_traits<_tBi>::difference_type n = 1)
-	{
-		return *i == val ? std::prev(i, n) : i;
-	}
-
-	template<typename _tIterator1, typename _tIterator2>
-	inline auto
-		make_move_iterator_pair(_tIterator1 it1, _tIterator2 it2) -> decltype(
-		std::make_pair(std::make_move_iterator(it1), std::make_move_iterator(it2)))
-	{
-		return std::make_pair(std::make_move_iterator(it1),
-			std::make_move_iterator(it2));
-	}
-
-	template<typename _tRange>
-	inline auto
-		make_move_iterator_pair(_tRange& c)
-		-> decltype(leo::make_move_iterator_pair(begin(c), end(c)))
-	{
-		return leo::make_move_iterator_pair(begin(c), end(c));
-	}
-
 	template<typename _type>
 	//指针迭代器
 	class pointer_iterator

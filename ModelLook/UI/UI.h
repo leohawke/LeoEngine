@@ -9,6 +9,12 @@
 #include <functional.hpp>
 #include <leoint.hpp>
 #include <iterator.hpp>
+#include <exception.hpp>
+#include <bitseg.hpp>
+#include <iterator_op.hpp>
+#include <string.hpp>
+#include <cctype.h>
+#include <cwctype.h>
 
 #include <algorithm>
 

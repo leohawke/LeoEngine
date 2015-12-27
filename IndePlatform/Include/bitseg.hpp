@@ -8,8 +8,11 @@
 //位段数据结构和访问
 namespace leo
 {
-
-	template<unsigned char _vN,bool _bEndian = {}>
+#ifdef LB_IMPL_MSCPP
+	template<unsigned char _vN,bool _bEndian = false>
+#else
+	template<unsigned char _vN, bool _bEndian = {}>
+#endif
 	class bitseg_iterator : public std::iterator<std::random_access_iterator_tag,
 		stdex::byte, ptrdiff_t, stdex::byte*,stdex::byte&>
 	{

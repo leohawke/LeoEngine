@@ -280,12 +280,15 @@
     <ClCompile Include="..\ModelLook\HUD\WidgetEvent.cpp" />
     <ClCompile Include="..\ModelLook\UI\Blend.cpp" />
     <ClCompile Include="..\ModelLook\UI\Blit.cpp" />
+    <ClCompile Include="..\ModelLook\UI\CharRenderer.cpp" />
     <ClCompile Include="..\ModelLook\UI\Draw.cpp" />
     <ClCompile Include="..\ModelLook\UI\Font.cpp" />
     <ClCompile Include="..\ModelLook\UI\Graphics.cpp" />
     <ClCompile Include="..\ModelLook\UI\GUI.cpp" />
     <ClCompile Include="..\ModelLook\UI\Rect.cpp" />
     <ClCompile Include="..\ModelLook\UI\TextBase.cpp" />
+    <ClCompile Include="..\ModelLook\UI\TextLayout.cpp" />
+    <ClCompile Include="..\ModelLook\UI\TextRenderer.cpp" />
     <ClCompile Include="FreeTypeTest.cpp" />
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>

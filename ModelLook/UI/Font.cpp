@@ -1,3 +1,6 @@
+#pragma warning(push)
+#pragma warning(disable:4244)
+
 #include "Font.hpp"
 #include <Singleton.hpp>
 #include <DebugOutput.hpp>
@@ -461,6 +464,44 @@ Font::Font(const FontFamily& family,FontSize s,
 	:typeface(family.GetTypefaceRef(fs)), font_size(s), style(fs)
 {}
 
+std::int8_t
+Font::GetAdvance(ucs4_t c, CharBitmap sbit) const
+{
+	if (!sbit)
+		sbit = GetGlyph(c, FT_LOAD_DEFAULT);
+	return LB_LIKELY(sbit) ? sbit.GetXAdvance() : 0;
+}
+std::int8_t
+Font::GetAscender() const
+{
+	return GetInternalInfo().ascender >> 6;
+}
+std::int8_t
+Font::GetDescender() const
+{
+	return GetInternalInfo().descender >> 6;
+}
+CharBitmap
+Font::GetGlyph(ucs4_t c, unsigned flags) const
+{
+	static_assert((FT_LOAD_RENDER | FT_LOAD_TARGET_NORMAL) == 4L,
+		"Invalid default argument found.");
+	const auto& face(GetTypeface());
+
+	return &face.LookupBitmap(Typeface::BitmapKey{ flags,
+		face.LookupGlyphIndex(c), font_size, style });
+}
+FontSize
+Font::GetHeight() const lnothrow
+{
+	return GetInternalInfo().height >> 6;
+}
+::FT_Size_Metrics
+Font::GetInternalInfo() const
+{
+	return GetTypeface().LookupSize(GetSize()).GetSizeRec().metrics;
+}
+
 void
 Font::SetSize(FontSize s)
 {
@@ -528,4 +569,6 @@ FetchDefaultFontCache()
 }
 
 LEO_DRAW_END
+
+#pragma warning(pop)
 

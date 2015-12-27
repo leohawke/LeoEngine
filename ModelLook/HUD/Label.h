@@ -16,11 +16,16 @@
 #define HUD_LABEL_H
 
 #include "Widget.h"
+#include "HUDBrush.h"
 #include "..\UI\Font.hpp"
+#include "..\UI\TextBase.h"
 
 LEO_BEGIN
 
 HUD_BEGIN
+
+using String = std::string;
+
 //文本对齐样式
 enum class TextAlignment
 {
@@ -33,17 +38,32 @@ enum class TextAlignment
 
 class LB_API MLabel {
 public:
+	/*!
+	\brief 当前使用的剪切文本更新器。
+	\note 第三个模板参数表示是否自动换行。
+	\note 被 DrawText 调用。
+	*/
+	GBrushUpdater<Drawing::TextState&, const String&, bool>
+		UpdateClippedText{ DefaultUpdateClippedText };
+
+	Drawing::Color ForeColor{ Drawing::ColorSpace::Black };
 	Drawing::Font Font;
+	Drawing::Padding Margin{ Drawing::DefaultMargin };
 
 	TextAlignment HorizontalAlignment,
 		VerticalAlignment = TextAlignment::Center;
 
-	std::string Text{};
+	/*!
+	\brief 启用自动换行。
+	*/
+	bool AutoWrapLine = {};
 
-	Drawing::Color ForeColor{ Drawing::ColorSpace::Black };
+	String Text{};
+
+	
 
 	explicit
-	MLabel(const Drawing::Font& = {},
+	MLabel(const Drawing::Font& = {},Drawing::Color = Drawing::ColorSpace::Black,
 			TextAlignment = TextAlignment::Left);
 	DefDeMoveCtor(MLabel)
 
@@ -66,6 +86,14 @@ public:
 	*/
 	void
 	DrawText(const Size&, const PaintContext&) const;
+
+	/*!
+	\brief 绘制剪切文本：使用指定的绘制上下文和文本状态。
+	*/
+	static void
+		DefaultUpdateClippedText(const PaintContext&, Drawing::TextState&,
+			const String&, bool);
+	//@}
 };
 
 class LB_API Label : public Widget, protected MLabel
@@ -88,7 +116,7 @@ public:
 	\note 仅当初始边界的大小为 Size::Invalid 时计算新的大小。
 	*/
 	static Rect
-	CalculateBounds(const std::string&, Rect, const Drawing::Font&);
+	CalculateBounds(const std::string&, Rect, const Drawing::Font&,const Drawing::Padding& m);
 
 
 	/*!
@@ -101,7 +129,7 @@ public:
 
 
 LB_API std::unique_ptr<Label>
-MakeLabel(const std::string&, const Rect& = Rect::Invalid, const Drawing::Font& = {});
+MakeLabel(const std::string&, const Rect& = Rect::Invalid, const Drawing::Font& = {}, const Drawing::Padding& = Drawing::DefaultMargin * 2);
 
 HUD_END
 

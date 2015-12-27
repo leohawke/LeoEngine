@@ -384,6 +384,25 @@ namespace leo
 		};
 		//@}
 
+		/*
+		\brief 显示缓存操作：清除/以纯色像素填充。
+		\tparam _tOut 输出迭代器类型（需要支持 += 操作，一般应是随机迭代器）。
+		*/
+		//@{
+		/*!
+		\brief 清除指定位置的 n 个连续像素。
+		\tparam _tOut 输出迭代器类型。
+		\sa YSLib::ClearSequence
+		*/
+		template<typename _tOut>
+		inline _tOut
+			ClearPixel(_tOut dst, size_t n) lnothrow
+		{
+			ClearSequence(dst, n);
+			return dst;
+		}
+
+
 		/*!
 		\brief 使用指定像素填充指定的标准矩形区域。
 		*/

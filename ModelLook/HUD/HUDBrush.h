@@ -2,6 +2,7 @@
 #define HUD_Brush_H
 
 #include "HUDBase.h"
+#include "HUDEvent.hpp"
 #include <leomathtype.hpp>
 
 LEO_BEGIN
@@ -33,6 +34,14 @@ public:
 	void
 		operator()(const PaintContext&) const;
 };
+
+/*!
+\brief 画刷更新器类型。
+
+按目标绘制上下文、源和附加偏移更新目标图像的回调接口。
+*/
+template<typename... _types>
+using GBrushUpdater = GHEvent<void(const PaintContext&, _types...)>;
 
 HUD_END
 

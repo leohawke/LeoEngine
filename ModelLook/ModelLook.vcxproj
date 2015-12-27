@@ -318,12 +318,15 @@
     <ClCompile Include="HUD\WidgetEvent.cpp" />
     <ClCompile Include="UI\Blend.cpp" />
     <ClCompile Include="UI\Blit.cpp" />
+    <ClCompile Include="UI\CharRenderer.cpp" />
     <ClCompile Include="UI\Draw.cpp" />
     <ClCompile Include="UI\Font.cpp" />
     <ClCompile Include="UI\Graphics.cpp" />
     <ClCompile Include="UI\GUI.cpp" />
     <ClCompile Include="UI\Rect.cpp" />
     <ClCompile Include="UI\TextBase.cpp" />
+    <ClCompile Include="UI\TextLayout.cpp" />
+    <ClCompile Include="UI\TextRenderer.cpp" />
     <ClCompile Include="UI\UIImpl.cpp" />
     <ClCompile Include="WinMain.cpp" />
     <ClInclude Include="..\All\RenderSystem\EFormat.hpp" />
@@ -338,6 +341,7 @@
     <ClInclude Include="HUD\HUDRenderSystem.h" />
     <ClInclude Include="UI\Blend.h" />
     <ClInclude Include="UI\Blit.h" />
+    <ClInclude Include="UI\CharRenderer.h" />
     <ClInclude Include="UI\Color.h" />
     <ClInclude Include="UI\Draw.h" />
     <ClInclude Include="UI\Font.hpp" />
@@ -345,6 +349,8 @@
     <ClInclude Include="UI\GUI.h" />
     <ClInclude Include="UI\GUIBase.h" />
     <ClInclude Include="UI\TextBase.h" />
+    <ClInclude Include="UI\TextLayout.h" />
+    <ClInclude Include="UI\TextRenderer.h" />
     <ClInclude Include="UI\UI.h" />
     <ClInclude Include="UI\UIImpl.h" />
   </ItemGroup>
