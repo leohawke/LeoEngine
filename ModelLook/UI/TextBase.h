@@ -4,6 +4,113 @@
 #include "GUI.h"
 #include "Color.h"
 #include "Font.hpp"
+#include <CHRLib\CharacterProcessing.h>
+
+namespace Text
+{
+	using std::string;
+	using std::wstring;
+	using leo::sfmt;
+	using leo::vsfmt;
+
+	using leo::to_string;
+	using leo::to_wstring;
+	using std::to_string;
+	using std::to_wstring;
+
+	using namespace CHRLib;
+	
+	/*!
+	\brief YSLib 基本字符串（使用 UCS-2 ）。
+	*/
+	using ucs2string = std::basic_string<ucs2_t>;
+
+	/*!
+	\brief YSLib 标准字符串（使用 UCS-2 作为内部编码）。
+	\warning 非虚析构。
+	*/
+	class LB_API String : public ucs2string
+	{
+	public:
+		/*!
+		\brief 无参数构造：默认实现。
+		*/
+		DefDeCtor(String)
+			using ucs2string::ucs2string;
+		/*!
+		\brief 构造：使用字符指针表示的 NTCTS 和指定编码。
+		*/
+		template<typename _tChar>
+		String(const _tChar* s, Encoding enc = CS_Default)
+			: ucs2string(MakeUCS2LE<ucs2string>(s, enc))
+		{}
+		/*!
+		\brief 构造：使用字符的初值符列表。
+		*/
+		template<typename _tChar>
+		String(std::initializer_list<_tChar> il)
+			: ucs2string(il.begin(), il.end())
+		{}
+		/*!
+		\brief 构造：使用 YSLib 基本字符串。
+		*/
+		String(const ucs2string& s)
+			: ucs2string(s)
+		{}
+		/*!
+		\brief 构造：使用 YSLib 基本字符串右值引用。
+		\since build 285
+		*/
+		String(ucs2string&& s)
+			: ucs2string(std::move(s))
+		{}
+		/*!
+		\brief 构造：使用指定字符类型的 std::basic_string 和指定编码。
+		\since build 281
+		*/
+		template<typename _tChar>
+		String(const std::basic_string<_tChar>& s, Encoding enc = CS_Default)
+			: String(s.c_str(), enc)
+		{}
+		/*!
+		\brief 复制构造：默认实现。
+		*/
+		DefDeCopyCtor(String)
+			/*!
+			\brief 转移构造：默认实现。
+			*/
+			DefDeMoveCtor(String)
+			DefDeDtor(String)
+
+			/*!
+			\brief 复制赋值：默认实现。
+			*/
+			DefDeCopyAssignment(String)
+			/*!
+			\brief 转移赋值：默认实现。
+			*/
+			DefDeMoveAssignment(String)
+
+			/*!
+			\brief 重复串接。
+			*/
+			String&
+			operator*=(size_t);
+
+		/*!
+		\brief 取指定编码的多字节字符串。
+		*/
+		PDefH(string, GetMBCS, Encoding enc = CS_Default) const
+			ImplRet(MakeMBCS<string>(*this, enc))
+	};
+
+	/*!
+	\relates String
+	*/
+	inline PDefHOp(String, *, const String& str, size_t n)
+		ImplRet(String(str) *= n)
+}
+
 
 LEO_DRAW_BEGIN
 

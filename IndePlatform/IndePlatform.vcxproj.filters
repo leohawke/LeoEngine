@@ -19,6 +19,9 @@
     <Filter Include="Header Files\experimental">
       <UniqueIdentifier>{a4a8dd00-a36f-43da-a293-016760b93956}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\CHRLib">
+      <UniqueIdentifier>{0b2db385-5d58-4588-bce3-17f5bb4e6ca0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\any.cpp">
@@ -53,6 +56,9 @@
     </ClCompile>
     <ClCompile Include="src\cwctype.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\CHRLib\chrmap.cpp">
+      <Filter>Header Files\CHRLib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -216,6 +222,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\cwctype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\CHRLib\Encoding.h">
+      <Filter>Header Files\CHRLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\CHRLib\CharacterMapping.h">
+      <Filter>Header Files\CHRLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\CHRLib\CharacterProcessing.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\cstring.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

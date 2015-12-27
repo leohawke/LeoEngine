@@ -295,6 +295,17 @@
 #	define LB_UNLIKELY(expr) (expr)
 #endif
 
+/*!
+\def YB_NONNULL
+\brief 指定假定保证不为空指针的函数参数。
+\warning 当指定的函数实际为空时行为未定义。
+*/
+#if LB_IMPL_GNUCPP >= 30300
+#	define LB_NONNULL(...) __attribute__ ((__nonnull__ (__VA_ARGS__)))
+#else
+#	define LB_NONNULL(...)
+#endif
+
 //指定无返回值函数
 #if LB_IMPL_GNUCPP >= 40800
 #	define LB_NORETURN [[noreturn]]

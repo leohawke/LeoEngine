@@ -79,6 +79,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Include\CHRLib\chrmap.cpp" />
     <ClCompile Include="src\any.cpp" />
     <ClCompile Include="src\cwctype.cpp" />
     <ClCompile Include="src\DebugOutput.cpp" />
@@ -100,9 +101,13 @@
     <ClInclude Include="Include\bitseg.hpp" />
     <ClInclude Include="Include\cache.hpp" />
     <ClInclude Include="Include\cctype.h" />
+    <ClInclude Include="Include\CHRLib\CharacterMapping.h" />
+    <ClInclude Include="Include\CHRLib\CharacterProcessing.h" />
+    <ClInclude Include="Include\CHRLib\Encoding.h" />
     <ClInclude Include="Include\clock.hpp" />
     <ClInclude Include="Include\ConstexprMath.hpp" />
     <ClInclude Include="Include\container.hpp" />
+    <ClInclude Include="Include\cstring.h" />
     <ClInclude Include="Include\cwctype.h" />
     <ClInclude Include="Include\DebugOutput.hpp" />
     <ClInclude Include="Include\deref_op.hpp" />

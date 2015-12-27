@@ -6,6 +6,20 @@
 
 namespace leo
 {
+	/*!
+	\brief 字节序。
+	\todo 使用单独的头文件。
+	*/
+	enum class byte_order
+	{
+		unknown = 0,
+		neutral = 1,
+		little = 2,
+		big = 3,
+		PDP = 4
+	};
+
+
 	//类型暴漏
 	using stdex::byte;
 
