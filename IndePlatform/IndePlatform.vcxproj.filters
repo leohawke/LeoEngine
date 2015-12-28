@@ -60,6 +60,9 @@
     <ClCompile Include="Include\CHRLib\chrmap.cpp">
       <Filter>Header Files\CHRLib</Filter>
     </ClCompile>
+    <ClCompile Include="Include\CHRLib\CharacterProcessing.cpp">
+      <Filter>Header Files\CHRLib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\Abstract.hpp">

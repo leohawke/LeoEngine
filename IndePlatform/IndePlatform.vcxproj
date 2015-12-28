@@ -79,6 +79,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Include\CHRLib\CharacterProcessing.cpp" />
     <ClCompile Include="Include\CHRLib\chrmap.cpp" />
     <ClCompile Include="src\any.cpp" />
     <ClCompile Include="src\cwctype.cpp" />
