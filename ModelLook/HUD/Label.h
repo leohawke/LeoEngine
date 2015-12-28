@@ -24,7 +24,7 @@ LEO_BEGIN
 
 HUD_BEGIN
 
-using String = std::string;
+using String = Drawing::String;
 
 //文本对齐样式
 enum class TextAlignment
@@ -116,7 +116,7 @@ public:
 	\note 仅当初始边界的大小为 Size::Invalid 时计算新的大小。
 	*/
 	static Rect
-	CalculateBounds(const std::string&, Rect, const Drawing::Font&,const Drawing::Padding& m);
+	CalculateBounds(const String&, Rect, const Drawing::Font&,const Drawing::Padding& m);
 
 
 	/*!
@@ -129,7 +129,7 @@ public:
 
 
 LB_API std::unique_ptr<Label>
-MakeLabel(const std::string&, const Rect& = Rect::Invalid, const Drawing::Font& = {}, const Drawing::Padding& = Drawing::DefaultMargin * 2);
+MakeLabel(const String&, const Rect& = Rect::Invalid, const Drawing::Font& = {}, const Drawing::Padding& = Drawing::DefaultMargin * 2);
 
 HUD_END
 

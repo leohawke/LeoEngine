@@ -114,6 +114,8 @@ namespace Text
 
 LEO_DRAW_BEGIN
 
+using String = Text::String;
+
 /*!
 \brief Ĭ�ϱ߾ࡣ
 */

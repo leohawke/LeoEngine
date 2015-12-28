@@ -7,7 +7,7 @@
 
 LEO_DRAW_BEGIN
 
-using String = std::string;
+
 
 /*!
 \note 使用 ADL <tt>GetEndOfLineOffsetOf</tt> 判断行尾位置。

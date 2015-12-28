@@ -86,7 +86,7 @@ MLabel::DefaultUpdateClippedText(const PaintContext& pc,Drawing::TextState& ts,
 	DrawClippedText(pc.Target, pc.ClipArea, ts, text, auto_wrap_line);
 }
 
-Rect Label::CalculateBounds(const std::string & text, Rect r, const Drawing::Font & fnt,
+Rect Label::CalculateBounds(const String & text, Rect r, const Drawing::Font & fnt,
 	const Drawing::Padding& m)
 {
 	if (r.GetSize() == Size::Invalid)
@@ -102,7 +102,7 @@ void Label::Refresh(PaintEventArgs && e)
 	(*this)(std::move(e));
 }
 
-LB_API std::unique_ptr<Label> MakeLabel(const std::string &text, const Rect & r, const Drawing::Font & fnt,const Drawing::Padding& m)
+LB_API std::unique_ptr<Label> MakeLabel(const String &text, const Rect & r, const Drawing::Font & fnt,const Drawing::Padding& m)
 {
 	auto p(std::make_unique<Label>(Label::CalculateBounds(text, r, fnt,m), fnt));
 
