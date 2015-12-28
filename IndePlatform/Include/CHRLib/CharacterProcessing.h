@@ -4,12 +4,14 @@
 #include "CharacterMapping.h"
 #include <cstdio> // for std::FILE;
 #include <memory> // for std::move;
-#include "../string.hpp" // for leo::string_traits;
+#include "../string.hpp" // for leo::string_traits,leo::enable_for_string_class_t;
 #include <algorithm> // for std::copy_n;
 #include "../cstring.h" // for stdex::ntctslen;
 
 namespace CHRLib
 {
+
+	using leo::enable_for_string_class_t;
 
 	/*!
 	\brief 判断整数类型字符在 ASCII 字符取值范围内。

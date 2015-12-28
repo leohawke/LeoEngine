@@ -14,6 +14,7 @@ namespace CHRLib
 	using leo::ucsint_t;
 	using stdex::byte;
 	using std::size_t;
+	
 
 	namespace CharSet
 	{
