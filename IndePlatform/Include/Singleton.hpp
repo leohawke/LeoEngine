@@ -2,7 +2,7 @@
 #define IndePlatform_Singleton_hpp
 
 #include "memory.hpp"
-#include "utility.hpp"
+#include "base.h"
 #include <functional>
 namespace leo
 {

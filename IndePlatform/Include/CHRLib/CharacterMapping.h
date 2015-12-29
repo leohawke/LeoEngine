@@ -8,6 +8,7 @@
 namespace CHRLib
 {
 	using CharSet::Encoding;
+	
 
 	/*!
 	\brief Ä¬ÈÏ×Ö·û±àÂë¡£

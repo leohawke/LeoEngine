@@ -498,8 +498,11 @@
 */
 #if LB_HAS_NOEXCEPT
 #	define lnoexcept noexcept
+#	define lnoexcept_assert(_msg, ...) \
+	static_assert(noexcept(__VA_ARGS__), _msg)
 #else
 #	define lnoexcept(...)
+#	define lnoexcept_assert(_msg, ...)
 #endif
 
 #if LB_HAS_NOEXCEPT

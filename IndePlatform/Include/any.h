@@ -1,7 +1,8 @@
 #ifndef IndePlatform_any_h
 #define IndePlatform_any_h
 
-#include "utility.hpp"
+#include "base.h"
+#include "type_op.hpp"
 #include "ref.hpp"
 #include <memory> //std::addressof,std::unique_ptr
 #include <typeinfo>//typeid,std::bad_cast

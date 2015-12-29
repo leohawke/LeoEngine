@@ -1,7 +1,8 @@
 #pragma once
 #include "ldef.h"
 #include "leoint.hpp"
-#include "utility.hpp"
+#include <base.h>
+#include <Abstract.hpp>
 
 #include <memory>
 #include <string>

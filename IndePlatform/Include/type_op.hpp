@@ -4,6 +4,9 @@
 #include "ldef.h" // type_traits.std::delval
 
 
+
+
+
 inline namespace cpp2011
 {
 	using std::integral_constant;
@@ -126,6 +129,8 @@ inline namespace cpp2011
 	using std::common_type;
 	using std::underlying_type;
 	using std::result_of;
+
+	
 	//@}
 }
 
@@ -251,7 +256,8 @@ inline namespace cpp2014
 
 	template<typename _type>
 	using result_of_t = typename result_of<_type>::type;
-	//@}
+
+	
 #endif
 	//@}
 
@@ -535,7 +541,6 @@ namespace leo {
 	using second_tag = n_tag<1>;
 }
 
-
 /*!
 \ingroup metafunctions
 \brief Âß¼­²Ù×÷Ôªº¯Êý¡£
@@ -587,4 +592,32 @@ struct or_<_b1, _b2, _b3, _bn...>
 template<typename _b>
 struct not_ : integral_constant<bool, !_b::value>
 {};
+
+inline namespace cpp2014
+{
+	template<typename _type1, typename _type2>
+	struct is_interoperable
+		: or_<is_convertible<_type1, _type2>, is_convertible<_type2, _type1>>
+	{};
+
+	/*!
+	\ingroup type_traits_operations
+	*/
+	//@{
+	template<typename _tFrom, typename _tTo, typename _type = void>
+	using enable_if_convertible_t
+		= enable_if_t<is_convertible<_tFrom, _tTo>::value, _type>;
+
+	template<typename _type1, typename _type2, typename _type = void>
+	using enable_if_interoperable_t
+		= enable_if_t<is_interoperable<_type1, _type2>::value, _type>;
+
+	template<typename _type1, typename _type2, typename _type = void>
+	using enable_if_same_t
+		= enable_if_t<is_same<_type1, _type2>::value, _type>;
+	//@}
+	//@}
+}
+
+
 #endif

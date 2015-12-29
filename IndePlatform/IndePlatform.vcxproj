@@ -81,7 +81,9 @@
   <ItemGroup>
     <ClCompile Include="Include\CHRLib\CharacterProcessing.cpp" />
     <ClCompile Include="Include\CHRLib\chrmap.cpp" />
+    <ClCompile Include="Include\CHRLib\MappingEx.cpp" />
     <ClCompile Include="src\any.cpp" />
+    <ClCompile Include="src\cstdio.cpp" />
     <ClCompile Include="src\cwctype.cpp" />
     <ClCompile Include="src\DebugOutput.cpp" />
     <ClCompile Include="src\exception.cpp" />
@@ -98,16 +100,21 @@
     <ClInclude Include="Include\algorithm.hpp" />
     <ClInclude Include="Include\any.h" />
     <ClInclude Include="Include\any_iterator.hpp" />
+    <ClInclude Include="Include\base.h" />
     <ClInclude Include="Include\BaseMacro.h" />
     <ClInclude Include="Include\bitseg.hpp" />
     <ClInclude Include="Include\cache.hpp" />
     <ClInclude Include="Include\cctype.h" />
     <ClInclude Include="Include\CHRLib\CharacterMapping.h" />
     <ClInclude Include="Include\CHRLib\CharacterProcessing.h" />
+    <ClInclude Include="Include\CHRLib\Convert.hpp" />
     <ClInclude Include="Include\CHRLib\Encoding.h" />
+    <ClInclude Include="Include\CHRLib\MappingEx.h" />
+    <ClInclude Include="Include\CHRLib\StaticMapping.hpp" />
     <ClInclude Include="Include\clock.hpp" />
     <ClInclude Include="Include\ConstexprMath.hpp" />
     <ClInclude Include="Include\container.hpp" />
+    <ClInclude Include="Include\cstdio.h" />
     <ClInclude Include="Include\cstring.h" />
     <ClInclude Include="Include\cwctype.h" />
     <ClInclude Include="Include\DebugOutput.hpp" />

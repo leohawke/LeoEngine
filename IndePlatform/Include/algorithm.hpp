@@ -14,6 +14,51 @@ namespace leo
 	范围(序列容器,内键数组) // ISO C++ Clause 23
 	*/
 
+
+	/*!	\defgroup mutating_algorithms Mutating Sequence Operations
+	\brief 可变序列操作。
+	\see WG21/N3936 25.3[alg.modifying.operations] 。
+	*/
+	//@{
+	/*!
+	\tparam _tIn 输入迭代器类型。
+	\tparam _tOut 输出迭代器类型。
+	\tparam _fPred 谓词类型。
+	\param first 被复制序列的起始输入迭代器。
+	\param result 输出迭代器。
+	\param pred 一元谓词。
+	\pre 迭代器可解引用。
+	*/
+	//@{
+	/*!
+	\brief 变换满足谓词的序列的连续元素。
+	\tparam _fOp 变换操作类型。
+	\param op 一元变换操作。
+	*/
+	template<typename _tIn, typename _tOut, typename _fPred, typename _fOp>
+	_tOut
+		transform_when(_tIn first, _tOut result, _fPred pred, _fOp op)
+	{
+		lunseq((lconstraint(!is_undereferenceable(first)), 0),
+			(lconstraint(!is_undereferenceable(result)), 0));
+
+		for (; pred(*first); lunseq((++first, 0), (++result, 0)))
+			*result = op(*first);
+		return result;
+	}
+
+	//! \brief 复制满足谓词的序列的连续元素。
+	template<typename _tIn, typename _tOut, typename _fPred>
+	_tOut
+		copy_when(_tIn first, _tOut result, _fPred pred)
+	{
+		return transform_when(first, result, pred,
+			[](decltype(*first)& v) lnothrow{
+			return static_cast<decltype(*first)&>(v);
+		});
+	}
+
+
 	/*序列转换
 	  _fop 操作类型
 	  _tOut 输出迭代器类型

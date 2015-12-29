@@ -177,12 +177,12 @@ namespace leo
 			}
 		};
 
-		LB_OP_TEMPLATE_HEADER1(dereferenceable) : _tBase
+		LB_OP_TEMPLATE_HEADER2(dereferenceable) : _tBase
 		{
-			auto
-			operator->() const -> decltype(&*std::declval<const _type&>())
+			lconstfn _type2
+			operator->() const lnoexcept_spec(*std::declval<const _type&>())
 			{
-				return &*static_cast<const _type&>(*this);
+				return std::addressof(*static_cast<const _type&>(*this));
 			}
 		};
 
@@ -329,8 +329,9 @@ namespace leo
 		{};
 
 
-		LB_OP_TEMPLATE_HEADER1(input_iteratable) : equality_comparable1<_type,
-			incrementable<_type, dereferenceable<_type, _tBase>>>
+
+		LB_OP_TEMPLATE_HEADER2(input_iteratable) : equality_comparable1<_type,
+			incrementable<_type, dereferenceable<_type,_type2,_tBase>>>
 		{};
 
 
@@ -338,12 +339,12 @@ namespace leo
 		{};
 
 
-		LB_OP_TEMPLATE_HEADER1(forward_iteratable) : input_iteratable<_type, _tBase>
+		LB_OP_TEMPLATE_HEADER2(forward_iteratable) : input_iteratable<_type,_type2,_tBase>
 		{};
 
 
-		LB_OP_TEMPLATE_HEADER1(bidirectional_iteratable)
-			: forward_iteratable<_type, decrementable<_type, _tBase>>
+		LB_OP_TEMPLATE_HEADER2(bidirectional_iteratable)
+			: forward_iteratable<_type,_type2,decrementable<_type, _tBase>>
 		{};
 
 

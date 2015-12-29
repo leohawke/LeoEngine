@@ -76,6 +76,57 @@ namespace leo
 	{
 		return leo::make_move_iterator_pair(begin(c), end(c));
 	}
+
+	namespace details
+	{
+
+		template<typename _tIter, typename _tTraits,
+			typename _tTag = typename _tTraits::iterator_category>
+		struct iterator_operators;
+
+		template<typename _tIter, typename _tTraits>
+		struct iterator_operators<_tIter, _tTraits, std::input_iterator_tag>
+		{
+			using type = input_iteratable<_tIter, typename _tTraits::reference>;
+		};
+
+		template<typename _tIter, typename _tTraits>
+		struct iterator_operators<_tIter, _tTraits, std::output_iterator_tag>
+		{
+			using type = output_iteratable<_tIter, typename _tTraits::reference>;
+		};
+
+		template<typename _tIter, typename _tTraits>
+		struct iterator_operators<_tIter, _tTraits, std::forward_iterator_tag>
+		{
+			using type = forward_iteratable<_tIter, typename _tTraits::reference>;
+		};
+
+		template<typename _tIter, typename _tTraits>
+		struct iterator_operators<_tIter, _tTraits, std::bidirectional_iterator_tag>
+		{
+			using type = bidirectional_iteratable<_tIter, typename _tTraits::reference>;
+		};
+
+		template<typename _tIter, typename _tTraits>
+		struct iterator_operators<_tIter, _tTraits, std::random_access_iterator_tag>
+		{
+			using type = random_access_iteratable<_tIter,
+				typename _tTraits::difference_type, typename _tTraits::reference>;
+		};
+
+	} // namespace details;
+
+
+	  /*!
+	  \ingroup metafunctions
+	  \brief 按迭代器类别取可实现迭代器的重载操作符集合的实现。
+	  \note 仅使用第二参数的特定成员，可以是兼容 std::iterator 的实例的类型。
+	  \warning 实例作为实现迭代器的基类时不应使用默认参数，因为此时无法访问成员类型。
+	  */
+	template<typename _tIter, typename _tTraits = std::iterator_traits<_tIter>>
+	using iterator_operators_t
+		= typename details::iterator_operators<_tIter, _tTraits>::type;
 }
 
 #endif

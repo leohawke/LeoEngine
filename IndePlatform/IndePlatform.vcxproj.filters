@@ -63,6 +63,12 @@
     <ClCompile Include="Include\CHRLib\CharacterProcessing.cpp">
       <Filter>Header Files\CHRLib</Filter>
     </ClCompile>
+    <ClCompile Include="Include\CHRLib\MappingEx.cpp">
+      <Filter>Header Files\CHRLib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cstdio.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\Abstract.hpp">
@@ -233,11 +239,26 @@
     <ClInclude Include="Include\CHRLib\CharacterMapping.h">
       <Filter>Header Files\CHRLib</Filter>
     </ClInclude>
-    <ClInclude Include="Include\CHRLib\CharacterProcessing.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Include\cstring.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\CHRLib\StaticMapping.hpp">
+      <Filter>Header Files\CHRLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\CHRLib\MappingEx.h">
+      <Filter>Header Files\CHRLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\CHRLib\Convert.hpp">
+      <Filter>Header Files\CHRLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\cstdio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\CHRLib\CharacterProcessing.h">
+      <Filter>Header Files\CHRLib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -8,6 +8,8 @@
 namespace CHRLib
 {
 	using ByteOrder = leo::byte_order;
+	using stdex::octet;
+	using stdex::byte;
 
 	using leo::ucs4_t;
 	using leo::ucs2_t;

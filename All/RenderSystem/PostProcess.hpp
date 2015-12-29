@@ -18,7 +18,7 @@
 #include <leo2DMath.hpp> //ops::Rect
 #include <Core\COM.hpp>  //win::unique_com
 #include <Core\Vertex.hpp> //Cord::NDCtoUV
-#include <utility.hpp>
+#include <base.h>
 /*!	\defgroupRenderSystem Library
 \brief ‰÷»æœµÕ≥ø‚°£
 \since build 1.00

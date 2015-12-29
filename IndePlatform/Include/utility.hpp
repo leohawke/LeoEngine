@@ -47,45 +47,7 @@ namespace leo
 		{}
 	};
 
-	class noncopyable
-	{
-	protected:
-		noncopyable() = default;
-		~noncopyable() = default;
-
-	public:
-		noncopyable(const noncopyable&) = delete;
-
-		noncopyable&
-			operator=(const noncopyable&) = delete;
-	};
-
-	class nonmovable
-	{
-	protected:
-		nonmovable() = default;
-		~nonmovable() = default;
-
-	public:
-		nonmovable(const nonmovable&) = delete;
-
-		nonmovable&
-			operator=(const nonmovable&) = delete;
-	};
-
-
-	class LB_API cloneable
-	{
-	public:
-		virtual cloneable*
-			clone() const = 0;
-
-		virtual
-			~cloneable()
-		{}
-	};
-
-
+	
 	/*!
 	\brief 使用 new 复制指定指针指向的对象。
 	*/

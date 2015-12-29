@@ -5,6 +5,7 @@
 #include <BaseMacro.h>
 #include <leoint.hpp>
 #include <LAssert.h>
+#include <base.h>
 #include <utility.hpp>
 #include <functional.hpp>
 #include <leoint.hpp>
