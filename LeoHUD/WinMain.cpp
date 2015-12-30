@@ -198,7 +198,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pHUDHostRender = std::make_shared<leo::HUD::HostRenderer>(*pPanel);
 	pPanel->SetRenderer(pHUDHostRender);
 
-	pLabel = leo::HUD::MakeLabel("编码测试", leo::Drawing::Rect({ 20,20 }, {400,100}));
+	pLabel = leo::HUD::MakeLabel(u8"编码测试", leo::Drawing::Rect({ 20,20 }, {400,100}));
 
 	char16_t * test = u"LYP-RICASE-CHU-FRANKHB";
 
