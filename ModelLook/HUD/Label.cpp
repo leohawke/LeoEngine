@@ -73,6 +73,7 @@ void MLabel::DrawText(const Size & s, const PaintContext & pc) const
 	const auto r((Rect(pc.Location, s) + Margin));
 	Drawing::TextState ts(Font, Drawing::FetchMargin(r, pc.Target.GetSize()));
 	ts.Color = ForeColor;
+	ts.ResetPen(pc.Location, Margin);
 	ts.Pen += GetAlignedPenOffset(s);
 
 	UpdateClippedText({ pc.Target, pc.Location, pc.ClipArea & r }, ts, Text,
