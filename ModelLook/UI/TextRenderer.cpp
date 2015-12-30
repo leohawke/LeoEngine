@@ -36,7 +36,6 @@ namespace
 		return abs_pitch;
 	}
 
-	//! \since build 368
 	template<typename _tCharRenderer, _tCharRenderer& _fCharRenderer,
 		typename... _tParams>
 		void
@@ -60,7 +59,7 @@ namespace
 					if (!pc.ClipArea.IsUnStrictlyEmpty())
 						_fCharRenderer(std::move(pc), ts.Color, cbmp.GetPitch() < 0,
 							cbuf, cbmp.GetFormat(), { FetchBMPSrcWidth(cbmp),
-							cbmp.GetHeight() }, yforward(args)...);
+							cbmp.GetHeight() }, lforward(args)...);
 				}
 			ts.Pen.X += cbmp.GetXAdvance();
 		}
