@@ -106,7 +106,7 @@ LB_API std::unique_ptr<Label> MakeLabel(const String &text, const Rect & r, cons
 {
 	auto p(std::make_unique<Label>(Label::CalculateBounds(text, r, fnt,m), fnt));
 
-	lunseq(p->Text = text);
+	lunseq(p->Margin = m, p->Text = text);
 	return p;
 }
 

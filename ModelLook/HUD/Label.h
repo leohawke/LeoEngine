@@ -100,6 +100,7 @@ class LB_API Label : public Widget, protected MLabel
 {
 public:
 	using MLabel::Font;
+	using MLabel::Margin;
 	using MLabel::HorizontalAlignment;
 	using MLabel::VerticalAlignment;
 	using MLabel::Text;
