@@ -350,7 +350,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pHUDHostRender = std::make_shared<leo::HUD::HostRenderer>(*pPanel);
 	pPanel->SetRenderer(pHUDHostRender);
 
-	pLabel = leo::HUD::MakeLabel("xiaxian baka");
+	pLabel = leo::HUD::MakeLabel("FPS 0000");
 	pLabel->SetVisible(true);
 	*pPanel += *pLabel;
 }
@@ -409,6 +409,24 @@ void Update() {
 	}
 }
 
+
+void CalcFps(float dt)
+{
+	static float eT = 0;
+	static unsigned eC = 0;
+	eT += dt;
+	++eC;
+
+	if (eT > 2.f)
+	{
+		auto FPS = static_cast<unsigned>(eC / eT);
+		pLabel->Text = leo::sfmt("FPS %u", FPS);
+
+		eT = 0.f;
+		eC = 0;
+	}
+}
+
 void Render()
 {
 	event.Wait();
@@ -418,6 +436,8 @@ void Render()
 		auto mRunTime = leo::clock::duration_to<>(leo::clock::now() - mBegin);
 		mBegin = leo::clock::now();
 		float dt = mRunTime;
+		CalcFps(dt);
+
 		leo::DeviceMgr dm;
 
 		pCamera->UpdateViewMatrix();
@@ -459,7 +479,7 @@ void Render()
 			pSky->Render(devicecontext, *pCamera);
 		}
 		
-		//pHUDHostRender->Render({static_cast<leo::uint16>(lastVp.Width),static_cast<leo::uint16>(lastVp.Height)});
+		pHUDHostRender->Render({static_cast<leo::uint16>(lastVp.Width),static_cast<leo::uint16>(lastVp.Height)});
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 

@@ -80,8 +80,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)LeoScheme\Sexp;$(SolutionDir)All\;$(SolutionDir)Indeplatform\include;$(SolutionDir)DirectXTex;$(SolutionDir)ModelLook\;$(IncludePath)</IncludePath>
+    <IncludePath>E:\SDKs\freetype-2.5.3\include;$(SolutionDir)LeoScheme\Sexp;$(SolutionDir)All\;$(SolutionDir)Indeplatform\include;$(SolutionDir)DirectXTex;$(SolutionDir)ModelLook\;$(IncludePath)</IncludePath>
     <ReferencePath>$(SolutionDir)LeoScheme\;$(SolutionDir)DirectXTex;$(ReferencePath)</ReferencePath>
+    <LibraryPath>E:\SDKs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -143,12 +144,15 @@
       <SDLCheck>true</SDLCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <OpenMPSupport>false</OpenMPSupport>
+      <DisableSpecificWarnings>4800</DisableSpecificWarnings>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>freetype-2.5.3/lib/x86/freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

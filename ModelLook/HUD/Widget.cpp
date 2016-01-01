@@ -110,7 +110,7 @@ Widget::InitializeEvents()
 HBrush
 Widget::MakeAlphaBrush()
 {
-	return SolidBlendBrush(Drawing::ColorSpace::Trans);
+	return NullBrush(Drawing::ColorSpace::Trans);
 }
 
 

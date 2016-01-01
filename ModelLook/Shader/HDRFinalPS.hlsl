@@ -60,11 +60,15 @@ float4 HDRFinal
 	in float2 Tex : TEXCOORD
 	) : SV_TARGET
 {
+	float adapted_lum = ReadAFloat(lum_tex.Sample(point_sampler, 0.5f.xx),16);
+
+	float lum = max(0.001f, adapted_lum);
+	
 	//note FXAA use the lum result in w channel;
 	float3 ldr_rgb = saturate(
 		ToneMapping(
 			src_tex.Sample(linear_sampler,Tex).rgb, 
 			bloom_tex.Sample(linear_sampler,Tex).rgb,
-			ReadAFloat(lum_tex.Sample(point_sampler, 0.5f.xx),16)));
+			lum));
 	return float4(ldr_rgb, dot(ldr_rgb, RGB_TO_LUM));
 }

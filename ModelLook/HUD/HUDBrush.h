@@ -9,6 +9,17 @@ LEO_BEGIN
 
 HUD_BEGIN
 
+class LB_API NullBrush
+{
+public:
+	NullBrush(Drawing::Color)
+	{}
+
+	void
+		operator()(const PaintContext&) const;
+};
+
+
 class LB_API SolidBrush
 {
 public:
