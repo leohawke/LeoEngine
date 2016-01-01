@@ -174,9 +174,6 @@ public:
 		}
 
 		//״̬clear
-		context->OMSetBlendState(nullptr, nullptr, 0xffffffff);
-
-
 		ib_offset = 0;
 		vb_offset = 0;
 		commands.clear();

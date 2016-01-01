@@ -449,6 +449,8 @@ void Render()
 
 		static const float rgba[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 		devicecontext->ClearRenderTargetView(leo::global::globalD3DRenderTargetView, rgba);
+		devicecontext->OMSetBlendState(nullptr, nullptr, 0xffffffff);
+
 
 		D3D11_VIEWPORT lastVp;
 		UINT numVP = 1;

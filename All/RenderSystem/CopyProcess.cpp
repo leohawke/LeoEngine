@@ -67,7 +67,6 @@ public:
 
 	void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) override {
 		PointCopy::Draw(context, src, dst);
-		context->OMSetBlendState(nullptr, nullptr, 0XFFFFFFFF);
 	}
 private:
 	ID3D11BlendState*  blend_add;

@@ -69,6 +69,7 @@ void leo::HDRProcess::HDRCommon::Input(UINT width, UINT height)
 void leo::HDRProcess::HDRCommon::Apply(ID3D11DeviceContext * context)
 {
 	PostProcess::Apply(context);
+	context->OMSetBlendState(nullptr, nullptr, 0XFFFFFFFF);
 	context->VSSetShader(mLumVS, nullptr, 0);
 	context->VSSetConstantBuffers(0, 1, &mGpuParams);
 	ID3D11SamplerState* sss[] = { src_sampler,last_lum_sampler };
