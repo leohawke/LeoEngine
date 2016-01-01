@@ -19,6 +19,7 @@
 #include <Core\RenderSync.hpp>
 #include <Core\EffectQuad.hpp>
 #include <Core\Light.hpp>
+#include <Core\Skeleton.hpp>
 #include <Core\Sky.hpp>
 #include <Input.h>//to core!
 
@@ -43,6 +44,8 @@
 
 leo::Event event;
 std::vector<std::unique_ptr<leo::Mesh>> Models = {};
+std::shared_ptr<leo::SkeletonData> pSkeletonData;
+std::unique_ptr<leo::SkeletonInstance> pSkeletonModel;
 std::unique_ptr<leo::UVNCamera> pCamera = nullptr;
 std::unique_ptr<leo::CastShadowCamera> pShaderCamera;
 std::unique_ptr<leo::DeferredRender> pRender = nullptr;
@@ -339,6 +342,8 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 
 	pSky = std::make_unique<leo::Sky>(device, L"Resource\\snowcube1024.dds");
 	//pTerrain = std::make_unique<leo::Terrain<>>(device, L"Resource\\Test.Terrain");
+	pSkeletonData = leo::SkeletonData::Load(L"Resource\\soldier.l3d");
+	pSkeletonModel = std::make_unique<leo::SkeletonInstance>(pSkeletonData);
 	BuildLight(leo::DeviceMgr().GetDevice());
 
 	pPanel = std::make_unique<leo::HUD::Panel>(leo::HUD::Size(size.first,size.second));
@@ -360,6 +365,8 @@ void ClearRes() {
 
 	pHUDHostRender.reset();
 	pPanel.reset();
+	pSkeletonModel.reset();
+	pSkeletonData.reset();
 
 	ClearLight();
 }
@@ -452,7 +459,7 @@ void Render()
 			pSky->Render(devicecontext, *pCamera);
 		}
 		
-		pHUDHostRender->Render();
+		//pHUDHostRender->Render({static_cast<leo::uint16>(lastVp.Width),static_cast<leo::uint16>(lastVp.Height)});
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 
