@@ -42,7 +42,7 @@ public:
 		SetSize(const Size&) override;
 
 	void
-		Render();
+		Render(std::pair<uint16,uint16>);
 private:
 	void
 		InitWidgetView();

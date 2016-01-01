@@ -392,7 +392,7 @@ namespace leo
 		/*!
 		\brief 清除指定位置的 n 个连续像素。
 		\tparam _tOut 输出迭代器类型。
-		\sa YSLib::ClearSequence
+		\sa ClearSequence
 		*/
 		template<typename _tOut>
 		inline _tOut
@@ -402,6 +402,15 @@ namespace leo
 			return dst;
 		}
 
+		/*!
+		\brief 使用 n 个指定像素连续填充指定位置。
+		*/
+		template<typename _tPixel, typename _tOut>
+		inline void
+			FillPixel(_tOut dst_iter, size_t n, _tPixel c)
+		{
+			CopyLine<true>()(dst_iter, pseudo_iterator<_tPixel>(c), SDst(n));
+		}
 
 		/*!
 		\brief 使用指定像素填充指定的标准矩形区域。
@@ -413,6 +422,19 @@ namespace leo
 			Drawing::BlitRectLines(CopyLine<true>(), dst,
 				pseudo_iterator<_tPixel>(c), lforward(args)...);
 		}
+
+
+		/*!
+		\brief 清除图形接口上下文缓冲区。
+		*/
+		LB_API void
+			ClearImage(const Graphics&);
+
+		/*!
+		\brief 使用指定颜色填充图形接口上下文缓冲区。
+		*/
+		LB_API void
+			Fill(const Graphics&, Color);
 	}
 }
 

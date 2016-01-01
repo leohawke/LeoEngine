@@ -34,9 +34,11 @@ public:
 
 	void Resize(const size_type& size);
 
+	void RePos(const size_type& pos);
+
 	void Update(float t);
 
-	void Render();
+	void Render(size_type);
 
 	bool IsMined();
 

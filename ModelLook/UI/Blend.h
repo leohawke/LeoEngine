@@ -189,6 +189,28 @@ namespace leo
 				}
 			};
 
+			/*!
+			\ingroup PixelShaders
+			\brief ÏñËØ¼ÆËã£ºAlpha »ìºÏ¡£
+			*/
+			struct BlitBlendPoint
+			{
+			private:
+				template<typename _type>
+				using ABitTrait = typename decay_t<_type>::Trait;
+			public:
+				template<typename _tOut, typename _tIn>
+				inline void
+					operator()(_tOut dst_iter, _tIn src_iter)
+				{
+					static_assert(std::is_convertible<remove_reference_t<
+						decltype(*dst_iter)>, Pixel< >> (), "Wrong type found.");
+
+					*dst_iter = Shaders::BlendAlpha<ABitTrait<decltype(*dst_iter)>::ABitsN,
+						8>(*dst_iter, *src_iter, AlphaType(FetchAlpha(*src_iter)));
+				}
+			};
+
 		} // namespace Shaders;
 
 
@@ -201,8 +223,8 @@ namespace leo
 		{
 			using bl_it = pseudo_iterator<const Pixel<>>;
 
-			Drawing::BlitRectPixels(Shaders::BlitAlphaPoint(), dst,
-				pair_iterator<bl_it, ConstBitmapPtr>(bl_it(c), dst), lforward(args)...);
+			Drawing::BlitRectPixels(Shaders::BlitBlendPoint(), dst,
+				bl_it(c), lforward(args)...);
 		}
 
 		void

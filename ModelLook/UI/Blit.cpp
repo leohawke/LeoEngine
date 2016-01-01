@@ -24,6 +24,18 @@ namespace leo
 
 		} // unnamed namespace;
 
+
+		void
+			ClearImage(const Graphics& g)
+		{
+			ClearPixel(g.GetBufferPtr(), size_t(GetAreaOf(g.GetSize())));
+		}
+
+		void
+			Fill(const Graphics& g, Color c)
+		{
+			FillPixel<Pixel<>>(g.GetBufferPtr(), size_t(GetAreaOf(g.GetSize())), c);
+		}
 	}
 }
 

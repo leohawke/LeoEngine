@@ -31,6 +31,10 @@ public:
 		: Color(c)
 	{}
 
+	SolidBlendBrush(Drawing::ColorSpace::ColorSet c,Drawing::AlphaType a)
+		: Color(c,a)
+	{}
+
 	void
 		operator()(const PaintContext&) const;
 };

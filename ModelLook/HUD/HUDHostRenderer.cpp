@@ -1,6 +1,7 @@
 
 #include "HUDHostRenderer.h"
 #include "Widget.h"
+#include "../UI/Blit.h"
 
 LEO_BEGIN
 HUD_BEGIN
@@ -15,7 +16,7 @@ void HostRenderer::SetSize(const Size & s)
 	window->Resize({ static_cast<uint16>(s.GetWidth()),static_cast<uint16>(s.GetHeight())});
 }
 
-void HostRenderer::Render()
+void HostRenderer::Render(std::pair<uint16, uint16> hostsize)
 {
 	if(!window->IsMined())
 	{
@@ -31,17 +32,21 @@ void HostRenderer::Render()
 			const auto g(GetContext());
 			const auto r(GetInvalidatedArea());
 
+			Drawing::ClearImage(*g);
 			b = bool(Validate(wgt, wgt, { *g,{},r }));
 		}
 		if(b)
-			window->Render();
+			window->Render(hostsize);
 	}
 }
 
 void HostRenderer::InitWidgetView()
 {
 	//Converte widget to a WidgetCCV
-	//donothing
+	
+	auto& pos(widget.get().GetLocationOf());
+
+	window->RePos({static_cast<uint16>(pos.GetX()),static_cast<uint16>(pos.GetY())});
 }
 
 HUD_END

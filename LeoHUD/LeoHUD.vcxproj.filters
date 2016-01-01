@@ -180,9 +180,6 @@
     <ClCompile Include="WinMain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="FreeTypeTest.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="..\ModelLook\UI\Rect.cpp">
       <Filter>依赖源文件\UI</Filter>
     </ClCompile>
@@ -219,15 +216,6 @@
     <ClCompile Include="..\ModelLook\UI\TextRenderer.cpp">
       <Filter>依赖源文件\UI</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="FontGenPS.hlsl" />
-    <FxCompile Include="..\ModelLook\Shader\UIPS.hlsl">
-      <Filter>源文件</Filter>
-    </FxCompile>
-    <FxCompile Include="..\ModelLook\Shader\UIVS.hlsl">
-      <Filter>源文件</Filter>
-    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FreeTypeTest.h">

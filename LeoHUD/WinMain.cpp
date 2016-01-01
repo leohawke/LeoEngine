@@ -193,8 +193,10 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 
 	pRender = std::make_unique<leo::DeferredRender>(device, size);
 
-	pPanel = std::make_unique<leo::HUD::Panel>(leo::HUD::Size(size.first, size.second));
-	pPanel->Background = leo::HUD::SolidBrush(leo::Drawing::ColorSpace::Yellow);
+	using namespace leo::Drawing::ColorSpace;
+
+	pPanel = std::make_unique<leo::HUD::Panel>(leo::HUD::Size(size.first/10, size.second/10));
+	pPanel->Background = leo::HUD::SolidBlendBrush(Yellow,0x1F);
 	pHUDHostRender = std::make_shared<leo::HUD::HostRenderer>(*pPanel);
 	pPanel->SetRenderer(pHUDHostRender);
 
@@ -273,8 +275,8 @@ void Render()
 
 		//forward render
 		devicecontext->OMSetRenderTargets(1, &leo::global::globalD3DRenderTargetView, *leo::global::globalDepthStencil);
-	
-		pHUDHostRender->Render();
+
+		pHUDHostRender->Render({ 800, 600 });
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 

@@ -199,6 +199,14 @@ public:
 
 	{}
 	/*!
+	\brief 构造：使用默认颜色,指定Alpha值。
+	*/
+	lconstfn
+		Color(ColorSet cs, AlphaType a_) lnothrow
+		:r((cs & 0xFF00) >> 8), g((cs & 0xFF0000) >> 16),
+		b((cs & 0xFF000000) >> 24),a(a_)
+	{}
+	/*!
 	\brief 构造：使用 RGB 值和 alpha 位。
 	*/
 	lconstfn
