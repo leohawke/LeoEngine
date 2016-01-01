@@ -354,7 +354,7 @@ FontCache::FontCache(size_t /*cache_size*/)
 	::FT_Error error;
 
 	if (LB_LIKELY((error = ::FT_Init_FreeType(&library)) == 0))
-		LTraceDe(Informative, "FreeType library instance initialized.\n");
+		LTraceDe(record_level::Informative, "FreeType library instance initialized.\n");
 	else
 	{
 		// TODO: Format without allocating memory.
@@ -437,14 +437,14 @@ FontCache::LoadTypefaces(const FontPath& path)
 		const auto face_num(face->num_faces);
 
 		::FT_Done_Face(face);
-		LTraceDe(Informative, "Loaded faces num '%ld' from path '%s'.\n",
+		LTraceDe(record_level::Informative, "Loaded faces num '%ld' from path '%s'.\n",
 			face_num, path.c_str());
 		if (face_num < 0)
 			return 0;
 		for (long i(0); i < face_num; ++i)
 			// XXX: Conversion to 'long' might be implementation-defined.
 			TryExpr(*this += *(new Typeface(*this, path, std::uint32_t(i))))
-			CatchExpr(..., LTraceDe(Warning, "Failed loading face of path"
+			CatchExpr(..., LTraceDe(record_level::Warning, "Failed loading face of path"
 				" '%s', index '%ld'.", path.c_str(), i))
 			return size_t(face_num);
 	}

@@ -63,7 +63,7 @@ namespace leo {
 #if defined(DEBUG)
 #define DebugPrintf leo::details::debug_helper::global_debug
 #else
-#define DebugPrintf(...) {}
+#define DebugPrintf(...)
 #endif
 #endif
 
@@ -77,7 +77,11 @@ namespace leo {
 #endif
 
 #ifndef LTraceDe
+#if defined(DEBUG)
 #define LTraceDe(level,...) DebugPrintf(__VA_ARGS__)
+#else
+#define LTraceDe(level,...) level
+#endif
 #endif
 
 #endif

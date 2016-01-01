@@ -212,7 +212,22 @@ namespace leo
 			void startprofile(const std::wstring& name);
 			void endprofile(const std::wstring& name);
 
-			void endframe();//SpriteRenderer,SpriteFont
+			template<typename F,limpl(typename = enable_if_t<is_function<F>::value,void>)>
+			void endframe(F&& f) {
+				currframe = (currframe + 1) % querylatency;
+
+				for (auto iter = profiles.begin(); iter != profiles.end(); ++iter)
+				{
+					auto & profile = (*iter).second;
+
+					float time = profile.time(currframe, context);
+
+					if (time == 0.f)
+						continue;
+
+					std::invoke(f,currframe, iter->first, time);
+				}
+			}
 		protected:
 			static const std::uint64_t querylatency = d3d11_timer::querylatency;
 

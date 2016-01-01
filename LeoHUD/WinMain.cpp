@@ -198,9 +198,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pHUDHostRender = std::make_shared<leo::HUD::HostRenderer>(*pPanel);
 	pPanel->SetRenderer(pHUDHostRender);
 
-	pLabel = leo::HUD::MakeLabel(u8"编码测试");
-
-	char16_t * test = u"LYP-RICASE-CHU-FRANKHB";
+	pLabel = leo::HUD::MakeLabel(u8"FPS 0000");
 
 	pLabel->SetVisible(true);
 	*pPanel += *pLabel;
@@ -281,6 +279,10 @@ void Render()
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 
 		leo::RenderSync::GetInstance()->Present();
+
+		mRunTime = leo::clock::duration_to<>(leo::clock::now() - mBegin);
+		auto FPS = static_cast<unsigned>(1.f / mRunTime);
+		pLabel->Text = leo::sfmt(u8"FPS %u", FPS);
 	}
 }
 

@@ -675,25 +675,7 @@ namespace leo
 			auto & profile = profiles[name];
 			profile.end(currframe, context);
 		}
-		
-		void profiler::endframe()//SpriteRenderer& spriteRenderer, SpriteFont& spriteFont
-		{
-			currframe = (currframe + 1) % querylatency;
-
-			//Todo : query "query time"
-
-			for (auto iter = profiles.begin(); iter != profiles.end(); ++iter)
-			{
-				auto & profile = (*iter).second;
-				
-				float time = profile.time(currframe, context);
-
-				if (time == 0.f)
-					continue;
-				RecordPrintf(L"currframe: %u ",currframe);
-				RecordPrintf(L"%s: %f\n", iter->first.c_str(), time);
-			}
-		}
+	
 
 		profileblock::profileblock(const std::wstring& name)
 			:name(name)
