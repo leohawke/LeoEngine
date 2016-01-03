@@ -43,7 +43,8 @@ namespace leo{
 
 		mLocalPoses = leo::make_unique<SkeletonData::JointPose[]>(mSkeData->mSkeleton.mJointCount);
 		mGlobalPoses = leo::make_unique<float4x4Object[]>(mSkeData->mSkeleton.mJointCount);
-		ReCurrAniBindPose();
+
+		SwitchAnimation(L"TPos");
 	}
 	SkeletonInstance::~SkeletonInstance(){
 	}
@@ -66,6 +67,15 @@ namespace leo{
 
 	
 	bool SkeletonInstance::SwitchAnimation(const wchar_t* aniName){
+		if (wcscmp(aniName,L"TPose") == 0)
+		{
+			mPlayAni = false;
+			for (auto jointIndex = 0u; jointIndex != mSkeData->mSkeleton.mJointCount; ++jointIndex) {
+				save(mSkinMatrixs[jointIndex], I());
+			}
+		}
+
+
 		auto Index = hash(aniName);
 		if (std::find(mSkeData->mAnimaNames.begin(), mSkeData->mAnimaNames.end(), Index) == mSkeData->mAnimaNames.end())
 			return false;

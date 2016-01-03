@@ -21,6 +21,9 @@
 
 class LinearizeDepthImpl;
 
+#ifdef DEBUG
+#include "RenderSystem/DebugProcess.hpp"
+#endif
 class leo::DeferredRender::DeferredResImpl {
 public:
 	/*
@@ -53,16 +56,26 @@ public:
 
 	win::unique_com<ID3D11Texture2D> mShadingTex = nullptr;
 
-	//TODO:格式检查支持,替换格式
-	DeferredResImpl(ID3D11Device* device, std::pair<uint16, uint16> size) {
+#ifdef DEBUG
+	win::unique_com<ID3D11Texture2D> mDebugCopy = nullptr;
+	win::unique_com<ID3D11ShaderResourceView> mDebugCopySRV = nullptr;
 
+	std::unique_ptr<leo::NormalDebug> mNormalDebugProcess;
+#endif
+
+	//TODO:格式检查支持,替换格式
+	DeferredResImpl(ID3D11Device* device, std::pair<uint16, uint16> size)
+#ifdef DEBUG
+	:mNormalDebugProcess(std::make_unique<leo::NormalDebug>(device))
+#endif
+	{
 		CreateRes(device, size);
 	}
 
 	~DeferredResImpl() = default;
 private:
 	void CreateRes(ID3D11Device* device, std::pair<uint16, uint16> size) {
-		CD3D11_TEXTURE2D_DESC gbuffTexDesc{ DXGI_FORMAT_R8G8B8A8_UNORM,size.first,size.second };
+		CD3D11_TEXTURE2D_DESC gbuffTexDesc{ DXGI_FORMAT_R8G8B8A8_UNORM,size.first,size.second,1,1};
 		gbuffTexDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 		//mNormalSpecPowSRV
 		{
@@ -111,6 +124,9 @@ private:
 			device->CreateTexture2D(&shadingTexDesc, nullptr, &mShadingTex);
 			device->CreateShaderResourceView(mShadingTex, nullptr, &mShadingSRV);
 			device->CreateRenderTargetView(mShadingTex, nullptr, &mShadingRTV);
+		}
+		{
+
 		}
 	}
 };
@@ -370,6 +386,60 @@ void leo::DeferredRender::PostProcess(ID3D11DeviceContext * context, ID3D11Rende
 	context->RSSetViewports(1, &pStateImpl->mViewPort);
 	pHDRProcess->Draw(context,pResImpl->mShadingSRV,rtv);
 }
+
+
+
+#ifdef DEBUG
+#include "CopyProcess.hpp"
+void leo::DeferredRender::DebugProcess(ID3D11DeviceContext* context, ID3D11RenderTargetView * rtv, ID3D11Texture2D* rtv_tex)
+{
+	D3D11_VIEWPORT lastVp;
+	UINT numVP = 1;
+	context->RSGetViewports(&numVP, &lastVp);
+
+	//总是输出最终效果于左上角
+	{
+		static auto pCopyProcess = Make_CopyProcess(nullptr, bilinear_process);
+		if (!pResImpl->mDebugCopy) {
+			D3D11_TEXTURE2D_DESC rt_desc;
+			rtv_tex->GetDesc(&rt_desc);
+			rt_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+			rt_desc.Usage = D3D11_USAGE_DEFAULT;
+
+			ID3D11Device* device = nullptr;
+			context->GetDevice(&device);
+
+			dxcall(device->CreateTexture2D(&rt_desc, nullptr, &pResImpl->mDebugCopy));
+			dxcall(device->CreateShaderResourceView(pResImpl->mDebugCopy, nullptr, &pResImpl->mDebugCopySRV));
+
+			device->Release();
+		}
+		context->CopyResource(pResImpl->mDebugCopy, rtv_tex);
+
+
+		auto left_top_vp = pStateImpl->mViewPort;
+		left_top_vp.Width /= 2;
+		left_top_vp.Height /= 2;
+		context->RSSetViewports(1, &left_top_vp);
+		context->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
+		pCopyProcess->Apply(context);
+		pCopyProcess->Draw(context, pResImpl->mDebugCopySRV, rtv);
+	}
+	//输出法线在右上角
+	{
+		auto right_top_vp = pStateImpl->mViewPort;
+		right_top_vp.Width /= 2;
+		right_top_vp.Height /= 2;
+		right_top_vp.TopLeftX += right_top_vp.Width;
+		context->RSSetViewports(1, &right_top_vp);
+		context->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
+		pResImpl->mNormalDebugProcess->Apply(context);
+		pResImpl->mNormalDebugProcess->Draw(context, pResImpl->mNormalSpecPowSRV, rtv);
+		std::invoke(dx::SetShaderResourceView<D3D11_PIXEL_SHADER>(context), 0,(ID3D11ShaderResourceView*)nullptr);
+	}
+	context->RSSetViewports(1, &lastVp);
+}
+#endif
 
 void leo::DeferredRender::SetSSAOParams(bool enable, uint8 level) noexcept
 {

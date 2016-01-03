@@ -60,6 +60,10 @@ namespace leo {
 
 		void PostProcess(ID3D11DeviceContext* context, ID3D11RenderTargetView* rtv, float dt);
 
+#ifdef DEBUG
+		void DebugProcess(ID3D11DeviceContext* context, ID3D11RenderTargetView * rtv, ID3D11Texture2D* rtv_tex);
+#endif
+
 		void SetSSAOParams(bool enable, uint8 level) noexcept;
 
 		void LightPass(ID3D11DeviceContext* context,DepthStencil& depth_stencil, const Camera& camera) noexcept;

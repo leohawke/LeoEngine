@@ -191,10 +191,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 			pCamera->Roll(+1.f);
 			break;
 		case ID_YAW_FRONT:
-			pCamera->Yaw(-1.f);
+			pCamera->Yaw(-1.f*leo::LM_RPD);
 			break;
 		case ID_YAW_BACK:
-			pCamera->Yaw(+1.f);
+			pCamera->Yaw(+1.f*leo::LM_RPD);
 			break;
 		case ID_PITCH_UP:
 			pCamera->Pitch(-1.f);
@@ -288,8 +288,8 @@ void BuildLight(ID3D11Device* device) {
 	pRender->AddLight(mSpotLight);
 
 	auto mDirLight = std::make_shared<leo::DirectionalLightSource>();
-	mDirLight->Directional(leo::float3(0.f, -1.f, 0.f));
-	mDirLight->Diffuse(leo::float3(2.4f, 2.1f, 1.8f));
+	mDirLight->Directional(leo::float3(0.f,0.f, 1.f));
+	mDirLight->Diffuse(leo::float3(0.8f, 0.7f, 0.6f));
 	pRender->AddLight(mDirLight);
 }
 
@@ -352,9 +352,9 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pSkeletonModel = std::make_unique<leo::SkeletonInstance>(pSkeletonData);
 	pSkeletonModel->Translation(leo::float3(0.f,-6.f,12.f));
 	pSkeletonModel->Scale(0.2f);
+	pSkeletonModel->Rotation(leo::float3(0.f, 1.f, 0.f), leo::LM_PI);
 
-	auto animation_names = pSkeletonModel->GetAniNames();
-	pSkeletonModel->SwitchAnimation(animation_names[0]);
+	pSkeletonModel->SwitchAnimation(pSkeletonModel->GetAniNames()[0]);
 	pSkeletonModel->BeginCurrentAni();
 
 	auto pModelMesh = std::make_unique<leo::Mesh>();
@@ -491,15 +491,21 @@ void Render()
 				pRender->PostProcess(devicecontext, leo::global::globalD3DRenderTargetView, dt);
 			}
 		}
-		devicecontext->RSSetViewports(1, &lastVp);
-
+		
 		//forward render
 		devicecontext->OMSetRenderTargets(1, &leo::global::globalD3DRenderTargetView, *leo::global::globalDepthStencil);
 		if (pSky) {
 			pSky->Render(devicecontext, *pCamera);
 		}
-		
+	
+		devicecontext->RSSetViewports(1, &lastVp);
 		pHUDHostRender->Render({static_cast<leo::uint16>(lastVp.Width),static_cast<leo::uint16>(lastVp.Height)});
+
+
+#ifdef DEBUG
+		if (pRender)
+			pRender->DebugProcess(devicecontext, leo::global::globalD3DRenderTargetView,leo::global::globalD3DRenderTargetTexture2D);
+#endif
 
 		leo::DeviceMgr().GetSwapChain()->Present(0, 0);
 

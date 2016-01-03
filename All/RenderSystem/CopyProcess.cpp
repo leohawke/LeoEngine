@@ -15,7 +15,7 @@ public:
 
 	virtual void Apply(ID3D11DeviceContext* context) override {
 		PostProcess::Apply(context);
-		context->PSGetSamplers(0, 1, &point_sampler);
+		context->PSSetSamplers(0, 1, &point_sampler);
 	}
 
 private:
@@ -96,7 +96,6 @@ public:
 
 	void Draw(ID3D11DeviceContext* context, ID3D11ShaderResourceView* src, ID3D11RenderTargetView* dst) override {
 		BilinearCopy::Draw(context, src, dst);
-		context->OMSetBlendState(nullptr, nullptr, 0XFFFFFFFF);
 	}
 private:
 	ID3D11BlendState*  blend_add;
@@ -107,18 +106,33 @@ std::shared_ptr<leo::PostProcess> leo::Make_CopyProcess(ID3D11Device * create, c
 	switch (type)
 	{
 	case leo::point_process:
-		return std::make_shared<PointCopy>(create);
+	{
+		static auto point_copy = std::make_shared<PointCopy>(create);
+		return point_copy;
+	}
 		break;
 	case leo::bilinear_process:
-		return std::make_shared<BilinearCopy>(create);
-		break;
+	{
+		static auto bilinear_copy = std::make_shared<BilinearCopy>(create);
+		return bilinear_copy;
+	}
+	break;
+
 	case leo::point_addprocess:
-		return std::make_shared<AddPointCopy>(create);
+	{
+		static auto addpoint_copy = std::make_shared<AddPointCopy>(create);
+		return addpoint_copy;
+	}
 		break;
 	case leo::bilinear_addprocess:
-		return std::make_shared<AddBilinearCopy>(create);
+	{
+		static auto addbilinear_copy = std::make_shared<AddBilinearCopy>(create);
+		return addbilinear_copy;
+	}
 		break;
 	}
 
 	return nullptr;
 }
+
+

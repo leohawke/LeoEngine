@@ -30,7 +30,8 @@ struct VertexOut
 
 
 uint4 CalcIndices(uint indices) {
-	return uint4((indices & 0xff000000) >> 24,
+	return uint4(
+		(indices & 0xff000000) >> 24,
 		(indices & 0x00ff0000) >> 16,
 		(indices & 0x0000ff00) >> 8,
 		(indices & 0x000000ff)

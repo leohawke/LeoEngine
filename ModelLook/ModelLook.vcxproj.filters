@@ -452,6 +452,9 @@
     <ClInclude Include="UI\CharRenderer.h">
       <Filter>UI</Filter>
     </ClInclude>
+    <ClInclude Include="RenderSystem\DebugProcess.hpp">
+      <Filter>RenderSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="The LeoEngine Terrain File.tpl">
@@ -547,6 +550,9 @@
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="Shader\SkinGenGBufferPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\NormalDebug.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>

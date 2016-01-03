@@ -342,6 +342,7 @@
     <ClInclude Include="HUD\HUDImpl.h" />
     <ClInclude Include="HUD\HUDPanel.h" />
     <ClInclude Include="HUD\HUDRenderSystem.h" />
+    <ClInclude Include="RenderSystem\DebugProcess.hpp" />
     <ClInclude Include="UI\Blend.h" />
     <ClInclude Include="UI\Blit.h" />
     <ClInclude Include="UI\CharRenderer.h" />
@@ -538,6 +539,14 @@ fxc /Zi /E"BlurYPS" /Fo"$(OutDir)Shader\%(Filename)YPS.cso" /T "ps_4_0_level_9_1
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">LumVS</EntryPointName>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">LumVS</EntryPointName>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\NormalDebug.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
