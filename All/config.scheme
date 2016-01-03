@@ -1,6 +1,6 @@
 ﻿(config
-	(window (width 800)
-			(height 600)
+	(window (width 1600)
+			(height 900)
 	)
 	(search-dirs
 		(dir "./Resource/")
@@ -12,6 +12,9 @@
 		)
 		(effect	(name gbuffer)
 			(shader (v GenGBufferVS.cso) (p GenGBufferPS.cso))
+		)
+		(effect	(name skingbuffer)
+			(shader (v SkinGenGBufferVS.cso) (p SkinGenGBufferPS.cso))
 		)
 		(effect	(name quad)
 			(shader (v QUADVS.cso))

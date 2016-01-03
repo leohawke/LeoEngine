@@ -417,6 +417,24 @@ namespace leo
 
 			ID3D11DeviceContext* context;
 		};
+
+		template<D3D11_SHADER_TYPE>
+		struct SetConstantBuffer;
+
+		template<>
+		struct SetConstantBuffer<D3D11_PIXEL_SHADER>
+		{
+			SetConstantBuffer(ID3D11DeviceContext* _context)
+				:context(_context)
+			{}
+
+			template<typename... S>
+			void operator()(UINT start_slot, S... args) {
+				ContextApply(context, &ID3D11DeviceContext::PSSetConstantBuffers, start_slot, args...);
+			}
+
+			ID3D11DeviceContext* context;
+		};
 	}
 
 	//computer shader

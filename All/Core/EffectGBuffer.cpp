@@ -26,7 +26,7 @@ namespace leo {
 			mPixelShader = sm.CreatePixelShader(blob);
 
 			RenderStates rss;
-			anisoSampler = rss.GetSamplerState(L"anisoSampler");
+			anisoSampler = rss.GetSamplerState(L"aniso_sampler");
 		}
 
 		~EffectGBufferDelegate()
@@ -116,14 +116,7 @@ namespace leo {
 		ID3D11SamplerState* anisoSampler = nullptr;
 	};
 
-	void leo::EffectGBuffer::Specular(const float4 & specular_power, ID3D11DeviceContext * context)
-	{
-		lassume(dynamic_cast<EffectGBufferDelegate *>(this));
-
-		return ((EffectGBufferDelegate *)this)->Specular(
-			specular_power, context
-			);
-	}
+	
 
 	const std::unique_ptr<EffectGBuffer>& EffectGBuffer::GetInstance(ID3D11Device* device)
 	{
@@ -176,6 +169,15 @@ namespace leo {
 
 		return ((EffectGBufferDelegate *)this)->DiffuseSRV(
 			diff, context
+			);
+	}
+
+	void EffectGBuffer::Specular(const float4 & specular_power, ID3D11DeviceContext * context)
+	{
+		lassume(dynamic_cast<EffectGBufferDelegate *>(this));
+
+		return ((EffectGBufferDelegate *)this)->Specular(
+			specular_power, context
 			);
 	}
 

@@ -101,7 +101,12 @@ namespace leo
 		anisoSampler.BorderColor[1] = 0.f;
 		anisoSampler.BorderColor[2] = 0.f;
 		anisoSampler.BorderColor[3] = 0.f;
-		p->CreateSamplerState(L"anisoSampler", anisoSampler);
+		p->CreateSamplerState(L"aniso_sampler", anisoSampler);
+
+		CD3D11_SAMPLER_DESC bilinearSampler{ D3D11_DEFAULT };
+		bilinearSampler.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+		p->CreateSamplerState(L"bilinear_sampler", bilinearSampler);
+
 
 		CD3D11_SAMPLER_DESC trilinearSampler(D3D11_DEFAULT);
 		trilinearSampler.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;

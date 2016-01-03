@@ -2,7 +2,7 @@
 #include "utility.hpp"
 
 
-#include "EffectSkeleton.hpp"
+#include "EffectGBuffer.hpp"
 
 #include "Camera.hpp"
 
@@ -178,20 +178,21 @@ namespace leo{
 		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		context->IASetInputLayout(ShaderMgr().CreateInputLayout(InputLayoutDesc::Skinned));
 
-		auto & mEffect = EffectSkeleton::GetInstance();
+		auto & mEffect = leo::EffectSkinGBuffer::GetInstance();
 
 		auto world =SQT::operator std::array<__m128, 4U>();
 		auto viewproj = load(camera.ViewProj());
 		mEffect->WorldMatrix(world);
 		mEffect->WorldViewProjMatrix(Multiply(world,viewproj));
 		mEffect->SkinMatrix(mSkinMatrixs.get(),mSkeData->mSkeleton.mJointCount);
+		mEffect->ViewMatrix(load(camera.View()));
 		mEffect->Apply(context);
 
 		for (auto it = mSkeData->mSubSets.cbegin(); it != mSkeData->mSubSets.cend(); ++it)
 		{
-			mEffect->Mat(it->mMat, context);
+			mEffect->Specular(it->mMat.specular, context);
 			mEffect->DiffuseSRV(it->mTexSRV,context);
-			mEffect->NormalMapSRV(it->mNormalSRV, context);
+			mEffect->NormalSRV(it->mNormalSRV, context);
 			context->DrawIndexed(it->mLodIndices[0].mCount, it->mLodIndices[0].mOffset, 0);
 		}
 

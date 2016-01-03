@@ -310,6 +310,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	//Effect,Staic Instance	
 	#if 1
 	leo::EffectGBuffer::GetInstance(device);
+	leo::EffectSkinGBuffer::GetInstance(device);
 	leo::EffectQuad::GetInstance(device);
 	leo::EffectSky::GetInstance(device);
 	leo::EffectTerrain::GetInstance(device);

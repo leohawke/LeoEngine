@@ -113,9 +113,6 @@
     <ClCompile Include="..\All\Core\Sky.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\All\Core\EffectSkeleton.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="..\All\Core\BillBoard.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -292,6 +289,9 @@
     </ClCompile>
     <ClCompile Include="UI\CharRenderer.cpp">
       <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\EffectSkinGBuffer.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
