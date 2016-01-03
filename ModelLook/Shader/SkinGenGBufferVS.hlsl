@@ -1,7 +1,7 @@
 cbuffer cbChangerEveryFrame : register(b0)
 {
 	matrix World;
-	matrix InvTransposeWorldView;
+	matrix InvTransposeWorld;
 	matrix WorldViewProj;
 }
 
@@ -58,7 +58,7 @@ VertexOut main(VertexIn vin)
 	}
 
 	// Transform to world space space.
-	vout.NormalW =normalize(mul(normalL, (float3x3)InvTransposeWorldView));
+	vout.NormalW =normalize(mul(normalL, (float3x3)InvTransposeWorld));
 	vout.TangentW = normalize(mul(tangentL, (float3x3)World));
 	vout.Tex = vin.Tex;
 	// Transform to homogeneous clip space.

@@ -382,7 +382,6 @@
     <ClInclude Include="HUD\Widget.h" />
     <ClInclude Include="HUD\WidgetEvent.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="Rubbishmemory.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\All\config.scheme">
@@ -403,6 +402,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     </CustomBuild>
     <None Include="Shader\Lighting.hlsli" />
+    <None Include="Shader\NormalUti" />
     <None Include="Shader\NormalUti.hlsli" />
     <None Include="Shader\utility" />
     <None Include="The LeoEngine Terrain File.tpl" />
@@ -675,6 +675,10 @@ fxc /E"main_8"  /Fo"$(OutDir)Shader\%(Filename)_8.cso" /T "ps_5_0" /nologo $(Pro
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">GBufferMRTPS</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">GBufferMRTPS</EntryPointName>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)Shader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="Shader\SkinGenGBufferVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>

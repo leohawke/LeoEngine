@@ -54,6 +54,9 @@
     <Filter Include="RenderSystem\OpenGL">
       <UniqueIdentifier>{b8ab8338-2910-4143-bcf9-f8114c406082}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader\include">
+      <UniqueIdentifier>{1749d59c-33cd-40eb-b5a6-f3076f074614}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -296,7 +299,6 @@
     <ClInclude Include="Axis.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Rubbishmemory.h" />
     <ClInclude Include="..\All\RenderSystem\Deferred.h">
       <Filter>RenderSystem</Filter>
     </ClInclude>
@@ -462,7 +464,10 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="Shader\utility">
-      <Filter>Shader</Filter>
+      <Filter>Shader\include</Filter>
+    </None>
+    <None Include="Shader\NormalUti">
+      <Filter>Shader\include</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
