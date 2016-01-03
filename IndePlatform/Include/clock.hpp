@@ -86,15 +86,6 @@ namespace leo
 				return result.count();
 			}
 
-
-#if 0
-			template<typename RETURN = float, typename TIMEUNIT = std::chrono::seconds>
-			RETURN CalcDeltas(const GameClock& other)
-			{
-				return duration_to<RETURN, TIMEUNIT>(this->m_timecycles - other.m_timecycles);
-			}
-#endif
-
 			template<typename VARG = float, typename TIMEUNIT = std::chrono::seconds>
 			static void Update(const VARG& dt)
 			{

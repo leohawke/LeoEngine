@@ -43,6 +43,7 @@ namespace leo {
 			mVSCBPerFrame.Update(context);
 			mPSCBPerMatrial.Update(context);
 			mPSCBPerCamera.Update(context);
+			mVertexShaderConstantBufferPerSkin.Update(context);
 
 			pContext.VSSetShader(mVertexShader, nullptr, 0);
 			pContext.VSSetConstantBuffers(0, 1, &mVSCBPerFrame.mBuffer);
@@ -57,7 +58,7 @@ namespace leo {
 
 
 		void  LM_VECTOR_CALL WorldViewProjMatrix(matrix  Matrix, ID3D11DeviceContext* context) {
-			mVSCBPerFrame.WorldViewProj = Matrix;
+			mVSCBPerFrame.WorldViewProj = Transpose(Matrix);
 			if (context)
 				mVSCBPerFrame.Update(context);
 		}

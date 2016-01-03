@@ -213,12 +213,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 			{
 				bool t = renderAble;
 				renderAble = false;
-				leo::EffectConfig::GetInstance()->NormalLine(true);
+				//leo::EffectConfig::GetInstance()->NormalLine(true);
 				renderAble = t;
 			}
 			else
 			{
-				leo::EffectConfig::GetInstance()->NormalLine(false);
+				//leo::EffectConfig::GetInstance()->NormalLine(false);
 			}
 			break;
 		default:
@@ -350,6 +350,8 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	//pTerrain = std::make_unique<leo::Terrain<>>(device, L"Resource\\Test.Terrain");
 	pSkeletonData = leo::SkeletonData::Load(L"Resource\\soldier.l3d");
 	pSkeletonModel = std::make_unique<leo::SkeletonInstance>(pSkeletonData);
+	pSkeletonModel->Translation(leo::float3(0.f,-6.f,12.f));
+	pSkeletonModel->Scale(0.2f);
 
 	auto animation_names = pSkeletonModel->GetAniNames();
 	pSkeletonModel->SwitchAnimation(animation_names[0]);
@@ -357,7 +359,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 
 	auto pModelMesh = std::make_unique<leo::Mesh>();
 	pModelMesh->Load(L"Resource/Sphere.l3d", leo::DeviceMgr().GetDevice());
-	pModelMesh->Translation(leo::float3(0.f, 0.f, 3.f));
+	pModelMesh->Translation(leo::float3(3.f, 0.f, 3.f));
 	pModelMesh->Scale(2.f);
 	Models.push_back(std::move(pModelMesh));
 
@@ -395,8 +397,10 @@ void Update() {
 	while (renderThreadRun)
 	{
 		static auto mBegin = leo::clock::now();
-		mBegin = leo::clock::now();
 		auto mRunTime = leo::clock::duration_to<>(leo::clock::now() - mBegin);
+		mBegin = leo::clock::now();
+
+		leo::clock::GameClock::Update(mRunTime);
 
 		leo::win::KeysState::GetInstance()->Update();
 
@@ -415,6 +419,7 @@ void Update() {
 		}
 
 		pSkeletonModel->Update();
+
 
 		if (mRunTime < 1 / 30.f)
 			std::this_thread::sleep_for(leo::clock::to_duration<>(1 / 30.f - mRunTime));
