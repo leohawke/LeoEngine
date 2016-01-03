@@ -472,6 +472,9 @@
     <None Include="Shader\NormalUti">
       <Filter>Shader\include</Filter>
     </None>
+    <None Include="..\All\Resource\soldier.l3d">
+      <Filter>Res</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\LinearizeDepthPS.hlsl">
@@ -572,6 +575,30 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="..\All\Resource\snowcube1024.dds">
+      <Filter>Res</Filter>
+    </Image>
+    <Image Include="..\All\Resource\jacket_norm.dds">
+      <Filter>Res</Filter>
+    </Image>
+    <Image Include="..\All\Resource\pants_diff.dds">
+      <Filter>Res</Filter>
+    </Image>
+    <Image Include="..\All\Resource\pants_norm.dds">
+      <Filter>Res</Filter>
+    </Image>
+    <Image Include="..\All\Resource\upBody_diff.dds">
+      <Filter>Res</Filter>
+    </Image>
+    <Image Include="..\All\Resource\upbody_norm.dds">
+      <Filter>Res</Filter>
+    </Image>
+    <Image Include="..\All\Resource\jacket_diff.dds">
+      <Filter>Res</Filter>
+    </Image>
+    <Image Include="..\All\Resource\head_norm.dds">
+      <Filter>Res</Filter>
+    </Image>
+    <Image Include="..\All\Resource\head_diff.dds">
       <Filter>Res</Filter>
     </Image>
   </ItemGroup>

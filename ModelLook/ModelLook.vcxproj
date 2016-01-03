@@ -400,6 +400,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
+    <None Include="..\All\Resource\soldier.l3d" />
     <None Include="Shader\Lighting.hlsli" />
     <None Include="Shader\NormalUti" />
     <None Include="Shader\NormalUti.hlsli" />
@@ -777,7 +778,24 @@ fxc /E"main_8"  /Fo"$(OutDir)Shader\%(Filename)_8.cso" /T "ps_5_0" /nologo $(Pro
     <Text Include="需求.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\All\Resource\head_diff.dds">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy /Y   $(SolutionDir)All\Resource\%(Filename)%(Extension)  $(OutDir)Fonts\%(Filename)%(Extension)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy /Y   $(SolutionDir)All\Resource\%(Filename)%(Extension)  $(OutDir)Fonts\%(Filename)%(Extension)</Command>
+    </Image>
+    <Image Include="..\All\Resource\head_norm.dds">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy /Y   $(SolutionDir)All\Resource\%(Filename)%(Extension)  $(OutDir)Fonts\%(Filename)%(Extension)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy /Y   $(SolutionDir)All\Resource\%(Filename)%(Extension)  $(OutDir)Fonts\%(Filename)%(Extension)</Command>
+    </Image>
+    <Image Include="..\All\Resource\jacket_diff.dds">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy /Y   $(SolutionDir)All\Resource\%(Filename)%(Extension)  $(OutDir)Fonts\%(Filename)%(Extension)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy /Y   $(SolutionDir)All\Resource\%(Filename)%(Extension)  $(OutDir)Fonts\%(Filename)%(Extension)</Command>
+    </Image>
+    <Image Include="..\All\Resource\jacket_norm.dds" />
+    <Image Include="..\All\Resource\pants_diff.dds" />
+    <Image Include="..\All\Resource\pants_norm.dds" />
     <Image Include="..\All\Resource\snowcube1024.dds" />
+    <Image Include="..\All\Resource\upBody_diff.dds" />
+    <Image Include="..\All\Resource\upbody_norm.dds" />
     <Image Include="icon1.ico" />
     <Image Include="ModelLook.ico" />
   </ItemGroup>
