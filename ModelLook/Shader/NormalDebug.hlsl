@@ -1,6 +1,6 @@
 #include <NormalUti>
 
-Texture2D<float4> texNormalAlpha:register(t1);
+Texture2D<float4> texNormalAlpha:register(t0);
 
 SamplerState samPoint : register(s0);
 
