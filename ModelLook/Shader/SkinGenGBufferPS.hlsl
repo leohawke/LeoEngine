@@ -23,10 +23,10 @@ cbuffer Camera : register(b1) {
 
 struct PixelIn
 {
-	float4 PosH     : SV_POSITION;
 	float3 NormalW  : NORMAL;
 	float3 TangentW : TANGENT;
 	float2 Tex      : TEXCOORD;
+	float4 PosH     : SV_POSITION;
 };
 
 void GBufferMRTPS(PixelIn pin, 

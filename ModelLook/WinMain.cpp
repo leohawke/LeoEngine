@@ -165,12 +165,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	DeviceEvent();
 	BuildRes(clientSize);
 
-	auto pModelMesh = std::make_unique<leo::Mesh>();
-	pModelMesh->Load(L"Resource/Sphere.l3d", leo::DeviceMgr().GetDevice());
-	pModelMesh->Translation(leo::float3(0.f,0.f,3.f));
-	pModelMesh->Scale(2.f);
-	Models.push_back(std::move(pModelMesh));
-
 	auto cmdmsgproc = [&](HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)-> LRESULT
 	{
 		switch (LOWORD(wParam))
@@ -286,19 +280,30 @@ void BuildLight(ID3D11Device* device) {
 	auto mSpotLight = std::make_shared<leo::SpotLightSource>();
 	mSpotLight->InnerAngle(leo::LM_RPD * 10);
 	mSpotLight->OuterAngle(leo::LM_RPD * 55);
-	mSpotLight->Diffuse(leo::float3(0.9f, 0.2f, 0.2f));
+	mSpotLight->Diffuse(leo::float3(0.8f, 0.7f, 0.6f));
 	mSpotLight->Directional(leo::float3(0.f, 0.707f, 0.707f));
 	mSpotLight->FallOff(leo::float3(0.f, 0.1f, 0.1f));
 	mSpotLight->Position(leo::float3(0.f, 0.f, -3.f));
 	mSpotLight->Range(6.f);
-	//pRender->AddLight(mSpotLight);
+	pRender->AddLight(mSpotLight);
 
 	auto mDirLight = std::make_shared<leo::DirectionalLightSource>();
 	mDirLight->Directional(leo::float3(0.f, -1.f, 0.f));
-	mDirLight->Diffuse(leo::float3(1.9f, 1.9f, 1.1f));
-	//pRender->AddLight(mDirLight);
+	mDirLight->Diffuse(leo::float3(2.4f, 2.1f, 1.8f));
+	pRender->AddLight(mDirLight);
 }
+
 void ClearLight() {
+}
+
+void BuildUI(std::pair<leo::uint16, leo::uint16> size) {
+	pPanel = std::make_unique<leo::HUD::Panel>(leo::HUD::Size(size.first, size.second));
+	pHUDHostRender = std::make_shared<leo::HUD::HostRenderer>(*pPanel);
+	pPanel->SetRenderer(pHUDHostRender);
+
+	pLabel = leo::HUD::MakeLabel("FPS 0000");
+	pLabel->SetVisible(true);
+	*pPanel += *pLabel;
 }
 
 void BuildRes(std::pair<leo::uint16, leo::uint16> size)
@@ -345,15 +350,20 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	//pTerrain = std::make_unique<leo::Terrain<>>(device, L"Resource\\Test.Terrain");
 	pSkeletonData = leo::SkeletonData::Load(L"Resource\\soldier.l3d");
 	pSkeletonModel = std::make_unique<leo::SkeletonInstance>(pSkeletonData);
+
+	auto animation_names = pSkeletonModel->GetAniNames();
+	pSkeletonModel->SwitchAnimation(animation_names[0]);
+	pSkeletonModel->BeginCurrentAni();
+
+	auto pModelMesh = std::make_unique<leo::Mesh>();
+	pModelMesh->Load(L"Resource/Sphere.l3d", leo::DeviceMgr().GetDevice());
+	pModelMesh->Translation(leo::float3(0.f, 0.f, 3.f));
+	pModelMesh->Scale(2.f);
+	Models.push_back(std::move(pModelMesh));
+
 	BuildLight(leo::DeviceMgr().GetDevice());
-
-	pPanel = std::make_unique<leo::HUD::Panel>(leo::HUD::Size(size.first,size.second));
-	pHUDHostRender = std::make_shared<leo::HUD::HostRenderer>(*pPanel);
-	pPanel->SetRenderer(pHUDHostRender);
-
-	pLabel = leo::HUD::MakeLabel("FPS 0000");
-	pLabel->SetVisible(true);
-	*pPanel += *pLabel;
+	BuildUI(size);
+	
 }
 
 void ClearRes() {
@@ -384,6 +394,9 @@ void ReSize(std::pair<leo::uint16, leo::uint16> size) {
 void Update() {
 	while (renderThreadRun)
 	{
+		static auto mBegin = leo::clock::now();
+		mBegin = leo::clock::now();
+		auto mRunTime = leo::clock::duration_to<>(leo::clock::now() - mBegin);
 
 		leo::win::KeysState::GetInstance()->Update();
 
@@ -401,10 +414,8 @@ void Update() {
 			++i;
 		}
 
-		static auto mBegin = leo::clock::now();
+		pSkeletonModel->Update();
 
-		auto mRunTime = leo::clock::duration_to<>(leo::clock::now() - mBegin);
-		mBegin = leo::clock::now();
 		if (mRunTime < 1 / 30.f)
 			std::this_thread::sleep_for(leo::clock::to_duration<>(1 / 30.f - mRunTime));
 	}
@@ -465,6 +476,7 @@ void Render()
 			for (auto & pModelMesh : Models) {
 				pModelMesh->Render(devicecontext, *pCamera);
 			}
+			pSkeletonModel->Render(*pCamera);
 
 			if (pRender) {
 				pRender->UnBind(devicecontext, *leo::global::globalDepthStencil);

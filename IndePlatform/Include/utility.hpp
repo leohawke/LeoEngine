@@ -643,7 +643,7 @@ namespace leo
 
 namespace leo {
 	namespace details {
-		static class StringTableDelegate {
+		class StringTableDelegate {
 		public:
 			~StringTableDelegate() {
 				for (auto &str : mMap)
@@ -675,19 +675,22 @@ namespace leo {
 			}
 		private:
 			std::unordered_map<std::size_t, wchar_t*> mMap;
-		} mTable;
+		};
+
+
+		StringTableDelegate& GetST();
 	}
 
 	inline std::size_t hash(const wchar_t* str) {
-		return details::mTable.hash(str);
+		return details::GetST().hash(str);
 	}
 
 	inline std::size_t hash(const std::wstring& str) {
-		return details::mTable.hash(str);
+		return details::GetST().hash(str);
 	}
 
 	inline const wchar_t* unhash(std::size_t sid) noexcept(false){
-		if (auto str = details::mTable.unhash(sid))
+		if (auto str = details::GetST().unhash(sid))
 			return str;
 		else
 			throw std::invalid_argument("该资源不存在");

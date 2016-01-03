@@ -2,6 +2,16 @@
 #include "platform.h"
 #include "string.hpp"
 
+
+namespace leo {
+	namespace details {
+		StringTableDelegate& GetST() {
+			static StringTableDelegate table;
+			return table;
+		}
+	}
+}
+
 namespace leo
 {
 #ifdef WIN32
