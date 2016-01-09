@@ -50,13 +50,18 @@ namespace leo
 			float3 pos;
 			float3 normal;
 			float2 tex;
-			float3 tangent;
+			float4 tangent;
 
 			NormalMap(float x,float y,float z,float i,float j,float k,float u,float v,float ii,float ij,float ik)
-				:pos(x, y, z), normal(i, j, k), tex(u, v), tangent(ii,ij,ik)
+				:pos(x, y, z), normal(i, j, k), tex(u, v), tangent(ii,ij,ik,1.f)
 			{}
 
-			NormalMap(const float3& pos,const float3& nor,const float2& tex,const float3& tan)
+
+			NormalMap(const float3& pos, const float3& nor, const float2& tex, const float3& tan)
+				:pos(pos), normal(nor), tex(tex), tangent(tan, 1.f)
+			{}
+
+			NormalMap(const float3& pos,const float3& nor,const float2& tex,const float4& tan)
 				:pos(pos), normal(nor), tex(tex), tangent(tan)
 			{}
 

@@ -28,7 +28,7 @@ namespace leo
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, loffsetof(Vertex::NormalMap, pos), D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, loffsetof(Vertex::NormalMap, normal), D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, loffsetof(Vertex::NormalMap, tex), D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, loffsetof(Vertex::NormalMap, tangent), D3D11_INPUT_PER_VERTEX_DATA, 0 }
+			{ "TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, loffsetof(Vertex::NormalMap, tangent), D3D11_INPUT_PER_VERTEX_DATA, 0 }
 		};
 
 		extern const D3D11_INPUT_ELEMENT_DESC NormalMapV[4]

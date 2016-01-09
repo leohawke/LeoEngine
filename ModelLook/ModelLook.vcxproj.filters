@@ -472,9 +472,6 @@
     <None Include="Shader\NormalUti">
       <Filter>Shader\include</Filter>
     </None>
-    <None Include="..\All\Resource\soldier.l3d">
-      <Filter>Res</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\LinearizeDepthPS.hlsl">

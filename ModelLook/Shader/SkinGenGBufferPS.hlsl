@@ -24,7 +24,7 @@ cbuffer Camera : register(b1) {
 struct PixelIn
 {
 	float3 NormalW  : NORMAL;
-	float3 TangentW : TANGENT;
+	float4 TangentW : TANGENT;
 	float2 Tex      : TEXCOORD;
 	float4 PosH     : SV_POSITION;
 };

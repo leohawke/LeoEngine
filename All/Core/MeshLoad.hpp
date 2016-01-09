@@ -48,7 +48,7 @@ namespace leo
 			storge::float3  pos;
 			storge::float3 normal;
 			storge::float2 tex;
-			storge::float3 tangent;
+			storge::float4 tangent;
 		};
 
 		struct SkeletonHeader{

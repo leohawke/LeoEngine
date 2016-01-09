@@ -25,7 +25,7 @@ namespace leo
 	¶¥µã0 ------------------XMFLOAT3 pos;
 	XMFLOAT3 normal;
 	XMFLOAT2 tex;
-	XMFLOAT3 tangent;
+	XMFLOAT4 tangent;
 	¶¥µã1
 	¶¥µã2
 	...
@@ -186,7 +186,7 @@ namespace leo
 				for (UINT i = 0; i < numVertices; ++i)
 				{
 				fin >> ignore >> vertices[i].pos.x >> vertices[i].pos.y >> vertices[i].pos.z;
-				fin >> ignore >> vertices[i].tangent.x >> vertices[i].tangent.y >> vertices[i].tangent.z >> fignore;
+				fin >> ignore >> vertices[i].tangent.x >> vertices[i].tangent.y >> vertices[i].tangent.z >> vertices[i].tangent.w;
 				fin >> ignore >> vertices[i].normal.x >> vertices[i].normal.y >> vertices[i].normal.z;
 				fin >> ignore >> vertices[i].tex.x >> vertices[i].tex.y;
 				}
@@ -194,7 +194,7 @@ namespace leo
 				for (UINT i = 0; i < numVertices; ++i)
 				{
 				fin >> ignore >> vertices[i].pos.x >> vertices[i].pos.y >> vertices[i].pos.z;
-				fin >> ignore >> vertices[i].tangent.x >> vertices[i].tangent.y >> vertices[i].tangent.z >> fignore;
+				fin >> ignore >> vertices[i].tangent.x >> vertices[i].tangent.y >> vertices[i].tangent.z >> vertices[i].tangent.w;
 				fin >> ignore >> vertices[i].normal.x >> vertices[i].normal.y >> vertices[i].normal.z;
 				fin >> ignore >> vertices[i].tex.x >> vertices[i].tex.y;
 				fin >> ignore >> weights[0] >> weights[1] >> weights[2] >> fignore;
@@ -487,12 +487,12 @@ namespace leo
 				tangent.z = (duv[1].y*e[0].z - duv[0].y*e[1].z) / inv;
 
 
-				vertices[ind[0]].tangent = Add(float3(vertices[ind[0]].tangent), tangent);
-				vertices[ind[1]].tangent = Add(float3(vertices[ind[1]].tangent), tangent);
-				vertices[ind[2]].tangent = Add(float3(vertices[ind[2]].tangent), tangent);
+				vertices[ind[0]].tangent =float4(Add(float3(vertices[ind[0]].tangent), tangent),1.f);
+				vertices[ind[1]].tangent = float4(Add(float3(vertices[ind[1]].tangent), tangent), 1.f);
+				vertices[ind[2]].tangent = float4(Add(float3(vertices[ind[2]].tangent), tangent), 1.f);
 			}
 			for (auto &v : vertices)
-				v.tangent = Normalize(v.tangent);
+				v.tangent = float4(Normalize(float3(v.tangent)),1.f);
 		}
 
 		template<typename T, typename U>
@@ -620,7 +620,7 @@ namespace leo
 			v.tex.v = 0.5f;
 
 			v.tangent = Cross(v.normal, float3(0.f, 1.f, 0.f));
-			v.tangent = Normalize(v.tangent);
+			v.tangent =float4(Normalize(float3(v.tangent)),v.tangent.w);
 		}
 
 		fin >> sgnore;
