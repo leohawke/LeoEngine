@@ -202,6 +202,14 @@ namespace leo
 				const uint32 indices = (jointIndices[0] << 24) | (jointIndices[1] << 16) | (jointIndices[2] << 8) | jointIndices[3];
 				veradjInfo[i].indices = indices;
 				std::memcpy(veradjInfo[i].weights, weights, sizeof(float) * 3);
+
+				//!the m3d anim file is RHS!!
+				//vertices[i].pos.z = -vertices[i].pos.z;
+				//vertices[i].pos.x = -vertices[i].pos.x;
+
+				vertices[i].tangent.z = -vertices[i].tangent.z;
+				vertices[i].normal.z = -vertices[i].normal.z;
+
 				}
 			fout->Write(fileoffset, &vertices[0], vertices.size()*sizeof(MeshVertex));
 			fileoffset += vertices.size()*sizeof(MeshVertex);
@@ -248,6 +256,14 @@ namespace leo
 					joints[i](1, 0) >> joints[i](1, 1) >> joints[i](1, 2) >> joints[i](1, 3) >>
 					joints[i](2, 0) >> joints[i](2, 1) >> joints[i](2, 2) >> joints[i](2, 3) >>
 					joints[i](3, 0) >> joints[i](3, 1) >> joints[i](3, 2) >> joints[i](3, 3);
+
+				//joints[i](3, 2) = -joints[i](3, 2);
+				//joints[i](2, 2) = -joints[i](2, 2);
+				//joints[i](1, 2) = -joints[i](1, 2);
+				//joints[i](0, 2) = -joints[i](0, 2);
+
+
+
 			}
 
 			fin >> ignore; // BoneHierarchy header text

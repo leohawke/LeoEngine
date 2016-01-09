@@ -157,6 +157,8 @@ namespace leo{
 		auto Indices = CalcFrameIndex(frame);
 
 
+
+
 		for (auto jointIndex = 0u; jointIndex != mSkeData->mSkeleton.mJointCount; ++jointIndex){
 			auto & p1 = mClip.mSamples[Indices.first].mJointsPose[jointIndex];
 			auto & p2 = mClip.mSamples[Indices.second].mJointsPose[jointIndex];
@@ -172,10 +174,14 @@ namespace leo{
 			auto toParent = mLocalPoses[jointIndex].operator std::array<__m128, 4U>();
 			save(mGlobalPoses[jointIndex], Multiply(toParent, parentToRoot));
 		}
+
+
 		for (auto jointIndex = 0u; jointIndex != mSkeData->mSkeleton.mJointCount; ++jointIndex){
 			auto invBindPose = load(mSkeData->mSkeleton.mJoints[jointIndex].mInvBindPose);
 			auto toRoot = load(static_cast<const float4x4&>(mGlobalPoses[jointIndex]));
-			save(mSkinMatrixs[jointIndex], Multiply(invBindPose, toRoot));
+			save(mSkinMatrixs[jointIndex],Multiply(invBindPose, toRoot));
+			//save(mSkinMatrixs[jointIndex], Multiply(Multiply(invBindPose, rhs_lhs_m), toRoot));
+			//mSkinMatrixs[jointIndex](2, 2) = -mSkinMatrixs[jointIndex](2, 2);
 		}
 	}
 	void SkeletonInstance::Render(const Camera& camera){
@@ -190,9 +196,18 @@ namespace leo{
 
 		auto & mEffect = leo::EffectSkinGBuffer::GetInstance();
 
-		auto world =SQT::operator std::array<__m128, 4U>();
-		auto viewproj = load(camera.ViewProj());
+		auto world = operator std::array<__m128, 4>();
+
 		mEffect->WorldMatrix(world);
+
+		//右手坐标系最终反转
+		if (true)
+		{
+			const float4x4 invert_z = { {float3(1.f,0,0),float3(0,1.f,0),float3(0,0,-1.f)} };
+			const auto rhs_lhs = load(invert_z);
+			world = Multiply(world, rhs_lhs);
+		}
+		auto viewproj = load(camera.ViewProj());
 		mEffect->WorldViewProjMatrix(Multiply(world,viewproj));
 		mEffect->SkinMatrix(mSkinMatrixs.get(),mSkeData->mSkeleton.mJointCount);
 		mEffect->ViewMatrix(load(camera.View()));

@@ -289,7 +289,7 @@ void BuildLight(ID3D11Device* device) {
 
 	auto mDirLight = std::make_shared<leo::DirectionalLightSource>();
 	mDirLight->Directional(leo::float3(0.f,0.f, 1.f));
-	mDirLight->Diffuse(leo::float3(0.8f, 0.7f, 0.6f));
+	mDirLight->Diffuse(leo::float3(0.5f, 0.5f, 0.5f));
 	pRender->AddLight(mDirLight);
 }
 
@@ -350,17 +350,21 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	//pTerrain = std::make_unique<leo::Terrain<>>(device, L"Resource\\Test.Terrain");
 	pSkeletonData = leo::SkeletonData::Load(L"Resource\\soldier.l3d");
 	pSkeletonModel = std::make_unique<leo::SkeletonInstance>(pSkeletonData);
-	pSkeletonModel->Translation(leo::float3(0.f,-6.f,12.f));
+	pSkeletonModel->Translation(leo::float3(0.f,-12.f,5.f));
 	pSkeletonModel->Scale(0.2f);
 	pSkeletonModel->Rotation(leo::float3(0.f, 1.f, 0.f), leo::LM_PI);
 
+#if 1
 	pSkeletonModel->SwitchAnimation(pSkeletonModel->GetAniNames()[0]);
 	pSkeletonModel->BeginCurrentAni();
+#else
+	pSkeletonModel->SwitchAnimation("TPose");
+#endif
 
 	auto pModelMesh = std::make_unique<leo::Mesh>();
 	pModelMesh->Load(L"Resource/Sphere.l3d", leo::DeviceMgr().GetDevice());
-	pModelMesh->Translation(leo::float3(3.f, 0.f, 3.f));
-	pModelMesh->Scale(2.f);
+	pModelMesh->Translation(leo::float3(5.f, -3.f, 3.f));
+	pModelMesh->Scale(1.f);
 	Models.push_back(std::move(pModelMesh));
 
 	BuildLight(leo::DeviceMgr().GetDevice());
