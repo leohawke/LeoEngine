@@ -40,6 +40,6 @@ void GBufferMRTPS(PixelIn pin,
 	NormalSpecPow.xyz = CompressionNormal(mul(bumpedNormalW,(float3x3)View));
 	NormalSpecPow.w = Object.SpecularPow / 256.f;
 
-	DiffuseSpec.rgb = texDiffuse.Sample(aniso_sampler, pin.Tex).rgb;
+	DiffuseSpec.rgb = texDiffuse.Sample(bilinear_sampler, pin.Tex).rgb;
 	DiffuseSpec.a = dot(Object.Specular, half3(0.2126f, 0.7152f, 0.0722f));
 }

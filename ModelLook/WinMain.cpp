@@ -289,7 +289,7 @@ void BuildLight(ID3D11Device* device) {
 
 	auto mDirLight = std::make_shared<leo::DirectionalLightSource>();
 	mDirLight->Directional(leo::float3(0.f,0.f, 1.f));
-	mDirLight->Diffuse(leo::float3(0.5f, 0.5f, 0.5f));
+	mDirLight->Diffuse(leo::float3(0.9f, 0.9f, 0.9f));
 	pRender->AddLight(mDirLight);
 }
 
@@ -338,7 +338,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pos.x = -pos.x;
 	pos.z = -pos.z;
 
-	pCamera->LookAt(float3(0.f, 12.f, -24.f), float3(0.f, 0.f, 0.f), float3(0.f, 1.f, 0.f));
+	pCamera->LookAt(float3(0.f, 0.f, -24.f), float3(0.f, 0.f, 0.f), float3(0.f, 1.f, 0.f));
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 
 	leo::EffectQuad::GetInstance().SetFrustum(device, *pCamera);

@@ -75,11 +75,15 @@ namespace leo {
 				mPSCBPerCamera.Update(context);
 		}
 
-		void DiffuseSRV(ID3D11ShaderResourceView * const diff, ID3D11DeviceContext*) {
+		void DiffuseSRV(ID3D11ShaderResourceView * const diff, ID3D11DeviceContext* context) {
 			mPixelShaderDiffuseSRV = diff;
+			if (context)
+				context->PSSetShaderResources(0, 1, &mPixelShaderDiffuseSRV);
 		}
-		void NormalSRV(ID3D11ShaderResourceView * const normal, ID3D11DeviceContext*) {
+		void NormalSRV(ID3D11ShaderResourceView * const normal, ID3D11DeviceContext* context) {
 			mPixelShaderNormalSRV = normal;
+			if (context)
+				context->PSSetShaderResources(1, 1, &mPixelShaderNormalSRV);
 		}
 
 

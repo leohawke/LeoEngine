@@ -397,9 +397,9 @@ void leo::DeferredRender::DebugProcess(ID3D11DeviceContext* context, ID3D11Rende
 	UINT numVP = 1;
 	context->RSGetViewports(&numVP, &lastVp);
 
+	static auto pCopyProcess = Make_CopyProcess(nullptr, bilinear_process);
 	//总是输出最终效果于左上角
 	{
-		static auto pCopyProcess = Make_CopyProcess(nullptr, bilinear_process);
 		if (!pResImpl->mDebugCopy) {
 			D3D11_TEXTURE2D_DESC rt_desc;
 			rtv_tex->GetDesc(&rt_desc);
@@ -424,6 +424,15 @@ void leo::DeferredRender::DebugProcess(ID3D11DeviceContext* context, ID3D11Rende
 		context->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
 		pCopyProcess->Apply(context);
 		pCopyProcess->Draw(context, pResImpl->mDebugCopySRV, rtv);
+	}
+	//输出DIffuse在左下角
+	{
+		auto left_bottom_vp = pStateImpl->mViewPort;
+		left_bottom_vp.Width /= 2;
+		left_bottom_vp.Height /= 2;
+		left_bottom_vp.TopLeftY += left_bottom_vp.Height;
+		context->RSSetViewports(1, &left_bottom_vp);
+		pCopyProcess->Draw(context, pResImpl->mDiffuseSpecSRV, rtv);
 	}
 	//输出法线在右上角
 	{

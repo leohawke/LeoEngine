@@ -187,7 +187,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pos.x = -pos.x;
 	pos.z = -pos.z;
 
-	pCamera->LookAt(leo::float3(0.f, 12.f, -24.f), leo::float3(0.f, 0.f, 0.f), leo::float3(0.f, 1.f, 0.f));
+	pCamera->LookAt(leo::float3(0.f, 0.f, -24.f), leo::float3(0.f, 0.f, 0.f), leo::float3(0.f, 1.f, 0.f));
 	pCamera->SetFrustum(leo::default_param::frustum_fov, leo::DeviceMgr().GetAspect(), leo::default_param::frustum_near, leo::default_param::frustum_far);
 
 	leo::EffectQuad::GetInstance().SetFrustum(device, *pCamera);
