@@ -15,6 +15,8 @@
 #include <Core\Camera.hpp>
 #include <Core\EffectGBuffer.hpp>
 #include <Core\EffectQuad.hpp>
+#include <Core\Vertex.hpp>
+#include <Core\MeshLoad.hpp>
 
 
 #include "HUD\HUDHostRenderer.h"
@@ -205,6 +207,12 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pLabel->SetVisible(true);
 	*pPanel += *pLabel;
 
+
+	//构建资源
+	auto sphere_mesh = leo::helper::CreateSphere(5, 36, 36);
+	leo::MeshFile::meshdataTol3d(sphere_mesh, L"Sphere.l3d");
+
+	leo::MeshFile::m3dTol3d(L"soldier.m3d", L"soldier.l3d");
 }
 
 

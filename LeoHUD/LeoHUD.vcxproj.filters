@@ -216,6 +216,9 @@
     <ClCompile Include="..\ModelLook\UI\TextRenderer.cpp">
       <Filter>依赖源文件\UI</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\Core\MeshLoad.cpp">
+      <Filter>依赖源文件\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FreeTypeTest.h">
