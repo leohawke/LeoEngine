@@ -15,6 +15,7 @@
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>LeoScheme</RootNamespace>
     <TargetPlatformVersion>8.1</TargetPlatformVersion>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -43,10 +44,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(SolutionDir)Indeplatform\Include;$(IncludePath)</IncludePath>
     <SourcePath>$(VC_SourcePath);$(UniversalCRT_SourcePath);</SourcePath>
+    <IntDir>E:\Inter\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(SolutionDir)Indeplatform\Include;$(IncludePath)</IncludePath>
     <SourcePath>$(VC_SourcePath);$(UniversalCRT_SourcePath);$(SolutionDir)All\Indeplatform\src;</SourcePath>
+    <IntDir>E:\Inter\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

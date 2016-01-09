@@ -74,6 +74,7 @@
     <IncludePath>$(SolutionDir)LeoScheme\Sexp;$(SolutionDir)All\;$(SolutionDir)Indeplatform\include;$(SolutionDir)DirectXTex;$(SolutionDir)ModelLook\;E:\SDKs\freetype-2.5.3\include;$(IncludePath)</IncludePath>
     <ReferencePath>$(SolutionDir)LeoScheme\;$(SolutionDir)DirectXTex;$(ReferencePath)</ReferencePath>
     <LibraryPath>E:\SDKs;$(LibraryPath)</LibraryPath>
+    <IntDir>E:\Inter\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -83,6 +84,7 @@
     <IncludePath>$(SolutionDir)LeoScheme\Sexp;$(SolutionDir)All\;$(SolutionDir)Indeplatform\include;$(SolutionDir)DirectXTex;$(SolutionDir)ModelLook\;E:\SDKs\freetype-2.5.3\include;$(IncludePath)</IncludePath>
     <LibraryPath>E:\SDKs;$(LibraryPath)</LibraryPath>
     <ReferencePath>$(SolutionDir)LeoScheme\;$(SolutionDir)DirectXTex;$(ReferencePath)</ReferencePath>
+    <IntDir>E:\Inter\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
