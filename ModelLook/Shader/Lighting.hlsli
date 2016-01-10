@@ -1,3 +1,5 @@
+//Dbp = (a+2) / 2PI (n.m)@
+//Blinn-Phong (n.h)@
 float roughness_term(float3 halfway_vec, float3 normal, float roughness)
 {
 	return pow(max(dot(halfway_vec, normal), 0.0f), roughness);

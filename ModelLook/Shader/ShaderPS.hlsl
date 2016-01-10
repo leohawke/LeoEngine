@@ -19,17 +19,22 @@ float3 fresnel_term_schlick(float3 light_vec, float3 halfway_vec, float3 c_spec)
 	return c_spec > 0 ? c_spec + (1 - c_spec) * exp2(-(5.55473f * e_n + 6.98316f) * e_n) : 0;
 }
 
+//Dbp = (a+2) / 2PI (n.m)@
 float specular_normalize_factor(float roughness)
 {
 	return (roughness + 2) / 8;
 }
 
+//Gimplicit(lc,v,h) = (n.lc)(n.v)
+//todo calc G and F in lighting pass
+//Cook - Torrance
 float3 Shading(float3 diff_lighting, float3 spec_lighting, float shininess,
 	float3 diffuse, float3 specular, float3 view_dir, float3 normal)
 {
 	return float3(max(diff_lighting * diffuse
 		+ specular_normalize_factor(shininess) * spec_lighting
 		//用view和normal来代替light和halfway
+		//http://www.klayge.org/wiki/index.php/%E5%BB%B6%E8%BF%9F%E6%B8%B2%E6%9F%93
 		* fresnel_term_schlick(normalize(view_dir), normal, specular), 0));
 }
 
