@@ -1,5 +1,5 @@
-#include "NormalUti.hlsli"
-#include "Lighting.hlsli"
+#include <NormalUti>
+#include <Lighting>
 Texture2D<float> texDepth :register(t0);
 Texture2D<float4> texNormalAlpha:register(t1);
 

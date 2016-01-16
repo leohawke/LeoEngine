@@ -460,16 +460,13 @@
     <None Include="The LeoEngine Terrain File.tpl">
       <Filter>Support Tool Config</Filter>
     </None>
-    <None Include="Shader\NormalUti.hlsli">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="Shader\Lighting.hlsli">
-      <Filter>Shader</Filter>
-    </None>
     <None Include="Shader\utility">
       <Filter>Shader\include</Filter>
     </None>
     <None Include="Shader\NormalUti">
+      <Filter>Shader\include</Filter>
+    </None>
+    <None Include="Shader\Lighting">
       <Filter>Shader\include</Filter>
     </None>
   </ItemGroup>

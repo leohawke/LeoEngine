@@ -289,7 +289,7 @@ void BuildLight(ID3D11Device* device) {
 
 	auto mDirLight = std::make_shared<leo::DirectionalLightSource>();
 	mDirLight->Directional(leo::float3(0.f,-1.f, 1.f));
-	mDirLight->Diffuse(leo::float3(0.6f, 0.6f, 0.6f));
+	mDirLight->Diffuse(leo::float3(1.6f, 1.6f, 1.6f));
 	pRender->AddLight(mDirLight);
 
 	auto mAmbLight = std::make_shared<leo::AmbientLightSource>();

@@ -62,3 +62,23 @@ float3 NormalSampleCalc(float3 normalMapSample, float3 unitNormalW, float4 tange
 
 	return bumpedNormalW;
 }
+
+
+float4 TexCubeSampleLevel(textureCUBE tex, sampler sa, float3 tc, float mip, float mip_bias)
+{
+	return tex.SampleLevel(sa, tc, mip);
+}
+
+float2 get_xy_channel(float4 v)
+{
+	return v.rg;
+}
+
+float4 decode_hdr_yc(float y, float4 c)
+{
+	float Y = exp2(y * 65536 / 2048 - 16);
+	float2 C = get_xy_channel(c);
+	C *= C;
+
+	return float4(Y * float3(C.g, (1.0f - C.g - C.r), C.r) / float3(0.2126f, 0.7152f, 0.0722f), 1);
+}

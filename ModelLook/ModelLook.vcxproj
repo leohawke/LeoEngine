@@ -402,9 +402,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
-    <None Include="Shader\Lighting.hlsli" />
+    <None Include="Shader\Lighting" />
     <None Include="Shader\NormalUti" />
-    <None Include="Shader\NormalUti.hlsli" />
     <None Include="Shader\utility" />
     <None Include="The LeoEngine Terrain File.tpl" />
   </ItemGroup>

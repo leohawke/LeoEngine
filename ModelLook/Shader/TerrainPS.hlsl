@@ -1,4 +1,4 @@
-#include "NormalUti.hlsli"
+#include <NormalUti>
 cbuffer cbParam
 {
 #ifdef DEBUG

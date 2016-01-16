@@ -1,4 +1,6 @@
-#include "NormalUti.hlsli"
+#include <NormalUti>
+#include <Lighting>
+#include <utility>
 Texture2D<float4> texNormalAlpha:register(t0);
 Texture2D<float4> texLighting:register(t1);
 Texture2D<float4> texDiffuseSpec:register(t2);
@@ -13,39 +15,44 @@ struct VertexOut
 	float2 Tex : TEXCOORD1;
 };
 
-float3 fresnel_term_schlick(float3 light_vec, float3 halfway_vec, float3 c_spec)
-{
-	float e_n = saturate(dot(light_vec, halfway_vec));
-	return c_spec > 0 ? c_spec + (1 - c_spec) * exp2(-(5.55473f * e_n + 6.98316f) * e_n) : 0;
-}
 
-//Dbp = (a+2) / 2PI (n.m)@
-float specular_normalize_factor(float roughness)
+cbuffer SkylightParam
 {
-	return (roughness + 2) / 8;
-}
+	float4x4 inv_view;
+	int3 skylight_diff_spec_mip;
+	float skylight_mip_bias;
+};
 
-//Gimplicit(lc,v,h) = (n.lc)(n.v)
-//todo calc G and F in lighting pass
-//Cook - Torrance
-float3 Shading(float3 diff_lighting, float3 spec_lighting, float shininess,
-	float3 diffuse, float3 specular, float3 view_dir, float3 normal)
-{
-	return float3(max(diff_lighting * diffuse
-		+ specular_normalize_factor(shininess) * spec_lighting
-		//用view和normal来代替light和halfway
-		//http://www.klayge.org/wiki/index.php/%E5%BB%B6%E8%BF%9F%E6%B8%B2%E6%9F%93
-		* fresnel_term_schlick(normalize(view_dir), normal, specular), 0));
-}
+TextureCube skylight_y_cube_tex;
+TextureCube skylight_c_cube_tex;
+SamplerState skylight_sampler;
 
-float3 Shading(float4 lighting, float shininess, float3 diffuse, float3 specular,
-	float3 view_dir, float3 normal)
+float4 SkylightShading(float shininess, float4 mrt1, float3 normal, float3 view)
 {
-	const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);
-	float3 diff_lighting = lighting.rgb;
-	float3 spec_lighting = lighting.a / (dot(lighting.rgb, RGB_TO_LUM) + 1e-6f) * lighting.rgb;
-	return Shading(diff_lighting, spec_lighting, shininess, diffuse, specular,
-		view_dir, normal);
+	float4 shading = 0;
+
+	if (skylight_diff_spec_mip.z)
+	{
+		float3 c_diff = GetDiffuse(mrt1);
+		float c_spec = GetSpecular(mrt1);
+
+		normal = mul(normal, (float3x3)inv_view);
+		view = mul(view, (float3x3)inv_view);
+
+		float3 prefiltered_clr = decode_hdr_yc(TexCubeSampleLevel(skylight_y_cube_tex, skylight_sampler, normal, skylight_diff_spec_mip.x, 0).r,
+			TexCubeSampleLevel(skylight_c_cube_tex, skylight_sampler, normal, skylight_diff_spec_mip.x, 0)).xyz;
+		shading.xyz + CalcEnvDiffuse(prefiltered_clr, c_diff);
+
+		shininess = log2(shininess) / 13; // log2(8192) == 13
+
+		float mip = CalcPrefilteredEnvMip(shininess, skylight_diff_spec_mip.y);
+		float3 r = CalcPrefilteredEnvVec(normal, view);
+		prefiltered_clr = decode_hdr_yc(TexCubeSampleLevel(skylight_y_cube_tex, skylight_sampler, r, mip, skylight_mip_bias).r,
+			TexCubeSampleLevel(skylight_c_cube_tex, skylight_sampler, r, mip, skylight_mip_bias)).xyz;
+		shading.xyz += CalcEnvSpecular(prefiltered_clr, c_spec, shininess, normal, view);
+	}
+
+	return shading;
 }
 
 float4 main(VertexOut pin) : SV_TARGET
@@ -57,4 +64,16 @@ float4 main(VertexOut pin) : SV_TARGET
 	float4 diffuse_spec = texDiffuseSpec.Sample(samPoint, pin.Tex);
 	half ao = 1.f; //texAmbient.Sample(samPoint, pin.Tex);
 	return float4(Shading(light, NormalAlpha.a*256, diffuse_spec.xyz, diffuse_spec.w,v,n)*ao,1);
+}
+
+
+float4 skymain(VertexOut pin) : SV_TARGET
+{
+	float4 NormalAlpha = texNormalAlpha.Sample(samPoint, pin.Tex);
+	float shininess = NormalAlpha.a * 256;
+	float3 normal = DeCompressionNormal(half3(NormalAlpha.rgb));
+	float3 view_dir = pin.ViewDir;
+	float4 mrt1 = texDiffuseSpec.Sample(samPoint, pin.Tex);
+
+	return SkylightShading(shininess, mrt1, normal, view_dir);
 }

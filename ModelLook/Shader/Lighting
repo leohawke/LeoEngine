@@ -1,0 +1,128 @@
+//Dbp = (a+2) / 2PI (n.m)@
+//Blinn-Phong (n.h)@
+float roughness_term(float3 halfway_vec, float3 normal, float roughness)
+{
+	return pow(max(dot(halfway_vec, normal), 0.0f), roughness);
+}
+
+//todo :add light params :attn
+float attenuation_term(float3 light_pos, float3 pos, float3 atten)
+{
+	float3 v = light_pos - pos;
+	float d2 = dot(v, v);
+	float d = sqrt(d2);
+	return 1 / dot(atten, float3(1, d, d2));
+}
+
+float spot_lighting(float3 light_pos, float3 light_dir, float2 cos_cone, float3 pos)
+{
+	// cos_cone is (cos_outer_cone, cos_inner_cone)
+
+	float3 v = normalize(pos - light_pos);
+	float cos_direction = dot(v, light_dir);
+
+	return smoothstep(cos_cone.x, cos_cone.y, cos_direction);
+}
+
+float3 fresnel_term_schlick(float3 light_vec, float3 halfway_vec, float3 c_spec)
+{
+	float e_n = saturate(dot(light_vec, halfway_vec));
+	return c_spec > 0 ? c_spec + (1 - c_spec) * exp2(-(5.55473f * e_n + 6.98316f) * e_n) : 0;
+}
+
+//Dbp = (a+2) / 2PI (n.m)@
+float specular_normalize_factor(float roughness)
+{
+	return (roughness + 2) / 8;
+}
+
+//Gimplicit(lc,v,h) = (n.lc)(n.v)
+//todo calc G and F in lighting pass
+//Cook - Torrance
+float3 Shading(float3 diff_lighting, float3 spec_lighting, float shininess,
+	float3 diffuse, float3 specular, float3 view_dir, float3 normal)
+{
+	return float3(max(diff_lighting * diffuse
+		+ specular_normalize_factor(shininess) * spec_lighting
+		//用view和normal来代替light和halfway
+		//http://www.klayge.org/wiki/index.php/%E5%BB%B6%E8%BF%9F%E6%B8%B2%E6%9F%93
+		* fresnel_term_schlick(normalize(view_dir), normal, specular), 0));
+}
+
+float3 Shading(float4 lighting, float shininess, float3 diffuse, float3 specular,
+	float3 view_dir, float3 normal)
+{
+	const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);
+	float3 diff_lighting = lighting.rgb;
+	float3 spec_lighting = lighting.a / (dot(lighting.rgb, RGB_TO_LUM) + 1e-6f) * lighting.rgb;
+	return Shading(diff_lighting, spec_lighting, shininess, diffuse, specular,
+		view_dir, normal);
+}
+
+
+// Environment BRDF
+float CalcPrefilteredEnvMip(float roughness, int num_mip)
+{
+	return num_mip - roughness * num_mip;
+}
+
+float3 CalcPrefilteredEnvVec(float3 normal, float3 view)
+{
+	return -reflect(view, normal);
+}
+
+float3 CalcEnvDiffuse(float3 prefiltered_env, float3 c_diff)
+{
+	return prefiltered_env * c_diff;
+}
+
+float3 CalcEnvSpecular(float3 prefiltered_env, float3 c_spec, float roughness, float3 normal, float3 view)
+{
+	float n_dot_v = saturate(dot(normal, view));
+	roughness = max(0.5f / 16, roughness);
+	float2 env_brdf;
+	float4 tmp = ((float4(-4.996914762f, 7.253111161f, -1.963867075f, -0.170416225f) * roughness
+		+ float4(8.993475061f, -15.42473953f, 4.712593001f, 0.448102365f)) * roughness
+		+ float4(-4.928234727f, 10.95286522f, -3.852980973f, -0.389332014f)) * roughness
+		+ float4(0.846124834f, -1.596815751f, 1.005729748f, 0.113484128f);
+	env_brdf.x = (((tmp.x * n_dot_v + tmp.y) * n_dot_v + tmp.z) * n_dot_v) + tmp.w;
+	tmp = ((float4(-0.684077741f, 1.316163916f, -0.70869252f, 0.073264505f) * roughness
+		+ float4(0.719315865f, -1.384932814f, 0.775880046f, -0.105818706f)) * roughness
+		+ float4(-0.101034049f, 0.18680998f, -0.117919199f, 0.030727381f)) * roughness
+		+ float4(0.001922126f, 0.006697305f, -0.015741592f, 0.007229544f);
+	env_brdf.y = (((tmp.x * n_dot_v + tmp.y) * n_dot_v + tmp.z) * n_dot_v) + tmp.w;
+	env_brdf = saturate(env_brdf);
+	return prefiltered_env * (c_spec * env_brdf.x + env_brdf.y);
+}
+
+
+float4 CalcColor(float lambert,float spec,float atten,float3 light_color) {
+	float2 ds = lambert*atten*float2(1, spec);
+	return ds.xxxy*float4(light_color, 1.f);
+}
+
+float4 CalcDRLighting(float3 light_pos, float3 pos_es, float3 normal, float3 view_dir,
+	float shininess, float atten, float3 light_color,float range) {
+	float4 lighting = 0;
+	float3 dir = light_pos - pos_es;
+	float dist = length(dir);
+	if (dist < range) {
+		dir /= dist;
+		float lambert = dot(normal, dir);
+		if (lambert > 0) {
+			float spec = roughness_term(normalize(dir - view_dir), normal, shininess);
+			lighting = CalcColor(lambert, spec, atten, light_color);
+		}
+	}
+	return lighting;
+}
+
+float3 GetDiffuse(float4 mrt1)
+{
+	return mrt1.xyz;
+}
+
+float GetSpecular(float4 mrt1)
+{
+	return mrt1.w;
+}
