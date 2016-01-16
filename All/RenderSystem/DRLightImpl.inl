@@ -4,6 +4,7 @@
 #include <Core\Vertex.hpp>
 #include <RenderSystem\d3dx11.hpp>
 #include <RenderSystem\ShaderMgr.h>
+#include <leomathex.hpp>
 #include "DeferredRender.hpp"
 
 using namespace leo;
@@ -268,7 +269,7 @@ public:
 	void Draw(ID3D11DeviceContext * context, DirectionalLightSource& light_source, const Camera& camera) {
 		DirectionalLight mPSCBParams;
 		mPSCBParams.Diffuse = light_source.Diffuse();
-		mPSCBParams.Directional = -light_source.Directional();
+		mPSCBParams.Directional = TransformNormal(-light_source.Directional(),camera.View());
 		context->UpdateSubresource(mPSCB, 0, 0, &mPSCBParams, 0, 0);
 		context->PSSetShader(mDirectionalLightQuadPS, nullptr, 0);
 		context->PSSetConstantBuffers(0, 1, &mPSCB);
@@ -286,6 +287,49 @@ private:
 
 	leo::win::unique_com<ID3D11Buffer>  mPSCB = nullptr;
 };
+
+class AmbientVolumeImpl :public leo::Singleton<AmbientVolumeImpl, false> {
+public:
+	AmbientVolumeImpl(ID3D11Device* device) {
+		leo::ShaderMgr sm;
+
+		mAmbientLightQuadPS = sm.CreatePixelShader(
+			leo::FileSearch::Search(L"AmbientLightQuadPS.cso"));
+
+		CD3D11_BUFFER_DESC pscbDesc{ sizeof(leo::AmbientLight),D3D11_BIND_CONSTANT_BUFFER };
+
+		leo::dxcall(device->CreateBuffer(&pscbDesc, nullptr, &mPSCB));
+	}
+
+	~AmbientVolumeImpl() {
+	}
+
+	void Apply(ID3D11DeviceContext * context, const Camera& camera) {
+		EffectQuad::GetInstance().Apply(context);
+	}
+
+	void Draw(ID3D11DeviceContext * context, const float3& light_diffuse, const Camera& camera) {
+		AmbientLight mPSCBParams;
+		mPSCBParams.Diffuse = light_diffuse;
+		mPSCBParams.Directional = TransformNormal({ 0,1,0 }, camera.View());
+		context->UpdateSubresource(mPSCB, 0, 0, &mPSCBParams, 0, 0);
+		context->PSSetShader(mAmbientLightQuadPS, nullptr, 0);
+		context->PSSetConstantBuffers(0, 1, &mPSCB);
+		//Important ,Disable z-write
+		EffectQuad::GetInstance().Draw(context);
+	}
+
+	static AmbientVolumeImpl& GetInstance(ID3D11Device* device = nullptr) {
+		static AmbientVolumeImpl mInstance{ device };
+		return mInstance;
+	}
+
+private:
+	ID3D11PixelShader* mAmbientLightQuadPS = nullptr;
+
+	leo::win::unique_com<ID3D11Buffer>  mPSCB = nullptr;
+};
+
 
 void leo::DeferredRender::LightSourcesRender::Init(ID3D11Device * device)
 {
@@ -310,6 +354,8 @@ void leo::DeferredRender::LightPass(ID3D11DeviceContext * context, DepthStencil&
 	ID3D11ShaderResourceView* srvs[] = { GetLinearDepthSRV(),GetNormalAlphaSRV() };
 	context->PSSetSamplers(0, 1, &LinearizeDepthImpl::GetInstance().mSamPoint);
 	context->PSSetShaderResources(0, 2, srvs);
+
+	__m128 ambinet = load(float3(0, 0, 0));
 
 	for (auto &light_source : mLightSourceList) {
 		switch (light_source->Type())
@@ -338,6 +384,10 @@ void leo::DeferredRender::LightPass(ID3D11DeviceContext * context, DepthStencil&
 			dirImpl.Draw(context, dir_light, camera);
 		}
 											 break;
+		case LightSource::ambient_light: {
+			ambinet = Add(ambinet, load(light_source->Diffuse()));
+		}
+										 break;
 		default:
 			break;
 		}

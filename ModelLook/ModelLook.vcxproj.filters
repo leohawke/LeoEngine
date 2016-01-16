@@ -555,6 +555,9 @@
     <FxCompile Include="Shader\NormalDebug.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\AmbientLightQuadPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ModelLook.rc">

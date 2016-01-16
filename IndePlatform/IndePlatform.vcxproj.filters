@@ -260,6 +260,9 @@
     <ClInclude Include="Include\CHRLib\CharacterProcessing.h">
       <Filter>Header Files\CHRLib</Filter>
     </ClInclude>
+    <ClInclude Include="Include\leomathex.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="g++compiler.bat" />

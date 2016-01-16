@@ -155,5 +155,10 @@ leo::DirectionalLightSource::DirectionalLightSource()
 {
 }
 
+leo::AmbientLightSource::AmbientLightSource()
+	: LightSource(ambient_light)
+{
+}
+
 
 

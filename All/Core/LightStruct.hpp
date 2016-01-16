@@ -20,6 +20,7 @@ namespace leo {
 	struct PointLight;
 	struct DirectionalLight;
 	struct SpotLight;
+	struct AmbientLight;
 
 	struct PointLight {
 		float3 Position;
@@ -28,6 +29,11 @@ namespace leo {
 	};
 
 	struct DirectionalLight {
+		float3 Directional;
+		float3 Diffuse;
+	};
+
+	struct AmbientLight {
 		float3 Directional;
 		float3 Diffuse;
 	};

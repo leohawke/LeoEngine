@@ -136,6 +136,7 @@
     <ClInclude Include="Include\ldef.h" />
     <ClInclude Include="Include\leo2DMath.hpp" />
     <ClInclude Include="Include\leoint.hpp" />
+    <ClInclude Include="Include\leomathex.hpp" />
     <ClInclude Include="Include\leomathsse.hpp" />
     <ClInclude Include="Include\leomathsseconvert.hpp" />
     <ClInclude Include="Include\leomathsseoper.hpp" />

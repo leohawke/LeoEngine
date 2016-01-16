@@ -39,6 +39,8 @@ namespace leo {
 
 			directional_light,
 
+			ambient_light,
+
 			type_count
 		};
 
@@ -201,6 +203,35 @@ namespace leo {
 	private:
 		float3 mDirectional;
 	};
+
+	class LB_API AmbientLightSource :public LightSource {
+	public:
+		AmbientLightSource();
+
+		const float3& Directional() const {
+			return mDirectional;
+		}
+
+		void Directional(const float3& dir) {
+			mDirectional = dir;
+		}
+	protected:
+		float CosInnerAngle() const {
+			return 0.f;
+		}
+		void InnerAngle(float angle) {
+		}
+		float CosOuterAngle() const {
+			return 0.f;
+		}
+		float SinOuterAngle() const {
+			return 0.f;
+		}
+		void OuterAngle(float angle) {
+		}
+	private:
+		float3 mDirectional;
+	};
 }
 
 namespace std {
@@ -245,6 +276,21 @@ namespace std {
 		auto _Ret = std::allocate_shared <
 			leo::DirectionalLightSource, leo::aligned_alloc < leo::DirectionalLightSource, 16 >>
 			(leo::aligned_alloc<leo::DirectionalLightSource, 16>());
+#endif
+		return (_Ret);
+	}
+
+	//make_shared overload for AmbientLightSource
+	template<>
+	inline shared_ptr<leo::AmbientLightSource> make_shared()
+	{	// make a shared_ptr
+#ifdef LEO_MEMORY_LIMIT
+		shared_ptr<leo::DirectionalLightSource> _Ret;
+		_Ret.reset(new leo::DirectionalLightSource());
+#else
+		auto _Ret = std::allocate_shared <
+			leo::AmbientLightSource, leo::aligned_alloc < leo::DirectionalLightSource, 16 >>
+			(leo::aligned_alloc<leo::AmbientLightSource, 16>());
 #endif
 		return (_Ret);
 	}
