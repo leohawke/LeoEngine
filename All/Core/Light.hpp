@@ -208,14 +208,17 @@ namespace leo {
 	public:
 		AmbientLightSource();
 
+	protected:
+
+		//Spot,Directional
 		const float3& Directional() const {
 			return mDirectional;
 		}
 
+		//Spot,Directional
 		void Directional(const float3& dir) {
-			mDirectional = dir;
 		}
-	protected:
+
 		float CosInnerAngle() const {
 			return 0.f;
 		}
@@ -230,7 +233,7 @@ namespace leo {
 		void OuterAngle(float angle) {
 		}
 	private:
-		float3 mDirectional;
+		static float3 const mDirectional;
 	};
 }
 
@@ -289,7 +292,7 @@ namespace std {
 		_Ret.reset(new leo::DirectionalLightSource());
 #else
 		auto _Ret = std::allocate_shared <
-			leo::AmbientLightSource, leo::aligned_alloc < leo::DirectionalLightSource, 16 >>
+			leo::AmbientLightSource, leo::aligned_alloc < leo::AmbientLightSource, 16 >>
 			(leo::aligned_alloc<leo::AmbientLightSource, 16>());
 #endif
 		return (_Ret);

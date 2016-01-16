@@ -160,5 +160,7 @@ leo::AmbientLightSource::AmbientLightSource()
 {
 }
 
+const leo::float3 leo::AmbientLightSource::mDirectional = { 0,-1.f,0 };
+
 
 

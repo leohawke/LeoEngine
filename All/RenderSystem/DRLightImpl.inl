@@ -308,9 +308,9 @@ public:
 		EffectQuad::GetInstance().Apply(context);
 	}
 
-	void Draw(ID3D11DeviceContext * context, const float3& light_diffuse, const Camera& camera) {
+	void Draw(ID3D11DeviceContext * context, __m128 light_diffuse, const Camera& camera) {
 		AmbientLight mPSCBParams;
-		mPSCBParams.Diffuse = light_diffuse;
+		save(mPSCBParams.Diffuse,light_diffuse);
 		mPSCBParams.Directional = TransformNormal({ 0,1,0 }, camera.View());
 		context->UpdateSubresource(mPSCB, 0, 0, &mPSCBParams, 0, 0);
 		context->PSSetShader(mAmbientLightQuadPS, nullptr, 0);
@@ -336,6 +336,7 @@ void leo::DeferredRender::LightSourcesRender::Init(ID3D11Device * device)
 	PointLightVolumeImpl::GetInstance(device);
 	SpotLightVolumeImpl::GetInstance(device);
 	DirectionalVolumeImpl::GetInstance(device);
+	AmbientVolumeImpl::GetInstance(device);
 }
 
 void leo::DeferredRender::LightSourcesRender::Destroy()
@@ -343,6 +344,7 @@ void leo::DeferredRender::LightSourcesRender::Destroy()
 	PointLightVolumeImpl::GetInstance().~PointLightVolumeImpl();
 	SpotLightVolumeImpl::GetInstance().~SpotLightVolumeImpl();
 	DirectionalVolumeImpl::GetInstance().~DirectionalVolumeImpl();
+	AmbientVolumeImpl::GetInstance().~AmbientVolumeImpl();
 }
 
 void leo::DeferredRender::LightPass(ID3D11DeviceContext * context, DepthStencil& depthstencil, const Camera & camera) noexcept
@@ -392,5 +394,10 @@ void leo::DeferredRender::LightPass(ID3D11DeviceContext * context, DepthStencil&
 			break;
 		}
 	}
+
+	auto & ambImpl = AmbientVolumeImpl::GetInstance();
+	ambImpl.Apply(context, camera);
+	LightQuadPass(context);
+	ambImpl.Draw(context, ambinet, camera);
 }
 
