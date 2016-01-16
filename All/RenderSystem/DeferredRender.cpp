@@ -12,6 +12,7 @@
 #include "DeferredRender.hpp"
 #include "ShaderMgr.h"
 #include "HDRProcess.h"
+#include "CopyProcess.hpp"
 #include "RenderStates.hpp"
 
 #include <DirectXPackedVector.h>
@@ -125,8 +126,9 @@ private:
 			device->CreateShaderResourceView(mShadingTex, nullptr, &mShadingSRV);
 			device->CreateRenderTargetView(mShadingTex, nullptr, &mShadingRTV);
 		}
+		//some state
 		{
-
+			leo::Make_CopyProcess(device, leo::copyprocesss_type::point_process);
 		}
 	}
 };
@@ -242,6 +244,8 @@ public:
 
 	//ViewPort = ◊Ó÷’¥Û–°
 	D3D11_VIEWPORT mViewPort;
+
+	uint32 mDRPPFlags = HDR;
 };
 
 class LinearizeDepthImpl : public leo::Singleton<LinearizeDepthImpl, false>
@@ -381,10 +385,23 @@ void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context, DepthStenci
 
 void leo::DeferredRender::PostProcess(ID3D11DeviceContext * context, ID3D11RenderTargetView * rtv, float dt)
 {
-	pHDRProcess->SetFrameDelta(dt);
-	pHDRProcess->Apply(context);
-	context->RSSetViewports(1, &pStateImpl->mViewPort);
-	pHDRProcess->Draw(context,pResImpl->mShadingSRV,rtv);
+	//todo ,add postprocess swapchain
+	if (pStateImpl->mDRPPFlags & HDR) {
+		pHDRProcess->SetFrameDelta(dt);
+		pHDRProcess->Apply(context);
+		context->RSSetViewports(1, &pStateImpl->mViewPort);
+		pHDRProcess->Draw(context, pResImpl->mShadingSRV, rtv);
+	}
+	else {
+		auto pPointCopy = leo::Make_CopyProcess(nullptr, leo::copyprocesss_type::point_process);
+		pPointCopy->Apply(context);
+		context->RSSetViewports(1, &pStateImpl->mViewPort);
+		pPointCopy->Draw(context, pResImpl->mShadingSRV, rtv);
+	}
+}
+
+void leo::DeferredRender::SetPostProcess(uint32 flag) {
+	pStateImpl->mDRPPFlags = flag;
 }
 
 

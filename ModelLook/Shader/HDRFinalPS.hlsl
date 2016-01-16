@@ -39,9 +39,11 @@ float3 F(float3 x) {
 float3 ToneMapping(float3 color, float3 blur, float adapted_lum) {
 	const float3 BLUE_SHIFT = float3(0.4f, 0.4f, 0.7f);
 
+
 	color += blur * g_fBloomScale;
 
 	float lum = dot(color, RGB_TO_LUM);
+
 
 	// martin's modified blue shift
 	color = lerp(lum * BLUE_SHIFT, color, saturate(16.0f * lum));

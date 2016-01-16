@@ -41,6 +41,10 @@ namespace leo {
 			static void Init(ID3D11Device* device);
 			static void Destroy();
 		};
+
+		enum DR_PP_FLAG : uint32 {
+			HDR = 1,
+		};
 	public:
 		using size_type = std::pair<uint16, uint16>;
 
@@ -63,6 +67,7 @@ namespace leo {
 #ifdef DEBUG
 		void DebugProcess(ID3D11DeviceContext* context, ID3D11RenderTargetView * rtv, ID3D11Texture2D* rtv_tex);
 #endif
+		void SetPostProcess(uint32 flag);
 
 		void SetSSAOParams(bool enable, uint8 level) noexcept;
 

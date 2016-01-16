@@ -350,6 +350,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	#endif
 
 	pRender = std::make_unique<leo::DeferredRender>(device, size);
+	//pRender->SetPostProcess(0);//no hdr
 
 	pSky = std::make_unique<leo::Sky>(device, L"Resource\\snowcube1024.dds");
 	//pTerrain = std::make_unique<leo::Terrain<>>(device, L"Resource\\Test.Terrain");

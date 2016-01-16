@@ -182,7 +182,7 @@ namespace leo
 				&global::globalD3DContext);
 			if (SUCCEEDED(hr) && featureLevel >= D3D_FEATURE_LEVEL_11_0)
 			{
-				EnumSizes(adapter, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB);
+				EnumSizes(adapter, DXGI_FORMAT_R8G8B8A8_UNORM);
 				break;
 			}
 			else
@@ -217,7 +217,7 @@ namespace leo
 		// All Direct3D 11 capable devices support 4X MSAA for all render 
 		// target formats, so we only need to check quality support.
 		UINT m4xMsaaQuality = 0;
-		dxcall(global::globalD3DDevice->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, 1, &m4xMsaaQuality));
+		dxcall(global::globalD3DDevice->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, 1, &m4xMsaaQuality));
 
 		//Warning: if not use MSAA,the VSGraphicDebug will throw thre exceptions
 		//Note: deferred shading doesn't match size
@@ -277,7 +277,7 @@ namespace leo
 		global::globalDepthStencil->ReSize(size,global::globalD3DDevice);
 
 		try{
-			dxcall(global::globalDXGISwapChain->ResizeBuffers(1, size.first, size.second, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, 0));
+			dxcall(global::globalDXGISwapChain->ResizeBuffers(1, size.first, size.second, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
 
 			dxcall(global::globalDXGISwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&global::globalD3DRenderTargetTexture2D)));
 			leo::dx::DebugCOM(global::globalD3DRenderTargetTexture2D, "global::globalD3DRenderTargetTexture2D");
