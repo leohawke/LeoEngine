@@ -18,6 +18,7 @@
 #include <memory.hpp>
 #include "LightStruct.hpp"
 #include <leomathutility.hpp>
+#include <RenderSystem/Texture.hpp>
 
 namespace leo {
 
@@ -208,6 +209,12 @@ namespace leo {
 	public:
 		AmbientLightSource();
 
+
+		 TexturePtr const & SkylightTexY() const ;
+		 TexturePtr const & SkylightTexC() const ;
+		 TexturePtr const & SkylightTex() const ;
+		 void SkylightTex(TexturePtr const & tex_y, TexturePtr const & tex_c) ;
+		 void SkylightTex(TexturePtr const & tex) ;
 	protected:
 
 		//Spot,Directional
@@ -234,6 +241,9 @@ namespace leo {
 		}
 	private:
 		static float3 const mDirectional;
+
+		mutable TexturePtr mSkyTexY;
+		mutable TexturePtr mSkyTexC;
 	};
 }
 

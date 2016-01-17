@@ -357,7 +357,12 @@ void leo::DeferredRender::LightPass(ID3D11DeviceContext * context, DepthStencil&
 	context->PSSetSamplers(0, 1, &LinearizeDepthImpl::GetInstance().mSamPoint);
 	context->PSSetShaderResources(0, 2, srvs);
 
-	__m128 ambinet = load(float3(0, 0, 0));
+	__m128 ambient = load(float3(0, 0, 0));
+	unsigned ambient_count = 0;
+	
+	pStateImpl->SkyLightC = nullptr;
+	pStateImpl->SkyLightY = nullptr;
+
 
 	for (auto &light_source : mLightSourceList) {
 		switch (light_source->Type())
@@ -387,7 +392,17 @@ void leo::DeferredRender::LightPass(ID3D11DeviceContext * context, DepthStencil&
 		}
 											 break;
 		case LightSource::ambient_light: {
-			ambinet = Add(ambinet, load(light_source->Diffuse()));
+			ambient = Add(ambient, load(light_source->Diffuse()));
+			++ambient_count;
+			auto & ambient_light = dynamic_cast<AmbientLightSource&>(*light_source);
+			if (ambient_light.SkylightTexY()) {
+				pStateImpl->SkyLightY = ambient_light.SkylightTexY();
+				pStateImpl->SkyLightC = ambient_light.SkylightTexC();
+
+				auto view = load(camera.View());
+				__m128 det;
+				save(pStateImpl->mCPUSkyLightParam.inv_view,Inverse(det, view));
+			}
 		}
 										 break;
 		default:
@@ -395,9 +410,12 @@ void leo::DeferredRender::LightPass(ID3D11DeviceContext * context, DepthStencil&
 		}
 	}
 
+	if (ambient_count == 0)
+		ambient = load(float3(0.1f, 0.1f, 0.1f));
+
 	auto & ambImpl = AmbientVolumeImpl::GetInstance();
 	ambImpl.Apply(context, camera);
 	LightQuadPass(context);
-	ambImpl.Draw(context, ambinet, camera);
+	ambImpl.Draw(context, ambient, camera);
 }
 

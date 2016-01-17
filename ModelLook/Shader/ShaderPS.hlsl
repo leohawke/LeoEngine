@@ -16,15 +16,15 @@ struct VertexOut
 };
 
 
-cbuffer SkylightParam
+cbuffer SkylightParam :register(b0)
 {
 	float4x4 inv_view;
 	int3 skylight_diff_spec_mip;
 	float skylight_mip_bias;
 };
 
-TextureCube skylight_y_cube_tex;
-TextureCube skylight_c_cube_tex;
+TextureCube skylight_y_cube_tex:register(t3);
+TextureCube skylight_c_cube_tex:register(t4);
 SamplerState skylight_sampler;
 
 float4 SkylightShading(float shininess, float4 mrt1, float3 normal, float3 view)
@@ -41,7 +41,7 @@ float4 SkylightShading(float shininess, float4 mrt1, float3 normal, float3 view)
 
 		float3 prefiltered_clr = decode_hdr_yc(TexCubeSampleLevel(skylight_y_cube_tex, skylight_sampler, normal, skylight_diff_spec_mip.x, 0).r,
 			TexCubeSampleLevel(skylight_c_cube_tex, skylight_sampler, normal, skylight_diff_spec_mip.x, 0)).xyz;
-		shading.xyz + CalcEnvDiffuse(prefiltered_clr, c_diff);
+		shading.xyz += CalcEnvDiffuse(prefiltered_clr, c_diff);
 
 		shininess = log2(shininess) / 13; // log2(8192) == 13
 

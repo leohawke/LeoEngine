@@ -14,8 +14,10 @@
 #include "HDRProcess.h"
 #include "CopyProcess.hpp"
 #include "RenderStates.hpp"
-
 #include <DirectXPackedVector.h>
+
+#include <RenderSystem/D3D11/D3D11Texture.hpp>
+
 //TODO :Support MSAA
 
 
@@ -133,7 +135,7 @@ private:
 	}
 };
 
-class leo::DeferredRender::DeferredStateImpl {
+class leo::DeferredRender::DeferredStateImpl :public PassAlloc {
 public:
 	DeferredStateImpl(ID3D11Device* device,size_type size) {
 		CD3D11_DEPTH_STENCIL_DESC shaderPassDesc{ D3D11_DEFAULT };
@@ -155,6 +157,8 @@ public:
 		mViewPort.TopLeftY = 0;
 		mViewPort.MaxDepth = 1.0f;
 		mViewPort.MinDepth = 0.0f;
+
+		dx::CreateGPUCBuffer(device, mCPUSkyLightParam, mGPUSkyLightParam);
 	}
 
 	void BuildDRLightStencil_StateObject(ID3D11Device* device) {
@@ -246,6 +250,18 @@ public:
 	D3D11_VIEWPORT mViewPort;
 
 	uint32 mDRPPFlags = HDR;
+
+	//SkylightParam
+	struct {
+		float4x4 inv_view;
+		int skylight_diff_spec_mip[3];
+		float skylight_mip_bias;
+	} mCPUSkyLightParam;
+
+	TexturePtr SkyLightY;
+	TexturePtr SkyLightC;
+
+	win::unique_com<ID3D11Buffer> mGPUSkyLightParam;
 };
 
 class LinearizeDepthImpl : public leo::Singleton<LinearizeDepthImpl, false>
@@ -375,6 +391,25 @@ void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context, DepthStenci
 
 	context->PSSetShaderResources(0,arrlen(srvs),srvs);
 	context->PSSetSamplers(0, 1, &(LinearizeDepthImpl::GetInstance().mSamPoint));
+
+	if (pStateImpl->SkyLightY) {
+
+		auto skylight_y_param = dynamic_cast<D3D11Texture2D*>(pStateImpl->SkyLightY.get())->ResourceView();
+		auto skylight_c_param = dynamic_cast<D3D11Texture2D*>(pStateImpl->SkyLightC.get())->ResourceView();
+
+		auto mip = pStateImpl->SkyLightY->NumMipMaps();
+		pStateImpl->mCPUSkyLightParam.skylight_diff_spec_mip[0] = mip - 1;
+		pStateImpl->mCPUSkyLightParam.skylight_diff_spec_mip[1] = mip - 2;
+		pStateImpl->mCPUSkyLightParam.skylight_diff_spec_mip[2] = 1;
+		pStateImpl->mCPUSkyLightParam.skylight_mip_bias = mip / -2.0f;
+
+		context->UpdateSubresource(pStateImpl->mGPUSkyLightParam, 0, nullptr, &pStateImpl->mCPUSkyLightParam, 0, 0);
+		context->PSSetConstantBuffers(0, 1, &pStateImpl->mGPUSkyLightParam);
+
+		std::invoke(dx::SetShaderResourceView<D3D11_PIXEL_SHADER>(context), 3, skylight_y_param, skylight_c_param);
+	}
+
+
 	//TODO-Z greate opt
 	effectQuad.Draw(context);
 

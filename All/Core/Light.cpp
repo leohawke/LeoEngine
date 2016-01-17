@@ -160,6 +160,32 @@ leo::AmbientLightSource::AmbientLightSource()
 {
 }
 
+TexturePtr const & leo::AmbientLightSource::SkylightTexY() const
+{
+	return mSkyTexY;
+}
+
+TexturePtr const & leo::AmbientLightSource::SkylightTexC() const
+{
+	return mSkyTexC;
+}
+
+TexturePtr const & leo::AmbientLightSource::SkylightTex() const
+{
+	return mSkyTexY;
+}
+
+void leo::AmbientLightSource::SkylightTex(TexturePtr const & tex_y, TexturePtr const & tex_c)
+{
+	mSkyTexY = tex_y;
+	mSkyTexC = tex_c;
+}
+
+void leo::AmbientLightSource::SkylightTex(TexturePtr const & tex)
+{
+	mSkyTexY = tex;
+}
+
 const leo::float3 leo::AmbientLightSource::mDirectional = { 0,-1.f,0 };
 
 
