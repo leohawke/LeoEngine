@@ -160,7 +160,7 @@ namespace leo {
 
 	class D3D11Texture1D : public D3D11Texture {
 	public:
-		D3D11Texture1D(uint16 width, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info = {}, ElementInitData = {});
+		D3D11Texture1D(uint16 width, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access, ElementInitData = {});
 
 		~D3D11Texture1D();
 
@@ -223,7 +223,9 @@ namespace leo {
 
 	class D3D11TextureCube : public D3D11Texture {
 	public:
-		D3D11TextureCube(uint32 size, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info = {}, ElementInitData = {});
+		D3D11TextureCube(uint16 size, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access, ElementInitData = {});
+
+		~D3D11TextureCube();
 
 		uint16 Width(uint8 /*level*/) const override;
 		uint16 Height(uint8 /*level*/) const override;
@@ -243,6 +245,11 @@ namespace leo {
 		ID3D11DepthStencilView* DepthStencilView();
 
 		void ReclaimHWResource(ElementInitData const * init_data) override;
+	private:
+		D3D11_TEXTURE2D_DESC mDesc;
+		win::unique_com<ID3D11Texture2D> mTex;
+
+		uint16 mWidth;
 	};
 }
 

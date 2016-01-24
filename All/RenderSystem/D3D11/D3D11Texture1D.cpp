@@ -8,8 +8,8 @@ namespace {
 	auto context = [] {return leo::DeviceMgr().GetDeviceContext(); };
 }
 
-leo::D3D11Texture1D::D3D11Texture1D(uint16 width, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, ElementInitData)
-	: D3D11Texture(DT_1D, access, sample_info)
+leo::D3D11Texture1D::D3D11Texture1D(uint16 width, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access, ElementInitData init_data)
+	: D3D11Texture(DT_1D, access)
 {
 	if (0 == numMipMaps)
 	{
@@ -39,6 +39,14 @@ leo::D3D11Texture1D::D3D11Texture1D(uint16 width, uint8 numMipMaps, uint8 array_
 	mFormat = format;
 	mDesc.Format = D3D11Mapping::MappingFormat(mFormat);
 	mWidth = width;
+
+	mDesc.Width = width;
+	mDesc.MipLevels = NumMipMaps();
+	mDesc.ArraySize = ArraySize();
+	mDesc.Format = D3D11Mapping::MappingFormat(Format());
+
+	D3DFlags(mDesc.Usage, mDesc.BindFlags, mDesc.CPUAccessFlags, mDesc.MiscFlags);
+	ReclaimHWResource(init_data.data == nullptr ? nullptr : &init_data);
 }
 
 using leo::D3D11Texture1D;

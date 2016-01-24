@@ -63,24 +63,8 @@ leo::D3D11Texture2D::D3D11Texture2D(uint16 width, uint16 height, uint8 numMipMap
 	mDesc.Height = height;
 	mDesc.MipLevels = NumMipMaps();
 	mDesc.ArraySize = ArraySize();
-	switch (Format())
-	{
-	case EF_D16:
-		mDesc.Format = DXGI_FORMAT_R16_TYPELESS;
-		break;
 
-	case EF_D24S8:
-		mDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
-		break;
-
-	case EF_D32F:
-		mDesc.Format = DXGI_FORMAT_R32_TYPELESS;
-		break;
-
-	default:
-		mDesc.Format = D3D11Mapping::MappingFormat(Format());
-		break;
-	}
+	mDesc.Format = D3D11Mapping::MappingFormat(Format());
 	mDesc.SampleDesc.Count = sample_info.Count;
 	mDesc.SampleDesc.Quality = sample_info.Quality;
 

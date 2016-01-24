@@ -296,6 +296,9 @@
     <ClCompile Include="..\All\RenderSystem\D3D11\D3D11Texture1D.cpp">
       <Filter>RenderSystem\D3D11</Filter>
     </ClCompile>
+    <ClCompile Include="..\All\RenderSystem\D3D11\D3D11TextureCube.cpp">
+      <Filter>RenderSystem\D3D11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />

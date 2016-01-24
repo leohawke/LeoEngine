@@ -271,6 +271,7 @@
     <ClCompile Include="..\All\RenderSystem\D3D11\D3D11Texture.cpp" />
     <ClCompile Include="..\All\RenderSystem\D3D11\D3D11Texture1D.cpp" />
     <ClCompile Include="..\All\RenderSystem\D3D11\D3D11Texture2D.cpp" />
+    <ClCompile Include="..\All\RenderSystem\D3D11\D3D11TextureCube.cpp" />
     <ClCompile Include="..\All\RenderSystem\d3dx11.cpp" />
     <ClCompile Include="..\All\RenderSystem\Deferred.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
