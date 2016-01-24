@@ -38,7 +38,7 @@ namespace leo {
 		virtual std::string const & Name() const = 0;
 
 		virtual TexturePtr MakeTexture2D(uint16 width, uint16 height, uint8 numMipMaps, uint8 array_size,
-			EFormat format, SampleDesc sample_info, uint32 access, ElementInitData init_data) = 0;
+			EFormat format, SampleDesc sample_info, uint32 access, ElementInitData const * init_data) = 0;
 	};
 
 

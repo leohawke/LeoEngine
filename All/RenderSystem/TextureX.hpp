@@ -25,10 +25,11 @@ namespace leo {
 		using std::experimental::filesystem::path;
 
 		LB_API TexturePtr MakeTexture2D(uint16 width, uint16 height, uint8 numMipMaps, uint8 array_size,
-			EFormat format, SampleDesc sample_info, uint32 access,ElementInitData init_data);
+			EFormat format, SampleDesc sample_info, uint32 access,ElementInitData const * init_data);
 
 		std::shared_ptr<Drawing::IImage> MakeIImage(Drawing::Size);
 
+		LB_API TexturePtr SyncLoadTexture(const path& tex_name, uint32 access);
 		LB_API TexturePtr ASyncLoadTexture(const path& tex_name, uint32 access);
 	}
 }

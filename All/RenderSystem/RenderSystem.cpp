@@ -14,7 +14,7 @@ namespace leo {
 		}
 
 		TexturePtr MakeTexture2D(uint16 width, uint16 height, uint8 numMipMaps, uint8 array_size,
-			EFormat format, SampleDesc sample_info, uint32 access, ElementInitData init_data) override {
+			EFormat format, SampleDesc sample_info, uint32 access, ElementInitData const * init_data) override {
 			return Texture::NullTexture;
 		}
 	};

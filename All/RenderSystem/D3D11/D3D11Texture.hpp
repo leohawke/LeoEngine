@@ -160,7 +160,7 @@ namespace leo {
 
 	class D3D11Texture1D : public D3D11Texture {
 	public:
-		D3D11Texture1D(uint16 width, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access, ElementInitData = {});
+		D3D11Texture1D(uint16 width, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access, ElementInitData const* = {});
 
 		~D3D11Texture1D();
 
@@ -189,7 +189,7 @@ namespace leo {
 
 	class D3D11Texture2D : public D3D11Texture {
 	public:
-		D3D11Texture2D(uint16 width, uint16 height, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info = {}, ElementInitData = {});
+		D3D11Texture2D(uint16 width, uint16 height, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info = {}, ElementInitData const* = {});
 
 		~D3D11Texture2D();
 
@@ -223,7 +223,7 @@ namespace leo {
 
 	class D3D11TextureCube : public D3D11Texture {
 	public:
-		D3D11TextureCube(uint16 size, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access, ElementInitData = {});
+		D3D11TextureCube(uint16 size, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access, ElementInitData const* = {});
 
 		~D3D11TextureCube();
 

@@ -35,7 +35,7 @@ namespace details
 			tex = leo::X::MakeTexture2D(static_cast<uint16>(s.Width), static_cast<uint16>(s.Height)
 				, 1, 1,
 				EFormat::EF_ARGB8, SampleDesc(),
-				EAccess::EA_C_W | EAccess::EA_G_R, ElementInitData());
+				EAccess::EA_C_W | EAccess::EA_G_R, nullptr);
 		}
 
 		~hud_tex_wrapper() {}
