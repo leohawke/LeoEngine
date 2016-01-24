@@ -518,8 +518,23 @@ namespace leo {
 		return 1;
 	}
 
+	void D3D11Texture::Map1D(uint8 array_index, uint8 level, MapAccess tma, uint16 x_offset, uint16 width, void *& data)
+	{
+		assert(false);
+	}
+
 	void D3D11Texture::Map2D(uint8 array_index, uint8 level, MapAccess tma, uint16 x_offset, uint16 y_offset,
 		uint16 width, uint16 height, void *& data, uint32_t & row_pitch)
+	{
+		assert(false);
+	}
+
+	void D3D11Texture::MapCube(uint8 array_index, CubeFaces face, uint8 level, MapAccess tma, uint16 x_offset, uint16 y_offset, uint16 width, uint16 height, void *& data, uint32_t & row_pitch)
+	{
+		assert(false);
+	}
+
+	void D3D11Texture::Unmap1D(uint8 array_index, uint8 level)
 	{
 		assert(false);
 	}
@@ -527,6 +542,10 @@ namespace leo {
 	void D3D11Texture::Unmap2D(uint8 array_index, uint8 level)
 	{
 		assert(false);
+	}
+
+	void D3D11Texture::UnmapCube(uint8 array_index, CubeFaces face, uint8 level)
+	{
 	}
 
 	ID3D11Resource* D3D11Texture::Resource() const {

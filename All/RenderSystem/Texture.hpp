@@ -72,7 +72,7 @@ namespace leo {
 			friend class Texture;
 
 		public:
-			/*Mapper(Texture& tex, uint8 array_index, uint8 level, MapAccess tma,
+			Mapper(Texture& tex, uint8 array_index, uint8 level, MapAccess tma,
 				uint16 x_offset, uint16 width)
 				: TexRef(tex),
 				MappedArrayIndex(array_index),
@@ -80,7 +80,7 @@ namespace leo {
 			{
 				TexRef.Map1D(array_index, level, tma, x_offset, width, pSysMem);
 				RowPitch = SlicePitch = width * NumFormatBytes(tex.Format());
-			}*/
+			}
 			Mapper(Texture& tex, uint8 array_index, uint8 level, MapAccess tma,
 				uint16 x_offset, uint16 y_offset,
 				uint16 width, uint16 height)
@@ -100,7 +100,7 @@ namespace leo {
 			{
 				TexRef.Map3D(array_index, level, tma, x_offset, y_offset, z_offset, width, height, depth, pSysMem, RowPitch, SlicePitch);
 			}*/
-			/*Mapper(Texture& tex, uint8 array_index, CubeFaces face, uint8 level, TextureMapAccess tma,
+			Mapper(Texture& tex, uint8 array_index, CubeFaces face, uint8 level, MapAccess tma,
 				uint16 x_offset, uint16 y_offset,
 				uint16 width, uint16 height)
 				: TexRef(tex),
@@ -110,15 +110,15 @@ namespace leo {
 			{
 				TexRef.MapCube(array_index, face, level, tma, x_offset, y_offset, width, height, pSysMem, RowPitch);
 				SlicePitch = RowPitch * height;
-			}*/
+			}
 
 			~Mapper()
 			{
 				switch (TexRef.Type())
 				{
-				/*case TT_1D:
+				case DT_1D:
 					TexRef.Unmap1D(MappedArrayIndex, MappedLevel);
-					break;*/
+					break;
 
 				case DT_2D:
 					TexRef.Unmap2D(MappedArrayIndex, MappedLevel);
@@ -128,9 +128,9 @@ namespace leo {
 					TexRef.Unmap3D(MappedArrayIndex, MappedLevel);
 					break;*/
 
-				/*case TT_Cube:
+				case DT_Cube:
 					TexRef.UnmapCube(MappedArrayIndex, MappedFace, MappedLevel);
-					break;*/
+					break;
 				}
 			}
 
@@ -196,11 +196,19 @@ namespace leo {
 
 		uint32_t Access() const;
 
+		virtual void Map1D(uint8 array_index, uint8 level, MapAccess tma,
+			uint16 x_offset, uint16 width,
+			void*& data) = 0;
 		virtual void Map2D(uint8 array_index, uint8 level, MapAccess tma,
 			uint16 x_offset, uint16 y_offset, uint16 width, uint16 height,
 			void*& data, uint32_t& row_pitch) = 0;
+		virtual void MapCube(uint8 array_index, CubeFaces face, uint8 level, MapAccess tma,
+			uint16 x_offset, uint16 y_offset, uint16 width, uint16 height,
+			void*& data, uint32_t& row_pitch) = 0;
 
+		virtual void Unmap1D(uint8 array_index, uint8 level) = 0;
 		virtual void Unmap2D(uint8 array_index, uint8 level) = 0;
+		virtual void UnmapCube(uint8 array_index, CubeFaces face, uint8 level) = 0;
 
 		virtual void ReclaimHWResource(ElementInitData const * init_data) = 0;
 	protected:

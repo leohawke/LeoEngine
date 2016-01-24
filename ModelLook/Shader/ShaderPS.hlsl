@@ -25,7 +25,7 @@ cbuffer SkylightParam :register(b0)
 
 TextureCube skylight_y_cube_tex:register(t3);
 TextureCube skylight_c_cube_tex:register(t4);
-SamplerState skylight_sampler;
+SamplerState skylight_sampler : register(s1);
 
 float4 SkylightShading(float shininess, float4 mrt1, float3 normal, float3 view)
 {

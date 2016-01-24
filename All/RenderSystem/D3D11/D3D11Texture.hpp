@@ -43,11 +43,20 @@ namespace leo {
 		uint16 Height(uint8 /*level*/) const override;
 		uint16 Depth(uint8 /*level*/) const override;
 
+		virtual void Map1D(uint8 array_index, uint8 level, MapAccess tma,
+			uint16 x_offset, uint16 width,
+			void*& data) override;
 		virtual void Map2D(uint8 array_index, uint8 level, MapAccess tma,
 			uint16 x_offset, uint16 y_offset,
 			uint16 width, uint16 height,
 			void*& data, uint32_t& row_pitch) override;
+		virtual void MapCube(uint8 array_index, CubeFaces face, uint8 level, MapAccess tma,
+			uint16 x_offset, uint16 y_offset, uint16 width, uint16 height,
+			void*& data, uint32_t& row_pitch) override;
+
+		virtual void Unmap1D(uint8 array_index, uint8 level) override;
 		virtual void Unmap2D(uint8 array_index, uint8 level) override;
+		virtual void UnmapCube(uint8 array_index, CubeFaces face, uint8 level) override;
 
 		virtual ID3D11Resource* Resource() const = 0;
 
@@ -149,6 +158,35 @@ namespace leo {
 
 	using D3D11TexturePtr = std::shared_ptr<D3D11Texture>;
 
+	class D3D11Texture1D : public D3D11Texture {
+	public:
+		D3D11Texture1D(uint16 width, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info = {}, ElementInitData = {});
+
+		~D3D11Texture1D();
+
+		uint16 Width(uint8 /*level*/) const override;
+
+		void Map1D(uint8 array_index, uint8 level, MapAccess tma,
+			uint16 x_offset,
+			uint16 width,
+			void*& data) override;
+
+		void Unmap1D(uint8 array_index, uint8 level) override;
+
+		ID3D11Resource* Resource() const;
+
+		ID3D11ShaderResourceView* ResouceView();
+		ID3D11UnorderedAccessView* AccessView();
+		ID3D11Texture1D* D3DTexture() const;
+
+		void ReclaimHWResource(ElementInitData const * init_data) override;
+	private:
+		D3D11_TEXTURE1D_DESC mDesc;
+		win::unique_com<ID3D11Texture1D> mTex;
+
+		uint16 mWidth;
+	};
+
 	class D3D11Texture2D : public D3D11Texture {
 	public:
 		D3D11Texture2D(uint16 width, uint16 height, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info = {}, ElementInitData = {});
@@ -158,11 +196,12 @@ namespace leo {
 		uint16 Width(uint8 /*level*/) const override;
 		uint16 Height(uint8 /*level*/) const override;
 
-
+		
 		void Map2D(uint8 array_index, uint8 level, MapAccess tma,
 			uint16 x_offset, uint16 y_offset,
 			uint16 width, uint16 height,
 			void*& data, uint32_t& row_pitch) override;
+		
 		void Unmap2D(uint8 array_index, uint8 level) override;
 
 		ID3D11Resource* Resource() const;
@@ -179,7 +218,31 @@ namespace leo {
 		D3D11_TEXTURE2D_DESC mDesc;
 		win::unique_com<ID3D11Texture2D> mTex;
 
-		std::vector<std::pair<uint16,uint16>> mSize;
+		uint16 mWidth, mHeight;
+	};
+
+	class D3D11TextureCube : public D3D11Texture {
+	public:
+		D3D11TextureCube(uint32 size, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info = {}, ElementInitData = {});
+
+		uint16 Width(uint8 /*level*/) const override;
+		uint16 Height(uint8 /*level*/) const override;
+
+
+		void MapCube(uint8 array_index, CubeFaces face, uint8 level, MapAccess tma,
+			uint16 x_offset, uint16 y_offset, uint16 width, uint16 height,
+			void*& data, uint32_t& row_pitch) override;
+
+		void UnmapCube(uint8 array_index, CubeFaces face, uint8 level) override;
+
+		ID3D11Resource* Resource() const;
+
+		ID3D11ShaderResourceView* ResouceView();
+		ID3D11UnorderedAccessView* AccessView();
+		ID3D11RenderTargetView* TargetView();
+		ID3D11DepthStencilView* DepthStencilView();
+
+		void ReclaimHWResource(ElementInitData const * init_data) override;
 	};
 }
 

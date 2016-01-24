@@ -3,21 +3,9 @@
 #include "..\..\DeviceMgr.h"
 #include <exception.hpp>
 
-auto device = [] {return leo::DeviceMgr().GetDevice(); };
-auto context = [] {return leo::DeviceMgr().GetDeviceContext(); };
-
-
 namespace {
-
-	template<unsigned N>
-	leo::uint16& get(std::pair<leo::uint16, leo::uint16>& pair) {
-		return N == 0 ? pair.first : pair.second;
-	}
-
-	enum select {
-		width = 0,
-		height = 1,
-	};
+	auto device = [] {return leo::DeviceMgr().GetDevice(); };
+	auto context = [] {return leo::DeviceMgr().GetDeviceContext(); };
 }
 
 leo::D3D11Texture2D::D3D11Texture2D(uint16 width, uint16 height, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, ElementInitData init_data)
@@ -68,14 +56,8 @@ leo::D3D11Texture2D::D3D11Texture2D(uint16 width, uint16 height, uint8 numMipMap
 	mArraySize = array_size;
 	mFormat = format;
 
-	mSize.resize(NumMipMaps());
-	get<select::width>(mSize[0]) = width;
-	get<select::height>(mSize[0]) = height;
-	for (uint8 level = 1; level < NumMipMaps(); ++level)
-	{
-		get<select::width>(mSize[level]) = std::max<uint32_t>(1U, width >> level);
-		get<select::height>(mSize[level]) = std::max<uint32_t>(1U, height >>level);
-	}
+	mWidth = width;
+	mHeight = height;
 
 	mDesc.Width = width;
 	mDesc.Height = height;
@@ -112,13 +94,13 @@ ImplDeDtor(D3D11Texture2D)
 leo::uint16 leo::D3D11Texture2D::Width(uint8 level) const
 {
 	LAssert(level < NumMipMaps(), "level out of NumMipMaps range");
-	return get<select::width>(mSize[level]);
+	return std::max<uint16>(1U,mWidth>>level);
 }
 
 leo::uint16 leo::D3D11Texture2D::Height(uint8 level) const
 {
 	LAssert(level < NumMipMaps(), "level out of NumMipMaps range");
-	return get<select::height>(mSize[level]);
+	return std::max<uint16>(1U, mHeight >> level);
 }
 
 void leo::D3D11Texture2D::Map2D(uint8 array_index, uint8 level, MapAccess tma, uint16 x_offset, uint16 y_offset,

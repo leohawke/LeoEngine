@@ -159,6 +159,8 @@ public:
 		mViewPort.MinDepth = 0.0f;
 
 		dx::CreateGPUCBuffer(device, mCPUSkyLightParam, mGPUSkyLightParam);
+
+		mTriLinear = RenderStates().GetSamplerState(L"trilinearSampler");
 	}
 
 	void BuildDRLightStencil_StateObject(ID3D11Device* device) {
@@ -262,6 +264,7 @@ public:
 	TexturePtr SkyLightC;
 
 	win::unique_com<ID3D11Buffer> mGPUSkyLightParam;
+	ID3D11SamplerState* mTriLinear;
 };
 
 class LinearizeDepthImpl : public leo::Singleton<LinearizeDepthImpl, false>
@@ -405,6 +408,7 @@ void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context, DepthStenci
 
 		context->UpdateSubresource(pStateImpl->mGPUSkyLightParam, 0, nullptr, &pStateImpl->mCPUSkyLightParam, 0, 0);
 		context->PSSetConstantBuffers(0, 1, &pStateImpl->mGPUSkyLightParam);
+		context->PSSetSamplers(1, 1, &pStateImpl->mTriLinear);
 
 		std::invoke(dx::SetShaderResourceView<D3D11_PIXEL_SHADER>(context), 3, skylight_y_param, skylight_c_param);
 	}
