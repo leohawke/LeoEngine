@@ -36,9 +36,15 @@ namespace leo {
 		virtual ~RenderFactory();
 
 		virtual std::string const & Name() const = 0;
+		
+		virtual TexturePtr MakeTexture1D(uint16 width, uint8 num_mip_maps, uint8 array_size,
+			EFormat format, uint32_t access, ElementInitData const * init_data) = 0;
 
 		virtual TexturePtr MakeTexture2D(uint16 width, uint16 height, uint8 numMipMaps, uint8 array_size,
 			EFormat format, SampleDesc sample_info, uint32 access, ElementInitData const * init_data) = 0;
+
+		virtual TexturePtr MakeTextureCube(uint16 size, uint8 num_mip_maps, uint8 array_size,
+			EFormat format, uint32_t access, ElementInitData const * init_data) = 0;
 	};
 
 

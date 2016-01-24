@@ -1,17 +1,39 @@
 #include "TextureX.hpp"
 #include "RenderSystem.hpp"
+#include "D3D11/D3D11RenderSystem.hpp"
 
 #include "DirectXTex.h"
 #include "file.hpp"
 
 namespace leo {
 	namespace X {
+
+		TexturePtr MakeTexture1D(uint16 width, uint8 numMipMaps, uint8 array_size,
+			EFormat format, uint32_t access, ElementInitData const * init_data)
+		{
+			return GetRenderEngine().GetFactory().MakeTexture1D(
+				width,
+				numMipMaps, array_size,
+				format, access,
+				init_data);
+		}
+
 		TexturePtr MakeTexture2D(uint16 width, uint16 height, uint8 numMipMaps, uint8 array_size, EFormat format, SampleDesc sample_info, uint32 access, ElementInitData const * init_data)
 		{
 			return GetRenderEngine().GetFactory().MakeTexture2D(
 				width, height, 
 				numMipMaps, array_size, 
 				format, sample_info, access, 
+				init_data);
+		}
+
+		TexturePtr MakeTextureCube(uint16 size, uint8 numMipMaps, uint8 array_size,
+			EFormat format, uint32_t access, ElementInitData const * init_data)
+		{
+			return GetRenderEngine().GetFactory().MakeTextureCube(
+				size,
+				numMipMaps, array_size,
+				format, access,
 				init_data);
 		}
 
@@ -153,16 +175,16 @@ namespace leo {
 			{
 			case DirectX::TEX_DIMENSION_TEXTURE1D:
 			{
-				return nullptr;
+				return MakeTexture1D(static_cast<uint16>(metadata.width), static_cast<uint8>(metadata.mipLevels), static_cast<uint8>(metadata.arraySize), D3D11Mapping::MappingFormat(metadata.format), access, init_data.get());
 			}
 			break;
 
 			case DirectX::TEX_DIMENSION_TEXTURE2D:
 			{
 				if (metadata.IsCubemap())
-					return nullptr;
+					return MakeTextureCube(static_cast<uint16>(metadata.width), static_cast<uint8>(metadata.mipLevels), static_cast<uint8>(metadata.arraySize), D3D11Mapping::MappingFormat(metadata.format), access, init_data.get());
 				else
-					return MakeTexture2D(static_cast<uint16>(metadata.width), static_cast<uint16>(metadata.height),static_cast<uint8>(metadata.mipLevels), static_cast<uint8>(metadata.arraySize),EF_ABGR8,{},access, init_data.get());
+					return MakeTexture2D(static_cast<uint16>(metadata.width), static_cast<uint16>(metadata.height),static_cast<uint8>(metadata.mipLevels), static_cast<uint8>(metadata.arraySize),D3D11Mapping::MappingFormat(metadata.format),{},access, init_data.get());
 			}
 			break;
 

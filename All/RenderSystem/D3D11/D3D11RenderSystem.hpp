@@ -33,8 +33,14 @@ namespace leo {
 			return name;
 		}
 
+		TexturePtr MakeTexture1D(uint16 width, uint8 numMipMaps, uint8 array_size,
+			EFormat format, uint32_t access, ElementInitData const * init_data) override;
+
 		TexturePtr MakeTexture2D(uint16 width, uint16 height, uint8 numMipMaps, uint8 array_size,
 			EFormat format, SampleDesc sample_info, uint32 access, ElementInitData const *init_data) override;
+
+		TexturePtr MakeTextureCube(uint16 size, uint8 numMipMaps, uint8 array_size,
+			EFormat format, uint32_t access, ElementInitData const * init_data) override;
 	};
 
 	class D3D11Engine :public RenderEngine {
@@ -61,6 +67,7 @@ namespace leo {
 
 	namespace D3D11Mapping {
 		DXGI_FORMAT MappingFormat(EFormat format);
+		EFormat MappingFormat(DXGI_FORMAT format);
 
 		D3D11_MAP Mapping(Texture::MapAccess tma, Texture::Dis_Type type, uint32 access, uint8 numMipMaps);
 	}
