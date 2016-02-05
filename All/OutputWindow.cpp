@@ -61,6 +61,17 @@ namespace leo
 		RECT r{ 0, 0, clientSize.first, clientSize.second };
 		AdjustWindowRectEx(&r, style, false,exStyle);
 
+		int X = CW_USEDEFAULT, Y = CW_USEDEFAULT;
+
+		if (style & WS_POPUP) {
+			int sX = GetSystemMetrics(SM_CXSCREEN);
+			int sY = GetSystemMetrics(SM_CYSCREEN);
+
+			if (sX > clientSize.first)
+				X = (sX - clientSize.first) / 2;
+			if (sY > clientSize.second)
+				Y = (sY - clientSize.second) / 2;
+		}
 
 
 		// Create the application's window
@@ -68,8 +79,8 @@ namespace leo
 			classname,
 			classname,
 			style,
-			CW_USEDEFAULT,
-			CW_USEDEFAULT,
+			X,
+			Y,
 			r.right-r.left,
 			r.bottom-r.top,
 			NULL,
@@ -115,7 +126,10 @@ namespace leo
 		auto dx = (r.right - r.left) - (cr.right - cr.left);
 		auto dy = (r.bottom - r.top) - (cr.bottom - cr.top);
 
-		MoveWindow(this->GetHwnd(), r.left, r.top, clientSize.first + dx, clientSize.second + dy, false);
+		POINT sp = { r.left,r.top };
+		ClientToScreen(this->GetHwnd(), &sp);
+
+		MoveWindow(this->GetHwnd(),sp.x,sp.y, clientSize.first + dx, clientSize.second + dy, true);
 	}
 
 	std::pair<leo::uint16, leo::uint16> OutputWindow::ClientSize() const lnothrow

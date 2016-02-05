@@ -63,7 +63,7 @@ namespace leo {
 #if defined(DEBUG)
 #define DebugPrintf leo::details::debug_helper::global_debug
 #else
-#define DebugPrintf(...)
+#define DebugPrintf(...) __VA_ARGS__
 #endif
 #endif
 
