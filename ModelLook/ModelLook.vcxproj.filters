@@ -604,6 +604,12 @@
     <Image Include="..\All\Resource\head_diff.dds">
       <Filter>Res</Filter>
     </Image>
+    <Image Include="Lake_CraterLake03_filtered_c.dds">
+      <Filter>Res</Filter>
+    </Image>
+    <Image Include="Lake_CraterLake03_filtered_y.dds">
+      <Filter>Res</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\All\config.scheme">

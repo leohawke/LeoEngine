@@ -32,6 +32,7 @@
 #include <Core\EffectGBuffer.hpp>
 #include <RenderSystem\DeferredRender.hpp>
 #include <RenderSystem\RenderStates.hpp>
+#include <RenderSystem\TextureX.hpp>
 #include "window.hpp"
 
 //another
@@ -296,6 +297,11 @@ void BuildLight(ID3D11Device* device) {
 	mAmbLight->Diffuse(leo::float3(0.1f, 0.1f, 0.1f));
 	pRender->AddLight(mAmbLight);
 
+
+	auto cubetex_y = leo::X::SyncLoadTexture("Lake_CraterLake03_filtered_y.dds", leo::EA_G_R | leo::EA_I);
+	auto cubetex_c = leo::X::SyncLoadTexture("Lake_CraterLake03_filtered_c.dds", leo::EA_G_R | leo::EA_I);
+
+	mAmbLight->SkylightTex(cubetex_y, cubetex_c);
 }
 
 void ClearLight() {

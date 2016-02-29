@@ -41,7 +41,7 @@ float4 SkylightShading(float shininess, float4 mrt1, float3 normal, float3 view)
 
 		float3 prefiltered_clr = decode_hdr_yc(TexCubeSampleLevel(skylight_y_cube_tex, skylight_sampler, normal, skylight_diff_spec_mip.x, 0).r,
 			TexCubeSampleLevel(skylight_c_cube_tex, skylight_sampler, normal, skylight_diff_spec_mip.x, 0)).xyz;
-		shading.xyz += CalcEnvDiffuse(prefiltered_clr, c_diff);
+		shading.xyz = CalcEnvDiffuse(prefiltered_clr, c_diff);
 
 		shininess = log2(shininess) / 13; // log2(8192) == 13
 
@@ -58,22 +58,15 @@ float4 SkylightShading(float shininess, float4 mrt1, float3 normal, float3 view)
 float4 main(VertexOut pin) : SV_TARGET
 {
 	float4 NormalAlpha = texNormalAlpha.Sample(samPoint, pin.Tex);
-	float3 v = pin.ViewDir;
-	float3 n = DeCompressionNormal(half3(NormalAlpha.rgb));
-	float4 light = texLighting.Sample(samPoint,pin.Tex);
-	float4 diffuse_spec = texDiffuseSpec.Sample(samPoint, pin.Tex);
-	half ao = 1.f; //texAmbient.Sample(samPoint, pin.Tex);
-	return float4(Shading(light, NormalAlpha.a*256, diffuse_spec.xyz, diffuse_spec.w,v,n)*ao,1);
-}
-
-
-float4 skymain(VertexOut pin) : SV_TARGET
-{
-	float4 NormalAlpha = texNormalAlpha.Sample(samPoint, pin.Tex);
 	float shininess = NormalAlpha.a * 256;
 	float3 normal = DeCompressionNormal(half3(NormalAlpha.rgb));
 	float3 view_dir = pin.ViewDir;
 	float4 mrt1 = texDiffuseSpec.Sample(samPoint, pin.Tex);
 
-	return SkylightShading(shininess, mrt1, normal, view_dir);
+	float4 light = texLighting.Sample(samPoint, pin.Tex);
+
+	half ao = 1.f; //texAmbient.Sample(samPoint, pin.Tex);
+
+	float4 sky_shading =  SkylightShading(shininess, mrt1, normal, view_dir);
+	return float4(Shading(light, shininess, mrt1.xyz, mrt1.w,view_dir,normal)*ao,1) + sky_shading;
 }

@@ -57,7 +57,7 @@ leo::D3D11TextureCube::D3D11TextureCube(uint16 size, uint8 numMipMaps, uint8 arr
 	mDesc.Width = size;
 	mDesc.Height = size;
 	mDesc.MipLevels = NumMipMaps();
-	mDesc.ArraySize = ArraySize()*6;
+	mDesc.ArraySize = ArraySize();
 	mDesc.MiscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
 
 	mDesc.Format = D3D11Mapping::MappingFormat(Format());
