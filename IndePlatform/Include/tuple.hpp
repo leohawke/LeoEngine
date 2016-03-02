@@ -198,17 +198,40 @@ namespace leo
 		}
 
 		template<std::size_t N, class C, class R, class... Args>
+		decltype(auto) paras_f(R(C::*)(Args...) const) {
+			using type = typename type_list<Args...>::type<N>;
+			return type();
+		}
+
+		template<std::size_t N, class C, class R, class... Args>
 		decltype(auto) paras_f(R(__stdcall C::*)(Args...)) {
 			using type = typename type_list<Args...>::type<N>;
 			return type();
 		}
+
+		template<std::size_t N, class P, bool>
+		struct paras_index;
+
+
+		template<std::size_t N, class P>
+		struct paras_index<N, P, true>
+		{
+			using target_type = decltype(&P::operator());
+			using type = decltype(paras_f<N>(std::declval<decltype(&P::operator())>()));
+		};
+
+		template<std::size_t N, class P>
+		struct paras_index<N, P, false>
+		{
+			using target_type = P;
+			using type = decltype(paras_f<N>(target_type()));
+		};
 	}
 
 
-	template<std::size_t N,class P>
-	struct paras_index
-	{
-		using type = decltype(details::paras_f<N>(P()));
+	template<std::size_t N, class P>
+	struct paras_index : details::paras_index<N,std::decay_t<P>,std::is_class<std::remove_reference_t<P>>::value> {
+
 	};
 
 }

@@ -500,7 +500,7 @@ void leo::DeferredRender::DebugProcess(ID3D11DeviceContext* context, ID3D11Rende
 		context->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
 		pResImpl->mNormalDebugProcess->Apply(context);
 		pResImpl->mNormalDebugProcess->Draw(context, pResImpl->mNormalSpecPowSRV, rtv);
-		std::invoke(dx::SetShaderResourceView<D3D11_PIXEL_SHADER>(context), 0,(ID3D11ShaderResourceView*)nullptr);
+		std::invoke(dx::SetShaderResourceView<D3D11_PIXEL_SHADER>(context), 0,nullptr);
 	}
 	context->RSSetViewports(1, &lastVp);
 }

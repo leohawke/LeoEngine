@@ -364,7 +364,8 @@ namespace leo
 
 		template<typename P,typename... S>
 		void ContextSet(P&& f, S... args) {
-			typename type_list<S...>::type<0>  ss[] = {args...};
+			using target_type = std::remove_cv_t<std::remove_pointer_t<typename paras_index<1, P>::type>>;
+			target_type  ss[] = {args...};
 			f(leo::arrlen(ss) , ss);
 		}
 
@@ -372,9 +373,10 @@ namespace leo
 		template<typename P, typename... S>
 		void ContextApply(ID3D11DeviceContext* _this, P&& f, UINT start_slot, S... args) {
 			using type = typename leo::type_list<S...>::type<0>;
-			static_assert(std::is_same<std::remove_cv_t<std::remove_pointer_t<typename paras_index<2, P>::type>>, type>::value, "Type Check Failed");
+			using target_type = std::remove_cv_t<std::remove_pointer_t<typename paras_index<2, P>::type>>;
+			static_assert(std::is_convertible<type,target_type>::value, "Type Check Failed");
 
-			auto lambda_f = [&](UINT size, type const* p) {
+			auto lambda_f = [&](UINT size, target_type const* p) {
 				(_this->*f)(start_slot, size, p);
 			};
 
