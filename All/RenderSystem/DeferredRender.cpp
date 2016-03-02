@@ -386,13 +386,7 @@ void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context, DepthStenci
 	effectQuad.Apply(context);
 	context->PSSetShader(pStateImpl->mShaderPS, nullptr, 0);
 
-	ID3D11ShaderResourceView* srvs[] = {
-		pResImpl->mNormalSpecPowSRV,
-		pResImpl->mLightSRV ,
-		pResImpl->mDiffuseSpecSRV
-	};
-
-	context->PSSetShaderResources(0,arrlen(srvs),srvs);
+	std::invoke(dx::SetShaderResourceView<D3D11_PIXEL_SHADER>(context),0, pResImpl->mNormalSpecPowSRV, pResImpl->mLightSRV,pResImpl->mDiffuseSpecSRV);
 	context->PSSetSamplers(0, 1, &(LinearizeDepthImpl::GetInstance().mSamPoint));
 
 	if (pStateImpl->SkyLightY) {

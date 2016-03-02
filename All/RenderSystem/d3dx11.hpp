@@ -363,7 +363,7 @@ namespace leo
 		}
 
 		template<typename P,typename... S>
-		void ContextSet(P&& f, S... args) {
+		void ContextSet(P&& f, S&&... args) {
 			using target_type = std::remove_cv_t<std::remove_pointer_t<typename paras_index<1, P>::type>>;
 			target_type  ss[] = {args...};
 			f(leo::arrlen(ss) , ss);
@@ -371,7 +371,7 @@ namespace leo
 
 	
 		template<typename P, typename... S>
-		void ContextApply(ID3D11DeviceContext* _this, P&& f, UINT start_slot, S... args) {
+		void ContextApply(ID3D11DeviceContext* _this, P&& f, UINT start_slot, S&&... args) {
 			using type = typename leo::type_list<S...>::type<0>;
 			using target_type = std::remove_cv_t<std::remove_pointer_t<typename paras_index<2, P>::type>>;
 			static_assert(std::is_convertible<type,target_type>::value, "Type Check Failed");
@@ -413,7 +413,7 @@ namespace leo
 			{}
 
 			template<typename... S>
-			void operator()(UINT start_slot, S... args) {
+			void operator()(UINT start_slot, S&&... args) {
 				ContextApply(context, &ID3D11DeviceContext::PSSetShaderResources, start_slot, args...);
 			}
 
