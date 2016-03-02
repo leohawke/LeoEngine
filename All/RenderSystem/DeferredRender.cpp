@@ -397,8 +397,8 @@ void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context, DepthStenci
 
 	if (pStateImpl->SkyLightY) {
 
-		auto skylight_y_param = dynamic_cast<D3D11Texture2D*>(pStateImpl->SkyLightY.get())->ResourceView();
-		auto skylight_c_param = dynamic_cast<D3D11Texture2D*>(pStateImpl->SkyLightC.get())->ResourceView();
+		auto skylight_y_param = dynamic_cast<D3D11TextureCube*>(pStateImpl->SkyLightY.get())->ResourceView();
+		auto skylight_c_param = dynamic_cast<D3D11TextureCube*>(pStateImpl->SkyLightC.get())->ResourceView();
 
 		auto mip = pStateImpl->SkyLightY->NumMipMaps();
 		pStateImpl->mCPUSkyLightParam.skylight_diff_spec_mip[0] = mip - 1;
