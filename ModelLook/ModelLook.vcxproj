@@ -405,6 +405,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
+    <None Include="..\All\Resource\TerrainCHMCS.cso" />
+    <None Include="..\All\Resource\Test.Terrain" />
     <None Include="Shader\Lighting" />
     <None Include="Shader\NormalUti" />
     <None Include="Shader\utility" />
@@ -790,6 +792,7 @@ fxc /E"main_8"  /Fo"$(OutDir)Shader\%(Filename)_8.cso" /T "ps_5_0" /nologo $(Pro
     <Text Include="需求.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\All\Resource\GaussianNoise256.jpg" />
     <Image Include="..\All\Resource\head_diff.dds">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy /Y   $(SolutionDir)All\Resource\%(Filename)%(Extension)  $(OutDir)Fonts\%(Filename)%(Extension)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy /Y   $(SolutionDir)All\Resource\%(Filename)%(Extension)  $(OutDir)Fonts\%(Filename)%(Extension)</Command>

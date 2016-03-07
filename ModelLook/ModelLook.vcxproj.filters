@@ -475,6 +475,12 @@
     <None Include="Shader\Lighting">
       <Filter>Shader\include</Filter>
     </None>
+    <None Include="..\All\Resource\TerrainCHMCS.cso">
+      <Filter>Res</Filter>
+    </None>
+    <None Include="..\All\Resource\Test.Terrain">
+      <Filter>Res</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\LinearizeDepthPS.hlsl">
@@ -608,6 +614,9 @@
       <Filter>Res</Filter>
     </Image>
     <Image Include="Lake_CraterLake03_filtered_y.dds">
+      <Filter>Res</Filter>
+    </Image>
+    <Image Include="..\All\Resource\GaussianNoise256.jpg">
       <Filter>Res</Filter>
     </Image>
   </ItemGroup>

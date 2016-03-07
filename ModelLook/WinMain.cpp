@@ -379,6 +379,8 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pModelMesh->Scale(1.f);
 	Models.push_back(std::move(pModelMesh));
 
+
+
 	BuildLight(leo::DeviceMgr().GetDevice());
 	BuildUI(size);
 	
