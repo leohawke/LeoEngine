@@ -411,9 +411,7 @@ void leo::DeferredRender::ShadingPass(ID3D11DeviceContext * context, DepthStenci
 	//TODO-Z greate opt
 	effectQuad.Draw(context);
 
-	for (auto & s : srvs)
-		s = nullptr;
-	context->PSSetShaderResources(0, arrlen(srvs), srvs);
+	std::invoke(dx::SetShaderResourceView<D3D11_PIXEL_SHADER>(context), 0, nullptr, nullptr, nullptr);
 }
 
 void leo::DeferredRender::PostProcess(ID3D11DeviceContext * context, ID3D11RenderTargetView * rtv, float dt)
