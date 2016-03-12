@@ -29,10 +29,9 @@
 #include "exception.hpp"
 #include "..\DeviceMgr.h"
 #include "..\TextureMgr.h"
-#include "RenderSystem\ShaderMgr.h"
-#include "EffectTerrain.hpp"
-#include "EffectTerrainSO.hpp"
-#include "..\file.hpp"
+
+#include "Core\TerrainGen.h"
+#include "Core/EffectTerrain.hpp"
 #include <vector>
 
 
@@ -54,13 +53,7 @@ namespace leo
 		//}
 		Terrain(ID3D11Device* device, const std::wstring& terrainfilename)
 		{
-			struct TerrainFileHeader
-			{
-				float mChunkSize;
-				std::uint32_t mHorChunkNum;
-				std::uint32_t mVerChunkNum;
-				wchar_t mHeightMap[leo::win::file::max_path];
-			}mTerrainFileHeader;
+			
 			auto pFile = leo::win::File::Open(terrainfilename, win::File::TO_READ | win::File::NO_CREATE);
 			pFile->Read(&mTerrainFileHeader, sizeof(TerrainFileHeader), 0);
 			mHorChunkNum = mTerrainFileHeader.mHorChunkNum;
@@ -97,13 +90,6 @@ namespace leo
 
 				dxcall(device->CreateBuffer(&vbDesc, &vbDataDesc, &mCommonVertexBuffer));
 				DebugDXCOM(mCommonVertexBuffer);
-				CD3D11_BUFFER_DESC sovbDesc(8*(MAXEDGE + 1)*(MAXEDGE + 1), D3D11_BIND_STREAM_OUTPUT, D3D11_USAGE_DEFAULT);
-				dxcall(device->CreateBuffer(&sovbDesc, nullptr, &mSOTargetBuffer));
-				DebugDXCOM(mSOTargetBuffer);
-
-				CD3D11_BUFFER_DESC readvbDesc(8*(MAXEDGE + 1)*(MAXEDGE + 1),0, D3D11_USAGE_STAGING, D3D11_CPU_ACCESS_READ);
-				dxcall(device->CreateBuffer(&readvbDesc, nullptr, &mReadBuffer));
-				DebugDXCOM(mReadBuffer);
 			}
 			Catch_DX_Exception
 
@@ -226,7 +212,7 @@ namespace leo
 			}
 			Catch_DX_Exception
 			leo::TextureMgr tm;
-			mNoiseMap = tm.LoadTextureSRV(mTerrainFileHeader.mHeightMap);
+			mHeightMapSRV.reset(tm.LoadTextureSRV(mTerrainFileHeader.mHeightMap));
 
 			mWeightMap = tm.LoadTextureSRV(L"Resource/blend.dds");
 			mMatArrayMap = tm.LoadTexture2DArraySRV(std::array<const wchar_t*, 5>({
@@ -235,78 +221,11 @@ namespace leo
 				L"Resource/stone.dds",
 				L"Resource/lightdirt.dds",
 				L"Resource/snow.dds"}));
-
-			{
-				const uint16 size[] = { 256,512,1024,2048,4096 };
-
-				auto clamp_size = [&](uint16 ord_size){
-					uint8 i = 0;
-					for (;i != arrlen(size);){
-						if (ord_size > size[i])
-							++i;
-						else
-							break;
-					}
-					i = std::min<size_t>(i, arrlen(size) - 1);
-					return size[i];
-				};
-
-				mNormaMapHorSize = clamp_size(uint16(mHorChunkNum*MAXEDGE));
-				mNormaMapVerSize = clamp_size(uint16(mVerChunkNum* MAXEDGE));
-
-				float4 Params{ 1.f / mNormaMapHorSize,1.f / mNormaMapVerSize,5.f,5.f };
-
-				D3D11_BUFFER_DESC Desc;
-				Desc.Usage = D3D11_USAGE_DEFAULT;
-				Desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-				Desc.CPUAccessFlags = 0;
-				Desc.MiscFlags = 0;
-				Desc.StructureByteStride = 0;
-				Desc.ByteWidth = sizeof(Params);
-
-				D3D11_SUBRESOURCE_DATA Data;
-				Data.pSysMem = &Params;
-
-				dxcall(device->CreateBuffer(&Desc, &Data, &mCHMCSCB));
-
-
-				D3D11_TEXTURE2D_DESC NormalMapTexDesc;
-
-				NormalMapTexDesc.Format = DXGI_FORMAT_R32_FLOAT;
-
-				NormalMapTexDesc.ArraySize = 1;
-				NormalMapTexDesc.MipLevels = 1;
-
-				NormalMapTexDesc.SampleDesc.Count = 1;
-				NormalMapTexDesc.SampleDesc.Quality = 0;
-
-				NormalMapTexDesc.Width = mNormaMapHorSize;
-				NormalMapTexDesc.Height =mNormaMapVerSize;
-
-				NormalMapTexDesc.Usage = D3D11_USAGE_DEFAULT;
-				NormalMapTexDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
-				NormalMapTexDesc.CPUAccessFlags = 0;
-				NormalMapTexDesc.MiscFlags = 0;
-
-				auto mTex = leo::win::make_scope_com<ID3D11Texture2D>();
-
-				leo::dxcall(device->CreateTexture2D(&NormalMapTexDesc, nullptr, &mTex));
-				leo::dxcall(device->CreateShaderResourceView(mTex, nullptr, &mHeightMapSRV));
-				leo::dxcall(device->CreateUnorderedAccessView(mTex, nullptr, &mHeightMapUAV));
-
-				leo::ShaderMgr SM;
-				mCHMCS = SM.CreateComputeShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"terrain", D3D11_COMPUTE_SHADER)));
-
-				leo::RenderStates SS;
-				mSS = SS.GetSamplerState(L"NearestRepeat");
-			}
 		}
 		~Terrain()
 		{
 			leo::win::ReleaseCOM(mCommonVertexBuffer);
 			leo::win::ReleaseCOM(mCommonIndexBuffer);
-			leo::win::ReleaseCOM(mSOTargetBuffer);
-			leo::win::ReleaseCOM(mReadBuffer);
 		}
 #ifdef LB_IMPL_MSCPP
 		static_assert(leo::constexprmath::pow<2, MAXLOD>::value < MAXEDGE, "The n LOD's edgevertex is 2 times (n+1) LOD's edgevertex");
@@ -319,12 +238,6 @@ namespace leo
 	public:
 		void Render(ID3D11DeviceContext* context, const Camera& camera)
 		{
-			static bool has_height_map = false;
-			if (!has_height_map) {
-				ComputerHeightMap(context);
-				has_height_map = true;
-			}
-
 			context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			UINT strides[] = { sizeof(Terrain::Vertex) };
 			UINT offsets[] = { 0 };
@@ -345,7 +258,6 @@ namespace leo
 			mNeedDrawChunks.clear();
 
 			DetermineDrawChunk(camera);
-
 
 			for (auto chunk : mNeedDrawChunks) {
 				auto slotX = chunk->mSlotX;
@@ -401,118 +313,9 @@ namespace leo
 			//Todo
 			//GS生成,绘制阴影
 		}
-		/*
-		float GetHeight(const float2& xz) const{
-			//初始化一些东西
-			static auto mScreenSize = DeviceMgr().GetClientSize();
-			static auto mAveChunkNum = static_cast<uint32>((mScreenSize.first*mScreenSize.second) / (MINEDGEPIXEL*3.f*MAXEDGE*MAXEDGE))+3u;
-			static std::map < std::pair<uint32, uint32>, std::vector<float>> mMap;
-			static auto mSizePerEDGE = 1.f*mChunkSize / MAXEDGE;
-			auto base = Offset(0, 0);
-			base.x -= (mChunkSize / 2.f);
-			base.y += (mChunkSize / 2.f);
-			auto slotX = static_cast<uint32>((xz.x - base.x)/mChunkSize);
-			auto slotY = static_cast<uint32>((base.y - xz.y) /mChunkSize);
-			auto chunk = std::make_pair(slotX,slotY);
-			if (mMap.find(chunk) == mMap.cend()) {
-				if (mMap.size() > mAveChunkNum)
-					mMap.erase(mMap.begin());
-				//流输出
-				auto context = DeviceMgr().GetDeviceContext();
-				context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-				UINT strides[] = { sizeof(Terrain::Vertex) };
-				UINT offsets[] = { 0 };
-				context->IASetVertexBuffers(0, 1, &mCommonVertexBuffer, strides, offsets);
-				context->IASetInputLayout(ShaderMgr().CreateInputLayout(InputLayoutDesc::Terrain));
 
-				auto & mEffect = EffectTerrainSO::GetInstance();
-				mEffect->HeightMap(mHeightMap);
-				mEffect->UVScale(float2(1.f / mHorChunkNum / mChunkSize, 1.f / mVerChunkNum / mChunkSize));
-				mEffect->WorldOffset(Offset(slotX, slotY));
-				static UINT pOffsets[1] = { 0 };
-				mEffect->SetSOTargets(1, &mSOTargetBuffer, pOffsets);
-
-
-				mEffect->Apply(context);
-
-				context->Draw((MAXEDGE + 1)*(MAXEDGE + 1), 0);
-
-				//拷贝
-				context->CopyResource(mReadBuffer, mSOTargetBuffer);
-				//映射,读取
-				std::vector<SOOutput> mHeights;
-				D3D11_MAPPED_SUBRESOURCE mapSubRes;
-				try {
-					dxcall(context->Map(mReadBuffer, 0, D3D11_MAP_READ, 0, &mapSubRes));
-					std::transform(
-						(SOOutput*)mapSubRes.pData,
-						((SOOutput*)mapSubRes.pData) + (MAXEDGE + 1)*(MAXEDGE + 1),
-						std::back_insert_iterator<std::vector<SOOutput>>(mHeights),
-						[](const SOOutput& data)
-					{
-						return data;
-					}
-					);
-					context->Unmap(mReadBuffer, 0);
-				}
-				Catch_DX_Exception
-				std::sort(mHeights.begin(), mHeights.end());
-				std::vector<float> mY;
-				std::transform(mHeights.begin(),mHeights.end(),std::back_insert_iterator<std::vector<float>>(mY),
-					[](const SOOutput& data) {
-					return data.H;
-				});
-				mMap.emplace(chunk,std::move(mY));
-			}
-			
-			auto offset = Offset(slotX, slotY);
-			offset.x -= (mChunkSize / 2.f);
-			offset.y += (mChunkSize / 2.f);
-			std::pair<uint32, uint32> mSamples[4];
-			//暂时忽略有可能出现的数值错误,比如位于一个Chunk的边
-			mSamples[0].first = static_cast<uint32>(((xz.x - offset.x) / mChunkSize) * MAXEDGE);
-			mSamples[0].second = static_cast<uint32>(((offset.y - xz.y) / mChunkSize)*MAXEDGE);
-
-			mSamples[1].first = mSamples[0].first + 1;
-			mSamples[1].second = mSamples[0].second;
-
-			mSamples[2].first = mSamples[0].first;
-			mSamples[2].second = mSamples[0].second + 1;
-
-			mSamples[3].first = mSamples[0].first + 1;
-			mSamples[3].second = mSamples[0].second + 1;
-
-			//水平和竖直上的插值
-			auto xt = ((xz.x - offset.x) - mSamples[0].first*mSizePerEDGE) / mSizePerEDGE;
-			auto yt = ((offset.y - xz.y) - mSamples[0].second*mSizePerEDGE) / mSizePerEDGE;
-
-			return Lerp(
-				Lerp(
-				mMap[chunk][mSamples[0].second*(MAXEDGE + 1) + mSamples[0].first],
-				mMap[chunk][mSamples[1].second*(MAXEDGE + 1) + mSamples[1].first],
-				xt),
-				Lerp(
-				mMap[chunk][mSamples[2].second*(MAXEDGE + 1) + mSamples[2].first],
-				mMap[chunk][mSamples[3].second*(MAXEDGE + 1) + mSamples[3].first],
-				xt),
-				yt);
-		}
-		*/
 	private:
-		struct SOOutput {
-			union
-			{
-				struct {
-					float H;
-					uint32 Id;
-				};
-				uint64 data;
-			};
-
-			bool operator<(const SOOutput& rhs) {
-				return Id < rhs.Id;
-			}
-		};
+		TerrainFileHeaderEx mTerrainFileHeader;
 
 		struct Vertex
 		{
@@ -566,8 +369,7 @@ namespace leo
 		ID3D11Buffer* mCommonVertexBuffer = nullptr;
 		ID3D11Buffer* mCommonIndexBuffer = nullptr;
 
-		ID3D11Buffer* mSOTargetBuffer = nullptr;
-		ID3D11Buffer* mReadBuffer = nullptr;
+		
 		struct Index
 		{
 			std::uint32_t mOffset;
@@ -584,14 +386,10 @@ namespace leo
 
 		std::vector<float3, aligned_alloc<float3, 16>> mVersInfo;
 
-		ID3D11ComputeShader* mCHMCS = nullptr;
-
-		ID3D11SamplerState* mSS = nullptr;
+		
 
 		leo::win::unique_com<ID3D11ShaderResourceView> mHeightMapSRV = nullptr;
-		leo::win::unique_com<ID3D11UnorderedAccessView> mHeightMapUAV = nullptr;
 
-		leo::win::unique_com<ID3D11Buffer> mCHMCSCB = nullptr;
 	private:
 #if 0
 		uint8 ClipToScreenSpaceLod(XMVECTOR clip0, XMVECTOR clip1)
@@ -627,9 +425,6 @@ namespace leo
 
 			clip0 = load(p0);
 			clip1 = load(p1);
-
-			DebugPrintf("%d %d\n", x, y);
-			assert(p0.x <= p1.x);
 
 		allin:
 			auto gScreenSize = load(float4(mScreenSize, 1.f, 1.f));
@@ -674,11 +469,6 @@ namespace leo
 			auto vp1 = Multiply(p1, view);
 			auto cameralod = DistanceToCameraLod(vp0, vp1);
 
-			//auto pp0 = XMVector4Transform(vp0, proj);
-			//auto pp1 = XMVector4Transform(vp1, proj);
-			//auto edgelod = EdgeToScreenSpaceLod(pp0, pp1);
-
-			//auto lod = max(cameralod, MAXLOD);
 			return cameralod;
 		}
 
@@ -734,23 +524,7 @@ namespace leo
 			return float2((mHorChunkNum - 1)*mChunkSize / -2.f + slotX*mChunkSize, +(mVerChunkNum - 1)*mChunkSize / 2 - slotY*mChunkSize);
 		}
 
-		void ComputerHeightMap(ID3D11DeviceContext* context) {
-			ID3D11ShaderResourceView* nullSRV = nullptr;
-			context->VSSetShaderResources(0, 1, &nullSRV);
-			context->PSSetShaderResources(3, 1, &nullSRV);
-
-			context->CSSetShader(mCHMCS, nullptr, 0);
-			context->CSSetUnorderedAccessViews(0, 1, &mHeightMapUAV, nullptr);
-			context->CSSetConstantBuffers(0, 1, &mCHMCSCB);
-			context->CSSetShaderResources(0, 1, &mNoiseMap);
-			context->CSSetSamplers(0, 1, &mSS);
-
-			context->Dispatch(mNormaMapHorSize / 32, mNormaMapVerSize / 32, 1);
-
-			ID3D11UnorderedAccessView* mNullptrUAV = nullptr;
-			context->CSSetUnorderedAccessViews(0, 1, &mNullptrUAV, nullptr);
-			context->CSSetShader(nullptr, nullptr, 0);
-		}
+		
 	};
 }
 #endif

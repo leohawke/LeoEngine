@@ -313,6 +313,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Core\EffectSkinGBuffer.cpp" />
+    <ClCompile Include="Core\TerrainGen.cpp" />
     <ClCompile Include="HUD\HUDBrush.cpp" />
     <ClCompile Include="HUD\HUDContainer.cpp" />
     <ClCompile Include="HUD\HUDControl.cpp" />
@@ -341,6 +342,7 @@
     <ClInclude Include="..\All\RenderSystem\RenderSystem.hpp" />
     <ClInclude Include="..\All\RenderSystem\Texture.hpp" />
     <ClInclude Include="..\All\RenderSystem\TextureX.hpp" />
+    <ClInclude Include="Core\TerrainGen.h" />
     <ClInclude Include="HUD\HUDBrush.h" />
     <ClInclude Include="HUD\HUDContainer.h" />
     <ClInclude Include="HUD\HUDHostRenderer.h" />

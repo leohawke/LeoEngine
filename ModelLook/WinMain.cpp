@@ -379,11 +379,10 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pModelMesh->Scale(1.f);
 	Models.push_back(std::move(pModelMesh));
 
-
+	pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(),L"Resource/Test.Terrain");
 
 	BuildLight(leo::DeviceMgr().GetDevice());
 	BuildUI(size);
-	
 }
 
 void ClearRes() {
@@ -501,6 +500,9 @@ void Render()
 			}
 			pSkeletonModel->Render(*pCamera);
 
+			if (pTerrain)
+				pTerrain->Render(devicecontext, *pCamera);
+
 			if (pRender) {
 				pRender->UnBind(devicecontext, *leo::global::globalDepthStencil);
 				pRender->LinearizeDepth(devicecontext, *leo::global::globalDepthStencil, pCamera->mNear, pCamera->mFar);
@@ -512,6 +514,7 @@ void Render()
 		
 		//forward render
 		devicecontext->OMSetRenderTargets(1, &leo::global::globalD3DRenderTargetView, *leo::global::globalDepthStencil);
+		
 		if (pSky) {
 			pSky->Render(devicecontext, *pCamera);
 		}
