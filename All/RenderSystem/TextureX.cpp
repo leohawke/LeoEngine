@@ -1,10 +1,16 @@
 #include "TextureX.hpp"
 #include "RenderSystem.hpp"
 #include "D3D11/D3D11RenderSystem.hpp"
+#include "D3D11/D3D11Texture.hpp"
 
 #include "DirectXTex.h"
+#include "D3DX11.hpp"
 #include "file.hpp"
+#include "DeviceMgr.h"
 
+namespace {
+	auto context = [] {return leo::DeviceMgr().GetDeviceContext(); };
+}
 namespace leo {
 	namespace X {
 
@@ -197,6 +203,13 @@ namespace leo {
 
 
 			return nullptr;
+		}
+
+		bool SyncSaveTexture(const path& tex_path, TexturePtr tex) {
+			D3D11Texture2D* tex_2d = static_cast<D3D11Texture2D*>(tex.get());
+			auto path = tex_path.generic_wstring();
+			dx::SaveDDSTextureToFile(context(), tex_2d->Resource(), path.c_str());
+			return true;
 		}
 	}
 

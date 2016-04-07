@@ -30,7 +30,9 @@
 
 #ifdef PLATFORM_WIN32
 #define WIN32_LEAN_AND_MEAN
+#ifndef STRICT
 #define STRICT
+#endif
 #endif
 
 #ifdef ARCH_X86

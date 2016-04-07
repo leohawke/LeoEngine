@@ -142,6 +142,9 @@ namespace leo
 			_In_ size_t maxsize = 0
 			);
 
+		HRESULT SaveDDSTextureToFile(_In_ ID3D11DeviceContext* pContext,
+			_In_ ID3D11Resource* pSource,
+			_In_z_ LPCWSTR fileName);
 #if defined(DEBUG) | defined(_DEBUG)
 #ifndef DebugDXCOM
 #define DebugDXCOM(x) leo::dx::DebugCOM(x,sizeof(#x) -1,#x)

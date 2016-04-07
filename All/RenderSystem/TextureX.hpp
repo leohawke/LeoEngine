@@ -35,6 +35,8 @@ namespace leo {
 
 		LB_API TexturePtr SyncLoadTexture(const path& tex_name, uint32 access);
 		LB_API TexturePtr ASyncLoadTexture(const path& tex_name, uint32 access);
+
+		LB_API bool SyncSaveTexture(const path& tex_path, TexturePtr tex);
 	}
 }
 

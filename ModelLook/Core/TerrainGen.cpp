@@ -208,7 +208,15 @@ namespace leo {
 		TerrainFileHeaderEx headerEx;
 		memcpy(headerEx, header);
 		memset(headerEx.mHeightMap, 0);
+		wcscpy(headerEx.mHeightMap, height_map_path.c_str());
 
-		return false;
+		headerEx.Reserved = 0;
+
+		X::SyncSaveTexture(height_map_path, mNoiseMapTex);
+
+		auto pFile = leo::win::File::Open(dst_terrain, win::File::TO_WRITE);
+		pFile->Write(0, &headerEx, sizeof(TerrainFileHeaderEx));
+		
+		return true;
 	}
 }

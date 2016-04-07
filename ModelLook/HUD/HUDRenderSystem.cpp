@@ -154,13 +154,13 @@ public:
 
 		auto iter = commands.begin();
 		auto prev_mat_ptr = iter->mat.ptr;
-		auto srv =dynamic_cast<D3D11Texture2D*>(prev_mat_ptr.get())->ResouceView();
+		auto srv =dynamic_cast<D3D11Texture2D*>(prev_mat_ptr.get())->ResourceView();
 		context->PSSetShaderResources(0, 1, &srv);
 		while (iter != commands.end())
 		{
 			if (iter->mat.ptr != prev_mat_ptr) {
 				prev_mat_ptr = iter->mat.ptr;
-				auto srv = dynamic_cast<D3D11Texture2D*>(prev_mat_ptr.get())->ResouceView();
+				auto srv = dynamic_cast<D3D11Texture2D*>(prev_mat_ptr.get())->ResourceView();
 				context->PSSetShaderResources(0, 1, &srv);
 			}
 			color.x = iter->mat.color.GetR() / 255.f;
