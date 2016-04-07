@@ -107,7 +107,7 @@ ID3D11Resource * leo::D3D11Texture2D::Resource() const
 	return mTex.get();
 }
 
-ID3D11ShaderResourceView * leo::D3D11Texture2D::ResouceView()
+ID3D11ShaderResourceView * leo::D3D11Texture2D::ResourceView()
 {
 	LAssert(Access() & EA_G_R,"ShaderResourceView means GPU_Read");
 	//LAssert(first_array_index < ArraySize());

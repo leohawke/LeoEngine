@@ -94,14 +94,13 @@ namespace leo
 
 
 		CD3D11_SAMPLER_DESC anisoSampler(D3D11_DEFAULT);
-		anisoSampler.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
-		anisoSampler.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
-		anisoSampler.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
-		anisoSampler.BorderColor[0] = 0.f;
-		anisoSampler.BorderColor[1] = 0.f;
-		anisoSampler.BorderColor[2] = 0.f;
-		anisoSampler.BorderColor[3] = 0.f;
+		anisoSampler.Filter = D3D11_FILTER_ANISOTROPIC;
+		anisoSampler.MaxAnisotropy = 2;
 		p->CreateSamplerState(L"aniso_sampler", anisoSampler);
+		anisoSampler.MaxAnisotropy = 4;
+		p->CreateSamplerState(L"anisox4_sampler", anisoSampler);
+		anisoSampler.MaxAnisotropy = 8;
+		p->CreateSamplerState(L"anisox8_sampler", anisoSampler);
 
 		CD3D11_SAMPLER_DESC bilinearSampler{ D3D11_DEFAULT };
 		bilinearSampler.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;

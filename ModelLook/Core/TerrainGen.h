@@ -18,6 +18,7 @@
 
 #include <leoint.hpp>
 #include "file.hpp"
+#include "RenderSystem/ShaderMgr.h"
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;
@@ -40,8 +41,8 @@ namespace leo {
 		wchar_t mHeightMap[leo::win::file::max_path];
 	};
 
-	bool GenTerrainEx(ID3D11Device* device, ID3D11DeviceContext* context,const TerrainFileHeader& header,const std::wstring& dst_terrain, const std::wstring& height_map_path);
-	bool ReBuildTerrain(ID3D11Device* device, ID3D11DeviceContext* context,const std::wstring& src_terrain,const std::wstring& dst_terrain,const std::wstring& height_map_path);
+	bool GenTerrainEx(ID3D11Device* device, ID3D11DeviceContext* context,const TerrainFileHeader& header,const uint8& maxedage,const std::wstring& dst_terrain, const std::wstring& height_map_path);
+	bool ReBuildTerrain(ID3D11Device* device, ID3D11DeviceContext* context,const std::wstring& src_terrain, const uint8& maxedage,const std::wstring& dst_terrain,const std::wstring& height_map_path);
 
 }
 

@@ -81,13 +81,13 @@ namespace leo {
 	template< class T, unsigned N >
 	inline std::size_t hash(const T(&x)[N])
 	{
-		return hash_range(x, x + N);
+		return hash(x, x + N);
 	}
 
 	template< class T, unsigned N >
 	inline std::size_t hash(T(&x)[N])
 	{
-		return hash_range(x, x + N);
+		return hash(x, x + N);
 	}
 
 	namespace details

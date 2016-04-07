@@ -6,7 +6,8 @@
 #include "Core/EngineConfig.h"
 
 #include "RenderSystem/d3dx11.hpp"
-#include "RenderSystem/ShaderMgr.h"
+#include "RenderSystem/D3D11/D3D11Texture.hpp"
+#include "RenderSystem/TextureX.hpp"
 #include "RenderSystem/RenderStates.hpp"
 
 namespace leo {
@@ -109,7 +110,7 @@ namespace leo {
 		}
 		*/
 
-		struct SOOutput {
+		/*struct SOOutput {
 			union
 			{
 				struct {
@@ -124,43 +125,10 @@ namespace leo {
 			}
 		};
 
-		ID3D11ComputeShader* mCHMCS = nullptr;
-		ID3D11ShaderResourceView* mNoiseMap = nullptr;
-		uint16 mNormaMapHorSize;
-		uint16 mNormaMapVerSize;
-
-		std::uint32_t mHorChunkNum;
-		std::uint32_t mVerChunkNum;
-
-
 		ID3D11Buffer* mSOTargetBuffer = nullptr;
 		ID3D11Buffer* mReadBuffer = nullptr;
-		leo::win::unique_com<ID3D11Buffer> mCHMCSCB = nullptr;
-		leo::win::unique_com<ID3D11UnorderedAccessView> mHeightMapUAV = nullptr;
-		leo::win::unique_com<ID3D11ShaderResourceView> mHeightMapSRV = nullptr;
-		//leo::win::ReleaseCOM(mSOTargetBuffer);
-		//		
-		//leo::win::ReleaseCOM(mReadBuffer);
-		ID3D11SamplerState* mSS = nullptr;
-		void ComputerHeightMap(ID3D11DeviceContext* context) {
-			ID3D11ShaderResourceView* nullSRV = nullptr;
-			context->VSSetShaderResources(0, 1, &nullSRV);
-			context->PSSetShaderResources(3, 1, &nullSRV);
-
-			context->CSSetShader(mCHMCS, nullptr, 0);
-			context->CSSetUnorderedAccessViews(0, 1, &mHeightMapUAV, nullptr);
-			context->CSSetConstantBuffers(0, 1, &mCHMCSCB);
-			context->CSSetShaderResources(0, 1, &mNoiseMap);
-			context->CSSetSamplers(0, 1, &mSS);
-
-			context->Dispatch(mNormaMapHorSize / 32, mNormaMapVerSize / 32, 1);
-
-			ID3D11UnorderedAccessView* mNullptrUAV = nullptr;
-			context->CSSetUnorderedAccessViews(0, 1, &mNullptrUAV, nullptr);
-			context->CSSetShader(nullptr, nullptr, 0);
-		}
-
-#define MAXEDGE 128
+		
+		
 		void CreateSOBuffer(ID3D11Device* device) {
 			CD3D11_BUFFER_DESC sovbDesc(8 * (MAXEDGE + 1)*(MAXEDGE + 1), D3D11_BIND_STREAM_OUTPUT, D3D11_USAGE_DEFAULT);
 			dxcall(device->CreateBuffer(&sovbDesc, nullptr, &mSOTargetBuffer));
@@ -171,69 +139,76 @@ namespace leo {
 			DebugDXCOM(mReadBuffer);
 
 			{
-				const uint16 size[] = { 256,512,1024,2048,4096 };
-
-				auto clamp_size = [&](uint16 ord_size) {
-					size_t i = 0;
-					for (; i != arrlen(size);) {
-						if (ord_size > size[i])
-							++i;
-						else
-							break;
-					}
-					i = std::min<size_t>(i, arrlen(size) - 1);
-					return size[i];
-				};
-
-				mNormaMapHorSize = clamp_size(uint16(mHorChunkNum*MAXEDGE));
-				mNormaMapVerSize = clamp_size(uint16(mVerChunkNum* MAXEDGE));
-
-				float4 Params{ 1.f / mNormaMapHorSize,1.f / mNormaMapVerSize,5.f,5.f };
-
-				D3D11_BUFFER_DESC Desc;
-				Desc.Usage = D3D11_USAGE_DEFAULT;
-				Desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-				Desc.CPUAccessFlags = 0;
-				Desc.MiscFlags = 0;
-				Desc.StructureByteStride = 0;
-				Desc.ByteWidth = sizeof(Params);
-
-				D3D11_SUBRESOURCE_DATA Data;
-				Data.pSysMem = &Params;
-
-				dxcall(device->CreateBuffer(&Desc, &Data, &mCHMCSCB));
-
-
-				D3D11_TEXTURE2D_DESC NormalMapTexDesc;
-
-				NormalMapTexDesc.Format = DXGI_FORMAT_R32_FLOAT;
-
-				NormalMapTexDesc.ArraySize = 1;
-				NormalMapTexDesc.MipLevels = 1;
-
-				NormalMapTexDesc.SampleDesc.Count = 1;
-				NormalMapTexDesc.SampleDesc.Quality = 0;
-
-				NormalMapTexDesc.Width = mNormaMapHorSize;
-				NormalMapTexDesc.Height = mNormaMapVerSize;
-
-				NormalMapTexDesc.Usage = D3D11_USAGE_DEFAULT;
-				NormalMapTexDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
-				NormalMapTexDesc.CPUAccessFlags = 0;
-				NormalMapTexDesc.MiscFlags = 0;
-
-				auto mTex = leo::win::make_scope_com<ID3D11Texture2D>();
-
-				leo::dxcall(device->CreateTexture2D(&NormalMapTexDesc, nullptr, &mTex));
-				leo::dxcall(device->CreateShaderResourceView(mTex, nullptr, &mHeightMapSRV));
-				leo::dxcall(device->CreateUnorderedAccessView(mTex, nullptr, &mHeightMapUAV));
-
-				leo::ShaderMgr SM;
-				mCHMCS = SM.CreateComputeShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"terrain", D3D11_COMPUTE_SHADER)));
-
-				leo::RenderStates SS;
-				mSS = SS.GetSamplerState(L"NearestRepeat");
+				
+			
 			}
-		}
+		}*/
+	}
+	
+	bool ReBuildTerrain(ID3D11Device * device, ID3D11DeviceContext * context, const std::wstring & src_terrain, const uint8& maxedage, const std::wstring & dst_terrain, const std::wstring & height_map_path)
+	{
+		TerrainFileHeader header;
+		auto pFile = leo::win::File::Open(src_terrain, win::File::TO_READ | win::File::NO_CREATE);
+		pFile->Read(&header, sizeof(TerrainFileHeader), 0);
+
+		return GenTerrainEx(device,context,header,maxedage,dst_terrain,height_map_path);
+	}
+
+	template<typename T>
+	using com_ptr = leo::win::unique_com<T>;
+
+	bool GenTerrainEx(ID3D11Device * device, ID3D11DeviceContext * context, const TerrainFileHeader & header, const uint8& maxedage, const std::wstring & dst_terrain, const std::wstring & height_map_path)
+	{
+		auto HorChunkNum = header.mHorChunkNum;
+		auto VerChunkNum = header.mVerChunkNum;
+		auto select_tex_size = [&](uint16 ord_size) {
+			const uint16 tex_opt_size[] = { 256,512,1024,2048,4096 };
+			size_t i = 0;
+			for (; i != arrlen(tex_opt_size);) {
+				if (ord_size > tex_opt_size[i])
+					++i;
+				else
+					break;
+			}
+			i = std::min<size_t>(i, arrlen(tex_opt_size) - 1);
+			return tex_opt_size[i];
+		};
+
+		auto HeightMapHorSize = select_tex_size(uint16(HorChunkNum*maxedage));
+		auto HeightMapVerSize = select_tex_size(uint16(VerChunkNum* maxedage));
+
+		float4 Params{ 1.f / HeightMapHorSize,1.f / HeightMapVerSize,5.f,5.f };
+		com_ptr<ID3D11Buffer> mCHMCSCB = nullptr;
+		dx::CreateGPUCBuffer(device,Params,mCHMCSCB, "TerrainCHMCSParams");
+		
+		auto mHeightMapTex =X::MakeTexture2D(HeightMapHorSize, HeightMapVerSize, 1, 1, EF_R32F, {}, EA_G_R | EA_G_U,nullptr);
+		auto mHeightMapD3DTex = static_cast<D3D11Texture2D*>(mHeightMapTex.get());
+
+		auto mNoiseMapTex = X::SyncLoadTexture(header.mHeightMap, EA_G_R);
+		auto mNoiseMapD3DTex = static_cast<D3D11Texture2D*>(mNoiseMapTex.get());
+
+		auto computer_shader = ShaderMgr().CreateComputeShader(FileSearch::Search(EngineConfig::ShaderConfig::GetShaderFileName(L"terrain", D3D11_COMPUTE_SHADER)));
+
+		auto point_sampler = RenderStates().GetSamplerState(L"NearestRepeat");
+
+		context->CSSetShader(computer_shader, nullptr, 0);
+		auto mHeightMapUAV = mHeightMapD3DTex->AccessView();
+		context->CSSetUnorderedAccessViews(0, 1, &mHeightMapUAV, nullptr);
+		context->CSSetConstantBuffers(0, 1, &mCHMCSCB);
+		auto mNoiseMapSRV = mNoiseMapD3DTex->ResourceView();
+		context->CSSetShaderResources(0, 1, &mNoiseMapSRV);
+		context->CSSetSamplers(0, 1, &point_sampler);
+
+		context->Dispatch(HeightMapHorSize / 32, HeightMapVerSize / 32, 1);
+
+		ID3D11UnorderedAccessView* mNullptrUAV = nullptr;
+		context->CSSetUnorderedAccessViews(0, 1, &mNullptrUAV, nullptr);
+		context->CSSetShader(nullptr, nullptr, 0);
+
+		TerrainFileHeaderEx headerEx;
+		memcpy(headerEx, header);
+		memset(headerEx.mHeightMap, 0);
+
+		return false;
 	}
 }

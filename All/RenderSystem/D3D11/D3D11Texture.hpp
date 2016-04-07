@@ -206,10 +206,10 @@ namespace leo {
 
 		ID3D11Resource* Resource() const;
 
-		ID3D11ShaderResourceView* ResouceView();
-		ID3D11UnorderedAccessView* AccessView();
-		ID3D11RenderTargetView* TargetView();
-		ID3D11DepthStencilView* DepthStencilView();
+		ID3D11ShaderResourceView* ResourceView() override;
+		ID3D11UnorderedAccessView* AccessView() override;
+		ID3D11RenderTargetView* TargetView() override;
+		ID3D11DepthStencilView* DepthStencilView() override;
 
 		ID3D11Texture2D* D3DTexture() const;
 

@@ -149,6 +149,7 @@
       <OpenMPSupport>false</OpenMPSupport>
       <DisableSpecificWarnings>4800</DisableSpecificWarnings>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
