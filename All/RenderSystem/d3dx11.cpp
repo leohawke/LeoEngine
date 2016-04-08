@@ -1364,11 +1364,6 @@ namespace leo
 		//--------------------------------------------------------------------------------------
 #if !defined(WINAPI_FAMILY) || (WINAPI_FAMILY != WINAPI_FAMILY_PHONE_APP) || (_WIN32_WINNT > _WIN32_WINNT_WIN8)
 
-		namespace DirectX
-		{
-			extern bool _IsWIC2();
-			extern IWICImagingFactory* _GetWIC();
-		}
 
 		HRESULT SaveWICTextureToFile(_In_ ID3D11DeviceContext* pContext,
 			_In_ ID3D11Resource* pSource,

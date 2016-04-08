@@ -14,6 +14,7 @@
 #include <Core\Mesh.hpp>
 #include <Core\Camera.hpp>
 #include <Core\Terrain.hpp>
+#include <Core\TerrainGen.h>
 #include <Core\FileSearch.h>
 #include <Core\EngineConfig.h>
 #include <Core\RenderSync.hpp>
@@ -344,8 +345,8 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 
 
 
-	leo::float3 pos;
-	save(pos, leo::Multiply(leo::Splat(-2.f*mSphere.GetRadius()), leo::load(dir)));
+	float3 pos;
+	leo::save(pos, leo::Multiply(leo::Splat(-2.f*mSphere.GetRadius()), leo::load(dir)));
 	pos.x = -pos.x;
 	pos.z = -pos.z;
 
@@ -379,7 +380,8 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pModelMesh->Scale(1.f);
 	Models.push_back(std::move(pModelMesh));
 
-	pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(),L"Resource/Test.Terrain");
+	leo::ReBuildTerrain(leo::DeviceMgr().GetDevice(), leo::DeviceMgr().GetDeviceContext(), L"Resource/Test.Terrain", 128, L"Resource/Test.TerrainEx", L"Resource/Test.TerrainEx.DDS");
+	pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(),L"Resource/Test.TerrainEx");
 
 	BuildLight(leo::DeviceMgr().GetDevice());
 	BuildUI(size);
