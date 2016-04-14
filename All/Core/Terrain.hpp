@@ -212,7 +212,7 @@ namespace leo
 			}
 			Catch_DX_Exception
 			leo::TextureMgr tm;
-			mHeightMapSRV.reset(tm.LoadTextureSRV(mTerrainFileHeader.mHeightMap));
+			mHeightMapSRV = tm.LoadTextureSRV(mTerrainFileHeader.mHeightMap);
 
 			mWeightMap = tm.LoadTextureSRV(L"Resource/blend.dds");
 			mMatArrayMap = tm.LoadTexture2DArraySRV(std::array<const wchar_t*, 5>({
@@ -388,7 +388,7 @@ namespace leo
 
 		
 
-		leo::win::unique_com<ID3D11ShaderResourceView> mHeightMapSRV = nullptr;
+		ID3D11ShaderResourceView* mHeightMapSRV = nullptr;
 
 	private:
 #if 0

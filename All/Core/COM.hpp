@@ -40,12 +40,12 @@ namespace leo
 						DebugPrintf("%s address: %p,refcount: ", name.c_str(), com);
 					return;
 				}
-				DebugPrintf("UNKNOWN address: %p,refcount: ", com);
+				DebugPrintf("Unnamed-%s address: %p,refcount: ", typeid(COM).name(), com);
 			}
 
 			template<typename COM>
 			void Print(COM* com,...) {
-				DebugPrintf("UNKNOWN address: %p,refcount: ", com);
+				DebugPrintf("Unnamed-%s address: %p,refcount: ",typeid(COM).name(),com);
 			}
 
 			template<typename COM>
