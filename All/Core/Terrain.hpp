@@ -32,6 +32,9 @@
 
 #include "Core\TerrainGen.h"
 #include "Core/EffectTerrain.hpp"
+
+#include "Rendersystem/TextureX.hpp"
+#include "Rendersystem/D3D11/D3D11Texture.hpp"
 #include <vector>
 
 
@@ -55,7 +58,7 @@ namespace leo
 		{
 			
 			auto pFile = leo::win::File::Open(terrainfilename, win::File::TO_READ | win::File::NO_CREATE);
-			pFile->Read(&mTerrainFileHeader, sizeof(TerrainFileHeader), 0);
+			pFile->Read(&mTerrainFileHeader, sizeof(TerrainFileHeaderEx), 0);
 			mHorChunkNum = mTerrainFileHeader.mHorChunkNum;
 			mVerChunkNum = mTerrainFileHeader.mVerChunkNum;
 			mChunkSize = mTerrainFileHeader.mChunkSize;
@@ -212,7 +215,10 @@ namespace leo
 			}
 			Catch_DX_Exception
 			leo::TextureMgr tm;
-			mHeightMapSRV = tm.LoadTextureSRV(mTerrainFileHeader.mHeightMap);
+
+			mHeightMap = X::SyncLoadTexture(mTerrainFileHeader.mHeightMap, EA_G_R);
+			mNormaMapHorSize = mHeightMap->Width(0);
+			mNormaMapVerSize = mHeightMap->Height(0);
 
 			mWeightMap = tm.LoadTextureSRV(L"Resource/blend.dds");
 			mMatArrayMap = tm.LoadTexture2DArraySRV(std::array<const wchar_t*, 5>({
@@ -247,7 +253,7 @@ namespace leo
 
 			auto & mEffect = EffectTerrain::GetInstance();
 			mEffect->ViewProjMatrix(camera.ViewProj());
-			mEffect->HeightMap(mHeightMapSRV);
+			mEffect->HeightMap(mHeightMap);
 			mEffect->UVScale(float2(1.f / mHorChunkNum / mChunkSize, 1.f / mVerChunkNum / mChunkSize));
 			mEffect->WeightMap(mWeightMap);
 			mEffect->MatArrayMap(mMatArrayMap);
@@ -388,7 +394,7 @@ namespace leo
 
 		
 
-		ID3D11ShaderResourceView* mHeightMapSRV = nullptr;
+		TexturePtr mHeightMap = nullptr;
 
 	private:
 #if 0

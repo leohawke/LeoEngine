@@ -1,6 +1,7 @@
 #include "EffectTerrain.hpp"
 #include "RenderSystem\ShaderMgr.h"
 #include "RenderSystem\RenderStates.hpp"
+#include "RenderSystem\D3D11\D3D11Texture.hpp"
 #include "Terrain.hpp"
 #include "FileSearch.h"
 #include "EngineConfig.h"
@@ -86,9 +87,10 @@ namespace leo
 				mVSCBPerMatrix.Update(context);
 		}
 		
-		void HeightMap(ID3D11ShaderResourceView * srv, ID3D11DeviceContext * context)
+		void HeightMap(TexturePtr tex, ID3D11DeviceContext * context)
 		{
-			mHeightSRV = srv;
+			D3D11Texture2D* d3d_tex = static_cast<D3D11Texture2D*>(tex.get());
+			mHeightSRV = d3d_tex->ResourceView();
 			if (context)
 				context->VSSetShaderResources(0, 1, &mHeightSRV);
 		}
@@ -198,12 +200,12 @@ namespace leo
 			scale, context
 			);
 	}
-	void leo::EffectTerrain::HeightMap(ID3D11ShaderResourceView * srv, ID3D11DeviceContext * context)
+	void leo::EffectTerrain::HeightMap(TexturePtr tex, ID3D11DeviceContext * context)
 	{
 		lassume(dynamic_cast<EffectTerrainDelegate *>(this));
 
 		return ((EffectTerrainDelegate *)this)->HeightMap(
-			srv, context
+			tex, context
 			);
 	}
 	

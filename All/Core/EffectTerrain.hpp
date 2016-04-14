@@ -14,7 +14,7 @@
 #define Core_Terrain_Effect_hpp
 
 #include "effect.h"
-
+#include "RenderSystem/Texture.hpp"
 
 namespace leo
 {
@@ -27,7 +27,7 @@ namespace leo
 		void ViewMatrix(const float4x4& matrix, ID3D11DeviceContext* context = nullptr);
 		void WorldOffset(const float2& offset, ID3D11DeviceContext* context = nullptr);
 		void UVScale(const float2& offset, ID3D11DeviceContext* context = nullptr);
-		void HeightMap(ID3D11ShaderResourceView* srv, ID3D11DeviceContext* context = nullptr);
+		void HeightMap(TexturePtr tex, ID3D11DeviceContext* context = nullptr);
 #ifdef DEBUG
 		void LodColor(const float4& color, ID3D11DeviceContext* context);
 
