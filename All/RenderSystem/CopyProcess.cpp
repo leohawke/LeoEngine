@@ -1,7 +1,10 @@
 #include "CopyProcess.hpp"
 #include "RenderStates.hpp"
 #include <Core\FileSearch.h>
-class PointCopy :public leo::PostProcess {
+
+#include <Singleton.hpp>
+
+class PointCopy :public leo::PostProcess,leo::Singleton<PointCopy> {
 public:
 	PointCopy(ID3D11Device* create)
 		:PostProcess(create)
@@ -22,7 +25,7 @@ private:
 	ID3D11SamplerState* point_sampler;
 };
 
-class BilinearCopy :public leo::PostProcess {
+class BilinearCopy :public leo::PostProcess, leo::Singleton<BilinearCopy> {
 public:
 	BilinearCopy(ID3D11Device* create)
 		:PostProcess(create)
@@ -42,7 +45,7 @@ private:
 	ID3D11SamplerState* bilinear_sampler;
 };
 
-class AddPointCopy :public PointCopy {
+class AddPointCopy :public PointCopy, leo::Singleton<AddPointCopy> {
 public:
 	AddPointCopy(ID3D11Device* create)
 		:PointCopy(create)
@@ -72,7 +75,7 @@ private:
 	ID3D11BlendState*  blend_add;
 };
 
-class AddBilinearCopy :public BilinearCopy {
+class AddBilinearCopy :public BilinearCopy, leo::Singleton<AddBilinearCopy> {
 public:
 	AddBilinearCopy(ID3D11Device* create)
 		:BilinearCopy(create)
