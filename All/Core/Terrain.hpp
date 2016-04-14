@@ -1,15 +1,15 @@
 //
 //  Leo Engine Source File.
-//  Copyright (C), FNS Studios, 2014-2014.
+//  Copyright (C), FNS Studios, 2014-2016.
 // -------------------------------------------------------------------------
 //  File name:   Core/Terrain.h
-//  Version:     v1.00
+//  Version:     v1.01
 //  Created:     8/29/2014 by leo hawke.
-//  Compilers:   Visual Studio.NET 2013
+//  Compilers:   Visual Studio.NET 2015
 //  Description: 简易地形渲染系统<简易LOD>
 // -------------------------------------------------------------------------
 //  History:
-//				
+//			4/14/2016 不再运行时构建高度图
 //
 ////////////////////////////////////////////////////////////////////////////
 
@@ -216,7 +216,7 @@ namespace leo
 			Catch_DX_Exception
 			leo::TextureMgr tm;
 
-			mHeightMap = X::SyncLoadTexture(mTerrainFileHeader.mHeightMap, EA_G_R);
+			mHeightMap = X::SyncLoadTexture(mTerrainFileHeader.mHeightMap, EA_G_R | EA_I);
 			mNormaMapHorSize = mHeightMap->Width(0);
 			mNormaMapVerSize = mHeightMap->Height(0);
 

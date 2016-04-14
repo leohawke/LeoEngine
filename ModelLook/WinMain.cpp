@@ -380,6 +380,7 @@ void BuildRes(std::pair<leo::uint16, leo::uint16> size)
 	pModelMesh->Scale(1.f);
 	Models.push_back(std::move(pModelMesh));
 
+	leo::ReBuildTerrain(leo::DeviceMgr().GetDevice(), leo::DeviceMgr().GetDeviceContext(), L"Resource/Test.Terrain", 128, L"Resource/Test.TerrainEx", L"Resource/Test.TerrainEx.DDS");
 	pTerrain = std::make_unique<leo::Terrain<>>(leo::DeviceMgr().GetDevice(),L"Resource/Test.TerrainEx");
 
 	BuildLight(leo::DeviceMgr().GetDevice());
