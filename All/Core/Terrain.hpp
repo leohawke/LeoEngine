@@ -508,7 +508,7 @@ namespace leo
 			static auto value_function = [](const Chunk& chunk, std::list<Chunk*>& mNeedDrawChunks) {
 				mNeedDrawChunks.push_back(const_cast<Chunk*>(&chunk));
 			};
-			static auto clip_function = [](const float4& rect, const Camera& camera) {
+			static auto cond_function = [](const float4& rect, const Camera& camera) {
 				float3 v[3];
 				v[0] = float3(rect.x - rect.z / 2, 0, rect.y + rect.w / 2);
 				v[1] = float3(rect.x + rect.z / 2, 0, rect.y + rect.w / 2);
@@ -521,7 +521,7 @@ namespace leo
 			mChunksQuadTree.Iterator(
 				value_function,
 				value_param,
-				clip_function,
+				cond_function,
 				std::make_tuple(std::cref(camera))
 				);
 
@@ -532,7 +532,7 @@ namespace leo
 				rect.x = offset.x;
 				rect.y = offset.y;
 				rect.z = rect.w = mChunkSize;
-				if (clip_function(rect,camera))
+				if (cond_function(rect,camera))
 					++iter;
 				else
 					iter = mNeedDrawChunks.erase(iter);

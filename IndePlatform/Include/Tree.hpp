@@ -303,7 +303,7 @@ namespace leo{
 			typename std::enable_if<
 				value_function<typename std::remove_reference<F1>::type>::value &&
 				clip_function<typename std::remove_reference<F2>::type>::value>
-				::type Iterator(const F1& value_func, const std::tuple<Opt1...>& args1, const F2& clip_func, const std::tuple<Opt2...>& args2)
+				::type Iterator(const F1& value_func, const std::tuple<Opt1...>& args1, const F2& cond_func, const std::tuple<Opt2...>& args2)
 			{
 				static_assert(clip_function<typename std::remove_reference<F2>::type>::value, "fuck");
 				std::stack<Node*> mNodeStack;
@@ -314,7 +314,7 @@ namespace leo{
 					auto & node = mNodeStack.top();
 					mNodeStack.pop();
 
-					if (!apply(clip_func, node->mRect, args2))
+					if (!apply(cond_func, node->mRect, args2))
 						continue;
 
 
