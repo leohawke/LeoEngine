@@ -220,6 +220,13 @@ namespace leo
 			mNormaMapHorSize = mHeightMap->Width(0);
 			mNormaMapVerSize = mHeightMap->Height(0);
 
+			{
+				auto HeightMapTemp = X::SyncLoadTexture(mTerrainFileHeader.mHeightMap, EA_C_R);
+				Texture::Mapper TextureMap(*HeightMapTemp,0,1,Texture::MA_RO,0,0,mNormaMapHorSize,mNormaMapVerSize);
+				HeightRowPitch = TextureMap.GetRowPitch() / sizeof(float);
+				HeightData = std::make_unique<float[]>(mNormaMapVerSize*HeightRowPitch);
+				std::memcpy(HeightData.get(), TextureMap.Pointer<float>(), mNormaMapVerSize*TextureMap.GetRowPitch());
+			}
 			mWeightMap = tm.LoadTextureSRV(L"Resource/blend.dds");
 			mMatArrayMap = tm.LoadTexture2DArraySRV(std::array<const wchar_t*, 5>({
 				L"Resource/grass.dds", 
@@ -320,6 +327,12 @@ namespace leo
 			//GS生成,绘制阴影
 		}
 
+		float GetHeight(const float2 & xz) const {
+			//地形大小是 宽: mChunkSize*mHorChunkNum
+			//			高: mChunkSize*mVerChunkNum
+			//			世界坐标系 x范围=> ?
+			//			世界坐标系 y范围=> ?
+		}
 	private:
 		TerrainFileHeaderEx mTerrainFileHeader;
 
@@ -392,10 +405,11 @@ namespace leo
 
 		std::vector<float3, aligned_alloc<float3, 16>> mVersInfo;
 
-		
-
-		TexturePtr mHeightMap = nullptr;
-
+		struct {
+			TexturePtr mHeightMap = nullptr;
+			std::unique_ptr<float[]> HeightData;
+			uint32 HeightRowPitch;
+		};
 	private:
 #if 0
 		uint8 ClipToScreenSpaceLod(XMVECTOR clip0, XMVECTOR clip1)

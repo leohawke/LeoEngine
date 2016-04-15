@@ -212,7 +212,7 @@ namespace leo {
 
 		headerEx.Reserved = 0;
 
-		X::SyncSaveTexture(height_map_path, mNoiseMapTex);
+		X::SyncSaveTexture(height_map_path, mHeightMapTex);
 
 		auto pFile = leo::win::File::Open(dst_terrain, win::File::TO_WRITE);
 		pFile->Write(0, &headerEx, sizeof(TerrainFileHeaderEx));

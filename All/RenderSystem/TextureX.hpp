@@ -16,6 +16,7 @@
 #define ShaderSystem_TextureX_Hpp
 
 #include "Texture.hpp"
+#include <leomathtype.hpp>
 #include "UI/Graphics.h"
 
 #include <experimental/filesystem>
@@ -37,6 +38,31 @@ namespace leo {
 		LB_API TexturePtr ASyncLoadTexture(const path& tex_name, uint32 access);
 
 		LB_API bool SyncSaveTexture(const path& tex_path, TexturePtr tex);
+
+		class SampleState{};
+
+		class XTexture {
+		public:
+			// Gets the number of mipmaps to be used for this texture.
+			uint8 NumMipMaps() const;
+			// Gets the size of texture array
+			uint8 ArraySize() const;
+
+			// Returns the width of the texture.
+			virtual uint16 Width(uint8 level) const;
+			// Returns the height of the texture.
+			virtual uint16 Height(uint8 level) const;
+			// Returns the depth of the texture (only for 3D texture).
+			virtual uint16 Depth(uint8 level) const;
+
+			// Returns the pixel format for the texture surface.
+			EFormat Format() const;
+
+			// Returns the texture type of the texture.
+			Texture::Dis_Type Type() const;
+
+			virtual void* SampleLevel(SampleState, const float3& uvw, uint8 level) const;
+		};
 	}
 }
 
