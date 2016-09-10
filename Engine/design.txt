@@ -1,0 +1,5 @@
+基于Device/Context的封装
+Device负责Create
+Context负责其他
+Context持有Device封装
+Device持有原始Device

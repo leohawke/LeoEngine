@@ -1,0 +1,173 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="CHRLib">
+      <UniqueIdentifier>{5edf5115-26db-406b-a5d9-b31da76d25d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCF">
+      <UniqueIdentifier>{b387822f-6105-4454-b1c9-5fd6f2980d4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework">
+      <UniqueIdentifier>{926270a9-7972-4484-9c3b-82a5d3dc0428}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Win32">
+      <UniqueIdentifier>{515c7ddb-9098-46e7-91e9-05781544e4ba}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CHRLib\CharacterMapping.h">
+      <Filter>CHRLib</Filter>
+    </ClInclude>
+    <ClInclude Include="CHRLib\CharacterProcessing.h">
+      <Filter>CHRLib</Filter>
+    </ClInclude>
+    <ClInclude Include="CHRLib\Convert.hpp">
+      <Filter>CHRLib</Filter>
+    </ClInclude>
+    <ClInclude Include="CHRLib\Encoding.h">
+      <Filter>CHRLib</Filter>
+    </ClInclude>
+    <ClInclude Include="CHRLib\MappingEx.h">
+      <Filter>CHRLib</Filter>
+    </ClInclude>
+    <ClInclude Include="CHRLib\StaticMapping.hpp">
+      <Filter>CHRLib</Filter>
+    </ClInclude>
+    <ClInclude Include="ldef.h" />
+    <ClInclude Include="linttype.hpp" />
+    <ClInclude Include="lmacro.h" />
+    <ClInclude Include="type_op.hpp" />
+    <ClInclude Include="lcompiler.h" />
+    <ClInclude Include="deref_op.hpp" />
+    <ClInclude Include="algorithm.hpp" />
+    <ClInclude Include="iterator.hpp" />
+    <ClInclude Include="cstdio.h" />
+    <ClInclude Include="cstring.h" />
+    <ClInclude Include="cwctype.h" />
+    <ClInclude Include="cctype.h" />
+    <ClInclude Include="any.h" />
+    <ClInclude Include="any_iterator.hpp" />
+    <ClInclude Include="functional.hpp" />
+    <ClInclude Include="sutility.h" />
+    <ClInclude Include="ref.hpp" />
+    <ClInclude Include="tuple.hpp" />
+    <ClInclude Include="string.hpp" />
+    <ClInclude Include="iterator_op.hpp" />
+    <ClInclude Include="operators.hpp" />
+    <ClInclude Include="variadic.hpp" />
+    <ClInclude Include="addressof.hpp" />
+    <ClInclude Include="type_traits.hpp" />
+    <ClInclude Include="integer_sequence.hpp" />
+    <ClInclude Include="functor.hpp" />
+    <ClInclude Include="enum.hpp" />
+    <ClInclude Include="pointer.hpp" />
+    <ClInclude Include="range.hpp" />
+    <ClInclude Include="typeinfo.h" />
+    <ClInclude Include="MCF\Abstract.hpp">
+      <Filter>MCF</Filter>
+    </ClInclude>
+    <ClInclude Include="type_pun.hpp" />
+    <ClInclude Include="container.hpp" />
+    <ClInclude Include="memory.hpp" />
+    <ClInclude Include="cassert.h" />
+    <ClInclude Include="lmemory.hpp" />
+    <ClInclude Include="array.hpp" />
+    <ClInclude Include="iterator_trait.hpp" />
+    <ClInclude Include="ios.hpp" />
+    <ClInclude Include="utility.hpp" />
+    <ClInclude Include="exception.h" />
+    <ClInclude Include="pseudo_mutex.h" />
+    <ClInclude Include="scope_gurad.hpp" />
+    <ClInclude Include="cache.hpp" />
+    <ClInclude Include="Debug.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Platform.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="FCommon.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="NativeAPI.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32\Mingw32.h">
+      <Filter>Framework\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="FContainer.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Mutex.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="concurrency.h" />
+    <ClInclude Include="future.hpp" />
+    <ClInclude Include="Win32\Consoles.h">
+      <Filter>Framework\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="LException.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="LCoreUtilities.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Host.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="FReference.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="LAdaptor.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="LShellDefinition.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="FFileIO.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="LConsole.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="CHRLib\CharacterProcessing.cpp">
+      <Filter>CHRLib</Filter>
+    </ClCompile>
+    <ClCompile Include="CHRLib\chrmap.cpp">
+      <Filter>CHRLib</Filter>
+    </ClCompile>
+    <ClCompile Include="CHRLib\MappingEx.cpp">
+      <Filter>CHRLib</Filter>
+    </ClCompile>
+    <ClCompile Include="any.cpp" />
+    <ClCompile Include="cstdio.cpp" />
+    <ClCompile Include="cwctype.cpp" />
+    <ClCompile Include="sutility.cpp" />
+    <ClCompile Include="cassert.cpp" />
+    <ClCompile Include="exception.cpp" />
+    <ClCompile Include="vc.cpp" />
+    <ClCompile Include="FCommon.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="concurrency.cpp" />
+    <ClCompile Include="Win32\Consoles.cpp">
+      <Filter>Framework\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Host.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="LException.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="FFileIO.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\MinGW32.cpp">
+      <Filter>Framework\Win32</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
