@@ -106,7 +106,7 @@ namespace platform_ex {
 					}
 				}
 				LAssert(false, "Not Enough Space");
-				return 0;
+				throw;
 			}
 
 			void Device::DeallocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE Type, D3D12_CPU_DESCRIPTOR_HANDLE Handle)
@@ -130,13 +130,13 @@ namespace platform_ex {
 					desc_heap_flag_num = cbv_srv_uav_heap_flag.size();
 					break;
 				}
-				auto Offset = Handle.ptr- d3d_desc_heaps[Type]->GetCPUDescriptorHandleForHeapStart();
+				auto Offset = Handle.ptr - d3d_desc_heaps[Type]->GetCPUDescriptorHandleForHeapStart().ptr;
 				auto index = Offset / d3d_desc_incres_sizes[Type];
 				if(index >= desc_heap_offset)
 					*(desc_heap_flag_iter + index- desc_heap_offset) = false;
 			}
 
-			ID3D12Device* operator->() lnoexcept {
+			ID3D12Device*  Device::operator->() lnoexcept {
 				return d3d_device.Get();
 			}
 
@@ -179,8 +179,7 @@ namespace platform_ex {
 				null_srv_desc.Texture2D.MostDetailedMip = 0;
 				null_srv_desc.Texture2D.PlaneSlice = 0;
 				null_srv_desc.Texture2D.ResourceMinLODClamp = 0;
-				null_srv_handle = d3d_desc_heaps[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->GetCPUDescriptorHandleForHeapStart();
-				null_srv_handle.ptr += AllocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				null_srv_handle = AllocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 				d3d_device->CreateShaderResourceView(nullptr, &null_srv_desc, null_srv_handle);
 
 				D3D12_UNORDERED_ACCESS_VIEW_DESC null_uav_desc;
@@ -188,8 +187,7 @@ namespace platform_ex {
 				null_uav_desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 				null_uav_desc.Texture2D.MipSlice = 0;
 				null_uav_desc.Texture2D.PlaneSlice = 0;
-				null_uav_handle = d3d_desc_heaps[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->GetCPUDescriptorHandleForHeapStart();
-				null_uav_handle.ptr += AllocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				null_uav_handle = AllocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 				d3d_device->CreateUnorderedAccessView(nullptr, nullptr, &null_uav_desc, null_uav_handle);
 			}
 

@@ -7,10 +7,8 @@
 
 #include "../../Win32/COM.h"
 
-enum D3D_FEATURE_LEVEL;
-struct D3D12_ROOT_SIGNATURE_DESC;
-enum D3D_ROOT_SIGNATURE_VERSION;
-struct ID3D10Blob;
+#include <UniversalDXSDK/d3d12.h>
+#include <UniversalDXSDK/dxgi1_5.h>
 
 namespace platform_ex {
 	namespace Windows {

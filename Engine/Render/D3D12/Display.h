@@ -8,8 +8,6 @@
 
 #include <LBase/linttype.hpp>
 #include "d3d12_dxgi.h"
-#include <dxgi1_5.h>
-#include <d3d12.h>
 
 namespace platform_ex {
 	namespace Windows {

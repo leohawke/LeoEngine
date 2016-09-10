@@ -8,7 +8,7 @@
 #include "../IContext.h"
 #include "Adapter.h"
 #include "Display.h"
-#include <d3d12.h>
+#include <UniversalDXSDK/d3d12.h>
 
 namespace platform_ex {
 	namespace Windows {
