@@ -100,7 +100,7 @@ namespace platform_ex {
 				for (auto i = 0; i != desc_heap_flag_num; ++i) {
 					if (!*(desc_heap_flag_iter + i)) {
 						*(desc_heap_flag_iter + i) = true;
-						D3D12_CPU_DESCRIPTOR_HANDLE handle = d3d_desc_heaps[Type]->GetCPUDescriptorHandleForHeapStart();
+						auto handle = GetCPUDescriptorHandleForHeapStart(d3d_desc_heaps[Type].Get());
 						handle.ptr += ((i+ desc_heap_offset) * d3d_desc_incres_sizes[Type]);
 						return handle;
 					}
@@ -130,7 +130,7 @@ namespace platform_ex {
 					desc_heap_flag_num = cbv_srv_uav_heap_flag.size();
 					break;
 				}
-				auto Offset = Handle.ptr - d3d_desc_heaps[Type]->GetCPUDescriptorHandleForHeapStart().ptr;
+				auto Offset = Handle.ptr - GetCPUDescriptorHandleForHeapStart(d3d_desc_heaps[Type].Get()).ptr;
 				auto index = Offset / d3d_desc_incres_sizes[Type];
 				if(index >= desc_heap_offset)
 					*(desc_heap_flag_iter + index- desc_heap_offset) = false;
