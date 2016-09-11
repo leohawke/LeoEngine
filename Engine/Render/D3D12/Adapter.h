@@ -9,8 +9,6 @@
 #include <LBase/linttype.hpp>
 #include <LBase/FContainer.h>
 
-#include <dxgi1_5.h>
-
 namespace platform_ex {
 	namespace Windows {
 		namespace DXGI {

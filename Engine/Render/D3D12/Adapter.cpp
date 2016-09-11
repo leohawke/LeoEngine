@@ -1,6 +1,5 @@
 #include "Adapter.h"
 #include "d3d12_dxgi.h"
-#include <d3d12.h>
 
 namespace platform_ex {
 	namespace Windows {
@@ -33,7 +32,7 @@ namespace platform_ex {
 				video_modes.resize(0);
 
 				COMPtr<IDXGIAdapter3> adapter3;
-				auto hr = adapter->QueryInterface(COMPtr_RefParam(adapter3));
+				auto hr = adapter->QueryInterface(COMPtr_RefParam(adapter3,IID_IDXGIAdapter3));
 				if (adapter3 != nullptr)
 				{
 					DXGI_ADAPTER_DESC2 desc2;
@@ -104,7 +103,7 @@ namespace platform_ex {
 			AdapterList::AdapterList()
 				:current_iterator(end())
 			{
-				CheckHResult(CreateFactory1(COMPtr_RefParam(dxgi_factory_4)));
+				CheckHResult(CreateFactory1(COMPtr_RefParam(dxgi_factory_4,IID_IDXGIFactory4)));
 				CheckHResult(Enumerate());
 			}
 

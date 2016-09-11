@@ -1,4 +1,4 @@
-/*!	\file StaticMapping.hpp
+﻿/*!	\file StaticMapping.hpp
 \ingroup CHRLib
 \brief 静态编码映射。
 \version r2436

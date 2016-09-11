@@ -1,8 +1,5 @@
 #include "d3d12_dxgi.h"
 
-#include <d3d12.h>
-#include <dxgi1_5.h>
-
 namespace platform_ex {
 	namespace Windows {
 		namespace DXGI {

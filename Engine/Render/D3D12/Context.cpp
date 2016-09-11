@@ -147,7 +147,7 @@ namespace platform_ex {
 				d3d_feature_level = feature_level;
 
 				CheckHResult(d3d_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
-					COMPtr_RefParam(d3d_cmd_allocators[Command_Render])));
+					COMPtr_RefParam(d3d_cmd_allocators[Command_Render],IID_ID3D12CommandAllocator)));
 
 				auto create_desc_heap=[&](D3D12_DESCRIPTOR_HEAP_TYPE Type,UINT NumDescriptors,
 					D3D12_DESCRIPTOR_HEAP_FLAGS Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,UINT NodeMask = 0)
@@ -159,7 +159,7 @@ namespace platform_ex {
 						NodeMask
 					};
 					CheckHResult(d3d_device->CreateDescriptorHeap(&descriptor_desc,
-						COMPtr_RefParam(d3d_desc_heaps[Type])));
+						COMPtr_RefParam(d3d_desc_heaps[Type],IID_ID3D12DescriptorHeap)));
 					d3d_desc_incres_sizes[Type] = d3d_device->GetDescriptorHandleIncrementSize(Type);
 				};
 
@@ -197,7 +197,7 @@ namespace platform_ex {
 #ifndef NDEBUG
 				{
 					COMPtr<ID3D12Debug> debug_ctrl;
-					if (SUCCEEDED(D3D12::GetDebugInterface(COMPtr_RefParam(debug_ctrl)))) {
+					if (SUCCEEDED(D3D12::GetDebugInterface(COMPtr_RefParam(debug_ctrl,IID_ID3D12Debug)))) {
 						LAssertNonnull(debug_ctrl);
 						debug_ctrl->EnableDebugLayer();
 					}
@@ -217,7 +217,7 @@ namespace platform_ex {
 			{
 				CheckHResult(d3d_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT,
 					device->d3d_cmd_allocators[Device::Command_Render].Get(), nullptr,
-					COMPtr_RefParam(d3d_cmd_lists[Device::Command_Render])));
+					COMPtr_RefParam(d3d_cmd_lists[Device::Command_Render], IID_ID3D12GraphicsCommandList)));
 			}
 
 			void Context::CreateDeviceAndDisplay() {

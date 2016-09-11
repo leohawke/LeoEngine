@@ -98,8 +98,8 @@ namespace platform_ex {
 			: pInterface(ptr)
 		{}
 		template<class _iOther>
-		COMPtr(_iOther& intf, std::enable_if_t<!std::is_convertible_v<_iOther&,
-			COMPtr&>, int> = 0) lnothrow
+		COMPtr(_iOther& intf, std::enable_if_t<!std::is_convertible<_iOther&,
+			COMPtr&>::value, int> = 0) lnothrow
 			: pInterface(&intf)
 		{
 			pInterface->AddRef();
@@ -386,7 +386,11 @@ namespace platform_ex {
 	template<class _iCOM>
 	inline DefSwap(lnothrow, COMPtr<_iCOM>)
 
-#define COMPtr_RefParam(p) __uuidof(decltype(*p)),leo::replace_cast<void**>(&p.ReleaseAndGetRef())
+#ifdef LB_IMPL_MSCPP
+#define COMPtr_RefParam(p,guid) __uuidof(decltype(*p)),leo::replace_cast<void**>(&p.ReleaseAndGetRef())
+#else
+#define COMPtr_RefParam(p,guid) guid,leo::replace_cast<void**>(&p.ReleaseAndGetRef())
+#endif
 	//@}
 	//@}
 }
