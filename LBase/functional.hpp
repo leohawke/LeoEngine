@@ -206,6 +206,92 @@ namespace leo
 #if __cpp_lib_invoke >= 201411
 	using std::invoke;
 #else
+	namespace details
+	{
+
+		template<typename _tClass, typename _type>
+		struct is_callable_target
+			: is_base_of<member_target_type_t<_type>, _tClass>
+		{};
+
+		template<typename _fCallable, typename _type>
+		struct is_callable_case1 : and_<is_member_function_pointer<_fCallable>,
+			is_callable_target<_type&&, _fCallable>>
+		{};
+
+		template<typename _fCallable, typename _type>
+		struct is_callable_case2 : and_<is_member_function_pointer<_fCallable>,
+			not_<is_callable_target<_type&&, _fCallable>>>
+		{};
+
+		template<typename _fCallable, typename _type>
+		struct is_callable_case3 : and_<is_member_object_pointer<_fCallable>,
+			is_callable_target<_type&&, _fCallable>>
+		{};
+
+		template<typename _fCallable, typename _type>
+		struct is_callable_case4 : and_<is_member_object_pointer<_fCallable>,
+			not_<is_callable_target<_type&&, _fCallable>>>
+		{};
+
+		template<typename _fCallable, typename _type, typename... _tParams>
+		lconstfn auto
+			invoke_impl(_fCallable&& f, _type&& obj, _tParams&&... args)
+			-> enable_if_t<is_callable_case1<decay_t<_fCallable>, _type>::value,
+			decltype((obj.*f)(lforward(args)...))>
+		{
+			return lconstraint(f), (obj.*f)(lforward(args)...);
+		}
+		template<typename _fCallable, typename _type, typename... _tParams>
+		lconstfn auto
+			invoke_impl(_fCallable&& f, _type&& obj, _tParams&&... args)
+			-> enable_if_t<is_callable_case2<decay_t<_fCallable>, _type>::value,
+			decltype(((*lforward(obj)).*f)(lforward(args)...))>
+		{
+			return lconstraint(f), ((*lforward(obj)).*f)(lforward(args)...);
+		}
+		template<typename _fCallable, typename _type>
+		lconstfn auto
+			invoke_impl(_fCallable&& f, _type&& obj)
+			-> enable_if_t<is_callable_case3<decay_t<_fCallable>, _type>::value,
+			decltype(obj.*f)>
+		{
+			return lconstraint(f), obj.*f;
+		}
+		template<typename _fCallable, typename _type>
+		lconstfn auto
+			invoke_impl(_fCallable&& f, _type&& obj)
+			-> enable_if_t<is_callable_case4<decay_t<_fCallable>, _type>::value,
+			decltype((*lforward(obj)).*f)>
+		{
+			return lconstraint(f), (*lforward(obj)).*f;
+		}
+		template<typename _func, typename... _tParams>
+		lconstfn auto
+			invoke_impl(_func&& f, _tParams&&... args)
+			-> enable_if_t<!is_member_pointer<decay_t<_func>>::value,
+			decltype(lforward(f)(lforward(args)...))>
+		{
+			return lforward(f)(lforward(args)...);
+		}
+
+	} // namespace details;
+
+	/*!
+	\brief 调用可调用对象。
+	\sa http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4169.html
+	\see WG21 N4527 20.9.2[func.require] ， WG21 N4527 20.9.3[func.invoke] 。
+	\see http://wg21.cmeerw.net/lwg/issue2013 。
+	\see http://wg21.cmeerw.net/cwg/issue1581 。
+	\see https://llvm.org/bugs/show_bug.cgi?id=23141 。
+	\since build 1.4
+	*/
+	template<typename _fCallable, typename... _tParams>
+	limpl(lconstfn) result_of_t<_fCallable && (_tParams&&...)>
+		invoke(_fCallable&& f, _tParams&&... args)
+	{
+		return details::invoke_impl(lforward(f), lforward(args)...);
+	}
 #endif
 
 	namespace details

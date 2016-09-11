@@ -178,7 +178,7 @@ namespace leo
 		std::function<void(value_type&)> flush{};
 
 		explicit
-			used_list_cache(size_type s = yimpl(15U))
+			used_list_cache(size_type s = limpl(15U))
 			: used_list(), used_cache(), max_use(s)
 		{}
 		used_list_cache(used_list_cache&&) = default;

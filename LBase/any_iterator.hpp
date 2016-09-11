@@ -195,8 +195,8 @@ namespace leo
 			using param_obj_type = typename remove_rcv<_tIter>::type;
 			using handler = any_ops::input_iterator_handler<param_obj_type>;
 
-			static_assert(is_convertible<decltype(*std::declval<typename
-				wrapped_traits<param_obj_type>::type&>()), reference>::value,
+			static_assert(is_convertible<indirect_t<unwrap_reference_t<
+				decay_t<_tIter>>&>, reference>::value,
 				"Wrong target iterator type found.");
 
 			manager = handler::manage;

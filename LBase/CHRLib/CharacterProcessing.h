@@ -13,6 +13,7 @@ namespace CHRLib
 {
 
 	using leo::enable_for_string_class_t;
+	using leo::enable_if_t;
 
 	/*!
 	\brief 判断整数类型字符在 ASCII 字符取值范围内。
@@ -179,7 +180,7 @@ namespace CHRLib
 	LB_NONNULL(1) _tDst
 		MakeUCS2LE(const char* s, Encoding enc = CS_Default)
 	{
-		return MakeUCS2LE<_tDst>(s, stdex::ntctslen(s), enc);
+		return MakeUCS2LE<_tDst>(s, leo::ntctslen(s), enc);
 	}
 	//@}
 	//! \brief 构造指定类型的 UCS-2 字符串。
@@ -199,7 +200,7 @@ namespace CHRLib
 	LB_NONNULL(1) inline _tDst
 		MakeUCS2LE(const ucs2_t* s, Encoding enc = CharSet::ISO_10646_UCS_2)
 	{
-		return MakeUCS2LE<_tDst>(s, stdex::ntctslen(s), enc);
+		return MakeUCS2LE<_tDst>(s, leo::ntctslen(s), enc);
 	}
 	//@}
 	//! \brief 转换 UCS-4 字符串为指定类型的 UCS-2 字符串。
@@ -221,7 +222,7 @@ namespace CHRLib
 	LB_NONNULL(1) _tDst
 		MakeUCS2LE(const ucs4_t* s, Encoding enc = CharSet::ISO_10646_UCS_4)
 	{
-		return MakeUCS2LE<_tDst>(s, stdex::ntctslen(s), enc);
+		return MakeUCS2LE<_tDst>(s, leo::ntctslen(s), enc);
 	}
 	//@}
 	//! \note 转换指定类型的 UCS2-LE 字符串：仅当源类型参数不可直接构造目标类型时有效。
@@ -265,7 +266,7 @@ namespace CHRLib
 	LB_NONNULL(1) _tDst
 		MakeUCS4LE(const char* s, Encoding enc = CS_Default)
 	{
-		return MakeUCS4LE<_tDst>(s, stdex::ntctslen(s), enc);
+		return MakeUCS4LE<_tDst>(s, leo::ntctslen(s), enc);
 	}
 	//@}
 	//! \brief 构造指定类型的 UCS-4 字符串。
@@ -284,7 +285,7 @@ namespace CHRLib
 	LB_NONNULL(1) inline _tDst
 		MakeUCS4LE(const ucs4_t* s, Encoding enc = CharSet::ISO_10646_UCS_4)
 	{
-		return MakeUCS4LE<_tDst>(s, stdex::ntctslen(s), enc);
+		return MakeUCS4LE<_tDst>(s, leo::ntctslen(s), enc);
 	}
 	//@}
 	//! \brief 转换 UCS-2 字符串为指定类型的 UCS-4 字符串。
@@ -303,7 +304,7 @@ namespace CHRLib
 	LB_NONNULL(1) _tDst
 		MakeUCS4LE(const ucs2_t* s, Encoding enc = CharSet::ISO_10646_UCS_2)
 	{
-		return MakeUCS4LE<_tDst>(s, stdex::ntctslen(s), enc);
+		return MakeUCS4LE<_tDst>(s, leo::ntctslen(s), enc);
 	}
 	//@}
 	//! \note 转换指定类型的 UCS4-LE 字符串：仅当源类型参数不可直接构造目标类型时有效。
@@ -382,7 +383,7 @@ namespace CHRLib
 	LB_NONNULL(1) _tDst
 		MakeMBCS(const ucs2_t* s, Encoding enc = CS_Default)
 	{
-		return MakeMBCS<_tDst>(s, stdex::ntctslen(s), enc);
+		return MakeMBCS<_tDst>(s, leo::ntctslen(s), enc);
 	}
 	//@}
 	/*!
@@ -407,7 +408,7 @@ namespace CHRLib
 	LB_NONNULL(1) _tDst
 		MakeMBCS(const ucs4_t* s, Encoding enc = CS_Default)
 	{
-		return MakeMBCS<_tDst>(s, stdex::ntctslen(s), enc);
+		return MakeMBCS<_tDst>(s, leo::ntctslen(s), enc);
 	}
 	//@}
 	//! \note 转换指定类型的多字节字符串：仅当源类型参数不可直接构造目标类型时有效。

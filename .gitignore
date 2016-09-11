@@ -218,3 +218,4 @@ LScheme/
 LScheme Test/
 LTest/
 *.opendb
+*.o

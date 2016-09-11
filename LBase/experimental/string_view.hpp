@@ -16,6 +16,9 @@
 #if defined(LB_IMPL_MSCPP)
 #include <xutility>
 #endif
+#if defined(LB_IMPL_GNUCPP)
+#pragma GCC system_header
+#endif
 
 namespace std
 {
@@ -458,7 +461,7 @@ namespace std
 			//workaround : std::numeric_limits<int> in mscpp doesn't return constexpr
 #if defined(LB_IMPL_MSCPP)
 			static const int
-#elif 
+#else
 			static constexpr const int
 #endif
 				_S_compare(size_type __n1, size_type __n2) noexcept

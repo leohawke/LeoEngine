@@ -56,7 +56,7 @@ namespace leo {
 		{
 			const _tChar* p(s);
 
-			while (!stdex::is_null(*p))
+			while (!leo::is_null(*p))
 				++p;
 			return size_t(p - s);
 		}

@@ -145,7 +145,7 @@ namespace leo
 	public:
 		transformed_iterator() = default;
 		template<typename _tIterOrig, typename _tTran,
-			limpl(typename = exclude_self_ctor_t<transformed_iterator, _tIterOrig>)>
+			limpl(typename = exclude_self_t<transformed_iterator, _tIterOrig>)>
 			explicit lconstfn
 			transformed_iterator(_tIterOrig&& i, _tTran f = {})
 			: iterator_type(lforward(i)), transformer(f)
@@ -310,74 +310,134 @@ namespace leo
 
 	namespace iterator_transformation
 	{
-		template<typename _tIter>
-		static lconstfn auto
-			first(const _tIter& i) -> decltype((i->first))
-		{
-			return i->first;
-		}
-		template<typename _tIter>
-		static lconstfn auto
-			second(const _tIter& i) -> decltype((i->second))
-		{
-			return i->second;
-		}
 
-		template<typename _tIter>
-		static lconstfn auto
-			get(const _tIter& i) -> decltype(((*i).get()))
+		//! \since build 1.4
+		//@{
+		template<typename _tIter = void>
+		struct first
 		{
-			return (*i).get();
-		}
+			lconstfn auto
+				operator()(const _tIter& i) const -> decltype((i->first))
+			{
+				return i->first;
+			}
+		};
 
-		template<typename _tIter>
-		static lconstfn auto
-			indirect(const _tIter& i) -> decltype((**i))
+		template<>
+		struct first<void>
 		{
-			return **i;
-		}
+			template<typename _tIter>
+			lconstfn auto
+				operator()(const _tIter& i) const -> decltype((i->first))
+			{
+				return i->first;
+			}
+		};
+
+
+		template<typename _tIter = void>
+		struct get
+		{
+			lconstfn auto
+				operator()(const _tIter& i) const -> decltype((*i).get())
+			{
+				return (*i).get();
+			}
+		};
+
+		template<>
+		struct get<void>
+		{
+			template<typename _tIter>
+			lconstfn auto
+				operator()(const _tIter& i) const -> decltype((*i).get())
+			{
+				return (*i).get();
+			}
+		};
+
+
+		template<typename _tIter = void>
+		struct indirect
+		{
+			lconstfn auto
+				operator()(const _tIter& i) const -> decltype(**i)
+			{
+				return **i;
+			}
+		};
+
+		template<>
+		struct indirect<void>
+		{
+			template<typename _tIter>
+			lconstfn auto
+				operator()(const _tIter& i) const -> decltype(**i)
+			{
+				return **i;
+			}
+		};
+
+
+		template<typename _tIter = void>
+		struct second
+		{
+			lconstfn auto
+				operator()(const _tIter& i) const -> decltype((i->second))
+			{
+				return i->second;
+			}
+		};
+
+		template<>
+		struct second<void>
+		{
+			template<typename _tIter>
+			lconstfn auto
+				operator()(const _tIter& i) const -> decltype((i->second))
+			{
+				return i->second;
+			}
+		};
+		//@}
 	} // namespace iterator_transformation;
 
 	lconstexpr first_tag get_first{}, get_key{};
 	lconstexpr second_tag get_second{}, get_value{};
-	lconstexpr struct indirect_tag{} get_indirect{};
-	lconstexpr const struct get_tag {} get_get{};
+	lconstexpr struct indirect_tag_t{} get_indirect{};
+	lconstexpr const struct get_tag_t {} get_get{};
 
 	template<typename _tIter>
 	inline auto
 		operator|(_tIter&& i, first_tag)
-		-> decltype(make_transform(lforward(i), iterator_transformation::first<
-		typename array_ref_decay<_tIter>::type>))
+		-> decltype(make_transform(lforward(i), 
+			iterator_transformation::first<>()))
 	{
-		return make_transform(lforward(i), iterator_transformation::first<
-			typename array_ref_decay<_tIter>::type>);
+		return make_transform(lforward(i), iterator_transformation::first<>());
 	}
 	template<typename _tIter>
 	inline auto
 		operator|(_tIter&& i, second_tag)
-		-> decltype(make_transform(lforward(i), iterator_transformation::second<
-		typename array_ref_decay<_tIter>::type>))
+		-> decltype(make_transform(lforward(i),
+			iterator_transformation::second<>()))
 	{
-		return make_transform(lforward(i), iterator_transformation::second<
-			typename array_ref_decay<_tIter>::type>);
+		return make_transform(lforward(i), iterator_transformation::second<>());
 	}
 	template<typename _tIter>
 	inline auto
-		operator|(_tIter&& i, indirect_tag)
-		-> decltype(make_transform(lforward(i), iterator_transformation::indirect<
-		typename array_ref_decay<_tIter>::type>))
+		operator|(_tIter&& i, indirect_tag_t)
+		-> decltype(make_transform(lforward(i), 
+			iterator_transformation::indirect<>()))
 	{
-		return make_transform(lforward(i), iterator_transformation::indirect<
-			typename array_ref_decay<_tIter>::type>);
+		return make_transform(lforward(i), iterator_transformation::indirect<>());
 	}
 	template<typename _tIter>
 	inline auto
-		operator|(_tIter&& i, get_tag)
-		-> decltype(make_transform(lforward(i), iterator_transformation::get<
-			typename array_ref_decay<_tIter>::type>))
+		operator|(_tIter&& i, get_tag_t)
+		-> decltype(make_transform(lforward(i), 
+			iterator_transformation::get<>()))
 	{
-		return make_transform(lforward(i), iterator_transformation::get<
-			typename array_ref_decay<_tIter>::type>);
+		return make_transform(lforward(i), iterator_transformation::get<>());
 	}
 
 	template<typename _tMaster, typename _tSlave,

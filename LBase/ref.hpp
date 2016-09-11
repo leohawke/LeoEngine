@@ -57,7 +57,7 @@ namespace leo
 	public:
 		lconstfn
 			lref(_type& t) lnothrow
-			: ptr(addressof(t))
+			: ptr(leo::addressof(t))
 		{}
 		lconstfn
 			lref(std::reference_wrapper<_type> t) lnothrow

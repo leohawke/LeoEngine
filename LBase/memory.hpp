@@ -31,6 +31,8 @@
 #	endif
 #endif
 
+using stdex::nullptr_t;
+
 namespace leo
 {
 	//@{

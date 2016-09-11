@@ -863,7 +863,7 @@ namespace leo {
 		= enable_if_t<is_convertible<_tFrom, _tTo>::value, _type>;
 
 	template<typename _tFrom,typename _tTo,typename _type = void>
-	using enable_if_incovertible_t
+	using enable_if_inconvertible_t
 		= enable_if_t<!is_convertible<_tFrom, _tTo>::value, _type>;
 
 	template<typename _type1, typename _type2, typename _type = void>

@@ -8,6 +8,8 @@
 
 #include "LBase/ldef.h"
 
+using stdex::nullptr_t;
+
 namespace leo {
 	/*!	\defgroup is_undereferenceable Is Undereferenceable Iterator
 	\brief 判断迭代器实例是否不可解引用。
