@@ -119,13 +119,11 @@ namespace platform_ex {
 				IDXGIAdapter1 *  dxgi_adapter = nullptr;
 				while (dxgi_factory_4->EnumAdapters1(adapter_i, &dxgi_adapter) != DXGI_ERROR_NOT_FOUND)
 				{
-					ID3D12Device* device = nullptr;
 					if (dxgi_adapter && SUCCEEDED(D3D12::CreateDevice(dxgi_adapter, D3D_FEATURE_LEVEL_11_0,
-						IID_ID3D12Device, reinterpret_cast<void**>(&device)))) {
+						IID_ID3D12Device,nullptr))) {
 						emplace_back(adapter_i, dxgi_adapter);
 						//check result not important
 						back().Enumerate();
-						device->Release();
 					}
 					++adapter_i;
 				}

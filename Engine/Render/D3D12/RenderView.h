@@ -61,7 +61,11 @@ namespace platform_ex {
 
 			class GPUDataStructView {};
 
-			class RenderTargetView :public GPUDataStructView,public platform::Render::RenderTargetView {};
+			class RenderTargetView :public GPUDataStructView,public platform::Render::RenderTargetView {
+			public:
+
+			
+			};
 
 			class DepthStencilView :public GPUDataStructView,public platform::Render::DepthStencilView {};
 

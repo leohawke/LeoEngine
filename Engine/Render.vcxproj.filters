@@ -63,6 +63,9 @@
     <ClInclude Include="Render\IRenderView.h">
       <Filter>Render</Filter>
     </ClInclude>
+    <ClInclude Include="Render\ITexture.hpp">
+      <Filter>Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -85,6 +88,9 @@
     </ClCompile>
     <ClCompile Include="Render\D3D12\RenderView.cpp">
       <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Texture.cpp">
+      <Filter>Render</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
