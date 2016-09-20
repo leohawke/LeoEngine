@@ -6,6 +6,7 @@
 #define LE_RENDER_D3D12_Context_h 1
 
 #include "../IContext.h"
+#include "Texture.h"
 #include "Adapter.h"
 #include "Display.h"
 #include <UniversalDXSDK/d3d12.h>
@@ -22,6 +23,8 @@ namespace platform_ex {
 				void DeallocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE Type, D3D12_CPU_DESCRIPTOR_HANDLE Handle);
 				
 				ID3D12Device* operator->() lnoexcept;
+
+
 			public:
 				friend class Context;
 			

@@ -66,6 +66,9 @@
     <ClInclude Include="Render\ITexture.hpp">
       <Filter>Render</Filter>
     </ClInclude>
+    <ClInclude Include="Render\D3D12\Texture.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -89,8 +92,11 @@
     <ClCompile Include="Render\D3D12\RenderView.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Texture.cpp">
+    <ClCompile Include="Render\ITexture.cpp">
       <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\Texture.cpp">
+      <Filter>Render\D3D12</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

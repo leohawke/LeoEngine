@@ -168,6 +168,7 @@
     <ClInclude Include="Render\D3D12\Display.h" />
     <ClInclude Include="Render\D3D12\RenderView.h" />
     <ClInclude Include="Render\D3D12\test.h" />
+    <ClInclude Include="Render\D3D12\Texture.h" />
     <ClInclude Include="Render\IContext.h" />
     <ClInclude Include="Render\IFormat.hpp" />
     <ClInclude Include="Render\IRenderView.h" />
@@ -181,7 +182,8 @@
     <ClCompile Include="Render\D3D12\Display.cpp" />
     <ClCompile Include="Render\D3D12\Convert.cpp" />
     <ClCompile Include="Render\D3D12\RenderView.cpp" />
-    <ClCompile Include="Render\Texture.cpp" />
+    <ClCompile Include="Render\D3D12\Texture.cpp" />
+    <ClCompile Include="Render\ITexture.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
