@@ -1,4 +1,4 @@
-#include <LBase/pointer.hpp>
+﻿#include <LBase/pointer.hpp>
 #include "Context.h"
 #include "Display.h"
 
@@ -100,7 +100,7 @@ namespace platform_ex {
 				for (auto i = 0; i != desc_heap_flag_num; ++i) {
 					if (!*(desc_heap_flag_iter + i)) {
 						*(desc_heap_flag_iter + i) = true;
-						auto handle = GetCPUDescriptorHandleForHeapStart(d3d_desc_heaps[Type].Get());
+						auto handle = d3d_desc_heaps[Type]->GetCPUDescriptorHandleForHeapStart();
 						handle.ptr += ((i+ desc_heap_offset) * d3d_desc_incres_sizes[Type]);
 						return handle;
 					}
@@ -130,10 +130,30 @@ namespace platform_ex {
 					desc_heap_flag_num = cbv_srv_uav_heap_flag.size();
 					break;
 				}
-				auto Offset = Handle.ptr - GetCPUDescriptorHandleForHeapStart(d3d_desc_heaps[Type].Get()).ptr;
+				auto Offset = Handle.ptr - d3d_desc_heaps[Type]->GetCPUDescriptorHandleForHeapStart().ptr;
 				auto index = Offset / d3d_desc_incres_sizes[Type];
 				if(index >= desc_heap_offset)
 					*(desc_heap_flag_iter + index- desc_heap_offset) = false;
+			}
+
+			std::shared_ptr<Texture1D> Device::CreateTexture(uint16 width, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data)
+			{
+				return nullptr;
+			}
+
+			std::shared_ptr<Texture2D> Device::CreateTexture(uint16 width, uint16 height, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data)
+			{
+				return nullptr;
+			}
+
+			std::shared_ptr<Texture3D> Device::CreateTexture(uint16 width, uint16 height, uint16 depth, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data)
+			{
+				return nullptr;
+			}
+
+			std::shared_ptr<TextureCube> Device::CreateTextureCube(uint16 size, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data)
+			{
+				return nullptr;
 			}
 
 			ID3D12Device*  Device::operator->() lnoexcept {
@@ -148,6 +168,9 @@ namespace platform_ex {
 
 				CheckHResult(d3d_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
 					COMPtr_RefParam(d3d_cmd_allocators[Command_Render],IID_ID3D12CommandAllocator)));
+
+				CheckHResult(d3d_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
+					COMPtr_RefParam(d3d_cmd_allocators[Command_Resource], IID_ID3D12CommandAllocator)));
 
 				auto create_desc_heap=[&](D3D12_DESCRIPTOR_HEAP_TYPE Type,UINT NumDescriptors,
 					D3D12_DESCRIPTOR_HEAP_FLAGS Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,UINT NodeMask = 0)
@@ -213,11 +236,33 @@ namespace platform_ex {
 				return adapter_list.CurrentAdapter();
 			}
 
+			void D3D12::Context::SyncCPUGPU(bool force)
+			{
+			}
+
+			const COMPtr<ID3D12GraphicsCommandList> & D3D12::Context::GetCommandList(Device::CommandType index) const
+			{
+				return d3d_cmd_lists[index];
+			}
+
+			std::mutex & D3D12::Context::GetCommandListMutex(Device::CommandType index)
+			{
+				return cmd_list_mutexs[index];
+			}
+
+			void D3D12::Context::CommitCommandList(Device::CommandType)
+			{
+			}
+
 			void Context::ContextEx(ID3D12Device * d3d_device, ID3D12CommandQueue * cmd_queue)
 			{
 				CheckHResult(d3d_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT,
 					device->d3d_cmd_allocators[Device::Command_Render].Get(), nullptr,
 					COMPtr_RefParam(d3d_cmd_lists[Device::Command_Render], IID_ID3D12GraphicsCommandList)));
+
+				CheckHResult(d3d_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT,
+					device->d3d_cmd_allocators[Device::Command_Resource].Get(), nullptr,
+					COMPtr_RefParam(d3d_cmd_lists[Device::Command_Resource], IID_ID3D12GraphicsCommandList)));
 			}
 
 			void Context::CreateDeviceAndDisplay() {

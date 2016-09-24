@@ -176,6 +176,9 @@
     <ClInclude Include="Win32\COM.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\CommonTextureImpl.hcc">
+      <FileType>CppCode</FileType>
+    </ClInclude>
     <ClCompile Include="Render\D3D12\Adapter.cpp" />
     <ClCompile Include="Render\D3D12\Context.cpp" />
     <ClCompile Include="Render\D3D12\d3d12_dxgi.cpp" />

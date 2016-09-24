@@ -7,9 +7,14 @@
 
 namespace platform {
 	namespace Render {
-		class Device {};
+		class Device {
+		public:
+
+		};
 
 		class Context {
+		public:
+
 		private:
 			virtual void CreateDeviceAndDisplay() = 0;
 		};

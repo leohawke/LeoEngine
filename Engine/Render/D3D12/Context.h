@@ -6,10 +6,13 @@
 #define LE_RENDER_D3D12_Context_h 1
 
 #include "../IContext.h"
-#include "Texture.h"
 #include "Adapter.h"
 #include "Display.h"
+#include "Texture.h"
+
 #include <UniversalDXSDK/d3d12.h>
+
+#include <LBase/concurrency.h>
 
 namespace platform_ex {
 	namespace Windows {
@@ -24,10 +27,29 @@ namespace platform_ex {
 				
 				ID3D12Device* operator->() lnoexcept;
 
+				std::shared_ptr<Texture1D> CreateTexture(uint16 width, uint8 num_mipmaps, uint8 array_size,
+					EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data = nullptr);
+
+				std::shared_ptr<Texture2D> CreateTexture(uint16 width,uint16 height,uint8 num_mipmaps, uint8 array_size,
+					EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data = nullptr);
+				
+				std::shared_ptr<Texture3D> CreateTexture(uint16 width, uint16 height,uint16 depth, uint8 num_mipmaps, uint8 array_size,
+					EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data = nullptr);
+				
+				std::shared_ptr<TextureCube> CreateTextureCube(uint16 size, uint8 num_mipmaps, uint8 array_size,
+					EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data = nullptr);
 
 			public:
 				friend class Context;
 			
+				enum CommandType {
+					Command_Render = 0,
+					//Command_Compute,
+					//Command_Copy,
+					Command_Resource,
+					CommandTypeCount
+				};
+
 				//@{
 				//\brief 使用者可以修改这些值满足特定需求
 				lconstexpr static UINT const NUM_MAX_RENDER_TARGET_VIEWS = 1024+Display::NUM_BACK_BUFFERS;
@@ -50,12 +72,7 @@ namespace platform_ex {
 
 				//@{
 				//\brief object for create object
-				enum CommandType {
-					Command_Render = 0,
-					//Command_Compute,
-					//Command_Copy,
-					CommandTypeCount
-				};
+				
 
 				array<COMPtr<ID3D12CommandAllocator>, CommandTypeCount> d3d_cmd_allocators;
 				//COMPtr<ID3D12CommandQueue> d3d_cmd_compute_quque;
@@ -81,7 +98,15 @@ namespace platform_ex {
 
 				DefGetter(const lnothrow, IDXGIFactory4*, DXGIFactory4, adapter_list.GetDXGIFactory4());
 				DefGetter(, Device&, Device, *device);
+
+				void SyncCPUGPU(bool force = true);
+
+				const COMPtr<ID3D12GraphicsCommandList>& GetCommandList(Device::CommandType) const;
+				std::mutex& GetCommandListMutex(Device::CommandType);
+
+				void CommitCommandList(Device::CommandType);
 				friend class Device;
+
 			private:
 				void ContextEx(ID3D12Device* device, ID3D12CommandQueue* cmd_queue);
 				void CreateDeviceAndDisplay() override;
@@ -93,7 +118,7 @@ namespace platform_ex {
 				shared_ptr<Display> display;
 
 				array<COMPtr<ID3D12GraphicsCommandList>,Device::CommandTypeCount> d3d_cmd_lists;
-
+				array<std::mutex, Device::CommandTypeCount> cmd_list_mutexs;
 			public:
 				static Context& Instance();
 			};

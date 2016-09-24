@@ -25,6 +25,9 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Render\Common">
+      <UniqueIdentifier>{7aa79ed7-2378-4480-a199-fc79ad93af98}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="emacro.h">
@@ -97,6 +100,9 @@
     </ClCompile>
     <ClCompile Include="Render\D3D12\Texture.cpp">
       <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\CommonTextureImpl.hcc">
+      <Filter>Render\Common</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

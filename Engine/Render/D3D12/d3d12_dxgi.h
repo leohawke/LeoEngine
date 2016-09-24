@@ -97,12 +97,23 @@ namespace platform_ex {
 			HRESULT SerializeRootSignature(D3D12_ROOT_SIGNATURE_DESC const * pRootSignature,
 				D3D_ROOT_SIGNATURE_VERSION Version, ID3D10Blob** ppBlob, ID3D10Blob** ppErrorBlob);
 
-			
+			/*
 			inline D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandleForHeapStart(ID3D12DescriptorHeap * This) {
 				auto ThisWrap = reinterpret_cast<ID3D12DescriptorHeapWrap*>(This);
 				D3D12_CPU_DESCRIPTOR_HANDLE handle = {};
 				ThisWrap->lpVtbl->GetCPUDescriptorHandleForHeapStart(ThisWrap, &handle);
 				return handle;
+			}
+			*/
+
+			struct RESOURCE_STATE_TRANSITION {
+				D3D12_RESOURCE_STATES StateBefore = D3D12_RESOURCE_STATE_COMMON;
+				D3D12_RESOURCE_STATES StateAfter = D3D12_RESOURCE_STATE_COMMON;
+			};
+
+			inline UINT CalcSubresource(UINT MipSlice, UINT ArraySlice, UINT PlaneSlice, UINT MipLevels, UINT ArraySize)
+			{
+				return MipSlice + ArraySlice * MipLevels + PlaneSlice * MipLevels * ArraySize;
 			}
 		}
 	}

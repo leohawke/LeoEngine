@@ -4178,12 +4178,36 @@ EXTERN_C const IID IID_ID3D12DescriptorHeap;
     ID3D12DescriptorHeap : public ID3D12Pageable
     {
     public:
+		/*
         virtual D3D12_DESCRIPTOR_HEAP_DESC STDMETHODCALLTYPE GetDesc( void) = 0;
         
         virtual D3D12_CPU_DESCRIPTOR_HANDLE STDMETHODCALLTYPE GetCPUDescriptorHandleForHeapStart( void) = 0;
         
         virtual D3D12_GPU_DESCRIPTOR_HANDLE STDMETHODCALLTYPE GetGPUDescriptorHandleForHeapStart( void) = 0;
-        
+        */
+		virtual void  STDMETHODCALLTYPE GetDesc(D3D12_DESCRIPTOR_HEAP_DESC*) = 0;
+
+		virtual void  STDMETHODCALLTYPE GetCPUDescriptorHandleForHeapStart(D3D12_CPU_DESCRIPTOR_HANDLE*) = 0;
+
+		virtual void  STDMETHODCALLTYPE GetGPUDescriptorHandleForHeapStart(D3D12_GPU_DESCRIPTOR_HANDLE*) = 0;
+
+		D3D12_DESCRIPTOR_HEAP_DESC GetDesc() {
+			D3D12_DESCRIPTOR_HEAP_DESC desc;
+			GetDesc(&desc);
+			return desc;
+		}
+
+		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandleForHeapStart() {
+			D3D12_CPU_DESCRIPTOR_HANDLE handle;
+			GetCPUDescriptorHandleForHeapStart(&handle);
+			return handle;
+		}
+
+		D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandleForHeapStart() {
+			D3D12_GPU_DESCRIPTOR_HANDLE handle;
+			GetGPUDescriptorHandleForHeapStart(&handle);
+			return handle;
+		}
     };
     
     

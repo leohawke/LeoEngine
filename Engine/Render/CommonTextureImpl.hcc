@@ -1,0 +1,152 @@
+using platform::Render::Mapper;
+using TMA = platform::Render::TextureMapAccess;
+
+#include <LBase/exception.h>
+
+void ResizeTexture(void* dst_data, uint32 dst_row_pitch, uint32 dst_slice_pitch, EFormat dst_format,
+	uint16 dst_width, uint16 dst_height, uint16 dst_depth,
+	void const * src_data, uint32 src_row_pitch, uint32 src_slice_pitch, EFormat src_format,
+	uint16 src_width, uint16 src_height, uint16 src_depth,
+	bool linear)
+{
+	throw leo::unimplemented();
+}
+
+void Texture1D::Resize(platform::Render::Texture1D & base_target, uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_width, uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_width, bool linear)
+{
+	auto & target = static_cast<Texture1D&>(base_target);
+	auto & device = Context::Instance().GetDevice();
+
+	std::shared_ptr<Texture1D> src_cpu;
+	Texture1D* src_cpu_ptr = this;
+	uint8 src_cpu_array_index{};
+	uint8 src_cpu_level{};
+	uint16 src_cpu_x_offset{};
+	if (GetAccessMode() & EA_CPURead) {
+		src_cpu_array_index = src_array_index;
+		src_cpu_level = src_level;
+		src_cpu_x_offset = src_x_offset;
+	}
+	else {
+		src_cpu = device.CreateTexture(src_width, 1, 1, GetFormat(), EA_CPURead, GetSampleInfo());
+		src_cpu_ptr = src_cpu.get();
+
+		CopyToSubTexture(*src_cpu, 0, 0, 0, src_width, src_array_index, src_level, src_x_offset, src_width);
+
+	}
+
+	std::shared_ptr<Texture1D> dst_cpu;
+	Texture1D* dst_cpu_ptr = &target;
+	uint8 dst_cpu_array_index {};
+	uint8 dst_cpu_level {};
+	uint16 dst_cpu_x_offset {};
+	if (target.GetAccessMode() & EA_CPURead) {
+		dst_cpu_array_index = dst_array_index;
+		dst_cpu_level = dst_level;
+		dst_cpu_x_offset = dst_x_offset;
+	}
+	else {
+		dst_cpu = device.CreateTexture(dst_width, 1, 1, 
+			target.GetFormat(), EA_CPUWrite, target.GetSampleInfo());
+		dst_cpu_ptr = dst_cpu.get();
+	}
+
+	{
+		Mapper src_cpu_mapper(*src_cpu_ptr,src_cpu_array_index,src_cpu_level,TMA::ReadOnly, src_cpu_x_offset, src_width);
+		Mapper dst_cpu_mapper(*dst_cpu_ptr, dst_cpu_array_index,dst_cpu_level, TMA::WriteOnly, dst_cpu_x_offset,dst_width);
+
+		ResizeTexture(dst_cpu_mapper.Pointer<uint8>(), dst_cpu_mapper.RowPitch, dst_cpu_mapper.SlicePitch, target.GetFormat(),
+			dst_width, 1, 1,
+			src_cpu_mapper.Pointer<uint8>(), src_cpu_mapper.RowPitch, src_cpu_mapper.SlicePitch, GetFormat(),
+			src_width, 1, 1,
+			linear);
+	}
+
+	if (dst_cpu_ptr != &target) {
+		dst_cpu_ptr->CopyToSubTexture(target, dst_array_index, dst_level, dst_x_offset, dst_width, 0, 0, 0, dst_width);
+	}
+}
+
+void Texture2D::Resize(platform::Render::Texture2D & base_target, uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_width, uint16 dst_height,
+	uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_width, uint16 src_height, bool linear)
+{
+	auto & target = static_cast<Texture2D&>(base_target);
+	auto & device = Context::Instance().GetDevice();
+
+	std::shared_ptr<Texture2D> src_cpu;
+	Texture2D* src_cpu_ptr =this;
+	uint8 src_cpu_array_index{};
+	uint8 src_cpu_level{};
+	uint16 src_cpu_x_offset{};
+	uint16 src_cpu_y_offset{};
+	if ((GetAccessMode() & EA_CPURead))
+	{
+		src_cpu_array_index = src_array_index;
+		src_cpu_level = src_level;
+		src_cpu_x_offset = src_x_offset;
+		src_cpu_y_offset = src_y_offset;
+	}
+	else
+	{
+		src_cpu = device.CreateTexture(src_width, src_height, 1, 1,
+			GetFormat(), EA_CPURead | EA_CPUWrite, GetSampleInfo(), nullptr);
+		src_cpu_ptr = src_cpu.get();
+
+		CopyToSubTexture(*src_cpu, 0, 0, 0, 0, src_width, src_height,
+			src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height);
+	}
+
+	std::shared_ptr<Texture2D> dst_cpu;
+	Texture2D* dst_cpu_ptr = &target;
+	uint8 dst_cpu_array_index{};
+	uint8 dst_cpu_level{};
+	uint16 dst_cpu_x_offset{};
+	uint16 dst_cpu_y_offset{};
+	if ((target.GetAccessMode() & EA_CPUWrite) && !IsCompressedFormat(target.GetFormat()))
+	{
+		dst_cpu_ptr = &target;
+		dst_cpu_array_index = dst_array_index;
+		dst_cpu_level = dst_level;
+		dst_cpu_x_offset = dst_x_offset;
+		dst_cpu_y_offset = dst_y_offset;
+	}
+	else
+	{
+		dst_cpu = device.CreateTexture(dst_width, dst_height, 1, 1,
+			target.GetFormat(), EA_CPURead | EA_CPUWrite,target.GetSampleInfo(),nullptr);
+		dst_cpu_ptr = dst_cpu.get();
+	}
+
+	{
+		Mapper src_cpu_mapper(*src_cpu_ptr, src_cpu_array_index, src_cpu_level, TMA::ReadOnly, src_cpu_x_offset, src_cpu_y_offset, src_width, src_height);
+		Mapper dst_cpu_mapper(*dst_cpu_ptr, dst_cpu_array_index, dst_cpu_level, TMA::WriteOnly, dst_cpu_x_offset, dst_cpu_y_offset, dst_width, dst_height);
+		ResizeTexture(dst_cpu_mapper.Pointer<uint8_t>(), dst_cpu_mapper.RowPitch, dst_cpu_mapper.SlicePitch, target.GetFormat(),
+			dst_width, dst_height, 1,
+			src_cpu_mapper.Pointer<uint8_t>(), src_cpu_mapper.RowPitch, src_cpu_mapper.SlicePitch,GetFormat(),
+			src_width, src_height, 1,
+			linear);
+	}
+
+	if (dst_cpu_ptr != &target)
+	{
+		dst_cpu_ptr->CopyToSubTexture(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset,
+			dst_width, dst_height, 0, 0, 0, 0, dst_width, dst_height);
+	}
+}
+
+
+void Texture3D::Resize(platform::Render::Texture3D & base_target, uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_z_offset, uint16 dst_width, uint16 dst_height, uint16 dst_depth, uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_z_offset, uint16 src_width, uint16 src_height, uint16 src_depth, bool linear)
+{
+	auto & target = static_cast<Texture3D&>(base_target);
+	auto & device = Context::Instance().GetDevice();
+
+	throw leo::unimplemented();
+}
+
+void TextureCube::Resize(platform::Render::TextureCube & base_target, uint8 dst_array_index, CubeFaces dst_face, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_width, uint16 dst_height, uint8 src_array_index, CubeFaces src_face, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_width, uint16 src_height, bool linear)
+{
+	auto & target = static_cast<TextureCube&>(base_target);
+	auto & device = Context::Instance().GetDevice();
+
+	throw leo::unimplemented();
+}
