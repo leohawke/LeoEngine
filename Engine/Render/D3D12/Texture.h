@@ -26,6 +26,8 @@ namespace platform_ex {
 			class Texture
 			{
 			public:
+				explicit Texture(EFormat format);
+
 				ID3D12Resource* Resource() const {
 					return texture.Get();
 				}
@@ -51,32 +53,35 @@ namespace platform_ex {
 
 			protected:
 				void DeleteHWResource();
-				bool HWResourceReady();
+				bool ReadyHWResource() const;
 
 				template<typename _type>
-				static void DoHWCopyToTexture(_type& src, _type& target, RESOURCE_STATE_TRANSITION src_st = {}, RESOURCE_STATE_TRANSITION target_st = {});
+				static void DoHWCopyToTexture(_type& src, _type& target, ResourceStateTransition src_st = {}, ResourceStateTransition target_st = {});
 				template<typename _type>
 				static void DoHWCopyToSubTexture(_type& src, _type& target,
 					uint32 dst_subres, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_z_offset,
 					uint32 src_subres, uint16 src_x_offset, uint16 src_y_offset, uint16 src_z_offset,
 					uint16 width, uint16 height, uint16 depth,
-					RESOURCE_STATE_TRANSITION src_st = {}, RESOURCE_STATE_TRANSITION target_st = {});
+					ResourceStateTransition src_st = {}, ResourceStateTransition target_st = {});
 
 				void DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim,
 					uint16 width, uint16 height, uint16 depth, uint8 array_size,
 					ElementInitData const * init_data);
 
-				void DoMap(uint32 subres, TextureMapAccess tma,
+				void DoMap(EFormat format,uint32 subres, TextureMapAccess tma,
 					uint16 x_offset, uint16 y_offset, uint16 z_offset,
-					uint16 width, uint16 height, uint16 depth,
+					/*uint16 width,*/ uint16 height, uint16 depth,
 					void*& data, uint32& row_pitch, uint32& slice_pitch);
 				void DoUnmap(uint32 subres);
+
+				template<typename _type>
+				ViewSimulation* const& Retrive(_type& desc, std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>>& maps);
 
 				ViewSimulation* const & RetriveSRV(D3D12_SHADER_RESOURCE_VIEW_DESC const & desc);
 				ViewSimulation* const & RetriveUAV(D3D12_UNORDERED_ACCESS_VIEW_DESC const & desc);
 				ViewSimulation* const & RetriveRTV(D3D12_RENDER_TARGET_VIEW_DESC const & desc);
 				ViewSimulation* const & RetriveDSV(D3D12_DEPTH_STENCIL_VIEW_DESC const & desc);
-			private:
+			protected:
 				DXGI_FORMAT dxgi_format;
 
 				COMPtr<ID3D12Resource> texture;
@@ -120,6 +125,14 @@ namespace platform_ex {
 
 				ViewSimulation* RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) override;
 				ViewSimulation* RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) override;
+
+				template<typename _type>
+				static bool Equal(_type & lhs, _type & rhs) {
+					return (lhs.GetWidth(0) == rhs.GetWidth(0)) &&
+						(lhs.GetArraySize() == rhs.GetArraySize()) &&
+						(lhs.GetNumMipMaps() == rhs.GetNumMipMaps()) &&
+						(lhs.GetFormat() == rhs.GetFormat());
+				}
 			protected:
 				void Resize(platform::Render::Texture1D& target, uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_width,
 					uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_width,
@@ -159,6 +172,12 @@ namespace platform_ex {
 
 				ViewSimulation* RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) override;
 				ViewSimulation* RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) override;
+
+				template<typename _type>
+				static bool Equal(_type & lhs, _type & rhs) {
+					return (lhs.GetHeight(0) == rhs.GetHeight(0)) &&
+						Texture1D::Equal(lhs, rhs);
+				}
 			protected:
 				void Resize(platform::Render::Texture2D& target, uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_width, uint16 dst_height,
 					uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_width, uint16 src_height,
@@ -202,6 +221,13 @@ namespace platform_ex {
 
 				ViewSimulation* RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) override;
 				ViewSimulation* RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) override;
+
+
+
+				bool Equal(Texture3D& lhs, Texture3D & rhs) {
+					return (lhs.GetDepth(0) == rhs.GetDepth(0)) &&
+						Texture2D::Equal(lhs, rhs);
+				}
 			protected:
 				void Resize(platform::Render::Texture3D& target, uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_z_offset, uint16 dst_width, uint16 dst_height, uint16 dst_depth,
 					uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_z_offset, uint16 src_width, uint16 src_height, uint16 src_depth,

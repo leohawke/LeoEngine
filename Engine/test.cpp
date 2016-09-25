@@ -1,6 +1,7 @@
 #include <LBase/Win32/Mingw32.h>
 #include "Render/D3D12/test.h"
 #include "Render/D3D12/Context.h"
+#include "Render/D3D12/RenderView.h"
 
 #define TEST_CODE 1
 

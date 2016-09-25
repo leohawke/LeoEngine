@@ -105,11 +105,35 @@ namespace platform_ex {
 				return handle;
 			}
 			*/
-
-			struct RESOURCE_STATE_TRANSITION {
+			struct ResourceStateTransition {
 				D3D12_RESOURCE_STATES StateBefore = D3D12_RESOURCE_STATE_COMMON;
 				D3D12_RESOURCE_STATES StateAfter = D3D12_RESOURCE_STATE_COMMON;
 			};
+
+			struct TransitionBarrier :D3D12_RESOURCE_BARRIER {
+				TransitionBarrier(ResourceStateTransition state_trans, COMPtr<ID3D12Resource>& pResource, 
+					UINT Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
+					D3D12_RESOURCE_BARRIER_FLAGS flags = D3D12_RESOURCE_BARRIER_FLAG_NONE) {
+					Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+					Flags = flags;
+					Transition.pResource = pResource.Get();
+					Transition.StateBefore = state_trans.StateBefore;
+					Transition.StateAfter = state_trans.StateAfter;
+
+				}
+
+				operator D3D12_RESOURCE_BARRIER*() {
+					return this;
+				}
+
+				D3D12_RESOURCE_BARRIER* operator!() {
+					std::swap(Transition.StateBefore, Transition.StateAfter);
+					return this;
+				}
+
+			};
+
+			
 
 			inline UINT CalcSubresource(UINT MipSlice, UINT ArraySlice, UINT PlaneSlice, UINT MipLevels, UINT ArraySize)
 			{

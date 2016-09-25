@@ -50,7 +50,8 @@ namespace platform {
 			//\brief encode = UTF-8
 			virtual std::string const & Description() const = 0;
 		public:
-			explicit Texture(Type type, uint32 access, SampleDesc sample_info);
+			explicit Texture(Type type, uint8 numMipMaps, uint8 array_size,
+				EFormat format, uint32 access, SampleDesc sample_info);
 
 			virtual ~Texture();
 
@@ -95,7 +96,8 @@ namespace platform {
 
 		class LE_API Texture1D : public Texture {
 		public:
-			explicit Texture1D(uint32 access, SampleDesc sample_info);
+			explicit Texture1D(uint8 numMipMaps, uint8 array_size,
+				EFormat format, uint32 access, SampleDesc sample_info);
 
 			virtual ~Texture1D();
 
@@ -124,7 +126,8 @@ namespace platform {
 
 		class LE_API Texture2D : public Texture {
 		public:
-			explicit Texture2D(uint32 access, SampleDesc sample_info);
+			explicit Texture2D(uint8 numMipMaps, uint8 array_size,
+				EFormat format, uint32 access, SampleDesc sample_info);
 
 			virtual ~Texture2D();
 
@@ -156,7 +159,8 @@ namespace platform {
 
 		class LE_API Texture3D : public Texture {
 		public:
-			explicit Texture3D(uint32 access, SampleDesc sample_info);
+			explicit Texture3D(uint8 numMipMaps, uint8 array_size,
+				EFormat format, uint32 access, SampleDesc sample_info);
 
 			virtual ~Texture3D();
 
@@ -191,7 +195,8 @@ namespace platform {
 
 		class LE_API TextureCube : public Texture {
 		public:
-			explicit TextureCube(uint32 access, SampleDesc sample_info);
+			explicit TextureCube(uint8 numMipMaps, uint8 array_size,
+				EFormat format, uint32 access, SampleDesc sample_info);
 
 			virtual ~TextureCube();
 

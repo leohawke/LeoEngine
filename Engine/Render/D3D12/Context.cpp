@@ -1,6 +1,7 @@
 ﻿#include <LBase/pointer.hpp>
 #include "Context.h"
 #include "Display.h"
+#include "RenderView.h"
 
 #define TEST_CODE 1
 #if TEST_CODE

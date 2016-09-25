@@ -186,6 +186,10 @@
     <ClCompile Include="Render\D3D12\Convert.cpp" />
     <ClCompile Include="Render\D3D12\RenderView.cpp" />
     <ClCompile Include="Render\D3D12\Texture.cpp" />
+    <ClCompile Include="Render\D3D12\Texture1D.cpp" />
+    <ClCompile Include="Render\D3D12\Texture2D.cpp" />
+    <ClCompile Include="Render\D3D12\Texture3D.cpp" />
+    <ClCompile Include="Render\D3D12\TextureCube.cpp" />
     <ClCompile Include="Render\ITexture.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>

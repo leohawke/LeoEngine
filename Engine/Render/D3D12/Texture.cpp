@@ -1,7 +1,29 @@
 ﻿#include "Texture.h"
 #include "Context.h"
+#include "Convert.h"
+#include "RenderView.h"
+#include <LBase/id.hpp>
+
 
 using namespace platform_ex::Windows::D3D12;
+using platform::Render::TextureMapAccess;
+
+static DXGI_FORMAT ConvertWrap(EFormat format) {
+	 switch (format) {
+	case EF_D16:
+		return DXGI_FORMAT_R16_TYPELESS;
+	case EF_D24S8:
+		return DXGI_FORMAT_R24G8_TYPELESS;
+	case EF_D32F:
+		return DXGI_FORMAT_R32_TYPELESS;
+	}
+	return Convert(format);
+}
+
+platform_ex::Windows::D3D12::Texture::Texture(EFormat format)
+	:dxgi_format(ConvertWrap(format))
+{
+}
 
 void Texture::DeleteHWResource()
 {
@@ -10,7 +32,7 @@ void Texture::DeleteHWResource()
 	texture_readback_heaps = nullptr;
 }
 
-bool Texture::HWResourceReady()
+bool Texture::ReadyHWResource() const
 {
 	return bool(texture);
 }
@@ -178,8 +200,157 @@ void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uin
 	}
 }
 
+void Texture::DoMap(EFormat format,uint32 subres, TextureMapAccess tma, 
+	uint16 x_offset, uint16 y_offset, uint16 z_offset,
+	/*uint16 width,*/  uint16 height, uint16 depth,
+	void *& data, uint32 & row_pitch, uint32 & slice_pitch)
+{
+	auto & context = Context::Instance();
+	auto & device = context.GetDevice();
+
+	last_tma = tma;
+
+	auto tex_desc = texture->GetDesc();
+	D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
+	uint32 num_rows;
+	uint64 row_sizes_in_bytes;
+	uint64 required_size = 0;
+	device->GetCopyableFootprints(&tex_desc, subres, 1, 0, &layout, &num_rows, &row_sizes_in_bytes, &required_size);
+
+	if ((TextureMapAccess::ReadOnly == tma) || (TextureMapAccess::ReadWrite == tma)) {
+		auto & cmd_list = context.GetCommandList(Device::Command_Render);
+		
+		TransitionBarrier barrier = {
+			{D3D12_RESOURCE_STATE_COMMON,D3D12_RESOURCE_STATE_COPY_SOURCE},
+			texture,
+			subres
+		};
+		cmd_list->ResourceBarrier(1, barrier);
+
+		D3D12_TEXTURE_COPY_LOCATION src = {
+			texture.Get(),
+			D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX,
+			subres
+		};
+
+		D3D12_TEXTURE_COPY_LOCATION dst = {
+			texture_readback_heaps.Get(),
+			D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT,
+			layout
+		};
+		
+		cmd_list->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
+		
+		cmd_list->ResourceBarrier(1, !barrier);
+
+		context.SyncCPUGPU();
+	}
+
+	uint8 * p;
+	texture_upload_heaps->Map(0, nullptr, reinterpret_cast<void**>(&p));
+
+	data = p + layout.Offset + (z_offset*layout.Footprint.Height + y_offset) * layout.Footprint.RowPitch
+		+ x_offset * NumFormatBytes(format);
+	row_pitch = layout.Footprint.RowPitch;
+	slice_pitch = layout.Footprint.RowPitch * layout.Footprint.Height;
+
+	if ((TextureMapAccess::ReadOnly == tma) || (TextureMapAccess::ReadWrite == tma)) {
+		texture_readback_heaps->Map(0, nullptr, reinterpret_cast<void**>(&p));
+		uint8* src_p = p + layout.Offset + (z_offset * layout.Footprint.Height + y_offset) * layout.Footprint.RowPitch
+			+ x_offset * NumFormatBytes(format);
+		uint8* dst_p = static_cast<uint8*>(data);
+		for (auto z = 0; z != depth; ++z)
+		{
+			memcpy(dst_p + z * slice_pitch, src_p + z * slice_pitch, row_pitch * height);
+		}
+		texture_readback_heaps->Unmap(0, nullptr);
+	}
+}
+
+void Texture::DoUnmap(uint32 subres)
+{
+	auto & context = Context::Instance();
+	auto & device = context.GetDevice();
+
+	texture_upload_heaps->Unmap(0, nullptr);
+
+
+	auto tex_desc = texture->GetDesc();
+	D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
+	uint32 num_rows;
+	uint64 row_sizes_in_bytes;
+	uint64 required_size = 0;
+	device->GetCopyableFootprints(&tex_desc, subres, 1, 0, &layout, &num_rows, &row_sizes_in_bytes, &required_size);
+	if ((TextureMapAccess::WriteOnly == last_tma) || (TextureMapAccess::ReadWrite == last_tma)) {
+		auto cmd_list = context.GetCommandList(Device::Command_Render);
+		context.SyncCPUGPU();
+
+		TransitionBarrier barrier{
+			{D3D12_RESOURCE_STATE_COMMON,D3D12_RESOURCE_STATE_COPY_SOURCE},
+			texture,
+			subres
+		};
+
+		cmd_list->ResourceBarrier(1, barrier);
+
+		D3D12_TEXTURE_COPY_LOCATION src = {
+			texture_upload_heaps.Get(),
+			D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT,
+			layout
+		};
+
+		D3D12_TEXTURE_COPY_LOCATION dst = {
+			texture.Get(),
+			D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX,
+			subres
+		};
+
+		cmd_list->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
+
+
+		cmd_list->ResourceBarrier(1, !barrier);
+	}
+}
+
+
 template<typename _type>
-void Texture::DoHWCopyToTexture(_type& src,_type & dst,RESOURCE_STATE_TRANSITION src_st,RESOURCE_STATE_TRANSITION dst_st)
+ViewSimulation * const& Texture::Retrive(_type & desc, std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>>& maps)
+{
+	if (ReadyHWResource()) {
+		auto p = reinterpret_cast<char const*>(&desc);
+		auto key = hash(p, p + sizeof(desc));
+		auto iter = maps.find(key);
+		if (iter != maps.end())
+			return iter->second.get();
+
+		return maps.emplace(key, std::make_unique<ViewSimulation>(texture, desc)).first->second.get();
+	}
+	return nullptr;
+}
+
+
+ViewSimulation * const & Texture::RetriveSRV(D3D12_SHADER_RESOURCE_VIEW_DESC const & desc)
+{
+	return Retrive(desc, srv_maps);
+}
+
+ViewSimulation * const & platform_ex::Windows::D3D12::Texture::RetriveUAV(D3D12_UNORDERED_ACCESS_VIEW_DESC const & desc)
+{
+	return Retrive(desc, uav_maps);
+}
+
+ViewSimulation * const & platform_ex::Windows::D3D12::Texture::RetriveRTV(D3D12_RENDER_TARGET_VIEW_DESC const & desc)
+{
+	return Retrive(desc, rtv_maps);
+}
+
+ViewSimulation * const & platform_ex::Windows::D3D12::Texture::RetriveDSV(D3D12_DEPTH_STENCIL_VIEW_DESC const & desc)
+{
+	return Retrive(desc, dsv_maps);
+}
+
+template<typename _type>	
+void Texture::DoHWCopyToTexture(_type& src,_type & dst, ResourceStateTransition src_st, ResourceStateTransition dst_st)
 {
 	auto& context = Context::Instance();
 	auto& cmd_list = context.GetCommandList(Device::Command_Render);
@@ -224,7 +395,7 @@ void Texture::DoHWCopyToSubTexture(_type & src, _type & target,
 	uint32 dst_subres, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_z_offset, 
 	uint32 src_subres, uint16 src_x_offset, uint16 src_y_offset, uint16 src_z_offset, 
 	uint16 width, uint16 height, uint16 depth, 
-	RESOURCE_STATE_TRANSITION src_st, RESOURCE_STATE_TRANSITION dst_st)
+	ResourceStateTransition src_st, ResourceStateTransition dst_st)
 {
 	auto& context = Context::Instance();
 	auto& cmd_list = context.GetCommandList(Device::Command_Render);
@@ -276,74 +447,6 @@ void Texture::DoHWCopyToSubTexture(_type & src, _type & target,
 	D3D12_RESOURCE_BARRIER barriers_rollback[] = { barrier_src,barrier_target };
 	cmd_list->ResourceBarrier(2, barriers_rollback);
 }
-
-template<typename _type>
-bool Texture1DEqual(_type & lhs,_type & rhs) {
-	return (lhs.GetWidth(0) == rhs.GetWidth(0)) &&
-		(lhs.GetArraySize() == rhs.GetArraySize()) &&
-		(lhs.GetNumMipMaps() == rhs.GetNumMipMaps()) &&
-		(lhs.GetFormat() == rhs.GetFormat());
-}
-
-template<typename _type>
-bool Texture2DEqual(_type & lhs, _type & rhs) {
-	return (lhs.GetHeight(0) == rhs.GetHeight(0)) &&
-		Texture1DEqual(lhs,rhs);
-}
-
-bool Texture3DEqual(Texture3D& lhs, Texture3D & rhs) {
-	return (lhs.GetDepth(0) == rhs.GetDepth(0)) &&
-		Texture3DEqual(lhs, rhs);
-}
-
-void Texture2D::CopyToTexture(platform::Render::Texture2D & base_target)
-{
-	auto& target = static_cast<Texture2D&>(base_target);
-
-	if (Texture2DEqual(*this, target))
-		DoHWCopyToTexture(*this, target);
-	else {
-		auto array_size = std::min(GetArraySize(), target.GetArraySize());
-		auto num_mips = std::min(GetNumMipMaps(), target.GetNumMipMaps());
-		for (auto index = 0; index != array_size; ++index) {
-			for (auto level = 0; level != num_mips; ++level) {
-				Resize(target, index, level, 0, 0, target.GetWidth(level), target.GetHeight(level),
-					index, level, 0, 0, GetWidth(level), GetHeight(level), 
-					true);
-			}
-		}
-	}
-}
-
-void Texture2D::CopyToSubTexture(platform::Render::Texture2D & base_target, 
-	uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_width, uint16 dst_height, 
-	uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_width, uint16 src_height)
-{
-	auto& target = static_cast<Texture2D&>(base_target);
-
-	if ((src_width == dst_width) && (src_height == dst_height) && (GetFormat() == target.GetFormat())) {
-		auto src_subres = CalcSubresource(src_level, src_array_index, 0,
-			GetNumMipMaps(),GetArraySize());
-		auto dst_subres = CalcSubresource(dst_level, dst_array_index, 0,
-			target.GetNumMipMaps(), target.GetArraySize());
-
-		DoHWCopyToSubTexture(*this, target,
-			dst_subres, dst_x_offset, dst_y_offset, 0,
-			src_subres, src_x_offset, src_y_offset, 0,
-			src_width, src_height, 1);
-	}
-	else {
-		Resize(target,
-			dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
-			src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height,
-			true);
-	}
-}
-
-void Texture3D::CopyToTexture(platform::Render::Texture3D & target)
-{
-}
-
 
 #include "../CommonTextureImpl.hcc"
 

@@ -72,6 +72,7 @@
     <ClInclude Include="Render\D3D12\Texture.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="Render\CommonTextureImpl.hcc" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -101,8 +102,17 @@
     <ClCompile Include="Render\D3D12\Texture.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="Render\CommonTextureImpl.hcc">
-      <Filter>Render\Common</Filter>
+    <ClCompile Include="Render\D3D12\Texture2D.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\Texture3D.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\Texture1D.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\TextureCube.cpp">
+      <Filter>Render\D3D12</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -48,6 +48,7 @@
     <ClInclude Include="functor.hpp" />
     <ClInclude Include="future.hpp" />
     <ClInclude Include="Host.h" />
+    <ClInclude Include="id.hpp" />
     <ClInclude Include="integer_sequence.hpp" />
     <ClInclude Include="ios.hpp" />
     <ClInclude Include="iterator.hpp" />

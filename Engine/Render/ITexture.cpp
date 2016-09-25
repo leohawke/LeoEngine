@@ -3,8 +3,10 @@
 using namespace platform::Render::IFormat;
 using namespace leo::inttype;
 
-platform::Render::Texture::Texture(Type type_, uint32 access, SampleDesc sample_info_)
-	:type(type_), access_mode(access), sample_info(sample_info_)
+platform::Render::Texture::Texture(Type type_, uint8 numMipMaps, uint8 array_size_,
+	EFormat format_, uint32 access, SampleDesc sample_info_)
+	:type(type_), access_mode(access), sample_info(sample_info_),
+	mipmap_size(numMipMaps),array_size(array_size_),format(format_)
 {
 }
 
@@ -52,8 +54,9 @@ uint32 platform::Render::Texture::GetAccessMode() const
 	return access_mode;
 }
 
-platform::Render::Texture1D::Texture1D(uint32 access, SampleDesc sample_info)
-	:Texture(TextureType::T_1D, access, sample_info)
+platform::Render::Texture1D::Texture1D(uint8 numMipMaps, uint8 array_size_,
+	EFormat format_, uint32 access, SampleDesc sample_info)
+	:Texture(TextureType::T_1D,numMipMaps,array_size_,format_, access, sample_info)
 {
 }
 
@@ -68,8 +71,9 @@ void platform::Render::Texture1D::Resize(uint8 dst_array_index, uint8 dst_level,
 	Resize(*this, dst_array_index, dst_level, dst_x_offset, dst_width, src_array_index, src_level, src_x_offset, src_width, linear);
 }
 
-platform::Render::Texture2D::Texture2D(uint32 access, SampleDesc sample_info)
-	:Texture(TextureType::T_2D, access, sample_info)
+platform::Render::Texture2D::Texture2D(uint8 numMipMaps, uint8 array_size_,
+	EFormat format_, uint32 access, SampleDesc sample_info)
+	:Texture(TextureType::T_2D,numMipMaps,array_size_,format_, access, sample_info)
 {
 }
 
@@ -87,8 +91,9 @@ void platform::Render::Texture2D::Resize(uint8 dst_array_index, uint8 dst_level,
 }
 
 
-platform::Render::Texture3D::Texture3D(uint32 access, SampleDesc sample_info)
-	:Texture(TextureType::T_3D,access,sample_info)
+platform::Render::Texture3D::Texture3D(uint8 numMipMaps, uint8 array_size_,
+	EFormat format_, uint32 access, SampleDesc sample_info)
+	:Texture(TextureType::T_3D,numMipMaps,array_size_,format_,access,sample_info)
 {
 }
 
@@ -105,8 +110,9 @@ void platform::Render::Texture3D::Resize(uint8 dst_array_index, uint8 dst_level,
 		linear);
 }
 
-platform::Render::TextureCube::TextureCube(uint32 access, SampleDesc sample_info)
-	:Texture(TextureType::T_Cube,access,sample_info)
+platform::Render::TextureCube::TextureCube(uint8 numMipMaps, uint8 array_size_,
+	EFormat format_, uint32 access, SampleDesc sample_info)
+	:Texture(TextureType::T_Cube,numMipMaps,array_size_,format_,access,sample_info)
 {
 }
 

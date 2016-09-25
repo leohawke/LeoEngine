@@ -129,6 +129,7 @@
     <ClInclude Include="LConsole.h">
       <Filter>Framework</Filter>
     </ClInclude>
+    <ClInclude Include="id.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CHRLib\CharacterProcessing.cpp">

@@ -3593,10 +3593,27 @@ EXTERN_C const IID IID_ID3D12Resource;
             UINT Subresource,
             _In_opt_  const D3D12_RANGE *pWrittenRange) = 0;
         
+		/*
         virtual D3D12_RESOURCE_DESC STDMETHODCALLTYPE GetDesc( void) = 0;
         
         virtual D3D12_GPU_VIRTUAL_ADDRESS STDMETHODCALLTYPE GetGPUVirtualAddress( void) = 0;
-        
+        */
+		virtual void STDMETHODCALLTYPE GetDesc(D3D12_RESOURCE_DESC*) = 0;
+
+		virtual void STDMETHODCALLTYPE GetGPUVirtualAddress(D3D12_GPU_VIRTUAL_ADDRESS*) = 0;
+
+		D3D12_RESOURCE_DESC GetDesc() {
+			D3D12_RESOURCE_DESC desc;
+			GetDesc(&desc);
+			return desc;
+		}
+
+		D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress() {
+			D3D12_GPU_VIRTUAL_ADDRESS address;
+			GetGPUVirtualAddress(&address);
+			return address;
+		}
+
         virtual HRESULT STDMETHODCALLTYPE WriteToSubresource( 
             UINT DstSubresource,
             _In_opt_  const D3D12_BOX *pDstBox,
