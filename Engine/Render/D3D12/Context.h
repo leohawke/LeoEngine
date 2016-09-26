@@ -6,9 +6,9 @@
 #define LE_RENDER_D3D12_Context_h 1
 
 #include "../IContext.h"
+#include "../IFormat.hpp"
 #include "Adapter.h"
 #include "Display.h"
-#include "Texture.h"
 
 #include <UniversalDXSDK/d3d12.h>
 
@@ -17,6 +17,12 @@
 namespace platform_ex {
 	namespace Windows {
 		namespace D3D12 {
+			using namespace platform::Render::IFormat;
+			class Texture1D;
+			class Texture2D;
+			class Texture3D;
+			class TextureCube;
+
 			class Device : platform::Render::Device {
 			public:
 				Device(DXGI::Adapter& adapter);

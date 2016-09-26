@@ -1,6 +1,6 @@
 #include "Texture.h"
-#include "RenderView.h"
 #include "Convert.h"
+#include "RenderView.h"
 
 using namespace platform_ex::Windows::D3D12;
 using BTexture = platform::Render::Texture2D;
@@ -80,50 +80,6 @@ void Texture2D::UnMap(uint8 array_index, uint8 level)
 {
 	auto subres = CalcSubresource(level, array_index, 0, mipmap_size, array_size);
 	DoUnmap(subres);
-}
-
-void Texture2D::CopyToTexture(platform::Render::Texture2D & base_target)
-{
-	auto& target = static_cast<Texture2D&>(base_target);
-
-	if (Equal(*this, target))
-		DoHWCopyToTexture(*this, target);
-	else {
-		auto array_size = std::min(GetArraySize(), target.GetArraySize());
-		auto num_mips = std::min(GetNumMipMaps(), target.GetNumMipMaps());
-		for (auto index = 0; index != array_size; ++index) {
-			for (auto level = 0; level != num_mips; ++level) {
-				Resize(target, index, level, 0, 0, target.GetWidth(level), target.GetHeight(level),
-					index, level, 0, 0, GetWidth(level), GetHeight(level),
-					true);
-			}
-		}
-	}
-}
-
-void Texture2D::CopyToSubTexture(platform::Render::Texture2D & base_target,
-	uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_width, uint16 dst_height,
-	uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_width, uint16 src_height)
-{
-	auto& target = static_cast<Texture2D&>(base_target);
-
-	if ((src_width == dst_width) && (src_height == dst_height) && (GetFormat() == target.GetFormat())) {
-		auto src_subres = CalcSubresource(src_level, src_array_index, 0,
-			GetNumMipMaps(), GetArraySize());
-		auto dst_subres = CalcSubresource(dst_level, dst_array_index, 0,
-			target.GetNumMipMaps(), target.GetArraySize());
-
-		DoHWCopyToSubTexture(*this, target,
-			dst_subres, dst_x_offset, dst_y_offset, 0,
-			src_subres, src_x_offset, src_y_offset, 0,
-			src_width, src_height, 1);
-	}
-	else {
-		Resize(target,
-			dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
-			src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height,
-			true);
-	}
 }
 
 ViewSimulation * Texture2D::RetriveShaderResourceView(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels)
