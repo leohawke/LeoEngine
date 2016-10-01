@@ -108,16 +108,15 @@ namespace platform_ex {
 
 				uint16 GetWidth(uint8 level) const override;
 
-				void Map(uint8 array_index, uint8 level, TextureMapAccess tma,
-					uint16 x_offset, uint16 width,
-					void*& data) override;
-				void UnMap(uint8 array_index, uint8 level) override;
+				void Map(TextureMapAccess tma,
+					void*& data,const Box1D&) override;
+				void UnMap(const Sub1D&) override;
 
 				void CopyToTexture(platform::Render::Texture1D& target) override;
 
 				void CopyToSubTexture(platform::Render::Texture1D& target,
-					uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_width,
-					uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_width) override;
+					const Box1D& dst,
+					const Box1D& src) override;
 
 				ViewSimulation* RetriveShaderResourceView(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) override;
 
@@ -134,8 +133,8 @@ namespace platform_ex {
 						(lhs.GetFormat() == rhs.GetFormat());
 				}
 			protected:
-				void Resize(platform::Render::Texture1D& target, uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_width,
-					uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_width,
+				void Resize(platform::Render::Texture1D& target, const Box1D& dst,
+					const Box1D& src,
 					bool linear) override;
 			private:
 				uint16 width;
@@ -154,17 +153,16 @@ namespace platform_ex {
 				uint16 GetWidth(uint8 level) const override;
 				uint16 GetHeight(uint8 level) const override;
 
-				void Map(uint8 array_index, uint8 level, TextureMapAccess tma,
-					uint16 x_offset, uint16 y_offset, uint16 width, uint16 height,
-					void*& data, uint32& row_pitch) override;
+				void Map(TextureMapAccess tma,
+					void*& data, uint32& row_pitch,const Box2D&) override;
 
-				void UnMap(uint8 array_index, uint8 level) override;
+				void UnMap(const Sub1D&) override;
 
 				void CopyToTexture(platform::Render::Texture2D& target) override;
 
 				void CopyToSubTexture(platform::Render::Texture2D& target,
-					uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_width, uint16 dst_height,
-					uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_width, uint16 src_height) override;
+					const Box2D& dst,
+					const Box2D& src) override;
 
 				ViewSimulation* RetriveShaderResourceView(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) override;
 
@@ -179,8 +177,8 @@ namespace platform_ex {
 						Texture1D::Equal(lhs, rhs);
 				}
 			protected:
-				void Resize(platform::Render::Texture2D& target, uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_width, uint16 dst_height,
-					uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_width, uint16 src_height,
+				void Resize(platform::Render::Texture2D& target, const Box2D& dst,
+					const Box2D& src,
 					bool linear) override;
 			private:
 				uint16 width;
@@ -201,18 +199,16 @@ namespace platform_ex {
 				uint16 GetHeight(uint8 level) const override;
 				uint16 GetDepth(uint8 level) const override;
 
-				void Map(uint8 array_index, uint8 level, TextureMapAccess tma,
-					uint16 x_offset, uint16 y_offset, uint16 z_offset,
-					uint16 width, uint16 height, uint16 depth,
-					void*& data, uint32& row_pitch, uint32& slice_pitch) override;
+				void Map(TextureMapAccess tma,
+					void*& data, uint32& row_pitch, uint32& slice_pitch,const Box3D&) override;
 
-				void UnMap(uint8 array_index, uint8 level) override;
+				void UnMap(const Sub1D&) override;
 
 				void CopyToTexture(platform::Render::Texture3D& target) override;
 
 				void CopyToSubTexture(platform::Render::Texture3D& target,
-					uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_z_offset, uint16 dst_width, uint16 dst_height, uint16 dst_depth,
-					uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_z_offset, uint16 src_width, uint16 src_height, uint16 src_depth) override;
+					const Box3D& dst,
+					const Box3D& src) override;
 
 				ViewSimulation* RetriveShaderResourceView(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) override;
 
@@ -229,8 +225,8 @@ namespace platform_ex {
 						Texture2D::Equal(lhs, rhs);
 				}
 			protected:
-				void Resize(platform::Render::Texture3D& target, uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_z_offset, uint16 dst_width, uint16 dst_height, uint16 dst_depth,
-					uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_z_offset, uint16 src_width, uint16 src_height, uint16 src_depth,
+				void Resize(platform::Render::Texture3D& target, const Box3D& dst,
+					const Box3D& src,
 					bool linear) override;
 			private:
 				uint16 width;
@@ -252,17 +248,16 @@ namespace platform_ex {
 				uint16 GetHeight(uint8 level) const override;
 
 
-				void Map(uint8 array_index, TextureCubeFaces face, uint8 level, TextureMapAccess tma,
-					uint16 x_offset, uint16 y_offset, uint16 width, uint16 height,
-					void*& data, uint32& row_pitch) override;
+				void Map(TextureMapAccess tma,
+					void*& data, uint32& row_pitch,const BoxCube&) override;
 
-				void UnMap(uint8 array_index, TextureCubeFaces face, uint8 level) override;
+				void UnMap(const Sub1D&,TextureCubeFaces face) override;
 
 				void CopyToTexture(platform::Render::TextureCube& target) override;
 
 				void CopyToSubTexture(platform::Render::TextureCube& target,
-					uint8 dst_array_index, TextureCubeFaces dst_face, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_width, uint16 dst_height,
-					uint8 src_array_index, TextureCubeFaces src_face, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_width, uint16 src_height) override;
+					const BoxCube& dst,
+					const BoxCube& src) override;
 
 				ViewSimulation* RetriveShaderResourceView(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) override;
 
@@ -275,8 +270,8 @@ namespace platform_ex {
 				ViewSimulation* RetriveRenderTargetView(uint8 array_index, TextureCubeFaces face, uint8 level) override;
 				ViewSimulation* RetriveDepthStencilView(uint8 array_index, TextureCubeFaces face, uint8 level) override;
 			protected:
-				void Resize(platform::Render::TextureCube& target, uint8 dst_array_index, CubeFaces dst_face, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_width, uint16 dst_height,
-					uint8 src_array_index, CubeFaces src_face, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_width, uint16 src_height,
+				void Resize(platform::Render::TextureCube& target, const BoxCube&,
+					const BoxCube&,
 					bool linear) override;
 			private:
 				uint16 size;

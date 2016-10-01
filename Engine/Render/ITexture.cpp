@@ -66,9 +66,9 @@ platform::Render::Texture1D::~Texture1D()
 
 
 
-void platform::Render::Texture1D::Resize(uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_width, uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_width, bool linear)
+void platform::Render::Texture1D::Resize(const Box1D& dst, const Box1D& src, bool linear)
 {
-	Resize(*this, dst_array_index, dst_level, dst_x_offset, dst_width, src_array_index, src_level, src_x_offset, src_width, linear);
+	Resize(*this, dst, src, linear);
 }
 
 platform::Render::Texture2D::Texture2D(uint8 numMipMaps, uint8 array_size_,
@@ -83,11 +83,11 @@ platform::Render::Texture2D::~Texture2D()
 
 
 
-void platform::Render::Texture2D::Resize(uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_width, uint16 dst_height, 
-	uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_width, uint16 src_height, bool linear)
+void platform::Render::Texture2D::Resize(const Box2D& dst, 
+	const Box2D& src, bool linear)
 {
-	Resize(*this, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
-		src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height, linear);
+	Resize(*this, dst,
+		src, linear);
 }
 
 
@@ -102,11 +102,11 @@ platform::Render::Texture3D::~Texture3D()
 }
 
 
-void platform::Render::Texture3D::Resize(uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_z_offset, uint16 dst_width, uint16 dst_height, uint16 dst_depth, 
-	uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_z_offset, uint16 src_width, uint16 src_height, uint16 src_depth, bool linear)
+void platform::Render::Texture3D::Resize(const Box3D& dst, 
+	const Box3D& src,bool linear)
 {
-	Resize(*this, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_z_offset, dst_width, dst_height, dst_depth,
-		src_array_index, src_level, src_x_offset, src_y_offset, src_z_offset, src_width, src_height, src_depth,
+	Resize(*this, dst,
+		src,
 		linear);
 }
 
@@ -120,10 +120,10 @@ platform::Render::TextureCube::~TextureCube()
 {
 }
 
-void platform::Render::TextureCube::Resize(uint8 dst_array_index, CubeFaces dst_face, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_width, uint16 dst_height, 
-	uint8 src_array_index, CubeFaces src_face, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_width, uint16 src_height, bool linear)
+void platform::Render::TextureCube::Resize(const BoxCube& dst, 
+	const BoxCube& src, bool linear)
 {
-	Resize(*this, dst_array_index, dst_face, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
-		src_array_index, src_face, src_level, src_x_offset, src_y_offset, src_width, src_height,
+	Resize(*this, dst,
+		src,
 		linear);
 }

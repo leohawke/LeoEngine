@@ -104,23 +104,44 @@ namespace platform {
 			// Returns the width of the texture.
 			virtual uint16 GetWidth(uint8 level) const = 0;
 
-			virtual void Map(uint8 array_index, uint8 level, TextureMapAccess tma,
-				uint16 x_offset, uint16 width,
-				void*& data) = 0;
-			virtual void UnMap(uint8 array_index, uint8 level) = 0;
+			struct Sub1D {
+				uint8 array_index;
+				uint8 level;
+
+				Sub1D(uint8 arrary_index_,uint8 level_)
+					:array_index(array_index),level(level_)
+				{}
+
+				Sub1D() = default;
+			};
+
+			struct Box1D : Sub1D {
+				uint16 x_offset;
+				uint16 width;
+
+				Box1D(const Sub1D& sub,uint16 xoffset_,uint16 width_)
+					:Sub1D(sub),x_offset(xoffset_),width(width_)
+				{}
+
+				explicit Box1D(uint16 width_)
+					:Sub1D(),x_offset(0),width(width_)
+				{}
+			};
+
+			virtual void Map(TextureMapAccess tma,
+				void*& data,const Box1D& box) = 0;
+			virtual void UnMap(const Sub1D& sub) = 0;
 
 			virtual void CopyToTexture(Texture1D& target) = 0;
 
-			virtual void CopyToSubTexture(Texture1D& target,
-				uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_width,
-				uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_width) = 0;
+			virtual void CopyToSubTexture(Texture1D& target,const Box1D& dst,const Box1D& src) = 0;
 		protected:
-			virtual void Resize(Texture1D& target,uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_width,
-				uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_width,
+			virtual void Resize(Texture1D& target,const Box1D& dst,
+				const Box1D& src,
 				bool linear) = 0;
 
-			void Resize(uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_width,
-				uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_width,
+			void Resize(const Box1D& dst,
+				const Box1D& src,
 				bool linear);
 		};
 
@@ -136,24 +157,41 @@ namespace platform {
 			// Returns the height of the texture.
 			virtual uint16 GetHeight(uint8 level) const = 0;
 
-			virtual void Map(uint8 array_index, uint8 level, TextureMapAccess tma,
-				uint16 x_offset, uint16 y_offset, uint16 width, uint16 height,
-				void*& data, uint32& row_pitch) = 0;
+			using Sub1D = Texture1D::Sub1D;
+			struct Box2D :Texture1D::Box1D {
+				uint16 y_offset;
+				uint16 height;
 
-			virtual void UnMap(uint8 array_index, uint8 level) = 0;
+				Box2D(const Box1D& box, uint16 yoffset_, uint16 height_)
+					:Box1D(box), y_offset(yoffset_), height(height_)
+				{}
+
+				explicit Box2D(uint16 width_,uint16 height_)
+					:Box1D(width_),height(height_)
+				{}
+
+				Box2D(uint8 array_index_,uint8 level_,uint16 x_offset_,uint16 y_offset_,uint16 width_,uint16 height_)
+					:Box1D({array_index_,level_},x_offset_,width_),y_offset(y_offset_),height(height_)
+				{}
+			};
+
+			virtual void Map(TextureMapAccess tma,
+				void*& data, uint32& row_pitch,const Box2D&) = 0;
+
+			virtual void UnMap(const Sub1D&) = 0;
 
 			virtual void CopyToTexture(Texture2D& target) = 0;
 			
 			virtual void CopyToSubTexture(Texture2D& target,
-				uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_width, uint16 dst_height,
-				uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_width, uint16 src_height) = 0;
+				const Box2D& dst,
+				const Box2D& src) = 0;
 		protected:
-			virtual void Resize(Texture2D& target,uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_width, uint16 dst_height,
-				uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_width, uint16 src_height,
+			virtual void Resize(Texture2D& target,const Box2D& dst,
+				const Box2D& src,
 				bool linear) = 0;
 
-			void Resize(uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_width, uint16 dst_height,
-				uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_width, uint16 src_height,
+			void Resize(const Box2D& dst,
+				const Box2D& src,
 				bool linear);
 		};
 
@@ -171,25 +209,33 @@ namespace platform {
 			// Returns the depth of the texture.
 			virtual uint16 GetDepth(uint8 level) const = 0;
 
-			virtual void Map(uint8 array_index, uint8 level, TextureMapAccess tma,
-				uint16 x_offset, uint16 y_offset, uint16 z_offset,
-				uint16 width, uint16 height, uint16 depth,
-				void*& data, uint32& row_pitch, uint32& slice_pitch) = 0;
+			using Sub1D = Texture1D::Sub1D;
+			struct Box3D :Texture2D::Box2D {
+				uint16 z_offset;
+				uint16 depth;
 
-			virtual void UnMap(uint8 array_index, uint8 level) = 0;
+				Box3D(const Box2D& box, uint16 zoffset_, uint16 depth_)
+					:Box2D(box), z_offset(zoffset_), depth(depth_)
+				{}
+			};
+
+			virtual void Map(TextureMapAccess tma,
+				void*& data, uint32& row_pitch, uint32& slice_pitch,const Box3D&) = 0;
+
+			virtual void UnMap(const Sub1D&) = 0;
 
 			virtual void CopyToTexture(Texture3D& target) = 0;
 			
 			virtual void CopyToSubTexture(Texture3D& target,
-				uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_z_offset, uint16 dst_width, uint16 dst_height, uint16 dst_depth,
-				uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_z_offset, uint16 src_width, uint16 src_height, uint16 src_depth) = 0;
+				const Box3D& dst,
+				const Box3D& src) = 0;
 		protected:
-			virtual void Resize(Texture3D& target,uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_z_offset, uint16 dst_width, uint16 dst_height, uint16 dst_depth,
-				uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_z_offset, uint16 src_width, uint16 src_height, uint16 src_depth,
+			virtual void Resize(Texture3D& target,const Box3D& dst,
+				const Box3D& src,
 				bool linear) = 0;
 
-			void Resize(uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_z_offset, uint16 dst_width, uint16 dst_height, uint16 dst_depth,
-				uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_z_offset, uint16 src_width, uint16 src_height, uint16 src_depth,
+			void Resize(const Box3D& dst,
+				const Box3D& src,
 				bool linear);
 		};
 
@@ -205,25 +251,29 @@ namespace platform {
 			// Returns the height of the texture.
 			virtual uint16 GetHeight(uint8 level) const = 0;
 
-			virtual void Map(uint8 array_index, CubeFaces face, uint8 level, TextureMapAccess tma,
-				uint16 x_offset, uint16 y_offset, uint16 width, uint16 height,
-				void*& data, uint32& row_pitch) = 0;
+			using Sub1D = Texture1D::Sub1D;
+			struct BoxCube:Texture2D::Box2D{
+				CubeFaces face;
+			};
 
-			virtual void UnMap(uint8 array_index, CubeFaces face, uint8 level) = 0;
+			virtual void Map(TextureMapAccess tma,
+				void*& data, uint32& row_pitch,const BoxCube&) = 0;
+
+			virtual void UnMap(const Sub1D&,CubeFaces face) = 0;
 
 			virtual void CopyToTexture(TextureCube& target) = 0;
 			
 			virtual void CopyToSubTexture(TextureCube& target,
-				uint8 dst_array_index, CubeFaces dst_face, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_width, uint16 dst_height,
-				uint8 src_array_index, CubeFaces src_face, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_width, uint16 src_height) = 0;
+				const BoxCube& dst,
+				const BoxCube& src) = 0;
 
 		protected:
-			virtual void Resize(TextureCube& target,uint8 dst_array_index, CubeFaces dst_face, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_width, uint16 dst_height,
-				uint8 src_array_index, CubeFaces src_face, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_width, uint16 src_height,
+			virtual void Resize(TextureCube& target,const BoxCube&,
+				const BoxCube& dst,
 				bool linear) = 0;
 
-			void Resize(uint8 dst_array_index, CubeFaces dst_face, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_width, uint16 dst_height,
-				uint8 src_array_index, CubeFaces src_face, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_width, uint16 src_height,
+			void Resize(const BoxCube&,
+				const BoxCube&,
 				bool linear);
 		};
 
@@ -232,60 +282,50 @@ namespace platform {
 			friend class Texture;
 
 		public:
-			Mapper(Texture1D& tex, uint8 array_index, uint8 level, TextureMapAccess tma,
-				uint16 x_offset, uint16 width)
+			Mapper(Texture1D& tex,TextureMapAccess tma,const Texture1D::Box1D& box)
 				: TexRef(tex),
-				MappedArrayIndex(array_index),
-				MappedLevel(level),
+			
 				finally([=](Texture& TexRef) {
-				static_cast<Texture1D&>(TexRef).UnMap(MappedArrayIndex, MappedLevel);
+				static_cast<Texture1D&>(TexRef).UnMap(box);
 			}
 					)
 			{
-				tex.Map(array_index, level, tma, x_offset, width, pSysMem);
-				RowPitch = SlicePitch = width * NumFormatBytes(tex.GetFormat());
+				tex.Map(tma, pSysMem,box);
+				RowPitch = SlicePitch = box.width * NumFormatBytes(tex.GetFormat());
 			}
-			Mapper(Texture2D& tex, uint8 array_index, uint8 level, TextureMapAccess tma,
-				uint16 x_offset, uint16 y_offset,
-				uint16 width, uint16 height)
+			Mapper(Texture2D& tex,TextureMapAccess tma,
+				const Texture2D::Box2D& box)
 				: TexRef(tex),
-				MappedArrayIndex(array_index),
-				MappedLevel(level),
+				
 				finally([=](Texture& TexRef) {
-				static_cast<Texture2D&>(TexRef).UnMap(MappedArrayIndex, MappedLevel);
+				static_cast<Texture2D&>(TexRef).UnMap(box);
 			}
 					)
 			{
-				tex.Map(array_index, level, tma, x_offset, y_offset, width, height, pSysMem, RowPitch);
-				SlicePitch = RowPitch * height;
+				tex.Map(tma, pSysMem, RowPitch,box);
+				SlicePitch = RowPitch * box.height;
 			}
-			Mapper(Texture3D& tex, uint8 array_index, uint8 level, TextureMapAccess tma,
-				uint16 x_offset, uint16 y_offset, uint16 z_offset,
-				uint16 width, uint16 height, uint16 depth)
+			Mapper(Texture3D& tex, TextureMapAccess tma,
+				const Texture3D::Box3D& box)
 				: TexRef(tex),
-				MappedArrayIndex(array_index),
-				MappedLevel(level),
+				
 				finally([=](Texture& TexRef) {
-				static_cast<Texture3D&>(TexRef).UnMap(MappedArrayIndex, MappedLevel);
+				static_cast<Texture3D&>(TexRef).UnMap(box);
 			}
 					)
 			{
-				tex.Map(array_index, level, tma, x_offset, y_offset, z_offset, width, height, depth, pSysMem, RowPitch, SlicePitch);
+				tex.Map(tma,pSysMem, RowPitch, SlicePitch,box);
 			}
-			Mapper(TextureCube& tex, uint8 array_index, TextureCubeFaces face, uint8 level, TextureMapAccess tma,
-				uint16 x_offset, uint16 y_offset,
-				uint16 width, uint16 height)
+			Mapper(TextureCube& tex,TextureMapAccess tma,
+				const TextureCube::BoxCube& box)
 				: TexRef(tex),
-				MappedArrayIndex(array_index),
-				MappedFace(face),
-				MappedLevel(level),
 				finally([=](Texture& TexRef) {
-				static_cast<TextureCube&>(TexRef).UnMap(MappedArrayIndex, MappedFace, MappedLevel);
+				static_cast<TextureCube&>(TexRef).UnMap(box,box.face);
 			}
 					)
 			{
-				tex.Map(array_index, face, level, tma, x_offset, y_offset, width, height, pSysMem, RowPitch);
-				SlicePitch = RowPitch * height;
+				tex.Map(tma, pSysMem, RowPitch,box);
+				SlicePitch = RowPitch * box.height;
 			}
 
 			~Mapper()
@@ -318,10 +358,6 @@ namespace platform {
 			uint32 RowPitch, SlicePitch;
 		private:
 			Texture& TexRef;
-
-			uint8 MappedArrayIndex;
-			TextureCubeFaces MappedFace;
-			uint8 MappedLevel;
 
 			std::function<void(Texture&)> finally;
 		};

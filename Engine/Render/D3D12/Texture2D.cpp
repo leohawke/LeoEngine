@@ -9,7 +9,7 @@ Texture2D::Texture2D(uint16 height_, uint16 width_,
 	uint8 numMipMaps, uint8 array_size_, 
 	EFormat format_, uint32 access_hint, platform::Render::SampleDesc sample_info)
 	:BTexture(numMipMaps,array_size_,format_,access_hint,sample_info),
-	Texture(format),
+	Texture(format_),
 	width(width_),height(height_)
 {
 	if (0 == mipmap_size) {
@@ -26,12 +26,12 @@ Texture2D::Texture2D(uint16 height_, uint16 width_,
 
 void Texture2D::BuildMipSubLevels()
 {
-	for (auto index = 0; index != GetArraySize(); ++index)
+	for (uint8 index = 0; index != GetArraySize(); ++index)
 	{
-		for (auto level = 1; level != GetNumMipMaps(); ++level)
+		for (uint8 level = 1; level != GetNumMipMaps(); ++level)
 		{
-			Resize(*this, index, level, 0, 0, GetWidth(level), GetHeight(level),
-				index, level - 1, 0, 0, GetWidth(level - 1), GetHeight(level - 1), true);
+			Resize(*this, { index, level, 0, 0, GetWidth(level), GetHeight(level) },
+			{ index, static_cast<uint8>(level - 1), 0, 0, GetWidth(level - 1), GetHeight(level - 1) }, true);
 		}
 	}
 
@@ -68,17 +68,17 @@ uint16 Texture2D::GetHeight(uint8 level) const
 	return std::max(1, height >> level);
 }
 
-void Texture2D::Map(uint8 array_index, uint8 level, TextureMapAccess tma, uint16 x_offset, uint16 y_offset, uint16 width, uint16 height, void *& data, uint32 & row_pitch)
+void Texture2D::Map(TextureMapAccess tma,void *& data, uint32 & row_pitch,const Box2D& box)
 {
-	auto subres = CalcSubresource(level, array_index, 0, mipmap_size, array_size);
+	auto subres = CalcSubresource(box.level, box.array_index, 0, mipmap_size, array_size);
 
 	uint32 slice_pitch;
-	DoMap(format,subres, tma, x_offset, y_offset, 0, height, 1, data, row_pitch, slice_pitch);
+	DoMap(format,subres, tma, box.x_offset, box.y_offset, 0, height, 1, data, row_pitch, slice_pitch);
 }
 
-void Texture2D::UnMap(uint8 array_index, uint8 level)
+void Texture2D::UnMap(const Sub1D& sub)
 {
-	auto subres = CalcSubresource(level, array_index, 0, mipmap_size, array_size);
+	auto subres = CalcSubresource(sub.level, sub.array_index, 0, mipmap_size, array_size);
 	DoUnmap(subres);
 }
 

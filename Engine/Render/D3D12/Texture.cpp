@@ -449,6 +449,47 @@ void Texture::DoHWCopyToSubTexture(_type & src, _type & target,
 }
 
 //@{
+void Texture1D::CopyToTexture(platform::Render::Texture1D & base_target)
+{
+	auto& target = static_cast<Texture1D&>(base_target);
+
+	if (Equal(*this, target))
+		DoHWCopyToTexture(*this, target);
+	else {
+		for (uint8 index = 0; index != array_size; ++index) {
+			for (uint8 level = 0; level != mipmap_size; ++level) {
+				Resize(target,
+					Box1D({ index, level }, 0, target.GetWidth(level)),
+					Box1D({ index, level }, 0, GetWidth(level)),
+					true);
+			}
+		}
+	}
+}
+
+void Texture1D::CopyToSubTexture(platform::Render::Texture1D & base_target, const Box1D& dst, const Box1D& src)
+{
+	auto& target = static_cast<Texture1D&>(base_target);
+
+	if ((src.width == dst.width) && (GetFormat() == target.GetFormat())) {
+		auto src_subres = CalcSubresource(src.level, src.array_index, 0,
+			GetNumMipMaps(), GetArraySize());
+		auto dst_subres = CalcSubresource(dst.level, dst.array_index, 0,
+			target.GetNumMipMaps(), target.GetArraySize());
+
+		DoHWCopyToSubTexture(*this, target,
+			dst_subres, dst.x_offset, 0, 0,
+			src_subres, src.x_offset, 0, 0,
+			src.width, 1, 1);
+	}
+	else {
+		Resize(target,
+			dst,
+			src,
+			true);
+	}
+}
+
 
 void Texture2D::CopyToTexture(platform::Render::Texture2D & base_target)
 {
@@ -459,10 +500,11 @@ void Texture2D::CopyToTexture(platform::Render::Texture2D & base_target)
 	else {
 		auto array_size = std::min(GetArraySize(), target.GetArraySize());
 		auto num_mips = std::min(GetNumMipMaps(), target.GetNumMipMaps());
-		for (auto index = 0; index != array_size; ++index) {
-			for (auto level = 0; level != num_mips; ++level) {
-				Resize(target, index, level, 0, 0, target.GetWidth(level), target.GetHeight(level),
-					index, level, 0, 0, GetWidth(level), GetHeight(level),
+		for (uint8 index = 0; index != array_size; ++index) {
+			for (uint8 level = 0; level != mipmap_size; ++level) {
+				Resize(target, 
+				{{{index, level}, 0,target.GetWidth(level)},0, target.GetHeight(level)},
+				{ {{index, level}, 0, GetWidth(level)},0, GetHeight(level) },
 					true);
 			}
 		}
@@ -470,32 +512,71 @@ void Texture2D::CopyToTexture(platform::Render::Texture2D & base_target)
 }
 
 void Texture2D::CopyToSubTexture(platform::Render::Texture2D & base_target,
-	uint8 dst_array_index, uint8 dst_level, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_width, uint16 dst_height,
-	uint8 src_array_index, uint8 src_level, uint16 src_x_offset, uint16 src_y_offset, uint16 src_width, uint16 src_height)
+	const Box2D& dst,
+	const Box2D& src)
 {
 	auto& target = static_cast<Texture2D&>(base_target);
 
-	if ((src_width == dst_width) && (src_height == dst_height) && (GetFormat() == target.GetFormat())) {
-		auto src_subres = CalcSubresource(src_level, src_array_index, 0,
+	if ((src.width == dst.width) && (src.height == dst.height) && (GetFormat() == target.GetFormat())) {
+		auto src_subres = CalcSubresource(src.level, src.array_index, 0,
 			GetNumMipMaps(), GetArraySize());
-		auto dst_subres = CalcSubresource(dst_level, dst_array_index, 0,
+		auto dst_subres = CalcSubresource(dst.level, dst.array_index, 0,
 			target.GetNumMipMaps(), target.GetArraySize());
 
 		DoHWCopyToSubTexture(*this, target,
-			dst_subres, dst_x_offset, dst_y_offset, 0,
-			src_subres, src_x_offset, src_y_offset, 0,
-			src_width, src_height, 1);
+			dst_subres, dst.x_offset, dst.y_offset, 0,
+			src_subres, src.x_offset, src.y_offset, 0,
+			src.width, src.height, 1);
 	}
 	else {
 		Resize(target,
-			dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
-			src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height,
+			dst,
+			src,
 			true);
 	}
 }
 
-void Texture3D::CopyToTexture(platform::Render::Texture3D & target)
+void Texture3D::CopyToTexture(platform::Render::Texture3D & base_target)
 {
+	auto& target = static_cast<Texture3D&>(base_target);
+
+	if (Equal(*this, target))
+		DoHWCopyToTexture(*this, target);
+	else {
+		auto array_size = std::min(GetArraySize(), target.GetArraySize());
+		auto num_mips = std::min(GetNumMipMaps(), target.GetNumMipMaps());
+		for (uint8 index = 0; index != array_size; ++index) {
+			for (uint8 level = 0; level != num_mips; ++level) {
+				Resize(target,
+				{ {{{index, level}, 0, target.GetWidth(level)},0, target.GetHeight(level)},0,target.GetDepth(level) },
+				Box3D(Texture2D::Box2D({{index, level}, 0, GetWidth(level) }, 0, GetHeight(level)), 0, GetDepth(level)),
+					true);
+			}
+		}
+	}
+}
+
+void Texture3D::CopyToSubTexture(platform::Render::Texture3D & base_target, const Box3D& dst, const Box3D& src)
+{
+	auto& target = static_cast<Texture3D&>(base_target);
+
+	if ((src.width == dst.width) && (src.height == dst.height) && (src.depth == dst.depth) && (GetFormat() == target.GetFormat())) {
+		auto src_subres = CalcSubresource(src.level, src.array_index, 0,
+			GetNumMipMaps(), GetArraySize());
+		auto dst_subres = CalcSubresource(dst.level, dst.array_index, 0,
+			target.GetNumMipMaps(), target.GetArraySize());
+
+		DoHWCopyToSubTexture(*this, target,
+			dst_subres, dst.x_offset, dst.y_offset, dst.z_offset,
+			src_subres, src.x_offset, src.y_offset, src.z_offset,
+			src.width, src.height, 1);
+	}
+	else {
+		Resize(target,
+			dst,
+			src,
+			true);
+	}
 }
 
 //}
