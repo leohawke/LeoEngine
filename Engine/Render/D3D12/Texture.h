@@ -187,7 +187,7 @@ namespace platform_ex {
 
 			class Texture3D :public platform::Render::Texture3D,public Texture {
 			public:
-				explicit Texture3D(uint16 height, uint16 width, uint16 depth, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
+				explicit Texture3D(uint16 width, uint16 height, uint16 depth, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
 
 				void BuildMipSubLevels() override;
 
@@ -236,7 +236,7 @@ namespace platform_ex {
 
 			class TextureCube :public platform::Render::TextureCube,public Texture {
 			public:
-				explicit TextureCube(uint8 size, uint16 width, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
+				explicit TextureCube(uint8 size,uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
 
 				void BuildMipSubLevels() override;
 
@@ -264,8 +264,8 @@ namespace platform_ex {
 				ViewSimulation* RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level) override;
 				ViewSimulation* RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, TextureCubeFaces first_face, uint8 num_faces, uint8 level) override;
 
-				ViewSimulation* RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) override;
-				ViewSimulation* RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) override;
+				ViewSimulation* RetriveRenderTargetView(uint8 first_array_index, uint8 array_size,uint8 level) override;
+				ViewSimulation* RetriveDepthStencilView(uint8 first_array_index, uint8 array_size,uint8 level) override;
 
 				ViewSimulation* RetriveRenderTargetView(uint8 array_index, TextureCubeFaces face, uint8 level) override;
 				ViewSimulation* RetriveDepthStencilView(uint8 array_index, TextureCubeFaces face, uint8 level) override;

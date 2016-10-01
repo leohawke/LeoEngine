@@ -73,7 +73,7 @@ void Texture2D::Map(TextureMapAccess tma,void *& data, uint32 & row_pitch,const 
 	auto subres = CalcSubresource(box.level, box.array_index, 0, mipmap_size, array_size);
 
 	uint32 slice_pitch;
-	DoMap(format,subres, tma, box.x_offset, box.y_offset, 0, height, 1, data, row_pitch, slice_pitch);
+	DoMap(format,subres, tma, box.x_offset, box.y_offset, 0, box.height, 1, data, row_pitch, slice_pitch);
 }
 
 void Texture2D::UnMap(const Sub1D& sub)

@@ -560,7 +560,7 @@ void Texture3D::CopyToSubTexture(platform::Render::Texture3D & base_target, cons
 {
 	auto& target = static_cast<Texture3D&>(base_target);
 
-	if ((src.width == dst.width) && (src.height == dst.height) && (src.depth == dst.depth) && (GetFormat() == target.GetFormat())) {
+	if ((src.width == dst.width) && (src.height == dst.height) && (GetFormat() == target.GetFormat())) {
 		auto src_subres = CalcSubresource(src.level, src.array_index, 0,
 			GetNumMipMaps(), GetArraySize());
 		auto dst_subres = CalcSubresource(dst.level, dst.array_index, 0,
@@ -579,6 +579,55 @@ void Texture3D::CopyToSubTexture(platform::Render::Texture3D & base_target, cons
 	}
 }
 
+
+void TextureCube::CopyToTexture(platform::Render::TextureCube & base_target)
+{
+	auto& target = static_cast<TextureCube&>(base_target);
+
+	if (Texture1D::Equal(*this, target))
+		DoHWCopyToTexture(*this, target);
+	else {
+		auto array_size = std::min(GetArraySize(), target.GetArraySize());
+		auto num_mips = std::min(GetNumMipMaps(), target.GetNumMipMaps());
+		for (uint8 index = 0; index != array_size; ++index) {
+			for (uint8 f = 0; f != 6; ++f) {
+				auto face = static_cast<CubeFaces>(f);
+				for (uint8 level = 0; level != mipmap_size; ++level) {
+					Resize(target,
+					{ {{ { index, level }, 0,target.GetWidth(level) },0, target.GetHeight(level)},face },
+					{ {{ { index, level }, 0, GetWidth(level) },0, GetHeight(level) }, face
+				},
+						true);
+				}
+			}
+		}
+	}
+}
+
+void TextureCube::CopyToSubTexture(platform::Render::TextureCube & base_target,
+	const BoxCube& dst,
+	const BoxCube& src)
+{
+	auto& target = static_cast<TextureCube&>(base_target);
+
+	if ((src.width == dst.width) && (src.height == dst.height) && (GetFormat() == target.GetFormat())) {
+		auto src_subres = CalcSubresource(src.level, src.array_index, 0,
+			GetNumMipMaps(), GetArraySize()*6);
+		auto dst_subres = CalcSubresource(dst.level, dst.array_index, 0,
+			target.GetNumMipMaps(), target.GetArraySize()*6);
+
+		DoHWCopyToSubTexture(*this, target,
+			dst_subres, dst.x_offset, dst.y_offset, 0,
+			src_subres, src.x_offset, src.y_offset, 0,
+			src.width, src.height, 1);
+	}
+	else {
+		Resize(target,
+			dst,
+			src,
+			true);
+	}
+}
 //}
 
 #include "../CommonTextureImpl.hcc"

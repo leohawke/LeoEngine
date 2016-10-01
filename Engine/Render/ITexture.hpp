@@ -38,7 +38,7 @@ namespace platform {
 				T_Cube
 			};
 
-			enum class CubeFaces {
+			enum class CubeFaces : uint8 {
 				Positive_X = 0,
 				Negative_X = 1,
 				Positive_Y = 2,
@@ -46,6 +46,13 @@ namespace platform {
 				Positive_Z = 4,
 				Negative_Z = 5,
 			};
+
+			friend uint8 operator+(const uint8& lhs,const CubeFaces& face) {
+				return lhs + static_cast<uint8>(face);
+			}
+			friend uint8 operator-(const uint8& lhs, const CubeFaces& face) {
+				return lhs - static_cast<uint8>(face);
+			}
 		protected:
 			//\brief encode = UTF-8
 			virtual std::string const & Description() const = 0;
@@ -121,6 +128,10 @@ namespace platform {
 
 				Box1D(const Sub1D& sub,uint16 xoffset_,uint16 width_)
 					:Sub1D(sub),x_offset(xoffset_),width(width_)
+				{}
+
+				Box1D(uint8 array_index_, uint8 level_, uint16 xoffset_, uint16 width_)
+					:Sub1D(array_index_,level_), x_offset(xoffset_), width(width_)
 				{}
 
 				explicit Box1D(uint16 width_)
@@ -217,6 +228,12 @@ namespace platform {
 				Box3D(const Box2D& box, uint16 zoffset_, uint16 depth_)
 					:Box2D(box), z_offset(zoffset_), depth(depth_)
 				{}
+
+				Box3D(uint8 array_index_, uint8 level_, 
+					uint16 x_offset_, uint16 y_offset_, uint16 z_offset_, 
+					uint16 width_, uint16 height_, uint16 depth_)
+					:Box2D(array_index_,level_ , x_offset_,y_offset_ ,width_,height_), z_offset(z_offset_), depth(depth_)
+				{}
 			};
 
 			virtual void Map(TextureMapAccess tma,
@@ -254,6 +271,10 @@ namespace platform {
 			using Sub1D = Texture1D::Sub1D;
 			struct BoxCube:Texture2D::Box2D{
 				CubeFaces face;
+
+				BoxCube(const Box2D& box,CubeFaces face_)
+					:Box2D(box),face(face)
+				{}
 			};
 
 			virtual void Map(TextureMapAccess tma,
