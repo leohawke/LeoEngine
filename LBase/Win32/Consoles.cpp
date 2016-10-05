@@ -9,7 +9,7 @@ namespace platform_ex
 {
 #if LFL_Win32
 
-	inline namespace Windows
+	namespace Windows
 	{
 		WConsole::WConsole(unsigned long dev)
 			: WConsole(::GetStdHandle(dev))

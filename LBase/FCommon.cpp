@@ -20,7 +20,7 @@ namespace platform
 		usystem(const char* cmd)
 	{
 #if LFL_Win32
-		return ::_wsystem(platform_ex::MBCSToWCS(cmd, CP_UTF8).c_str());
+		return ::_wsystem(platform_ex::Windows::MBCSToWCS(cmd, CP_UTF8).c_str());
 #else
 		return std::system(cmd);
 #endif

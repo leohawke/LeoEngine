@@ -24,8 +24,8 @@
 ////@{
 //using platform_ex::QueryFileNodeID;
 //using platform_ex::QueryFileTime;
-using platform_ex::UTF8ToWCS;
-using platform_ex::WCSToUTF8;
+using platform_ex::Windows::UTF8ToWCS;
+using platform_ex::Windows::WCSToUTF8;
 //using platform_ex::ConvertTime;
 //@}
 #elif LFL_API_POSIXFileSystem

@@ -393,7 +393,7 @@ namespace leo
 		sentry(T fun) :functor(std::move(fun)) {
 		}
 
-		sentry(sentry &&) = delete;
+		sentry(sentry &&) = default;
 		sentry(sentry const &) = delete;
 
 		~sentry() noexcept {

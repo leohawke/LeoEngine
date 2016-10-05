@@ -14,7 +14,7 @@
 
 namespace platform_ex
 {
-	inline namespace Windows
+	namespace Windows
 	{
 		/*!
 		\build Windows 控制台对象。

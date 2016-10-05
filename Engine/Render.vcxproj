@@ -160,6 +160,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Asset\TextureX.h" />
     <ClInclude Include="Core\LFile.h" />
     <ClInclude Include="emacro.h" />
     <ClInclude Include="Render\D3D12\Adapter.h" />
@@ -180,6 +181,8 @@
     <ClInclude Include="Win32\NTHandle.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Asset\TextureX.cpp" />
+    <ClCompile Include="Win32\File.cpp" />
     <ClCompile Include="Win32\NTHandle.cpp" />
     <ClInclude Include="Render\CommonTextureImpl.hcc">
       <FileType>CppCode</FileType>

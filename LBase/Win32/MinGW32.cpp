@@ -8,7 +8,7 @@ using namespace leo;
 namespace platform_ex {
 #if LFL_Win32
 
-	inline namespace Windows {
+	namespace Windows {
 		class Win32ErrorCategory : public std::error_category
 		{
 		public:

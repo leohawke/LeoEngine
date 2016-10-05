@@ -148,20 +148,20 @@ namespace platform_ex
 	string
 		DecodeArg(const char* str)
 	{
-		return MBCSToMBCS(str, CP_ACP, CP_UTF8);
+		return Windows::MBCSToMBCS(str, CP_ACP, CP_UTF8);
 	}
 
 	string
 		EncodeArg(const char* str)
 	{
-		return MBCSToMBCS(str);
+		return Windows::MBCSToMBCS(str);
 	}
 #	endif
 
 
 #if !LFL_Android
 #	if LFL_Win32
-	class TerminalData : private WConsole
+	class TerminalData : private Windows::WConsole
 	{
 	public:
 		TerminalData(int fd)

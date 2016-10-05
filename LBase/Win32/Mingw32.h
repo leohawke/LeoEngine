@@ -19,7 +19,7 @@
 
 namespace platform_ex {
 
-	inline namespace Windows {
+	namespace Windows {
 		using ErrorCode = unsigned long;
 
 		/*!

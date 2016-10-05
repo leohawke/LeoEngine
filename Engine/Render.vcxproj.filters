@@ -31,6 +31,9 @@
     <Filter Include="Core">
       <UniqueIdentifier>{5618b27d-0e8c-4aa7-88e2-7ff2e12b18f1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Asset">
+      <UniqueIdentifier>{2aaffc8d-b65b-4ade-b5c1-e3381ee609a9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="emacro.h">
@@ -75,7 +78,6 @@
     <ClInclude Include="Render\D3D12\Texture.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="Render\CommonTextureImpl.hcc" />
     <ClInclude Include="Core\LFile.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -88,11 +90,14 @@
     <ClInclude Include="Win32\NTHandle.h">
       <Filter>Win32</Filter>
     </ClInclude>
+    <ClInclude Include="Asset\TextureX.h">
+      <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\CommonTextureImpl.hcc">
+      <Filter>Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="test.cpp">
-      <Filter>Render\D3D12</Filter>
-    </ClCompile>
     <ClCompile Include="Render\D3D12\d3d12_dxgi.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
@@ -131,6 +136,15 @@
     </ClCompile>
     <ClCompile Include="Win32\NTHandle.cpp">
       <Filter>Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\File.cpp">
+      <Filter>Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\TextureX.cpp">
+      <Filter>Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="test.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

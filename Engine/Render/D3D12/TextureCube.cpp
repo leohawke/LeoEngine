@@ -243,4 +243,6 @@ ViewSimulation* TextureCube::RetriveDepthStencilView(uint8 array_index, TextureC
 	desc.Texture2DArray.MipSlice = level;
 	desc.Texture2DArray.ArraySize = 1;
 	desc.Texture2DArray.FirstArraySlice = array_index * 6 + face - CubeFaces::Positive_X;
+
+	return RetriveDSV(desc);
 }
