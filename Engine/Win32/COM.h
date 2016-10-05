@@ -2,8 +2,8 @@
 \ingroup Engine
 \brief COM ½Ó¿Ú¡£
 */
-#ifndef LE_COM_H
-#define LE_COM_H 1
+#ifndef LE_WIN32_COM_H
+#define LE_WIN32_COM_H 1
 
 #include <LBase/Win32/Mingw32.h>
 #include <LBase/type_traits.hpp>

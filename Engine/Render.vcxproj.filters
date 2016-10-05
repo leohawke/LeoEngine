@@ -28,6 +28,9 @@
     <Filter Include="Render\Common">
       <UniqueIdentifier>{7aa79ed7-2378-4480-a199-fc79ad93af98}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{5618b27d-0e8c-4aa7-88e2-7ff2e12b18f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="emacro.h">
@@ -73,6 +76,18 @@
       <Filter>Render\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="Render\CommonTextureImpl.hcc" />
+    <ClInclude Include="Core\LFile.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32\File.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32\Handle.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32\NTHandle.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -113,6 +128,9 @@
     </ClCompile>
     <ClCompile Include="Render\D3D12\TextureCube.cpp">
       <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\NTHandle.cpp">
+      <Filter>Win32</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
