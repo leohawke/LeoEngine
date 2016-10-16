@@ -96,6 +96,27 @@
     <ClInclude Include="Render\CommonTextureImpl.hcc">
       <Filter>Render</Filter>
     </ClInclude>
+    <ClInclude Include="Asset\DDSX.h">
+      <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\Loader.hpp">
+      <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\DeviceCaps.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\CompressionBC.hpp">
+      <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\TexCompression.hpp">
+      <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\CompressionETC.hpp">
+      <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Color_T.hpp">
+      <Filter>Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Render\D3D12\d3d12_dxgi.cpp">
@@ -145,6 +166,18 @@
     </ClCompile>
     <ClCompile Include="test.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\Loader.cpp">
+      <Filter>Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\IContext.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\TexCompression.cpp">
+      <Filter>Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Color_T.cpp">
+      <Filter>Render</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

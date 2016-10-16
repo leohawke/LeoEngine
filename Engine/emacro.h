@@ -7,7 +7,7 @@
 
 
 #include <LBase/ldef.h>
-
+#include <LBase/Debug.h>
 
 /*!
 \def LE_DLL
@@ -42,6 +42,10 @@
 #	define LE_API LB_ATTR(__visibility__("default"))
 #else
 #	define LE_API
+#endif
+
+#ifndef LE_LogError
+#define LE_LogError(...) TraceDe(platform::Descriptions::Err,__VA_ARGS__)
 #endif
 
 #endif

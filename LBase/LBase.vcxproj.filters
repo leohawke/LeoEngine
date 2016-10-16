@@ -130,6 +130,8 @@
       <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="id.hpp" />
+    <ClInclude Include="lmathtype.hpp" />
+    <ClInclude Include="lmathhalf.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CHRLib\CharacterProcessing.cpp">

@@ -190,6 +190,11 @@ UpgradeLog*.htm
 *.mdf
 *.ldf
 
+# New Sln files
+*.sln.db
+*.sln.db-shm
+*.sln.db-wal
+
 # Business Intelligence projects
 *.rdl.data
 *.bim.layout

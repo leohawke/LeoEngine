@@ -105,6 +105,48 @@
 #	define LB_Multithread 0
 #endif
 
+/*!
+\brief X86 ¼Ü¹¹¡£
+*/
+#define LB_Arch_X86 0x70086
+
+/*!
+\brief AMD64 ¼Ü¹¹¡£
+*/
+#define LB_Arch_X64 0x76486
+
+/*!
+\brief ARM ¼Ü¹¹¡£
+*/
+#define LB_Arch_ARM 0x70000
+
+#ifdef LB_IMPL_MSCPP
+//Visual C++
+#if defined(_M_IX86)
+#define LB_Arch LB_Arch_X86
+#elif defined(_M_AMD64)
+#define LB_Arch LB_Arch_X64
+#elif defined(_M_ARM)
+#define LB_Arch LB_Arch_ARM
+#else
+#error "unsupprot arch"
+#endif
+#else
+//g++ clang++
+#if defined(_X86_)
+#define LB_Arch LB_Arch_X86
+#elif defined(__amd64)
+#define LB_Arch LB_Arch_X64
+#endif
+#endif
+
+#if LB_Arch != LB_Arch_ARM
+#define LB_SSE 1
+#else
+#define LB_NEON 1
+#endif
+
+
 namespace platform
 {
 	//! \since build 1.4

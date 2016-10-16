@@ -419,7 +419,7 @@ namespace leo {
 	template<typename _type>
 	struct always
 	{
-	private:
+	public:
 		template<typename...>
 		struct impl
 		{

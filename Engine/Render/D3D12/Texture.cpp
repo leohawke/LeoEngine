@@ -314,7 +314,7 @@ void Texture::DoUnmap(uint32 subres)
 
 
 template<typename _type>
-ViewSimulation * const& Texture::Retrive(_type & desc, std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>>& maps)
+ViewSimulation * Texture::Retrive(_type & desc, std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>>& maps)
 {
 	if (ReadyHWResource()) {
 		auto p = reinterpret_cast<char const*>(&desc);
@@ -329,22 +329,22 @@ ViewSimulation * const& Texture::Retrive(_type & desc, std::unordered_map<std::s
 }
 
 
-ViewSimulation * const & Texture::RetriveSRV(D3D12_SHADER_RESOURCE_VIEW_DESC const & desc)
+ViewSimulation *  Texture::RetriveSRV(D3D12_SHADER_RESOURCE_VIEW_DESC const & desc)
 {
 	return Retrive(desc, srv_maps);
 }
 
-ViewSimulation * const & platform_ex::Windows::D3D12::Texture::RetriveUAV(D3D12_UNORDERED_ACCESS_VIEW_DESC const & desc)
+ViewSimulation * platform_ex::Windows::D3D12::Texture::RetriveUAV(D3D12_UNORDERED_ACCESS_VIEW_DESC const & desc)
 {
 	return Retrive(desc, uav_maps);
 }
 
-ViewSimulation * const & platform_ex::Windows::D3D12::Texture::RetriveRTV(D3D12_RENDER_TARGET_VIEW_DESC const & desc)
+ViewSimulation *platform_ex::Windows::D3D12::Texture::RetriveRTV(D3D12_RENDER_TARGET_VIEW_DESC const & desc)
 {
 	return Retrive(desc, rtv_maps);
 }
 
-ViewSimulation * const & platform_ex::Windows::D3D12::Texture::RetriveDSV(D3D12_DEPTH_STENCIL_VIEW_DESC const & desc)
+ViewSimulation *  platform_ex::Windows::D3D12::Texture::RetriveDSV(D3D12_DEPTH_STENCIL_VIEW_DESC const & desc)
 {
 	return Retrive(desc, dsv_maps);
 }

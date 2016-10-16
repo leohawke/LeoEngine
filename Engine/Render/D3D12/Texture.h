@@ -68,19 +68,19 @@ namespace platform_ex {
 					uint16 width, uint16 height, uint16 depth, uint8 array_size,
 					ElementInitData const * init_data);
 
-				void DoMap(EFormat format,uint32 subres, TextureMapAccess tma,
+				void DoMap(EFormat format, uint32 subres, TextureMapAccess tma,
 					uint16 x_offset, uint16 y_offset, uint16 z_offset,
 					/*uint16 width,*/ uint16 height, uint16 depth,
 					void*& data, uint32& row_pitch, uint32& slice_pitch);
 				void DoUnmap(uint32 subres);
 
 				template<typename _type>
-				ViewSimulation* const& Retrive(_type& desc, std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>>& maps);
+				ViewSimulation* Retrive(_type& desc, std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>>& maps);
 
-				ViewSimulation* const & RetriveSRV(D3D12_SHADER_RESOURCE_VIEW_DESC const & desc);
-				ViewSimulation* const & RetriveUAV(D3D12_UNORDERED_ACCESS_VIEW_DESC const & desc);
-				ViewSimulation* const & RetriveRTV(D3D12_RENDER_TARGET_VIEW_DESC const & desc);
-				ViewSimulation* const & RetriveDSV(D3D12_DEPTH_STENCIL_VIEW_DESC const & desc);
+				ViewSimulation*  RetriveSRV(D3D12_SHADER_RESOURCE_VIEW_DESC const & desc);
+				ViewSimulation* RetriveUAV(D3D12_UNORDERED_ACCESS_VIEW_DESC const & desc);
+				ViewSimulation* RetriveRTV(D3D12_RENDER_TARGET_VIEW_DESC const & desc);
+				ViewSimulation*  RetriveDSV(D3D12_DEPTH_STENCIL_VIEW_DESC const & desc);
 			protected:
 				DXGI_FORMAT dxgi_format;
 
@@ -109,7 +109,7 @@ namespace platform_ex {
 				uint16 GetWidth(uint8 level) const override;
 
 				void Map(TextureMapAccess tma,
-					void*& data,const Box1D&) override;
+					void*& data, const Box1D&) override;
 				void UnMap(const Sub1D&) override;
 
 				void CopyToTexture(platform::Render::Texture1D& target) override;
@@ -140,7 +140,7 @@ namespace platform_ex {
 				uint16 width;
 			};
 
-			class Texture2D :public platform::Render::Texture2D,public Texture {
+			class Texture2D :public platform::Render::Texture2D, public Texture {
 			public:
 				explicit Texture2D(uint16 height, uint16 width, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
 
@@ -154,7 +154,7 @@ namespace platform_ex {
 				uint16 GetHeight(uint8 level) const override;
 
 				void Map(TextureMapAccess tma,
-					void*& data, uint32& row_pitch,const Box2D&) override;
+					void*& data, uint32& row_pitch, const Box2D&) override;
 
 				void UnMap(const Sub1D&) override;
 
@@ -185,7 +185,7 @@ namespace platform_ex {
 				uint16 height;
 			};
 
-			class Texture3D :public platform::Render::Texture3D,public Texture {
+			class Texture3D :public platform::Render::Texture3D, public Texture {
 			public:
 				explicit Texture3D(uint16 width, uint16 height, uint16 depth, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
 
@@ -200,7 +200,7 @@ namespace platform_ex {
 				uint16 GetDepth(uint8 level) const override;
 
 				void Map(TextureMapAccess tma,
-					void*& data, uint32& row_pitch, uint32& slice_pitch,const Box3D&) override;
+					void*& data, uint32& row_pitch, uint32& slice_pitch, const Box3D&) override;
 
 				void UnMap(const Sub1D&) override;
 
@@ -234,9 +234,9 @@ namespace platform_ex {
 				uint16 depth;
 			};
 
-			class TextureCube :public platform::Render::TextureCube,public Texture {
+			class TextureCube :public platform::Render::TextureCube, public Texture {
 			public:
-				explicit TextureCube(uint8 size,uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
+				explicit TextureCube(uint8 size, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
 
 				void BuildMipSubLevels() override;
 
@@ -249,9 +249,9 @@ namespace platform_ex {
 
 
 				void Map(TextureMapAccess tma,
-					void*& data, uint32& row_pitch,const BoxCube&) override;
+					void*& data, uint32& row_pitch, const BoxCube&) override;
 
-				void UnMap(const Sub1D&,TextureCubeFaces face) override;
+				void UnMap(const Sub1D&, TextureCubeFaces face) override;
 
 				void CopyToTexture(platform::Render::TextureCube& target) override;
 
@@ -264,8 +264,8 @@ namespace platform_ex {
 				ViewSimulation* RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level) override;
 				ViewSimulation* RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, TextureCubeFaces first_face, uint8 num_faces, uint8 level) override;
 
-				ViewSimulation* RetriveRenderTargetView(uint8 first_array_index, uint8 array_size,uint8 level) override;
-				ViewSimulation* RetriveDepthStencilView(uint8 first_array_index, uint8 array_size,uint8 level) override;
+				ViewSimulation* RetriveRenderTargetView(uint8 first_array_index, uint8 array_size, uint8 level) override;
+				ViewSimulation* RetriveDepthStencilView(uint8 first_array_index, uint8 array_size, uint8 level) override;
 
 				ViewSimulation* RetriveRenderTargetView(uint8 array_index, TextureCubeFaces face, uint8 level) override;
 				ViewSimulation* RetriveDepthStencilView(uint8 array_index, TextureCubeFaces face, uint8 level) override;

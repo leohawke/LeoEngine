@@ -9,6 +9,7 @@
 
 namespace platform {
 	namespace Render {
+
 		inline namespace IFormat {
 
 			using namespace leo::inttype;
@@ -40,38 +41,38 @@ namespace platform {
 
 			// element format is a 64-bit value:
 			// 00000000 T3[4] T2[4] T1[4] T0[4] S3[6] S2[6] S1[6] S0[6] C3[4] C2[4] C1[4] C0[4]
-			template <uint64_t ch0, uint64_t ch1, uint64_t ch2, uint64_t ch3,
-				uint64_t ch0_size, uint64_t ch1_size, uint64_t ch2_size, uint64_t ch3_size,
-				uint64_t ch0_type, uint64_t ch1_type, uint64_t ch2_type, uint64_t ch3_type>
+			template <uint64 ch0, uint64 ch1, uint64 ch2, uint64 ch3,
+				uint64 ch0_size, uint64 ch1_size, uint64 ch2_size, uint64 ch3_size,
+				uint64 ch0_type, uint64 ch1_type, uint64 ch2_type, uint64 ch3_type>
 				struct MakeElementFormat4
 			{
-				lconstexpr static uint64_t const value = (ch0 << 0) | (ch1 << 4) | (ch2 << 8) | (ch3 << 12)
+				lconstexpr static uint64 const value = (ch0 << 0) | (ch1 << 4) | (ch2 << 8) | (ch3 << 12)
 					| (ch0_size << 16) | (ch1_size << 22) | (ch2_size << 28) | (ch3_size << 34)
 					| (ch0_type << 40) | (ch1_type << 44) | (ch2_type << 48) | (ch3_type << 52);
 			};
 
-			template <uint64_t ch0, uint64_t ch1, uint64_t ch2,
-				uint64_t ch0_size, uint64_t ch1_size, uint64_t ch2_size,
-				uint64_t ch0_type, uint64_t ch1_type, uint64_t ch2_type>
+			template <uint64 ch0, uint64 ch1, uint64 ch2,
+				uint64 ch0_size, uint64 ch1_size, uint64 ch2_size,
+				uint64 ch0_type, uint64 ch1_type, uint64 ch2_type>
 				struct MakeElementFormat3
 			{
-				lconstexpr static uint64_t const value = MakeElementFormat4<ch0, ch1, ch2, 0, ch0_size, ch1_size, ch2_size, 0, ch0_type, ch1_type, ch2_type, 0>::value;
+				lconstexpr static uint64 const value = MakeElementFormat4<ch0, ch1, ch2, 0, ch0_size, ch1_size, ch2_size, 0, ch0_type, ch1_type, ch2_type, 0>::value;
 			};
 
-			template <uint64_t ch0, uint64_t ch1,
-				uint64_t ch0_size, uint64_t ch1_size,
-				uint64_t ch0_type, uint64_t ch1_type>
+			template <uint64 ch0, uint64 ch1,
+				uint64 ch0_size, uint64 ch1_size,
+				uint64 ch0_type, uint64 ch1_type>
 				struct MakeElementFormat2
 			{
-				lconstexpr static uint64_t const value = MakeElementFormat3<ch0, ch1, 0, ch0_size, ch1_size, 0, ch0_type, ch1_type, 0>::value;
+				lconstexpr static uint64 const value = MakeElementFormat3<ch0, ch1, 0, ch0_size, ch1_size, 0, ch0_type, ch1_type, 0>::value;
 			};
 
-			template <uint64_t ch0,
-				uint64_t ch0_size,
-				uint64_t ch0_type>
+			template <uint64 ch0,
+				uint64 ch0_size,
+				uint64 ch0_type>
 				struct MakeElementFormat1
 			{
-				lconstexpr static uint64_t const value = MakeElementFormat2<ch0, 0, ch0_size, 0, ch0_type, 0>::value;
+				lconstexpr static uint64 const value = MakeElementFormat2<ch0, 0, ch0_size, 0, ch0_type, 0>::value;
 			};
 
 			/*
@@ -299,16 +300,16 @@ namespace platform {
 			inline EChannel
 				Channel(EFormat ef)
 			{
-				return static_cast<EChannel>((static_cast<uint64_t>(ef) >> (4 * c)) & 0xF);
+				return static_cast<EChannel>((static_cast<uint64>(ef) >> (4 * c)) & 0xF);
 			}
 
 			template <int c>
 			inline EFormat
 				Channel(EFormat ef, EChannel new_c)
 			{
-				uint64_t ef64 = static_cast<uint64_t>(ef);
+				uint64 ef64 = static_cast<uint64>(ef);
 				ef64 &= ~(0xFULL << (4 * c));
-				ef64 |= (static_cast<uint64_t>(new_c) << (4 * c));
+				ef64 |= (static_cast<uint64>(new_c) << (4 * c));
 				return static_cast<EFormat>(ef64);
 			}
 
@@ -316,16 +317,33 @@ namespace platform {
 			inline uint8_t
 				ChannelBits(EFormat ef)
 			{
-				return (static_cast<uint64_t>(ef) >> (16 + 6 * c)) & 0x3F;
+				return (static_cast<uint64>(ef) >> (16 + 6 * c)) & 0x3F;
 			}
 
 			template <int c>
 			inline EFormat
-				ChannelBits(EFormat ef, uint64_t new_c)
+				ChannelBits(EFormat ef, uint64 new_c)
 			{
-				uint64_t ef64 = static_cast<uint64_t>(ef);
+				uint64 ef64 = static_cast<uint64>(ef);
 				ef64 &= ~(0x3FULL << (16 + 6 * c));
 				ef64 |= (new_c << (16 + 6 * c));
+				return static_cast<EFormat>(ef64);
+			}
+
+			template <int c>
+			inline EChannelType
+				ChannelType(EFormat ef)
+			{
+				return static_cast<EChannelType>((static_cast<uint64>(ef) >> (40 + 4 * c)) & 0xF);
+			}
+
+			template <int c>
+			inline EFormat
+				ChannelType(EFormat ef, EChannelType new_c)
+			{
+				uint64 ef64 = static_cast<uint64>(ef);
+				ef64 &= ~(0xFULL << (40 + 4 * c));
+				ef64 |= (static_cast<uint64>(new_c) << (40 + 4 * c));
 				return static_cast<EFormat>(ef64);
 			}
 
@@ -346,6 +364,18 @@ namespace platform {
 				IsCompressedFormat(EFormat format)
 			{
 				return (EC_BC == Channel<0>(format)) || (EC_ETC == Channel<0>(format));
+			}
+
+			inline bool
+				IsSRGB(EFormat format)
+			{
+				return (ECT_UNorm_SRGB == ChannelType<0>(format));
+			}
+
+			inline bool
+				IsSigned(EFormat format)
+			{
+				return (ECT_SNorm == ChannelType<0>(format));
 			}
 
 			inline uint8_t
@@ -399,6 +429,35 @@ namespace platform {
 				return NumFormatBits(format) / 8;
 			}
 
+			inline EFormat
+				MakeSRGB(EFormat format)
+			{
+				if (ECT_UNorm == ChannelType<0>(format))
+				{
+					format = ChannelType<0>(format, ECT_UNorm_SRGB);
+				}
+				if (Channel<0>(format) != EC_BC)
+				{
+					if (ECT_UNorm == ChannelType<1>(format))
+					{
+						format = ChannelType<1>(format, ECT_UNorm_SRGB);
+					}
+					if (Channel<0>(format) != EC_ETC)
+					{
+						if (ECT_UNorm == ChannelType<2>(format))
+						{
+							format = ChannelType<2>(format, ECT_UNorm_SRGB);
+						}
+						if (ECT_UNorm == ChannelType<3>(format))
+						{
+							format = ChannelType<3>(format, ECT_UNorm_SRGB);
+						}
+					}
+				}
+
+				return format;
+			}
+
 
 			/*
 			\brief ElementAccess元素访问方式
@@ -423,6 +482,10 @@ namespace platform {
 			struct SampleDesc {
 				uint32 Count = 1;
 				uint32 Quality = 0;
+
+				SampleDesc(uint32 count,uint32 quality)
+					:Count(count),Quality(quality)
+				{}
 			};
 		}
 	}

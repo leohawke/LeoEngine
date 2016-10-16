@@ -6,9 +6,9 @@
 #define LE_RENDER_D3D12_Context_h 1
 
 #include "../IContext.h"
-#include "../IFormat.hpp"
 #include "Adapter.h"
 #include "Display.h"
+#include "Texture.h"
 
 #include <UniversalDXSDK/d3d12.h>
 
@@ -18,10 +18,6 @@ namespace platform_ex {
 	namespace Windows {
 		namespace D3D12 {
 			using namespace platform::Render::IFormat;
-			class Texture1D;
-			class Texture2D;
-			class Texture3D;
-			class TextureCube;
 
 			class Device : platform::Render::Device {
 			public:
@@ -33,17 +29,19 @@ namespace platform_ex {
 				
 				ID3D12Device* operator->() lnoexcept;
 
-				std::shared_ptr<Texture1D> CreateTexture(uint16 width, uint8 num_mipmaps, uint8 array_size,
-					EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data = nullptr);
+				Texture1D* CreateTexture(uint16 width, uint8 num_mipmaps, uint8 array_size,
+					EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data = nullptr) override;
 
-				std::shared_ptr<Texture2D> CreateTexture(uint16 width,uint16 height,uint8 num_mipmaps, uint8 array_size,
-					EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data = nullptr);
+				Texture2D* CreateTexture(uint16 width,uint16 height,uint8 num_mipmaps, uint8 array_size,
+					EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data = nullptr) override;
 				
-				std::shared_ptr<Texture3D> CreateTexture(uint16 width, uint16 height,uint16 depth, uint8 num_mipmaps, uint8 array_size,
-					EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data = nullptr);
+				Texture3D* CreateTexture(uint16 width, uint16 height,uint16 depth, uint8 num_mipmaps, uint8 array_size,
+					EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data = nullptr) override;
 				
-				std::shared_ptr<TextureCube> CreateTextureCube(uint16 size, uint8 num_mipmaps, uint8 array_size,
-					EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data = nullptr);
+				TextureCube* CreateTextureCube(uint16 size, uint8 num_mipmaps, uint8 array_size,
+					EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data = nullptr) override;
+
+				platform::Render::Caps& GetCaps() override;
 
 			public:
 				friend class Context;
@@ -66,6 +64,8 @@ namespace platform_ex {
 				D3D12_CPU_DESCRIPTOR_HANDLE null_srv_handle,null_uav_handle;
 
 			private:
+				void FillCaps();
+
 				void DeviceEx(ID3D12Device* device, ID3D12CommandQueue* cmd_queue, D3D_FEATURE_LEVEL feature_level);
 			private:
 				//@{
@@ -94,6 +94,8 @@ namespace platform_ex {
 				//@}
 
 				//@}
+
+				platform::Render::Caps d3d_caps;
 			};
 
 			class Context : public platform::Render::Context {
