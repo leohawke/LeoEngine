@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6946CA48-2E7E-4770-9D61-0F59C02D0271}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Render</RootNamespace>
+    <RootNamespace>Engine</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
     <ProjectName>Engine</ProjectName>
   </PropertyGroup>
