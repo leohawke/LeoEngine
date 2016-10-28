@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LBase", "LBase\LBase.vcxpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LTest", "LTest\LTest.vcxproj", "{99C0F63B-85A1-4525-8E05-A42A7DEA9CA6}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Render.vcxproj", "{6946CA48-2E7E-4770-9D61-0F59C02D0271}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcxproj", "{6946CA48-2E7E-4770-9D61-0F59C02D0271}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
