@@ -1,0 +1,163 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Render\D3D12\Adapter.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\Context.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\Convert.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\d3d12_dxgi.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\Display.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\RenderView.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\Texture.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\Texture1D.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\Texture2D.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\Texture3D.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\TextureCube.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Color_T.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\IContext.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ITexture.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\File.cpp">
+      <Filter>Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\NTHandle.cpp">
+      <Filter>Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\Loader.cpp">
+      <Filter>Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\TexCompression.cpp">
+      <Filter>Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\TextureX.cpp">
+      <Filter>Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="test.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Render\D3D12\Adapter.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\Context.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\Convert.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\d3d12_dxgi.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\Display.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\RenderView.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\test.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\Texture.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Color_T.hpp">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\DeviceCaps.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IContext.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IFormat.hpp">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IRenderView.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ITexture.hpp">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32\COM.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32\File.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32\Handle.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32\NTHandle.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LFile.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\CompressionBC.hpp">
+      <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\CompressionETC.hpp">
+      <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\DDSX.h">
+      <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\Loader.hpp">
+      <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\TexCompression.hpp">
+      <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\TextureX.h">
+      <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="emacro.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Render">
+      <UniqueIdentifier>{5b26259c-bdd7-411b-a6cb-36c3e5376e43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render\D3D12">
+      <UniqueIdentifier>{2cf8afb0-fd5b-444b-b357-508760e055ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Win32">
+      <UniqueIdentifier>{0a8995ab-b9c1-4a75-ab33-bd2a46e25fd3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{d71e34b1-aaa2-42c7-8011-d97ac858468a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Asset">
+      <UniqueIdentifier>{6fe807d3-6fd9-4d67-906d-40208594580a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Render\CommonTextureImpl.hcc">
+      <Filter>Render</Filter>
+    </None>
+  </ItemGroup>
+</Project>

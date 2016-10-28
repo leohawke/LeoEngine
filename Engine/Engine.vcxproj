@@ -18,6 +18,59 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Asset\Loader.cpp" />
+    <ClCompile Include="Asset\TexCompression.cpp" />
+    <ClCompile Include="Asset\TextureX.cpp" />
+    <ClCompile Include="Render\Color_T.cpp" />
+    <ClCompile Include="Render\D3D12\Adapter.cpp" />
+    <ClCompile Include="Render\D3D12\Context.cpp" />
+    <ClCompile Include="Render\D3D12\Convert.cpp" />
+    <ClCompile Include="Render\D3D12\d3d12_dxgi.cpp" />
+    <ClCompile Include="Render\D3D12\Display.cpp" />
+    <ClCompile Include="Render\D3D12\RenderView.cpp" />
+    <ClCompile Include="Render\D3D12\Texture.cpp" />
+    <ClCompile Include="Render\D3D12\Texture1D.cpp" />
+    <ClCompile Include="Render\D3D12\Texture2D.cpp" />
+    <ClCompile Include="Render\D3D12\Texture3D.cpp" />
+    <ClCompile Include="Render\D3D12\TextureCube.cpp" />
+    <ClCompile Include="Render\IContext.cpp" />
+    <ClCompile Include="Render\ITexture.cpp" />
+    <ClCompile Include="test.cpp" />
+    <ClCompile Include="Win32\File.cpp" />
+    <ClCompile Include="Win32\NTHandle.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Asset\CompressionBC.hpp" />
+    <ClInclude Include="Asset\CompressionETC.hpp" />
+    <ClInclude Include="Asset\DDSX.h" />
+    <ClInclude Include="Asset\Loader.hpp" />
+    <ClInclude Include="Asset\TexCompression.hpp" />
+    <ClInclude Include="Asset\TextureX.h" />
+    <ClInclude Include="Core\LFile.h" />
+    <ClInclude Include="emacro.h" />
+    <ClInclude Include="Render\Color_T.hpp" />
+    <ClInclude Include="Render\D3D12\Adapter.h" />
+    <ClInclude Include="Render\D3D12\Context.h" />
+    <ClInclude Include="Render\D3D12\Convert.h" />
+    <ClInclude Include="Render\D3D12\d3d12_dxgi.h" />
+    <ClInclude Include="Render\D3D12\Display.h" />
+    <ClInclude Include="Render\D3D12\RenderView.h" />
+    <ClInclude Include="Render\D3D12\test.h" />
+    <ClInclude Include="Render\D3D12\Texture.h" />
+    <ClInclude Include="Render\DeviceCaps.h" />
+    <ClInclude Include="Render\IContext.h" />
+    <ClInclude Include="Render\IFormat.hpp" />
+    <ClInclude Include="Render\IRenderView.h" />
+    <ClInclude Include="Render\ITexture.hpp" />
+    <ClInclude Include="Win32\COM.h" />
+    <ClInclude Include="Win32\File.h" />
+    <ClInclude Include="Win32\Handle.h" />
+    <ClInclude Include="Win32\NTHandle.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Render\CommonTextureImpl.hcc" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6946CA48-2E7E-4770-9D61-0F59C02D0271}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -165,59 +218,6 @@
     </Link>
     <Lib />
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="Asset\CompressionBC.hpp" />
-    <ClInclude Include="Asset\CompressionETC.hpp" />
-    <ClInclude Include="Asset\Loader.hpp" />
-    <ClInclude Include="Asset\DDSX.h" />
-    <ClInclude Include="Asset\TexCompression.hpp" />
-    <ClInclude Include="Asset\TextureX.h" />
-    <ClInclude Include="Core\LFile.h" />
-    <ClInclude Include="emacro.h" />
-    <ClInclude Include="Render\Color_T.hpp" />
-    <ClInclude Include="Render\D3D12\Adapter.h" />
-    <ClInclude Include="Render\D3D12\Context.h" />
-    <ClInclude Include="Render\D3D12\Convert.h" />
-    <ClInclude Include="Render\D3D12\d3d12_dxgi.h" />
-    <ClInclude Include="Render\D3D12\Display.h" />
-    <ClInclude Include="Render\D3D12\RenderView.h" />
-    <ClInclude Include="Render\D3D12\test.h" />
-    <ClInclude Include="Render\D3D12\Texture.h" />
-    <ClInclude Include="Render\DeviceCaps.h" />
-    <ClInclude Include="Render\IContext.h" />
-    <ClInclude Include="Render\IFormat.hpp" />
-    <ClInclude Include="Render\IRenderView.h" />
-    <ClInclude Include="Render\ITexture.hpp" />
-    <ClInclude Include="Win32\COM.h" />
-    <ClInclude Include="Win32\File.h" />
-    <ClInclude Include="Win32\Handle.h" />
-    <ClInclude Include="Win32\NTHandle.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Asset\Loader.cpp" />
-    <ClCompile Include="Asset\TexCompression.cpp" />
-    <ClCompile Include="Asset\TextureX.cpp" />
-    <ClCompile Include="Render\Color_T.cpp" />
-    <ClCompile Include="Render\IContext.cpp" />
-    <ClCompile Include="Win32\File.cpp" />
-    <ClCompile Include="Win32\NTHandle.cpp" />
-    <ClInclude Include="Render\CommonTextureImpl.hcc">
-      <FileType>CppCode</FileType>
-    </ClInclude>
-    <ClCompile Include="Render\D3D12\Adapter.cpp" />
-    <ClCompile Include="Render\D3D12\Context.cpp" />
-    <ClCompile Include="Render\D3D12\d3d12_dxgi.cpp" />
-    <ClCompile Include="Render\D3D12\Display.cpp" />
-    <ClCompile Include="Render\D3D12\Convert.cpp" />
-    <ClCompile Include="Render\D3D12\RenderView.cpp" />
-    <ClCompile Include="Render\D3D12\Texture.cpp" />
-    <ClCompile Include="Render\D3D12\Texture1D.cpp" />
-    <ClCompile Include="Render\D3D12\Texture2D.cpp" />
-    <ClCompile Include="Render\D3D12\Texture3D.cpp" />
-    <ClCompile Include="Render\D3D12\TextureCube.cpp" />
-    <ClCompile Include="Render\ITexture.cpp" />
-    <ClCompile Include="test.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

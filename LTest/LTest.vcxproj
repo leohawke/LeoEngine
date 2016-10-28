@@ -151,19 +151,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Engine\Render.vcxproj">
-      <Project>{6946ca48-2e7e-4770-9d61-0f59c02d0271}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\LBase\LBase.vcxproj">
-      <Project>{4f3ae107-3ffd-4d5c-82a8-5034c0041562}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="console.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="wWinMain.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Engine\Engine.vcxproj">
+      <Project>{6946ca48-2e7e-4770-9d61-0f59c02d0271}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\LBase\LBase.vcxproj">
+      <Project>{4f3ae107-3ffd-4d5c-82a8-5034c0041562}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
