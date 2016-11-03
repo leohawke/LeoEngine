@@ -16,6 +16,32 @@ namespace platform {
 	namespace M {
 		using namespace leo::inttype;
 
+		inline float linear_to_srgb(float linear) lnoexcept
+		{
+			if (linear < 0.0031308f)
+			{
+				return 12.92f * linear;
+			}
+			else
+			{
+				float const ALPHA = 0.055f;
+				return (1 + ALPHA) * pow(linear, 1 / 2.4f) - ALPHA;
+			}
+		}
+
+		inline float srgb_to_linear(float srgb) lnoexcept
+		{
+			if (srgb < 0.04045f)
+			{
+				return srgb / 12.92f;
+			}
+			else
+			{
+				float const ALPHA = 0.055f;
+				return pow((srgb + ALPHA) / (1 + ALPHA), 2.4f);
+			}
+		}
+
 		template <typename T>
 		class Color_T;
 
@@ -138,6 +164,7 @@ namespace platform {
 			bool operator==(Color_T<T> const & rhs) const lnoexcept;
 
 			friend Color_T<float> lerp(const Color_T<float>& lhs, const Color_T<float>& rhs,float w);
+			friend float dot(const Color_T<float>& lhs, const Color_T<float>& rhs);
 		private:
 			leo::math::float4 col_;
 		};
@@ -153,6 +180,10 @@ namespace platform {
 		inline Color_T<float>  lerp(const Color_T<float> & lhs, const Color_T<float> & rhs,float w) {
 			auto r = lerp(lhs.col_, rhs.col_, w);
 			return Color(r.data);
+		}
+
+		inline float dot(const Color_T<float>& lhs, const Color_T<float>& rhs) {
+			return dot(lhs.col_, rhs.col_);
 		}
 
 		void ConvertFromABGR32F(Render::EFormat fmt, Color const * input, uint32 num_elems, void* output);

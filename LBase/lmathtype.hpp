@@ -648,12 +648,20 @@ namespace leo {
 				&& float_equal(l.z, r.z) && float_equal(l.w, r.w);
 		}
 
+		inline bool operator!=(const float4& l, const float4& r) noexcept {
+			return !(l==r);
+		}
+
 		inline float dot(const float4&l, const float4& r) {
 			return l.x*r.x + l.y*r.y + l.z*r.z + l.w*r.w;
 		}
 
 		inline float length(const float4 & l) noexcept {
 			return sqrtf(dot(l, l));
+		}
+
+		inline float length_sq(const float4& l) noexcept {
+			return dot(l, l);
 		}
 
 		inline float4 normalize(const float4& l) noexcept {
@@ -670,6 +678,10 @@ namespace leo {
 		}
 
 		inline float4 operator*(const float4& l, float r) {
+			return{ l.x*r,l.y*r,l.z*r,l.w*r };
+		}
+
+		inline float4 operator*(float r,const float4& l) {
 			return{ l.x*r,l.y*r,l.z*r,l.w*r };
 		}
 
@@ -800,6 +812,11 @@ namespace leo {
 		template<typename vec>
 		inline vec clamp(const vec& _Min, const vec& _Max, const vec & _X) {
 			return max(_Min, min(_Max, _X));
+		}
+
+		template<typename vec>
+		inline vec lerp(const vec& a, const vec& b, const vec & t) {
+			return a*(1-t)+b*t;
 		}
 
 		inline float2 saturate(const float2& x) {

@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="Asset\Loader.cpp" />
     <ClCompile Include="Asset\TexCompression.cpp" />
+    <ClCompile Include="Asset\CompressionBC.cpp" />
     <ClCompile Include="Asset\TextureX.cpp" />
     <ClCompile Include="Render\Color_T.cpp" />
     <ClCompile Include="Render\D3D12\Adapter.cpp" />

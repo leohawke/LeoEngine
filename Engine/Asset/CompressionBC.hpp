@@ -262,7 +262,7 @@ namespace bc {
 		int RotationMode(ModeInfo const & mode_info) const;
 		int NumBitsPerIndex(ModeInfo const & mode_info, int8 index_mode = -1) const;
 		int NumBitsPerAlpha(ModeInfo const & mode_info, int8 index_mode = -1) const;
-		uint8 ErrorMetric(ModeInfo const & mode_info) const;
+		uint4 ErrorMetric(ModeInfo const & mode_info) const;
 		ARGBColor32 QuantizationMask(ModeInfo const & mode_info) const;
 		int NumPbitCombos(ModeInfo const & mode_info) const;
 		int const * PBitCombo(ModeInfo const & mode_info, int idx) const;

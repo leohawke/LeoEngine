@@ -59,6 +59,9 @@
       <Filter>Asset</Filter>
     </ClCompile>
     <ClCompile Include="test.cpp" />
+    <ClCompile Include="Asset\CompressionBC.cpp">
+      <Filter>Asset</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">

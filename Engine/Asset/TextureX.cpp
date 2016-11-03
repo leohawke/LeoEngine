@@ -419,7 +419,7 @@ namespace platform {
 	}
 
 
-	void ResizeTexture(void* dst_data, uint32 dst_row_pitch, uint32 dst_slice_pitch, Render::EFormat dst_format,
+	void X::ResizeTexture(void* dst_data, uint32 dst_row_pitch, uint32 dst_slice_pitch, Render::EFormat dst_format,
 		uint16 dst_width, uint16 dst_height, uint16 dst_depth,
 		void const * src_data, uint32 src_row_pitch, uint32 src_slice_pitch, Render::EFormat src_format,
 		uint16 src_width, uint16 src_height, uint16 src_depth,
