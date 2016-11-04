@@ -73,12 +73,12 @@ namespace etc {
 
 			TexCompressionMethod quality_;
 
-			uint32_t num_src_pixels_;
+			uint32 num_src_pixels_;
 			ARGBColor32 const * src_pixels_;
 
 			bool use_color4_;
 			int const * scan_deltas_;
-			uint32_t scan_delta_size_;
+			uint32 scan_delta_size_;
 
 			ARGBColor32 base_color5_;
 			bool constrain_against_base_color5_;
@@ -90,9 +90,9 @@ namespace etc {
 
 			Results& operator=(Results const & rhs);
 
-			uint64_t error_;
+			uint64 error_;
 			ARGBColor32 block_color_unscaled_;
-			uint32_t block_inten_table_;
+			uint32 block_inten_table_;
 			std::vector<uint8> selectors_;
 			bool block_color4_;
 		};
@@ -103,7 +103,7 @@ namespace etc {
 		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) override;
 		virtual void DecodeBlock(void* output, void const * input) override;
 
-		uint64_t EncodeETC1BlockInternal(ETC1Block& output, ARGBColor32 const * argb, TexCompressionMethod method);
+		uint64 EncodeETC1BlockInternal(ETC1Block& output, ARGBColor32 const * argb, TexCompressionMethod method);
 		void DecodeETCIndividualModeInternal(ARGBColor32* argb, ETC1Block const & etc1) const;
 		void DecodeETCDifferentialModeInternal(ARGBColor32* argb, ETC1Block const & etc1, bool alpha) const;
 
@@ -113,8 +113,8 @@ namespace etc {
 		struct ETC1SolutionCoordinates
 		{
 			ETC1SolutionCoordinates();
-			ETC1SolutionCoordinates(int r, int g, int b, uint32_t inten_table, bool color4);
-			ETC1SolutionCoordinates(ARGBColor32 const & c, uint32_t inten_table, bool color4);
+			ETC1SolutionCoordinates(int r, int g, int b, uint32 inten_table, bool color4);
+			ETC1SolutionCoordinates(ARGBColor32 const & c, uint32 inten_table, bool color4);
 			ETC1SolutionCoordinates(ETC1SolutionCoordinates const & rhs);
 
 			ETC1SolutionCoordinates& operator=(ETC1SolutionCoordinates const & rhs);
@@ -126,7 +126,7 @@ namespace etc {
 			void BlockColors(ARGBColor32* block_colors) const;
 
 			ARGBColor32 unscaled_color_;
-			uint32_t inten_table_;
+			uint32 inten_table_;
 			bool color4_;
 		};
 
@@ -138,15 +138,15 @@ namespace etc {
 
 			ETC1SolutionCoordinates coords_;
 			uint8 selectors_[8];
-			uint64_t error_;
+			uint64 error_;
 			bool valid_;
 		};
 
 	private:
-		uint32_t ETC1DecodeValue(uint32_t diff, uint32_t inten, uint32_t selector, uint32_t packed_c) const;
+		uint32 ETC1DecodeValue(uint32 diff, uint32 inten, uint32 selector, uint32 packed_c) const;
 
-		uint64_t PackETC1UniformBlock(ETC1Block& block, ARGBColor32 const * argb) const;
-		uint32_t PackETC1UniformPartition(Results& results, uint32_t num_colors, ARGBColor32 const * argb,
+		uint64 PackETC1UniformBlock(ETC1Block& block, ARGBColor32 const * argb) const;
+		uint32 PackETC1UniformPartition(Results& results, uint32 num_colors, ARGBColor32 const * argb,
 			bool use_diff, ARGBColor32 const * base_color5_unscaled) const;
 
 		void InitSolver(Params const & params, Results& result);
@@ -167,9 +167,9 @@ namespace etc {
 		float3 avg_color_;
 		int br_, bg_, bb_;
 		uint16 luma_[8];
-		uint32_t sorted_luma_[2][8];
-		uint32_t const * sorted_luma_indices_;
-		uint32_t* sorted_luma_ptr_;
+		uint32 sorted_luma_[2][8];
+		uint32 const * sorted_luma_indices_;
+		uint32* sorted_luma_ptr_;
 
 		PotentialSolution best_solution_;
 		PotentialSolution trial_solution_;
@@ -206,6 +206,14 @@ namespace etc {
 		TexCompressionETC1Ptr etc1_codec_;
 		TexCompressionETC2RGB8Ptr etc2_rgb8_codec_;
 	};
+
+	template <typename T>
+	inline T
+		sqr(T const & x) lnoexcept
+	{
+		return x * x;
+	}
+
 }
 
 #endif

@@ -693,6 +693,13 @@ namespace leo {
 			return l;
 		}
 
+		inline float3& operator+=(float3& l, const float3& r) {
+			l.x += r.x;
+			l.y += r.y;
+			l.z += r.z;
+			return l;
+		}
+
 		inline float4& operator-=(float4& l, const float4& r) {
 			l.x -= r.x;
 			l.y -= r.y;
@@ -714,6 +721,14 @@ namespace leo {
 			l.y /= r;
 			l.z /= r;
 			l.w /= r;
+			return l;
+		}
+
+		template<typename T>
+		inline float3& operator/=(float3&l, T r) {
+			l.x /= r;
+			l.y /= r;
+			l.z /= r;
 			return l;
 		}
 

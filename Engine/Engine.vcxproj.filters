@@ -62,6 +62,9 @@
     <ClCompile Include="Asset\CompressionBC.cpp">
       <Filter>Asset</Filter>
     </ClCompile>
+    <ClCompile Include="Asset\CompressionETC.cpp">
+      <Filter>Asset</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Asset\CompressionETC.cpp" />
     <ClCompile Include="Asset\Loader.cpp" />
     <ClCompile Include="Asset\TexCompression.cpp" />
     <ClCompile Include="Asset\CompressionBC.cpp" />
