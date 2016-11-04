@@ -25,14 +25,7 @@ IDXGISwapChain* LE_API Create(HWND hwnd) {
 	CatchRet(platform_ex::Windows::Win32Exception&, TraceDe(Warning, "d3d12 win32 op failed."), nullptr)
 	CatchRet(platform_ex::COMException&, TraceDe(Warning, "d3d12 com op failed."), nullptr)
 
-	platform::Render::TextureType type;
-	uint16 width, height,depth;
-	uint8 num_mipmaps,array_size;
-	platform::Render::EFormat format; 
-	uint32 row_pitch, slice_pitch;
-
-	platform::File blend_dds(L"blend.dds", platform::File::kToRead);
-	platform::X::GetImageInfo(blend_dds, type, width, height, depth, num_mipmaps, array_size, format, row_pitch, slice_pitch);
+	
 
 	return nullptr;
 }

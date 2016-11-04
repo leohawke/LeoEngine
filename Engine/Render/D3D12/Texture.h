@@ -39,19 +39,21 @@ namespace platform_ex {
 				virtual ViewSimulation* RetriveShaderResourceView(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) = 0;
 
 				virtual ViewSimulation* RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level) = 0;
-				virtual ViewSimulation* RetriveRenderTargetView(uint8 first_array_index, uint8 num_items, uint8 level) = 0;
-				virtual ViewSimulation* RetriveDepthStencilView(uint8 first_array_index, uint8 num_items, uint8 level) = 0;
+				virtual ViewSimulation* RetriveRenderTargetView(uint8 first_array_index, uint8 num_items, uint8 level);
+				virtual ViewSimulation* RetriveDepthStencilView(uint8 first_array_index, uint8 num_items, uint8 level);
 
-				virtual ViewSimulation* RetriveUnorderedAccessView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) = 0;
+				virtual ViewSimulation* RetriveUnorderedAccessView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level);
 				virtual ViewSimulation* RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) = 0;
 				virtual ViewSimulation* RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) = 0;
 
-				virtual ViewSimulation* RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, TextureCubeFaces first_face, uint8 num_faces, uint8 level) = 0;
+				virtual ViewSimulation* RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, TextureCubeFaces first_face, uint8 num_faces, uint8 level);
 
-				virtual ViewSimulation* RetriveRenderTargetView(uint8 array_index, TextureCubeFaces face, uint8 level) = 0;
-				virtual ViewSimulation* RetriveDepthStencilView(uint8 array_index, TextureCubeFaces face, uint8 level) = 0;
+				virtual ViewSimulation* RetriveRenderTargetView(uint8 array_index, TextureCubeFaces face, uint8 level);
+				virtual ViewSimulation* RetriveDepthStencilView(uint8 array_index, TextureCubeFaces face, uint8 level);
 
 			protected:
+				std::string const & HWDescription() const;
+
 				void DeleteHWResource();
 				bool ReadyHWResource() const;
 
@@ -99,7 +101,10 @@ namespace platform_ex {
 			class Texture1D :public platform::Render::Texture1D, public Texture {
 			public:
 				explicit Texture1D(uint16 width, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
-
+			protected:
+				//\brief encode = UTF-8
+				std::string const & Description() const override;
+			public:
 				void BuildMipSubLevels() override;
 
 				void HWResourceCreate(ElementInitData const * init_data) override;
@@ -143,7 +148,10 @@ namespace platform_ex {
 			class Texture2D :public platform::Render::Texture2D, public Texture {
 			public:
 				explicit Texture2D(uint16 height, uint16 width, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
-
+			protected:
+				//\brief encode = UTF-8
+				std::string const & Description() const override;
+			public:
 				void BuildMipSubLevels() override;
 
 				void HWResourceCreate(ElementInitData const * init_data) override;
@@ -188,7 +196,10 @@ namespace platform_ex {
 			class Texture3D :public platform::Render::Texture3D, public Texture {
 			public:
 				explicit Texture3D(uint16 width, uint16 height, uint16 depth, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
-
+			protected:
+				//\brief encode = UTF-8
+				std::string const & Description() const override;
+			public:
 				void BuildMipSubLevels() override;
 
 				void HWResourceCreate(ElementInitData const * init_data) override;
@@ -236,8 +247,11 @@ namespace platform_ex {
 
 			class TextureCube :public platform::Render::TextureCube, public Texture {
 			public:
-				explicit TextureCube(uint8 size, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
-
+				explicit TextureCube(uint16 size, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
+			protected:
+				//\brief encode = UTF-8
+				std::string const & Description() const override;
+			public:
 				void BuildMipSubLevels() override;
 
 				void HWResourceCreate(ElementInitData const * init_data) override;
@@ -269,6 +283,9 @@ namespace platform_ex {
 
 				ViewSimulation* RetriveRenderTargetView(uint8 array_index, TextureCubeFaces face, uint8 level) override;
 				ViewSimulation* RetriveDepthStencilView(uint8 array_index, TextureCubeFaces face, uint8 level) override;
+
+				ViewSimulation* RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) override;
+				ViewSimulation* RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) override;
 			protected:
 				void Resize(platform::Render::TextureCube& target, const BoxCube&,
 					const BoxCube&,
@@ -276,7 +293,6 @@ namespace platform_ex {
 			private:
 				uint16 size;
 			};
-
 		}
 	}
 }

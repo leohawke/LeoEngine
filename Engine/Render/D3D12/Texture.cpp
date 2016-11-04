@@ -9,7 +9,7 @@ using namespace platform_ex::Windows::D3D12;
 using platform::Render::TextureMapAccess;
 
 static DXGI_FORMAT ConvertWrap(EFormat format) {
-	 switch (format) {
+	switch (format) {
 	case EF_D16:
 		return DXGI_FORMAT_R16_TYPELESS;
 	case EF_D24S8:
@@ -23,6 +23,35 @@ static DXGI_FORMAT ConvertWrap(EFormat format) {
 platform_ex::Windows::D3D12::Texture::Texture(EFormat format)
 	:dxgi_format(ConvertWrap(format))
 {
+}
+
+ViewSimulation* Texture::RetriveRenderTargetView(uint8 first_array_index, uint8 num_items, uint8 level) {
+	throw leo::unsupported("Texture::RetriveRenderTargetView(uint8 first_array_index, uint8 num_items, uint8 level)");
+}
+ViewSimulation* Texture::RetriveDepthStencilView(uint8 first_array_index, uint8 num_items, uint8 level) {
+	throw leo::unsupported("Texture::RetriveDepthStencilView(uint8 first_array_index, uint8 num_items, uint8 level)");
+}
+
+ViewSimulation* Texture::RetriveUnorderedAccessView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) {
+	throw leo::unsupported("Texture::RetriveUnorderedAccessView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level)");
+}
+
+ViewSimulation* Texture::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, TextureCubeFaces first_face, uint8 num_faces, uint8 level){
+	throw leo::unsupported("Texture::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, TextureCubeFaces first_face, uint8 num_faces, uint8 level)");
+}
+
+ViewSimulation* Texture::RetriveRenderTargetView(uint8 array_index, TextureCubeFaces face, uint8 level) {
+	throw leo::unsupported("Texture::RetriveRenderTargetView(uint8 array_index, TextureCubeFaces face, uint8 level)");
+}
+
+ViewSimulation* Texture::RetriveDepthStencilView(uint8 array_index, TextureCubeFaces face, uint8 level) {
+	throw leo::unsupported("Texture::RetriveDepthStencilView(uint8 array_index, TextureCubeFaces face, uint8 level)");
+}
+
+std::string const & platform_ex::Windows::D3D12::Texture::HWDescription() const
+{
+	//TODO Format DXGI_FORMAT EFORMAT CREATE STATE
+	return "D3D12 Texture";
 }
 
 void Texture::DeleteHWResource()
@@ -81,7 +110,7 @@ void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uin
 
 	CheckHResult(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 		&tex_desc, D3D12_RESOURCE_STATE_COMMON, nullptr,
-		COMPtr_RefParam(texture,IID_ID3D12Resource)));
+		COMPtr_RefParam(texture, IID_ID3D12Resource)));
 
 	auto num_subres = array_size * base_this->GetNumMipMaps();
 	uint64 upload_buffer_size = 0;
@@ -111,7 +140,7 @@ void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uin
 	CheckHResult(device->CreateCommittedResource(&upload_heap_prop, D3D12_HEAP_FLAG_NONE,
 		&buff_desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
 		COMPtr_RefParam(texture_upload_heaps, IID_ID3D12Resource)));
-	
+
 	D3D12_HEAP_PROPERTIES readback_heap_prop;
 	readback_heap_prop.Type = D3D12_HEAP_TYPE_READBACK;
 	readback_heap_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
@@ -200,7 +229,7 @@ void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uin
 	}
 }
 
-void Texture::DoMap(EFormat format,uint32 subres, TextureMapAccess tma, 
+void Texture::DoMap(EFormat format, uint32 subres, TextureMapAccess tma,
 	uint16 x_offset, uint16 y_offset, uint16 z_offset,
 	/*uint16 width,*/  uint16 height, uint16 depth,
 	void *& data, uint32 & row_pitch, uint32 & slice_pitch)
@@ -219,7 +248,7 @@ void Texture::DoMap(EFormat format,uint32 subres, TextureMapAccess tma,
 
 	if ((TextureMapAccess::ReadOnly == tma) || (TextureMapAccess::ReadWrite == tma)) {
 		auto & cmd_list = context.GetCommandList(Device::Command_Render);
-		
+
 		TransitionBarrier barrier = {
 			{D3D12_RESOURCE_STATE_COMMON,D3D12_RESOURCE_STATE_COPY_SOURCE},
 			texture,
@@ -238,9 +267,9 @@ void Texture::DoMap(EFormat format,uint32 subres, TextureMapAccess tma,
 			D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT,
 			layout
 		};
-		
+
 		cmd_list->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
-		
+
 		cmd_list->ResourceBarrier(1, !barrier);
 
 		context.SyncCPUGPU();
@@ -349,8 +378,8 @@ ViewSimulation *  platform_ex::Windows::D3D12::Texture::RetriveDSV(D3D12_DEPTH_S
 	return Retrive(desc, dsv_maps);
 }
 
-template<typename _type>	
-void Texture::DoHWCopyToTexture(_type& src,_type & dst, ResourceStateTransition src_st, ResourceStateTransition dst_st)
+template<typename _type>
+void Texture::DoHWCopyToTexture(_type& src, _type & dst, ResourceStateTransition src_st, ResourceStateTransition dst_st)
 {
 	auto& context = Context::Instance();
 	auto& cmd_list = context.GetCommandList(Device::Command_Render);
@@ -391,10 +420,10 @@ void Texture::DoHWCopyToTexture(_type& src,_type & dst, ResourceStateTransition 
 }
 
 template<typename _type>
-void Texture::DoHWCopyToSubTexture(_type & src, _type & target, 
-	uint32 dst_subres, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_z_offset, 
-	uint32 src_subres, uint16 src_x_offset, uint16 src_y_offset, uint16 src_z_offset, 
-	uint16 width, uint16 height, uint16 depth, 
+void Texture::DoHWCopyToSubTexture(_type & src, _type & target,
+	uint32 dst_subres, uint16 dst_x_offset, uint16 dst_y_offset, uint16 dst_z_offset,
+	uint32 src_subres, uint16 src_x_offset, uint16 src_y_offset, uint16 src_z_offset,
+	uint16 width, uint16 height, uint16 depth,
 	ResourceStateTransition src_st, ResourceStateTransition dst_st)
 {
 	auto& context = Context::Instance();
@@ -424,7 +453,7 @@ void Texture::DoHWCopyToSubTexture(_type & src, _type & target,
 		src.Resource(),
 		D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX,
 		src_subres };
-	D3D12_TEXTURE_COPY_LOCATION dst_location= {
+	D3D12_TEXTURE_COPY_LOCATION dst_location = {
 		target.Resource(),
 		D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX,
 		dst_subres };
@@ -502,8 +531,8 @@ void Texture2D::CopyToTexture(platform::Render::Texture2D & base_target)
 		auto num_mips = std::min(GetNumMipMaps(), target.GetNumMipMaps());
 		for (uint8 index = 0; index != array_size; ++index) {
 			for (uint8 level = 0; level != mipmap_size; ++level) {
-				Resize(target, 
-				{{{index, level}, 0,target.GetWidth(level)},0, target.GetHeight(level)},
+				Resize(target,
+				{ {{index, level}, 0,target.GetWidth(level)},0, target.GetHeight(level) },
 				{ {{index, level}, 0, GetWidth(level)},0, GetHeight(level) },
 					true);
 			}
@@ -549,7 +578,7 @@ void Texture3D::CopyToTexture(platform::Render::Texture3D & base_target)
 			for (uint8 level = 0; level != num_mips; ++level) {
 				Resize(target,
 				{ {{{index, level}, 0, target.GetWidth(level)},0, target.GetHeight(level)},0,target.GetDepth(level) },
-				Box3D(Texture2D::Box2D({{index, level}, 0, GetWidth(level) }, 0, GetHeight(level)), 0, GetDepth(level)),
+					Box3D(Texture2D::Box2D({ {index, level}, 0, GetWidth(level) }, 0, GetHeight(level)), 0, GetDepth(level)),
 					true);
 			}
 		}
@@ -596,7 +625,7 @@ void TextureCube::CopyToTexture(platform::Render::TextureCube & base_target)
 					Resize(target,
 					{ {{ { index, level }, 0,target.GetWidth(level) },0, target.GetHeight(level)},face },
 					{ {{ { index, level }, 0, GetWidth(level) },0, GetHeight(level) }, face
-				},
+					},
 						true);
 				}
 			}
@@ -612,9 +641,9 @@ void TextureCube::CopyToSubTexture(platform::Render::TextureCube & base_target,
 
 	if ((src.width == dst.width) && (src.height == dst.height) && (GetFormat() == target.GetFormat())) {
 		auto src_subres = CalcSubresource(src.level, src.array_index, 0,
-			GetNumMipMaps(), GetArraySize()*6);
+			GetNumMipMaps(), GetArraySize() * 6);
 		auto dst_subres = CalcSubresource(dst.level, dst.array_index, 0,
-			target.GetNumMipMaps(), target.GetArraySize()*6);
+			target.GetNumMipMaps(), target.GetArraySize() * 6);
 
 		DoHWCopyToSubTexture(*this, target,
 			dst_subres, dst.x_offset, dst.y_offset, 0,
@@ -628,6 +657,32 @@ void TextureCube::CopyToSubTexture(platform::Render::TextureCube & base_target,
 			true);
 	}
 }
+
+
+std::string const & Texture1D::Description() const
+{
+	// TODO FORMAT Width Infomation
+	return HWDescription();
+}
+
+std::string const & Texture2D::Description() const
+{
+	// TODO FORMAT Width Height Infomation
+	return HWDescription();
+}
+
+std::string const & Texture3D::Description() const
+{
+	// TODO FORMAT Width Height Depth Infomation
+	return HWDescription();
+}
+
+std::string const & TextureCube::Description() const
+{
+	// TODO FORMAT Size Infomation
+	return HWDescription();
+}
+
 //}
 
 #include "../CommonTextureImpl.hcc"

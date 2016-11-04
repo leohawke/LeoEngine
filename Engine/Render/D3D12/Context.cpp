@@ -139,22 +139,34 @@ namespace platform_ex {
 
 			Texture1D* Device::CreateTexture(uint16 width, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data)
 			{
-				return nullptr;
+				auto texture = new Texture1D(width, num_mipmaps, array_size, format,access,sample_info);
+				if (init_data !=platform::Render::delayptr)
+					texture->HWResourceCreate(init_data);
+				return texture;
 			}
 
 			Texture2D* Device::CreateTexture(uint16 width, uint16 height, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data)
 			{
-				return nullptr;
+				auto texture = new Texture2D(width,height, num_mipmaps, array_size, format, access, sample_info);
+				if (init_data != platform::Render::delayptr)
+					texture->HWResourceCreate(init_data);
+				return texture;
 			}
 
 			Texture3D* Device::CreateTexture(uint16 width, uint16 height, uint16 depth, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data)
 			{
-				return nullptr;
+				auto texture = new Texture3D(width,height,depth, num_mipmaps, array_size, format, access, sample_info);
+				if (init_data != platform::Render::delayptr)
+					texture->HWResourceCreate(init_data);
+				return texture;
 			}
 
 			TextureCube* Device::CreateTextureCube(uint16 size, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data)
 			{
-				return nullptr;
+				auto texture = new TextureCube(size, num_mipmaps, array_size, format, access, sample_info);
+				if (init_data != platform::Render::delayptr)
+					texture->HWResourceCreate(init_data);
+				return texture;
 			}
 
 			ID3D12Device*  Device::operator->() lnoexcept {

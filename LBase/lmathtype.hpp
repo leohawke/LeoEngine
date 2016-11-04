@@ -72,7 +72,7 @@ namespace leo {
 				return 2;
 			}
 
-			scalar_type operator[](std::size_t index) const noexcept {
+			const scalar_type& operator[](std::size_t index) const noexcept {
 				lassume(index < size());
 				return data[index];
 			}
@@ -127,7 +127,7 @@ namespace leo {
 				return 3;
 			}
 
-			scalar_type operator[](std::size_t index) const noexcept {
+			const scalar_type& operator[](std::size_t index) const noexcept {
 				lassume(index < size());
 				return data[index];
 			}
@@ -179,7 +179,7 @@ namespace leo {
 				return 4;
 			}
 
-			scalar_type operator[](std::size_t index) const noexcept {
+			const scalar_type& operator[](std::size_t index) const noexcept {
 				lassume(index < size());
 				return data[index];
 			}

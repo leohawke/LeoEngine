@@ -323,6 +323,7 @@ namespace tc {
 
 		int3& operator+=(const int3& rhs) {
 			*this = *this + rhs;
+			return *this;
 		}
 	};
 

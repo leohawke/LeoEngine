@@ -5,7 +5,7 @@
 using namespace platform_ex::Windows::D3D12;
 using BTexture = platform::Render::TextureCube;
 
-TextureCube::TextureCube(uint8 size_,
+TextureCube::TextureCube(uint16 size_,
 	uint8 numMipMaps, uint8 array_size_, EFormat format_,
 	uint32 access_hint, SampleDesc sample_info)
 	:BTexture(numMipMaps, array_size_, format_, access_hint, sample_info),
@@ -245,4 +245,11 @@ ViewSimulation* TextureCube::RetriveDepthStencilView(uint8 array_index, TextureC
 	desc.Texture2DArray.FirstArraySlice = array_index * 6 + face - CubeFaces::Positive_X;
 
 	return RetriveDSV(desc);
+}
+
+ViewSimulation* TextureCube::RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) {
+	throw leo::unsupported("TextureCube::RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level)");
+}
+ViewSimulation* TextureCube::RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) {
+	throw leo::unsupported("TextureCube::RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level)");
 }

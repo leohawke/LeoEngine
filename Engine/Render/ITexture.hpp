@@ -79,8 +79,7 @@ namespace platform {
 
 			uint32 GetAccessMode() const;
 
-			// Copies (and maybe scales to fit) the contents of this texture to another texture.
-			virtual void CopyToTexture(Texture& target) = 0;
+			
 
 			virtual void BuildMipSubLevels() = 0;
 
