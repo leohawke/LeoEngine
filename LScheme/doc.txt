@@ -1,0 +1,210 @@
+本文档适用于 LScheme 及实现
+
+@1 整体设计：
+
+@1.1 设计的基本原理、表达形式和抽象：
+
+设计的出发点：构建一个可用计算机实现的Scheme变种语言。
+
+目的：在以标准 C++ 环境（宿主实现）的程序框架中嵌入配置和脚本操作。
+
+具体目的：配置包括形如fxml的Shader配置,形如xaml的UI配置,形如xml/json中的应用程序配置，其脚本操作应该支持诸如构建系统,应用程序API等。
+
+本文描述基于此出发点的 LScheme(Leo Scheme) 及其参考实现。
+
+@1.1.1 诸如fxml的shader配置需求：
+
+一阶段:使用@宏支持的hlsl与LScheme记号混杂[主要目标]
+	参考：http://okmij.org/ftp/Scheme/SXML.html
+	警告：同SXML的@语义不同
+二阶段:从LScheme生成Shader字节码
+中间阶段:Shader配置所对应的cpp接口,以及Shader编译工具链
+
+@2 基本概念和约定：
+
+@2.1  LScheme 实现模型：
+LScheme 尽量规避cpp/scheme中的未定义/实现定义行为,其行为是机器实现约束的
+
+@2.2 实现的执行阶段(phase of execution) ：
+分析(analysis) 阶段：处理代码，取得适当的中间表示(intemediate representation) ；
+
+代码生成：生成可被其它阶段执行的代码，称为目标代码；
+
+运行：运行目标代码。
+
+@3 文法：
+
+@3.1 基本概念：
+
+字符(character) ：组成语言代码的最小实体。
+
+基本翻译单元(basic transation unit) ：任意连续字符的有限序列（可以是空序列）。
+
+翻译单元(translation unit) ：基本翻译单元的集合，之间满足由派生实现定义的规则。
+
+
+@3.2 字符集和字符串：
+
+字符集(character set) ：对一个实现而言不变的字符的有限集合。
+
+基本字符集(basic character set) ：实现环境必须支持的字符集。具体由派生实现定义。
+
+字符串(character string) ：字符集上的序列。
+
+其它同 ISO/IEC 14882:2011 对 character 和 character set 的有关定义。
+
+@3.3 词法规则(lexical rules) ：
+
+约定元语言语法 <x> 表示词法元素 x ， ::= 表示定义， | 表示析取。
+
+@3.3.1 基本词法构造：
+
+<token> ::= <literal> | <$punctuator> | <$identifier>
+
+记号(token) ：代码中非空白符分隔的字符序列。
+
+字面量(literal) ：一种记号，参见 @3.3.3 。
+
+标点(punctuator) ：由派生实现定义的特定字符序列的集合，起分隔其它记号的作用，具有一定语义功能。
+
+标识符(identifier) ：除字面量和标点以外的记号。
+可以保证 ISO/IEC 14882:2011 的 identifier 的定义，或在上述标识符中插入字符 $ 构造得到的标识符属于 NPL 标识符。
+
+
+@3.3.2 转义序列和字符序列：
+
+<char-escape-content-seq> ::= <$single-escape-char> | <$escape-prefix-char><$escape-content-seq>
+
+<char-seq> ::= <$literal-char> | \<char-escape-seq>
+
+
+@3.3.3 字面量：
+
+<literal-content> ::= <char-seq> | <literal-char-seq><literal-data>
+
+<code-literal> ::= '<literal-content>'
+
+<data-literal> ::= "<literal-content>"
+
+<string-literal> ::= <code-literal> | <data-literal>
+
+<literal> ::= <string-literal> | <$derived-impldef-literal>
+
+代码字面量(code literal) ：以 ' 作为起始和结束字符的记号。
+
+数据字面量(data literal) ：以 " 作为起始和结束字符的记号。
+
+字符串字面量(string literal) ：代码字面量或数据字面量。
+
+字面量：字符串字面量或其它由派生实现定义的记号。
+
+@3.3.4 词法分析规则：
+
+输入翻译单元，输出记号序列。
+
+输出规则（按优先顺序）：
+
+断行连接：反斜杠之后紧接换行符的双字符序列视为续行符，会被删除；
+
+反斜杠转义：连续两个反斜杠被替换为一个反斜杠；
+
+引号转义：反斜杠之后紧接单引号或双引号时，反斜杠会被删除；
+
+字面量：未被转义的单引号或双引号后进入字面量解析状态，无视以下规则，直接逐字节输出原始输入，直至遇到对应的另一个引号。
+
+窄字符空白符替换：单字节空格、水平/垂直制表符、换行符被替换为单一空格；回车符会被忽略；
+
+原始输出：其它字符序列逐字节输出。
+
+@3.4.1 基本语法构造：
+
+
+
+@3.4.2 表达式(expression) ：
+
+expression ::= atomic-expression | composite-expression | list-expression
+
+表达式是受表达式语法约束的记号序列。
+
+其中构成分别称为原子表达式(atomic expression) 、复合表达式(composite expression) 和列表表达式(list expression) 。
+
+构成表达式的表达式是前者的子表达式(subexpression) 。
+
+
+
+@3.4.2.1 原子表达式：
+
+atomic-expression ::= token
+
+原子表达式不能被表示为其它表达式的语法构成形式的复合。
+
+
+@3.4.2.2 复合表达式：
+
+composite-expression ::= token expression | expression token
+
+符合表达式是原子表达式和表达式的复合。
+
+同一个表达式可能被按原子表达式出现的位置以不同的方式规约为复合表达式。允许的规约复合表达式的方式由派生实现定义。
+
+
+@3.4.2.3 列表表达式：
+
+list-expression ::= <left-list-bound> expression <right-list-bound>
+
+<left-list-bound> ::= ( | <extended-left-list-bound>
+
+<right-list-bound> ::= ) | <extended-right-list-bound>
+
+列表表达式是使用 <left-list-bound> 和 <right-list-bound> 作为边界的表达式。
+
+<left-list-bound> 和 <right-list-bound> 是不同的标点。
+
+边界为 ( 和 ) 的表达式是基本列表表达式。其它可能的边界由派生实现定义，构成扩展列表表达式。
+
+@4 语义：
+
+@4.1 求值规则：
+
+求值应满足以下基本规则：
+
+值替换规则：表达式的值的计算通过已知的子表达式的值替换决定。
+
+
+@4.2 求值策略：
+
+组合严格、顺序求值和替换策略可得到不同性质的求值策略。
+
+除非派生实现约定，表达式求值策略是应用序。
+
+典型性质组合如下：
+
+严格求值：
+
+应用序(applicative order) ：以最左最内(leftmost innermost) 优先的顺序求值。
+
+按值传递(pass by value) ：使用值替换的严格求值。
+
+按引用传递(pass by reference) ：使用引用替换的严格求值。
+
+共享对象传递(pass by shared object) ：使用的共享机制以及对象和值或引用的关系由派生实现定义。
+
+部分求值(partial evaluation) ：允许求值分为多个阶段(phase) 。
+
+非严格求值：
+
+正规序(normal order) ：以最左最外(leftmost outmost) 优先的顺序求值。
+
+按名传递(pass by name) ：使用名称替换且保持作为名称的表达式最后被替换的求值。
+
+按需传递(pass by need) ：按名传递但允许合并作用相同的表达式。
+
+非决定性求值(@4.4.1) ：
+
+完全归约(full reduction) ：替换不受到作用之间的依赖的限制。
+
+按预期传递(pass by future) ：并发的按名传递，在需要使用参数的值时同步。
+
+最优求值(optimistic evaluation) ：部分子表达式在未指定时机部分求值的按需求值，若超出约定时限则放弃并回退到按需求值。
+
+

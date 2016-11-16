@@ -112,12 +112,6 @@ namespace leo
 
 
 	/*!
-	\brief 默认初始化标记。
-	\since build 1.4
-	*/
-	lconstexpr const struct default_init_t {} default_init{};
-
-	/*!
 	\brief 包装类类型的值的对象。
 	\warning 非虚析构。
 	*/
@@ -139,7 +133,7 @@ namespace leo
 			limpl(typename = exclude_self_t<boxed_value, _tParam>)>
 			lconstfn
 			boxed_value(_tParam&& arg)
-			lnoexcept(is_nothrow_constructible<_type, _tParam&&>())
+			lnoexcept(is_nothrow_constructible<_type, _tParam&&>::value)
 			: value(lforward(arg))
 		{}
 		template<typename _tParam1, typename _tParam2, typename... _tParams>

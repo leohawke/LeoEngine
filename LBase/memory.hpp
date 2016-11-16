@@ -8,7 +8,8 @@
 #ifndef LBase_memory_Hpp
 #define LBase_memory_Hpp 1
 
-#include "LBase/addressof.hpp" // for "addressof.hpp", and_,
+#include "LBase/exception.h"
+#include "LBase/placement.hpp" // for "addressof.hpp", and_,
 //	is_copy_constructible, is_class_type, cond_t, vdefer, detected_t,
 //	conditional, ::constfn_addressof, indirect_element_t,
 //	remove_reference_t, detected_or_t, is_void, remove_pointer_t,
@@ -96,8 +97,30 @@ namespace leo
 		};
 		//@}
 
+		template<typename _type, typename... _tParams>
+		LB_NORETURN _type*
+			try_new_impl(void*, _tParams&&...)
+		{
+			throw_invalid_construction();
+		}
+		template<typename _type, typename... _tParams>
+		auto
+			try_new_impl(nullptr_t, _tParams&&... args)
+			-> decltype(new _type(lforward(args)...))
+		{
+			return new _type(lforward(args)...);
+		}
+
 	} // namespace details;
 	//@}
+
+	template<typename _type, typename... _tParams>
+	_type*
+		try_new(_tParams&&... args)
+	{
+		return details::try_new_impl<_type>(nullptr,lforward(args)...);
+	}
+
 
 	/*!
 	\ingroup unary_type_traits
@@ -129,142 +152,6 @@ namespace leo
 		detected_t<details::nested_allocator_t, _type>, _tDefault>
 	{};
 	//@}
-
-
-	/*!
-	\brief 原地构造。
-	\tparam _tParams 用于构造对象的参数包类型。
-	\param args 用于构造对象的参数包。
-	\since build 1.4
-	*/
-	template<typename _type, typename... _tParams>
-	inline void
-		construct_in(_type& obj, _tParams&&... args)
-	{
-		::new(static_cast<void*>(static_cast<_type*>(
-			constfn_addressof(obj)))) _type(lforward(args)...);
-	}
-
-
-	//! \since build 1.4
-	//@{
-	//! \tparam _tIter 迭代器类型。
-	//@{
-	/*!
-	\tparam _tParams 用于构造对象的参数包类型。
-	\param args 用于构造对象的参数包。
-	\pre 断言：指定范围末尾以外的迭代器满足 <tt>!is_undereferenceable</tt> 。
-	*/
-	//@{
-	/*!
-	\brief 使用指定参数在迭代器指定的位置构造对象。
-	\param i 迭代器。
-	\note 显式转换为 void* 指针以实现标准库算法 uninitialized_* 实现类似的语义。
-	\see libstdc++ 5 和 Microsoft VC++ 2013 标准库在命名空间 std 内对指针类型的实现：
-	_Construct 模板。
-	*/
-	template<typename _tIter, typename... _tParams>
-	void
-		construct(_tIter i, _tParams&&... args)
-	{
-		using value_type = typename std::iterator_traits<_tIter>::value_type;
-
-		lconstraint(!is_undereferenceable(i));
-		construct_in<value_type>(*i, lforward(args)...);
-	}
-
-	/*!
-	\brief 使用指定的参数重复构造迭代器范围内的对象序列。
-	\note 参数被传递的次数和构造的对象数相同。
-	*/
-	template<typename _tIter, typename... _tParams>
-	void
-		construct_range(_tIter first, _tIter last, _tParams&&... args)
-	{
-		for (; first != last; ++first)
-			construct(first, lforward(args)...);
-	}
-	//@}
-
-	/*!
-	\brief 原地析构。
-	\tparam _tParams 用于构造对象的参数包类型。
-	\param args 用于构造对象的参数包。
-	\since build 1.4
-	*/
-	template<typename _type>
-	inline void
-		destruct_in(_type& obj)
-	{
-		obj.~_type();
-	}
-
-
-	/*!
-	\brief 析构迭代器指向的对象。
-	\param i 迭代器。
-	\pre 断言：<tt>!is_undereferenceable(i)</tt> 。
-	\see libstdc++ 5 和 Microsoft VC++ 2013 标准库在命名空间 std 内对指针类型的实现：
-	_Destroy 模板。
-	*/
-	template<typename _tIter>
-	void
-		destruct(_tIter i)
-	{
-		using value_type = typename std::iterator_traits<_tIter>::value_type;
-
-		lconstraint(!is_undereferenceable(i));
-		destruct_in<value_type>(*i);
-	}
-
-	/*!
-	\brief 析构迭代器范围内的对象序列。
-	\note 保证顺序析构。
-	\see libstdc++ 5 标准库在命名空间 std 内的实现： _Destroy 模板。
-	*/
-	template<typename _tIter>
-	void
-		destruct_range(_tIter first, _tIter last)
-	{
-		for (; first != last; ++first)
-			destruct(first);
-	}
-	//@}
-
-
-	/*!
-	\brief 在迭代器指定的未初始化的范围上构造对象。
-	\tparam _tFwd 输出范围前向迭代器类型。
-	\tparam _tParams 用于构造对象的参数包类型。
-	\param first 输出范围起始迭代器。
-	\param args 用于构造对象的参数包。
-	\note 参数被传递的次数和构造的对象数相同。
-	\note 接口不保证失败时的析构顺序。
-	*/
-	//@{
-	/*!
-	\param last 输出范围终止迭代器。
-	\note 和 std::unitialized_fill 类似，但允许指定多个初始化参数。
-	\see WG21 N4431 20.7.12.3[uninitialized.fill] 。
-	*/
-	template<typename _tFwd, typename... _tParams>
-	void
-		uninitialized_construct(_tFwd first, _tFwd last, _tParams&&... args)
-	{
-		auto i = first;
-
-		try
-		{
-			for (; i != last; ++i)
-				construct(i, lforward(args)...);
-		}
-		catch (...)
-		{
-			// NOTE: The order is unspecified.
-			destruct_range(first, i);
-			throw;
-		}
-	}
 
 	/*!
 	\tparam _tSize 范围大小类型。

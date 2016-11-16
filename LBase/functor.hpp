@@ -381,7 +381,6 @@ namespace leo {
 
 	  /*!
 	  \note LBase 扩展。
-	  \since build 668
 	  */
 	  //@{
 	  //! \brief 一元 & 操作。

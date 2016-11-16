@@ -10,11 +10,14 @@
 
 #include "LBase/typeinfo.h" //for "typeinfo.h“，cloneable,type_id_info,
 // leo::type_id,std::bad_cast
-#include "LBase/addressof.hpp" //for leo::addressof
+#include "LBase/memory.hpp" //for leo::addressof
 #include "LBase/utility.hpp" // "utility.hpp", for boxed_value,
 //	standard_layout_storage, aligned_storage_t, is_aligned_storable,
 //	exclude_self_t, enable_if_t, decay_t, lconstraint;
+#include "LBase/exception.h"
 #include "LBase/ref.hpp" // for is_reference_wrapper, unwrap_reference_t;
+#include "LBase/placement.hpp"
+#include <initializer_list>
 #include <memory> //std::unique_ptr
 
 namespace leo
@@ -26,40 +29,6 @@ namespace leo
 	*/
 	namespace any_ops
 	{
-
-		//! \since build 1.4
-		//@{
-		//! \brief 使用不满足构造限制检查导致的异常。
-		class LB_API invalid_construction : public std::invalid_argument
-		{
-		public:
-			invalid_construction();
-			//! \since build 1.4
-			invalid_construction(const invalid_construction&) = default;
-
-			/*!
-			\brief 虚析构：类定义外默认实现。
-			\since build 1.4
-			*/
-			~invalid_construction() override;
-		};
-
-		/*!
-		\brief 抛出 invalid_construction 异常。
-		\throw invalid_construction
-		\relates invalid_construction
-		*/
-		LB_NORETURN LB_API void
-			throw_invalid_construction();
-		//@}
-
-
-		//! \since build 1.4
-		template<typename>
-		struct in_place_t
-		{};
-
-
 		//! \since build 1.4
 		template<typename>
 		struct with_handler_t
@@ -722,7 +691,10 @@ namespace leo
 			}
 
 			LB_API const type_info&
-				type() const lnothrowv;
+				type() const lnothrowv
+			{
+				return *unchecked_access<const type_info*>(any_ops::get_type);
+			}
 
 			//! \since build 1.4
 			template<typename _type>
@@ -809,7 +781,7 @@ namespace leo
 		//! \since build 1.4
 		template<typename _type, typename... _tParams>
 		inline
-			any(any_ops::in_place_t<_type>, _tParams&&... args)
+			any(in_place_type_t<_type>, _tParams&&... args)
 			: any(any_ops::with_handler_t<
 				any_ops::value_handler<_type>>(), lforward(args)...)
 		{}
@@ -832,7 +804,7 @@ namespace leo
 		{}
 		template<typename _tHolder, typename... _tParams>
 		inline
-			any(any_ops::use_holder_t, any_ops::in_place_t<_tHolder>,
+			any(any_ops::use_holder_t, in_place_type_t<_tHolder>,
 				_tParams&&... args)
 			: any(any_ops::with_handler_t<any_ops::holder_handler<_tHolder>>(),
 				lforward(args)...)
@@ -921,7 +893,7 @@ namespace leo
 
 	public:
 		void
-			clear() lnothrow;
+			reset() lnothrow;
 
 		/*!
 		\note LBase 扩展。

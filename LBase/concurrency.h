@@ -194,7 +194,13 @@ namespace leo
 		\note 阻塞等待当前所有任务完成后重新创建。
 		*/
 		void
-			reset();
+			reset() 
+		{
+			reset(max_tasks);
+		}
+
+		void
+			reset(size_t);
 
 		using thread_pool::size;
 

@@ -219,8 +219,8 @@ ModelManifest.xml
 
 #LeoEngine 1.4 leo files
 Inter/
-LScheme/
 LScheme Test/
 LTest/
 *.opendb
 *.o
+*.a

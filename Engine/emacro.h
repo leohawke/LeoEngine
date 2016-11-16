@@ -11,12 +11,12 @@
 
 /*!
 \def LE_DLL
-\brief 使用 Render 动态链接库。
+\brief 使用 Engine 动态链接库。
 \since build 1.02
 */
 /*!
 \def LE_BUILD_DLL
-\brief 构建 Render 动态链接库。
+\brief 构建 Engine 动态链接库。
 \since build 1.02
 */
 /*!

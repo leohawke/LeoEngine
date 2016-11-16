@@ -22,6 +22,7 @@
 #include "lmathhalf.h"
 #include "Debug.h"
 
+#include <cmath>
 #include <algorithm> //std::max,std::min
 #include <cstring> //std::memcpy 
 #include <array> //std::array
@@ -804,18 +805,18 @@ namespace leo {
 			return float4(min(l.x, r.x), min(l.y, r.y), min(l.b, r.b), min(l.a, r.a));
 		}
 
-		using std::abs;
+		using std::fabs;
 
 		inline float2 abs(const float2& f2) noexcept {
-			return float2(abs(f2.x), abs(f2.y));
+			return float2(fabs(f2.x), fabs(f2.y));
 		}
 
 		inline float3 abs(const float3& f3) noexcept {
-			return float3(abs(f3.x), abs(f3.y), abs(f3.z));
+			return float3(fabs(f3.x), fabs(f3.y), fabs(f3.z));
 		}
 
 		inline float4 abs(const float4& f4) noexcept {
-			return float4(abs(f4.x), abs(f4.y), abs(f4.z), abs(f4.w));
+			return float4(fabs(f4.x), fabs(f4.y), fabs(f4.z), fabs(f4.w));
 		}
 	}
 }

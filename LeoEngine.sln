@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LTest", "LTest\LTest.vcxproj", "{C0772B63-3097-4CFB-A3B5-266D9144B6C4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LScheme", "LScheme\LScheme.vcxproj", "{596F0CDD-56FD-406E-A5E4-2D3D5EC7CA78}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,6 +43,18 @@ Global
 		{C0772B63-3097-4CFB-A3B5-266D9144B6C4}.Release|x64.Build.0 = Release|x64
 		{C0772B63-3097-4CFB-A3B5-266D9144B6C4}.Release|x86.ActiveCfg = Release|Win32
 		{C0772B63-3097-4CFB-A3B5-266D9144B6C4}.Release|x86.Build.0 = Release|Win32
+		{596F0CDD-56FD-406E-A5E4-2D3D5EC7CA78}.Debug|x64.ActiveCfg = Debug|x64
+		{596F0CDD-56FD-406E-A5E4-2D3D5EC7CA78}.Debug|x64.Build.0 = Debug|x64
+		{596F0CDD-56FD-406E-A5E4-2D3D5EC7CA78}.Debug|x64.Deploy.0 = Debug|x64
+		{596F0CDD-56FD-406E-A5E4-2D3D5EC7CA78}.Debug|x86.ActiveCfg = Debug|Win32
+		{596F0CDD-56FD-406E-A5E4-2D3D5EC7CA78}.Debug|x86.Build.0 = Debug|Win32
+		{596F0CDD-56FD-406E-A5E4-2D3D5EC7CA78}.Debug|x86.Deploy.0 = Debug|Win32
+		{596F0CDD-56FD-406E-A5E4-2D3D5EC7CA78}.Release|x64.ActiveCfg = Release|x64
+		{596F0CDD-56FD-406E-A5E4-2D3D5EC7CA78}.Release|x64.Build.0 = Release|x64
+		{596F0CDD-56FD-406E-A5E4-2D3D5EC7CA78}.Release|x64.Deploy.0 = Release|x64
+		{596F0CDD-56FD-406E-A5E4-2D3D5EC7CA78}.Release|x86.ActiveCfg = Release|Win32
+		{596F0CDD-56FD-406E-A5E4-2D3D5EC7CA78}.Release|x86.Build.0 = Release|Win32
+		{596F0CDD-56FD-406E-A5E4-2D3D5EC7CA78}.Release|x86.Deploy.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

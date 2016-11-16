@@ -10,19 +10,6 @@ namespace leo
 	namespace any_ops
 	{
 
-		invalid_construction::invalid_construction()
-			: invalid_argument("Violation on construction found.")
-		{}
-
-		invalid_construction::~invalid_construction() = default;
-
-		void
-			throw_invalid_construction()
-		{
-			throw invalid_construction();
-		}
-
-
 		holder::~holder() = default;
 
 	} // namespace any_ops;
@@ -106,12 +93,6 @@ namespace leo
 				std::swap(manager, a.manager);
 		}
 
-		const type_info&
-			any_base::type() const lnothrowv
-		{
-			return *unchecked_access<const type_info*>(any_ops::get_type);
-		}
-
 	} // namespace details;
 
 
@@ -128,9 +109,9 @@ namespace leo
 	}
 
 	void
-		any::clear() lnothrow
+		any::reset() lnothrow
 	{
 		if (manager)
-			any_base::clear();
+			clear();
 	}
 }

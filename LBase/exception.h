@@ -126,6 +126,26 @@ namespace leo
 	//@}
 
 
+	class LB_API invalid_construction : public std::invalid_argument
+	{
+	public:
+		invalid_construction();
+		invalid_construction(const invalid_construction&) = default;
+
+		/*!
+		\brief 虚析构：类定义外默认实现。
+		*/
+		~invalid_construction() override;
+	};
+
+	/*!
+	\brief 抛出 invalid_construction 异常。
+	\throw invalid_construction
+	\relates invalid_construction
+	*/
+	LB_NORETURN LB_API void
+		throw_invalid_construction();
+
 	/*!
 	\brief 抛出错误： std::system_error 或允许相同构造函数参数的异常。
 	\throw _type 使用参数构造的异常。

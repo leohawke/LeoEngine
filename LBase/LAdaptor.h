@@ -1,10 +1,10 @@
 /*!	\file LAdaptor.h
-\ingroup Core
+\ingroup FrameWork
 \brief 外部库关联。
 */
 
-#ifndef LEO_Core_LAdaptor_h
-#define LEO_Core_LAdaptor_h 1
+#ifndef FrameWork_LAdaptor_h
+#define FrameWork_LAdaptor_h 1
 
 #include<LBase/algorithm.hpp>
 #include<LBase/functional.hpp>
@@ -14,9 +14,22 @@
 #include<LBase/FFileIO.h>
 
 namespace leo {
+	using platform::list;
+	using platform::vector;
+	using platform::unordered_map;
+	using platform::multimap;
+
+	using platform::forward_as_tuple;
+	using platform::get;
+	using platform::ignore;
+	using platform::make_pair;
+	using platform::make_tuple;
+	using platform::pair;
+	using platform::tie;
+	using platform::tuple;
+	using platform::tuple_cat;
 
 	using platform::basic_string;
-
 	using platform::string;
 	using platform::wstring;
 	using platform::sfmt;

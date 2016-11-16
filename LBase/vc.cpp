@@ -3,8 +3,11 @@
 #include "LBase/cache.hpp"
 #include "LBase/concurrency.h"
 #include "LBase/lmathtype.hpp"
+#include "LBase/examiner.hpp"
+#include "LBase/cast.hpp"
+#include "LBase/set.hpp"
 
-decltype(auto) foo() {
+static decltype(auto) foo() {
 	return 0;
 }
 

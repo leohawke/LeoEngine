@@ -72,7 +72,37 @@ namespace leo
 
 
 	  /*!
-	  \since build 651
+	  \note 使用 ADL get 。
+	  \see WG21 N4606 20.5.2.5[tuple.apply]/2 。
+	  \see WG21 P0209R2 。
+	  */
+	  //@{
+	namespace details
+	{
+
+		template<typename _type, class _tTuple, size_t... _vIdx>
+		lconstfn _type
+			make_from_tuple_impl(_tTuple&& t, index_sequence<_vIdx...>)
+		{
+			using std::get;
+
+			return _type(get<_vIdx>(lforward(t))...);
+		}
+
+	} // namespace details;
+
+	  //! \brief 从元组构造指定类型的值。
+	template<typename _type, class _tTuple>
+	lconstfn _type
+		make_from_tuple(_tTuple&& t)
+	{
+		return details::make_from_tuple_impl<_type>(lforward(t),
+			make_index_sequence<std::tuple_size<decay_t<_tTuple>>::value>());
+	}
+	//@}
+
+
+	  /*!
 	  \see WG21 P0088R0 。
 	  */
 	  //@{

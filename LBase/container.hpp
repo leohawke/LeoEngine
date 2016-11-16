@@ -924,28 +924,78 @@ namespace leo
 		std::piecewise_construct_t, std::tuple<_tKey&&>, std::tuple<_tParams&&...>>;
 
 
+	namespace details
+	{
+		template<class _tAssocCon>
+		struct assoc_con_traits
+		{
+			//@{
+			template<typename _tKey, typename... _tParams>
+			static inline typename _tAssocCon::iterator
+				emplace_hint_in_place(false_, _tAssocCon& con,
+					typename _tAssocCon::const_iterator hint, _tKey&&, _tParams&&... args)
+			{
+				return con.emplace_hint(hint, lforward(args)...);
+			}
+			template<typename _tKey, typename... _tParams>
+			static inline typename _tAssocCon::iterator
+				emplace_hint_in_place(true_, _tAssocCon& con,
+					typename _tAssocCon::const_iterator hint, _tKey&& k, _tParams&&... args)
+			{
+				return con.emplace_hint(hint, std::piecewise_construct,
+					std::forward_as_tuple(lforward(k)),
+					std::forward_as_tuple(lforward(args)...));
+			}
+
+			static inline const typename _tAssocCon::key_type&
+				extract_key(false_, const typename _tAssocCon::value_type& val)
+			{
+				return val;
+			}
+			static inline const typename _tAssocCon::key_type&
+				extract_key(true_, const typename _tAssocCon::value_type& val)
+			{
+				return val.first;
+			}
+			//@}
+		};
+
+		template<class _type>
+		using mapped_type_t = typename _type::mapped_type;
+
+
+		template<class _tAssocCon, typename _tKey, typename _tParam>
+		std::pair<typename _tAssocCon::iterator, bool>
+			insert_or_assign(std::pair<typename _tAssocCon::iterator, bool> pr,
+				_tAssocCon& con, _tKey&& k, _tParam&& arg)
+		{
+			if (pr.first)
+				pr.first
+				= emplace_hint_in_place(con, pr.second, lforward(k), lforward(arg));
+			else
+				pr.second = lforward(arg);
+			return pr;
+		}
+
+	} // unnamed namespace details;
+
 	/*!
 	\brief 带有提示的原地插入构造。
 	\since build 1.4
 	*/
 	//@{
+	/*!
+	\brief 带有提示的原地插入构造。
+	\since build 708
+	*/
 	template<class _tAssocCon, typename _tKey, typename... _tParams>
-	inline limpl(enable_if_t)<is_piecewise_mapped<_tAssocCon, _tKey,
-		_tParams...>::value, typename _tAssocCon::iterator>
+	inline auto
 		emplace_hint_in_place(_tAssocCon& con, typename _tAssocCon::const_iterator hint,
-			_tKey&& k, _tParams&&... args)
+			_tKey&& k, _tParams&&... args) -> typename _tAssocCon::iterator
 	{
-		return con.emplace_hint(hint, std::piecewise_construct,
-			std::forward_as_tuple(lforward(k)),
-			std::forward_as_tuple(lforward(args)...));
-	}
-	template<class _tAssocCon, typename _tKey, typename... _tParams>
-	inline limpl(enable_if_t)<!is_piecewise_mapped<_tAssocCon, _tKey,
-		_tParams...>::value, typename _tAssocCon::iterator>
-		emplace_hint_in_place(_tAssocCon& con, typename _tAssocCon::const_iterator hint,
-			_tKey&&, _tParams&&... args)
-	{
-		return con.emplace_hint(hint, lforward(args)...);
+		return details::assoc_con_traits<_tAssocCon>::emplace_hint_in_place(
+			is_piecewise_mapped<_tAssocCon, _tKey, _tParams...>(), con, hint,
+			lforward(k), lforward(args)...);
 	}
 	//@}
 
@@ -970,19 +1020,7 @@ namespace leo
 		}
 
 
-		//! \since build 1.4
-		template<class _tAssocCon, typename _tKey, typename _tParam>
-		std::pair<typename _tAssocCon::iterator, bool>
-			insert_or_assign(std::pair<typename _tAssocCon::iterator, bool> pr,
-				_tAssocCon& con, _tKey&& k, _tParam&& arg)
-		{
-			if (pr.first)
-				pr.first
-				= emplace_hint_in_place(con, pr.second, lforward(k), lforward(arg));
-			else
-				pr.second = lforward(arg);
-			return pr;
-		}
+		
 
 	} // unnamed namespace details;
 

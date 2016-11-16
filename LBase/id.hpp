@@ -134,15 +134,5 @@ namespace leo {
 	using ucsint_t = std::char_traits<ucs4_t>::int_type; //!< UCS 整数类型。
 }
 
-//Object Model
-namespace leo
-{
-	/*!
-	\brief 指定对参数指定类型的成员具有所有权的标签。
-	*/
-	template<typename>
-	struct OwnershipTag
-	{};
-}
 
 #endif

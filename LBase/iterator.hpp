@@ -14,8 +14,6 @@
 //	make_index_sequence, index_sequence, std::get;
 #include "ref.hpp" // for lref;
 
-
-
 namespace leo
 {
 	template<typename _type, typename _tIter = _type*,
@@ -124,75 +122,233 @@ namespace leo
 		}
 	};
 
-	template<typename _tIter, typename _fTransformer>
-	//转换迭代器
-	class transformed_iterator
-		: public pointer_classify<_tIter>::type
+	namespace details 
 	{
+		template<typename _tIter, typename _fTrans, typename _tReference>
+		struct transit_traits
+		{
+			using iterator_type = _t<pointer_classify<_tIter>>;
+			using iterator_category
+				= typename std::iterator_traits<iterator_type>::iterator_category;
+			using transformed_type = result_of_t<_fTrans&(_tIter&)>;
+			using difference_type
+				= typename std::iterator_traits<iterator_type>::difference_type;
+			using reference
+				= cond_t<is_same<_tReference, void>, transformed_type, _tReference>;
+			/*!
+			\todo 测试 operator-> 并支持代理指针。
+			*/
+			using pointer = decay_t<reference>*;
+		};
+	}
+
+	//变换迭代器
+	template<typename _tIter, typename _fTrans, typename _tReference = void>
+	class transformed_iterator : public iterator_operators_t<transformed_iterator<
+		_tIter, _fTrans, _tReference>, details::transit_traits<_tIter, _fTrans,
+		_tReference>>, private totally_ordered<transformed_iterator<_tIter, _fTrans,
+		_tReference>, typename
+		details::transit_traits<_tIter, _fTrans, _tReference>::iterator_type>
+	{
+		static_assert(is_decayed<_tIter>(), "Invalid type found.");
+		static_assert(is_decayed<_fTrans>(), "Invalid type found.");
+
+		template<typename, typename, typename>
+		friend class transformed_iterator;
+
+	private:
+		using impl_traits
+			= details::transit_traits<_tIter, _fTrans, _tReference>;
+
 	public:
-		using iterator_type = typename
-			pointer_classify<remove_reference_t<_tIter>>::type;
-		using transformer_type = decay_t<_fTransformer>;
-		using transformed_type = result_of_t<_fTransformer&(_tIter&)>;
-		using difference_type
-			= typename pointer_classify<_tIter>::type::difference_type;
-		using reference = decltype(std::declval<transformed_type>());
+		/*!
+		\brief 原迭代器类型。
+		*/
+		using iterator_type = typename impl_traits::iterator_type;
+		using transformer_type = _fTrans;
+		//@{
+		using iterator_category = typename impl_traits::iterator_category;
+		using value_type = typename impl_traits::transformed_type;
+		//@}
+		using transformed_type = typename impl_traits::transformed_type;
+		using difference_type = typename impl_traits::difference_type;
+		using pointer = typename impl_traits::pointer;
+		/*!
+		\note 仅当参数 _tReference 为引用时可符合 ISO C++ 对 ForwardIterator 的要求。
+		*/
+		using reference = typename impl_traits::reference;
 
 	protected:
-		//note 当为空类时作为第一个成员可启用空基类优化。
+		//! \note 当为空类时作为第一个成员可启用空基类优化。
 		mutable transformer_type transformer;
+
+	private:
+		iterator_type transformed;
 
 	public:
 		transformed_iterator() = default;
-		template<typename _tIterOrig, typename _tTran,
-			limpl(typename = exclude_self_t<transformed_iterator, _tIterOrig>)>
+		// XXX: This is not actually related to substitution order. For other cases,
+		//	use of multiple template parameters to simplify after CWG 1227 resolved
+		//	by C++14 may be necessary.
+		template<typename _tIter2,
+			limpl(typename = exclude_self_t<transformed_iterator, _tIter2>,
+				typename = enable_if_convertible_t<_tIter2&&, iterator_type>)>
 			explicit lconstfn
-			transformed_iterator(_tIterOrig&& i, _tTran f = {})
-			: iterator_type(lforward(i)), transformer(f)
+			transformed_iterator(_tIter2&& i)
+			: transformer(), transformed(lforward(i))
 		{}
+		template<typename _tIter2, typename _fTrans2 = _fTrans,
+			limpl(typename = exclude_self_t<transformed_iterator, _tIter2>)>
+			explicit lconstfn
+			transformed_iterator(_tIter2&& i, _fTrans2 f)
+			: transformer(f), transformed(lforward(i))
+		{}
+		template<typename _tIter2, typename _fTrans2, typename _tRef2,
+			limpl(typename = enable_if_t<and_<not_<is_convertible<const
+				transformed_iterator<_tIter2, _fTrans2, _tRef2>&, iterator_type>>,
+				is_constructible<_tIter, const _tIter2&>,
+				is_constructible<_fTrans, const _fTrans2&>>::value>)>
+			lconstfn
+			transformed_iterator(
+				const transformed_iterator<_tIter2, _fTrans2, _tRef2>& i)
+			: transformer(i.transformer), transformed(i.get())
+		{}
+		template<typename _tIter2, typename _fTrans2, typename _tRef2,
+			limpl(typename = enable_if_t<and_<not_<is_convertible<
+				transformed_iterator<_tIter2, _fTrans2, _tRef2>&&, iterator_type>>,
+				is_constructible<_tIter, _tIter2&&>,
+				is_constructible<_fTrans, _fTrans2&&>>::value>)>
+			lconstfn
+			transformed_iterator(transformed_iterator<_tIter2, _fTrans2, _tRef2>&& i)
+			: transformer(std::move(i.transformer)), transformed(i.get())
+		{}
+		//@{
 		transformed_iterator(const transformed_iterator&) = default;
-
+#if LB_IMPL_MSCPP
+		//! \since build 503 as workaround for Visual C++ 2013
+		transformed_iterator(transformed_iterator&& i)
+			: transformer(std::move(i.transformer))
+		{}
+#else
 		transformed_iterator(transformed_iterator&&) = default;
+#endif
+		//@}
 
-		inline reference
+		transformed_iterator&
+			operator=(const transformed_iterator&) = default;
+		transformed_iterator&
+			operator=(transformed_iterator&&) = default;
+
+		friend transformed_iterator&
+			operator+=(transformed_iterator& i, difference_type n)
+			lnoexcept(noexcept(decltype(i)(i)) && noexcept(i.get() += n))
+		{
+			i.get() += n;
+			return i;
+		}
+
+		friend transformed_iterator&
+			operator-=(transformed_iterator& i, difference_type n)
+			lnoexcept(noexcept(decltype(i)(i)) && noexcept(i.get() -= n))
+		{
+			i.get() -= n;
+			return i;
+		}
+
+		reference
 			operator*() const
+			lnoexcept_spec(reference(std::declval<transformed_iterator&>().
+				transformer(std::declval<transformed_iterator&>().get())))
 		{
-			return lforward(transformer(get()));
+			return transformer(get());
 		}
 
-		template<typename _tDiff>
-		enable_if_t<is_convertible<decltype(
-			std::declval<iterator_type&>()[_tDiff()]), reference>::value, reference>
-			operator[](_tDiff n)
+		transformed_iterator&
+			operator++()
 		{
-			return get()[difference_type(n)];
-		}
-
-		inline
-			operator iterator_type&()
-		{
+			++get();
 			return *this;
 		}
 
-		lconstfn
-			operator const iterator_type&() const
+		transformed_iterator&
+			operator--()
 		{
+			--get();
 			return *this;
 		}
 
-		inline iterator_type&
-			get()
+		//@{
+		template<limpl(typename = void)>
+		friend lconstfn bool
+			operator==(const transformed_iterator& x, const transformed_iterator& y)
+			lnoexcept_spec(bool(x.get() == y.get()))
 		{
-			return *this;
+			return x.get() == y.get();
+		}
+		template<limpl(typename = void)>
+		friend lconstfn bool
+			operator==(const transformed_iterator& x, const iterator_type& y)
+			lnoexcept_spec(bool(x.get() == y))
+		{
+			return x.get() == y;
 		}
 
+		template<limpl(typename = void)>
+		friend lconstfn bool
+			operator<(const transformed_iterator& x, const transformed_iterator& y)
+			lnoexcept_spec(bool(x.get() < y.get()))
+		{
+			return bool(x.get() < y.get());
+		}
+		template<limpl(typename = void)>
+		friend lconstfn bool
+			operator<(const transformed_iterator& x, const iterator_type& y)
+			lnoexcept_spec(bool(x.get() < y))
+		{
+			return bool(x.get() < y);
+		}
+
+		template<limpl(typename = void)>
+		friend lconstfn difference_type
+			operator-(const transformed_iterator& x, const transformed_iterator& y)
+			lnoexcept_spec(difference_type(x.get() - y.get()))
+		{
+			return difference_type(x.get() - y.get());
+		}
+		template<limpl(typename = void)>
+		friend lconstfn difference_type
+			operator-(const transformed_iterator& x, const iterator_type& y)
+			lnoexcept_spec(difference_type(x.get() - y))
+		{
+			return difference_type(x.get() - y);
+		}
+		template<limpl(typename = void)>
+		friend lconstfn difference_type
+			operator-(const iterator_type& x, const transformed_iterator& y)
+			lnoexcept_spec(difference_type(x - y.get()))
+		{
+			return difference_type(x - y.get());
+		}
+		//@}
+
+		//@{
+		//! \brief 取原迭代器引用。
+		lconstfn_relaxed iterator_type&
+			get() lnothrow
+		{
+			return transformed;
+		}
+
+		//! \brief 取原迭代器 const 引用。
 		lconstfn const iterator_type&
-			get() const
+			get() const lnothrow
 		{
-			return *this;
+			return transformed;
 		}
+		//@}
 
-		transformer_type&
+		//@{
+		lconstfn_relaxed transformer_type&
 			get_transformer() lnothrow
 		{
 			return transformer;
@@ -202,102 +358,8 @@ namespace leo
 		{
 			return transformer;
 		}
+		//@}
 	};
-
-	template<typename _type, typename _fTransformer>
-	inline bool
-		operator==(const transformed_iterator<_type, _fTransformer>& x,
-		const transformed_iterator<_type, _fTransformer>& y)
-	{
-		return x.get() == y.get();
-	}
-
-	template<typename _type, typename _fTransformer>
-	inline bool
-		operator!=(const transformed_iterator<_type, _fTransformer>& x,
-		const transformed_iterator<_type, _fTransformer>& y)
-	{
-		return !(x == y);
-	}
-
-	template<typename _type, typename _fTransformer>
-	inline transformed_iterator<_type, _fTransformer>&
-		operator+=(transformed_iterator<_type, _fTransformer>& i,
-		typename transformed_iterator<_type, _fTransformer>::difference_type n)
-	{
-		i.get() += n;
-		return i;
-	}
-
-	template<typename _type, typename _fTransformer>
-	inline transformed_iterator<_type, _fTransformer>&
-		operator-=(transformed_iterator<_type, _fTransformer>& i,
-		typename transformed_iterator<_type, _fTransformer>::difference_type n)
-	{
-		i.get() -= n;
-		return i;
-	}
-
-	template<typename _type, typename _fTransformer>
-	transformed_iterator<_type, _fTransformer>
-		operator+(const transformed_iterator<_type, _fTransformer>& i,
-		typename transformed_iterator<_type, _fTransformer>::difference_type n)
-	{
-		auto it(i);
-
-		it += n;
-		return it;
-	}
-
-	template<typename _type, typename _fTransformer>
-	transformed_iterator<_type, _fTransformer>
-		operator-(const transformed_iterator<_type, _fTransformer>& i,
-		typename transformed_iterator<_type, _fTransformer>::difference_type n)
-	{
-		auto it(i);
-
-		it -= n;
-		return it;
-	}
-	template<typename _type, typename _fTransformer>
-	typename transformed_iterator<_type, _fTransformer>::difference_type
-		operator-(const transformed_iterator<_type, _fTransformer>& x,
-		const transformed_iterator<_type, _fTransformer>& y)
-	{
-		return x.get() - y.get();
-	}
-
-	template<typename _type, typename _fTransformer>
-	inline bool
-		operator<(const transformed_iterator<_type, _fTransformer>& x,
-		const transformed_iterator<_type, _fTransformer>& y)
-	{
-		return bool(x.get() < y.get());
-	}
-
-	template<typename _type, typename _fTransformer>
-	inline bool
-		operator<=(const transformed_iterator<_type, _fTransformer>& x,
-		const transformed_iterator<_type, _fTransformer>& y)
-	{
-		return !(y < x);
-	}
-
-	template<typename _type, typename _fTransformer>
-	inline bool
-		operator>(const transformed_iterator<_type, _fTransformer>& x,
-		const transformed_iterator<_type, _fTransformer>& y)
-	{
-		return y < x;
-	}
-
-	template<typename _type, typename _fTransformer>
-	inline bool
-		operator>=(const transformed_iterator<_type, _fTransformer>& x,
-		const transformed_iterator<_type, _fTransformer>& y)
-	{
-		return !(x < y);
-	}
 
 	template<typename _tIter, typename _fTransformer>
 	inline transformed_iterator<decay_t<_tIter>,
@@ -658,7 +720,7 @@ namespace leo
 			decltype(*std::declval<iterator_type&>())>::value, int >>
 			explicit
 			operator bool() const
-			//	operator bool() const ynoexcept((!is_undereferenceable(std::declval<
+			//	operator bool() const lnoexcept((!is_undereferenceable(std::declval<
 			//		iterator_type&>()) && bool(*std::declval<iterator_type&>())))
 		{
 			return !is_undereferenceable(iter) && bool(*iter);

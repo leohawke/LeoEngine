@@ -251,6 +251,31 @@ namespace leo {
 
 	} // inline namespace cpp2014;
 
+
+#define LB_Impl_DeclIntT(_n, _t) \
+	template<_t _vInt> \
+	using _n = std::integral_constant<_t, _vInt>;
+#define LB_Impl_DeclIntTDe(_t) LB_Impl_DeclIntT(_t##_, _t)
+
+	LB_Impl_DeclIntTDe(bool)
+		LB_Impl_DeclIntTDe(char)
+		LB_Impl_DeclIntTDe(int)
+		LB_Impl_DeclIntT(llong_, long long)
+		LB_Impl_DeclIntTDe(long)
+		LB_Impl_DeclIntTDe(short)
+		LB_Impl_DeclIntT(ullong_, unsigned long long)
+		LB_Impl_DeclIntT(ulong_, unsigned long)
+		LB_Impl_DeclIntT(uint_, unsigned)
+		LB_Impl_DeclIntT(ushort_, unsigned short)
+		LB_Impl_DeclIntTDe(size_t)
+		LB_Impl_DeclIntTDe(ptrdiff_t)
+
+#undef LB_Impl_DeclIntTDe
+#undef LB_Impl_DeclIntT
+
+	using true_ = bool_<true>;
+	using false_ = bool_<false>;
+
 #if __cpp_lib_bool_constant >= 201505
 	using std::bool_constant;
 #else

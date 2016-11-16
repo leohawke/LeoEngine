@@ -893,7 +893,6 @@ namespace leo
 		using call_projection<_fCallable, make_index_sequence<_vLen>>::call;
 		/*!
 		\note 为避免歧义，不直接使用 using 声明。
-		\since build 657
 		*/
 		template<typename... _tParams>
 		static auto

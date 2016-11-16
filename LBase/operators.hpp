@@ -377,8 +377,12 @@ LB_Impl_Operators_bin_ts_four(_n,LB_Impl_Operators_cmpf, inline, no_constfn, _op
 		{
 			// TODO: Add non-const overloaded version? SFINAE?
 			// TODO: Use '_tOpt'.
-			lconstfn decltype(leo::constfn_addressof(std::declval<const _type2&>()))
-				operator->() const lnoexcept_spec(*std::declval<const _type&>())
+			
+			lconstfn identity_t<decltype(leo::constfn_addressof(std::declval<const _type2&>()))>
+				operator->() const 
+#ifndef LB_IMPL_MSCPP
+				lnoexcept_spec(*std::declval<const _type&>())
+#endif
 			{
 				return leo::constfn_addressof(*static_cast<const _type&>(*this));
 			}

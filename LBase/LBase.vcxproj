@@ -25,6 +25,7 @@
     <ClInclude Include="any_iterator.hpp" />
     <ClInclude Include="array.hpp" />
     <ClInclude Include="cache.hpp" />
+    <ClInclude Include="cast.hpp" />
     <ClInclude Include="cctype.h" />
     <ClInclude Include="CHRLib\CharacterMapping.h" />
     <ClInclude Include="CHRLib\CharacterProcessing.h" />
@@ -40,6 +41,7 @@
     <ClInclude Include="Debug.h" />
     <ClInclude Include="deref_op.hpp" />
     <ClInclude Include="enum.hpp" />
+    <ClInclude Include="examiner.hpp" />
     <ClInclude Include="exception.h" />
     <ClInclude Include="FCommon.h" />
     <ClInclude Include="FContainer.h" />
@@ -60,6 +62,7 @@
     <ClInclude Include="LConsole.h" />
     <ClInclude Include="LCoreUtilities.h" />
     <ClInclude Include="ldef.h" />
+    <ClInclude Include="LFunc.hpp" />
     <ClInclude Include="lmathhalf.h" />
     <ClInclude Include="lmathtype.hpp" />
     <ClInclude Include="LException.h" />
@@ -67,18 +70,21 @@
     <ClInclude Include="linttype.hpp" />
     <ClInclude Include="lmacro.h" />
     <ClInclude Include="lmemory.hpp" />
+    <ClInclude Include="LPath.hpp" />
     <ClInclude Include="LShellDefinition.h" />
     <ClInclude Include="MCF\Abstract.hpp" />
     <ClInclude Include="memory.hpp" />
     <ClInclude Include="Mutex.h" />
     <ClInclude Include="NativeAPI.h" />
     <ClInclude Include="operators.hpp" />
+    <ClInclude Include="placement.hpp" />
     <ClInclude Include="Platform.h" />
     <ClInclude Include="pointer.hpp" />
     <ClInclude Include="pseudo_mutex.h" />
     <ClInclude Include="range.hpp" />
     <ClInclude Include="ref.hpp" />
     <ClInclude Include="scope_gurad.hpp" />
+    <ClInclude Include="set.hpp" />
     <ClInclude Include="string.hpp" />
     <ClInclude Include="sutility.h" />
     <ClInclude Include="tuple.hpp" />

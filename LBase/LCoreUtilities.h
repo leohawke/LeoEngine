@@ -3,8 +3,8 @@
 \brief 核心实用模块。
 */
 
-#ifndef LEO_Core_LCoreUtilities_h
-#define LEO_Core_LCoreUtilities_h 1
+#ifndef FrameWork__LCoreUtilities_h
+#define FrameWork__LCoreUtilities_h 1
 
 #include <LBase/LException.h>
 #include <LBase/algorithm.hpp>

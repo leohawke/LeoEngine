@@ -1,10 +1,10 @@
 /*!	\file LConsole.h
-\ingroup Core
-\brief 核心实用模块。
+\ingroup LBase
+\brief 控制台。
 */
 
-#ifndef LEO_Core_LConsole_h
-#define LEO_Core_LConsole_h 1
+#ifndef FrameWork_LConsole_h
+#define FrameWork_LConsole_h 1
 
 namespace leo
 {

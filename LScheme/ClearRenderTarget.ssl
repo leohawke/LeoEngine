@@ -1,0 +1,14 @@
+;Temporary
+(shader
+	(cb0 float4 color)
+	(cb1 (matrix proj)
+		 (matrix view)
+	)
+	(vsmain (vs (: (float4 x) POSITION) SV_POSITION
+		(mul x proj view)
+	))
+	(psmain (ps (: (float4 x) SV_POSITION) SV_Target
+		color
+	))
+	(pass Clear vsmain psmain)
+)

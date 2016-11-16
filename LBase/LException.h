@@ -1,10 +1,10 @@
 /*!	\file LException.h
-\ingroup Core
+\ingroup FrameWork
 \brief 异常处理模块。
 */
 
-#ifndef LEO_Core_LException_h
-#define LEO_Core_LException_h 1
+#ifndef FrameWork__LException_h
+#define FrameWork__LException_h 1
 
 #include <exception>
 #include <stdexcept>
