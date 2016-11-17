@@ -77,6 +77,7 @@
     <ClInclude Include="Mutex.h" />
     <ClInclude Include="NativeAPI.h" />
     <ClInclude Include="operators.hpp" />
+    <ClInclude Include="optional.hpp" />
     <ClInclude Include="placement.hpp" />
     <ClInclude Include="Platform.h" />
     <ClInclude Include="pointer.hpp" />
@@ -247,6 +248,7 @@
       <SDLCheck>true</SDLCheck>
       <DisableSpecificWarnings>4180</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

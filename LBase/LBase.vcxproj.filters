@@ -142,6 +142,7 @@
     <ClInclude Include="LFunc.hpp">
       <Filter>Framework</Filter>
     </ClInclude>
+    <ClInclude Include="optional.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CHRLib\CharacterProcessing.cpp">

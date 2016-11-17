@@ -14,7 +14,7 @@
 #include <LBase/operators.hpp>
 #include <LBase/functional.hpp>
 
-#include <optional>
+#include <LBase/optional.hpp>
 
 namespace leo
 {
@@ -262,7 +262,7 @@ namespace leo
 	//! \brief 可选结果组合调用器。
 	template<typename _type>
 	using GOptionalLastValueInvoker = GCombinerInvoker<cond_t<std::is_void<
-		_type>, void, optional<_type>>, optional_last_value<_type>>;
+		_type>, void, optional<_type>>,optional_last_value<_type>>;
 
 
 
