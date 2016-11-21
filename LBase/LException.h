@@ -44,7 +44,7 @@ namespace leo
 			/*!
 			\brief 虚析构：类定义外默认实现。
 			*/
-			~LoggedEvent() override;
+		virtual	~LoggedEvent() override;
 
 		RecordLevel GetLevel() const lnothrow;
 	};
