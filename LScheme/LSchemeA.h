@@ -77,7 +77,6 @@ namespace scheme {
 		/*!
 		\brief 变换节点为语法分析树叶节点。
 		\note 可选参数指定结果名称。
-		\since build 598
 		*/
 		LS_API ValueNode
 			TransformToSyntaxNode(const ValueNode&, const string& = {});
@@ -87,24 +86,21 @@ namespace scheme {
 		\brief 转义 LSLA 节点字面量。
 		\return 调用 EscapeLiteral 转义访问字符串的结果。
 		\exception leo::bad_any_cast 异常中立：由 Access 抛出。
-		\since build 597
 		*/
 		LS_API string
 			EscapeNodeLiteral(const ValueNode&);
 
 		/*!
 		\brief 转义 LSLA 节点字面量。
-		\return 参数为控节点则空串，否则调用 Literalize 字面量化 EscapeNodeLiteral 的结果。
+		\return 参数为空节点则空串，否则调用 Literalize 字面量化 EscapeNodeLiteral 的结果。
 		\exception leo::bad_any_cast 异常中立：由 EscapeNodeLiteral 抛出。
 		\sa EscapeNodeLiteral
-		\since build 598
 		*/
 		LS_API string
 			LiteralizeEscapeNodeLiteral(const ValueNode&);
 
 		/*!
 		\brief 解析 LSLA 节点字符串。
-		\since build 508
 
 		以 string 类型访问节点，若失败则结果为空串。
 		*/
@@ -114,12 +110,10 @@ namespace scheme {
 
 		/*!
 		\brief 插入语法子节点。
-		\since build 599
 
 		在指定的节点插入以节点大小字符串为名称的节点，可用于语法分析树。
 		*/
 		//@{
-		//! \since build 666
 		template<class _tNodeOrCon>
 		ValueNode::iterator
 			InsertChildSyntaxNode(_tNodeOrCon&& node_or_con, ValueNode& child)
@@ -208,7 +202,7 @@ namespace scheme {
 			/*!
 			\brief 转换 SXML 节点为 XML 属性字符串。
 			\throw LoggedEvent 没有子节点。
-			\note 当前不支持 annotation ，在超过 2 个子节点时使用 YTraceDe 警告。
+			\note 当前不支持 annotation ，在超过 2 个子节点时使用 TraceDe 警告。
 			*/
 			LS_API string
 				ConvertAttributeNodeString(const TermNode&);
@@ -486,7 +480,6 @@ namespace scheme {
 			Data,
 			/*!
 			\brief 扩展字面量：由派生实现定义的其它字面量。
-			\since build 737
 			*/
 			Extended
 		};

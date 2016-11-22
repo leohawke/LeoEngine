@@ -717,6 +717,64 @@ namespace leo {
 	//@}
 
 
+	//@{
+	/*!
+	\exception std::bad_cast 空实例或类型检查失败 。
+	\relates ValueNode
+	*/
+	//@{
+	/*!
+	\brief 访问子节点的指定类型对象。
+	\note 使用 ADL \c AccessNode 。
+	*/
+	//@{
+	template<typename _type, typename... _tParams>
+	inline _type&
+		AccessChild(ValueNode& node, _tParams&&... args)
+	{
+		return Access<_type>(AccessNode(node, lforward(args)...));
+	}
+	template<typename _type, typename... _tParams>
+	inline const _type&
+		AccessChild(const ValueNode& node, _tParams&&... args)
+	{
+		return Access<_type>(AccessNode(node, lforward(args)...));
+	}
+	//@}
+
+	//! \brief 访问指定名称的子节点的指定类型对象的指针。
+	//@{
+	template<typename _type, typename... _tParams>
+	inline observer_ptr<_type>
+		AccessChildPtr(ValueNode& node, _tParams&&... args) lnothrow
+	{
+		return AccessPtr<_type>(
+			AccessNodePtr(node.GetContainerRef(), lforward(args)...));
+	}
+	template<typename _type, typename... _tParams>
+	inline observer_ptr<const _type>
+		AccessChildPtr(const ValueNode& node, _tParams&&... args) lnothrow
+	{
+		return AccessPtr<_type>(
+			AccessNodePtr(node.GetContainer(), lforward(args)...));
+	}
+	template<typename _type, typename... _tParams>
+	inline observer_ptr<_type>
+		AccessChildPtr(ValueNode* p_node, _tParams&&... args) lnothrow
+	{
+		return p_node ? AccessChildPtr<_type>(*p_node, lforward(args)...) : nullptr;
+	}
+	template<typename _type, typename... _tParams>
+	inline observer_ptr<const _type>
+		AccessChildPtr(const ValueNode* p_node, _tParams&&... args) lnothrow
+	{
+		return p_node ? AccessChildPtr<_type>(*p_node, lforward(args)...) : nullptr;
+	}
+	//@}
+	//@}
+	//@}
+
+
 	//! \note 结果不含子节点。
 	//@{
 	inline PDefH(const ValueNode&, AsNode, const ValueNode& node)
