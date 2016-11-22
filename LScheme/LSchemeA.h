@@ -200,7 +200,7 @@ namespace scheme {
 
 			//@{
 			/*!
-			\brief 转换 SXML 节点为 XML 属性字符串。
+			\brief 转换 sxml 节点为 XML 属性字符串。
 			\throw LoggedEvent 没有子节点。
 			\note 当前不支持 annotation ，在超过 2 个子节点时使用 TraceDe 警告。
 			*/
@@ -208,35 +208,35 @@ namespace scheme {
 				ConvertAttributeNodeString(const TermNode&);
 
 			/*!
-			\brief 转换 SXML 文档节点为 XML 字符串。
+			\brief 转换 sxml 文档节点为 XML 字符串。
 			\throw LoggedEvent 不符合最后一个参数约定的内容被解析。
 			\throw leo::unimplemented 指定 ParseOption::Strict 时解析未实现内容。
 			\sa ConvertStringNode
-			\see http://okmij.org/ftp/Scheme/SXML.html#Annotations 。
+			\see http://okmij.org/ftp/Scheme/sxml.html#Annotations 。
 			\todo 支持 *ENTITY* 和 *NAMESPACES* 标签。
 
-			转换 SXML 文档节点为 XML 。
+			转换 sxml 文档节点为 XML 。
 			尝试使用 ConvertStringNode 转换字符串节点，若失败作为非叶子节点递归转换。
-			因为当前 SXML 规范未指定注解(annotation) ，所以直接忽略。
+			因为当前 sxml 规范未指定注解(annotation) ，所以直接忽略。
 			*/
 			LS_API string
 				ConvertDocumentNode(const TermNode&, IndentGenerator = DefaultGenerateIndent,
 					size_t = 0, ParseOption = ParseOption::Normal);
 
 			/*!
-			\brief 转换 SXML 节点为被转义的 XML 字符串。
+			\brief 转换 sxml 节点为被转义的 XML 字符串。
 			\sa EscapeXML
 			*/
 			LS_API string
 				ConvertStringNode(const TermNode&);
 
 			/*!
-			\brief 打印 SContext::Analyze 分析取得的 SXML 语法树节点并刷新流。
+			\brief 打印 SContext::Analyze 分析取得的 sxml 语法树节点并刷新流。
 			\see ConvertDocumentNode
 			\see SContext::Analyze
 			\see Session
 
-			参数节点中取第一个节点作为 SXML 文档节点调用 ConvertStringNode 输出并刷新流。
+			参数节点中取第一个节点作为 sxml 文档节点调用 ConvertStringNode 输出并刷新流。
 			*/
 			LS_API void
 				PrintSyntaxNode(std::ostream& os, const TermNode&,
@@ -245,7 +245,7 @@ namespace scheme {
 
 
 			//@{
-			//! \brief 构造 SXML 文档顶级节点。
+			//! \brief 构造 sxml 文档顶级节点。
 			//@{
 			template<typename... _tParams>
 			ValueNode
@@ -259,7 +259,7 @@ namespace scheme {
 				//@}
 
 				/*!
-				\brief 构造 SXML 文档 XML 声明节点。
+				\brief 构造 sxml 文档 XML 声明节点。
 				\note 第一个参数指定节点名称，其余参数指定节点中 XML 声明的值：版本、编码和独立性。
 				\note 最后两个参数可选为空值，此时结果不包括对应的属性。
 				\warning 不对参数合规性进行检查。
@@ -269,7 +269,7 @@ namespace scheme {
 					const string& = "UTF-8", const string& = {});
 
 			/*!
-			\brief 构造包含 XML 声明的 SXML 文档节点。
+			\brief 构造包含 XML 声明的 sxml 文档节点。
 			\sa MakeTop
 			\sa MakeXMLDecl
 			*/
@@ -277,7 +277,7 @@ namespace scheme {
 				MakeXMLDoc(const string& = {}, const string& = "1.0",
 					const string& = "UTF-8", const string& = {});
 
-			//! \brief 构造 SXML 属性标记字面量。
+			//! \brief 构造 sxml 属性标记字面量。
 			//@{
 			inline PDefH(NodeLiteral, MakeAttributeTagLiteral,
 				std::initializer_list<NodeLiteral> il)
@@ -286,7 +286,7 @@ namespace scheme {
 			NodeLiteral
 				MakeAttributeTagLiteral(_tParams&&... args)
 			{
-				return SXML::MakeAttributeTagLiteral({ NodeLiteral(lforward(args)...) });
+				return sxml::MakeAttributeTagLiteral({ NodeLiteral(lforward(args)...) });
 			}
 			//@}
 
@@ -299,7 +299,7 @@ namespace scheme {
 			NodeLiteral
 				MakeAttributeLiteral(const string& name, _tParams&&... args)
 			{
-				return{ name,{ SXML::MakeAttributeTagLiteral(lforward(args)...) } };
+				return{ name,{ sxml::MakeAttributeTagLiteral(lforward(args)...) } };
 			}
 			//@}
 
@@ -318,12 +318,12 @@ namespace scheme {
 					_tParams&&... args)
 			{
 				InsertChildSyntaxNode(node_or_con,
-					SXML::MakeAttributeLiteral(name, lforward(args)...));
+					sxml::MakeAttributeLiteral(name, lforward(args)...));
 			}
 			//@}
 			//@}
 
-		} // namespace SXML;
+		} // namespace sxml;
 		  //@}
 
 
@@ -512,7 +512,7 @@ namespace scheme {
 			FetchValue(const ContextNode& ctx, const _tKey& name)
 		{
 			return leo::call_value_or<ValueObject>(
-				std::mem_fn(&ValueNode::Value), LSL::LookupName(ctx, name));
+				std::mem_fn(&ValueNode::Value),LookupName(ctx, name));
 		}
 		//@}
 

@@ -245,7 +245,85 @@ namespace leo {
 		using std::common_type_t;
 		using std::underlying_type_t;
 		using std::result_of_t;
+#else
+		//@{
+		template<typename _type>
+		using remove_const_t = typename remove_const<_type>::type;
 
+		template<typename _type>
+		using remove_volatile_t = typename remove_volatile<_type>::type;
+
+		template<typename _type>
+		using remove_cv_t = typename remove_cv<_type>::type;
+
+		template<typename _type>
+		using add_const_t = typename add_const<_type>::type;
+
+		template<typename _type>
+		using add_volatile_t = typename add_volatile<_type>::type;
+
+		template<typename _type>
+		using add_cv_t = typename add_cv<_type>::type;
+
+
+		template<typename _type>
+		using remove_reference_t = typename remove_reference<_type>::type;
+
+		template<typename _type>
+		using add_lvalue_reference_t = typename add_lvalue_reference<_type>::type;
+
+		template<typename _type>
+		using add_rvalue_reference_t = typename add_rvalue_reference<_type>::type;
+
+
+		template<typename _type>
+		using make_signed_t = typename make_signed<_type>::type;
+
+		template<typename _type>
+		using make_unsigned_t = typename make_unsigned<_type>::type;
+
+
+		template<typename _type>
+		using remove_extent_t = typename remove_extent<_type>::type;
+
+		template<typename _type>
+		using remove_all_extents_t = typename remove_all_extents<_type>::type;
+
+
+		template<typename _type>
+		using remove_pointer_t = typename remove_pointer<_type>::type;
+
+		template<typename _type>
+		using add_pointer_t = typename add_pointer<_type>::type;
+
+
+		template<size_t _vLen,
+			size_t _vAlign = yalignof(typename aligned_storage<_vLen>::type)>
+			using aligned_storage_t = typename aligned_storage<_vLen, _vAlign>::type;
+		//@}
+
+		//@{
+		template<size_t _vLen, typename... _types>
+		using aligned_union_t = typename aligned_union<_vLen, _types...>::type;
+
+		template<typename _type>
+		using decay_t = typename decay<_type>::type;
+
+		template<bool _bCond, typename _type = void>
+		using enable_if_t = typename enable_if<_bCond, _type>::type;
+
+		template<bool _bCond, typename _type, typename _type2>
+		using conditional_t = typename conditional<_bCond, _type, _type2>::type;
+
+		template<typename... _types>
+		using common_type_t = typename common_type<_types...>::type;
+
+		template<typename _type>
+		using underlying_type_t = typename underlying_type<_type>::type;
+
+		template<typename _type>
+		using result_of_t = typename result_of<_type>::type;
+		//@}
 #endif
 		//@}
 

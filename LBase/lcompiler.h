@@ -40,6 +40,10 @@
 #	ifndef __cpp_lib_make_reverse_iterator
 #		define __cpp_lib_make_reverse_iterator 201402
 #	endif
+
+#	ifndef __cpp_lib_optional
+#		define __cpp_lib_optional 201411
+#	endif
 //@}
 //@}
 #endif

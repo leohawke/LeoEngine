@@ -10,14 +10,26 @@
 #define LBase_Optional_hpp 1
 
 #include "LBase/functional.hpp"
+#ifdef LB_IMPL_MSCPP
 #include <optional>
+#else
+#include <experimental/optional>
+#endif
 
 namespace leo {
+#ifdef __cpp_lib_experimental_optional
+	using std::experimental::optional;
+	using std::experimental::nullopt_t;
+	using std::experimental::nullopt;
+	using std::experimental::bad_optional_access;
+#elif __cpp_lib_optional
 	using std::optional;
 	using std::nullopt_t;
 	using std::nullopt;
 	using std::bad_optional_access;
-
+#else
+#error "__cpp_lib_experimental_optional || __cpp_lib_optional"
+#endif
 
 	/*!
 	\brief 合并可选值序列。

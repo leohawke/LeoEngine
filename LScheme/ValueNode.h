@@ -578,7 +578,7 @@ namespace leo {
 	LB_API const ValueNode&
 		AccessNode(const ValueNode&, size_t);
 	//@}
-	template<typename _tKey, limpl(typename = typename enable_if_t<
+	template<typename _tKey, limpl(typename = leo::enable_if_t<
 		or_<std::is_constructible<const _tKey&, const string&>,
 		std::is_constructible<const string&, const _tKey&>>::value>)>
 		inline ValueNode&
@@ -586,7 +586,7 @@ namespace leo {
 	{
 		return AccessNode(node.GetContainerRef(), name);
 	}
-	template<typename _tKey, limpl(typename = typename enable_if_t<
+	template<typename _tKey, limpl(typename = leo::enable_if_t<
 		or_<std::is_constructible<const _tKey&, const string&>,
 		std::is_constructible<const string&, const _tKey&>>::value>)>
 		inline const ValueNode&
@@ -607,7 +607,7 @@ namespace leo {
 	}
 	//! \note 使用 ADL \c begin 和 \c end 指定范围迭代器。
 	template<class _tNode, typename _tRange,
-		limpl(typename = typename enable_if_t<
+		limpl(typename = leo::enable_if_t<
 			!std::is_constructible<const string&, const _tRange&>::value>)>
 		inline auto
 		AccessNode(_tNode&& node, const _tRange& c)
@@ -673,7 +673,7 @@ namespace leo {
 	LB_API observer_ptr<const ValueNode>
 		AccessNodePtr(const ValueNode&, size_t);
 	//@}
-	template<typename _tKey, limpl(typename = typename enable_if_t<
+	template<typename _tKey, limpl(typename = leo::enable_if_t<
 		or_<std::is_constructible<const _tKey&, const string&>,
 		std::is_constructible<const string&, const _tKey&>>::value>)>
 		inline observer_ptr<ValueNode>
@@ -681,7 +681,7 @@ namespace leo {
 	{
 		return AccessNodePtr(node.GetContainerRef(), name);
 	}
-	template<typename _tKey, limpl(typename = typename enable_if_t<
+	template<typename _tKey, limpl(typename = leo::enable_if_t<
 		or_<std::is_constructible<const _tKey&, const string&>,
 		std::is_constructible<const string&, const _tKey&>>::value>)>
 		inline observer_ptr<const ValueNode>
@@ -704,7 +704,7 @@ namespace leo {
 	}
 	//! \note 使用 ADL \c begin 和 \c end 指定范围迭代器。
 	template<class _tNode, typename _tRange,
-		limpl(typename = typename enable_if_t<
+		limpl(typename = leo::enable_if_t<
 			!std::is_constructible<const string&, const _tRange&>::value>)>
 		inline auto
 		AccessNodePtr(_tNode&& node, const _tRange& c)
