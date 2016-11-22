@@ -313,7 +313,7 @@ namespace leo {
 				cast(_tFrom v)
 			{
 				return general_polymorphic_cast_helper<_tFrom, _tTo, and_<is_base_of<
-					_tFrom, _tTo>, not_<have_common_nonempty_virtual_base<
+					_tFrom, _tTo>, not_<has_common_nonempty_virtual_base<
 					_t<remove_rp<_tFrom>>, _t<remove_rp<_tTo>>>>>::value>::cast(v);
 			}
 		};

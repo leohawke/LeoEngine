@@ -53,7 +53,6 @@
     <ClInclude Include="tuple.hpp" />
     <ClInclude Include="string.hpp" />
     <ClInclude Include="iterator_op.hpp" />
-    <ClInclude Include="operators.hpp" />
     <ClInclude Include="variadic.hpp" />
     <ClInclude Include="addressof.hpp" />
     <ClInclude Include="type_traits.hpp" />
@@ -183,5 +182,6 @@
     <ClCompile Include="Win32\MinGW32.cpp">
       <Filter>Framework\Win32</Filter>
     </ClCompile>
+    <ClCompile Include="operators.hpp" />
   </ItemGroup>
 </Project>

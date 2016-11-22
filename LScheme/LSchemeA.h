@@ -335,7 +335,7 @@ namespace scheme {
 		{
 		public:
 			LB_NONNULL(2)
-				LSLException(const char* str = "", leo::RecordLevel lv = leo::Err)
+				LSLException(const char* str, leo::RecordLevel lv = leo::Err)
 				: LoggedEvent(str, lv)
 			{}
 			LSLException(const leo::string_view sv,

@@ -76,7 +76,7 @@
     <ClInclude Include="memory.hpp" />
     <ClInclude Include="Mutex.h" />
     <ClInclude Include="NativeAPI.h" />
-    <ClInclude Include="operators.hpp" />
+    <ClCompile Include="operators.hpp" />
     <ClInclude Include="optional.hpp" />
     <ClInclude Include="placement.hpp" />
     <ClInclude Include="Platform.h" />

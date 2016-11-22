@@ -10,6 +10,8 @@ namespace leo {
 		: invalid_argument("Violation on construction found.")
 	{}
 
+	narrowing_error::~narrowing_error() = default;
+
 	invalid_construction::~invalid_construction() = default;
 
 	void

@@ -125,6 +125,22 @@ namespace leo
 	};
 	//@}
 
+	/*!
+	\brief 异常：无法表示数值范围的转换。
+	*/
+	class LB_API narrowing_error : public std::logic_error
+	{
+	public:
+		narrowing_error()
+			: logic_error("Norrowing found.")
+		{}
+		using logic_error::logic_error;
+		narrowing_error(const narrowing_error&) = default;
+		//! \brief 虚析构：类定义外默认实现。
+		~narrowing_error() override;
+	};
+	//@}
+
 
 	class LB_API invalid_construction : public std::invalid_argument
 	{

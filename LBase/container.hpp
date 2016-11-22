@@ -986,7 +986,6 @@ namespace leo
 	//@{
 	/*!
 	\brief 带有提示的原地插入构造。
-	\since build 708
 	*/
 	template<class _tAssocCon, typename _tKey, typename... _tParams>
 	inline auto
@@ -1121,7 +1120,7 @@ namespace leo
 	//@{
 	template<typename _func, class _tAssocCon, typename... _tParams>
 	std::pair<typename _tAssocCon::const_iterator, bool>
-		search_map(_func f, const _tAssocCon& con, _tParams&&... args)
+		search_map_by(_func f, const _tAssocCon& con, _tParams&&... args)
 	{
 		auto pr(leo::search_map(con, lforward(args)...));
 
@@ -1131,10 +1130,10 @@ namespace leo
 	}
 	template<typename _func, class _tAssocCon, typename... _tParams>
 	inline std::pair<typename _tAssocCon::iterator, bool>
-		search_map(_func f, _tAssocCon& con, _tParams&&... args)
+		search_map_by(_func f, _tAssocCon& con, _tParams&&... args)
 	{
 		return leo::cast_mutable(con,
-			leo::search_map(f, leo::as_const(con), lforward(args)...));
+			leo::search_map_by(f, leo::as_const(con), lforward(args)...));
 	}
 	//@}
 	//@}
@@ -1153,7 +1152,7 @@ namespace leo
 		try_emplace(_tAssocCon& con, _tKey&& k, _tParams&&... args)
 	{
 		// XXX: Blocked. 'lforward' may cause G++ 5.2 silent crash.
-		return leo::search_map([&](typename _tAssocCon::const_iterator i) {
+		return leo::search_map_by([&](typename _tAssocCon::const_iterator i) {
 			return emplace_hint_in_place(con, i, lforward(k),
 				std::forward<_tParams>(args)...);
 		}, con, k);
@@ -1165,7 +1164,7 @@ namespace leo
 			_tKey&& k, _tParams&&... args)
 	{
 		// XXX: Blocked. 'lforward' may cause G++ 5.2 silent crash.
-		return leo::search_map([&](typename _tAssocCon::const_iterator i) {
+		return leo::search_map_by([&](typename _tAssocCon::const_iterator i) {
 			return emplace_hint_in_place(con, i, lforward(k),
 				std::forward<_tParams>(args)...);
 		}, con, hint, k);

@@ -90,7 +90,6 @@ namespace leo
 		{}
 		/*!
 		\brief 使用函数对象。
-		\since build 494
 		*/
 		template<class _fCallable>
 		lconstfn
@@ -124,7 +123,11 @@ namespace leo
 		{}
 		DefDeCopyMoveCtorAssignment(GHEvent)
 
-			friend lconstfn bool
+			friend 
+#ifndef LB_IMPL_MSCPP
+			lconstfn 
+#endif
+			bool
 			operator==(const GHEvent& x, const GHEvent& y)
 		{
 			return
