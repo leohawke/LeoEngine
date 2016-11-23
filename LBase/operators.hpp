@@ -15,6 +15,10 @@
 #include "LBase/integer_sequence.hpp "// for index_sequence, vseq::defer_apply_t,
 //	vseq::_a, vseq::fold_t;
 
+#ifdef LB_IMPL_MSCPP
+#pragma warning(disable:4503)
+#endif
+
 namespace leo
 {
 	namespace deprecated {

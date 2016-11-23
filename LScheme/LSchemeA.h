@@ -18,7 +18,7 @@ namespace scheme {
 		\brief LA 元标签。
 		\note LA 是 LScheme 的抽象实现。
 		*/
-		struct LS_API LATag : LTag
+		struct LS_API LSLATag : LTag
 		{};
 
 

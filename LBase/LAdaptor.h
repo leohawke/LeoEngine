@@ -18,6 +18,7 @@ namespace leo {
 	using platform::vector;
 	using platform::unordered_map;
 	using platform::multimap;
+	using platform::set;
 
 	using platform::forward_as_tuple;
 	using platform::get;

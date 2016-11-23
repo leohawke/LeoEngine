@@ -517,7 +517,7 @@ namespace leo
 	//@}
 
 	/*!
-	\brief 复合调用 ystdex::bind1 和 std::placeholders::_2 以实现值的设置。
+	\brief 复合调用 leo::bind1 和 std::placeholders::_2 以实现值的设置。
 	\note 从右到左逐个应用参数。
 	\note ISO C++ 要求 std::placeholders::_2 被实现支持。
 	\since build 1.4
@@ -559,12 +559,12 @@ namespace leo
 	{
 		return composed<_func1, _func2>{f, g};
 	}
-	template<typename _func1, typename _func2, typename... _funcs>
+	template<typename _func, typename _func2, typename _func3, typename... _funcs>
 	lconstfn auto
-		compose(_func1 f, _func2 g, _funcs... args)
-		-> decltype(compose(compose(f, g), args...))
+		compose(_func f, _func2 g, _func3 h, _funcs... args)
+		-> decltype(leo::compose(leo::compose(f, g), h, args...))
 	{
-		return compose(compose(f, g), args...);
+		return leo::compose(leo::compose(f, g), h, args...);
 	}
 	//@}
 

@@ -46,6 +46,9 @@
     <ClInclude Include="LEvent.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="LScheme.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sdef.cpp">
@@ -64,6 +67,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="LSchemeA.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LScheme.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
