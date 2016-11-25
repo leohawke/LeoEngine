@@ -123,7 +123,7 @@ namespace leo
 		//! \since build 1.4
 		//@{
 		lconstfn
-			boxed_value() lnoexcept(is_nothrow_constructible<_type>())
+			boxed_value() lnoexcept(is_nothrow_constructible<_type>::value)
 			: value()
 		{}
 		lconstfn

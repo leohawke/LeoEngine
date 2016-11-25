@@ -768,11 +768,12 @@ namespace leo
 	struct call_projection<_tRet(_tParams...), index_sequence<_vSeq...>>
 	{
 		template<typename _fCallable>
-		static _tRet
+		static lconstfn auto
 			call(_fCallable&& f, std::tuple<_tParams...>&& args, limpl(decay_t<
 				decltype(lforward(f)(std::get<_vSeq>(std::move(args))...))>* = {}))
+			->decltype(lforward(f)(lforward(std::get<_vSeq>(std::move(args)))...))
 		{
-			lforward(f)(lforward(std::get<_vSeq>(std::move(args)))...);
+			return lforward(f)(lforward(std::get<_vSeq>(std::move(args)))...);
 		}
 
 		//@{
@@ -786,16 +787,18 @@ namespace leo
 				std::forward_as_tuple(lforward(args)...));
 		}
 
+		
 		template<typename _fCallable>
-		static _tRet
+		static lconstfn auto
 			invoke(_fCallable&& f, std::tuple<_tParams...>&& args,
-				limpl(decay_t<decltype(invoke(lforward(f),
-					std::get<_vSeq>(std::move(args))...))>* = {}))
+				limpl(decay_t<decltype(leo::invoke(lforward(f),
+					std::get<_vSeq>(std::move(args))...))>* = {})) -> decltype(
+						leo::invoke(lforward(f), std::get<_vSeq>(std::move(args))...))
 		{
-			return invoke(lforward(f), std::get<_vSeq>(std::move(args))...);
+			return leo::invoke(lforward(f), std::get<_vSeq>(std::move(args))...);
 		}
 		template<typename _func>
-		static auto
+		static lconstfn auto
 			invoke(_func&& f, _tParams&&... args)
 			-> decltype(call_projection::invoke(lforward(f),
 				std::forward_as_tuple(lforward(args)...)))
@@ -825,7 +828,7 @@ namespace leo
 	struct call_projection<std::tuple<_tParams...>, index_sequence<_vSeq...>>
 	{
 		template<typename _func>
-		static auto
+		static lconstfn auto
 			call(_func&& f, std::tuple<_tParams...>&& args)
 			-> decltype(lforward(f)(std::get<_vSeq>(std::move(args))...))
 		{
@@ -835,7 +838,7 @@ namespace leo
 		//! \since build 1.4
 		//@{
 		template<typename _func>
-		static auto
+		static lconstfn auto
 			call(_func&& f, _tParams&&... args)
 			-> decltype(call_projection::call(lforward(f),
 				std::forward_as_tuple(lforward(std::move(args))...)))
@@ -845,14 +848,14 @@ namespace leo
 		}
 
 		template<typename _fCallable>
-		static auto
+		static lconstfn auto
 			invoke(_fCallable&& f, std::tuple<_tParams...>&& args)
 			-> decltype(invoke(lforward(f), std::get<_vSeq>(args)...))
 		{
 			return invoke(lforward(f), std::get<_vSeq>(args)...);
 		}
 		template<typename _func>
-		static auto
+		static lconstfn auto
 			invoke(_func&& f, _tParams&&... args)
 			-> decltype(call_projection::invoke(lforward(f),
 				std::forward_as_tuple(lforward(args)...)))

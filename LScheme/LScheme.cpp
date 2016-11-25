@@ -540,13 +540,16 @@ namespace scheme
 			//	in leo. Otherwise current versions of G++ would crash here as internal
 			//	compiler error: "error reporting routines re-entered".
 			//	passes += ReduceFirst;
-			passes += leo::compose(NeedsRetry, ReduceFirst);
+			//passes += leo::compose(NeedsRetry, ReduceFirst);
+			passes += [](TermNode& term, ContextNode& ctx)->bool {return NeedsRetry(ReduceFirst(term, ctx));};
 			// TODO: Insert more form evaluation passes: macro expansion, etc.
 			//	passes += EvaluateContextFirst;
-			passes += leo::compose(NeedsRetry, EvaluateContextFirst);
+			//passes += leo::compose(NeedsRetry, EvaluateContextFirst);
+			passes += [](TermNode& term, ContextNode& ctx)->bool {return NeedsRetry(EvaluateContextFirst(term, ctx)); };
 			AccessListPassesRef(root) = std::move(passes);
 			//	AccessLeafPassesRef(root) = ReduceLeafToken;
-			AccessLeafPassesRef(root) = leo::compose(NeedsRetry, ReduceLeafToken);
+			//AccessLeafPassesRef(root) = leo::compose(NeedsRetry, ReduceLeafToken);
+			AccessLeafPassesRef(root) = [](TermNode& term, ContextNode& ctx)->bool {return NeedsRetry(ReduceLeafToken(term, ctx)); };
 		}
 
 		namespace Forms
