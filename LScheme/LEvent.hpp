@@ -103,9 +103,9 @@ namespace leo
 		*/
 		template<class _fCallable>
 		lconstfn
-			GHEvent(_fCallable&& f, enable_if_t<
+			GHEvent(_fCallable&& f,leo::enable_if_t<
 				!std::is_constructible<BaseType, _fCallable>::value, int> = 0)
-			: BaseType(make_expanded<_tRet(_tParams...)>(lforward(f))),
+			: BaseType(leo::make_expanded<_tRet(_tParams...)>(lforward(f))),
 			comp_eq(GHEvent::AreAlwaysEqual)
 		{}
 		/*!
@@ -488,7 +488,7 @@ namespace leo
 		bool
 			Contains(const HandlerType& h) const
 		{
-			using get_value;
+			using leo::get_value;
 
 			return std::count(handlers.cbegin() | get_value,
 				handlers.cend() | get_value, h) != 0;

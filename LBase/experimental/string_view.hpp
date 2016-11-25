@@ -664,6 +664,14 @@ namespace std
 
 	} // namespace experimental
 
+	template<>
+	struct less<experimental::string_view>
+	{
+		bool operator()(const experimental::string_view& _Left, const experimental::string_view& _Right) const
+		{	// apply operator< to operands
+			return _Left.compare(_Right) < 0;
+		}
+	};
 
 	  // [string.view.hash], hash support:
 
