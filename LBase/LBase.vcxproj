@@ -43,6 +43,7 @@
     <ClInclude Include="enum.hpp" />
     <ClInclude Include="examiner.hpp" />
     <ClInclude Include="exception.h" />
+    <ClInclude Include="experimental\string_view.hpp" />
     <ClInclude Include="FCommon.h" />
     <ClInclude Include="FContainer.h" />
     <ClInclude Include="FReference.h" />
@@ -117,6 +118,9 @@
     <ClCompile Include="vc.cpp" />
     <ClCompile Include="Win32\Consoles.cpp" />
     <ClCompile Include="Win32\MinGW32.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="experimental\string_view.hcc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4F3AE107-3FFD-4D5C-82A8-5034C0041562}</ProjectGuid>
@@ -211,6 +215,8 @@
       <SDLCheck>true</SDLCheck>
       <DisableSpecificWarnings>4180</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

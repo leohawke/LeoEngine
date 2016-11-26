@@ -88,7 +88,7 @@ namespace platform_ex {
 		}
 		Win32Exception::Win32Exception(ErrorCode ec, string_view msg, const char* fn,
 			RecordLevel lv)
-			: Win32Exception(ec, msg.to_string() + " @ " + Nonnull(fn), lv)
+			: Win32Exception(ec,string(msg) + " @ " + Nonnull(fn), lv)
 		{}
 		ImplDeDtor(Win32Exception)
 

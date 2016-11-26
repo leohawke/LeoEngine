@@ -13,6 +13,9 @@
     <Filter Include="Framework\Win32">
       <UniqueIdentifier>{515c7ddb-9098-46e7-91e9-05781544e4ba}</UniqueIdentifier>
     </Filter>
+    <Filter Include="experimental">
+      <UniqueIdentifier>{9ad89090-4ad8-4dc7-8d71-fb7f0e3a06d7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CHRLib\CharacterMapping.h">
@@ -142,6 +145,9 @@
       <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="optional.hpp" />
+    <ClInclude Include="experimental\string_view.hpp">
+      <Filter>experimental</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CHRLib\CharacterProcessing.cpp">
@@ -183,5 +189,10 @@
       <Filter>Framework\Win32</Filter>
     </ClCompile>
     <ClCompile Include="operators.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="experimental\string_view.hcc">
+      <Filter>experimental</Filter>
+    </None>
   </ItemGroup>
 </Project>

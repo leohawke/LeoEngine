@@ -354,10 +354,10 @@ namespace scheme
 		list<string> dst;
 
 		leo::split_l(src.cbegin(), src.cend(), IsDelimeter,
-			[&](const char* b, const char* e) LB_NONNULL(1, 2) {
+			[&](string_view::const_iterator b,string_view::const_iterator e) LB_NONNULL(1, 2) {
 			LAssert(e >= b, "Invalid split result found.");
 
-			string_view sv(b, size_t(e - b));
+			string_view sv(leo::addressof(*b), size_t(e - b));
 
 			LAssert(!sv.empty(), "Null token found.");
 			if (IsGraphicalDelimeter(*b))

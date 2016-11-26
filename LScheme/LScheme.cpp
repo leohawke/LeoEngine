@@ -515,7 +515,7 @@ namespace scheme
 					// XXX: Empty token is ignored.
 					// XXX: Remained reducible?
 				case LiteralCategory::Data:
-					term.Value = Deliteralize(id).to_string();
+					term.Value =string(Deliteralize(id));
 				default:
 					break;
 					// TODO: Handle other categories of literal.

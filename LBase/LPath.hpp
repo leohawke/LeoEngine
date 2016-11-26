@@ -6,7 +6,11 @@
 #ifndef FrameWork__LPath_hpp
 #define FrameWork__LPath_hpp 1
 
-#include "LBase/experimental/string_view.hpp"
+#ifdef LB_IMPL_MSCPP
+#include <string_view>
+#else
+#include <experimental/string_viw>
+#endif
 #include "LBase/id.hpp"
 #include "LBase/string.hpp"
 #include "LBase/operators.hpp"
