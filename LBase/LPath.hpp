@@ -9,7 +9,7 @@
 #ifdef LB_IMPL_MSCPP
 #include <string_view>
 #else
-#include <experimental/string_viw>
+#include <experimental/string_view>
 #endif
 #include "LBase/id.hpp"
 #include "LBase/string.hpp"
