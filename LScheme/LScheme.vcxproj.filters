@@ -49,6 +49,9 @@
     <ClInclude Include="LScheme.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="LSchemREPL.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sdef.cpp">

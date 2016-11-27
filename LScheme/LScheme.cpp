@@ -1,4 +1,5 @@
 #include "LScheme.h"
+#include "LSchemREPL.h"
 #include "SContext.h"
 #include <LBase/scope_gurad.hpp>
 
@@ -552,6 +553,49 @@ namespace scheme
 			AccessLeafPassesRef(root) = [](TermNode& term, ContextNode& ctx)->bool {return NeedsRetry(ReduceLeafToken(term, ctx)); };
 		}
 
+
+		REPLContext::REPLContext(bool trace)
+		{
+			using namespace std::placeholders;
+
+			SetupDefaultInterpretation(Root,
+				std::bind(std::ref(ListTermPreprocess), _1, _2));
+			if (trace)
+				SetupTraceDepth(Root);
+		}
+
+		TermNode
+			REPLContext::Perform(string_view unit)
+		{
+			LAssertNonnull(unit.data());
+			if (!unit.empty())
+				return Process(Session(unit));
+			throw LoggedEvent("Empty token list found.", Alert);
+		}
+
+		void
+			REPLContext::Process(TermNode& term)
+		{
+			Preprocess(term);
+			Reduce(term, Root);
+		}
+		TermNode
+			REPLContext::Process(const TokenList& token_list)
+		{
+			auto term(SContext::Analyze(token_list));
+
+			Process(term);
+			return term;
+		}
+		TermNode
+			REPLContext::Process(const Session& session)
+		{
+			auto term(SContext::Analyze(session));
+
+			Process(term);
+			return term;
+		}
+
 		namespace Forms
 		{
 
@@ -576,13 +620,11 @@ namespace scheme
 
 					// XXX: Modifier is treated as special name.
 					if (const auto p = TermToName(Deref(i)))
-					{
 						if (*p == mod)
 						{
 							con.erase(i);
 							return true;
 						}
-					}
 				}
 				return{};
 			}
@@ -740,6 +782,20 @@ namespace scheme
 				}
 				else
 					throw InvalidSyntax("Syntax error in lambda abstraction.");
+			}
+
+			void
+				CallSystem(TermNode& term)
+			{
+				Forms::CallUnaryAs<const string>([&](const string& cmd) {
+					term.Value = usystem(cmd.c_str());
+				}, term);
+			}
+
+			void
+				Eval(const string& unit, const REPLContext& ctx)
+			{
+				REPLContext(ctx).Perform(unit);
 			}
 
 		} // namespace Forms;

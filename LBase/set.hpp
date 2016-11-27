@@ -1,3 +1,10 @@
+/*!	\file set.hpp
+\ingroup LBase
+\par 修改时间:
+2016-11-18 11:07 +0800
+\brief 集合容器。
+*/
+
 #ifndef LBase_set_hpp
 #define LBase_set_hpp 1
 
@@ -6,7 +13,6 @@
 #include <map>
 
 namespace leo {
-
 
 	/*!
 	\brief 转移集合元素。
@@ -183,6 +189,9 @@ namespace leo {
 			amend_all();
 		}
 		mapped_set(mapped_set&& s)
+			// NOTE: ISO C++ allows the underlying associative container to throw on
+			//	move.
+			limpl(lnoexcept(is_nothrow_move_constructible<umap_type>::value))
 			: m_map(std::move(s.m_map))
 		{
 			amend_all();
@@ -618,7 +627,7 @@ namespace leo {
 
 	private:
 		void
-			amend_all() const
+			amend_all() const lnothrow
 		{
 			for (const auto& pr : m_map)
 				amend_pair(pr);

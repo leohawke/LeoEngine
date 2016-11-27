@@ -561,39 +561,80 @@ namespace scheme {
 			\brief 访问节点并调用一元函数。
 			*/
 			//@{
-			template<typename _func>
+			template<typename _func, typename... _tParams>
 			void
-				CallUnary(_func f, TermNode& term)
+				CallUnary(_func f, TermNode& term, _tParams&&... args)
 			{
 				QuoteN(term);
 
-				term.Value.EmplaceFromCall(f, Deref(std::next(term.begin())));
+				term.Value.EmplaceFromCall(f, Deref(std::next(term.begin())),
+					lforward(args)...);
 				term.ClearContainer();
 			}
 
-			template<typename _type, typename _func>
+			template<typename _type, typename _func, typename... _tParams>
 			void
-				CallUnaryAs(_func f, TermNode& term)
+				CallUnaryAs(_func f, TermNode& term, _tParams&&... args)
 			{
-				Forms::CallUnary([f](TermNode& node) {
-					return f(leo::Access<_type>(node));
+				Forms::CallUnary([&](TermNode& node) {
+					// XXX: Blocked. 'lforward' cause G++ 5.3 crash: internal compiler
+					//	error: Segmentation fault.
+					return leo::make_expanded<void(_type&, _tParams&&...)>(std::move(f))(
+						leo::Access<_type>(node), std::forward<_tParams&&>(args)...);
 				}, term);
 			}
 			//@}
 
+			/*!
+			\brief 保存一元函数展开调用的函数对象。
+			\todo 使用 C++1y lambda 表达式代替。
+			*/
+			//@{
+			//! \sa Forms::CallUnary
+			template<typename _func>
+			struct UnaryExpansion
+			{
+				_func Function;
+
+				template<typename... _tParams>
+				void
+					operator()(TermNode& term, _tParams&&... args)
+				{
+					Forms::CallUnary(Function, term, lforward(args)...);
+				}
+			};
+
+
+			//! \sa Forms::CallUnaryAs
+			template<typename _type, typename _func>
+			struct UnaryAsExpansion
+			{
+				_func Function;
+
+				template<typename... _tParams>
+				void
+					operator()(TermNode& term, _tParams&&... args)
+				{
+					Forms::CallUnaryAs<_type>(Function, term, lforward(args)...);
+				}
+			};
+			//@}
 
 			/*!
 			\brief 注册一元函数。
 			*/
+			template<typename _func>
+			void
+				RegisterUnaryFunction(ContextNode& node, const string& name, _func f)
+			{
+				RegisterFunction(node, name, UnaryExpansion<_func>{f}, IsBranch);
+			}
 			template<typename _type, typename _func>
 			void
-				RegisterUnaryFunction(TermNode& term, const string& name, _func f)
+				RegisterUnaryFunction(ContextNode& node, const string& name, _func f)
 			{
-				v1::RegisterFunction(term, name, [f](TermNode& node) {
-					Forms::CallUnaryAs<_type>(f, node);
-				}, IsBranch);
+				RegisterFunction(node, name, UnaryAsExpansion<_type, _func>{f}, IsBranch);
 			}
-
 
 			//@{
 			/*!
@@ -659,6 +700,13 @@ namespace scheme {
 			LS_API void
 				Lambda(TermNode&, ContextNode&);
 			//@}
+
+			/*!
+			\brief 调用 UTF-8 字符串的系统命令，并保存 int 类型的结果到项的值中。
+			\sa usystem
+			*/
+			LS_API void
+				CallSystem(TermNode&);
 
 		} // namespace Forms;
 

@@ -1,3 +1,7 @@
+/*\par 修改时间 :
+	2016-11-13 22:15 + 0800
+*/
+
 #ifndef LScheme_LSchemeA_H
 #define LScheme_LSchemeA_H 1
 
@@ -500,6 +504,13 @@ namespace scheme {
 		//@{
 		//! \brief 从指定上下文查找名称对应的节点。
 		template<typename _tKey>
+		inline observer_ptr<ValueNode>
+			LookupName(ContextNode& ctx, const _tKey& id) lnothrow
+		{
+			return leo::AccessNodePtr(ctx, id);
+		}
+
+		template<typename _tKey>
 		inline observer_ptr<const ValueNode>
 			LookupName(const ContextNode& ctx, const _tKey& id) lnothrow
 		{
@@ -512,7 +523,7 @@ namespace scheme {
 			FetchValue(const ContextNode& ctx, const _tKey& name)
 		{
 			return leo::call_value_or<ValueObject>(
-				std::mem_fn(&ValueNode::Value),LookupName(ctx, name));
+				std::mem_fn(&ValueNode::Value),scheme::LookupName(ctx, name));
 		}
 		//@}
 
