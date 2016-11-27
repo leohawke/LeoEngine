@@ -1,3 +1,10 @@
+/*! \file placement.hpp
+\ingroup LBase
+\brief 放置对象管理操作。
+\par 修改时间:
+2016-09-20 09:58 +0800
+*/
+
 #ifndef LBase_placement_hpp
 #define LBase_placement_hpp 1
 
@@ -7,6 +14,7 @@
 
 #include <new>
 #include <iterator>
+#include <memory>
 
 namespace leo {
 
@@ -121,7 +129,7 @@ namespace leo {
 	inline void
 		construct_in(_type& obj, _tParams&&... args)
 	{
-		construct_within<_type>(obj, yforward(args)...);
+		construct_within<_type>(obj, lforward(args)...);
 	}
 
 	//@{
@@ -147,7 +155,7 @@ namespace leo {
 		using value_type = typename std::iterator_traits<_tIter>::value_type;
 
 		lconstraint(!is_undereferenceable(i));
-		construct_within<value_type>(*i, yforward(args)...);
+		construct_within<value_type>(*i, lforward(args)...);
 	}
 
 	/*!
@@ -173,7 +181,7 @@ namespace leo {
 		construct_range(_tIter first, _tIter last, _tParams&&... args)
 	{
 		for (; first != last; ++first)
-			construct(first, yforward(args)...);
+			construct(first, lforward(args)...);
 	}
 	//@}
 
@@ -263,6 +271,281 @@ namespace leo {
 			destruct(first);
 	}
 	//@}
+
+
+#define LB_Impl_UninitGuard_Begin \
+	auto i = first; \
+	\
+	try \
+	{
+
+	// NOTE: The order of destruction is unspecified.
+#define LB_Impl_UninitGuard_End \
+	} \
+	catch(...) \
+	{ \
+		leo::destruct_range(first, i); \
+		throw; \
+	}
+
+	//@{
+	//! \brief 在范围内未初始化放置构造。
+	//@{
+	//! \see WG21 N4606 20.10.2[uninitialized.construct.default] 。
+	//@{
+	template<typename _tFwd>
+	inline void
+		uninitialized_default_construct(_tFwd first, _tFwd last)
+	{
+		LB_Impl_UninitGuard_Begin
+			for (; first != last; ++first)
+				leo::construct_default(first);
+		LB_Impl_UninitGuard_End
+	}
+
+	template<typename _tFwd, typename _tSize>
+	_tFwd
+		uninitialized_default_construct_n(_tFwd first, _tSize n)
+	{
+		LB_Impl_UninitGuard_Begin
+			// XXX: Excessive order refinment by ','?
+			for (; n > 0; static_cast<void>(++first), --n)
+				leo::construct_default(first);
+		LB_Impl_UninitGuard_End
+	}
+	//@}
+
+	//! \see WG21 N4606 20.10.3[uninitialized.construct.value] 。
+	template<typename _tFwd>
+	inline void
+		uninitialized_value_construct(_tFwd first, _tFwd last)
+	{
+		LB_Impl_UninitGuard_Begin
+			leo::construct_range(first, last);
+		LB_Impl_UninitGuard_End
+	}
+
+	template<typename _tFwd, typename _tSize>
+	_tFwd
+		uninitialized_value_construct_n(_tFwd first, _tSize n)
+	{
+		LB_Impl_UninitGuard_Begin
+			// XXX: Excessive order refinment by ','?
+			for (; n > 0; static_cast<void>(++first), --n)
+				leo::construct(first);
+		LB_Impl_UninitGuard_End
+			return first;
+	}
+	//@}
+
+
+	/*!
+	\brief 转移初始化范围。
+	\see WG21 N4606 20.10.10.5[uninitialized.move] 。
+	*/
+	//@{
+	template<typename _tIn, class _tFwd>
+	_tFwd
+		uninitialized_move(_tIn first, _tIn last, _tFwd result)
+	{
+		LB_Impl_UninitGuard_Begin
+			for (; first != last; static_cast<void>(++result), ++first)
+				leo::construct(result, std::move(*first));
+		LB_Impl_UninitGuard_End
+			return result;
+	}
+
+	template<typename _tIn, typename _tSize, class _tFwd>
+	std::pair<_tIn, _tFwd>
+		uninitialized_move_n(_tIn first, _tSize n, _tFwd result)
+	{
+		LB_Impl_UninitGuard_Begin
+			// XXX: Excessive order refinment by ','?
+			for (; n > 0; ++result, static_cast<void>(++first), --n)
+				leo::construct(result, std::move(*first));
+		LB_Impl_UninitGuard_End
+			return{ first, result };
+	}
+	//@}
+
+
+	/*!
+	\brief 在迭代器指定的未初始化的范围上构造对象。
+	\tparam _tFwd 输出范围前向迭代器类型。
+	\tparam _tParams 用于构造对象的参数包类型。
+	\param first 输出范围起始迭代器。
+	\param args 用于构造对象的参数包。
+	\note 参数被传递的次数和构造的对象数相同。
+	\note 接口不保证失败时的析构顺序。
+	*/
+	//@{
+	/*!
+	\param last 输出范围终止迭代器。
+	\note 和 std::unitialized_fill 类似，但允许指定多个初始化参数。
+	\see WG21 N4431 20.7.12.3[uninitialized.fill] 。
+	*/
+	template<typename _tFwd, typename... _tParams>
+	void
+		uninitialized_construct(_tFwd first, _tFwd last, _tParams&&... args)
+	{
+		LB_Impl_UninitGuard_Begin
+			for (; i != last; ++i)
+				leo::construct(i, lforward(args)...);
+		LB_Impl_UninitGuard_End
+	}
+
+	/*!
+	\tparam _tSize 范围大小类型。
+	\param n 范围大小。
+	\note 和 std::unitialized_fill_n 类似，但允许指定多个初始化参数。
+	\see WG21 N4431 20.7.12.4[uninitialized.fill.n] 。
+	*/
+	template<typename _tFwd, typename _tSize, typename... _tParams>
+	void
+		uninitialized_construct_n(_tFwd first, _tSize n, _tParams&&... args)
+	{
+		LB_Impl_UninitGuard_Begin
+			// NOTE: This form is by specification (WG21 N4431) of
+			//	'std::unitialized_fill' literally.
+			for (; n--; ++i)
+				leo::construct(i, lforward(args)...);
+		LB_Impl_UninitGuard_End
+	}
+	//@}
+	//@}
+
+#undef LB_Impl_UninitGuard_End
+#undef LB_Impl_UninitGuard_Begin
+
+	//@{
+	//! \brief 默认初始化构造分配器。
+	template<typename _type, class _tAlloc = std::allocator<_type>>
+	class default_init_allocator : public _tAlloc
+	{
+	public:
+		using allocator_type = _tAlloc;
+		using traits_type = std::allocator_traits<allocator_type>;
+		template<typename _tOther>
+		struct rebind
+		{
+			using other = default_init_allocator<_tOther,
+				typename traits_type::template rebind_alloc<_tOther>>;
+		};
+
+		using allocator_type::allocator_type;
+
+		template<typename _tOther>
+		void
+			construct(_tOther* p)
+			lnoexcept(std::is_nothrow_default_constructible<_tOther>::value)
+		{
+			::new(static_cast<void*>(p)) _tOther;
+		}
+		template<typename _tOther, typename... _tParams>
+		void
+			construct(_type* p, _tParams&&... args)
+		{
+			traits_type::construct(static_cast<allocator_type&>(*this), p,
+				lforward(args)...);
+		}
+	};
+
+
+	/*!
+	\brief 放置存储的对象删除器：释放时调用伪析构函数。
+	\tparam _type 被删除的对象类型。
+	\pre _type 满足 Destructible 。
+	*/
+	template<typename _type, typename _tPointer = _type*>
+	struct placement_delete
+	{
+		using pointer = _tPointer;
+
+		lconstfn placement_delete() lnothrow = default;
+		template<typename _type2,
+			limpl(typename = enable_if_convertible_t<_type2*, _type*>)>
+			placement_delete(const placement_delete<_type2>&) lnothrow
+		{}
+
+		//! \note 使用 ADL destroy_at 。
+		void
+			operator()(pointer p) const lnothrowv
+		{
+			destroy_at(p);
+		}
+	};
+
+
+	//! \brief 独占放置存储的对象所有权的指针。
+	template<typename _type, typename _tPointer = _type*>
+	using placement_ptr
+		= std::unique_ptr<_type, placement_delete<_type, _tPointer>>;
+	//@}
+
+
+	/*!
+	\brief 带记号标记的可选值。
+	\warning 非虚析构。
+	*/
+	template<typename _tToken, typename _type>
+	struct tagged_value
+	{
+		using token_type = _tToken;
+		using value_type = _type;
+
+		token_type token;
+		union
+		{
+			empty_base<> empty;
+			mutable _type value;
+		};
+
+		lconstfn
+			tagged_value()
+			lnoexcept_spec(is_nothrow_default_constructible<token_type>())
+			: token(), empty()
+		{}
+		tagged_value(default_init_t)
+		{}
+		tagged_value(token_type t)
+			: token(t), empty()
+		{}
+		template<typename... _tParams>
+		explicit lconstfn
+			tagged_value(token_type t, in_place_t, _tParams&&... args)
+			: token(t), value(lforward(args)...)
+		{}
+		tagged_value(const tagged_value& v)
+			: token(v.token)
+		{}
+		/*!
+		\brief 析构：空实现。
+		\note 不使用默认函数以避免派生此类的非平凡析构函数非合式而被删除。
+		*/
+		~tagged_value()
+		{}
+
+		template<typename... _tParams>
+		void
+			construct(_tParams&&... args)
+		{
+			leo::construct_in(value, lforward(args)...);
+		}
+
+		void
+			destroy() lnoexcept(is_nothrow_destructible<value_type>())
+		{
+			leo::destruct_in(value);
+		}
+
+		void
+			destroy_nothrow() lnothrow
+		{
+			lnoexcept_assert("Invalid type found.", value.~value_type());
+
+			destroy();
+		}
+	};
 }
 
 #endif

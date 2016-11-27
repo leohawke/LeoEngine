@@ -1,10 +1,13 @@
 /*! \file any.h
 \ingroup LBase
 \brief 动态泛型类型。
+\par 修改时间:
+2016-11-23 11:49 +0800
 
 \see WG21 N4582 20.6[any] 。
 \see http://www.boost.org/doc/libs/1_60_0/doc/html/any/reference.html 。
 */
+
 #ifndef LBase_any_h
 #define LBase_any_h 1
 
@@ -114,7 +117,7 @@ namespace leo
 			const type_info&
 				type() const lnothrow override
 			{
-				return type_id<_type>();
+				return leo::type_id<_type>();
 			}
 		};
 
@@ -173,7 +176,7 @@ namespace leo
 			const type_info&
 				type() const lnothrow override
 			{
-				return p_held ? type_id<_type>() : type_id<void>();
+				return p_held ? leo::type_id<_type>() : leo::type_id<void>();
 			}
 		};
 
@@ -199,7 +202,7 @@ namespace leo
 
 		//! \since build 1.3
 		using any_storage
-			= standard_layout_storage<aligned_storage_t<sizeof(void*), sizeof(void*)>>;
+			= standard_layout_storage<aligned_storage_t<sizeof(void*), lalignof(void*)>>;
 		//! \since build 1.3
 		using any_manager = void(*)(any_storage&, any_storage&, op_code);
 
@@ -239,7 +242,7 @@ namespace leo
 			using local_storage = bool_constant<_bStoredLocally>;
 			//@}
 
-			//! \since build 1.5
+			//! \since build 1.4
 			//@{
 			static void
 				copy(any_storage& d, const any_storage& s)
@@ -256,12 +259,12 @@ namespace leo
 
 		private:
 			static void
-				dispose_impl(false_type, any_storage& d) lnothrowv
+				dispose_impl(false_, any_storage& d) lnothrowv
 			{
 				delete d.access<value_type*>();
 			}
 			static void
-				dispose_impl(true_type, any_storage& d) lnothrowv
+				dispose_impl(true_, any_storage& d) lnothrowv
 			{
 				d.access<value_type>().~value_type();
 			}
@@ -283,22 +286,22 @@ namespace leo
 
 		private:
 			static value_type*
-				get_pointer_impl(false_type, any_storage& s)
+				get_pointer_impl(false_, any_storage& s)
 			{
 				return s.access<value_type*>();
 			}
 			static const value_type*
-				get_pointer_impl(false_type, const any_storage& s)
+				get_pointer_impl(false_, const any_storage& s)
 			{
 				return s.access<const value_type*>();
 			}
 			static value_type*
-				get_pointer_impl(true_type, any_storage& s)
+				get_pointer_impl(true_, any_storage& s)
 			{
 				return std::addressof(get_reference_impl(true_type(), s));
 			}
 			static const value_type*
-				get_pointer_impl(true_type, const any_storage& s)
+				get_pointer_impl(true_, const any_storage& s)
 			{
 				return std::addressof(get_reference_impl(true_type(), s));
 			}
@@ -317,28 +320,28 @@ namespace leo
 
 		private:
 			static value_type&
-				get_reference_impl(false_type, any_storage& s)
+				get_reference_impl(false_, any_storage& s)
 			{
-				const auto p(get_pointer_impl(false_type(), s));
+				const auto p(get_pointer_impl(false_(), s));
 
 				lassume(p);
 				return *p;
 			}
 			static const value_type&
-				get_reference_impl(false_type, const any_storage& s)
+				get_reference_impl(false_, const any_storage& s)
 			{
-				const auto p(get_pointer_impl(false_type(), s));
+				const auto p(get_pointer_impl(false_(), s));
 
 				lassume(p);
 				return *p;
 			}
 			static value_type&
-				get_reference_impl(true_type, any_storage& s)
+				get_reference_impl(true_, any_storage& s)
 			{
 				return s.access<value_type>();
 			}
 			static const value_type&
-				get_reference_impl(true_type, const any_storage& s)
+				get_reference_impl(true_, const any_storage& s)
 			{
 				return s.access<const value_type>();
 			}
@@ -357,13 +360,13 @@ namespace leo
 		private:
 			template<typename... _tParams>
 			static LB_ATTR(always_inline) void
-				init_impl(false_type, any_storage& d, _tParams&&... args)
+				init_impl(false_, any_storage& d, _tParams&&... args)
 			{
 				d = new value_type(lforward(args)...);
 			}
 			template<typename... _tParams>
 			static LB_ATTR(always_inline) void
-				init_impl(true_type, any_storage& d, _tParams&&... args)
+				init_impl(true_, any_storage& d, _tParams&&... args)
 			{
 				new(d.access()) value_type(lforward(args)...);
 			}
@@ -377,10 +380,10 @@ namespace leo
 				switch (op)
 				{
 				case get_type:
-					d = &type_id<value_type>();
+					d = &leo::type_id<value_type>();
 					break;
 				case get_ptr:
-					d = get_pointer(s);
+					d = static_cast<void*>(get_pointer(s));
 					break;
 				case clone:
 					copy(d, s);
@@ -389,7 +392,7 @@ namespace leo
 					dispose(d);
 					break;
 				case get_holder_type:
-					d = &type_id<void>();
+					d = &leo::type_id<void>();
 					break;
 				case get_holder_ptr:
 					d = static_cast<holder*>(nullptr);
@@ -458,10 +461,10 @@ namespace leo
 				switch (op)
 				{
 				case get_type:
-					d = &type_id<value_type>();
+					d = &leo::type_id<value_type>();
 					break;
 				case get_ptr:
-					d = get_pointer(s);
+					d =static_cast<void*>(get_pointer(s));
 					break;
 				default:
 					base::manage(d, s, op);
@@ -503,15 +506,15 @@ namespace leo
 		private:
 			//! \since build 1.4
 			static void
-				init(true_type, any_storage& d, std::unique_ptr<_tHolder> p)
+				init(false_, any_storage& d, std::unique_ptr<_tHolder> p)
 			{
-				new(d.access()) _tHolder(std::move(*p));
+				d.construct<value_type*>(p.release());
 			}
 			//! \since build 1.4
 			static void
-				init(false_type, any_storage& d, std::unique_ptr<_tHolder> p)
+				init(true_, any_storage& d, std::unique_ptr<_tHolder> p)
 			{
-				d = p.release();
+				d.construct<_tHolder>(std::move(*p));
 			}
 
 		public:
@@ -639,6 +642,13 @@ namespace leo
 				: manager(any_ops::construct<_tHandler>(storage, lforward(args)...))
 			{}
 
+
+		protected:
+			any_base(const any_base& a)
+				: manager(a.manager)
+			{}
+			~any_base() = default;
+		public:
 			LB_API any_ops::any_storage&
 				call(any_ops::any_storage&, any_ops::op_code) const;
 
@@ -652,7 +662,7 @@ namespace leo
 				destroy() lnothrowv;
 
 			bool
-				empty() const lnothrow
+				has_value() const lnothrow
 			{
 				return !manager;
 			}
@@ -697,11 +707,22 @@ namespace leo
 			}
 
 			//! \since build 1.4
-			template<typename _type>
+			template<typename _type, typename... _tParams>
 			inline _type
-				unchecked_access(any_ops::op_code op) const
+				unchecked_access(any_ops::op_code op, _tParams&&... args) const
 			{
 				any_ops::any_storage t;
+
+				const auto gd(t.pun<_type>(lforward(args)...));
+
+				return unchecked_access<_type>(t, op);
+			}
+			template<typename _type>
+			inline _type
+				unchecked_access(default_init_t, any_ops::op_code op) const
+			{
+				any_ops::any_storage t;
+				const auto gd(t.pun_default<_type>());
 
 				return unchecked_access<_type>(t, op);
 			}
@@ -726,6 +747,13 @@ namespace leo
 				emplace_with_handler<any_ops::value_handler<decay_t<_type>>>(
 					lforward(args)...);
 			}
+			template<typename _type, typename _tOther, typename... _tParams>
+			void
+				emplace(std::initializer_list<_tOther> il, _tParams&&... args)
+			{
+				emplace_with_handler<any_ops::value_handler<decay_t<_type>>>(
+					il, lforward(args)...);
+			}
 			template<typename _tHolder, typename... _tParams>
 			void
 				emplace(any_ops::use_holder_t, _tParams&&... args)
@@ -740,7 +768,7 @@ namespace leo
 			{
 				auto& a(static_cast<_tAny&>(*this));
 
-				a.clear();
+				a.reset();
 				a.manager = any_ops::construct<decay_t<_tHandler>>(lforward(args)...);
 			}
 		};
@@ -757,6 +785,7 @@ namespace leo
 	*/
 	class LB_API any : private details::any_base, private details::any_emplace<any>
 	{
+		friend details::any_emplace<any>;
 	public:
 		//! \post \c this->empty() 。
 		any() lnothrow = default;
@@ -776,7 +805,7 @@ namespace leo
 			inline
 			any(_type&& x)
 			: any(any_ops::with_handler_t<
-				any_ops::ref_handler<unwrap_reference_t<decay_t<_type>>>>(), x)
+				any_ops::ref_handler<remove_reference_t<decay_unwrap_t<_type>>>>(), x)
 		{}
 		//! \since build 1.4
 		template<typename _type, typename... _tParams>
@@ -862,7 +891,7 @@ namespace leo
 		}
 
 		//! \since build 1.4
-		using any_base::empty;
+		using any_base::has_value;
 
 		//! \note LBase 扩展。
 		//@{
@@ -982,6 +1011,27 @@ namespace leo
 		x.swap(y);
 	}
 
+
+	/*!
+	\ingroup helper_functions
+	\brief 创建 any 对象。
+	\see WG21 P0032R3 。
+	*/
+	//@{
+	template<typename _type, typename... _tParams>
+	any
+		make_any(_tParams&&... args)
+	{
+		return any(in_place<_type>, lforward(args)...);
+	}
+	template<typename _type, typename _tOther, typename... _tParams>
+	any
+		make_any(std::initializer_list<_tOther> il, _tParams&&... args)
+	{
+		return any(in_place<_type>, il, lforward(args)...);
+	}
+	//@}
+
 	/*!
 	\brief 动态泛型转换。
 	\return 当 <tt>p
@@ -1021,7 +1071,7 @@ namespace leo
 
 		if (const auto p = x.template target<remove_reference_t<_tValue>>())
 			return static_cast<_tValue>(*p);
-		throw bad_any_cast(x.type(), type_id<_tValue>());
+		throw bad_any_cast(x.type(), leo::type_id<_tValue>());
 	}
 	template<typename _tValue>
 	_tValue
@@ -1032,7 +1082,7 @@ namespace leo
 
 		if (const auto p = x.template target<const remove_reference_t<_tValue>>())
 			return static_cast<_tValue>(*p);
-		throw bad_any_cast(x.type(), type_id<_tValue>());
+		throw bad_any_cast(x.type(), leo::type_id<_tValue>());
 	}
 	//! \since build 1.4
 	template<typename _tValue>
@@ -1044,7 +1094,7 @@ namespace leo
 
 		if (const auto p = x.template target<remove_reference_t<_tValue>>())
 			return static_cast<_tValue>(*p);
-		throw bad_any_cast(x.type(), type_id<_tValue>());
+		throw bad_any_cast(x.type(), leo::type_id<_tValue>());
 	}
 	//@}
 	//@}
@@ -1065,8 +1115,8 @@ namespace leo
 	inline _type*
 		unchecked_any_cast(any* p) lnothrowv
 	{
-		lconstraint(p && !p->empty()
-			&& p->unchecked_type() == type_id<_type>());
+		lconstraint(p && p->has_value()
+			&& p->unchecked_type() == leo::type_id<_type>());
 		return static_cast<_type*>(p->unchecked_get());
 	}
 
@@ -1078,8 +1128,8 @@ namespace leo
 	inline const _type*
 		unchecked_any_cast(const any* p) lnothrowv
 	{
-		lconstraint(p && !p->empty()
-			&& p->unchecked_type() == type_id<const _type>());
+		lconstraint(p && p->has_value()
+			&& p->unchecked_type() == leo::type_id<const _type>());
 		return static_cast<const _type*>(p->unchecked_get());
 	}
 	//@}
@@ -1095,7 +1145,7 @@ namespace leo
 	inline _type*
 		unsafe_any_cast(any* p) lnothrowv
 	{
-		lconstraint(p && p->type() == type_id<_type>());
+		lconstraint(p && p->type() == leo::type_id<_type>());
 		return static_cast<_type*>(p->get());
 	}
 
@@ -1104,11 +1154,59 @@ namespace leo
 	inline const _type*
 		unsafe_any_cast(const any* p) lnothrowv
 	{
-		lconstraint(p && p->type() == type_id<const _type>());
+		lconstraint(p && p->type() == leo::type_id<const _type>());
 		return static_cast<const _type*>(p->get());
 	}
 	//@}
 	//@}
 
+
+	/*!
+	\note LBase 扩展。
+	\sa void_ref
+	*/
+	class LB_API void_ref_any
+	{
+	private:
+		mutable any data;
+
+	public:
+		void_ref_any() = default;
+		template<typename _type,
+			limpl(typename = exclude_self_t<void_ref_any, _type>)>
+			void_ref_any(_type&& x)
+			: void_ref_any(lforward(x), is_convertible<_type&&, void_ref>())
+		{}
+
+	private:
+		template<typename _type>
+		void_ref_any(_type&& x, true_)
+			: data(void_ref(lforward(x)))
+		{}
+		template<typename _type>
+		void_ref_any(_type&& x, false_)
+			: data(lforward(x))
+		{}
+
+	public:
+		void_ref_any(const void_ref_any&) = default;
+		void_ref_any(void_ref_any&&) = default;
+
+		void_ref_any&
+			operator=(const void_ref_any&) = default;
+		void_ref_any&
+			operator=(void_ref_any&&) = default;
+
+		//! \pre 间接断言：参数指定初始化对应的类型。
+		template<typename _type,
+			limpl(typename = exclude_self_t<void_ref_any, _type>)>
+			LB_PURE
+			operator _type() const
+		{
+			if (data.type() == leo::type_id<void_ref>())
+				return *leo::unchecked_any_cast<void_ref>(&data);
+			return std::move(*leo::unchecked_any_cast<_type>(&data));
+		}
+	};
 }
 #endif

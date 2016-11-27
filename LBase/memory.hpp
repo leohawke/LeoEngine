@@ -151,36 +151,6 @@ namespace leo
 		: conditional<has_nested_allocator<_type>::value,
 		detected_t<details::nested_allocator_t, _type>, _tDefault>
 	{};
-	//@}
-
-	/*!
-	\tparam _tSize 范围大小类型。
-	\param n 范围大小。
-	\note 和 std::unitialized_fill_n 类似，但允许指定多个初始化参数。
-	\see WG21 N4431 20.7.12.4[uninitialized.fill.n] 。
-	*/
-	template<typename _tFwd, typename _tSize, typename... _tParams>
-	void
-		uninitialized_construct_n(_tFwd first, _tSize n, _tParams&&... args)
-	{
-		auto i = first;
-
-		try
-		{
-			// NOTE: This form is by specification (WG21 N4431) of
-			//	'std::unitialized_fill' literally.
-			for (; n--; ++i)
-				construct(i, lforward(args)...);
-		}
-		catch (...)
-		{
-			// NOTE: The order is unspecified.
-			destruct_range(first, i);
-			throw;
-		}
-	}
-	//@}
-	//@}
 
 	/*!
 	\brief 使用显式析构函数调用和 std::free 的删除器。

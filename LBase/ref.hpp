@@ -161,6 +161,44 @@ namespace leo
 	//@}
 	//@}
 
+
+	//@{
+	template<typename _type>
+	struct decay_unwrap : unwrap_reference<decay_t<_type>>
+	{};
+
+	template<typename _type>
+	using decay_unwrap_t = _t<decay_unwrap<_type>>;
+	//@}
+	//@}
+
+
+	/*!
+	\brief 包装间接操作的引用适配器。
+	*/
+	template<typename _type, typename _tReference = lref<_type>>
+	class indirect_ref_adaptor
+	{
+	public:
+		using value_type = _type;
+		using reference = _tReference;
+
+	private:
+		reference ref;
+
+	public:
+		indirect_ref_adaptor(value_type& r)
+			: ref(r)
+		{}
+
+		auto
+			get() lnothrow -> decltype(ref.get().get())
+		{
+			return ref.get().get();
+		}
+	};
+
+
 	/*!
 	\brief 解除引用包装。
 	\note 默认仅提供对 \c std::reference_wrapper 和 lref 的实例类型的重载。

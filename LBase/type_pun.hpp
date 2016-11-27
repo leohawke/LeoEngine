@@ -1,13 +1,13 @@
-/*! \file type_pun.hpp
+ï»¿/*! \file type_pun.hpp
 \ingroup LBase
-\brief ¹²Ïí´æ´¢ºÍÖ±½Ó×ª»»¡£
+\brief å…±äº«å­˜å‚¨å’Œç›´æ¥è½¬æ¢ã€‚
 
 */
 #ifndef LBase_type_pun_hpp
 #define LBase_type_pun_hpp 1
 
 
-#include "LBase/type_traits.hpp" // for "type_traits.hpp", bool_constant, lalignof,
+#include "LBase/placement.hpp" // for "type_traits.hpp", bool_constant, lalignof,
 //	and_, is_trivial, enable_if_t, is_object_pointer, remove_pointer_t,
 //	aligned_storage_t, is_reference, remove_reference_t, exclude_self_t,
 //	decay_t;
@@ -23,12 +23,12 @@ namespace leo
 	using stdex::byte;
 	/*!	\defgroup aligned_type_traits Aligned Type Traits
 	\ingroup binary_type_traits
-	\brief ¶ÔÆëÀàĞÍÌØÕ÷¡£
-	\note µÚÒ»²ÎÊıÀàĞÍ±ÈµÚ¶ş²ÎÊıÀàĞÍ¶ÔÆëÒªÇó¸üÑÏ¸ñ»òÏàÍ¬¡£
+	\brief å¯¹é½ç±»å‹ç‰¹å¾ã€‚
+	\note ç¬¬ä¸€å‚æ•°ç±»å‹æ¯”ç¬¬äºŒå‚æ•°ç±»å‹å¯¹é½è¦æ±‚æ›´ä¸¥æ ¼æˆ–ç›¸åŒã€‚
 	*/
 	//@{
 	/*!
-	\brief ÅĞ¶ÏÊÇ·ñ¶ÔÆë¼æÈİ¡£
+	\brief åˆ¤æ–­æ˜¯å¦å¯¹é½å…¼å®¹ã€‚
 	\since build 1.4
 	*/
 	template<typename _type, typename _type2>
@@ -38,7 +38,7 @@ namespace leo
 
 
 	/*!
-	\brief ÅĞ¶ÏÊÇ·ñ¿ÉÔ­µØ¶ÔÆë´æ´¢¡£
+	\brief åˆ¤æ–­æ˜¯å¦å¯åŸåœ°å¯¹é½å­˜å‚¨ã€‚
 	\since build 1.4
 	*/
 	template<typename _type, typename _tDst>
@@ -48,7 +48,7 @@ namespace leo
 
 
 	/*!
-	\brief ÅĞ¶ÏÊÇ·ñ¿É¶ÔÆë´æ´¢¡£
+	\brief åˆ¤æ–­æ˜¯å¦å¯å¯¹é½å­˜å‚¨ã€‚
 	\since build 1.4
 	*/
 	template<typename _type, typename _tDst>
@@ -58,7 +58,7 @@ namespace leo
 
 
 	/*!
-	\brief ÅĞ¶ÏÊÇ·ñ¿ÉÌæ»»¶ÔÆë´æ´¢¡£
+	\brief åˆ¤æ–­æ˜¯å¦å¯æ›¿æ¢å¯¹é½å­˜å‚¨ã€‚
 	\since build 1.4
 	*/
 	template<typename _type, typename _tDst>
@@ -68,8 +68,8 @@ namespace leo
 
 
 	/*!
-	\brief ÅĞ¶ÏÊÇ·ñ¿ÉÆ½·²Ìæ»»´æ´¢¡£
-	\todo Ê¹ÓÃ \c is_trivially_copyable ´úÌæ is_trivial ¡£
+	\brief åˆ¤æ–­æ˜¯å¦å¯å¹³å‡¡æ›¿æ¢å­˜å‚¨ã€‚
+	\todo ä½¿ç”¨ \c is_trivially_copyable ä»£æ›¿ is_trivial ã€‚
 	*/
 	template<typename _type, typename _tDst>
 	struct is_trivially_replaceable : and_<is_trivial<_type>, is_trivial<_tDst>,
@@ -82,7 +82,7 @@ namespace leo
 	//@{
 	/*!
 	\ingroup metafunctions
-	\brief Ñ¡ÔñºÍÌØ¶¨ÀàĞÍ¿ÉÌæ»»×Ö·ûÀàÀàĞÍµÄÌØ¶¨ÖØÔØÒÔ±ÜÃâ³åÍ»¡£
+	\brief é€‰æ‹©å’Œç‰¹å®šç±»å‹å¯æ›¿æ¢å­—ç¬¦ç±»ç±»å‹çš„ç‰¹å®šé‡è½½ä»¥é¿å…å†²çªã€‚
 	*/
 	template<typename _tSrc, typename _tDst, typename _type = void>
 	using enable_if_replaceable_t
@@ -91,7 +91,7 @@ namespace leo
 
 	/*!
 	\ingroup transformation_traits
-	\brief ÏÔÊ½×ª»»µÄÌæ´ú¶ÔÆë´æ´¢¶ÔÆë´æ´¢ÀàĞÍ¡£
+	\brief æ˜¾å¼è½¬æ¢çš„æ›¿ä»£å¯¹é½å­˜å‚¨å¯¹é½å­˜å‚¨ç±»å‹ã€‚
 	*/
 	template<typename _type, size_t _vAlign = lalignof(_type)>
 	using pun_storage_t = aligned_storage_t<sizeof(_type), _vAlign>;
@@ -99,18 +99,18 @@ namespace leo
 
 	/*!
 	\ingroup cast
-	\pre Ä¿±êÀàĞÍÊÇ¶ÔÏóÖ¸Õë»òÒıÓÃ¡£
-	\note Ê¹ÓÃ \c reinterpret_cast ÇÒ±£Ö¤Ä¿±êÀàĞÍµÄ¶ÔÆëÒªÇó²»±ÈÔ´ÀàĞÍ¸üÑÏ¸ñÒÔ±£Ö¤¿ÉÄæ¡£
+	\pre ç›®æ ‡ç±»å‹æ˜¯å¯¹è±¡æŒ‡é’ˆæˆ–å¼•ç”¨ã€‚
+	\note ä½¿ç”¨ \c reinterpret_cast ä¸”ä¿è¯ç›®æ ‡ç±»å‹çš„å¯¹é½è¦æ±‚ä¸æ¯”æºç±»å‹æ›´ä¸¥æ ¼ä»¥ä¿è¯å¯é€†ã€‚
 	*/
 	//@{
 	/*!
-	\brief ±£Ö¤¶ÔÆë¼æÈİµÄÏÔÊ½×ª»»¡£
-	\note ÓÃÓÚÌæ´úÕë¶ÔÂú×ã is_aligned_compatible ÒªÇó¶ÔÏóµÄ \c reinterpret_cast ¡£
+	\brief ä¿è¯å¯¹é½å…¼å®¹çš„æ˜¾å¼è½¬æ¢ã€‚
+	\note ç”¨äºæ›¿ä»£é’ˆå¯¹æ»¡è¶³ is_aligned_compatible è¦æ±‚å¯¹è±¡çš„ \c reinterpret_cast ã€‚
 	*/
 	//@{
 	template<typename _pDst, typename _tSrc>
-	inline limpl(enable_if_t)<and_<is_object_pointer<_pDst>,
-		is_aligned_compatible<_tSrc, remove_pointer_t<_pDst>>>::value, _pDst>
+	inline limpl(enable_if_t) < and_<is_object_pointer<_pDst>,
+		is_aligned_compatible<_tSrc, remove_pointer_t<_pDst>>>::value, _pDst >
 		aligned_cast(_tSrc* v) lnothrow
 	{
 		return reinterpret_cast<_pDst>(v);
@@ -128,13 +128,13 @@ namespace leo
 
 
 	/*!
-	\brief ±£Ö¤¶ÔÆë´æ´¢µÄÏÔÊ½×ª»»¡£
-	\note ÓÃÓÚÌæ´úÕë¶ÔÂú×ã is_aligned_storable ÒªÇó¶ÔÏóµÄ \c reinterpret_cast ¡£
+	\brief ä¿è¯å¯¹é½å­˜å‚¨çš„æ˜¾å¼è½¬æ¢ã€‚
+	\note ç”¨äºæ›¿ä»£é’ˆå¯¹æ»¡è¶³ is_aligned_storable è¦æ±‚å¯¹è±¡çš„ \c reinterpret_cast ã€‚
 	*/
 	//@{
 	template<typename _pDst, typename _tSrc>
-	inline limpl(enable_if_t)<and_<is_object_pointer<_pDst>,
-		is_aligned_storable<_tSrc, remove_pointer_t<_pDst>>>::value, _pDst>
+	inline limpl(enable_if_t) < and_<is_object_pointer<_pDst>,
+		is_aligned_storable<_tSrc, remove_pointer_t<_pDst>>>::value, _pDst >
 		aligned_store_cast(_tSrc* v) lnothrow
 	{
 		return reinterpret_cast<_pDst>(v);
@@ -152,13 +152,13 @@ namespace leo
 
 
 	/*!
-	\brief ±£Ö¤¶ÔÆëÌæ»»´æ´¢µÄÏÔÊ½×ª»»¡£
-	\note ÓÃÓÚÌæ´úÕë¶ÔÂú×ã is_aligned_replaceable ÒªÇó¶ÔÏóµÄ \c reinterpret_cast ¡£
+	\brief ä¿è¯å¯¹é½æ›¿æ¢å­˜å‚¨çš„æ˜¾å¼è½¬æ¢ã€‚
+	\note ç”¨äºæ›¿ä»£é’ˆå¯¹æ»¡è¶³ is_aligned_replaceable è¦æ±‚å¯¹è±¡çš„ \c reinterpret_cast ã€‚
 	*/
 	//@{
 	template<typename _pDst, typename _tSrc>
-	inline limpl(enable_if_t)<and_<is_object_pointer<_pDst>,
-		is_aligned_replaceable<_tSrc, remove_pointer_t<_pDst>>>::value, _pDst>
+	inline limpl(enable_if_t) < and_<is_object_pointer<_pDst>,
+		is_aligned_replaceable<_tSrc, remove_pointer_t<_pDst>>>::value, _pDst >
 		aligned_replace_cast(_tSrc* v) lnothrow
 	{
 		return reinterpret_cast<_pDst>(v);
@@ -176,14 +176,14 @@ namespace leo
 
 
 	/*!
-	\brief ±£Ö¤Æ½·²Ìæ»»´æ´¢µÄÏÔÊ½×ª»»¡£
-	\note ÓÃÓÚÌæ´úÕë¶ÔÂú×ã is_trivially_replaceable ÒªÇó¶ÔÏóµÄ \c reinterpret_cast ¡£
+	\brief ä¿è¯å¹³å‡¡æ›¿æ¢å­˜å‚¨çš„æ˜¾å¼è½¬æ¢ã€‚
+	\note ç”¨äºæ›¿ä»£é’ˆå¯¹æ»¡è¶³ is_trivially_replaceable è¦æ±‚å¯¹è±¡çš„ \c reinterpret_cast ã€‚
 	\since build 1.4
 	*/
 	//@{
 	template<typename _pDst, typename _tSrc>
-	inline limpl(enable_if_t)<and_<is_object_pointer<_pDst>,
-		is_trivially_replaceable<_tSrc, remove_pointer_t<_pDst>>>::value, _pDst>
+	inline limpl(enable_if_t) < and_<is_object_pointer<_pDst>,
+		is_trivially_replaceable<_tSrc, remove_pointer_t<_pDst>>>::value, _pDst >
 		replace_cast(_tSrc* v) lnothrow
 	{
 		return reinterpret_cast<_pDst>(v);
@@ -201,9 +201,76 @@ namespace leo
 	//@}
 	//@}
 
+	/*!
+	\brief é¿å…ä¸¥æ ¼åˆ«ååˆ†æé™åˆ¶çš„ç¼“å†²å¼•ç”¨ã€‚
+	\tparam _type å®Œæ•´æˆ–ä¸å®Œæ•´çš„å¯¹è±¡ç±»å‹ã€‚
+	*/
+	template<typename _type>
+	class pun_ref
+	{
+		static_assert(is_object<_type>::value, "Invalid type found.");
+
+	private:
+		//! \invariant \c alias ã€‚
+		_type& alias;
+
+	public:
+		//! \pre å®ä¾‹åŒ–æ—¶å¯¹è±¡ç±»å‹å®Œæ•´ã€‚
+		//@{
+		/*!
+		\pre æŒ‡é’ˆå‚æ•°éç©ºã€‚
+		*/
+		//@{
+		pun_ref(decltype(default_init),void* p)
+			: alias(*::new(p) _type)
+		{}
+		template<typename... _tParams>
+		pun_ref(void* p, _tParams&&... args)
+			: alias(*::new(p) _type(lforward(args)...))
+		{}
+		//@}
+		~pun_ref()
+		{
+			alias.~_type();
+		}
+		//@}
+
+		_type&
+			get() const lnothrow
+		{
+			return alias;
+		}
+	};
+
+	//@{
+	//! \brief é¿å…ä¸¥æ ¼åˆ«ååˆ†æé™åˆ¶çš„ç¼“å†²ç‹¬å æ‰€æœ‰æƒæŒ‡é’ˆã€‚
+	template<typename _type>
+	using pun_ptr = placement_ptr<decay_t<_type>>;
+
+
+	//! \brief æ„é€ é¿å…ä¸¥æ ¼åˆ«ååˆ†æé™åˆ¶çš„ç¼“å†²ç‹¬å æ‰€æœ‰æƒæŒ‡é’ˆæŒ‡å®šçš„å€¼åˆå§‹åŒ–å¯¹è±¡ã€‚
+	template<typename _type, typename _tObj, typename... _tParams>
+	inline pun_ptr<_type>
+		make_pun(_tObj& obj, _tParams&&... args)
+	{
+		return pun_ptr<_type>(
+			leo::construct_within<decay_t<_type>>(obj, lforward(args)...));
+	}
 
 	/*!
-	\brief ÈÎÒâ±ê×¼²¼¾ÖÀàĞÍ´æ´¢¡£
+	\brief æ„é€ é¿å…ä¸¥æ ¼åˆ«ååˆ†æé™åˆ¶çš„ç¼“å†²ç‹¬å æ‰€æœ‰æƒæŒ‡é’ˆæŒ‡å®šçš„é»˜è®¤åˆå§‹åŒ–å¯¹è±¡ã€‚
+	*/
+	template<typename _type, typename _tObj>
+	inline pun_ptr<_type>
+		make_pun_default(_tObj& obj)
+	{
+		return
+			pun_ptr<_type>(leo::construct_default_within<decay_t<_type>>(obj));
+	}
+	//@}
+
+	/*!
+	\brief ä»»æ„æ ‡å‡†å¸ƒå±€ç±»å‹å­˜å‚¨ã€‚
 	\since build 1.4
 	*/
 	template<typename _tUnderlying = aligned_storage_t<sizeof(void*)>>
@@ -230,7 +297,7 @@ namespace leo
 		standard_layout_storage&
 			operator=(const standard_layout_storage&) = default;
 		/*!
-		\note Îª±ÜÃâÀàĞÍ´íÎó£¬ĞèÒªÈ·¶¨ÀàĞÍÊ±Ó¦Ê¹ÓÃÏÔÊ½Ê¹ÓÃ access Ö¸¶¨ÀàĞÍ¸³Öµ¡£
+		\note ä¸ºé¿å…ç±»å‹é”™è¯¯ï¼Œéœ€è¦ç¡®å®šç±»å‹æ—¶åº”ä½¿ç”¨æ˜¾å¼ä½¿ç”¨ access æŒ‡å®šç±»å‹èµ‹å€¼ã€‚
 		\since build 1.4
 		*/
 		template<typename _type,
@@ -271,6 +338,42 @@ namespace leo
 			return *static_cast<const _type*>(access());
 		}
 
+		//@{
+		//! \pre å¯¹è±¡æœªé€šè¿‡ construct æˆ–æ„é€ æ¨¡æ¿åˆ›å»ºã€‚
+		template<typename _type, typename... _tParams>
+		inline _type*
+			construct(_tParams&&... args)
+		{
+			return leo::construct_within<decay_t<_type>>(object,
+				lforward(args)...);
+		}
+
+		//! \pre æŒ‡å®šç±»å‹çš„å¯¹è±¡å·²é€šè¿‡ construct æˆ–æ„é€ æ¨¡æ¿åˆ›å»ºã€‚
+		template<typename _type>
+		inline void
+			destroy()
+		{
+			leo::destruct_in(access<decay_t<_type>>());
+		}
+
+		//! \pre å¯¹è±¡æœªé€šè¿‡ construct æˆ–æ„é€ æ¨¡æ¿åˆ›å»ºã€‚
+		//@{
+		template<typename _type, typename... _tParams>
+		inline pun_ptr<_type>
+			pun(_tParams&&... args)
+		{
+			return leo::make_pun<_type>(object, lforward(args)...);
+		}
+
+		template<typename _type, typename... _tParams>
+		inline pun_ptr<_type>
+			pun_default()
+		{
+			return leo::make_pun_default<_type>(object);
+		}
+		//@}
+		//@}
+
 		lconstfn_relaxed LB_PURE byte*
 			data() lnothrow
 		{
@@ -294,7 +397,7 @@ namespace leo
 
 	/*!
 	\ingroup transformation_traits
-	\brief ÏÔÊ½×ª»»µÄÌæ´ú±ê×¼²¼¾ÖÌæ´ú´æ´¢ÀàĞÍ¡£
+	\brief æ˜¾å¼è½¬æ¢çš„æ›¿ä»£æ ‡å‡†å¸ƒå±€æ›¿ä»£å­˜å‚¨ç±»å‹ã€‚
 	\since build 1.4
 	*/
 	template<typename _type, size_t _vAlign = lalignof(_type)>

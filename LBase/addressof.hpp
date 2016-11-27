@@ -78,7 +78,7 @@ namespace leo {
 			inline _type*
 			constfn_addressof(_type& r)
 		{
-			return addressof(r);
+			return leo::addressof(r);
 		}
 		//@}
 
