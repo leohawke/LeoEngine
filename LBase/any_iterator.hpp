@@ -1,8 +1,14 @@
+/*! \file any_iterator.hpp
+\ingroup LBase
+\brief 动态泛型迭代器。
+\par 修改时间:
+2016-11-23 11:22 +0800
+*/
+
 #ifndef LBase_any_iterator_h
 #define LBase_any_iterator_h 1
 
 #include "LBase/any.h"
-#include "LBase/functional.hpp"
 #include "LBase/iterator.hpp"
 
 namespace leo
@@ -46,10 +52,10 @@ namespace leo
 		{
 			using value_type = unwrap_reference_t<_type>;
 			using type = cond_t<is_reference_wrapper<_type>,
-				ref_handler<value_type>, value_handler<value_type >> ;
+				ref_handler<value_type>, value_handler<value_type >>;
 		};
 
-		template<typename _type>
+		template<typename _type, typename _tReference>
 		class iterator_handler : public wrap_handler<_type>::type
 		{
 		public:
@@ -69,8 +75,15 @@ namespace leo
 					d.access<bool>() = is_undereferenceable(get_reference(s));
 					break;
 				case dereference:
-					d = void_ref(*get_reference(s));
-					break;
+				{
+					using obj_t = cond_t<is_reference<_tReference>,
+						lref<decay_t<_tReference>>, _tReference>;
+					auto& p(d.access<any*>());
+
+					lassume(p);
+					*p = obj_t(*get_reference(s));
+				}
+				break;
 				case increase:
 					++get_reference(d);
 					break;
@@ -80,11 +93,11 @@ namespace leo
 			}
 		};
 
-		template<typename _type>
-		class input_iterator_handler : public iterator_handler<_type>
+		template<typename _type, typename _tReference>
+		class input_iterator_handler : public iterator_handler<_type, _tReference>
 		{
 		public:
-			using base = iterator_handler<_type>;
+			using base = iterator_handler<_type, _tReference>;
 			using value_type = typename base::value_type;
 
 			using base::get_reference;
@@ -97,11 +110,8 @@ namespace leo
 				switch (op)
 				{
 				case equals:
-				{
-					const auto p(d.access<any_storage*>());
-
-					d.access<bool>() = get_reference(*p) == get_reference(s);
-				}
+					if (get_reference(*d.access<any_storage*>()) != get_reference(s))
+						d = static_cast<any_storage*>(nullptr);
 					break;
 				default:
 					base::manage(d, s, op);
@@ -109,11 +119,11 @@ namespace leo
 			}
 		};
 
-		template<typename _type>
-		class forward_iterator_handler : public input_iterator_handler<_type>
+		template<typename _type, typename _tReference>
+		class forward_iterator_handler : public input_iterator_handler<_type, _tReference>
 		{
 		public:
-			using base = input_iterator_handler<_type>;
+			using base = input_iterator_handler<_type, _tReference>;
 			using value_type = typename base::value_type;
 
 			using base::get_reference;
@@ -123,11 +133,11 @@ namespace leo
 			using base::manage;
 		};
 
-		template<typename _type>
-		class bidirectional_iterator_handler : public forward_iterator_handler<_type>
+		template<typename _type, typename _tReference>
+		class bidirectional_iterator_handler : public forward_iterator_handler<_type, _tReference>
 		{
 		public:
-			using base = forward_iterator_handler<_type>;
+			using base = forward_iterator_handler<_type, _tReference>;
 			using value_type = typename base::value_type;
 
 			using base::get_reference;
@@ -148,60 +158,42 @@ namespace leo
 			}
 		};
 	}//namespace any_ops
-#define LB_IterOp1(_n, _t, _it, _e) \
-	template<typename _type, typename _tDifference, typename _tPointer, \
-		typename _tReference> \
-	inline _t \
-	_n(const _it<_type, _tDifference, _tPointer, _tReference>& i) \
-		{ \
-		return _e; \
-		}
-
-#define LB_IterOp2(_n, _t, _it, _e) \
-	template<typename _type, typename _tDifference, typename _tPointer, \
-		typename _tReference> \
-	inline _t \
-	_n(const _it<_type, _tDifference, _tPointer, _tReference>& x, \
-		const _it<_type, _tDifference, _tPointer, _tReference>& y) \
-		{ \
-		return _e; \
-		}
-
-#define LB_IterOpPost(_op, _it) \
-	_it \
-	operator _op(int) \
-		{ \
-		auto tmp = *this; \
-	\
-		_op *this; \
-		return tmp; \
-		}
 
 	template<typename _type, typename _tDifference = ptrdiff_t,
 		typename _tPointer = _type*, typename _tReference = _type&>
-	//动态泛型输入迭代器
-	class any_input_iterator : public std::iterator<std::input_iterator_tag, _type,
-		_tDifference, _tPointer, _tReference>, protected any
+		//动态泛型输入迭代器
+		class any_input_iterator : protected any,
+		public input_iteratable<any_input_iterator<_type, _tDifference, _tPointer,
+		_tReference>, _tReference>
 	{
+	protected:
+		using base = any;
 	public:
+		using iterator_category = std::input_iterator_tag;
+		using value_type = _type;
+		using difference_type = _tDifference;
+
 		using pointer = _tPointer;
 		using reference = _tReference;
 
 		any_input_iterator() = default;
-		template<typename _tIter>
-		any_input_iterator(_tIter&& i)
-			: any()
+		template<typename _tIter,
+			limpl(typename = exclude_self_t<any_input_iterator, _tIter>)>
+			any_input_iterator(_tIter&& i)
+			: any_input_iterator(any_ops::with_handler_t<
+				any_ops::input_iterator_handler<decay_t<_tIter>, reference>>(),
+				lforward(i))
+		{}
+	protected:
+		template<typename _tIter, typename _tHandler>
+		any_input_iterator(any_ops::with_handler_t<_tHandler> t, _tIter&& i)
+			: base(t, lforward(i))
 		{
-			using param_obj_type = typename remove_rcv<_tIter>::type;
-			using handler = any_ops::input_iterator_handler<param_obj_type>;
-
-			static_assert(is_convertible<indirect_t<unwrap_reference_t<
-				decay_t<_tIter>>&>, reference>::value,
-				"Wrong target iterator type found.");
-
-			manager = handler::manage;
-			handler::init(storage, lforward(i));
+			static_assert(is_convertible<indirect_t<decay_unwrap_t<_tIter>>,
+				reference>(), "Wrong target iterator type found.");
 		}
+
+	public:
 		any_input_iterator(const any_input_iterator&) = default;
 
 		any_input_iterator(any_input_iterator&&) = default;
@@ -210,18 +202,20 @@ namespace leo
 			operator=(const any_input_iterator&) = default;
 		any_input_iterator&
 
-		operator=(any_input_iterator&&) = default;
+			operator=(any_input_iterator&&) = default;
 
 
 		reference
 			operator*() const
 		{
-			lassume(manager);
-
+			// TODO: More graceful implementation for unused value?
+			any res;
 			any_ops::any_storage t;
+			const auto gd(t.pun<any*>(&res));
 
-			manager(t, storage, any_ops::dereference);
-			return reference(t.access<void_ref>());
+			call(t, any_ops::dereference);
+			return reference(
+				*leo::unchecked_any_cast<remove_reference_t<reference>>(&res));
 		}
 
 		pointer
@@ -233,72 +227,85 @@ namespace leo
 		any_input_iterator&
 			operator++()
 		{
-			lassume(manager);
-			manager(storage, storage, any_ops::increase);
+			call(get_storage(), any_ops::increase);
 			return *this;
 		}
 
-		any
-			get() const
+		friend bool
+			operator==(const any_input_iterator& x, const any_input_iterator& y)
 		{
-			return static_cast<const any&>(*this);
-		}
-
-		bool
-			check_undereferenceable() const
-		{
-			if (manager)
+			if (x.has_value() || y.has_value())
 			{
-				any_ops::any_storage t;
+				lassume(x.type() == y.type());
 
-				manager(t, storage, any_ops::check_undereferenceable);
-				return t.access<bool>();
+				using any_ops::any_storage;
+				any_storage t;
+				const auto gd(t.pun<any_storage*>(&x.get_storage()));
+
+				return y.template
+					unchecked_access<any_storage*>(t, any_ops::equals);
 			}
 			return true;
 		}
 
-		bool
-			equals(const any_input_iterator& i) const
+		any&
+			get() lnothrow
 		{
-			if (!*this && !i)
-				return true;
-			lassume(type() == i.type());
-
-			any_ops::any_storage t(&storage);
-
-			manager(t, i.storage, any_ops::equals);
-			return t.access<bool>();
+			return *this
 		}
 
+		const any&
+			get() const lnothrow
+		{
+			return *this
+		}
+
+		friend bool
+			is_undereferenceable(const any_input_iterator& i)
+		{
+			return i.has_value() ? i.template unchecked_access<bool>(
+				any_ops::check_undereferenceable) : true;
+		}
+
+
+		using any::target;
 		using any::type;
 	};
 
-	LB_IterOp2(operator==, bool, any_input_iterator, x.equals(y))
-
-	LB_IterOp2(operator!=, bool, any_input_iterator, !(x == y))
-
-	LB_IterOp1(is_undereferenceable, bool, any_input_iterator,
-		i.check_undereferenceable())
-
-	using input_monomorphic_iterator
-		= any_input_iterator<void_ref, ptrdiff_t, void*, void_ref>;
-
 	template<typename _type, typename _tDifference = ptrdiff_t,
 		typename _tPointer = _type*, typename _tReference = _type&>
-	//动态泛型前向迭代器
-	class any_forward_iterator
-		: public any_input_iterator<_type, _tDifference, _tPointer, _tReference>
+		//动态泛型前向迭代器
+		class any_forward_iterator
+		: public any_input_iterator<_type, _tDifference,
+		_tPointer, _tReference>, public forward_iteratable<any_forward_iterator<
+		_type, _tDifference, _tPointer, _tReference>, _tReference>
 	{
+	protected:
+		using base = any_input_iterator<_type, _tDifference,
+			_tPointer, _tReference>;
 	public:
 		using iterator_category = std::forward_iterator_tag;
 		using pointer = _tPointer;
 		using reference = _tReference;
 
 		any_forward_iterator() = default;
-		template<typename _tIter>
-		any_forward_iterator(_tIter&& i)
-			: any_input_iterator<_type, _tPointer, _tReference>(lforward(i))
+		template<typename _tIter,
+			limpl(typename = exclude_self_t<any_forward_iterator, _tIter>)>
+			any_forward_iterator(_tIter&& i)
+			: any_forward_iterator(any_ops::with_handler_t<
+				any_ops::forward_iterator_handler<decay_t<_tIter>, reference>>(),
+				lforward(i))
+		{
+			static_assert(is_convertible<indirect_t<decay_unwrap_t<_tIter>>,
+				reference>(), "Wrong target iterator type found.");
+		}
+	protected:
+		template<typename _tIter, typename _tHandler>
+		any_forward_iterator(any_ops::with_handler_t<_tHandler> t, _tIter&& i)
+			: base(t, lforward(i))
 		{}
+	public:
+
 		any_forward_iterator(const any_forward_iterator&) = default;
 
 		any_forward_iterator(any_forward_iterator&&) = default;
@@ -308,92 +315,92 @@ namespace leo
 			operator=(const any_forward_iterator&) = default;
 		any_forward_iterator&
 
-		operator=(any_forward_iterator&&) = default;
+			operator=(any_forward_iterator&&) = default;
 
 
 		any_forward_iterator&
 			operator++()
 		{
-			any_input_iterator<_type, _tPointer, _tReference>::operator++();
+			base::operator++();
 			return *this;
 		}
-		LB_IterOpPost(++, any_forward_iterator)
+
+		friend bool
+			operator==(const any_forward_iterator& x, const any_forward_iterator& y)
+		{
+			return static_cast<const base&>(x) == static_cast<const base&>(y);
+		}
 	};
-
-	LB_IterOp2(operator==, bool, any_forward_iterator, x.equals(y))
-
-	LB_IterOp2(operator!=, bool, any_forward_iterator, !(x == y))
-
-	LB_IterOp1(is_undereferenceable, bool, any_forward_iterator,
-		i.check_undereferenceable())
 
 	using forward_monomorphic_iterator
 		= any_forward_iterator<void_ref, ptrdiff_t, void*, void_ref>;
 
 	template<typename _type, typename _tDifference = ptrdiff_t,
 		typename _tPointer = _type*, typename _tReference = _type&>
-	//动态泛型双向迭代器
-	class any_bidirectional_iterator
-		: public any_forward_iterator<_type, _tDifference, _tPointer, _tReference>
+		//动态泛型双向迭代器
+		class any_bidirectional_iterator
+		: public any_forward_iterator<_type,
+		_tDifference, _tPointer, _tReference>, public bidirectional_iteratable<
+		any_bidirectional_iterator<_type, _tDifference, _tPointer, _tReference>,
+		_tReference>
 	{
+	protected:
+		using base = any_forward_iterator<_type,
+			_tDifference, _tPointer, _tReference>;
+
 	public:
 		using iterator_category = std::bidirectional_iterator_tag;
 		using pointer = _tPointer;
 		using reference = _tReference;
 
 		any_bidirectional_iterator() = default;
-		template<typename _tIter>
-		any_bidirectional_iterator(_tIter&& i)
-			: any_input_iterator<_type, _tPointer, _tReference>(lforward(i))
+		template<typename _tIter,
+			limpl(typename = exclude_self_t<any_bidirectional_iterator, _tIter>)>
+			any_bidirectional_iterator(_tIter&& i)
+			: any_forward_iterator<_type, _tPointer, _tReference>(lforward(i))
 		{}
+
+	protected:
+		template<typename _tIter, typename _tHandler>
+		any_bidirectional_iterator(any_ops::with_handler_t<_tHandler> t, _tIter&& i)
+			: base(t, lforward(i))
+		{}
+
+	public:
 		any_bidirectional_iterator(const any_bidirectional_iterator&) = default;
-#if LB_IMPL_MSCPP
-		any_bidirectional_iterator(any_bidirectional_iterator&& i)
-			: any_forward_iterator(static_cast<any_forward_iterator&&>(i))
-		{}
-#else
 		any_bidirectional_iterator(any_bidirectional_iterator&&) = default;
-#endif
 
 		any_bidirectional_iterator&
 			operator=(const any_bidirectional_iterator&) = default;
 		any_bidirectional_iterator&
 
-		operator=(any_bidirectional_iterator&&) = default;
+			operator=(any_bidirectional_iterator&&) = default;
 
 
 		any_bidirectional_iterator&
 			operator++()
 		{
-			any_forward_iterator<_type, _tPointer, _tReference>::operator++();
+			base::operator++();
 			return *this;
 		}
-		LB_IterOpPost(++, any_bidirectional_iterator)
 
-			any_bidirectional_iterator&
+		any_bidirectional_iterator&
 			operator--()
 		{
-			lassume(this->manager);
-			this->manager(this->storage, this->storage, any_ops::decrease);
+			this->call(this->get_storage(), any_ops::decrease);
 			return *this;
 		}
-		LB_IterOpPost(--, any_bidirectional_iterator)
+
+		friend bool
+			operator==(const any_bidirectional_iterator& x,
+				const any_bidirectional_iterator& y)
+		{
+			return static_cast<const base&>(x) == static_cast<const base&>(y);
+		}
 	};
 
-	LB_IterOp2(operator==, bool, any_bidirectional_iterator, x.equals(y))
-
-		LB_IterOp2(operator!=, bool, any_bidirectional_iterator, !(x == y))
-
-		LB_IterOp1(is_undereferenceable, bool, any_bidirectional_iterator,
-		i.check_undereferenceable())
-
-		using bidirectional_monomorphic_iterator
+	using bidirectional_monomorphic_iterator
 		= any_bidirectional_iterator<void_ref, ptrdiff_t, void*, void_ref>;
-
-
-#undef LB_IterOp1
-#undef LB_IterOp2
-#undef LB_IterOpPost
 }
 
 #endif
