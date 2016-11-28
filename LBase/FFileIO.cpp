@@ -12,7 +12,7 @@
 //	available if it is really being used.
 #		undef _fileno
 #	endif
-#	include <LBase/Win32/Mingw32.h>
+#	include <LBase/Win32/NLS.h>
 //	platform_ex::GetErrnoFromWin32, platform_ex::QueryFileLinks,
 //	platform_ex::QueryFileNodeID, platform_ex::QueryFileTime,
 //	platform_ex::WCSToUTF8, platform_ex::UTF8ToWCS, platform_ex::ConvertTime,

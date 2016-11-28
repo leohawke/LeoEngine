@@ -157,7 +157,7 @@ namespace platform_ex {
 			}
 		}
 
-		UniqueNtHandle File::CreateFileWA(const std::experimental::wstring_view& path, uint32 flags) {
+		UniqueNtHandle File::CreateFileWA(const wstring_view& path, uint32 flags) {
 			constexpr wchar_t kDosDevicePath[] = { L'\\', L'?', L'?' };
 
 			const auto uSize = path.size() * sizeof(wchar_t);
@@ -282,10 +282,10 @@ namespace platform_ex {
 		bool File::IsOpen() const lnoexcept {
 			return !!file;
 		}
-		void File::Open(const std::experimental::wstring_view& path, uint32 flags) {
+		void File::Open(const wstring_view& path, uint32 flags) {
 			File(path, flags).Swap(*this);
 		}
-		bool File::OpenNothrow(const std::experimental::wstring_view& path, uint32 flags) {
+		bool File::OpenNothrow(const wstring_view& path, uint32 flags) {
 			try {
 				Open(path, flags);
 				return true;

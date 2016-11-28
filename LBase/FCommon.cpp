@@ -4,7 +4,7 @@
 #include <cerrno>
 #include <cstdarg>
 #if LFL_Win32
-#	include <LBase/Win32/Mingw32.h>
+#	include <LBase/Win32/NLS.h>
 #endif
 
 namespace platform

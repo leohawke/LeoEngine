@@ -148,6 +148,9 @@
     <ClInclude Include="experimental\string_view.hpp">
       <Filter>experimental</Filter>
     </ClInclude>
+    <ClInclude Include="Win32\NLS.h">
+      <Filter>Framework\Win32</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CHRLib\CharacterProcessing.cpp">
@@ -189,6 +192,9 @@
       <Filter>Framework\Win32</Filter>
     </ClCompile>
     <ClCompile Include="operators.hpp" />
+    <ClCompile Include="Win32\NLS.cpp">
+      <Filter>Framework\Win32</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="experimental\string_view.hcc">

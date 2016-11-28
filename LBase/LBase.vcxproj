@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Win32\NLS.cpp" />
     <ClInclude Include="addressof.hpp" />
     <ClInclude Include="algorithm.hpp" />
     <ClInclude Include="any.h" />
@@ -98,6 +99,7 @@
     <ClInclude Include="variadic.hpp" />
     <ClInclude Include="Win32\Consoles.h" />
     <ClInclude Include="Win32\Mingw32.h" />
+    <ClInclude Include="Win32\NLS.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="any.cpp" />

@@ -3,6 +3,8 @@
 #if LFL_Win32
 #include <csignal>
 #include <LBase/NativeAPI.h>
+#include <LBase/Win32/Consoles.h>
+#include <LBase/Win32/NLS.h>
 #endif
 #if LB_Multithread == 1
 #include <LBase/concurrency.h>
@@ -31,10 +33,39 @@ namespace platform
 		}
 #endif
 
+#if LFL_Win32
+		LB_NONNULL(3) size_t
+			WConsoleOutput(wstring& wstr, unsigned long h, const char* str)
+		{
+			using namespace platform_ex;
+
+			wstr = platform_ex::Windows::UTF8ToWCS(str) + L'\n';
+			return platform_ex::Windows::WConsole(h).WriteString(wstr);
+		}
+#endif
+
 		using namespace Concurrency;
 
 	} // unnamed namespace;
 
+	bool
+		Echo(string_view sv) lnoexcept(false)
+	{
+#if LFL_Win32
+		wstring wstr;
+		size_t n(0);
+
+		TryExpr(n = WConsoleOutput(wstr, STD_OUTPUT_HANDLE, sv.data()))
+			CatchIgnore(platform_ex::Windows::Win32Exception&)
+			if (n < wstr.length())
+				std::cout << &wstr[n];
+		return bool(std::cout.flush());
+#elif LB_Hosted
+		return bool(std::cout << platform_ex::EncodeArg(sv) << std::endl);
+#else
+		return bool(std::cout << sv << std::endl);
+#endif
+	}
 
 	void
 		Logger::SetFilter(Filter f)

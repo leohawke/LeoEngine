@@ -5,9 +5,14 @@
 #ifndef LE_WIN32_File_H
 #define LE_WIN32_File_H 1
 
-#include <LBase/experimental/string_view.hpp> //TODO:replace it
-#include "NTHandle.h"
 #include <LBase/linttype.hpp>
+
+#ifdef LB_IMPL_MSCPP
+#include <string_view>
+#else
+#include <experimental/string_view> //TODO:replace it
+#endif
+#include "NTHandle.h"
 
 namespace platform_ex {
 	namespace Windows {
@@ -37,8 +42,14 @@ namespace platform_ex {
 				kDeleteOnClose = 0x00040000,
 				kDontTruncate = 0x00080000, // 默认情况下使用 kToWrite 打开文件会清空现有内容。
 			};
+
+#ifdef LB_IMPL_MSCPP
+			using wstring_view = std::wstring_view;
+#else
+			using wstring_view = std::experimental::wstring_view;
+#endif
 		private:
-			static UniqueNtHandle CreateFileWA(const std::experimental::wstring_view& path, uint32 flags);
+			static UniqueNtHandle CreateFileWA(const wstring_view& path, uint32 flags);
 		private:
 			UniqueNtHandle file;
 
@@ -47,7 +58,7 @@ namespace platform_ex {
 				: file()
 			{
 			}
-			File(const std::experimental::wstring_view& path, uint32 flags)
+			File(const wstring_view& path, uint32 flags)
 				: file(CreateFileWA(path, flags))
 			{
 			}
@@ -58,8 +69,8 @@ namespace platform_ex {
 			}
 
 			bool IsOpen() const lnoexcept;
-			void Open(const std::experimental::wstring_view& path, uint32 flags);
-			bool OpenNothrow(const std::experimental::wstring_view& path, uint32 flags);
+			void Open(const wstring_view& path, uint32 flags);
+			bool OpenNothrow(const wstring_view& path, uint32 flags);
 			void Close() lnoexcept;
 
 			uint64 GetSize() const;

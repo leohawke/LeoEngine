@@ -7,7 +7,7 @@
 #ifndef FrameWork_Win32_Consoles_h
 #define FrameWork_Win32_Consoles_h 1
 
-#include <LBase/Win32/Mingw32.h>
+#include <LBase/Win32/NLS.h>
 #include <cstdlib> // for std::system;
 #include <LBase/FContainer.h> // for array;
 #include <wincon.h>

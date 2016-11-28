@@ -146,11 +146,11 @@ namespace platform_ex {
 	LFL_CallWin32_Trace(_fn, lfsig, __VA_ARGS__)
 		//@}
 		//@}
-	
+
 		//! \since for Load D3D12
 		//@{
 		//! \brief 加载过程地址得到的过程类型。
-		using ModuleProc = std::remove_reference_t<decltype(*::GetProcAddress(::HMODULE(),{}))>;
+		using ModuleProc = std::remove_reference_t<decltype(*::GetProcAddress(::HMODULE(), {})) > ;
 
 		/*!
 		\brief 从模块加载指定过程的指针。
@@ -184,47 +184,6 @@ namespace platform_ex {
 				operator()(pointer) const lnothrow;
 		};
 
-		/*!	\defgroup native_encoding_conv Native Encoding Conversion
-		\brief 本机文本编码转换。
-		\exception leo::LoggedEvent 长度为负数或溢出 int 。
-
-		转换第一个 \c unsigned 参数指定编码的字符串为第二个 \c unsigned 参数指定的编码。
-		*/
-		//@{
-		//! \pre 间接断言：字符串指针参数非空。
-		LB_API LB_NONNULL(1) string
-			MBCSToMBCS(const char*, unsigned = CP_UTF8, unsigned = CP_ACP);
-		//! \pre 长度参数非零且不上溢 \c int 时间接断言：字符串指针参数非空。
-		LB_API string
-			MBCSToMBCS(string_view, unsigned = CP_UTF8, unsigned = CP_ACP);
-
-		//! \pre 间接断言：字符串指针参数非空。
-		LB_API LB_NONNULL(1) wstring
-			MBCSToWCS(const char*, unsigned = CP_ACP);
-		//! \pre 长度参数非零且不上溢 \c int 时间接断言：字符串指针参数非空。
-		LB_API wstring
-			MBCSToWCS(string_view, unsigned = CP_ACP);
-
-		//! \pre 间接断言：字符串指针参数非空。
-		LB_API LB_NONNULL(1) string
-			WCSToMBCS(const wchar_t*, unsigned = CP_ACP);
-		//! \pre 长度参数非零且不上溢 \c int 时间接断言：字符串指针参数非空。
-		LB_API string
-			WCSToMBCS(wstring_view, unsigned = CP_ACP);
-
-		//! \pre 间接断言：字符串指针参数非空。
-		inline LB_NONNULL(1) PDefH(wstring, UTF8ToWCS, const char* str)
-			ImplRet(MBCSToWCS(str, CP_UTF8))
-			//! \pre 长度参数非零且不上溢 \c int 时间接断言：字符串指针参数非空。
-			inline PDefH(wstring, UTF8ToWCS, string_view sv)
-			ImplRet(MBCSToWCS(sv, CP_UTF8))
-
-			//! \pre 间接断言：字符串指针参数非空。
-			inline LB_NONNULL(1) PDefH(string, WCSToUTF8, const wchar_t* str)
-			ImplRet(WCSToMBCS(str, CP_UTF8))
-			//! \pre 长度参数非零且不上溢 \c int 时间接断言：字符串指针参数非空。
-			inline PDefH(string, WCSToUTF8, wstring_view sv)
-			ImplRet(WCSToMBCS(sv, CP_UTF8))
 	}
 }
 

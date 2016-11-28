@@ -59,6 +59,21 @@ namespace platform {
 		upopen(const char16_t* filename, const char16_t* mode) lnothrowv;
 	//@}
 
+	using std::basic_filebuf;
+	using std::filebuf;
+	using std::wfilebuf;
+	//@{
+	using std::basic_ifstream;
+	using std::basic_ofstream;
+	using std::basic_fstream;
+	using std::ifstream;
+	using std::ofstream;
+	using std::fstream;
+	using std::wifstream;
+	using std::wofstream;
+	//@}
+	using std::wfstream;
+
 	/*!
 	\brief 表示文件操作失败的异常。
 	*/

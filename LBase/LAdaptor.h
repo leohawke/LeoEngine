@@ -100,6 +100,7 @@ namespace leo {
 	\brief »’÷æ°£
 	*/
 	//@{
+	using platform::Echo;
 	using platform::Logger;
 	using platform::FetchCommonLogger;
 	//@}
@@ -119,6 +120,19 @@ namespace leo {
 	//@{
 	using platform::upclose;
 	using platform::upopen;
+
+	using platform::basic_filebuf;
+	using platform::filebuf;
+	using platform::wfilebuf;
+	using platform::basic_ifstream;
+	using platform::basic_ofstream;
+	using platform::basic_fstream;
+	using platform::ifstream;
+	using platform::ofstream;
+	using platform::fstream;
+	using platform::wifstream;
+	using platform::wofstream;
+	using platform::wfstream;
 	//@}
 }
 #endif
