@@ -239,7 +239,7 @@ namespace leo
 			//! \since build 1.3
 			//@{
 			using value_type = _type;
-			using local_storage = bool_constant<_bStoredLocally>;
+			using local_storage = bool_<_bStoredLocally>;
 			//@}
 
 			//! \since build 1.4
@@ -298,12 +298,12 @@ namespace leo
 			static value_type*
 				get_pointer_impl(true_, any_storage& s)
 			{
-				return std::addressof(get_reference_impl(true_type(), s));
+				return std::addressof(get_reference_impl(true_(), s));
 			}
 			static const value_type*
 				get_pointer_impl(true_, const any_storage& s)
 			{
-				return std::addressof(get_reference_impl(true_type(), s));
+				return std::addressof(get_reference_impl(true_(), s));
 			}
 
 		public:
@@ -354,7 +354,7 @@ namespace leo
 			static void
 				init(any_storage& d, _tParams&&... args)
 			{
-				init_impl(local_storage(), d, lforward(args)...);
+				init_impl(local_storage(), d,lforward(args)...);
 			}
 
 		private:
@@ -362,13 +362,13 @@ namespace leo
 			static LB_ATTR(always_inline) void
 				init_impl(false_, any_storage& d, _tParams&&... args)
 			{
-				d = new value_type(lforward(args)...);
+				d.construct<value_type*>(new value_type(lforward(args)...));
 			}
 			template<typename... _tParams>
 			static LB_ATTR(always_inline) void
 				init_impl(true_, any_storage& d, _tParams&&... args)
 			{
-				new(d.access()) value_type(lforward(args)...);
+				d.construct<value_type>(lforward(args)...);
 			}
 			//@}
 
@@ -404,13 +404,13 @@ namespace leo
 			//@{
 			template<typename... _tParams>
 			LB_NORETURN static LB_ATTR(always_inline) void
-				try_init(false_type, _tParams&&...)
+				try_init(false_, _tParams&&...)
 			{
 				throw_invalid_construction();
 			}
 			template<class _bInPlace, typename... _tParams>
 			static LB_ATTR(always_inline) void
-				try_init(true_type, _bInPlace b, any_storage& d, _tParams&&... args)
+				try_init(true_, _bInPlace b, any_storage& d, _tParams&&... args)
 			{
 				init_impl(b, d, lforward(args)...);
 			}
@@ -769,7 +769,8 @@ namespace leo
 				auto& a(static_cast<_tAny&>(*this));
 
 				a.reset();
-				a.manager = any_ops::construct<decay_t<_tHandler>>(lforward(args)...);
+				a.manager = any_ops::construct<decay_t<_tHandler>>(a.storage,
+					lforward(args)...);
 			}
 		};
 

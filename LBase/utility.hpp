@@ -21,8 +21,10 @@
 //	pun_storage_t, std::swap, aligned_replace_cast, exclude_self_t,
 //	replace_storage_t;
 #include "LBase/memory.hpp" // for lassume, construct_in, destruct_in;
+#include "LBase/placement.hpp"
 #include "LBase/sutility.h"
 #include <functional> // for std::bind, std::ref
+#include <sstream>
 
 namespace leo
 {
@@ -134,7 +136,7 @@ namespace leo
 			lconstfn
 			boxed_value(_tParam&& arg)
 			lnoexcept(is_nothrow_constructible<_type, _tParam&&>::value)
-			: value(lforward(arg))
+			: value(static_cast<_tParam&&>(const_cast<_tParam&&>(arg)))
 		{}
 		template<typename _tParam1, typename _tParam2, typename... _tParams>
 		lconstfn
@@ -161,6 +163,48 @@ namespace leo
 		}
 
 		operator const _type&() const lnothrow
+		{
+			return value;
+		}
+	};
+
+	template<>
+	struct boxed_value<std::istringstream>
+	{
+		mutable std::istringstream value;
+
+		//! \since build 1.4
+		//@{
+		lconstfn
+			boxed_value() lnoexcept(is_nothrow_constructible<std::istringstream>::value)
+			: value()
+		{}
+		/*lconstfn
+			boxed_value(default_init_t) lnothrow
+			:value()
+		{}*/
+
+		lconstfn
+			boxed_value(std::istringstream&& arg)
+			lnoexcept(is_nothrow_constructible<std::istringstream, std::istringstream&&>::value)
+			: value(std::move(arg))
+		{}
+
+		//@}
+		//! \since build 1.4
+		//@{
+		boxed_value(boxed_value&&) = default;
+
+		boxed_value&
+			operator=(boxed_value&&) = default;
+		//@}
+
+		operator std::istringstream&() lnothrow
+		{
+			return value;
+		}
+
+		operator const std::istringstream&() const lnothrow
 		{
 			return value;
 		}

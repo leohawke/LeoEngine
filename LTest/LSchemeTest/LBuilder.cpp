@@ -139,7 +139,8 @@ LoadFunctions(REPLContext& context)
 		}, term);
 	}, IsBranch);
 	RegisterUnaryFunction<const string>(root, "eval",
-		leo::bind1(Eval, std::ref(context)));
+		[&](const string& t) {Eval(t, context); }
+		);
 	RegisterFunction(root, "system", CallSystem);
 	RegisterUnaryFunction<const string>(root, "echo", Echo);
 	RegisterUnaryFunction<const string>(root, "ofs", [&](const string& path){
