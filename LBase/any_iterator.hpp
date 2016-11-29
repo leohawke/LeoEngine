@@ -251,13 +251,13 @@ namespace leo
 		any&
 			get() lnothrow
 		{
-			return *this
+			return *this;
 		}
 
 		const any&
 			get() const lnothrow
 		{
-			return *this
+			return *this;
 		}
 
 		friend bool
@@ -271,6 +271,9 @@ namespace leo
 		using any::target;
 		using any::type;
 	};
+
+	using input_monomorphic_iterator
+		= any_input_iterator<void_ref, ptrdiff_t, void*, void_ref>;
 
 	template<typename _type, typename _tDifference = ptrdiff_t,
 		typename _tPointer = _type*, typename _tReference = _type&>

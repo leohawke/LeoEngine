@@ -7,5 +7,5 @@ g++ -DINITGUID -DUNICODE -D_UNICODE -municode -O2 -s -std=c++17\
 g++ -O2 -s -std=c++17\
  -I../  \
   ../LTest/LSchemeTest/*.cpp \
-  -L../LBase/build/ -L./ -lLBase -lLScheme -oEngineTest \
+  -L../LBase/build/ -L./ -lLScheme -lLBase -oLSchemeTest \
   -Wl,-subsystem,console
