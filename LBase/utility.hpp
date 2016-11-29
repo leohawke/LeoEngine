@@ -175,8 +175,7 @@ namespace leo
 
 		//! \since build 1.4
 		//@{
-		lconstfn
-			boxed_value() lnoexcept(is_nothrow_constructible<std::istringstream>::value)
+		boxed_value() lnoexcept(is_nothrow_constructible<std::istringstream>::value)
 			: value()
 		{}
 		/*lconstfn
@@ -184,8 +183,7 @@ namespace leo
 			:value()
 		{}*/
 
-		lconstfn
-			boxed_value(std::istringstream&& arg)
+		boxed_value(std::istringstream&& arg)
 			lnoexcept(is_nothrow_constructible<std::istringstream, std::istringstream&&>::value)
 			: value(std::move(arg))
 		{}
@@ -385,7 +383,7 @@ namespace leo
 	应与 std::call_once 和 leo::call_once 形式一致。
 	*/
 	template<typename _type, typename _tOnceFlag>
-	class call_once_init :private noncopyable,private nonmovable
+	class call_once_init :private noncopyable, private nonmovable
 	{
 	public:
 		using object_type = _type;
