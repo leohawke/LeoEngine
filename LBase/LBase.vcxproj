@@ -117,7 +117,7 @@
     <ClCompile Include="Host.cpp" />
     <ClCompile Include="LException.cpp" />
     <ClCompile Include="sutility.cpp" />
-    <ClCompile Include="vc.cpp" />
+    <ClCompile Include="LBase.cpp" />
     <ClCompile Include="Win32\Consoles.cpp" />
     <ClCompile Include="Win32\MinGW32.cpp" />
   </ItemGroup>

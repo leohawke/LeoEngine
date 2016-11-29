@@ -1,6 +1,6 @@
 ﻿/*!	\file LBuilder.cpp
 \ingroup LTest
-\brief NPL 解释实现。
+\brief LSL 解释实现。
 \par 修改时间:
 	2016-11-18 15:44 +0800
 */
@@ -17,6 +17,11 @@
 #include <LBase/Win32/Mingw32.h>
 //#include YFM_YSLib_Service_TextFile
 #include <LBase/Win32/NLS.h>
+
+namespace leo
+{
+	
+}
 
 namespace scheme
 {
@@ -143,15 +148,15 @@ LoadFunctions(REPLContext& context)
 		);
 	RegisterFunction(root, "system", CallSystem);
 	RegisterUnaryFunction<const string>(root, "echo", Echo);
-	/*RegisterUnaryFunction<const string>(root, "ofs", [&](const string& path){
+	RegisterUnaryFunction<const string>(root, "ofs", [&](const string& path){
 		if(ifstream ifs{path})
 			return ifs;
 		throw LoggedEvent(
 			leo::sfmt("Failed opening file '%s'.", path.c_str()));
-	});*/
-	//RegisterUnaryFunction<const string>(root, "oss", [&](const string& str){
-		//return std::istringstream(str);
-	//});
+	});
+	RegisterUnaryFunction<const string>(root, "oss", [&](const string& str){
+		return std::istringstream(str);
+	});
 	RegisterUnaryFunction<ifstream>(root, "parse-f", ParseStream);
 	RegisterUnaryFunction<std::istringstream>(root, "parse-s", ParseStream);
 	RegisterUnaryFunction<const string>(root, "lex", [&](const string& unit){

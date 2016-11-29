@@ -168,7 +168,6 @@
     <ClCompile Include="sutility.cpp" />
     <ClCompile Include="cassert.cpp" />
     <ClCompile Include="exception.cpp" />
-    <ClCompile Include="vc.cpp" />
     <ClCompile Include="FCommon.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
@@ -195,6 +194,7 @@
     <ClCompile Include="Win32\NLS.cpp">
       <Filter>Framework\Win32</Filter>
     </ClCompile>
+    <ClCompile Include="LBase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="experimental\string_view.hcc">

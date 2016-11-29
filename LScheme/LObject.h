@@ -11,6 +11,11 @@
 #include <LBase/examiner.hpp>
 #include <LBase/operators.hpp>
 
+#ifdef LB_IMPL_MSCPP
+#include <fstream>
+#include <sstream>
+#endif
+
 #include "sdef.h"
 
 namespace leo
@@ -39,6 +44,8 @@ namespace leo
 		EndDecl
 
 
+
+
 		template<typename _type1, typename _type2>
 	struct HeldEqual : private examiners::equal_examiner
 
@@ -46,7 +53,25 @@ namespace leo
 		using examiners::equal_examiner::are_equal;
 	};
 
+#ifdef LB_IMPL_MSCPP
+	template<>
+	struct HeldEqual<std::ifstream, std::ifstream>
+	{
+		static bool are_equal(const std::ifstream&, const std::ifstream&)
+		{
+			return true;
+		}
+	};
 
+	template<>
+	struct HeldEqual<std::istringstream, std::istringstream>
+	{
+		static bool are_equal(const std::istringstream&, const std::istringstream&)
+		{
+			return true;
+		}
+	};
+#endif
 
 	template<typename _type1, typename _type2>
 	struct HeldEqual<weak_ptr<_type1>, weak_ptr<_type2>>

@@ -136,7 +136,7 @@ namespace leo
 			lconstfn
 			boxed_value(_tParam&& arg)
 			lnoexcept(is_nothrow_constructible<_type, _tParam&&>::value)
-			: value(static_cast<_tParam&&>(const_cast<_tParam&&>(arg)))
+			: value(lforward(arg))
 		{}
 		template<typename _tParam1, typename _tParam2, typename... _tParams>
 		lconstfn
