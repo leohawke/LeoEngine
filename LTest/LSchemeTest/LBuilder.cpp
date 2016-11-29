@@ -143,15 +143,15 @@ LoadFunctions(REPLContext& context)
 		);
 	RegisterFunction(root, "system", CallSystem);
 	RegisterUnaryFunction<const string>(root, "echo", Echo);
-	RegisterUnaryFunction<const string>(root, "ofs", [&](const string& path){
+	/*RegisterUnaryFunction<const string>(root, "ofs", [&](const string& path){
 		if(ifstream ifs{path})
 			return ifs;
 		throw LoggedEvent(
 			leo::sfmt("Failed opening file '%s'.", path.c_str()));
-	});
-	RegisterUnaryFunction<const string>(root, "oss", [&](const string& str){
-		return std::istringstream(str);
-	});
+	});*/
+	//RegisterUnaryFunction<const string>(root, "oss", [&](const string& str){
+		//return std::istringstream(str);
+	//});
 	RegisterUnaryFunction<ifstream>(root, "parse-f", ParseStream);
 	RegisterUnaryFunction<std::istringstream>(root, "parse-s", ParseStream);
 	RegisterUnaryFunction<const string>(root, "lex", [&](const string& unit){

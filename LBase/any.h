@@ -664,7 +664,7 @@ namespace leo
 			bool
 				has_value() const lnothrow
 			{
-				return !manager;
+				return manager;
 			}
 
 			//! \pre ¶ÏÑÔ£º\c manager ¡£

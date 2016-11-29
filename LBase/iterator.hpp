@@ -18,8 +18,8 @@ namespace leo
 {
 	template<typename _type, typename _tIter = _type*,
 		typename _tTraits = std::iterator_traits<_tIter >>
-	//伪迭代器,总返回单一值
-	class pseudo_iterator
+		//伪迭代器,总返回单一值
+		class pseudo_iterator
 	{
 	public:
 		using iterator_type = _tIter;
@@ -122,7 +122,7 @@ namespace leo
 		}
 	};
 
-	namespace details 
+	namespace details
 	{
 		template<typename _tIter, typename _fTrans, typename _tReference>
 		struct transit_traits
@@ -224,14 +224,7 @@ namespace leo
 		{}
 		//@{
 		transformed_iterator(const transformed_iterator&) = default;
-#if LB_IMPL_MSCPP
-		//! \since build 503 as workaround for Visual C++ 2013
-		transformed_iterator(transformed_iterator&& i)
-			: transformer(std::move(i.transformer))
-		{}
-#else
 		transformed_iterator(transformed_iterator&&) = default;
-#endif
 		//@}
 
 		transformed_iterator&
@@ -466,13 +459,13 @@ namespace leo
 
 	lconstexpr first_tag get_first{}, get_key{};
 	lconstexpr second_tag get_second{}, get_value{};
-	lconstexpr struct indirect_tag_t{} get_indirect{};
+	lconstexpr struct indirect_tag_t {} get_indirect{};
 	lconstexpr const struct get_tag_t {} get_get{};
 
 	template<typename _tIter>
 	inline auto
 		operator|(_tIter&& i, first_tag)
-		-> decltype(make_transform(lforward(i), 
+		-> decltype(make_transform(lforward(i),
 			iterator_transformation::first<>()))
 	{
 		return make_transform(lforward(i), iterator_transformation::first<>());
@@ -488,7 +481,7 @@ namespace leo
 	template<typename _tIter>
 	inline auto
 		operator|(_tIter&& i, indirect_tag_t)
-		-> decltype(make_transform(lforward(i), 
+		-> decltype(make_transform(lforward(i),
 			iterator_transformation::indirect<>()))
 	{
 		return make_transform(lforward(i), iterator_transformation::indirect<>());
@@ -496,16 +489,16 @@ namespace leo
 	template<typename _tIter>
 	inline auto
 		operator|(_tIter&& i, get_tag_t)
-		-> decltype(make_transform(lforward(i), 
+		-> decltype(make_transform(lforward(i),
 			iterator_transformation::get<>()))
 	{
 		return make_transform(lforward(i), iterator_transformation::get<>());
 	}
 
 	template<typename _tMaster, typename _tSlave,
-	class _tTraits = std::iterator_traits<_tMaster >>
-	//成对迭代器
-	class pair_iterator : private std::pair<_tMaster, _tSlave>
+		class _tTraits = std::iterator_traits<_tMaster >>
+		//成对迭代器
+		class pair_iterator : private std::pair<_tMaster, _tSlave>
 	{
 	public:
 		using pair_type = std::pair<_tMaster, _tSlave>;
@@ -539,16 +532,7 @@ namespace leo
 		inline pair_iterator&
 			operator=(const pair_iterator&) = default;
 		inline pair_iterator&
-#if LB_IMPL_MSCPP
-			operator=(pair_iterator&& i)
-		{
-			static_cast<std::pair<_tMaster, _tSlave>&>(*this)
-				= static_cast<std::pair<_tMaster, _tSlave>&&>(i);
-			return *this;
-		}
-#else
 			operator=(pair_iterator&&) = default;
-#endif
 
 		pair_iterator&
 			operator+=(difference_type n)
@@ -648,7 +632,7 @@ namespace leo
 	template<typename _tMaster, typename _tSlave>
 	bool
 		operator==(const pair_iterator<_tMaster, _tSlave>& x,
-		const pair_iterator<_tMaster, _tSlave>& y)
+			const pair_iterator<_tMaster, _tSlave>& y)
 	{
 		return x.base().first == y.base().first
 			&& x.base().second == y.base().second();
@@ -657,7 +641,7 @@ namespace leo
 	template<typename _tMaster, typename _tSlave>
 	inline bool
 		operator!=(const pair_iterator<_tMaster, _tSlave>& x,
-		const pair_iterator<_tMaster, _tSlave>& y)
+			const pair_iterator<_tMaster, _tSlave>& y)
 	{
 		return !(x == y);
 	}
@@ -699,16 +683,8 @@ namespace leo
 		indirect_input_iterator&
 			operator=(const indirect_input_iterator&) = default;
 		indirect_input_iterator&
-#if LB_IMPL_MSCPP
-			//! \since build 458 as workaround for Visual C++ 2013
-			operator=(indirect_input_iterator&& i)
-		{
-			iter = std::move(i.iter);
-			return *this;
-		}
-#else
+
 			operator=(indirect_input_iterator&&) = default;
-#endif
 
 		pointer
 			operator->() const
@@ -760,7 +736,7 @@ namespace leo
 		{
 			return iter;
 		}
-			const iterator_type&
+		const iterator_type&
 			get() const lnothrow
 		{
 			return iter;
@@ -770,7 +746,7 @@ namespace leo
 	template<typename _tIter>
 	inline bool
 		operator!=(const indirect_input_iterator<_tIter>& x,
-		const indirect_input_iterator<_tIter>& y)
+			const indirect_input_iterator<_tIter>& y)
 	{
 		return !(x == y);
 	}
@@ -830,7 +806,7 @@ namespace leo
 			++idx;
 			return *this;
 		}
-			subscriptive_iterator
+		subscriptive_iterator
 			operator++(int)lnothrow
 		{
 			auto i(*this);
@@ -839,13 +815,13 @@ namespace leo
 			return i;
 		}
 
-			subscriptive_iterator
+		subscriptive_iterator
 			operator--() lnothrow
 		{
 			--idx;
 			return *this;
 		}
-			subscriptive_iterator
+		subscriptive_iterator
 			operator--(int)lnothrow
 		{
 			auto i(*this);
@@ -854,7 +830,7 @@ namespace leo
 			return i;
 		}
 
-			reference
+		reference
 			operator[](difference_type n) const
 		{
 			lassume(!(idx + n < 0));
@@ -881,13 +857,13 @@ namespace leo
 			return con_ptr;
 		}
 
-			bool
+		bool
 			equals(const subscriptive_iterator<_tCon, _type>& i) const lnothrow
 		{
 			return con_ptr == i.con_ptr && idx == i.idx;
 		}
 
-			size_t
+		size_t
 			index() const lnothrow
 		{
 			return idx;
@@ -897,15 +873,15 @@ namespace leo
 	template<class _tCon, typename _type>
 	bool
 		operator==(const subscriptive_iterator<_tCon, _type>& x,
-		const subscriptive_iterator<_tCon, _type>& y) lnothrow
+			const subscriptive_iterator<_tCon, _type>& y) lnothrow
 	{
 		return x.equals(y);
 	}
 
-		template<class _tCon, typename _type>
+	template<class _tCon, typename _type>
 	bool
 		operator!=(const subscriptive_iterator<_tCon, _type>& x,
-		const subscriptive_iterator<_tCon, _type>& y) lnothrow
+			const subscriptive_iterator<_tCon, _type>& y) lnothrow
 	{
 		return !(x == y);
 	}

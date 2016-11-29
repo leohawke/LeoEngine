@@ -237,7 +237,7 @@ namespace leo
 
 			//@{
 			//! \brief 比较相等：参数都为空或都非空且存储的对象相等。
-			LB_API friend bool
+			LS_API friend bool
 			operator==(const ValueObject&, const ValueObject&);
 
 		/*!
