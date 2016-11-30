@@ -8,18 +8,18 @@
 
 using namespace leo;
 
-#define NPL_TracePerform 1
-#define NPL_TracePerformDetails 0
+#define LSL_TracePerform 1
+#define LSL_TracePerformDetails 0
 
 namespace scheme
 {
 
-#define NPL_NAME "NPL console"
-#define NPL_VER "b30xx"
-#define NPL_PLATFORM "[MinGW32]"
+#define LSL_NAME "LSL console"
+#define LSL_VER "1.40"
+#define LSL_PLATFORM "[Win32]"
 lconstexpr auto prompt("> ");
-lconstexpr auto title(NPL_NAME" " NPL_VER" @ (" __DATE__", " __TIME__") "
-	NPL_PLATFORM);
+lconstexpr auto title(LSL_NAME" " LSL_VER" @ (" __DATE__", " __TIME__") "
+	LSL_PLATFORM);
 
 /// 519
 namespace
@@ -68,7 +68,7 @@ LogTree(const ValueNode& node, Logger::Level lv)
 Interpreter::Interpreter(Application& app,
 	std::function<void(REPLContext&)> loader)
 	: wc(), err_threshold(RecordLevel(0x10)), line(),
-#if NPL_TracePerformDetails
+#if LSL_TracePerformDetails
 	context(true)
 #else
 	context()
@@ -81,7 +81,7 @@ Interpreter::Interpreter(Application& app,
 	cout << title << endl << "Initializing...";
 	//p_env.reset(new Environment(app));
 	loader(context);
-	cout << "NPLC initialization OK!" << endl << endl;
+	cout << "LSL initialization OK!" << endl << endl;
 	wc.UpdateForeColor(InfoColor);
 	cout << "Type \"exit\" to exit,"
 		" \"cls\" to clear screen, \"help\", \"about\", or \"license\""
@@ -107,7 +107,7 @@ Interpreter::HandleSignal(SSignal e)
 		cout << not_impl << "Help" << endl;
 		break;
 	case SSignal::License:
-		cout << "See license file of the YSLib project." << endl;
+		cout << not_impl << "License" << endl;
 		break;
 	default:
 		LAssert(false, "Wrong command!");
@@ -128,7 +128,7 @@ Interpreter::Process()
 
 			const auto res(context.Perform(line));
 
-#if NPL_TracePerform
+#if LSL_TracePerform
 		//	wc.UpdateForeColor(InfoColor);
 		//	cout << "Unrecognized reduced token list:" << endl;
 			wc.UpdateForeColor(ReducedColor);
@@ -167,5 +167,5 @@ Interpreter::WaitForLine(std::istream& is, std::ostream& os)
 	return std::getline(is, line);
 }
 
-} // namespace NPL;
+} // namespace scheme;
 
