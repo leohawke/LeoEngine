@@ -88,6 +88,14 @@ Interpreter::Interpreter(Application& app,
 		" for more information." << endl << endl;
 }
 
+Interpreter::~Interpreter()
+{
+	using namespace std;
+
+	wc.UpdateForeColor(InfoColor);
+	cout << "LSL Exit!" << endl << endl;
+}
+
 void
 Interpreter::HandleSignal(SSignal e)
 {

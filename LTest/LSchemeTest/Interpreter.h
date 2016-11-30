@@ -50,24 +50,19 @@ lconstexpr Color DefaultColor(Gray), TitleColor(Cyan),
 	SignalColor(DarkRed), SideEffectColor(Yellow), ReducedColor(Magenta);
 
 
-/// 304
 class Interpreter
 {
 private:
-	/// 520
 	platform_ex::Windows::WConsole wc;
-	/// 674
 	leo::RecordLevel err_threshold;
-	/// 689
 	//leo::unique_ptr<leo::Environment> p_env;
-	/// 674
 	string line;
-	/// 740
 	REPLContext context;
 
 public:
-	/// 740
 	Interpreter(leo::Application&, std::function<void(REPLContext&)>);
+
+	~Interpreter();
 
 	void
 	HandleSignal(SSignal);

@@ -22,7 +22,7 @@ namespace platform_ex
 		}
 		WConsole::~WConsole()
 		{
-			FilterExceptions(std::bind(&WConsole::RestoreAttributes, this), lfsig);
+			//FilterExceptions(std::bind(&WConsole::RestoreAttributes, this), lfsig);
 		}
 
 		::CONSOLE_SCREEN_BUFFER_INFO

@@ -8,7 +8,7 @@ add2 x 1
 (lambda (x) x) x
 define x
 (lambda (x) x) x
-define (neg x) -0 x
+define (neg x) - 0 x
 neg 2
 define id (lamdba (x) x)
 id ($quote 1)
