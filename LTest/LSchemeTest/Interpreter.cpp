@@ -142,7 +142,7 @@ Interpreter::Process()
 			wc.UpdateForeColor(SignalColor);
 			HandleSignal(e);
 		}
-		CatchExpr(LSLException& e, PrintError(wc, e, "NPLException"))
+		CatchExpr(LSLException& e, PrintError(wc, e, "LSLException"))
 		catch(LoggedEvent& e)
 		{
 			if(e.GetLevel() < err_threshold)
