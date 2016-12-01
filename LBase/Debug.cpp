@@ -150,7 +150,17 @@ namespace platform
 	{
 		LAssertNonnull(tag.data());
 #if LFL_Win32
-		return platform_ex::SendDebugStringEx;
+		return [](Level lv, Logger& logger, const char* str) {
+			// TODO: Avoid throwing of %WriteString here for better performance?
+			// FIXME: Output may be partially updated?
+			try
+			{
+				wstring wstr;
+
+				WConsoleOutput(wstr, STD_ERROR_HANDLE, str);
+			}
+			CatchExpr(platform_ex::Windows::Win32Exception&, DefaultSendLog(lv, logger, str))
+		};
 #endif
 		return DefaultSendLog;
 	}
@@ -161,7 +171,7 @@ namespace platform
 	{
 		try
 		{
-#if YF_Multithread == 1
+#if LB_Multithread == 1
 			const auto& t_id(FetchCurrentThreadID());
 
 			if (!t_id.empty())
@@ -180,7 +190,7 @@ namespace platform
 		lnothrowv
 	{
 		LAssertNonnull(stream);
-#if YF_Multithread == 1
+#if LB_Multithread == 1
 		const auto& t_id(FetchCurrentThreadID());
 
 		if (!t_id.empty())
@@ -319,15 +329,6 @@ namespace platform_ex
 					"[%s]: %s", sfmt(lv), Nonnull(str))).c_str());
 		}
 		CatchIgnore(...)
-	}
-
-	void SendDebugStringEx(Logger::Level lv, Logger& log, const char* str) lnothrowv
-	{
-		SendDebugString(lv, log, str);
-		//todo: Ê¹ÓÃ WriteConsole Êä³ö
-		static Terminal term;
-		UpdateForeColorByLevel(term, lv);
-		Logger::DefaultSendLog(lv, log, str);
 	}
 
 #endif

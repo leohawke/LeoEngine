@@ -55,7 +55,7 @@ namespace scheme
 
 
 		/*!
-		\brief 会话：分析指定 NPL 代码。
+		\brief 会话：分析指定 LSL 代码。
 		*/
 		class LS_API Session
 	{

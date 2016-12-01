@@ -308,15 +308,6 @@ namespace platform_ex {
 		SendDebugString(platform::Logger::Level, platform::Logger&, const char*)
 		lnothrowv;
 
-
-	/*!
-	\brief 发送字符串至调试器以及使用Win32控制台API进行输出(包含颜色)。
-	\pre 间接断言：字符串参数非空。
-	\note 当前直接调用 ::OutputDebugStringA ::WriteConsoleA 。
-	*/
-	LB_API LB_NONNULL(3) void
-		SendDebugStringEx(platform::Logger::Level, platform::Logger&, const char* str) 
-		lnothrowv;
 #endif
 }
 

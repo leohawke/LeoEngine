@@ -90,10 +90,6 @@ Interpreter::Interpreter(Application& app,
 
 Interpreter::~Interpreter()
 {
-	using namespace std;
-
-	wc.UpdateForeColor(InfoColor);
-	cout << "LSL Exit!" << endl << endl;
 }
 
 void
