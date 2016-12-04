@@ -230,7 +230,7 @@ namespace scheme {
 	\brief 编码 XML 字符串。
 	\see http://www.w3.org/TR/2006/REC-xml11-20060816/#charsets 。
 
-	允许 XML 1.1 字符，仅对空字符使用 YTraceDe 进行警告。
+	允许 XML 1.1 字符，仅对空字符使用 TraceDe 进行警告。
 	仅对 XML 1.0 和 XML 1.1 规定的有条件使用字符 \c & 、 \c < 和 \c > 生成转义序列。
 	*/
 	LS_API string
