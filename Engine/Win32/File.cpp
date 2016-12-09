@@ -358,8 +358,8 @@ namespace platform_ex {
 					LFL_Raise_Win32Exception_On_Failure(::MCF_RtlNtStatusToDosError(lStatus), "File: NtReadFile() 失败。");
 				}
 				do {
-					LARGE_INTEGER liTimeout;
-					liTimeout.QuadPart = -1;
+					::LARGE_INTEGER liTimeout;
+					liTimeout.QuadPart = INT64_MAX;
 					lStatus = ::NtDelayExecution(true, &liTimeout);
 					lassume(NT_SUCCESS(lStatus));
 				} while (bIoPending);

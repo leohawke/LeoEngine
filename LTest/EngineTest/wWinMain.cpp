@@ -3,6 +3,10 @@
 #include "../../Engine/Render/D3D12/test.h"
 
 #include <Engine/Asset/TextureX.h>
+
+
+#include "LSchemEngineUnitTest.h"
+
 #define TEST_CODE 1
 
 #if TEST_CODE
@@ -16,6 +20,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR cmdLine, int nCmdShow)
 
 	auto swap_chain = Create(hwnd);
 
+	unit_test::ExceuteLSchemEngineUnitTest();
 
 	auto texture = platform::X::LoadTexture("bc5.dds", platform::Render::EA_Immutable);
 

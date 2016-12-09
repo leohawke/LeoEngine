@@ -125,6 +125,9 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions);INITGUID</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -148,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="LSchemEngineUnitTest.cpp" />
     <ClCompile Include="wWinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +161,12 @@
     <ProjectReference Include="..\..\LBase\LBase.vcxproj">
       <Project>{4f3ae107-3ffd-4d5c-82a8-5034c0041562}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\LScheme\LScheme.vcxproj">
+      <Project>{596f0cdd-56fd-406e-a5e4-2d3d5ec7ca78}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="LSchemEngineUnitTest.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
