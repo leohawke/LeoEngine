@@ -348,6 +348,14 @@ namespace scheme {
 			*/
 			void
 				operator()(TermNode&, ContextNode&) const;
+
+			/*!
+			\brief 比较上下文处理器相等。
+			\note 忽略检查例程的等价性。
+			*/
+			friend PDefHOp(bool, == , const FormContextHandler& x,
+				const FormContextHandler& y)
+				ImplRet(x.Handler == y.Handler)
 		};
 
 
@@ -379,6 +387,10 @@ namespace scheme {
 			*/
 			void
 				operator()(TermNode&, ContextNode&) const;
+
+			friend PDefHOp(bool, == , const FunctionContextHandler& x,
+				const FunctionContextHandler& y)
+				ImplRet(x.Handler == y.Handler)
 		};
 
 
@@ -445,16 +457,19 @@ namespace scheme {
 		/*!
 		\brief 求值标识符。
 		\note 不验证标识符是否为字面量；仅以字面量处理时可能需要重规约。
-		\sa FetchValue
+		sa EvaluateTermNode
+		\sa FetchValuePtr
+		\sa LiftTermRef
 		\sa LiteralHandler
 
 		依次进行以下求值操作：
-		调用 FetchValue 查找值，若失败抛出未声明异常；
-		以 LiteralHandler 访问字面量处理器，若成功调用并返回字面量处理器的处理结果；
-		否则，以 TermNode 访问值，若发现是枝节点，返回要求重规约。
+		调用 FetchValuePtr 查找值，若失败抛出未声明异常；
+		调用 LiftTermRef 替换节点的值；
+		以 LiteralHandler 访问字面量处理器，若成功调用并返回字面量处理器的处理结果。
+		若未返回，调用 EvaluateTermNode 求值。
 		*/
 		LS_API ReductionStatus
-			EvaluateIdentifier(TermNode&, ContextNode&, string_view);
+			EvaluateIdentifier(TermNode&, const ContextNode&, string_view);
 
 		/*!
 		\brief 求值叶节点记号。
@@ -473,6 +488,18 @@ namespace scheme {
 		LS_API ReductionStatus
 			EvaluateLeafToken(TermNode&, ContextNode&, string_view);
 		//@}
+
+		/*!
+		\brief 求值以节点数据结构间接表示的项。
+		\sa IsBranch
+		\sa LiftTermRef
+
+		以 TermNode 按项访问值，若成功调用 LiftTermRef 替换值；
+		若发现项是枝节点，返回要求重规约。
+		以项访问对规约以项转移的可能未求值的操作数是必要的。
+		*/
+		LS_API ReductionStatus
+			EvaluateTermNode(TermNode&);
 
 		/*!
 		\brief 规约提取名称的叶节点记号。
@@ -567,8 +594,9 @@ namespace scheme {
 			{
 				QuoteN(term);
 
-				term.Value.EmplaceFromCall(f, Deref(std::next(term.begin())),
-					lforward(args)...);
+				leo::EmplaceFromCall(term.Value,
+					leo::make_expanded<void(TermNode&, _tParams&&...)>(std::move(f)),
+					Deref(std::next(term.begin())), lforward(args)...);
 				term.ClearContainer();
 			}
 
@@ -708,8 +736,24 @@ namespace scheme {
 			LS_API void
 				CallSystem(TermNode&);
 
-		} // namespace Forms;
 
+			//@{
+			/*!
+			\brief 比较两个子项的值相等。
+			\sa leo::HoldSame
+			*/
+			LS_API void
+				EqualReference(TermNode&);
+
+			/*!
+			\brief 比较两个子项的值相等。
+			\sa leo::ValueObject
+			*/
+			LS_API void
+				EqualValue(TermNode&);
+			//@}
+
+		} // namespace Forms;
 	}
 } // namespace scheme;
 

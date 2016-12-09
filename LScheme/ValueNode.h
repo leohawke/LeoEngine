@@ -100,7 +100,7 @@ namespace leo {
 				std::tuple<_tParams3...> args3)
 			: name(make_from_tuple<string>(args2)),
 			container(make_from_tuple<Container>(args1)),
-			Value(make_from_tuple<Container>(args3))
+			Value(make_from_tuple<ValueObject>(args3))
 		{}
 		//@}
 
@@ -231,6 +231,11 @@ namespace leo {
 			PDefH(void, SetContent, ValueNode&& node)
 			ImplExpr(SwapContent(node))
 			//@}
+
+			void
+			SetContentIndirect(Container, const ValueObject&) lnothrow;
+		PDefH(void, SetContentIndirect, const ValueNode& node)
+			ImplExpr(SetContentIndirect(node.GetContainer(), node.Value))
 
 			PDefH(bool, Add, const ValueNode& node)
 			ImplRet(insert(node).second)

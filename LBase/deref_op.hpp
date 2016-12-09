@@ -51,6 +51,26 @@ namespace leo {
 	}
 	//@}
 
+	/*!
+	\brief 调用非引用或默认值。
+	*/
+	//@{
+	template<typename _tOther, typename _type, typename _func>
+	lconstfn auto
+		call_nonnull_or(_func f, _type p, _tOther&& other = {})
+		-> decltype(p ? f(p) : other)
+	{
+		return p ? f(p) : other;
+	}
+	template<typename _tOther, typename _type, typename _func,
+		typename _tSentinal = nullptr_t>
+		lconstfn auto
+		call_nonnull_or(_func f, _type p, _tOther&& other, _tSentinal last)
+		-> decltype(!bool(p == last) ? f(p) : other)
+	{
+		return !bool(p == last) ? f(p) : other;
+	}
+	//@}
 
 	//! \brief 取非空值或默认值。
 	//@{
@@ -72,15 +92,15 @@ namespace leo {
 
 	//! \brief 调用非空值或取默认值。
 	//@{
-	template<typename _tOther, typename _func, typename _type>
+	template<typename _tOther, typename _type, typename _func>
 	lconstfn auto
 		call_value_or(_func f, _type p, _tOther&& other = {})
 		-> decltype(p ? f(*p) : other)
 	{
 		return p ? f(*p) : other;
 	}
-	template<typename _tOther, typename _func, typename _type,
-		typename _tSentinal = nullptr_t>
+	template<typename _tOther, typename _type, typename _func,
+	typename _tSentinal = nullptr_t>
 		lconstfn auto
 		call_value_or(_func f, _type p, _tOther&& other, _tSentinal last)
 		-> decltype(!bool(p == last) ? f(*p) : other)

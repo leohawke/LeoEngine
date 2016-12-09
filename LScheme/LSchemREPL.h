@@ -63,7 +63,7 @@ namespace scheme {
 			\brief 创建 REPL 并对翻译单元规约以求值。
 			*/
 			LS_API void
-				Eval(const string&t, const REPLContext&);
+				Eval(TermNode&, const REPLContext&);
 		}
 	}
 }

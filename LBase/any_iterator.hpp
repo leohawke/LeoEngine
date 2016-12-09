@@ -2,7 +2,7 @@
 \ingroup LBase
 \brief 动态泛型迭代器。
 \par 修改时间:
-2016-11-23 11:22 +0800
+2016-11-26 12:27 +0800
 */
 
 #ifndef LBase_any_iterator_h
@@ -45,14 +45,6 @@ namespace leo
 			distance,
 			less_compare,
 			end_random_access_iteartor_op
-		};
-
-		template<typename _type>
-		struct wrap_handler
-		{
-			using value_type = unwrap_reference_t<_type>;
-			using type = cond_t<is_reference_wrapper<_type>,
-				ref_handler<value_type>, value_handler<value_type >>;
 		};
 
 		template<typename _type, typename _tReference>

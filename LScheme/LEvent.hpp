@@ -60,20 +60,15 @@ namespace leo
 		struct GEquality
 		{
 			//@{
-			using decayed_type = decay_t<_tFunctor>;
+			using Decayed = decay_t<_tFunctor>;
 
 			static bool
 				AreEqual(const GHEvent& x, const GHEvent& y)
-				lnoexcept_spec(std::declval<const decayed_type>()
-					== std::declval<const decayed_type>())
+				lnoexcept_spec(std::declval<const Decayed>()
+					== std::declval<const Decayed>())
 			{
-				const auto p(x.template target<decayed_type>());
-
-				if (const auto q = y.template target<decayed_type>())
-					return p == q || (p && *p == *q);
-				else
-					return !p;
-				return{};
+				return Deref(x.template target<Decayed>())
+					== Deref(y.template target<Decayed>());
 			}
 			//@}
 		};
@@ -132,7 +127,7 @@ namespace leo
 		{
 			return
 #if defined(LS_DLL) || defined(LS_BUILD_DLL)
-				x.BaseType::target_type() == y.BaseType::target_type()
+				x.target_type() == y.target_type()
 #else
 				x.comp_eq == y.comp_eq
 #endif
@@ -165,6 +160,9 @@ namespace leo
 			return true;
 		}
 		//@}
+
+		public:
+			using BaseType::target_type;
 	};
 	//@}
 
@@ -861,7 +859,7 @@ namespace leo
 		\brief 复制构造：深复制。
 		*/
 		GEventPointerWrapper(const GEventPointerWrapper& item)
-			: ptr(clone_polymorphic(item.ptr))
+			: ptr(leo::clone_polymorphic(Deref(item.ptr)))
 		{}
 		DefDeMoveCtor(GEventPointerWrapper)
 

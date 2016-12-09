@@ -110,11 +110,9 @@ namespace scheme
 			lconstfn PDefH(ReductionStatus, ToStatus, bool res) lnothrow
 				ImplRet(res ? ReductionStatus::NeedRetry : ReductionStatus::Success)
 
-				//! \since build 736
 				lconstfn PDefH(bool, NeedsRetry, ReductionStatus res) lnothrow
 				ImplRet(res != ReductionStatus::Success)
 
-				//! \since build 736
 				template<typename _func>
 			TermNode
 				TransformForSeparatorTmpl(_func f, const TermNode& term, const ValueObject& pfx,
@@ -130,6 +128,18 @@ namespace scheme
 						std::ref(delim)), std::bind(f, std::ref(res), _1, _2));
 				}
 				return res;
+			}
+
+			template<typename _func>
+			void
+				EqualTerm(TermNode& term, _func f)
+			{
+				Forms::QuoteN(term, 2);
+
+				auto i(term.begin());
+				const auto& x(Deref(++i));
+
+				term.Value = f(x.Value, Deref(++i).Value);
 			}
 
 		} // unnamed namespace;
@@ -283,7 +293,7 @@ namespace scheme
 			TermNode app_term(NoContainer, term.GetName());
 
 			if (move)
-				app_term.SetContent(std::move(closure));
+				LiftTerm(app_term, closure);
 			else
 				app_term.SetContent(closure);
 			// TODO: Test for normal form?
@@ -469,26 +479,20 @@ namespace scheme
 		}
 
 		ReductionStatus
-			EvaluateIdentifier(TermNode& term, ContextNode& ctx, string_view id)
+			EvaluateIdentifier(TermNode& term,const ContextNode& ctx, string_view id)
 		{
 			LAssertNonnull(id.data());
 
-			if (auto v = FetchValue(ctx, id))
+			if (const auto p = FetchValuePtr(ctx, id))
 			{
-				term.Value = std::move(v);
+				LiftTermRef(term, *p);
 				if (const auto p_handler = AccessPtr<LiteralHandler>(term))
 					return ToStatus((*p_handler)(ctx));
 			}
 			else
 				throw BadIdentifier(id);
-			if (const auto p = AccessPtr<TermNode>(term))
-			{
-				term.SetContent(std::move(*p));
-				// NOTE: To make it work with %DetectReducible.
-				if (IsBranch(term))
-					return ReductionStatus::NeedRetry;
-			}
-			return ReductionStatus::Success;
+			
+			return EvaluateTermNode(term);
 		}
 
 		ReductionStatus
@@ -521,6 +525,19 @@ namespace scheme
 					break;
 					// TODO: Handle other categories of literal.
 				}
+			}
+			return ReductionStatus::Success;
+		}
+
+		ReductionStatus
+			EvaluateTermNode(TermNode& term)
+		{
+			if (const auto p = AccessPtr<TermNode>(term))
+			{
+				LiftTermRef(term, *p);
+				// NOTE: To make it work with %DetectReducible.
+				if (IsBranch(term))
+					return ReductionStatus::NeedRetry;
 			}
 			return ReductionStatus::Success;
 		}
@@ -793,9 +810,23 @@ namespace scheme
 			}
 
 			void
-				Eval(const string& unit, const REPLContext& ctx)
+				EqualReference(TermNode& term)
 			{
-				REPLContext(ctx).Perform(unit);
+				EqualTerm(term, leo::HoldSame);
+			}
+
+			void
+				EqualValue(TermNode& term)
+			{
+				EqualTerm(term, leo::equal_to<>());
+			}
+
+			void
+				Eval(TermNode& term, const REPLContext& ctx)
+			{
+				Forms::CallUnaryAs<const string>([ctx](const string& unit) {
+					REPLContext(ctx).Perform(unit);
+				}, term);
 			}
 
 		} // namespace Forms;

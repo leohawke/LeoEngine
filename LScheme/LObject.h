@@ -23,7 +23,7 @@ namespace leo
 	/*!
 	\brief 指定对参数指定类型的成员具有所有权的标签。
 	*/
-	template<typename>
+	template<typename = void>
 	struct OwnershipTag
 	{};
 
@@ -37,10 +37,17 @@ namespace leo
 	struct HasOwnershipOf : std::is_base_of<OwnershipTag<_type>, _tOwner>
 	{};
 
-	DeclDerivedI(LS_API, IValueHolder, any_ops::holder)
+	DeclDerivedI(LS_API, IValueHolder, leo::any_ops::holder)
 
 		DeclIEntry(bool operator==(const IValueHolder&) const)
 
+		/*!
+		\brief 创建引用。
+
+		创建引用持有对象。
+		派生实现应保证返回的值持有对应的 lref<T> 类型的值引用当前持有的 T 类型的值。
+		*/
+		DeclIEntry(leo::any Refer() const)
 		EndDecl
 
 
@@ -123,15 +130,14 @@ namespace leo
 		{}
 		using boxed_value<_type>::boxed_value;
 		//@}
-		DefDeCopyCtor(ValueHolder)
-			DefDeMoveCtor(ValueHolder)
-
-			DefDeCopyAssignment(ValueHolder)
-			DefDeMoveAssignment(ValueHolder)
+		DefDeCopyMoveCtorAssignment(ValueHolder)
 
 			PDefHOp(bool, == , const IValueHolder& obj) const ImplI(IValueHolder)
 			ImplRet(type() == obj.type() && AreEqualHeld(this->value,
-				static_cast<const ValueHolder&>(obj).value))
+				Deref(static_cast<value_type*>(obj.get()))))
+
+			leo::any
+			Refer() const ImplI(IValueHolder);
 
 			PDefH(ValueHolder*, clone, ) const ImplI(IValueHolder)
 			ImplRet(try_new<ValueHolder>(*this))
@@ -163,7 +169,7 @@ namespace leo
 		{}
 		//@{
 		PointerHolder(const PointerHolder& h)
-			: PointerHolder(h.p_held ? new _type(*h.p_held) : nullptr)
+			: PointerHolder(leo::clone_monomorphic_ptr(h.p_held))
 		{}
 		DefDeMoveCtor(PointerHolder)
 			//@}
@@ -173,7 +179,10 @@ namespace leo
 
 			PDefHOp(bool, == , const IValueHolder& obj) const ImplI(IValueHolder)
 			ImplRet(type() == obj.type() && AreEqualHeld(*p_held,
-				Deref(static_cast<const PointerHolder&>(obj).p_held)))
+				Deref(static_cast<value_type*>(obj.get()))))
+
+			leo::any
+			Refer() const ImplI(IValueHolder);
 
 			DefClone(const ImplI(IValueHolder), PointerHolder)
 
@@ -184,10 +193,81 @@ namespace leo
 			ImplRet(p_held ? type_id<_type>() : type_id<void>())
 	};
 
+	/*!
+	\brief 带等于接口的引用动态泛型持有者。
+	\tparam _type 持有的被引用的值类型。
+	\note 不对持有值具有所有权。
+	\sa ValueHolder
+	*/
+	template<typename _type>
+	class RefHolder : implements IValueHolder
+	{
+		static_assert(std::is_object<_type>(), "Invalid type found.");
+
+	public:
+		using value_type
+			= leo::remove_reference_t<leo::unwrap_reference_t<_type>>;
+
+	private:
+		ValueHolder<lref<value_type>> base;
+
+	public:
+		//! \brief 不取得所有权。
+		RefHolder(_type& r)
+			: base(r)
+		{}
+		DefDeCopyMoveCtorAssignment(RefHolder)
+
+			PDefHOp(bool, == , const IValueHolder& obj) const ImplI(IValueHolder)
+			ImplRet(type() == obj.type() && AreEqualHeld(Deref(static_cast<
+				value_type*>(get())), Deref(static_cast<value_type*>(obj.get()))))
+
+			PDefH(leo::any, Refer, ) const ImplI(IValueHolder)
+			ImplRet(leo::any(leo::any_ops::use_holder,
+				leo::in_place<RefHolder>, *this))
+
+			DefClone(const ImplI(IValueHolder), RefHolder)
+
+			PDefH(void*, get, ) const ImplI(IValueHolder)
+			ImplRet(leo::pvoid(std::addressof(
+				Deref(static_cast<lref<value_type>*>(base.get())).get())))
+
+			PDefH(const type_info&, type, ) const lnothrow ImplI(IValueHolder)
+			ImplRet(leo::type_id<value_type>())
+	};
+
+
+	template<typename _type>
+	leo::any
+		ValueHolder<_type>::Refer() const
+	{
+		return leo::any(leo::any_ops::use_holder, leo::in_place<RefHolder<
+			_type>>, leo::ref(this->value));
+	}
+
+	template<typename _type, class _tPointer>
+	leo::any
+		PointerHolder<_type, _tPointer>::Refer() const
+	{
+		if (const auto& p = p_held.get())
+			return leo::any(leo::any_ops::use_holder,
+				leo::in_place<RefHolder<_type>>, leo::ref(*p));
+		leo::throw_invalid_construction();
+	}
+
 	class LS_API ValueObject : private equality_comparable<ValueObject>
 	{
+	public:
+		/*!
+		\brief 储存的内容。
+		*/
+		using Content = leo::any;
+
 	private:
-		any content;
+		struct holder_refer_tag
+		{};
+
+		Content content;
 
 	public:
 		/*!
@@ -200,10 +280,10 @@ namespace leo
 			\pre obj 可作为转移构造参数。
 			*/
 			template<typename _type,
-			limpl(typename = exclude_self_t<ValueObject, _type>)>
+			limpl(typename = leo::exclude_self_t<ValueObject, _type>)>
 			ValueObject(_type&& obj)
-			: content(any_ops::use_holder,
-				in_place<ValueHolder<decay_t<_type>>>, lforward(obj))
+			: content(leo::any_ops::use_holder,
+				leo::in_place<ValueHolder<leo::decay_t<_type>>>, lforward(obj))
 		{}
 		/*!
 		\brief 构造：使用对象初始化参数。
@@ -212,10 +292,24 @@ namespace leo
 		\pre _type 可被 _tParams 参数初始化。
 		*/
 		template<typename _type, typename... _tParams>
-		ValueObject(in_place_type_t<_type>, _tParams&&... args)
-			: content(any_ops::use_holder,
-				in_place<ValueHolder<_type>>, lforward(args)...)
+		ValueObject(leo::in_place_type_t<_type>, _tParams&&... args)
+			: content(leo::any_ops::use_holder,
+				leo::in_place<ValueHolder<_type>>, lforward(args)...)
 		{}
+	private:
+		/*!
+		\brief 构造：使用持有者。
+		*/
+		ValueObject(const IValueHolder& holder, holder_refer_tag)
+			: content(holder.Refer())
+		{}
+	public:
+		template<typename _type>
+		ValueObject(_type& obj, OwnershipTag<>)
+			: content(leo::any_ops::use_holder,
+				leo::in_place<RefHolder<_type>>, leo::ref(obj))
+		{}
+
 		/*!
 		\brief 构造：使用对象指针。
 		\note 得到包含指针指向的指定对象的实例，并获得所有权。
@@ -264,6 +358,12 @@ namespace leo
 			//! \brief 比较相等：参数都为空或都非空且存储的对象相等。
 			LS_API friend bool
 			operator==(const ValueObject&, const ValueObject&);
+
+
+		/*!
+		\brief 取储存的内容。
+		*/
+		DefGetter(const lnothrow, const Content&, Content, content)
 
 		/*!
 		\brief 取指定类型的对象。
@@ -323,14 +423,21 @@ namespace leo
 		}
 		//@}
 
-		//@{
-		template<typename _type, typename... _tParams>
+		/*!
+		\brief 清除。
+		\post <tt>*this == ValueObject()</tt> 。
+		*/
+		PDefH(void, Clear, ) lnothrow
+			ImplExpr(content.reset())
+
+			//@{
+			template<typename _type, typename... _tParams>
 		void
 			Emplace(_tParams&&... args)
 		{
 			using Holder = ValueHolder<decay_t<_type>>;
 
-			content.emplace<Holder>(any_ops::use_holder,
+			content.emplace<Holder>(leo::any_ops::use_holder,
 				Holder(lforward(args)...));
 		}
 		template<typename _type>
@@ -339,74 +446,16 @@ namespace leo
 		{
 			using Holder = PointerHolder<decay_t<_type>>;
 
-			content.emplace<Holder>(any_ops::use_holder, Holder(p));
+			content.emplace<Holder>(leo::any_ops::use_holder, Holder(p));
 		}
 
-		//@{
-		template<typename _func, typename... _tParams>
-		void
-			EmplaceFromCall(identity<void>, _func&& f,
-				_tParams&&... args)
-		{
-			lforward(f)(lforward(args)...);
-		}
-		template<typename _type, typename _func, typename... _tParams>
-		void
-			EmplaceFromCall(identity<_type>, _func&& f,
-				_tParams&&... args)
-		{
-			Emplace<_type>(lforward(f)(lforward(args)...));
-		}
-		template<typename _func, typename... _tParams>
-		void
-			EmplaceFromCall(_func&& f, _tParams&&... args)
-		{
-			EmplaceFromCall(identity<result_of_t<
-				_func && (_tParams&&...)>>(), lforward(f), lforward(args)...);
-		}
-
-		template<typename _fCallable, typename... _tParams>
-		void
-			EmplaceFromInvoke(identity<void>, _fCallable&& f,
-				_tParams&&... args)
-		{
-			invoke(lforward(f), lforward(args)...);
-		}
-		template<typename _type, typename _fCallable, typename... _tParams>
-		void
-			EmplaceFromInvoke(identity<_type>, _fCallable&& f,
-				_tParams&&... args)
-		{
-			Emplace<_type>(invoke(lforward(f), lforward(args)...));
-		}
-		template<typename _fCallable, typename... _tParams>
-		void
-			EmplaceFromInvoke(_fCallable&& f, _tParams&&... args)
-		{
-			EmplaceFromInvoke(identity<decltype(invoke(lforward(f),
-				lforward(args)...))>(), lforward(f), lforward(args)...);
-		}
 		//@}
 
-		template<typename _type, typename... _tParams>
-		_type&
-			EmplaceIfEmpty(_tParams&&... args)
-		{
-			if (!*this)
-			{
-				Emplace<_type>(lforward(args)...);
-				return GetObject<_type>();
-			}
-			return Access<_type>();
-		}
-		//@}
-
-		/*!
-		\brief 清除。
-		\post <tt>*this == ValueObject()</tt> 。
-		*/
-		PDefH(void, Clear, ) lnothrow
-			ImplExpr(content.reset())
+			/*!
+			\brief 取间接引用的值对象。
+			*/
+			ValueObject
+			MakeIndirect() const;
 
 			/*!
 			\brief 交换。
@@ -414,6 +463,70 @@ namespace leo
 			friend PDefH(void, swap, ValueObject& x, ValueObject& y) lnothrow
 			ImplExpr(x.content.swap(y.content))
 	};
+
+	/*!
+	\relates ValueObject
+	*/
+	//@{
+	template<typename _func, typename... _tParams>
+	void
+		EmplaceFromCall(ValueObject&, leo::identity<void>, _func&& f,
+			_tParams&&... args)
+	{
+		lforward(f)(lforward(args)...);
+	}
+	template<typename _type, typename _func, typename... _tParams>
+	void
+		EmplaceFromCall(ValueObject& vo, leo::identity<_type>, _func&& f,
+			_tParams&&... args)
+	{
+		vo.Emplace<_type>(lforward(f)(lforward(args)...));
+	}
+	template<typename _func, typename... _tParams>
+	void
+		EmplaceFromCall(ValueObject& vo, _func&& f, _tParams&&... args)
+	{
+		leo::EmplaceFromCall(vo, leo::identity<leo::result_of_t<
+			_func && (_tParams&&...)>>(), lforward(f), lforward(args)...);
+	}
+
+	template<typename _fCallable, typename... _tParams>
+	void
+		EmplaceFromInvoke(ValueObject&, leo::identity<void>, _fCallable&& f,
+			_tParams&&... args)
+	{
+		leo::invoke(lforward(f), lforward(args)...);
+	}
+	template<typename _type, typename _fCallable, typename... _tParams>
+	void
+		EmplaceFromInvoke(ValueObject& vo, leo::identity<_type>, _fCallable&& f,
+			_tParams&&... args)
+	{
+		vo.Emplace<_type>(leo::invoke(lforward(f), lforward(args)...));
+	}
+	template<typename _fCallable, typename... _tParams>
+	void
+		EmplaceFromInvoke(ValueObject& vo, _fCallable&& f, _tParams&&... args)
+	{
+		leo::EmplaceFromInvoke(leo::identity<decltype(leo::invoke(
+			lforward(f), lforward(args)...))>(), lforward(f), lforward(args)...);
+	}
+
+	template<typename _type, typename... _tParams>
+	_type&
+		EmplaceIfEmpty(ValueObject& vo, _tParams&&... args)
+	{
+		if (!vo)
+		{
+			vo.Emplace<_type>(lforward(args)...);
+			return vo.GetObject<_type>();
+		}
+		return vo.Access<_type>();
+	}
+
+	//! \brief 判断是否持有相同对象。
+	inline PDefH(bool, HoldSame, const ValueObject& x, const ValueObject& y)
+		ImplRet(leo::hold_same(x.GetContent(), y.GetContent()))
 
 	/*!
 	\brief 依赖项模板。
@@ -466,7 +579,7 @@ namespace leo
 			if (!ptr)
 				ptr = PointerType(new DependentType());
 			else if (!ptr.unique())
-				ptr = PointerType(clone_monomorphic(ptr));
+				ptr = PointerType(leo::clone_monomorphic(Deref(ptr)));
 			return Nonnull(ptr);
 		}
 

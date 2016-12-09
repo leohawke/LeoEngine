@@ -28,6 +28,13 @@ namespace leo {
 	}
 
 	void
+		ValueNode::SetContentIndirect(Container con, const ValueObject& vo) lnothrow
+	{
+		container.swap(con),
+			Value = vo.MakeIndirect();
+	}
+
+	void
 		ValueNode::SwapContent(ValueNode& node) lnothrow
 	{
 		SwapContainer(node),

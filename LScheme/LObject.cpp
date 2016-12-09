@@ -17,4 +17,11 @@ namespace leo {
 			return !p;
 		return{};
 	}
+
+	ValueObject
+		ValueObject::MakeIndirect() const
+	{
+		return ValueObject(leo::polymorphic_downcast<const IValueHolder&>(
+			Deref(content.get_holder())), holder_refer_tag());
+	}
 }

@@ -60,8 +60,192 @@ namespace leo
 		template<typename _type>
 		using nested_allocator_t = typename _type::allocator_type;
 
+		//@{
+		template<typename _type, typename... _tParams>
+		using mem_new_t
+			= decltype(_type::operator new(std::declval<_tParams>()...));
 
-		//! \since build 1.4
+		template<typename _type, typename... _tParams>
+		using mem_delete_t
+			= decltype(_type::operator delete(std::declval<_tParams>()...));
+		//@}
+
+	} // namespace details;
+	//@}
+
+	//@{
+	template<typename _type, typename... _tParams>
+	struct has_mem_new : is_detected<details::mem_new_t, _type, _tParams...>
+	{};
+
+	template<typename _type, typename... _tParams>
+	struct has_mem_delete : is_detected<details::mem_delete_t, _type, _tParams...>
+	{};
+	//@}
+
+	/*!
+	\ingroup unary_type_traits
+	\brief 判断类型是否符合分配器要求的目标类型。
+	\since build 1.4
+	*/
+	template<typename _type>
+	struct is_allocatable : is_nonconst_object<_type>
+	{};
+
+
+	/*!
+	\ingroup unary_type_traits
+	\brief 判断类型具有嵌套的成员 allocator_type 指称一个可复制构造的类类型。
+	*/
+	template<typename _type>
+	struct has_nested_allocator
+		: details::check_allocator<detected_t<details::nested_allocator_t, _type>>
+	{};
+
+
+	/*!
+	\ingroup metafunctions
+	\brief 取嵌套成员分配器类型，若不存在则使用第二模板参数指定的默认类型。
+	*/
+	template<typename _type, class _tDefault = std::allocator<_type>>
+	struct nested_allocator
+		: conditional<has_nested_allocator<_type>::value,
+		detected_t<details::nested_allocator_t, _type>, _tDefault>
+	{};
+
+	/*!
+	\brief 释放分配器的删除器。
+	\since build 1.4
+	*/
+	template<class _tAlloc>
+	class allocator_delete
+	{
+	private:
+		using traits = std::allocator_traits<_tAlloc>;
+
+	public:
+		using pointer = typename traits::pointer;
+		using size_type = typename traits::size_type;
+
+	private:
+		_tAlloc& alloc_ref;
+		size_type size;
+
+	public:
+		allocator_delete(_tAlloc& alloc, size_type s)
+			: alloc_ref(alloc), size(s)
+		{}
+
+		void
+			operator()(pointer p) const lnothrowv
+		{
+			traits::deallocate(alloc_ref, p, size);
+		}
+	};
+
+
+	/*!
+	\brief 构造分配器守护。
+	*/
+	template<typename _tAlloc>
+	std::unique_ptr<_tAlloc, allocator_delete<_tAlloc>>
+		make_allocator_guard(_tAlloc& a,
+			typename std::allocator_traits<_tAlloc>::size_type n = 1)
+	{
+		using del_t = allocator_delete<_tAlloc>;
+
+		return std::unique_ptr<_tAlloc, del_t>(
+			std::allocator_traits<_tAlloc>::allocate(a, n), del_t(a, n));
+	}
+
+
+	//@{
+	//! \brief 使用分配器创建对象。
+	template<typename _type, class _tAlloc, typename... _tParams>
+	auto
+		create_with_allocator(_tAlloc&& a, _tParams&&... args)
+		-> decltype(leo::make_allocator_guard(a).release())
+	{
+		auto gd(leo::make_allocator_guard(a));
+
+		leo::construct_within<typename std::allocator_traits<decay_t<_tAlloc>>
+			::value_type>(*gd.get(), lforward(args)...);
+		return gd.release();
+	}
+
+
+	//! \ingroup allocators
+	//@{
+	/*!
+	\brief 类分配器。
+	\warning 非虚析构。
+
+	和 std::allocator 类似但自动检查类的成员代替 ::operator new/::operator delete 。
+	*/
+	template<class _type>
+	struct class_allocator : std::allocator<_type>
+	{
+		class_allocator() = default;
+		using std::allocator<_type>::allocator;
+		class_allocator(const class_allocator&) = default;
+
+		_type*
+			allocate(size_t n)
+		{
+			return _type::operator new(n * sizeof(_type));
+		}
+
+		void
+			deallocate(_type* p, size_t)
+		{
+			// TODO: What if the size hint is supported by %_type?
+			return _type::operator delete(p);
+		}
+	};
+
+
+	/*!
+	\brief 局部分配器。
+
+	对支持类作用域分配的类类型为 class_allocator ，否则为 std::allocator 。
+	*/
+	template<typename _type>
+	using local_allocator = cond_t<and_<has_mem_new<_type, size_t>,
+		has_mem_delete<_type*>>, class_allocator<_type>, std::allocator<_type>>;
+	//@}
+	//@}
+
+	namespace details
+	{
+
+		template<typename _type, typename... _tParams>
+		LB_NORETURN _type*
+			try_new_impl(void*, _tParams&&...)
+		{
+			throw_invalid_construction();
+		}
+		template<typename _type, typename... _tParams>
+		auto
+			try_new_impl(nullptr_t, _tParams&&... args)
+			-> decltype(new _type(lforward(args)...))
+		{
+			return new _type(lforward(args)...);
+		}
+
+		template<typename _type, class _tAlloc, typename... _tParams>
+		LB_NORETURN _type*
+			try_create_with_allocator_impl(void*, _tAlloc&, _tParams&&...)
+		{
+			throw_invalid_construction();
+		}
+		template<typename _type, class _tAlloc, typename... _tParams>
+		auto
+			try_create_with_allocator_impl(nullptr_t, _tAlloc& a, _tParams&&... args)
+			-> decltype(leo::create_with_allocator<_type>(a, lforward(args)...))
+		{
+			return leo::create_with_allocator<_type>(a, lforward(args)...);
+		}
+
 		//@{
 		template<typename _type>
 		struct pack_obj_impl
@@ -97,60 +281,32 @@ namespace leo
 		};
 		//@}
 
-		template<typename _type, typename... _tParams>
-		LB_NORETURN _type*
-			try_new_impl(void*, _tParams&&...)
-		{
-			throw_invalid_construction();
-		}
-		template<typename _type, typename... _tParams>
-		auto
-			try_new_impl(nullptr_t, _tParams&&... args)
-			-> decltype(new _type(lforward(args)...))
-		{
-			return new _type(lforward(args)...);
-		}
-
 	} // namespace details;
-	//@}
 
+
+	  //! \throw invalid_construction 调用非合式。
+	  //@{
+	  /*!
+	  \brief 尝试调用 new 表达式创建对象。
+	  */
 	template<typename _type, typename... _tParams>
 	_type*
 		try_new(_tParams&&... args)
 	{
-		return details::try_new_impl<_type>(nullptr,lforward(args)...);
+		return details::try_new_impl<_type>(nullptr, lforward(args)...);
 	}
 
-
 	/*!
-	\ingroup unary_type_traits
-	\brief 判断类型是否符合分配器要求的目标类型。
-	\since build 1.4
+	\brief 尝试调用 leo::create_with_allocator 表达式创建对象。
 	*/
-	template<typename _type>
-	struct is_allocatable : is_nonconst_object<_type>
-	{};
+	template<typename _type, class _tAlloc, typename... _tParams>
+	_type*
+		try_create_with_allocator(_tAlloc&& a, _tParams&&... args)
+	{
+		return details::try_create_with_allocator_impl<_type>(nullptr, a,
+			lforward(args)...);
+	}
 
-
-	/*!
-	\ingroup unary_type_traits
-	\brief 判断类型具有嵌套的成员 allocator_type 指称一个可复制构造的类类型。
-	*/
-	template<typename _type>
-	struct has_nested_allocator
-		: details::check_allocator<detected_t<details::nested_allocator_t, _type>>
-	{};
-
-
-	/*!
-	\ingroup metafunctions
-	\brief 取嵌套成员分配器类型，若不存在则使用第二模板参数指定的默认类型。
-	*/
-	template<typename _type, class _tDefault = std::allocator<_type>>
-	struct nested_allocator
-		: conditional<has_nested_allocator<_type>::value,
-		detected_t<details::nested_allocator_t, _type>, _tDefault>
-	{};
 
 	/*!
 	\brief 使用显式析构函数调用和 std::free 的删除器。
@@ -282,71 +438,7 @@ namespace leo
 	};
 	//@}
 
-
-	/*!
-	\brief 释放分配器的删除器。
-	\since build 1.4
-	*/
-	template<class _tAlloc>
-	class allocator_delete
-	{
-	private:
-		using traits = std::allocator_traits<_tAlloc>;
-
-	public:
-		using pointer = typename traits::pointer;
-		using size_type = typename traits::size_type;
-
-	private:
-		_tAlloc& alloc_ref;
-		size_type size;
-
-	public:
-		allocator_delete(_tAlloc& alloc, size_type s)
-			: alloc_ref(alloc), size(s)
-		{}
-
-		void
-			operator()(pointer p) const lnothrowv
-		{
-			traits::deallocate(alloc_ref, p, size);
-		}
-	};
-
-
-	//! \since build 1.4
-	//@{
-	//! \brief 使用分配器复制指定指针指向的对象。
-	template<typename _type, class _tAlloc
-		= std::allocator<indirect_element_t<_type>>>
-		auto
-		clone_monomorphic(const _type& p, _tAlloc&& a = _tAlloc())
-		-> decltype(std::addressof(*p))
-	{
-		using traits = std::allocator_traits<_tAlloc>;
-		using value_type = typename traits::value_type;
-
-		auto p_allocated(traits::allocate(a, sizeof(value_type)));
-		const auto p_storage(std::addressof(*p_allocated));
-
-		traits::construct(a, p_storage, *p);
-		return p_storage;
-	}
-
-	/*!
-	\brief 使用 \c clone 成员函数复制指定指针指向的多态类类型对象。
-	\pre 断言： <tt>is_polymorphic<indirect_element_t<decltype(p)>>()</tt> 。
-	*/
-	template<class _type>
-	auto
-		clone_polymorphic(const _type& p) -> decltype(std::addressof(*p))
-	{
-		static_assert(is_polymorphic<indirect_element_t<decltype(p)>>(),
-			"Non-polymorphic class type found.");
-
-		return p->clone();
-	}
-	//@}
+	
 
 
 	/*!
@@ -609,21 +701,6 @@ namespace leo
 		return std::make_shared<_type>(il);
 	}
 
-
-	/*!
-	\brief 构造分配器守护。
-	\since build 1.4
-	*/
-	template<typename _tAlloc>
-	std::unique_ptr<_tAlloc, allocator_delete<_tAlloc>>
-		make_allocator_guard(_tAlloc& alloc,
-			typename std::allocator_traits<_tAlloc>::size_type n = 1)
-	{
-		using del_t = allocator_delete<_tAlloc>;
-
-		return std::unique_ptr<_tAlloc, del_t>(alloc.allocate(n), del_t(alloc, n));
-	}
-
 	/*!
 	\brief 智能指针转换。
 	\since build 1.4
@@ -693,6 +770,67 @@ namespace leo
 	}
 	//@}
 
+	//! \since build 1.4
+	//@{
+	//! \brief 使用 new 复制对象。
+	template<typename _type>
+	inline _type*
+		clone_monomorphic(const _type& v)
+	{
+		return new _type(v);
+	}
+	//! \brief 使用分配器复制对象。
+	template<typename _type, class _tAlloc>
+	inline auto
+		clone_monomorphic(const _type& v, _tAlloc&& a)
+		-> decltype(leo::create_with_allocator<_type>(lforward(a), v))
+	{
+		return leo::create_with_allocator<_type>(lforward(a), v);
+	}
+
+	//! \brief 若指针非空，使用 new 复制指针指向的对象。
+	template<typename _tPointer>
+	inline auto
+		clone_monomorphic_ptr(const _tPointer& p)
+		-> decltype(leo::clone_monomorphic(*p))
+	{
+		using ptr_t = decltype(leo::clone_monomorphic(*p));
+
+		return p ? leo::clone_monomorphic(*p) : ptr_t();
+	}
+	//! \brief 若指针非空，使用分配器复制指针指向的对象。
+	template<typename _tPointer, class _tAlloc>
+	inline auto
+		clone_monomorphic_ptr(const _tPointer& p, _tAlloc&& a)
+		-> decltype(leo::clone_monomorphic(*p, lforward(a)))
+	{
+		using ptr_t = decltype(leo::clone_monomorphic(*p, lforward(a)));
+
+		return p ? leo::clone_monomorphic(*p, lforward(a)) : ptr_t();
+	}
+
+	/*!
+	\brief 使用 \c clone 成员函数复制多态类类型对象。
+	\pre 静态断言： <tt>is_polymorphic<decltype(v)>()</tt> 。
+	*/
+	template<class _type>
+	inline auto
+		clone_polymorphic(const _type& v) -> decltype(v.clone())
+	{
+		static_assert(is_polymorphic<_type>(), "Non-polymorphic class type found.");
+
+		return v.clone();
+	}
+
+	//! \brief 若指针非空，使用 \c clone 成员函数复制指针指向的多态类类型对象。
+	template<class _tPointer>
+	inline auto
+		clone_polymorphic_ptr(const _tPointer& p) -> decltype(clone_polymorphic(*p))
+	{
+		return
+			p ? leo::clone_polymorphic(*p) : decltype(clone_polymorphic(*p))();
+	}
+	//@}
 
 	//! \since build 1.4
 	//@{

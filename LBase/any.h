@@ -2,7 +2,7 @@
 \ingroup LBase
 \brief 动态泛型类型。
 \par 修改时间:
-2016-11-23 11:49 +0800
+2016-12-07 13:17 +0800
 
 \see WG21 N4582 20.6[any] 。
 \see http://www.boost.org/doc/libs/1_60_0/doc/html/any/reference.html 。
@@ -64,6 +64,15 @@ namespace leo
 				type() const lnothrow = 0;
 		};
 
+		/*!
+		\brief 判断是否持有相同对象。
+		\relates holder
+		*/
+		inline bool
+			hold_same(const holder& x, const holder& y)
+		{
+			return x.get() == y.get();
+		}
 
 		/*!
 		\brief 值类型动态泛型持有者。
@@ -103,7 +112,7 @@ namespace leo
 			value_holder*
 				clone() const override
 			{
-				return new value_holder(this->value);
+				return leo::clone_monomorphic(*this);
 			}
 
 			//! \since build 1.3
@@ -151,7 +160,7 @@ namespace leo
 			//! \since build 1.3
 			//@{
 			pointer_holder(const pointer_holder& h)
-				: pointer_holder(h.p_held ? new value_type(*h.p_held) : nullptr)
+				: pointer_holder(leo::clone_monomorphic(h.p_held))
 			{}
 			pointer_holder(pointer_holder&&) = default;
 			//@}
@@ -164,7 +173,7 @@ namespace leo
 			pointer_holder*
 				clone() const override
 			{
-				return new pointer_holder(*this);
+				return leo::clone_monomorphic(*this);
 			}
 
 			void*
@@ -383,7 +392,7 @@ namespace leo
 					d = &leo::type_id<value_type>();
 					break;
 				case get_ptr:
-					d = static_cast<void*>(get_pointer(s));
+					d = leo::pvoid(get_pointer(s));
 					break;
 				case clone:
 					copy(d, s);
@@ -464,7 +473,7 @@ namespace leo
 					d = &leo::type_id<value_type>();
 					break;
 				case get_ptr:
-					d =static_cast<void*>(get_pointer(s));
+					d =leo::pvoid(get_pointer(s));
 					break;
 				default:
 					base::manage(d, s, op);
@@ -537,7 +546,7 @@ namespace leo
 					d = &type_id<value_type>();
 					break;
 				case get_ptr:
-					d = get_pointer(s);
+					d =leo::pvoid(get_pointer(s));
 					break;
 				case get_holder_type:
 					d = &type_id<_tHolder>();
@@ -551,6 +560,13 @@ namespace leo
 			}
 		};
 
+		template<typename _type>
+		struct wrap_handler
+		{
+			using value_type = remove_reference_t<unwrap_reference_t<_type>>;
+			using type = cond_t<is_reference_wrapper<_type>, ref_handler<value_type>,
+				value_handler<value_type>>;
+		};
 	} // namespace any_ops;
 
 
@@ -791,23 +807,14 @@ namespace leo
 		//! \post \c this->empty() 。
 		any() lnothrow = default;
 		//! \since build 1.4
-		template<typename _type, limpl(typename = exclude_self_t<any, _type>,
-			typename = enable_if_t<!is_reference_wrapper<decay_t<_type>>::value>)>
+		template<typename _type, limpl(typename = exclude_self_t<any, _type>)>
 			inline
 			any(_type&& x)
 			: any(any_ops::with_handler_t<
-				any_ops::value_handler<decay_t<_type>>>(), lforward(x))
+				_t<any_ops::wrap_handler<decay_t<_type>>>>(), lforward(x))
 		{}
 		//! \note LBase 扩展。
 		//@{
-		//! \since build 1.4
-		template<typename _type, limpl(typename
-			= enable_if_t<is_reference_wrapper<decay_t<_type>>::value>)>
-			inline
-			any(_type&& x)
-			: any(any_ops::with_handler_t<
-				any_ops::ref_handler<remove_reference_t<decay_unwrap_t<_type>>>>(), x)
-		{}
 		//! \since build 1.4
 		template<typename _type, typename... _tParams>
 		inline
@@ -1102,6 +1109,15 @@ namespace leo
 
 	//! \note LBase 扩展。
 	//@{
+	/*!
+	\brief 判断是否持有相同对象。
+	*/
+	inline bool
+		hold_same(const any& x, const any& y)
+	{
+		return x.get() == y.get();
+	}
+
 	/*!
 	\brief 未检查的动态泛型转换。
 	\note 对非空对象语义同非公开接口 \c boost::unsafe_any_cast 。

@@ -525,6 +525,16 @@ namespace scheme {
 			return leo::call_value_or<ValueObject>(
 				std::mem_fn(&ValueNode::Value),scheme::LookupName(ctx, name));
 		}
+
+		template<typename _tKey>
+		static observer_ptr<const ValueObject>
+			FetchValuePtr(const ContextNode& ctx, const _tKey& name)
+		{
+			return leo::call_value_or<observer_ptr<const ValueObject>>(
+				[](const ValueNode& node) {
+				return make_observer(&node.Value);
+			}, scheme::LookupName(ctx, name));
+		}
 		//@}
 
 		/*!
@@ -637,8 +647,23 @@ namespace scheme {
 
 		//! \brief 使用第二个参数指定的项的内容替换第一个项的内容。
 		inline PDefH(void, LiftTerm, TermNode& term, TermNode& tm)
-			ImplExpr(TermNode(std::move(tm)).SwapContent(term))
+			ImplExpr(term.SetContent(std::move(tm)))
 			//@}
+
+			//@{
+			inline PDefH(void, LiftTerm, ValueObject& term_v, ValueObject& vo)
+			ImplExpr(term_v = std::move(vo))
+			inline PDefH(void, LiftTerm, TermNode& term, ValueObject& vo)
+			ImplExpr(LiftTerm(term.Value, vo))
+			//@}
+
+			//@{
+			inline PDefH(void, LiftTermRef, TermNode& term, TermNode& tm)
+			ImplExpr(term.SetContentIndirect(tm))
+			inline PDefH(void, LiftTermRef, ValueObject& term_v, const ValueObject& vo)
+			ImplExpr(term_v = vo.MakeIndirect())
+			inline PDefH(void, LiftTermRef, TermNode& term, const ValueObject& vo)
+			ImplExpr(LiftTermRef(term.Value, vo))
 
 			//! \pre 断言：参数指定的项是枝节点。
 			//@{

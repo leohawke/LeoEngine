@@ -123,20 +123,33 @@ namespace leo
 	template<typename _type, bool _bSigned = is_signed<_type>::value>
 	struct make_widen_int
 	{
-		using type = typename make_signed_c<typename
-			make_width_int<integer_width<_type>::value << 1>::type, _bSigned>::type;
+	private:
+		using width = integer_width<_type>;
+
+	public:
+		using type = _t<make_signed_c<_t<make_width_int<(width::value << 1) <= 64
+			? width::value << 1 : width::value>>, _bSigned>>;
 	};
 
-	template<bool _bSigned>
-	struct make_widen_int<std::int64_t, _bSigned>
-	{
-		using type = std::int64_t;
-	};
+	/*!
+	\brief 公共整数类型。
+	\note 同 common_type 但如果可能，按需自动扩展整数位宽避免缩小数值范围。
+	*/
+	//@{
+	template<typename... _types>
+	struct common_int_type : common_type<_types...>
+	{};
 
-	template<bool _bSigned>
-	struct make_widen_int<std::uint64_t, _bSigned>
+	template<typename _type1, typename _type2, typename... _types>
+	struct common_int_type<_type1, _type2, _types...>
 	{
-		using type = std::uint64_t;
+	private:
+		using common_t = common_type_t<_type1, _type2>;
+
+	public:
+		using type = typename common_int_type<cond_t<
+			and_<is_unsigned<common_t>, or_<is_signed<_type1>, is_signed<_type2>>>,
+			_t<make_widen_int<common_t, true>>, common_t>, _types...>::type;
 	};
 	//@}
 

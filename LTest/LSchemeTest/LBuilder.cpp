@@ -11,6 +11,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <typeindex>
 //#include YFM_NPL_Configuration
 //#include YFM_Helper_Initialization
 #include <LBase/Debug.h>
@@ -143,9 +144,7 @@ LoadFunctions(REPLContext& context)
 			throw std::domain_error("Runtime error: divided by zero.");
 		}, term);
 	}, IsBranch);
-	RegisterUnaryFunction<const string>(root, "eval",
-		[&](const string& t) {Eval(t, context); }
-		);
+	RegisterFunction(root, "eval", leo::bind1(Eval, std::ref(context)));
 	RegisterFunction(root, "system", CallSystem);
 	RegisterUnaryFunction<const string>(root, "echo", Echo);
 	RegisterUnaryFunction<const string>(root, "ofs", [&](const string& path){
@@ -167,6 +166,28 @@ LoadFunctions(REPLContext& context)
 		return lex;
 	});
 	RegisterUnaryFunction<LexicalAnalyzer>(root, "parse-lex", ParseOutput);
+	RegisterUnaryFunction<LexicalAnalyzer>(root, "parse-lex", ParseOutput);
+
+	RegisterUnaryFunction<const string>(root, "put", [&](const string& str) {
+		std::cout << str;
+	});
+
+	RegisterUnaryFunction<const string>(root, "puts", [&](const string& str) {
+		std::cout << str << std::endl;
+	});
+
+	RegisterUnaryFunction(root, "typeid", [](TermNode& term) {
+		return term.Value.GetType().hash_code();
+	});
+
+	RegisterUnaryFunction(root, "nameof",
+		[](TermNode& term) {
+		return term.Value.GetType().name();
+	});
+
+	RegisterFunction(root, "eq?", EqualReference);
+
+	RegisterFunction(root, "eqv?", EqualValue);
 }
 
 } // unnamed namespace;
