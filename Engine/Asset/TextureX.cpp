@@ -132,15 +132,7 @@ namespace platform {
 
 
 	Render::TexturePtr LoadDDSTexture(File && file, uint32 access) {
-		auto loading = std::make_unique<dds::DDSLoadingDesc>(std::move(file), access);
-
-		auto coroutine = loading->Coroutine();
-
-		auto iter = coroutine.begin();
-		while (!*iter)
-			++iter;
-
-		return *iter;
+		return asset::SyncLoad<dds::DDSLoadingDesc>(std::move(file), access);
 	}
 
 	Render::TexturePtr X::LoadTexture(X::path const& texpath, uint32 access) {

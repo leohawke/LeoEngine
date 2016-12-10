@@ -42,10 +42,10 @@ namespace platform {
 			bool linear);
 	}
 
-#if ENGINE_TOOL
+#ifdef ENGINE_TOOL
 	namespace T {
 		//对于大端平台，不使用运行时代码处理，而是将资源转换至逻辑匹配的资源格式
-		void ImageLE2BE(File const & file) {
+		inline void ImageLE2BE(File const & file) {
 
 		}
 	}
