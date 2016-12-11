@@ -59,6 +59,19 @@ namespace platform {
 
 		std::shared_ptr<AssetType> ParseNode()
 		{
+			auto& effect_node = effect_desc.data->effect_node;
+			LAssert(effect_node.GetName() == "effect", R"(Invalid Format:Not Begin With "effect")");
+
+			//TODO refer support
+
+			//macro (macro (@ (name "foo")) "value")
+			{
+				if (auto p = leo::AccessNodePtr(effect_node, "macro")) {
+
+				}
+			}
+
+
 			return nullptr;
 		}
 
