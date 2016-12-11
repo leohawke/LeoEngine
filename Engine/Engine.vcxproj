@@ -28,6 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Asset\CompressionETC.cpp" />
+    <ClCompile Include="Asset\EffectAsset.cpp" />
     <ClCompile Include="Asset\EffectX.cpp" />
     <ClCompile Include="Asset\Loader.cpp" />
     <ClCompile Include="Asset\TexCompression.cpp" />
@@ -55,6 +56,7 @@
     <ClInclude Include="Asset\CompressionBC.hpp" />
     <ClInclude Include="Asset\CompressionETC.hpp" />
     <ClInclude Include="Asset\DDSX.h" />
+    <ClInclude Include="Asset\EffectAsset.h" />
     <ClInclude Include="Asset\EffectX.h" />
     <ClInclude Include="Asset\Loader.hpp" />
     <ClInclude Include="Asset\TexCompression.hpp" />

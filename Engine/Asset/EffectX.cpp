@@ -33,9 +33,7 @@ namespace platform {
 		std::experimental::generator<std::shared_ptr<AssetType>> Coroutine() override {
 			co_yield PreCreate();
 			co_yield LoadNode();
-#ifdef ENGINE_TOOL
-			co_yield BuildHLSL();
-#endif
+			co_yield ParseNode();
 			co_yield CreateAsset();
 		}
 	private:
@@ -59,16 +57,15 @@ namespace platform {
 			return  nullptr;
 		}
 
+		std::shared_ptr<AssetType> ParseNode()
+		{
+			return nullptr;
+		}
+
 		std::shared_ptr<AssetType> CreateAsset()
 		{
 			return effect_desc.effect_asset;
 		}
-#ifdef ENGINE_TOOL
-		std::shared_ptr<AssetType> BuildHLSL()
-		{
-			return nullptr;
-		}
-#endif
 	};
 
 	asset::EffectAsset platform::X::LoadEffectAsset(path const & effectpath)
