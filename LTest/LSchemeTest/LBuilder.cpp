@@ -182,7 +182,7 @@ LoadFunctions(REPLContext& context)
 
 	RegisterUnaryFunction(root, "nameof",
 		[](TermNode& term) {
-		return term.Value.GetType().name();
+		return std::string(term.Value.GetType().name());
 	});
 
 	RegisterFunction(root, "eq?", EqualReference);
