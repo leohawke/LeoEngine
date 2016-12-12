@@ -18,7 +18,7 @@ namespace leo {
 
 	lconstexpr const struct NoContainerTag {} NoContainer{};
 
-	class LB_API ValueNode : private totally_ordered<ValueNode>,
+	class LS_API ValueNode : private totally_ordered<ValueNode>,
 		private totally_ordered<ValueNode, string>
 	{
 	public:
@@ -531,7 +531,6 @@ namespace leo {
 	//@{
 	LB_API ValueNode&
 		AccessNode(ValueNode::Container*, const string&);
-	//! \since build 670
 	LB_API const ValueNode&
 		AccessNode(const ValueNode::Container*, const string&);
 	template<typename _tKey>

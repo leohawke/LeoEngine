@@ -10,7 +10,7 @@
 #include "LBase/ldef.h"
 #include <ios> // for std::basic_ios, std::ios_base::iostate;
 
-namespace ystdex
+namespace leo
 {
 	/*!
 	\brief ÉèÖÃÁ÷×´Ì¬¡£

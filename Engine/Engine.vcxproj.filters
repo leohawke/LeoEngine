@@ -65,6 +65,12 @@
     <ClCompile Include="Asset\CompressionETC.cpp">
       <Filter>Asset</Filter>
     </ClCompile>
+    <ClCompile Include="Asset\EffectX.cpp">
+      <Filter>Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset\EffectAsset.cpp">
+      <Filter>Asset</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -143,6 +149,12 @@
       <Filter>Asset</Filter>
     </ClInclude>
     <ClInclude Include="emacro.h" />
+    <ClInclude Include="Asset\EffectX.h">
+      <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\EffectAsset.h">
+      <Filter>Asset</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

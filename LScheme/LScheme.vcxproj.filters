@@ -18,8 +18,8 @@
     <Text Include="doc.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClearRenderTarget.sxml" />
     <None Include="ClearRenderTarget.ssl" />
+    <None Include="ClearRenderTargetv1.sxml" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc_Sxml.h">
@@ -52,6 +52,9 @@
     <ClInclude Include="LSchemREPL.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Configuration.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sdef.cpp">
@@ -73,6 +76,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="LScheme.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Configuration.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -24,13 +24,29 @@ namespace asset {
 	class AssetLoading : IAssetLoading
 	{
 	public:
+		using AssetType = T;
+
 		virtual ~AssetLoading()
 		{}
 
 		//wait Coroutine()
 		//返回值非空 已完成
-		virtual std::experimental::generator<std::shared_ptr<T>> Coroutine() = 0;
+		virtual std::experimental::generator<std::shared_ptr<AssetType>> Coroutine() = 0;
 	};
+
+	template<typename Loading, typename... _tParams>
+	std::shared_ptr<typename Loading::AssetType> SyncLoad(_tParams&&... args)
+	{
+		auto loading = std::make_unique<Loading>(lforward(args)...);
+
+		auto coroutine = loading->Coroutine();
+
+		auto iter = coroutine.begin();
+		while (!*iter)
+			++iter;
+
+		return *iter;
+	}
 }
 
 #endif

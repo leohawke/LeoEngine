@@ -821,7 +821,6 @@ namespace dds {
 			co_yield CreateTexture();
 			co_yield ReadDDS();
 			co_yield HWResourceCreate();
-			co_yield *desc.tex;
 		}
 
 	private:
