@@ -361,7 +361,6 @@ namespace scheme {
 
 		/*!
 		\brief 函数上下文处理器。
-		\since build 696
 		*/
 		class LS_API FunctionContextHandler
 		{

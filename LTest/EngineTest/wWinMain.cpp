@@ -16,6 +16,8 @@ HWND Create(WORD width, WORD height);
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR cmdLine, int nCmdShow)
 {
+	leo::FetchCommonLogger().SetSender(platform_ex::SendDebugString);
+
 	auto hwnd = Create(800, 600);
 
 	auto swap_chain = Create(hwnd);
