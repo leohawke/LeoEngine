@@ -92,7 +92,7 @@ namespace asset {
 			DefGetter(lnothrow, EffectParamType&, ElemTypeRef, elem_type)
 	private:
 		EffectParamType type;
-		leo::uint32 array_size;
+		leo::uint32 array_size = 0;
 
 		EffectParamType elem_type;
 	};

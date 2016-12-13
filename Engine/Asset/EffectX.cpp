@@ -99,7 +99,8 @@ namespace platform {
 						param.SetName(Access("name", param_node));
 						param.GetTypeRef() = AssetType::GetType(Access("type",param_node));
 						if (param.GetType() >= asset::EPT_bool) {
-							param.GetArraySizeRef() =std::stoul(Access("arraysize", param_node));
+							if(auto p = leo::AccessChildPtr<std::string>(param_node, "arraysize"))
+								param.GetArraySizeRef() =std::stoul(*p);
 						}
 						else if (param.GetType() <= asset::EPT_consume_structured_buffer) {
 							param.GetElemTypeRef() = AssetType::GetType(Access("elemtype", param_node));

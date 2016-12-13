@@ -155,6 +155,7 @@ std::string asset::EffectAsset::GenHLSLShader() const
 				<< endl;
 		}
 	}
+	ss << endl;
 
 	for (auto & fragment : GetFragments())
 		ss << fragment.GetFragment() << endl;
