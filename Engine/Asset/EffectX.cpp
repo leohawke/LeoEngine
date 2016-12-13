@@ -64,13 +64,58 @@ namespace platform {
 
 			//TODO refer support
 
-			//macro (macro (@ (name "foo")) "value")
-			{
-				if (auto p = leo::AccessNodePtr(effect_node, "macro")) {
+			auto SelectNodes = [](const char* name,const ValueNode& node) {
+				return node.SelectChildren([&](const leo::ValueNode& child) {
+					return child == name;
+				});
+			};
 
+			auto Access = [](const char* name, const ValueNode& node) {
+				return leo::AccessChild<std::string>(node,name);
+			};
+
+			auto hash = [](auto param) {
+				return std::hash<decltype(param)>()(param);
+			};
+
+			//macro (macro (name foo) (value bar))
+			{
+				auto macro_nodes = SelectNodes("macro",effect_node);
+				for (auto & macro_node : macro_nodes) {
+					effect_desc.effect_asset->GetMacrosRef().emplace_back(
+						Access("name",macro_node),
+						Access("value", macro_node));
 				}
 			}
-
+			{
+				auto cbuffer_nodes = SelectNodes("cbuffer",effect_node);
+				for (auto & cbuffer_node : cbuffer_nodes) {
+					asset::EffectConstantBufferAsset cbuffer;
+					cbuffer.SetName(Access("name", cbuffer_node));
+					auto param_nodes = SelectNodes("parameter", cbuffer_node);
+					std::vector<leo::uint32> ParamIndices;
+					for (auto & param_node : param_nodes) {
+						asset::EffectParameterAsset param;
+						param.SetName(Access("name", param_node));
+						param.GetTypeRef() = AssetType::GetType(Access("type",param_node));
+						if (param.GetType() >= asset::EPT_bool) {
+							param.GetArraySizeRef() =std::stoul(Access("arraysize", param_node));
+						}
+						else if (param.GetType() <= asset::EPT_consume_structured_buffer) {
+							param.GetElemTypeRef() = AssetType::GetType(Access("elemtype", param_node));
+						}
+						ParamIndices.emplace_back(static_cast<leo::uint32>(effect_desc.effect_asset->GetParams().size()));
+						effect_desc.effect_asset->GetParamsRef().emplace_back(std::move(param));
+					}
+					cbuffer.GetParamIndicesRef() = std::move(ParamIndices);
+					effect_desc.effect_asset->GetCBuffersRef().emplace_back(std::move(cbuffer));
+				}
+			}
+			{
+				auto fragment= leo::AccessChild<std::string>(effect_node, "shader");
+				effect_desc.effect_asset->GetFragmentsRef().emplace_back();
+				effect_desc.effect_asset->GetFragmentsRef().back().GetFragmentRef() = fragment;
+			}
 
 			return nullptr;
 		}

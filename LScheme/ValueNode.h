@@ -437,7 +437,7 @@ namespace leo {
 			/*!
 			\brief 交换。
 			*/
-			LB_API friend void
+			LS_API friend void
 			swap(ValueNode&, ValueNode&) lnothrow;
 
 		//@{
@@ -529,9 +529,9 @@ namespace leo {
 	\throw std::out_of_range 未找到对应节点。
 	*/
 	//@{
-	LB_API ValueNode&
+	LS_API ValueNode&
 		AccessNode(ValueNode::Container*, const string&);
-	LB_API const ValueNode&
+	LS_API const ValueNode&
 		AccessNode(const ValueNode::Container*, const string&);
 	template<typename _tKey>
 	ValueNode&
@@ -577,9 +577,9 @@ namespace leo {
 	\note 时间复杂度 O(n) 。
 	*/
 	//@{
-	LB_API ValueNode&
+	LS_API ValueNode&
 		AccessNode(ValueNode&, size_t);
-	LB_API const ValueNode&
+	LS_API const ValueNode&
 		AccessNode(const ValueNode&, size_t);
 	//@}
 	template<typename _tKey, limpl(typename = leo::enable_if_t<
@@ -624,9 +624,9 @@ namespace leo {
 
 	//! \brief 访问节点指针。
 	//@{
-	LB_API observer_ptr<ValueNode>
+	LS_API observer_ptr<ValueNode>
 		AccessNodePtr(ValueNode::Container&, const string&) lnothrow;
-	LB_API observer_ptr<const ValueNode>
+	LS_API observer_ptr<const ValueNode>
 		AccessNodePtr(const ValueNode::Container&, const string&) lnothrow;
 	template<typename _tKey>
 	observer_ptr<ValueNode>
@@ -672,9 +672,9 @@ namespace leo {
 	\note 时间复杂度 O(n) 。
 	*/
 	//@{
-	LB_API observer_ptr<ValueNode>
+	LS_API observer_ptr<ValueNode>
 		AccessNodePtr(ValueNode&, size_t);
-	LB_API observer_ptr<const ValueNode>
+	LS_API observer_ptr<const ValueNode>
 		AccessNodePtr(const ValueNode&, size_t);
 	//@}
 	template<typename _tKey, limpl(typename = leo::enable_if_t<
@@ -900,7 +900,7 @@ namespace leo {
 	\note 重复使用作为新节点的名称，可用于插入不重复节点。
 	*/
 	//@{
-	LB_API string
+	LS_API string
 		MakeIndex(size_t);
 	inline PDefH(string, MakeIndex, const ValueNode::Container& con)
 		ImplRet(MakeIndex(con.size()))

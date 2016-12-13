@@ -1,6 +1,12 @@
 #include "EffectAsset.h"
 #include <LBase/string.hpp>
 
+void asset::EffectNodeAsset::SetName(const std::string & Name)
+{
+	name = Name;
+	hash = std::hash<std::string>()(name);
+}
+
 //TODO string_view
 class type_define
 {
@@ -93,8 +99,13 @@ private:
 	std::vector<size_t> hashs;
 };
 
-std::string asset::EffectAsset::GetTypeName(EffectParamType type) const {
+std::string asset::EffectAsset::GetTypeName(EffectParamType type) {
 	return type_define::Instance().type_name(type);
+}
+
+asset::EffectParamType asset::EffectAsset::GetType(const std::string & name) 
+{
+	return (EffectParamType)type_define::Instance().type_code(name);
 }
 
 

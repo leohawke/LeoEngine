@@ -1,5 +1,8 @@
 #include "LSchemEngineUnitTest.h"
 #include <LScheme/Configuration.h>
+
+#include "../../Engine/Asset/EffectX.h"
+
 #include <sstream>
 #include <LBase/Debug.h>
 
@@ -11,9 +14,9 @@ void unit_test::ExceuteLSchemEngineUnitTest()
 {
 	auto ClearRenderTargetv1 = R"(
 		(effect
-			(macro (@ (name "VERSION")) "v1")
-			(cbuffer (@ (name "per_frame"))
-			(parameter (@ (type "float4") (name "color")))
+			(macro (name "VERSION") (value "v1"))
+			(cbuffer  (name "per_frame")
+				(parameter  (type "float4") (name "color"))
 			)
 			(shader
 				"
@@ -43,6 +46,18 @@ void unit_test::ExceuteLSchemEngineUnitTest()
 
 	LAssert(!config.GetNodeRRef().empty(), "Empty configuration found.");
 	ParseEffectNodeV1(config.GetNodeRRef());
+
+	{
+		std::ofstream fout("ClearRenderTargetv1.lsl");
+		fout << ClearRenderTargetv1;
+	}
+
+	auto effect_asset = platform::X::LoadEffectAsset("ClearRenderTargetv1.lsl");
+	auto shader = effect_asset.GenHLSLShader();
+	{
+		std::ofstream fout("ClearRenderTargetv1.lsl.hlsl");
+		fout << shader;
+	}
 }
 
 void ParseMacroNodev1(const leo::ValueNode& node);
@@ -61,30 +76,16 @@ void ParseEffectNodeV1(const leo::ValueNode& node)
 	}
 }
 
-void ParseAtNode(const leo::ValueNode& node)
-{
+void ParseMacroNodev1(const leo::ValueNode& node) {
 	try {
 		if (auto pname = leo::AccessChildPtr<std::string>(node, "name"))
 			TraceDe(Debug, "(name %s)\t", pname->c_str());
 		if (auto ptype = leo::AccessChildPtr<std::string>(node, "type"))
 			TraceDe(Debug, "(type %s)\t", ptype->c_str());
-		
+		if (auto pvalue = leo::AccessChildPtr<std::string>(node, "value"))
+			TraceDe(Debug, "(type %s)\t", pvalue->c_str());
 	}
-	CatchExpr(leo::bad_any_cast&,LAssert(false,R"(@ Invalid Format:Type Match failed)"))
-}
-
-void ParseMacroNodev1(const leo::ValueNode& node) {
-	TraceDe(Debug, "(@\t");
-	ParseAtNode(leo::AccessNode(node, "@"));
-	TraceDe(Debug, ")\t");
-	auto values = node.SelectChildren([](const leo::ValueNode& node) {
-		return leo::IsPrefixedIndex(node.GetName());
-	});
-	std::for_each(values.begin(), values.end(), [](const leo::ValueNode& node) {
-		if (auto pvalue = leo::AccessPtr<std::string>(node)) {
-			TraceDe(Debug, "%s\t", pvalue->c_str());
-		}
-	});
+	CatchExpr(leo::bad_any_cast&, LAssert(false, R"(@ Invalid Format:Type Match failed)"))
 }
 
 

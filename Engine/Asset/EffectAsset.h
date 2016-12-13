@@ -66,10 +66,8 @@ namespace asset {
 	class EffectNodeAsset {
 	public:
 		DefGetter(const lnothrow, const std::string&, Name, name)
-			DefGetter(lnothrow, std::string&, NameRef, name)
 			DefGetter(const lnothrow, std::size_t, NameHash, hash)
-			DefGetter(lnothrow, std::size_t&, NameHashRef, hash)
-
+			void SetName(const std::string&);
 	private:
 		std::string name;
 		std::size_t hash;
@@ -124,7 +122,8 @@ namespace asset {
 			DefGetter(lnothrow, std::vector<ShaderFragmentAsset>&, FragmentsRef, fragements)
 
 
-			std::string GetTypeName(EffectParamType type) const;
+		static	std::string GetTypeName(EffectParamType type);
+		static EffectParamType GetType(const std::string&);
 	private:
 		std::vector<macro_pair> macros;
 		std::vector<EffectConstantBufferAsset> cbuffers;
