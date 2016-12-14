@@ -47,6 +47,7 @@ namespace platform {
 		std::shared_ptr<AssetType> LoadNode()
 		{
 			std::ifstream fin(effect_desc.effect_path);
+			fin >> std::noskipws;
 			using sb_it_t = std::istream_iterator<char>;
 
 			scheme::Session session(sb_it_t(fin), sb_it_t{});

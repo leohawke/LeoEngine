@@ -19,16 +19,16 @@ void unit_test::ExceuteLSchemEngineUnitTest()
 				(parameter  (type "float4") (name "color"))
 			)
 			(shader
-				"
-				float4 ClearVS(float4 position : POSITION) :SV_POSITION
-				{
-					return position;
-				}
-				float4 ClearPS() : SV_TARGET
-				{
-					return color;
-				}
-				"
+"
+float4 ClearVS(float4 position : POSITION) :SV_POSITION
+{
+	return position;
+}
+float4 ClearPS() : SV_TARGET
+{
+	return color;
+}
+"
 			)
 			(technique (@ (name "ClearRT"))
 				(pass (@ (name "p0"))
