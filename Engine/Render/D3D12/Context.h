@@ -5,6 +5,7 @@
 #ifndef LE_RENDER_D3D12_Context_h
 #define LE_RENDER_D3D12_Context_h 1
 
+#include "../Effect/BlitEffect.h"
 #include "../IContext.h"
 #include "Adapter.h"
 #include "Display.h"
@@ -22,7 +23,6 @@ namespace platform_ex {
 			class Device : platform::Render::Device {
 			public:
 				Device(DXGI::Adapter& adapter);
-
 
 				D3D12_CPU_DESCRIPTOR_HANDLE AllocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE Type);
 				void DeallocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE Type, D3D12_CPU_DESCRIPTOR_HANDLE Handle);
@@ -43,6 +43,7 @@ namespace platform_ex {
 
 				platform::Render::Caps& GetCaps() override;
 
+				platform::Render::Effect::BlitEffect* BlitEffect();
 			public:
 				friend class Context;
 			

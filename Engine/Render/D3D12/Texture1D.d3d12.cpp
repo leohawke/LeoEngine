@@ -22,13 +22,21 @@ Texture1D::Texture1D(uint16 width_, uint8 numMipMaps, uint8 array_size_, EFormat
 
 void Texture1D::BuildMipSubLevels()
 {
-	for (uint8 index = 0; index != GetArraySize(); ++index)
-	{
-		for (uint8 level = 1; level != GetNumMipMaps(); ++level)
+	if (IsDepthFormat(format) || IsCompressedFormat(format)) {
+		for (uint8 index = 0; index != GetArraySize(); ++index)
 		{
-			Resize(*this, { index, level, 0,  GetWidth(level) },
-			{ index, static_cast<uint8>(level - 1), 0,GetWidth(level - 1) }, true);
+			for (uint8 level = 1; level != GetNumMipMaps(); ++level)
+			{
+				Resize(*this, { index, level, 0,  GetWidth(level) },
+				{ index, static_cast<uint8>(level - 1), 0,GetWidth(level - 1) }, true);
+			}
 		}
+	}
+	else {
+		auto & effect = *D3D12::Context::Instance().GetDevice().BlitEffect();
+		auto & tech = effect.BilinearCopy;
+		auto & pass = tech.GetPass(0);
+		pass.Bind(effect);
 	}
 }
 

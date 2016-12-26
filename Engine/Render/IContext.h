@@ -7,6 +7,7 @@
 
 #include "DeviceCaps.h"
 #include "ITexture.hpp"
+#include "Effect/Effect.hpp"
 
 namespace platform {
 	namespace Render {
@@ -61,7 +62,7 @@ namespace platform {
 		{
 			return !rhs.equals(lhs);
 		}
-
+		
 		class Device {
 		public:
 			virtual Caps& GetCaps() = 0;
@@ -82,6 +83,8 @@ namespace platform {
 		class Context {
 		public:
 			virtual Device& GetDevice() = 0;
+
+			virtual void Push(const PipleState&) = 0;
 		private:
 			virtual void CreateDeviceAndDisplay() = 0;
 		public:

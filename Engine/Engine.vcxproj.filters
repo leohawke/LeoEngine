@@ -1,37 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Render\D3D12\Adapter.cpp">
-      <Filter>Render\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\D3D12\Context.cpp">
-      <Filter>Render\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\D3D12\Convert.cpp">
-      <Filter>Render\D3D12</Filter>
-    </ClCompile>
     <ClCompile Include="Render\D3D12\d3d12_dxgi.cpp">
-      <Filter>Render\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\D3D12\Display.cpp">
-      <Filter>Render\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\D3D12\RenderView.cpp">
-      <Filter>Render\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\D3D12\Texture.cpp">
-      <Filter>Render\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\D3D12\Texture1D.cpp">
-      <Filter>Render\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\D3D12\Texture2D.cpp">
-      <Filter>Render\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\D3D12\Texture3D.cpp">
-      <Filter>Render\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\D3D12\TextureCube.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="Render\Color_T.cpp">
@@ -70,6 +40,42 @@
     </ClCompile>
     <ClCompile Include="Asset\EffectAsset.cpp">
       <Filter>Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Effect\Effect.cpp">
+      <Filter>Render\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\Texture1D.d3d12.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\Texture2D.d3d12.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\Texture3D.d3d12.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\TextureCube.d3d12.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\Texture.d3d12.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\RenderView.d3d12.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\Display.d3d12.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\ShaderCompose.d3d12.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\Convert.d3d12.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\Context.d3d12.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\Adapter.d3d12.cpp">
+      <Filter>Render\D3D12</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -155,6 +161,15 @@
     <ClInclude Include="Asset\EffectAsset.h">
       <Filter>Asset</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Effect\BlitEffect.h">
+      <Filter>Render\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Effect\Effect.hpp">
+      <Filter>Render\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\ShaderCompose.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
@@ -171,6 +186,9 @@
     </Filter>
     <Filter Include="Asset">
       <UniqueIdentifier>{6fe807d3-6fd9-4d67-906d-40208594580a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render\Effect">
+      <UniqueIdentifier>{2f13adcf-582b-42d5-ae5a-cbd369ded2c3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

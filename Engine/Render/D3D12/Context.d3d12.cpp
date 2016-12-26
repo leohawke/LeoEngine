@@ -479,6 +479,11 @@ namespace platform_ex {
 				return d3d_caps;
 			}
 
+			platform::Render::Effect::BlitEffect * D3D12::Device::BlitEffect()
+			{
+				return nullptr;
+			}
+
 			Context::Context()
 				:adapter_list()
 			{
