@@ -116,6 +116,7 @@ namespace platform_ex {
 				void CommitCommandList(Device::CommandType);
 				friend class Device;
 
+				void Push(const platform::Render::PipleState&);
 			private:
 				void ContextEx(ID3D12Device* device, ID3D12CommandQueue* cmd_queue);
 				void CreateDeviceAndDisplay() override;

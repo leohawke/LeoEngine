@@ -524,6 +524,11 @@ namespace platform_ex {
 			{
 			}
 
+			void D3D12::Context::Push(const platform::Render::PipleState &)
+			{
+				throw leo::unimplemented();
+			}
+
 			void Context::ContextEx(ID3D12Device * d3d_device, ID3D12CommandQueue * cmd_queue)
 			{
 				CheckHResult(d3d_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT,

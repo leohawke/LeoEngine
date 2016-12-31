@@ -170,6 +170,9 @@
     <ClInclude Include="Render\D3D12\ShaderCompose.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="Render\D3D12\PipleState.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

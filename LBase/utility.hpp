@@ -112,6 +112,22 @@ namespace leo
 		return underlying_type_t<_type>(val);
 	}
 
+	/*!
+	\brief 计算指定数组类型对象的长度。
+	*/
+	template<typename _type, size_t _vN>
+	lconstfn size_t
+		arrlen(_type(&)[_vN])
+	{
+		return _vN;
+	}
+	template<typename _type, size_t _vN>
+	lconstfn size_t
+		arrlen(_type(&&)[_vN])
+	{
+		return _vN;
+	}
+
 
 	/*!
 	\brief 包装类类型的值的对象。

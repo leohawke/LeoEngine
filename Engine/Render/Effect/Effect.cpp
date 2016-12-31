@@ -22,8 +22,16 @@ namespace platform::Render::Effect {
 		Context::Instance().Push(state);
 		effect.GetShader(bind_index).Bind();
 	}
+	void Pass::UnBind(Effect & effect)
+	{
+		effect.GetShader(bind_index).UnBind();
+	}
 	ShaderCompose& Pass::GetShader(Effect & effect)
 	{
 		return effect.GetShader(bind_index);
+	}
+	PipleState & Pass::GetState()
+	{
+		return state;
 	}
 }

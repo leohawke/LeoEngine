@@ -69,6 +69,7 @@
     <ClInclude Include="Render\D3D12\Adapter.h" />
     <ClInclude Include="Render\D3D12\Context.h" />
     <ClInclude Include="Render\D3D12\Convert.h" />
+    <ClInclude Include="Render\D3D12\PipleState.h" />
     <ClInclude Include="Render\D3D12\ShaderCompose.h" />
     <ClInclude Include="Render\D3D12\d3d12_dxgi.h" />
     <ClInclude Include="Render\D3D12\Display.h" />
