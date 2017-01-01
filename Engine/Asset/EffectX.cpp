@@ -12,7 +12,7 @@ namespace platform {
 
 	class EffectLoadingDesc : public asset::AssetLoading<asset::EffectAsset> {
 	private:
-		struct EffectDesc{
+		struct EffectDesc {
 			X::path effect_path;
 			struct Data {
 				leo::ValueNode effect_node;
@@ -46,14 +46,7 @@ namespace platform {
 
 		std::shared_ptr<AssetType> LoadNode()
 		{
-			std::ifstream fin(effect_desc.effect_path);
-			fin >> std::noskipws;
-			using sb_it_t = std::istream_iterator<char>;
-
-			scheme::Session session(sb_it_t(fin), sb_it_t{});
-
-			TryExpr(effect_desc.data->effect_node = v1::LoadNode(SContext::Analyze(std::move(session))))
-			CatchExpr(..., leo::rethrow_badstate(fin, std::ios_base::failbit))
+			effect_desc.data->effect_node = LoadNode(effect_desc.effect_path);
 
 			return  nullptr;
 		}
@@ -63,16 +56,21 @@ namespace platform {
 			auto& effect_node = effect_desc.data->effect_node;
 			LAssert(effect_node.GetName() == "effect", R"(Invalid Format:Not Begin With "effect")");
 
-			//TODO refer support
-
-			auto SelectNodes = [](const char* name,const ValueNode& node) {
+			auto SelectNodes = [](const char* name, const ValueNode& node) {
 				return node.SelectChildren([&](const leo::ValueNode& child) {
 					return child == name;
 				});
 			};
 
+			std::vector<std::pair<std::string, ValueNode>> includes;
+			RecursiveReferNode(effect_node, includes);
+
+			for (auto& pair : includes) {
+				effect_node.insert(pair.second.begin(), pair.second.end());
+			}
+
 			auto Access = [](const char* name, const ValueNode& node) {
-				return leo::AccessChild<std::string>(node,name);
+				return leo::AccessChild<std::string>(node, name);
 			};
 
 			auto hash = [](auto param) {
@@ -81,15 +79,15 @@ namespace platform {
 
 			//macro (macro (name foo) (value bar))
 			{
-				auto macro_nodes = SelectNodes("macro",effect_node);
+				auto macro_nodes = SelectNodes("macro", effect_node);
 				for (auto & macro_node : macro_nodes) {
 					effect_desc.effect_asset->GetMacrosRef().emplace_back(
-						Access("name",macro_node),
+						Access("name", macro_node),
 						Access("value", macro_node));
 				}
 			}
 			{
-				auto cbuffer_nodes = SelectNodes("cbuffer",effect_node);
+				auto cbuffer_nodes = SelectNodes("cbuffer", effect_node);
 				for (auto & cbuffer_node : cbuffer_nodes) {
 					asset::EffectConstantBufferAsset cbuffer;
 					cbuffer.SetName(Access("name", cbuffer_node));
@@ -98,10 +96,10 @@ namespace platform {
 					for (auto & param_node : param_nodes) {
 						asset::EffectParameterAsset param;
 						param.SetName(Access("name", param_node));
-						param.GetTypeRef() = AssetType::GetType(Access("type",param_node));
+						param.GetTypeRef() = AssetType::GetType(Access("type", param_node));
 						if (param.GetType() >= asset::EPT_bool) {
-							if(auto p = leo::AccessChildPtr<std::string>(param_node, "arraysize"))
-								param.GetArraySizeRef() =std::stoul(*p);
+							if (auto p = leo::AccessChildPtr<std::string>(param_node, "arraysize"))
+								param.GetArraySizeRef() = std::stoul(*p);
 						}
 						else if (param.GetType() <= asset::EPT_consume_structured_buffer) {
 							param.GetElemTypeRef() = AssetType::GetType(Access("elemtype", param_node));
@@ -114,9 +112,11 @@ namespace platform {
 				}
 			}
 			{
-				auto fragment= leo::AccessChild<std::string>(effect_node, "shader");
-				effect_desc.effect_asset->GetFragmentsRef().emplace_back();
-				effect_desc.effect_asset->GetFragmentsRef().back().GetFragmentRef() = fragment;
+				auto fragments = SelectNodes("shader", effect_node);
+				for (auto& fragment : fragments) {
+					effect_desc.effect_asset->GetFragmentsRef().emplace_back();
+					effect_desc.effect_asset->GetFragmentsRef().back().GetFragmentRef() =leo::Access<std::string>(fragment);
+				}
 			}
 
 			return nullptr;
@@ -125,6 +125,42 @@ namespace platform {
 		std::shared_ptr<AssetType> CreateAsset()
 		{
 			return effect_desc.effect_asset;
+		}
+
+		template<typename path_type>
+		ValueNode LoadNode(const path_type& path) {
+			std::ifstream fin(path);
+			fin >> std::noskipws;
+			using sb_it_t = std::istream_iterator<char>;
+
+			scheme::Session session(sb_it_t(fin), sb_it_t{});
+
+			try {
+				return v1::LoadNode(SContext::Analyze(std::move(session)));
+			}
+
+			CatchExpr(..., leo::rethrow_badstate(fin, std::ios_base::failbit))
+		}
+
+		void RecursiveReferNode(const ValueNode& effct_node, std::vector<std::pair<std::string, ValueNode>>& includes) {
+			auto refer_nodes = effct_node.SelectChildren([&](const leo::ValueNode& child) {
+				return child == "refer";
+			});
+			for (auto & refer_node : refer_nodes) {
+				auto path = leo::Access<std::string>(refer_node);
+
+				auto include_node = LoadNode(path);
+				RecursiveReferNode(include_node, includes);
+
+				if (std::find_if(includes.begin(), includes.end(), [&path](const std::pair<std::string, ValueNode>& pair)
+				{
+					return pair.first == path;
+				}
+				) == includes.end())
+				{
+					includes.emplace_back(path, include_node);
+				}
+			}
 		}
 	};
 
