@@ -15,7 +15,7 @@ namespace platform {
 		struct EffectDesc {
 			X::path effect_path;
 			struct Data {
-				leo::ValueNode effect_node;
+				scheme::TermNode effect_node;
 			};
 			std::shared_ptr<Data> data;
 			std::shared_ptr<AssetType> effect_asset;
@@ -46,7 +46,7 @@ namespace platform {
 
 		std::shared_ptr<AssetType> LoadNode()
 		{
-			effect_desc.data->effect_node = LoadNode(effect_desc.effect_path);
+			effect_desc.data->effect_node = *LoadNode(effect_desc.effect_path).begin();
 
 			return  nullptr;
 		}
@@ -54,23 +54,40 @@ namespace platform {
 		std::shared_ptr<AssetType> ParseNode()
 		{
 			auto& effect_node = effect_desc.data->effect_node;
-			LAssert(effect_node.GetName() == "effect", R"(Invalid Format:Not Begin With "effect")");
+			LAssert(leo::Access<std::string>(*effect_node.begin()) == "effect", R"(Invalid Format:Not Begin With "effect")");
 
-			auto SelectNodes = [](const char* name, const ValueNode& node) {
-				return node.SelectChildren([&](const leo::ValueNode& child) {
-					return child == name;
+			auto SelectNodes = [](const char* name, const scheme::TermNode& node) {
+				return node.SelectChildren([&](const scheme::TermNode& child) {
+					if (child.size()) {
+						return leo::Access<std::string>(*child.begin()) == name;
+					}
+					return false;
 				});
 			};
 
-			std::vector<std::pair<std::string, ValueNode>> includes;
-			RecursiveReferNode(effect_node, includes);
+			std::vector<std::pair<std::string, scheme::TermNode>> refers;
+			RecursiveReferNode(effect_node,refers);
 
-			for (auto& pair : includes) {
-				effect_node.insert(pair.second.begin(), pair.second.end());
+			auto new_node = leo::MakeNode(MakeIndex(0));
+
+			for (auto& pair : refers) {
+				for (auto & node : pair.second) {
+					new_node.try_emplace(leo::MakeIndex(new_node),std::make_pair(node.begin(),node.end()), leo::MakeIndex(new_node));
+				}
 			}
 
-			auto Access = [](const char* name, const ValueNode& node) {
-				return leo::AccessChild<std::string>(node, name);
+			for(auto & node : effect_node)
+				new_node.try_emplace(leo::MakeIndex(new_node), std::make_pair(node.begin(), node.end()), leo::MakeIndex(new_node));
+
+			effect_node = new_node;
+
+			auto Access = [](const char* name, const scheme::TermNode& node) {
+				auto it = std::find_if(node.begin(), node.end(), [&](const scheme::TermNode& child) {
+					if (child.size())
+						return leo::Access<std::string>(*child.begin()) == name;
+					return false;
+				});
+				return leo::Access<std::string>(*(it->rbegin()));
 			};
 
 			auto hash = [](auto param) {
@@ -115,7 +132,10 @@ namespace platform {
 				auto fragments = SelectNodes("shader", effect_node);
 				for (auto& fragment : fragments) {
 					effect_desc.effect_asset->GetFragmentsRef().emplace_back();
-					effect_desc.effect_asset->GetFragmentsRef().back().GetFragmentRef() =leo::Access<std::string>(fragment);
+					effect_desc.effect_asset->GetFragmentsRef().back().
+						GetFragmentRef() = scheme::Deliteralize(
+							leo::Access<std::string>(*fragment.rbegin())
+						);
 				}
 			}
 
@@ -128,7 +148,7 @@ namespace platform {
 		}
 
 		template<typename path_type>
-		ValueNode LoadNode(const path_type& path) {
+		scheme::TermNode LoadNode(const path_type& path) {
 			std::ifstream fin(path);
 			fin >> std::noskipws;
 			using sb_it_t = std::istream_iterator<char>;
@@ -136,23 +156,26 @@ namespace platform {
 			scheme::Session session(sb_it_t(fin), sb_it_t{});
 
 			try {
-				return v1::LoadNode(SContext::Analyze(std::move(session)));
+				return SContext::Analyze(std::move(session));
 			}
 
 			CatchExpr(..., leo::rethrow_badstate(fin, std::ios_base::failbit))
 		}
 
-		void RecursiveReferNode(const ValueNode& effct_node, std::vector<std::pair<std::string, ValueNode>>& includes) {
-			auto refer_nodes = effct_node.SelectChildren([&](const leo::ValueNode& child) {
-				return child == "refer";
+		void RecursiveReferNode(const ValueNode& effct_node, std::vector<std::pair<std::string, scheme::TermNode>>& includes) {
+			auto refer_nodes = effct_node.SelectChildren([&](const scheme::TermNode& child) {
+				if (child.size()) {
+					return leo::Access<std::string>(*child.begin()) == "refer";
+				}
+				return false;
 			});
 			for (auto & refer_node : refer_nodes) {
-				auto path = leo::Access<std::string>(refer_node);
+				auto path = leo::Access<std::string>(*refer_node.rbegin());
 
-				auto include_node = LoadNode(path);
+				auto include_node = *LoadNode(path).begin();
 				RecursiveReferNode(include_node, includes);
 
-				if (std::find_if(includes.begin(), includes.end(), [&path](const std::pair<std::string, ValueNode>& pair)
+				if (std::find_if(includes.begin(), includes.end(), [&path](const std::pair<std::string,scheme::TermNode>& pair)
 				{
 					return pair.first == path;
 				}
