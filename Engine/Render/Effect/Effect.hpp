@@ -17,6 +17,19 @@ namespace platform::Render {
 
 	class ShaderCompose {
 	public:
+		enum class Type : leo::uint8
+		{
+			VertexShader,
+			PixelShader,
+			GeometryShader,
+			ComputeShader,
+			HullShader,
+			DomainShader,
+		};
+
+		const leo::uint8 NumTypes = (leo::uint8)Type::DomainShader + 1;
+
+
 		virtual void Bind() = 0;
 		virtual void UnBind() = 0;
 

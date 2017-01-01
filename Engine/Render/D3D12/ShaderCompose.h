@@ -14,6 +14,8 @@ namespace platform_ex::Windows::D3D12 {
 	class ShaderCompose:public platform::Render::ShaderCompose
 	{
 	public:
+
+
 		 void Bind() override;
 		 void UnBind() override;
 
@@ -23,6 +25,15 @@ namespace platform_ex::Windows::D3D12 {
 	public:
 		std::optional<ShaderBlob> VertexShader;
 		std::optional<ShaderBlob> PixelShader;
+	private:
+		void CreateRootSignature();
+		void CreateBarriers();
+		void SwapAndPresent();
+	private:
+		COMPtr<ID3D12RootSignature> root_signature;
+		COMPtr<ID3D12DescriptorHeap> sampler_heap;
+
+		std::vector<D3D12_RESOURCE_BARRIER> barriers;
 	};
 
 	inline void operator<<(D3D12_SHADER_BYTECODE& desc, std::nullptr_t)

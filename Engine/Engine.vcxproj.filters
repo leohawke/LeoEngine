@@ -198,5 +198,16 @@
     <None Include="Render\CommonTextureImpl.hcc">
       <Filter>Render</Filter>
     </None>
+    <None Include="Render\Effect\PostProcess.lsl">
+      <Filter>Render\Effect</Filter>
+    </None>
+    <None Include="Render\Effect\Util.lsl">
+      <Filter>Render\Effect</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="Render\Effect\Bilt.lsl">
+      <Filter>Render\Effect</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

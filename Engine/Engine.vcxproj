@@ -90,6 +90,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Render\CommonTextureImpl.hcc" />
+    <CustomBuild Include="Render\Effect\Bilt.lsl">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_TOOL|x64'">true</ExcludedFromBuild>
+    </CustomBuild>
+    <None Include="Render\Effect\PostProcess.lsl" />
+    <None Include="Render\Effect\Util.lsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6946CA48-2E7E-4770-9D61-0F59C02D0271}</ProjectGuid>
