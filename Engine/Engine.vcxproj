@@ -50,6 +50,7 @@
     <ClCompile Include="Render\Effect\Effect.cpp" />
     <ClCompile Include="Render\IContext.cpp" />
     <ClCompile Include="Render\ITexture.cpp" />
+    <ClCompile Include="Render\PipleState.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="Win32\File.cpp" />
     <ClCompile Include="Win32\NTHandle.cpp" />
@@ -83,6 +84,7 @@
     <ClInclude Include="Render\IFormat.hpp" />
     <ClInclude Include="Render\IRenderView.h" />
     <ClInclude Include="Render\ITexture.hpp" />
+    <ClInclude Include="Render\PipleState.h" />
     <ClInclude Include="Win32\COM.h" />
     <ClInclude Include="Win32\File.h" />
     <ClInclude Include="Win32\Handle.h" />

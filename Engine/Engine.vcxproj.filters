@@ -77,6 +77,9 @@
     <ClCompile Include="Render\D3D12\Adapter.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
+    <ClCompile Include="Render\PipleState.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -173,6 +176,9 @@
     <ClInclude Include="Render\D3D12\PipleState.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="Render\PipleState.h">
+      <Filter>Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
@@ -207,7 +213,7 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Render\Effect\Bilt.lsl">
-      <Filter>Render\Effect</Filter>
+      <Filter>Render\D3D12</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

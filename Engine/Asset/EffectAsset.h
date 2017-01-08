@@ -11,6 +11,8 @@
 #include <LBase/lmacro.h>
 #include <LBase/linttype.hpp>
 
+#include "../Render/PipleState.h"
+
 namespace asset {
 
 	enum EffectParamType
@@ -106,12 +108,37 @@ namespace asset {
 		std::string fragment;
 	};
 
+	using EffectMacro = std::pair<std::string, std::string>;
+
+	class TechniquePassAsset :public EffectNodeAsset {
+	public:
+		DefGetter(const lnothrow, const std::vector<EffectMacro>&, Macros, macros)
+			DefGetter(lnothrow, std::vector<EffectMacro>&, MacrosRef, macros)
+
+			DefGetter(const lnothrow,const platform::Render::PipleState&, PipleState, piple_state)
+			DefGetter(lnothrow, platform::Render::PipleState&, PipleStateRef, piple_state)
+	private:
+		platform::Render::PipleState piple_state;
+		std::vector<EffectMacro> macros;
+	};
+
+	class EffectTechniqueAsset : public EffectNodeAsset {
+	public:
+		DefGetter(const lnothrow, const std::vector<EffectMacro>&, Macros, macros)
+			DefGetter(lnothrow, std::vector<EffectMacro>&, MacrosRef, macros)
+
+			DefGetter(const lnothrow, const std::vector<TechniquePassAsset>&, Passes, passes)
+			DefGetter(lnothrow, std::vector<TechniquePassAsset>&, PassesRef, passes)
+	private:
+		std::vector<EffectMacro> macros;
+		std::vector<TechniquePassAsset> passes;
+	};
+
 	class EffectAsset {
 	public:
-		using macro_pair = std::pair<std::string, std::string>;
 
-		DefGetter(const lnothrow, const std::vector<macro_pair>&, Macros, macros)
-			DefGetter(lnothrow, std::vector<macro_pair>&, MacrosRef, macros)
+		DefGetter(const lnothrow, const std::vector<EffectMacro>&, Macros, macros)
+			DefGetter(lnothrow, std::vector<EffectMacro>&, MacrosRef, macros)
 			DefGetter(const lnothrow, const std::vector<EffectConstantBufferAsset>&, CBuffers, cbuffers)
 			DefGetter(lnothrow, std::vector<EffectConstantBufferAsset>&, CBuffersRef, cbuffers)
 
@@ -121,14 +148,17 @@ namespace asset {
 			DefGetter(const lnothrow, const std::vector<ShaderFragmentAsset>&, Fragments, fragements)
 			DefGetter(lnothrow, std::vector<ShaderFragmentAsset>&, FragmentsRef, fragements)
 
+			DefGetter(const lnothrow, const std::vector<EffectTechniqueAsset>&, Techniques, techniques)
+			DefGetter(lnothrow, std::vector<EffectTechniqueAsset>&, TechniquesRef, techniques)
 
 		static	std::string GetTypeName(EffectParamType type);
 		static EffectParamType GetType(const std::string&);
 	private:
-		std::vector<macro_pair> macros;
+		std::vector<EffectMacro> macros;
 		std::vector<EffectConstantBufferAsset> cbuffers;
 		std::vector<EffectParameterAsset> params;
 		std::vector<ShaderFragmentAsset> fragements;
+		std::vector<EffectTechniqueAsset> techniques;
 #ifdef ENGINE_TOOL
 	public:
 		std::string GenHLSLShader() const;

@@ -10,10 +10,9 @@
 #include <vector>
 #include <memory>
 
-namespace platform::Render {
-	class PipleState {
+#include "../PipleState.h"
 
-	};
+namespace platform::Render {
 
 	class ShaderCompose {
 	public:
