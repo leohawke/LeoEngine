@@ -128,6 +128,14 @@ namespace leo {
 		: combined_hash<std::tuple<_type1, _type2>>
 	{};
 
+#ifdef LB_IMPL_MSCPP
+#pragma warning(disable:4307)
+#endif
+	lconstexpr size_t constfn_hash(const char * str, size_t seed = 0)
+	{
+		return 0 == *str ? seed : constfn_hash(str + 1, seed ^ (*str + 0x9e3779b9 + (seed << 6) + (seed >> 2)));
+	}
+
 
 	using ucs2_t = char16_t; //!< UCS-2 字符类型。
 	using ucs4_t = char32_t; //!< UCS-4 字符类型。

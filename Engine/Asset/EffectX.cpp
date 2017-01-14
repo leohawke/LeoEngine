@@ -77,7 +77,7 @@ namespace platform {
 				return std::hash<decltype(param)>()(param);
 			};
 
-			ParseMacro(effect_desc.effect_asset->GetMacrosRef(),effect_node);
+			ParseMacro(effect_desc.effect_asset->GetMacrosRef(), effect_node);
 			{
 				auto cbuffer_nodes = SelectNodes("cbuffer", effect_node);
 				for (auto & cbuffer_node : cbuffer_nodes) {
@@ -272,7 +272,362 @@ namespace platform {
 
 		void ParsePassState(asset::TechniquePassAsset& pass, scheme::TermNode& pass_node)
 		{
+			using leo::constfn_hash;
+			using namespace Render;
+			auto to_bool = [](const std::string& value) {
+				return value.size() > 0 && value[0] == 't';
+			};
 
+			auto to_uint8 = [](const std::string& value) {
+				return static_cast<leo::uint8>(std::stoul(value));
+			};
+
+			auto to_uint16 = [](const std::string& value) {
+				return static_cast<leo::uint16>(std::stoul(value));
+			};
+
+			auto to_uint32 = [](const std::string& value) {
+				return static_cast<leo::uint32>(std::stoul(value));
+			};
+
+			auto to_float4 = [](const std::string& value) {
+				leo::math::float4 result;
+				auto iter = result.begin();
+				leo::split(value.begin(), value.end(),
+					[](char c) {return c == ','; },
+					[&](decltype(value.begin()) b, decltype(value.end()) e) {
+						auto v = std::string(b, e);
+						*iter = std::stof(v);
+						++iter;
+					}
+				);
+				return result;
+			};
+
+			auto & rs_desc = pass.GetPipleStateRef().RasterizerState;
+			auto & ds_desc = pass.GetPipleStateRef().DepthStencilState;
+			auto & bs_desc = pass.GetPipleStateRef().BlendState;
+
+			auto default_parse = [&](std::size_t hash, const std::string& value) {
+				switch (hash)
+				{
+				case constfn_hash("blend_enable_0"):
+					bs_desc.blend_enable[0] = to_bool(value);
+					break;
+				case constfn_hash("blend_enable_1"):
+					bs_desc.blend_enable[1] = to_bool(value);
+					break;
+				case constfn_hash("blend_enable_2"):
+					bs_desc.blend_enable[2] = to_bool(value);
+					break;
+				case constfn_hash("blend_enable_3"):
+					bs_desc.blend_enable[3] = to_bool(value);
+					break;
+				case constfn_hash("blend_enable_4"):
+					bs_desc.blend_enable[4] = to_bool(value);
+					break;
+				case constfn_hash("blend_enable_5"):
+					bs_desc.blend_enable[5] = to_bool(value);
+					break;
+				case constfn_hash("blend_enable_6"):
+					bs_desc.blend_enable[6] = to_bool(value);
+					break;
+				case constfn_hash("blend_enable_7"):
+					bs_desc.blend_enable[7] = to_bool(value);
+					break;
+				case constfn_hash("logic_op_enable_0"):
+					bs_desc.logic_op_enable[0] = to_bool(value);
+					break;
+				case constfn_hash("logic_op_enable_1"):
+					bs_desc.logic_op_enable[1] = to_bool(value);
+					break;
+				case constfn_hash("logic_op_enable_2"):
+					bs_desc.logic_op_enable[2] = to_bool(value);
+					break;
+				case constfn_hash("logic_op_enable_3"):
+					bs_desc.logic_op_enable[3] = to_bool(value);
+					break;
+				case constfn_hash("logic_op_enable_4"):
+					bs_desc.logic_op_enable[4] = to_bool(value);
+					break;
+				case constfn_hash("logic_op_enable_5"):
+					bs_desc.logic_op_enable[5] = to_bool(value);
+					break;
+				case constfn_hash("logic_op_enable_6"):
+					bs_desc.logic_op_enable[6] = to_bool(value);
+					break;
+				case constfn_hash("logic_op_enable_7"):
+					bs_desc.logic_op_enable[7] = to_bool(value);
+					break;
+
+				case constfn_hash("blend_op_0"):
+					bs_desc.blend_op[0] = BlendDesc::to_op(value);
+					break;
+				case constfn_hash("blend_op_1"):
+					bs_desc.blend_op[1] = BlendDesc::to_op(value);
+					break;
+				case constfn_hash("blend_op_2"):
+					bs_desc.blend_op[2] = BlendDesc::to_op(value);
+					break;
+				case constfn_hash("blend_op_3"):
+					bs_desc.blend_op[3] = BlendDesc::to_op(value);
+					break;
+				case constfn_hash("blend_op_4"):
+					bs_desc.blend_op[4] = BlendDesc::to_op(value);
+					break;
+				case constfn_hash("blend_op_5"):
+					bs_desc.blend_op[5] = BlendDesc::to_op(value);
+					break;
+				case constfn_hash("blend_op_6"):
+					bs_desc.blend_op[6] = BlendDesc::to_op(value);
+				case constfn_hash("blend_op_7"):
+					bs_desc.blend_op[7] = BlendDesc::to_op(value);
+					break;
+
+				case constfn_hash("src_blend_0"):
+					bs_desc.src_blend[0] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("src_blend_1"):
+					bs_desc.src_blend[1] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("src_blend_2"):
+					bs_desc.src_blend[2] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("src_blend_3"):
+					bs_desc.src_blend[3] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("src_blend_4"):
+					bs_desc.src_blend[4] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("src_blend_5"):
+					bs_desc.src_blend[5] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("src_blend_6"):
+					bs_desc.src_blend[6] = BlendDesc::to_factor(value);
+				case constfn_hash("src_blend_7"):
+					bs_desc.src_blend[7] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("dst_blend_0"):
+					bs_desc.dst_blend[0] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("dst_blend_1"):
+					bs_desc.dst_blend[1] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("dst_blend_2"):
+					bs_desc.dst_blend[2] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("dst_blend_3"):
+					bs_desc.dst_blend[3] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("dst_blend_4"):
+					bs_desc.dst_blend[4] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("dst_blend_5"):
+					bs_desc.dst_blend[5] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("dst_blend_6"):
+					bs_desc.dst_blend[6] = BlendDesc::to_factor(value);
+				case constfn_hash("dst_blend_7"):
+					bs_desc.dst_blend[7] = BlendDesc::to_factor(value);
+					break;
+
+				case constfn_hash("blend_op_alpha_0"):
+					bs_desc.blend_op_alpha[0] = BlendDesc::to_op(value);
+					break;
+				case constfn_hash("blend_op_alpha_1"):
+					bs_desc.blend_op_alpha[1] = BlendDesc::to_op(value);
+					break;
+				case constfn_hash("blend_op_alpha_2"):
+					bs_desc.blend_op_alpha[2] = BlendDesc::to_op(value);
+					break;
+				case constfn_hash("blend_op_alpha_3"):
+					bs_desc.blend_op_alpha[3] = BlendDesc::to_op(value);
+					break;
+				case constfn_hash("blend_op_alpha_4"):
+					bs_desc.blend_op_alpha[4] = BlendDesc::to_op(value);
+					break;
+				case constfn_hash("blend_op_alpha_5"):
+					bs_desc.blend_op_alpha[5] = BlendDesc::to_op(value);
+					break;
+				case constfn_hash("blend_op_alpha_6"):
+					bs_desc.blend_op_alpha[6] = BlendDesc::to_op(value);
+				case constfn_hash("blend_op_alpha_7"):
+					bs_desc.blend_op_alpha[7] = BlendDesc::to_op(value);
+					break;
+
+				case constfn_hash("src_blend_alpha_0"):
+					bs_desc.src_blend_alpha[0] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("src_blend_alpha_1"):
+					bs_desc.src_blend_alpha[1] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("src_blend_alpha_2"):
+					bs_desc.src_blend_alpha[2] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("src_blend_alpha_3"):
+					bs_desc.src_blend_alpha[3] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("src_blend_alpha_4"):
+					bs_desc.src_blend_alpha[4] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("src_blend_alpha_5"):
+					bs_desc.src_blend_alpha[5] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("src_blend_alpha_6"):
+					bs_desc.src_blend_alpha[6] = BlendDesc::to_factor(value);
+				case constfn_hash("src_blend_alpha_7"):
+					bs_desc.src_blend_alpha[7] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("dst_blend_alpha_0"):
+					bs_desc.dst_blend_alpha[0] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("dst_blend_alpha_1"):
+					bs_desc.dst_blend_alpha[1] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("dst_blend_alpha_2"):
+					bs_desc.dst_blend_alpha[2] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("dst_blend_alpha_3"):
+					bs_desc.dst_blend_alpha[3] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("dst_blend_alpha_4"):
+					bs_desc.dst_blend_alpha[4] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("dst_blend_alpha_5"):
+					bs_desc.dst_blend_alpha[5] = BlendDesc::to_factor(value);
+					break;
+				case constfn_hash("dst_blend_alpha_6"):
+					bs_desc.dst_blend_alpha[6] = BlendDesc::to_factor(value);
+				case constfn_hash("dst_blend_alpha_7"):
+					bs_desc.dst_blend_alpha[7] = BlendDesc::to_factor(value);
+					break;
+
+				case constfn_hash("color_write_mask_0"):
+					bs_desc.color_write_mask[0] = to_uint8(value);
+					break;
+				case constfn_hash("color_write_mask_1"):
+					bs_desc.color_write_mask[1] = to_uint8(value);
+					break;
+				case constfn_hash("color_write_mask_2"):
+					bs_desc.color_write_mask[2] = to_uint8(value);
+					break;
+				case constfn_hash("color_write_mask_3"):
+					bs_desc.color_write_mask[3] = to_uint8(value);
+					break;
+				case constfn_hash("color_write_mask_4"):
+					bs_desc.color_write_mask[4] = to_uint8(value);
+					break;
+				case constfn_hash("color_write_mask_5"):
+					bs_desc.color_write_mask[5] = to_uint8(value);
+					break;
+				case constfn_hash("color_write_mask_6"):
+					bs_desc.color_write_mask[7] = to_uint8(value);
+					break;
+				case constfn_hash("color_write_mask_7"):
+					bs_desc.color_write_mask[7] = to_uint8(value);
+					break;
+				}
+			};
+			for (auto & child_node : pass_node) {
+				try {
+					auto first = leo::Access<std::string>(*child_node.begin());
+					auto second = leo::Access<std::string>(*child_node.rbegin());
+					auto first_hash = leo::constfn_hash(first.c_str());
+
+					switch (first_hash)
+					{
+					case constfn_hash("rs_mode"):
+						rs_desc.mode = RasterizerDesc::to_mode<RasterizerMode>(second);
+						break;
+					case constfn_hash("cull"):
+						rs_desc.cull = RasterizerDesc::to_mode<CullMode>(second);
+						break;
+					case constfn_hash("ccw"):
+						rs_desc.ccw = to_bool(second);
+						break;
+					case constfn_hash("depth_clip_enable"):
+						rs_desc.depth_clip_enable = to_bool(second);
+						break;
+					case constfn_hash("scissor_enable"):
+						rs_desc.scissor_enable = to_bool(second);
+						break;
+					case constfn_hash("multisample_enable"):
+						rs_desc.multisample_enable = to_bool(second);
+						break;
+
+					case constfn_hash("depth_enable"):
+						ds_desc.depth_enable = to_bool(second);
+						break;
+					case constfn_hash("depth_write_mask"):
+						ds_desc.depth_enable = to_bool(second);
+						break;
+					case constfn_hash("depth_func"):
+						ds_desc.depth_func = DepthStencilDesc::to_op<CompareOp>(second);
+						break;
+
+					case constfn_hash("front_stencil_enable"):
+						ds_desc.front_stencil_enable = to_bool(second);
+						break;
+					case constfn_hash("front_stencil_ref"):
+						ds_desc.front_stencil_ref = to_uint16(second);
+						break;
+					case constfn_hash("front_stencil_read_mask"):
+						ds_desc.front_stencil_read_mask = to_uint16(second);
+						break;
+					case constfn_hash("front_stencil_write_mask"):
+						ds_desc.front_stencil_write_mask = to_uint16(second);
+						break;
+					case constfn_hash("front_stencil_fail"):
+						ds_desc.front_stencil_fail = DepthStencilDesc::to_op<StencilOp>(second);
+						break;
+					case constfn_hash("front_stencil_depth_fail"):
+						ds_desc.front_stencil_depth_fail = DepthStencilDesc::to_op<StencilOp>(second);
+						break;
+					case constfn_hash("front_stencil_pass"):
+						ds_desc.front_stencil_pass = DepthStencilDesc::to_op<StencilOp>(second);
+						break;
+
+					case constfn_hash("back_stencil_enable"):
+						ds_desc.back_stencil_enable = to_bool(second);
+						break;
+					case constfn_hash("back_stencil_ref"):
+						ds_desc.back_stencil_ref = to_uint16(second);
+						break;
+					case constfn_hash("back_stencil_read_mask"):
+						ds_desc.back_stencil_read_mask = to_uint16(second);
+						break;
+					case constfn_hash("back_stencil_write_mask"):
+						ds_desc.back_stencil_write_mask = to_uint16(second);
+						break;
+					case constfn_hash("back_stencil_fail"):
+						ds_desc.back_stencil_fail = DepthStencilDesc::to_op<StencilOp>(second);
+						break;
+					case constfn_hash("back_stencil_depth_fail"):
+						ds_desc.back_stencil_depth_fail = DepthStencilDesc::to_op<StencilOp>(second);
+						break;
+					case constfn_hash("back_stencil_pass"):
+						ds_desc.back_stencil_pass = DepthStencilDesc::to_op<StencilOp>(second);
+						break;
+
+					case constfn_hash("blend_factor"):
+						auto value = to_float4(second);
+						bs_desc.blend_factor = M::Color(value.data);
+						break;
+					case constfn_hash("sample_mask"):
+						bs_desc.sample_mask = to_uint32(second);
+						break;
+					case constfn_hash("alpha_to_coverage_enable"):
+						bs_desc.alpha_to_coverage_enable = to_bool(second);
+						break;
+					case constfn_hash("independent_blend_enable"):
+						bs_desc.independent_blend_enable = to_bool(second);
+						break;
+					default:
+						default_parse(first_hash, second);
+					}
+				}
+				CatchIgnore(leo::bad_any_cast &)
+			}
 		}
 
 		void UniqueMacro(std::vector<asset::EffectMacro>& macros)

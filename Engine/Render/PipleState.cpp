@@ -52,10 +52,10 @@ namespace platform::Render {
 		logic_op_enable.fill(false);
 		blend_op.fill(BlendOp::Add);
 		src_blend.fill(BlendFactor::One);
-		dest_blend.fill(BlendFactor::Zero);
+		dst_blend.fill(BlendFactor::Zero);
 		blend_op_alpha.fill(BlendOp::Add);
 		src_blend_alpha.fill(BlendFactor::One);
-		dest_blend_alpha.fill(BlendFactor::Zero);
+		dst_blend_alpha.fill(BlendFactor::Zero);
 		color_write_mask.fill((leo::uint8)ColorMask::All);
 	}
 

@@ -126,7 +126,7 @@ namespace leo
 	//@}
 
 	/*!
-	\brief 异常：无法表示数值范围的转换。
+	\brief 异常：无法表示数值/枚举范围内的转换。
 	*/
 	class LB_API narrowing_error : public std::logic_error
 	{

@@ -7,7 +7,7 @@
 #define LE_RENDER_PIPESTATE_h 1
 
 #include <LBase/linttype.hpp>
-
+#include <LBase/id.hpp>
 #include "Color_T.hpp"
 
 namespace platform::Render {
@@ -23,6 +23,8 @@ namespace platform::Render {
 			return y2t.t;
 		}
 	}
+
+
 
 	enum class RasterizerMode {
 		Point,
@@ -101,7 +103,7 @@ namespace platform::Render {
 		All = Red | Green | Blue | Alpha
 
 	};
-	
+
 	enum class TexAddressingMode
 	{
 		Wrap,
@@ -158,6 +160,43 @@ namespace platform::Render {
 
 		RasterizerDesc();
 		friend bool operator<(const RasterizerDesc& lhs, const RasterizerDesc& rhs);
+
+		template<typename T>
+		static T to_mode(const std::string & value);
+
+		template<>
+		static RasterizerMode to_mode(const std::string & value)
+		{
+			auto hash = leo::constfn_hash(value.c_str());
+			switch (hash)
+			{
+			case leo::constfn_hash("Point"):
+				return RasterizerMode::Point;
+			case leo::constfn_hash("Line"):
+				return RasterizerMode::Line;
+			case leo::constfn_hash("Face"):
+				return RasterizerMode::Face;
+			}
+
+			throw leo::narrowing_error();
+		}
+
+		template<>
+		static CullMode to_mode(const std::string & value)
+		{
+			auto hash = leo::constfn_hash(value.c_str());
+			switch (hash)
+			{
+			case leo::constfn_hash("None"):
+				return CullMode::None;
+			case leo::constfn_hash("Front"):
+				return CullMode::Front;
+			case leo::constfn_hash("Back"):
+				return CullMode::Back;
+			}
+
+			throw leo::narrowing_error();
+		}
 	};
 
 
@@ -188,6 +227,59 @@ namespace platform::Render {
 		DepthStencilDesc();
 
 		friend bool operator<(const DepthStencilDesc  & lhs, const DepthStencilDesc  & rhs);
+
+		template<typename T>
+		static T to_op(const std::string & value);
+
+		template<>
+		static CompareOp to_op(const std::string & value)
+		{
+			auto hash = leo::constfn_hash(value.c_str());
+			switch (hash) {
+			case leo::constfn_hash("Fail"):
+				return CompareOp::Fail;
+			case leo::constfn_hash("Pass"):
+				return CompareOp::Pass;
+			case leo::constfn_hash("Less"):
+				return CompareOp::Less;
+			case leo::constfn_hash("Less_Equal"):
+				return CompareOp::Less_Equal;
+			case leo::constfn_hash("Equal"):
+				return CompareOp::Equal;
+			case leo::constfn_hash("NotEqual"):
+				return CompareOp::NotEqual;
+			case leo::constfn_hash("GreaterEqual"):
+				return CompareOp::GreaterEqual;
+			case leo::constfn_hash("Greater"):
+				return CompareOp::Greater;
+			}
+
+			throw leo::narrowing_error();
+		}
+
+		template<>
+		static StencilOp to_op(const std::string& value)
+		{
+			auto hash = leo::constfn_hash(value.c_str());
+			switch (hash) {
+			case leo::constfn_hash("Keep"):
+				return StencilOp::Keep;
+			case leo::constfn_hash("Zero"):
+				return StencilOp::Zero;
+			case leo::constfn_hash("Replace"):
+				return StencilOp::Replace;
+			case leo::constfn_hash("Decr"):
+				return StencilOp::Decr;
+			case leo::constfn_hash("Invert"):
+				return StencilOp::Invert;
+			case leo::constfn_hash("Incr_Wrap"):
+				return StencilOp::Incr_Wrap;
+			case leo::constfn_hash("Decr_Wrap"):
+				return StencilOp::Decr_Wrap;
+			}
+
+			throw leo::narrowing_error();
+		}
 	};
 
 	struct BlendDesc
@@ -202,22 +294,83 @@ namespace platform::Render {
 		std::array<bool, 8>				logic_op_enable;
 		std::array<BlendOp, 8>	blend_op;
 		std::array<BlendFactor, 8>	src_blend;
-		std::array<BlendFactor, 8>	dest_blend;
+		std::array<BlendFactor, 8>	dst_blend;
 		std::array<BlendOp, 8>	blend_op_alpha;
 		std::array<BlendFactor, 8>	src_blend_alpha;
-		std::array<BlendFactor, 8>	dest_blend_alpha;
+		std::array<BlendFactor, 8>	dst_blend_alpha;
 		std::array<leo::uint8, 8>			color_write_mask;
 
 		BlendDesc();
 
 		friend bool operator<(const BlendDesc  & lhs, const BlendDesc  & rhs);
+
+		static BlendFactor to_factor(const std::string& value)
+		{
+			auto hash = leo::constfn_hash(value.c_str());
+			switch (hash) {
+			case leo::constfn_hash("Zero"):
+				return BlendFactor::Zero;
+			case leo::constfn_hash("One"):
+				return BlendFactor::One;
+			case leo::constfn_hash("Src_Alpha"):
+				return BlendFactor::Src_Alpha;
+			case leo::constfn_hash("Dst_Alpha"):
+				return BlendFactor::Dst_Alpha;
+			case leo::constfn_hash("Inv_Src_Alpha"):
+				return BlendFactor::Inv_Src_Alpha;
+			case leo::constfn_hash("Inv_Dst_Alpha"):
+				return BlendFactor::Inv_Dst_Alpha;
+			case leo::constfn_hash("Src_Color"):
+				return BlendFactor::Src_Color;
+			case leo::constfn_hash("Dst_Color"):
+				return BlendFactor::Dst_Color;
+			case leo::constfn_hash("Inv_Src_Color"):
+				return BlendFactor::Inv_Src_Color;
+			case leo::constfn_hash("Inv_Dst_Color"):
+				return BlendFactor::Inv_Dst_Color;
+			case leo::constfn_hash("Src_Alpha_Sat"):
+				return BlendFactor::Src_Alpha_Sat;
+			case leo::constfn_hash("Factor"):
+				return BlendFactor::Factor;
+			case leo::constfn_hash("Inv_Factor"):
+				return BlendFactor::Inv_Factor;
+#if     1			
+			case leo::constfn_hash("Src1_Alpha"):
+				return BlendFactor::Src1_Alpha;
+			case leo::constfn_hash("Inv_Src1_Alpha"):
+				return BlendFactor::Inv_Src1_Alpha;
+			case leo::constfn_hash("Src1_Color"):
+				return BlendFactor::Src1_Color;
+			case leo::constfn_hash("Inv_Src1_Color"):
+				return BlendFactor::Inv_Src1_Color;
+#endif
+			}
+			throw leo::narrowing_error();
+		}
+
+		static BlendOp to_op(const std::string& value) {
+			auto hash = leo::constfn_hash(value.c_str());
+			switch (hash) {
+			case leo::constfn_hash("Add"):
+				return BlendOp::Add;
+			case leo::constfn_hash("Sub"):
+				return BlendOp::Sub;
+			case leo::constfn_hash("Rev_Sub"):
+				return BlendOp::Rev_Sub;
+			case leo::constfn_hash("Min"):
+				return BlendOp::Min;
+			case leo::constfn_hash("Max"):
+				return BlendOp::Max;
+			}
+			throw leo::narrowing_error();
+		}
 	};
 
 	class PipleState {
 	public:
-		explicit PipleState(const RasterizerDesc r_desc = {},const DepthStencilDesc& ds_desc = {},
+		explicit PipleState(const RasterizerDesc r_desc = {}, const DepthStencilDesc& ds_desc = {},
 			const BlendDesc& b_desc = {})
-			:RasterizerState(r_desc),DepthStencilState(ds_desc),BlendState(b_desc)
+			:RasterizerState(r_desc), DepthStencilState(ds_desc), BlendState(b_desc)
 		{}
 
 	public:
@@ -246,6 +399,73 @@ namespace platform::Render {
 		SamplerDesc();
 
 		friend bool operator<(const SamplerDesc  & lhs, const SamplerDesc  & rhs);
+
+		template<typename T>
+		static T to_op(const std::string & value);
+
+		template<>
+		static CompareOp to_op(const std::string & value) {
+			return DepthStencilDesc::to_op<CompareOp>(value);
+		}
+
+		static TexAddressingMode to_mode(const std::string& value) {
+			auto hash = leo::constfn_hash(value.c_str());
+			switch (hash) {
+			case leo::constfn_hash("Wrap"):
+				return TexAddressingMode::Wrap;
+			case leo::constfn_hash("Mirror"):
+				return TexAddressingMode::Mirror;
+			case leo::constfn_hash("Clamp"):
+				return TexAddressingMode::Clamp;
+			case leo::constfn_hash("Border"):
+				return TexAddressingMode::Border;
+			}
+			throw leo::narrowing_error();
+		}
+
+		template<>
+		static TexFilterOp to_op(const std::string& value) {
+			auto hash = leo::constfn_hash(value.c_str());
+			switch (hash) {
+			case leo::constfn_hash("Min_Mag_Mip_Point"):
+				return TexFilterOp::Min_Mag_Mip_Point;
+			case leo::constfn_hash("Min_Mag_Point_Mip_Linear"):
+				return TexFilterOp::Min_Mag_Point_Mip_Linear;
+			case leo::constfn_hash("Min_Point_Mag_Linear_Mip_Point"):
+				return TexFilterOp::Min_Point_Mag_Linear_Mip_Point;
+			case leo::constfn_hash("Min_Point_Mag_Mip_Linear"):
+				return TexFilterOp::Min_Point_Mag_Mip_Linear;
+			case leo::constfn_hash("Min_Linear_Mag_Mip_Point"):
+				return TexFilterOp::Min_Linear_Mag_Mip_Point;
+			case leo::constfn_hash("Min_Linear_Mag_Point_Mip_Linear"):
+				return TexFilterOp::Min_Linear_Mag_Point_Mip_Linear;
+			case leo::constfn_hash("Min_Mag_Linear_Mip_Point"):
+				return TexFilterOp::Min_Mag_Linear_Mip_Point;
+			case leo::constfn_hash("Min_Mag_Mip_Linear"):
+				return TexFilterOp::Min_Mag_Mip_Linear;
+			case leo::constfn_hash("Anisotropic"):
+				return TexFilterOp::Anisotropic;
+			case leo::constfn_hash("Cmp_Min_Mag_Mip_Point"):
+				return TexFilterOp::Cmp_Min_Mag_Mip_Point;
+			case leo::constfn_hash("Cmp_Min_Mag_Point_Mip_Linear"):
+				return TexFilterOp::Cmp_Min_Mag_Mip_Point;
+			case leo::constfn_hash("Cmp_Min_Point_Mag_Linear_Mip_Point"):
+				return TexFilterOp::Cmp_Min_Point_Mag_Linear_Mip_Point;
+			case leo::constfn_hash("Cmp_Min_Point_Mag_Mip_Linear"):
+				return TexFilterOp::Cmp_Min_Point_Mag_Mip_Linear;
+			case leo::constfn_hash("Cmp_Min_Linear_Mag_Mip_Point"):
+				return TexFilterOp::Cmp_Min_Linear_Mag_Mip_Point;
+			case leo::constfn_hash("Cmp_Min_Linear_Mag_Point_Mip_Linear"):
+				return TexFilterOp::Cmp_Min_Linear_Mag_Point_Mip_Linear;
+			case leo::constfn_hash("Cmp_Min_Mag_Linear_Mip_Point"):
+				return TexFilterOp::Cmp_Min_Mag_Linear_Mip_Point;
+			case leo::constfn_hash("Cmp_Min_Mag_Mip_Linear"):
+				return TexFilterOp::Cmp_Min_Mag_Mip_Linear;
+			case leo::constfn_hash("Cmp_Anisotropic"):
+				return TexFilterOp::Cmp_Anisotropic;
+			}
+			throw leo::narrowing_error();
+		}
 	};
 
 }
