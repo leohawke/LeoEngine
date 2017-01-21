@@ -12,6 +12,7 @@
 #include <LBase/linttype.hpp>
 
 #include "../Render/PipleState.h"
+#include "../Render/Effect/Effect.hpp"
 
 namespace asset {
 
@@ -75,7 +76,7 @@ namespace asset {
 		std::size_t hash;
 	};
 
-	class EffectConstantBufferAsset : public EffectNodeAsset{
+	class EffectConstantBufferAsset : public EffectNodeAsset {
 	public:
 		DefGetter(const lnothrow, const std::vector<leo::uint32>&, ParamIndices, indices)
 			DefGetter(lnothrow, std::vector<leo::uint32>&, ParamIndicesRef, indices)
@@ -85,9 +86,9 @@ namespace asset {
 
 	class EffectParameterAsset : public EffectNodeAsset {
 	public:
-		DefGetter(const lnothrow,const EffectParamType& ,Type,type)
-			DefGetter( lnothrow,  EffectParamType&, TypeRef, type)
-			DefGetter(const lnothrow,leo::uint32,ArraySize,array_size)
+		DefGetter(const lnothrow, const EffectParamType&, Type, type)
+			DefGetter(lnothrow, EffectParamType&, TypeRef, type)
+			DefGetter(const lnothrow, leo::uint32, ArraySize, array_size)
 			DefGetter(lnothrow, leo::uint32&, ArraySizeRef, array_size)
 
 			DefGetter(const lnothrow, const EffectParamType&, ElemType, elem_type)
@@ -101,8 +102,8 @@ namespace asset {
 
 	class ShaderFragmentAsset {
 	public:
-		DefGetter(const lnothrow,const std::string&,Fragment,fragment)
-			DefGetter(lnothrow,std::string&, FragmentRef, fragment)
+		DefGetter(const lnothrow, const std::string&, Fragment, fragment)
+			DefGetter(lnothrow, std::string&, FragmentRef, fragment)
 
 	private:
 		std::string fragment;
@@ -112,14 +113,25 @@ namespace asset {
 
 	class TechniquePassAsset :public EffectNodeAsset {
 	public:
+		using ShaderType = platform::Render::ShaderCompose::Type;
 		DefGetter(const lnothrow, const std::vector<EffectMacro>&, Macros, macros)
 			DefGetter(lnothrow, std::vector<EffectMacro>&, MacrosRef, macros)
 
-			DefGetter(const lnothrow,const platform::Render::PipleState&, PipleState, piple_state)
+			DefGetter(const lnothrow, const platform::Render::PipleState&, PipleState, piple_state)
 			DefGetter(lnothrow, platform::Render::PipleState&, PipleStateRef, piple_state)
+
+			void AssignOrInsertHash(ShaderType type, size_t  blobhash)
+			{
+				blobindexs.insert_or_assign(type, blobhash);
+			}
+
+			size_t GetHash(ShaderType type) const {
+				return blobindexs.find(type)->second;
+			}
 	private:
 		platform::Render::PipleState piple_state;
 		std::vector<EffectMacro> macros;
+		std::unordered_map<ShaderType, size_t> blobindexs;
 	};
 
 	class EffectTechniqueAsset : public EffectNodeAsset {
@@ -134,8 +146,30 @@ namespace asset {
 		std::vector<TechniquePassAsset> passes;
 	};
 
-	class EffectAsset {
+	class ShaderBlobAsset :leo::noncopyable {
 	public:
+		using Type = platform::Render::ShaderCompose::Type;
+		using ShaderBlob = platform::Render::ShaderCompose::ShaderBlob;
+
+		explicit ShaderBlobAsset(Type _type, ShaderBlob&& _blob)
+			:type(_type), blob(lforward(_blob))
+		{}
+
+		ShaderBlobAsset() = default;
+
+
+		DefGetter(const lnothrow, const Type&, ShaderType, type)
+
+			DefGetter(const lnothrow, const ShaderBlob&, Blob, blob)
+	private:
+		Type type;
+		ShaderBlob blob;
+	};
+
+	class EffectAsset : leo::noncopyable {
+	public:
+		EffectAsset() = default;
+
 
 		DefGetter(const lnothrow, const std::vector<EffectMacro>&, Macros, macros)
 			DefGetter(lnothrow, std::vector<EffectMacro>&, MacrosRef, macros)
@@ -151,6 +185,15 @@ namespace asset {
 			DefGetter(const lnothrow, const std::vector<EffectTechniqueAsset>&, Techniques, techniques)
 			DefGetter(lnothrow, std::vector<EffectTechniqueAsset>&, TechniquesRef, techniques)
 
+			const ShaderBlobAsset & GetBlob(size_t blob_index) const {
+			return blobs.find(blob_index)->second;
+		}
+
+		template<typename... Params>
+		void EmplaceBlob(Params&&... params) {
+			blobs.emplace(lforward(params)...);
+		}
+
 		static	std::string GetTypeName(EffectParamType type);
 		static EffectParamType GetType(const std::string&);
 	private:
@@ -159,6 +202,7 @@ namespace asset {
 		std::vector<EffectParameterAsset> params;
 		std::vector<ShaderFragmentAsset> fragements;
 		std::vector<EffectTechniqueAsset> techniques;
+		std::unordered_map<size_t, ShaderBlobAsset> blobs;
 #ifdef ENGINE_TOOL
 	public:
 		std::string GenHLSLShader() const;

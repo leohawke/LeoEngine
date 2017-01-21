@@ -1,6 +1,6 @@
 /*! \file Engine\Render\DeviceCaps.h
 \ingroup Engine
-\brief 绘制创建接口类。
+\brief 设备能力集。
 */
 #ifndef LE_RENDER_DeviceCaps_h
 #define LE_RENDER_DeviceCaps_h 1
@@ -12,6 +12,12 @@
 namespace platform{
 	namespace Render {
 		struct Caps {
+			enum class Type {
+				D3D12
+			};
+
+			Type type;
+
 			uint16 max_texture_depth;
 
 			std::function<bool(EFormat)> TextureFormatSupport;

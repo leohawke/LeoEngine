@@ -7,8 +7,51 @@
 #include <fstream>
 #include <iterator>
 
+enum D3DCOMPILER_FLAGS
+{
+	D3DCOMPILE_DEBUG = (1 << 0),
+	D3DCOMPILE_SKIP_VALIDATION = (1 << 1),
+	D3DCOMPILE_SKIP_OPTIMIZATION = (1 << 2),
+	D3DCOMPILE_PACK_MATRIX_ROW_MAJOR = (1 << 3),
+	D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR = (1 << 4),
+	D3DCOMPILE_PARTIAL_PRECISION = (1 << 5),
+	D3DCOMPILE_FORCE_VS_SOFTWARE_NO_OPT = (1 << 6),
+	D3DCOMPILE_FORCE_PS_SOFTWARE_NO_OPT = (1 << 7),
+	D3DCOMPILE_NO_PRESHADER = (1 << 8),
+	D3DCOMPILE_AVOID_FLOW_CONTROL = (1 << 9),
+	D3DCOMPILE_PREFER_FLOW_CONTROL = (1 << 10),
+	D3DCOMPILE_ENABLE_STRICTNESS = (1 << 11),
+	D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY = (1 << 12),
+	D3DCOMPILE_IEEE_STRICTNESS = (1 << 13),
+	D3DCOMPILE_OPTIMIZATION_LEVEL0 = (1 << 14),
+	D3DCOMPILE_OPTIMIZATION_LEVEL1 = 0,
+	D3DCOMPILE_OPTIMIZATION_LEVEL2 = ((1 << 14) | (1 << 15)),
+	D3DCOMPILE_OPTIMIZATION_LEVEL3 = (1 << 15),
+	D3DCOMPILE_RESERVED16 = (1 << 16),
+	D3DCOMPILE_RESERVED17 = (1 << 17),
+	D3DCOMPILE_WARNINGS_ARE_ERRORS = (1 << 18),
+	D3DCOMPILE_RESOURCES_MAY_ALIAS = (1 << 19),
+	D3DCOMPILE_ENABLE_UNBOUNDED_DESCRIPTOR_TABLES = (1 << 20),
+	D3DCOMPILE_ALL_RESOURCES_BOUND = (1 << 21),
+};
+
+
+enum D3DCOMPILER_STRIP_FLAGS
+{
+	D3DCOMPILER_STRIP_REFLECTION_DATA = 0x00000001,
+	D3DCOMPILER_STRIP_DEBUG_INFO = 0x00000002,
+	D3DCOMPILER_STRIP_TEST_BLOBS = 0x00000004,
+	D3DCOMPILER_STRIP_PRIVATE_DATA = 0x00000008,
+	D3DCOMPILER_STRIP_ROOT_SIGNATURE = 0x00000010,
+	D3DCOMPILER_STRIP_FORCE_DWORD = 0x7fffffff,
+};
+
+
 namespace platform {
 	using namespace scheme;
+
+	std::vector<asset::EffectMacro> AppendCompileMacros(const std::vector<asset::EffectMacro>& macros, asset::ShaderBlobAsset::Type type);
+	std::string_view CompileProfile(asset::ShaderBlobAsset::Type type);
 
 	class EffectLoadingDesc : public asset::AssetLoading<asset::EffectAsset> {
 	private:
@@ -19,6 +62,7 @@ namespace platform {
 			};
 			std::shared_ptr<Data> data;
 			std::shared_ptr<AssetType> effect_asset;
+			std::string effect_code;
 		} effect_desc;
 	public:
 		explicit EffectLoadingDesc(X::path const & effectpath)
@@ -113,6 +157,7 @@ namespace platform {
 						);
 				}
 			}
+			effect_desc.effect_code = effect_desc.effect_asset->GenHLSLShader();
 			ParseTechnique(effect_node);
 
 			return nullptr;
@@ -265,6 +310,7 @@ namespace platform {
 					//pass也有宏节点
 					ParseMacro(pass.GetMacrosRef(), pass_node);
 					ParsePassState(*pass_ptr, pass_node);
+					ComposePassShader(technique, *pass_ptr, pass_node);
 				}
 				effect_desc.effect_asset->GetTechniquesRef().emplace_back(std::move(technique));
 			}
@@ -296,10 +342,10 @@ namespace platform {
 				leo::split(value.begin(), value.end(),
 					[](char c) {return c == ','; },
 					[&](decltype(value.begin()) b, decltype(value.end()) e) {
-						auto v = std::string(b, e);
-						*iter = std::stof(v);
-						++iter;
-					}
+					auto v = std::string(b, e);
+					*iter = std::stof(v);
+					++iter;
+				}
 				);
 				return result;
 			};
@@ -630,6 +676,62 @@ namespace platform {
 			}
 		}
 
+		void ComposePassShader(const asset::EffectTechniqueAsset&technique, asset::TechniquePassAsset& pass, scheme::TermNode& pass_node) {
+			size_t seed = 0;
+			auto macro_hash = leo::combined_hash<asset::EffectMacro>();
+			std::vector<asset::EffectMacro> macros{ effect_desc.effect_asset->GetMacros() };
+			for (auto & macro_pair : technique.GetMacros()) {
+				leo::hash_combine(seed, macro_hash(macro_pair));
+				macros.emplace_back(macro_pair);
+			}
+			for (auto & macro_pair : pass.GetMacros()) {
+				leo::hash_combine(seed, macro_hash(macro_pair));
+				macros.emplace_back(macro_pair);
+			}
+
+			for (auto & child_node : pass_node) {
+				try {
+					auto first = leo::Access<std::string>(*child_node.begin());
+					auto second = leo::Access<std::string>(*child_node.rbegin());
+					auto first_hash = leo::constfn_hash(first.c_str());
+
+					asset::ShaderBlobAsset::Type compile_type;
+					string_view compile_entry_point = second;
+					size_t blob_hash = seed;
+					leo::hash_combine(blob_hash, std::hash<std::string>()(second));
+
+					switch (first_hash) {
+					case leo::constfn_hash("vertex_shader"):
+						compile_type = platform::Render::ShaderCompose::Type::VertexShader;
+						break;
+					case leo::constfn_hash("pixel_shader"):
+						compile_type = platform::Render::ShaderCompose::Type::PixelShader;
+						break;
+					default:
+						continue;
+					}
+					string_view profile = CompileProfile(compile_type);
+
+					auto blob = X::Shader::CompileToDXBC(compile_type, effect_desc.effect_code, compile_entry_point, AppendCompileMacros(macros,compile_type), profile,
+						D3DCOMPILE_ENABLE_STRICTNESS |
+#ifndef NDEBUG
+						D3DCOMPILE_DEBUG
+#else
+						D3DCOMPILE_OPTIMIZATION_LEVEL3
+#endif
+					);
+					//TODO Support Reflect Infomation
+					X::Shader::ReflectDXBC(blob);
+					blob.swap(X::Shader::StripDXBC(blob, D3DCOMPILER_STRIP_REFLECTION_DATA | D3DCOMPILER_STRIP_DEBUG_INFO
+						| D3DCOMPILER_STRIP_TEST_BLOBS | D3DCOMPILER_STRIP_PRIVATE_DATA));
+
+					effect_desc.effect_asset->EmplaceBlob(blob_hash,asset::ShaderBlobAsset(compile_type,std::move(blob)));
+					pass.AssignOrInsertHash(compile_type,blob_hash);
+				}
+				CatchIgnore(leo::bad_any_cast &)
+			}
+		}
+
 		void UniqueMacro(std::vector<asset::EffectMacro>& macros)
 		{
 			//宏的覆盖原则 删除前面已定义的宏
@@ -650,6 +752,6 @@ namespace platform {
 
 	asset::EffectAsset platform::X::LoadEffectAsset(path const & effectpath)
 	{
-		return *asset::SyncLoad<EffectLoadingDesc>(effectpath);
+		return  std::move(*asset::SyncLoad<EffectLoadingDesc>(effectpath));
 	}
 }

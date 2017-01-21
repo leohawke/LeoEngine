@@ -230,6 +230,7 @@ namespace platform_ex {
 			}
 
 			void Device::FillCaps() {
+				d3d_caps.type =platform::Render::Caps::Type::D3D12;
 				d3d_caps.max_texture_depth = D3D12_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
 
 				std::pair<EFormat, DXGI_FORMAT> fmts[] =
