@@ -7,44 +7,50 @@
 #include <fstream>
 #include <iterator>
 
-enum D3DCOMPILER_FLAGS
-{
-	D3DCOMPILE_DEBUG = (1 << 0),
-	D3DCOMPILE_SKIP_VALIDATION = (1 << 1),
-	D3DCOMPILE_SKIP_OPTIMIZATION = (1 << 2),
-	D3DCOMPILE_PACK_MATRIX_ROW_MAJOR = (1 << 3),
-	D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR = (1 << 4),
-	D3DCOMPILE_PARTIAL_PRECISION = (1 << 5),
-	D3DCOMPILE_FORCE_VS_SOFTWARE_NO_OPT = (1 << 6),
-	D3DCOMPILE_FORCE_PS_SOFTWARE_NO_OPT = (1 << 7),
-	D3DCOMPILE_NO_PRESHADER = (1 << 8),
-	D3DCOMPILE_AVOID_FLOW_CONTROL = (1 << 9),
-	D3DCOMPILE_PREFER_FLOW_CONTROL = (1 << 10),
-	D3DCOMPILE_ENABLE_STRICTNESS = (1 << 11),
-	D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY = (1 << 12),
-	D3DCOMPILE_IEEE_STRICTNESS = (1 << 13),
-	D3DCOMPILE_OPTIMIZATION_LEVEL0 = (1 << 14),
-	D3DCOMPILE_OPTIMIZATION_LEVEL1 = 0,
-	D3DCOMPILE_OPTIMIZATION_LEVEL2 = ((1 << 14) | (1 << 15)),
-	D3DCOMPILE_OPTIMIZATION_LEVEL3 = (1 << 15),
-	D3DCOMPILE_RESERVED16 = (1 << 16),
-	D3DCOMPILE_RESERVED17 = (1 << 17),
-	D3DCOMPILE_WARNINGS_ARE_ERRORS = (1 << 18),
-	D3DCOMPILE_RESOURCES_MAY_ALIAS = (1 << 19),
-	D3DCOMPILE_ENABLE_UNBOUNDED_DESCRIPTOR_TABLES = (1 << 20),
-	D3DCOMPILE_ALL_RESOURCES_BOUND = (1 << 21),
-};
+#include "../Render/IContext.h"
+#include "../Win32/COM.h"
 
+#pragma warning(disable:4715) //return value or throw exception;
 
-enum D3DCOMPILER_STRIP_FLAGS
-{
-	D3DCOMPILER_STRIP_REFLECTION_DATA = 0x00000001,
-	D3DCOMPILER_STRIP_DEBUG_INFO = 0x00000002,
-	D3DCOMPILER_STRIP_TEST_BLOBS = 0x00000004,
-	D3DCOMPILER_STRIP_PRIVATE_DATA = 0x00000008,
-	D3DCOMPILER_STRIP_ROOT_SIGNATURE = 0x00000010,
-	D3DCOMPILER_STRIP_FORCE_DWORD = 0x7fffffff,
-};
+namespace D3DFlags {
+	enum COMPILER_FLAGS
+	{
+		D3DCOMPILE_DEBUG = (1 << 0),
+		D3DCOMPILE_SKIP_VALIDATION = (1 << 1),
+		D3DCOMPILE_SKIP_OPTIMIZATION = (1 << 2),
+		D3DCOMPILE_PACK_MATRIX_ROW_MAJOR = (1 << 3),
+		D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR = (1 << 4),
+		D3DCOMPILE_PARTIAL_PRECISION = (1 << 5),
+		D3DCOMPILE_FORCE_VS_SOFTWARE_NO_OPT = (1 << 6),
+		D3DCOMPILE_FORCE_PS_SOFTWARE_NO_OPT = (1 << 7),
+		D3DCOMPILE_NO_PRESHADER = (1 << 8),
+		D3DCOMPILE_AVOID_FLOW_CONTROL = (1 << 9),
+		D3DCOMPILE_PREFER_FLOW_CONTROL = (1 << 10),
+		D3DCOMPILE_ENABLE_STRICTNESS = (1 << 11),
+		D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY = (1 << 12),
+		D3DCOMPILE_IEEE_STRICTNESS = (1 << 13),
+		D3DCOMPILE_OPTIMIZATION_LEVEL0 = (1 << 14),
+		D3DCOMPILE_OPTIMIZATION_LEVEL1 = 0,
+		D3DCOMPILE_OPTIMIZATION_LEVEL2 = ((1 << 14) | (1 << 15)),
+		D3DCOMPILE_OPTIMIZATION_LEVEL3 = (1 << 15),
+		D3DCOMPILE_RESERVED16 = (1 << 16),
+		D3DCOMPILE_RESERVED17 = (1 << 17),
+		D3DCOMPILE_WARNINGS_ARE_ERRORS = (1 << 18),
+		D3DCOMPILE_RESOURCES_MAY_ALIAS = (1 << 19),
+		D3DCOMPILE_ENABLE_UNBOUNDED_DESCRIPTOR_TABLES = (1 << 20),
+		D3DCOMPILE_ALL_RESOURCES_BOUND = (1 << 21),
+	};
+
+	enum COMPILER_STRIP_FLAGS
+	{
+		D3DCOMPILER_STRIP_REFLECTION_DATA = 0x00000001,
+		D3DCOMPILER_STRIP_DEBUG_INFO = 0x00000002,
+		D3DCOMPILER_STRIP_TEST_BLOBS = 0x00000004,
+		D3DCOMPILER_STRIP_PRIVATE_DATA = 0x00000008,
+		D3DCOMPILER_STRIP_ROOT_SIGNATURE = 0x00000010,
+		D3DCOMPILER_STRIP_FORCE_DWORD = 0x7fffffff,
+	};
+}
 
 
 namespace platform {
@@ -712,21 +718,22 @@ namespace platform {
 					}
 					string_view profile = CompileProfile(compile_type);
 
-					auto blob = X::Shader::CompileToDXBC(compile_type, effect_desc.effect_code, compile_entry_point, AppendCompileMacros(macros,compile_type), profile,
-						D3DCOMPILE_ENABLE_STRICTNESS |
+					auto blob = X::Shader::CompileToDXBC(compile_type, effect_desc.effect_code, compile_entry_point, AppendCompileMacros(macros, compile_type), profile,
+						D3DFlags::D3DCOMPILE_ENABLE_STRICTNESS |
 #ifndef NDEBUG
-						D3DCOMPILE_DEBUG
+						D3DFlags::D3DCOMPILE_DEBUG
 #else
-						D3DCOMPILE_OPTIMIZATION_LEVEL3
+						D3DFlags::D3DCOMPILE_OPTIMIZATION_LEVEL3
 #endif
+						,effect_desc.effect_path.string()
 					);
 					//TODO Support Reflect Infomation
 					X::Shader::ReflectDXBC(blob);
-					blob.swap(X::Shader::StripDXBC(blob, D3DCOMPILER_STRIP_REFLECTION_DATA | D3DCOMPILER_STRIP_DEBUG_INFO
-						| D3DCOMPILER_STRIP_TEST_BLOBS | D3DCOMPILER_STRIP_PRIVATE_DATA));
+					blob.swap(X::Shader::StripDXBC(blob, D3DFlags::D3DCOMPILER_STRIP_REFLECTION_DATA | D3DFlags::D3DCOMPILER_STRIP_DEBUG_INFO
+						| D3DFlags::D3DCOMPILER_STRIP_TEST_BLOBS | D3DFlags::D3DCOMPILER_STRIP_PRIVATE_DATA));
 
-					effect_desc.effect_asset->EmplaceBlob(blob_hash,asset::ShaderBlobAsset(compile_type,std::move(blob)));
-					pass.AssignOrInsertHash(compile_type,blob_hash);
+					effect_desc.effect_asset->EmplaceBlob(blob_hash, asset::ShaderBlobAsset(compile_type, std::move(blob)));
+					pass.AssignOrInsertHash(compile_type, blob_hash);
 				}
 				CatchIgnore(leo::bad_any_cast &)
 			}
@@ -754,4 +761,102 @@ namespace platform {
 	{
 		return  std::move(*asset::SyncLoad<EffectLoadingDesc>(effectpath));
 	}
+
+	std::vector<asset::EffectMacro> AppendCompileMacros(const std::vector<asset::EffectMacro>& macros, asset::ShaderBlobAsset::Type type)
+	{
+		using namespace  platform::Render;
+
+		auto append_macros = macros;
+		auto caps = Context::Instance().GetDevice().GetCaps();
+		switch (caps.type) {
+		case Caps::Type::D3D12:
+			append_macros.emplace_back("D3D12", "1");
+			//TODO depend feature_level
+			append_macros.emplace_back("SM_VERSION", "50");
+			break;
+		}
+		switch (type) {
+		case ShaderCompose::Type::VertexShader:
+			append_macros.emplace_back("VS", "1");
+			break;
+		case ShaderCompose::Type::PixelShader:
+			append_macros.emplace_back("PS", "1");
+			break;
+		}
+		return append_macros;
+	}
+
+	std::string_view CompileProfile(asset::ShaderBlobAsset::Type type)
+	{
+		using namespace  platform::Render;
+
+		auto caps = Context::Instance().GetDevice().GetCaps();
+		switch (caps.type) {
+		case Caps::Type::D3D12:
+			switch (type) {
+			case ShaderCompose::Type::VertexShader:
+				return "vs_5_0";
+			case ShaderCompose::Type::PixelShader:
+				return "ps_5_0";
+			}
+		}
+		return "";
+	}
 }
+
+
+#include <LBase/Platform.h>
+
+#ifdef LFL_Win32
+
+#include <UniversalDXSDK/d3dcompiler.h>
+#ifdef LFL_Win64
+#pragma comment(lib,"UniversalDXSDK/Lib/x64/d3dcompiler.lib")
+#else
+#endif
+namespace platform::X::Shader {
+	Render::ShaderCompose::ShaderBlob CompileToDXBC(Render::ShaderCompose::Type type, std::string_view code,
+		std::string_view entry_point, const std::vector<asset::EffectMacro>& macros,
+		std::string_view profile, leo::uint32 flags, string_view SourceName) {
+		std::vector<D3D_SHADER_MACRO> defines;
+		for (auto& macro : macros) {
+			D3D_SHADER_MACRO define;
+			define.Name = macro.first.c_str();
+			define.Definition = macro.second.c_str();
+			defines.emplace_back(define);
+		}
+		platform_ex::COMPtr<ID3DBlob> code_blob;
+		platform_ex::COMPtr<ID3DBlob> error_blob;
+
+		auto hr = D3DCompile(code.data(), code.size(), SourceName.data(), defines.data(), nullptr, entry_point.data(), profile.data(), flags, 0, &code_blob, &error_blob);
+		if (code_blob) {
+			Render::ShaderCompose::ShaderBlob blob;
+			blob.first = std::make_unique<stdex::byte[]>(code_blob->GetBufferSize());
+			blob.second = code_blob->GetBufferSize();
+			std::memcpy(blob.first.get(), code_blob->GetBufferPointer(), blob.second);
+			return std::move(blob);
+		}
+		//TODO error_blob
+		auto error =reinterpret_cast<char*>(error_blob->GetBufferPointer());
+		LE_LogError(error);
+		platform_ex::CheckHResult(hr);
+	}
+	void ReflectDXBC(const Render::ShaderCompose::ShaderBlob& blob) {
+		//TODO Support Reflect Infomation
+		//Find Variables;
+	}
+	Render::ShaderCompose::ShaderBlob StripDXBC(const Render::ShaderCompose::ShaderBlob& code_blob, leo::uint32 flags) {
+		platform_ex::COMPtr<ID3DBlob> stripped_blob;
+		platform_ex::CheckHResult(D3DStripShader(code_blob.first.get(), code_blob.second, flags, &stripped_blob));
+		Render::ShaderCompose::ShaderBlob blob;
+		blob.first = std::make_unique<stdex::byte[]>(stripped_blob->GetBufferSize());
+		blob.second = stripped_blob->GetBufferSize();
+		std::memcpy(blob.first.get(), stripped_blob->GetBufferPointer(), blob.second);
+		return std::move(blob);
+	}
+}
+
+#else
+//TODO CryEngine HLSLCross Compiler?
+//Other Target Platfom Compiler [Tool...]
+#endif
