@@ -143,7 +143,7 @@ namespace platform {
 							if (auto p = leo::AccessChildPtr<std::string>(param_node, "arraysize"))
 								param.GetArraySizeRef() = std::stoul(*p);
 						}
-						else if (param.GetType() <= asset::EPT_consume_structured_buffer) {
+						else if (param.GetType() <= asset::EPT_ConsumeStructuredBuffer) {
 							TryExpr(param.GetElemTypeRef() = AssetType::GetType(Access("elemtype", param_node)))
 								CatchIgnore(std::exception&)
 						}
@@ -164,7 +164,7 @@ namespace platform {
 						if (auto p = leo::AccessChildPtr<std::string>(param_node, "arraysize"))
 							param.GetArraySizeRef() = std::stoul(*p);
 					}
-					else if (param.GetType() <= asset::EPT_consume_structured_buffer) {
+					else if (param.GetType() <= asset::EPT_ConsumeStructuredBuffer) {
 						if (auto elemtype = AccessPtr("elemtype", param_node))
 							param.GetElemTypeRef() = AssetType::GetType(*elemtype);
 					}
@@ -300,7 +300,7 @@ namespace platform {
 
 					asset::TechniquePassAsset* pass_ptr = nullptr;
 					if (inherit) {
-						auto exist_passes = technique.GetPasses();
+						auto& exist_passes = technique.GetPassesRef();
 						auto exist_pass = std::find_if(exist_passes.begin(), exist_passes.end(), [&pass](const asset::TechniquePassAsset& exist)
 						{
 							return pass.GetNameHash() == exist.GetNameHash();

@@ -53,7 +53,6 @@ namespace platform_ex {
 	/*!
 	\brief 检查 ::HRESULT 值，若表示失败则抛出 COMException 。
 	\return 表示成功的值。
-	\since build 563
 	*/
 	inline ::HRESULT
 		CheckHResult(::HRESULT h)

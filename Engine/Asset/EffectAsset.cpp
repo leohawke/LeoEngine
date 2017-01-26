@@ -19,7 +19,9 @@ public:
 
 	uint32_t type_code(std::string const & name) const
 	{
-		size_t const name_hash = std::hash<std::string>()(name);
+		auto lowername = name;
+		std::transform(lowername.begin(), lowername.end(), lowername.begin(), std::tolower);
+		size_t const name_hash = std::hash<std::string>()(lowername);
 		for (uint32_t i = 0; i < hashs.size(); ++i)
 		{
 			if (hashs[i] == name_hash)
@@ -43,27 +45,27 @@ public:
 
 	type_define()
 	{
-		types.emplace_back("texture1D");
-		types.emplace_back("texture2D");
-		types.emplace_back("texture3D");
-		types.emplace_back("textureCUBE");
-		types.emplace_back("texture1DArray");
-		types.emplace_back("texture2DArray");
-		types.emplace_back("texture3DArray");
-		types.emplace_back("textureCUBEArray");
-		types.emplace_back("buffer");
-		types.emplace_back("structured_buffer");
-		types.emplace_back("rw_buffer");
-		types.emplace_back("rw_structured_buffer");
-		types.emplace_back("rw_texture1D");
-		types.emplace_back("rw_texture2D");
-		types.emplace_back("rw_texture3D");
-		types.emplace_back("rw_texture1DArray");
-		types.emplace_back("rw_texture2DArray");
-		types.emplace_back("append_structured_buffer");
-		types.emplace_back("consume_structured_buffer");
-		types.emplace_back("byte_address_buffer");
-		types.emplace_back("rw_byte_address_buffer");
+		types.emplace_back("Texture1D");
+		types.emplace_back("Texture2D");
+		types.emplace_back("Texture3D");
+		types.emplace_back("TextureCUBE");
+		types.emplace_back("Texture1DArray");
+		types.emplace_back("Texture2DArray");
+		types.emplace_back("Texture3DArray");
+		types.emplace_back("TextureCUBEArray");
+		types.emplace_back("Buffer");
+		types.emplace_back("StructuredBuffer");
+		types.emplace_back("RWBuffer");
+		types.emplace_back("RWStructuredBuffer");
+		types.emplace_back("RWTexture1D");
+		types.emplace_back("RWTexture2D");
+		types.emplace_back("RWTexture3D");
+		types.emplace_back("RWTexture1DArray");
+		types.emplace_back("RWTexture2DArray");
+		types.emplace_back("AppendStructuredBuffer");
+		types.emplace_back("ConsumeStructuredBuffer");
+		types.emplace_back("ByteAddressBuffer");
+		types.emplace_back("RWByteAddressBuffer");
 		types.emplace_back("sampler");
 		types.emplace_back("shader"); 
 		types.emplace_back("bool");
@@ -90,8 +92,10 @@ public:
 		types.emplace_back("float4x3");
 		types.emplace_back("float4x4");
 		
-		for (auto type : types)
+		for (auto type : types) {
+			std::transform(type.begin(), type.end(), type.begin(), std::tolower);
 			hashs.emplace_back(std::hash<decltype(type)>()(type));
+		}
 	}
 
 private:
@@ -119,6 +123,7 @@ std::string asset::EffectAsset::GenHLSLShader() const
 		ss << leo::sfmt("#define %s %s", name_value.first.c_str(), name_value.second.c_str()) << endl;
 	}
 	ss << endl;
+	std::set<std::size_t> except_set;
 	for (auto & cbuffer : GetCBuffers())
 	{
 		ss << leo::sfmt("cbuffer %s", cbuffer.GetName().c_str()) << endl;
@@ -133,6 +138,7 @@ std::string asset::EffectAsset::GenHLSLShader() const
 					ss << leo::sfmt("[%s]", std::to_string(param.GetArraySize()).c_str());
 				ss << ';' << endl;
 			}
+			except_set.insert(param.GetNameHash());
 		}
 
 		ss << "};" << endl;
@@ -140,15 +146,17 @@ std::string asset::EffectAsset::GenHLSLShader() const
 
 	for (auto & param : GetParams())
 	{
+		if (except_set.count(param.GetNameHash()) > 0)
+			continue;
 		std::string elem_type;
-		if (param.GetType() <= EPT_consume_structured_buffer &&param.GetElemType() != EPT_ElemEmpty) {
+		if (param.GetType() <= EPT_ConsumeStructuredBuffer &&param.GetElemType() != EPT_ElemEmpty) {
 			elem_type = GetTypeName(param.GetElemType());
 			ss << leo::sfmt("%s<%s> %s", GetTypeName(param.GetType()).c_str(),
 				elem_type.c_str(), param.GetName().c_str())
 				<< ';'
 				<<endl;
 		}
-		else if (param.GetType() <= EPT_rw_byte_address_buffer) {
+		else  {
 			ss << leo::sfmt("%s %s", GetTypeName(param.GetType()).c_str(),
 				param.GetName().c_str())
 				<< ';'
