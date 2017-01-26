@@ -144,13 +144,31 @@ namespace platform {
 								param.GetArraySizeRef() = std::stoul(*p);
 						}
 						else if (param.GetType() <= asset::EPT_consume_structured_buffer) {
-							param.GetElemTypeRef() = AssetType::GetType(Access("elemtype", param_node));
+							TryExpr(param.GetElemTypeRef() = AssetType::GetType(Access("elemtype", param_node)))
+								CatchIgnore(std::exception&)
 						}
 						ParamIndices.emplace_back(static_cast<leo::uint32>(effect_desc.effect_asset->GetParams().size()));
 						effect_desc.effect_asset->GetParamsRef().emplace_back(std::move(param));
 					}
 					cbuffer.GetParamIndicesRef() = std::move(ParamIndices);
 					effect_desc.effect_asset->GetCBuffersRef().emplace_back(std::move(cbuffer));
+				}
+			}
+			{
+				auto param_nodes = SelectNodes("parameter",effect_node);
+				for (auto & param_node : param_nodes) {
+					asset::EffectParameterAsset param;
+					param.SetName(Access("name", param_node));
+					param.GetTypeRef() = AssetType::GetType(Access("type", param_node));
+					if (param.GetType() >= asset::EPT_bool) {
+						if (auto p = leo::AccessChildPtr<std::string>(param_node, "arraysize"))
+							param.GetArraySizeRef() = std::stoul(*p);
+					}
+					else if (param.GetType() <= asset::EPT_consume_structured_buffer) {
+						if (auto elemtype = AccessPtr("elemtype", param_node))
+							param.GetElemTypeRef() = AssetType::GetType(*elemtype);
+					}
+					effect_desc.effect_asset->GetParamsRef().emplace_back(std::move(param));
 				}
 			}
 			{
@@ -581,6 +599,8 @@ namespace platform {
 				}
 			};
 			for (auto & child_node : pass_node) {
+				if (child_node.size() != 2)
+					continue;
 				try {
 					auto first = leo::Access<std::string>(*child_node.begin());
 					auto second = leo::Access<std::string>(*child_node.rbegin());
@@ -696,6 +716,8 @@ namespace platform {
 			}
 
 			for (auto & child_node : pass_node) {
+				if (child_node.size() != 2)
+					continue;
 				try {
 					auto first = leo::Access<std::string>(*child_node.begin());
 					auto second = leo::Access<std::string>(*child_node.rbegin());
@@ -825,6 +847,9 @@ namespace platform::X::Shader {
 			define.Definition = macro.second.c_str();
 			defines.emplace_back(define);
 		}
+		D3D_SHADER_MACRO define_end = { nullptr, nullptr };
+		defines.push_back(define_end);
+
 		platform_ex::COMPtr<ID3DBlob> code_blob;
 		platform_ex::COMPtr<ID3DBlob> error_blob;
 

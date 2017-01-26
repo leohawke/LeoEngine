@@ -64,6 +64,8 @@ namespace asset {
 		EPT_float4x2,
 		EPT_float4x3,
 		EPT_float4x4,
+
+		EPT_ElemEmpty,
 	};
 
 	class EffectNodeAsset {
@@ -97,7 +99,7 @@ namespace asset {
 		EffectParamType type;
 		leo::uint32 array_size = 0;
 
-		EffectParamType elem_type;
+		EffectParamType elem_type = EPT_ElemEmpty;
 	};
 
 	class ShaderFragmentAsset {
