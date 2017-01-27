@@ -2,6 +2,10 @@
 #include "../IContext.h"
 
 namespace platform::Render::Effect {
+	Effect::Effect(const std::string & name)
+		:NameKey(name)
+	{
+	}
 
 	void platform::Render::Effect::Effect::Bind(leo::uint8 index)
 	{

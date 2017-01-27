@@ -10,6 +10,9 @@
 #include <LBase/id.hpp>
 #include "Color_T.hpp"
 
+#include <cctype>
+#include <algorithm>
+
 namespace platform::Render {
 	namespace details {
 		template<typename T, typename Y>
@@ -234,23 +237,25 @@ namespace platform::Render {
 		template<>
 		static CompareOp to_op(const std::string & value)
 		{
-			auto hash = leo::constfn_hash(value.c_str());
+			auto lower_value = value;
+			leo::to_lower(lower_value);
+			auto hash = leo::constfn_hash(lower_value.c_str());
 			switch (hash) {
-			case leo::constfn_hash("Fail"):
+			case leo::constfn_hash("fail"):
 				return CompareOp::Fail;
-			case leo::constfn_hash("Pass"):
+			case leo::constfn_hash("pass"):
 				return CompareOp::Pass;
-			case leo::constfn_hash("Less"):
+			case leo::constfn_hash("less"):
 				return CompareOp::Less;
-			case leo::constfn_hash("Less_Equal"):
+			case leo::constfn_hash("less_equal"):
 				return CompareOp::Less_Equal;
-			case leo::constfn_hash("Equal"):
+			case leo::constfn_hash("equal"):
 				return CompareOp::Equal;
-			case leo::constfn_hash("NotEqual"):
+			case leo::constfn_hash("notequal"):
 				return CompareOp::NotEqual;
-			case leo::constfn_hash("GreaterEqual"):
+			case leo::constfn_hash("greaterequal"):
 				return CompareOp::GreaterEqual;
-			case leo::constfn_hash("Greater"):
+			case leo::constfn_hash("greater"):
 				return CompareOp::Greater;
 			}
 
@@ -260,21 +265,23 @@ namespace platform::Render {
 		template<>
 		static StencilOp to_op(const std::string& value)
 		{
-			auto hash = leo::constfn_hash(value.c_str());
+			auto lower_value = value;
+			leo::to_lower(lower_value);
+			auto hash = leo::constfn_hash(lower_value.c_str());
 			switch (hash) {
-			case leo::constfn_hash("Keep"):
+			case leo::constfn_hash("keep"):
 				return StencilOp::Keep;
-			case leo::constfn_hash("Zero"):
+			case leo::constfn_hash("zero"):
 				return StencilOp::Zero;
-			case leo::constfn_hash("Replace"):
+			case leo::constfn_hash("replace"):
 				return StencilOp::Replace;
-			case leo::constfn_hash("Decr"):
+			case leo::constfn_hash("decr"):
 				return StencilOp::Decr;
-			case leo::constfn_hash("Invert"):
+			case leo::constfn_hash("invert"):
 				return StencilOp::Invert;
-			case leo::constfn_hash("Incr_Wrap"):
+			case leo::constfn_hash("incr_wrap"):
 				return StencilOp::Incr_Wrap;
-			case leo::constfn_hash("Decr_Wrap"):
+			case leo::constfn_hash("decr_wrap"):
 				return StencilOp::Decr_Wrap;
 			}
 
@@ -383,11 +390,11 @@ namespace platform::Render {
 	{
 		M::Color border_clr;
 
-		TexAddressingMode addr_mode_u;
-		TexAddressingMode addr_mode_v;
-		TexAddressingMode addr_mode_w;
+		TexAddressingMode address_mode_u;
+		TexAddressingMode address_mode_v;
+		TexAddressingMode address_mode_w;
 
-		TexFilterOp filter;
+		TexFilterOp filtering;
 
 		leo::uint8 max_anisotropy;
 		float min_lod;
@@ -409,15 +416,17 @@ namespace platform::Render {
 		}
 
 		static TexAddressingMode to_mode(const std::string& value) {
-			auto hash = leo::constfn_hash(value.c_str());
+			auto lower_value = value;
+			leo::to_lower(lower_value);
+			auto hash = leo::constfn_hash(lower_value.c_str());
 			switch (hash) {
-			case leo::constfn_hash("Wrap"):
+			case leo::constfn_hash("wrap"):
 				return TexAddressingMode::Wrap;
-			case leo::constfn_hash("Mirror"):
+			case leo::constfn_hash("mirror"):
 				return TexAddressingMode::Mirror;
-			case leo::constfn_hash("Clamp"):
+			case leo::constfn_hash("clamp"):
 				return TexAddressingMode::Clamp;
-			case leo::constfn_hash("Border"):
+			case leo::constfn_hash("border"):
 				return TexAddressingMode::Border;
 			}
 			throw leo::narrowing_error();
@@ -425,43 +434,45 @@ namespace platform::Render {
 
 		template<>
 		static TexFilterOp to_op(const std::string& value) {
-			auto hash = leo::constfn_hash(value.c_str());
+			auto lower_value = value;
+			leo::to_lower(lower_value);
+			auto hash = leo::constfn_hash(lower_value.c_str());
 			switch (hash) {
-			case leo::constfn_hash("Min_Mag_Mip_Point"):
+			case leo::constfn_hash("min_mag_mip_point"):
 				return TexFilterOp::Min_Mag_Mip_Point;
-			case leo::constfn_hash("Min_Mag_Point_Mip_Linear"):
+			case leo::constfn_hash("min_mag_point_mip_linear"):
 				return TexFilterOp::Min_Mag_Point_Mip_Linear;
-			case leo::constfn_hash("Min_Point_Mag_Linear_Mip_Point"):
+			case leo::constfn_hash("min_point_mag_linear_mip_point"):
 				return TexFilterOp::Min_Point_Mag_Linear_Mip_Point;
-			case leo::constfn_hash("Min_Point_Mag_Mip_Linear"):
+			case leo::constfn_hash("min_point_mag_mip_linear"):
 				return TexFilterOp::Min_Point_Mag_Mip_Linear;
-			case leo::constfn_hash("Min_Linear_Mag_Mip_Point"):
+			case leo::constfn_hash("min_linear_mag_mip_point"):
 				return TexFilterOp::Min_Linear_Mag_Mip_Point;
-			case leo::constfn_hash("Min_Linear_Mag_Point_Mip_Linear"):
+			case leo::constfn_hash("min_linear_mag_point_mip_linear"):
 				return TexFilterOp::Min_Linear_Mag_Point_Mip_Linear;
-			case leo::constfn_hash("Min_Mag_Linear_Mip_Point"):
+			case leo::constfn_hash("min_mag_linear_mip_point"):
 				return TexFilterOp::Min_Mag_Linear_Mip_Point;
-			case leo::constfn_hash("Min_Mag_Mip_Linear"):
+			case leo::constfn_hash("min_mag_mip_linear"):
 				return TexFilterOp::Min_Mag_Mip_Linear;
-			case leo::constfn_hash("Anisotropic"):
+			case leo::constfn_hash("anisotropic"):
 				return TexFilterOp::Anisotropic;
-			case leo::constfn_hash("Cmp_Min_Mag_Mip_Point"):
+			case leo::constfn_hash("cmp_min_mag_mip_point"):
 				return TexFilterOp::Cmp_Min_Mag_Mip_Point;
-			case leo::constfn_hash("Cmp_Min_Mag_Point_Mip_Linear"):
+			case leo::constfn_hash("cmp_min_mag_point_mip_linear"):
 				return TexFilterOp::Cmp_Min_Mag_Mip_Point;
-			case leo::constfn_hash("Cmp_Min_Point_Mag_Linear_Mip_Point"):
+			case leo::constfn_hash("cmp_min_point_mag_linear_mip_point"):
 				return TexFilterOp::Cmp_Min_Point_Mag_Linear_Mip_Point;
-			case leo::constfn_hash("Cmp_Min_Point_Mag_Mip_Linear"):
+			case leo::constfn_hash("cmp_min_point_mag_mip_linear"):
 				return TexFilterOp::Cmp_Min_Point_Mag_Mip_Linear;
-			case leo::constfn_hash("Cmp_Min_Linear_Mag_Mip_Point"):
+			case leo::constfn_hash("cmp_min_linear_mag_mip_point"):
 				return TexFilterOp::Cmp_Min_Linear_Mag_Mip_Point;
-			case leo::constfn_hash("Cmp_Min_Linear_Mag_Point_Mip_Linear"):
+			case leo::constfn_hash("cmp_min_linear_mag_point_mip_linear"):
 				return TexFilterOp::Cmp_Min_Linear_Mag_Point_Mip_Linear;
-			case leo::constfn_hash("Cmp_Min_Mag_Linear_Mip_Point"):
+			case leo::constfn_hash("cmp_min_mag_linear_mip_point"):
 				return TexFilterOp::Cmp_Min_Mag_Linear_Mip_Point;
-			case leo::constfn_hash("Cmp_Min_Mag_Mip_Linear"):
+			case leo::constfn_hash("cmp_min_mag_mip_linear"):
 				return TexFilterOp::Cmp_Min_Mag_Mip_Linear;
-			case leo::constfn_hash("Cmp_Anisotropic"):
+			case leo::constfn_hash("cmp_anisotropic"):
 				return TexFilterOp::Cmp_Anisotropic;
 			}
 			throw leo::narrowing_error();

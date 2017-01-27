@@ -66,8 +66,8 @@ namespace platform::Render {
 
 	SamplerDesc::SamplerDesc()
 		: border_clr(0, 0, 0, 0),
-		addr_mode_u(TexAddressingMode::Wrap), addr_mode_v(TexAddressingMode::Wrap), addr_mode_w(TexAddressingMode::Wrap),
-		filter(TexFilterOp::Min_Mag_Mip_Point),
+		address_mode_u(TexAddressingMode::Wrap), address_mode_v(TexAddressingMode::Wrap), address_mode_w(TexAddressingMode::Wrap),
+		filtering(TexFilterOp::Min_Mag_Mip_Point),
 		max_anisotropy(16),
 		min_lod(0), max_lod(std::numeric_limits<float>::max()),
 		mip_map_lod_bias(0),

@@ -8,8 +8,10 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <optional>
 #include <LBase/lmacro.h>
 #include <LBase/linttype.hpp>
+#include <LBase/any.h>
 
 #include "../Render/PipleState.h"
 #include "../Render/Effect/Effect.hpp"
@@ -123,13 +125,13 @@ namespace asset {
 			DefGetter(lnothrow, platform::Render::PipleState&, PipleStateRef, piple_state)
 
 			void AssignOrInsertHash(ShaderType type, size_t  blobhash)
-			{
-				blobindexs.insert_or_assign(type, blobhash);
-			}
+		{
+			blobindexs.insert_or_assign(type, blobhash);
+		}
 
-			size_t GetHash(ShaderType type) const {
-				return blobindexs.find(type)->second;
-			}
+		size_t GetHash(ShaderType type) const {
+			return blobindexs.find(type)->second;
+		}
 	private:
 		platform::Render::PipleState piple_state;
 		std::vector<EffectMacro> macros;
@@ -188,12 +190,26 @@ namespace asset {
 			DefGetter(lnothrow, std::vector<EffectTechniqueAsset>&, TechniquesRef, techniques)
 
 			const ShaderBlobAsset & GetBlob(size_t blob_index) const {
-			return blobs.find(blob_index)->second;
-		}
+				return blobs.find(blob_index)->second;
+			}
 
 		template<typename... Params>
 		void EmplaceBlob(Params&&... params) {
 			blobs.emplace(lforward(params)...);
+		}
+
+		template<typename T>
+		void BindValue(size_t param_index, T&& value) {
+			bind_values.emplace_back(param_index, lforward(value));
+		}
+
+		std::optional<leo::any> GetValue(size_t param_index) {
+			auto iter =  std::find_if(bind_values.begin(), bind_values.end(), [&](const std::pair<size_t, leo::any>& pair) {
+				return pair.first == param_index;
+			});
+			if (iter != bind_values.end())
+				return iter->second;
+			return std::nullopt;
 		}
 
 		static	std::string GetTypeName(EffectParamType type);
@@ -202,6 +218,7 @@ namespace asset {
 		std::vector<EffectMacro> macros;
 		std::vector<EffectConstantBufferAsset> cbuffers;
 		std::vector<EffectParameterAsset> params;
+		std::vector<std::pair<size_t, leo::any>> bind_values;
 		std::vector<ShaderFragmentAsset> fragements;
 		std::vector<EffectTechniqueAsset> techniques;
 		std::unordered_map<size_t, ShaderBlobAsset> blobs;

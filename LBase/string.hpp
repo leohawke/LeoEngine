@@ -13,6 +13,7 @@
 #include "LBase/cstdio.h" // for lconstraint, vfmtlen;
 #include "LBase/cstring.h" // for ntctslen;
 #include "LBase/array.hpp" // for std::bidirectional_iterator_tag, to_array;
+#include "LBase/type_traits.hpp"
 #include <istream> // for std::basic_istream;
 #include "ios.hpp" // for rethrow_badstate;
 #include <ostream> // for std::basic_ostream;
@@ -1166,6 +1167,15 @@ namespace leo
 			val = std::move(s);
 		});
 		return std::move(val);
+	}
+
+	template<typename _tString,typename _tChar =typename string_traits<_tString>::value_type>
+	void to_lower(_tString&& str) {
+		std::transform(string_begin(str),string_end(str),string_begin(str), [](_tChar c)
+		{
+			return static_cast<_tChar>(std::tolower(c));
+		}
+		);
 	}
 }
 #endif

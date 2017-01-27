@@ -136,40 +136,17 @@ namespace platform {
 					auto param_nodes = SelectNodes("parameter", cbuffer_node);
 					std::vector<leo::uint32> ParamIndices;
 					for (auto & param_node : param_nodes) {
-						asset::EffectParameterAsset param;
-						param.SetName(Access("name", param_node));
-						param.GetTypeRef() = AssetType::GetType(Access("type", param_node));
-						if (param.GetType() >= asset::EPT_bool) {
-							if (auto p = leo::AccessChildPtr<std::string>(param_node, "arraysize"))
-								param.GetArraySizeRef() = std::stoul(*p);
-						}
-						else if (param.GetType() <= asset::EPT_ConsumeStructuredBuffer) {
-							TryExpr(param.GetElemTypeRef() = AssetType::GetType(Access("elemtype", param_node)))
-								CatchIgnore(std::exception&)
-						}
-						ParamIndices.emplace_back(static_cast<leo::uint32>(effect_desc.effect_asset->GetParams().size()));
-						effect_desc.effect_asset->GetParamsRef().emplace_back(std::move(param));
+						auto param_index = ParseParam(param_node);
+						ParamIndices.emplace_back(static_cast<leo::uint32>(param_index));
 					}
 					cbuffer.GetParamIndicesRef() = std::move(ParamIndices);
 					effect_desc.effect_asset->GetCBuffersRef().emplace_back(std::move(cbuffer));
 				}
 			}
 			{
-				auto param_nodes = SelectNodes("parameter",effect_node);
-				for (auto & param_node : param_nodes) {
-					asset::EffectParameterAsset param;
-					param.SetName(Access("name", param_node));
-					param.GetTypeRef() = AssetType::GetType(Access("type", param_node));
-					if (param.GetType() >= asset::EPT_bool) {
-						if (auto p = leo::AccessChildPtr<std::string>(param_node, "arraysize"))
-							param.GetArraySizeRef() = std::stoul(*p);
-					}
-					else if (param.GetType() <= asset::EPT_ConsumeStructuredBuffer) {
-						if (auto elemtype = AccessPtr("elemtype", param_node))
-							param.GetElemTypeRef() = AssetType::GetType(*elemtype);
-					}
-					effect_desc.effect_asset->GetParamsRef().emplace_back(std::move(param));
-				}
+				auto param_nodes = SelectNodes("parameter", effect_node);
+				for (auto & param_node : param_nodes)
+					ParseParam(param_node);
 			}
 			{
 				auto fragments = SelectNodes("shader", effect_node);
@@ -348,9 +325,7 @@ namespace platform {
 				return value.size() > 0 && value[0] == 't';
 			};
 
-			auto to_uint8 = [](const std::string& value) {
-				return static_cast<leo::uint8>(std::stoul(value));
-			};
+			
 
 			auto to_uint16 = [](const std::string& value) {
 				return static_cast<leo::uint16>(std::stoul(value));
@@ -360,19 +335,6 @@ namespace platform {
 				return static_cast<leo::uint32>(std::stoul(value));
 			};
 
-			auto to_float4 = [](const std::string& value) {
-				leo::math::float4 result;
-				auto iter = result.begin();
-				leo::split(value.begin(), value.end(),
-					[](char c) {return c == ','; },
-					[&](decltype(value.begin()) b, decltype(value.end()) e) {
-					auto v = std::string(b, e);
-					*iter = std::stof(v);
-					++iter;
-				}
-				);
-				return result;
-			};
 
 			auto & rs_desc = pass.GetPipleStateRef().RasterizerState;
 			auto & ds_desc = pass.GetPipleStateRef().DepthStencilState;
@@ -747,7 +709,7 @@ namespace platform {
 #else
 						D3DFlags::D3DCOMPILE_OPTIMIZATION_LEVEL3
 #endif
-						,effect_desc.effect_path.string()
+						, effect_desc.effect_path.string()
 					);
 					//TODO Support Reflect Infomation
 					X::Shader::ReflectDXBC(blob);
@@ -777,13 +739,80 @@ namespace platform {
 					++iter;
 			}
 		}
+
+		size_t ParseParam(const scheme::TermNode& param_node) {
+			asset::EffectParameterAsset param;
+			param.SetName(Access("name", param_node));
+			param.GetTypeRef() = AssetType::GetType(Access("type", param_node));
+			if (param.GetType() >= asset::EPT_bool) {
+				if (auto p = leo::AccessChildPtr<std::string>(param_node, "arraysize"))
+					param.GetArraySizeRef() = std::stoul(*p);
+			}
+			else if (param.GetType() <= asset::EPT_ConsumeStructuredBuffer) {
+				if (auto elemtype = AccessPtr("elemtype", param_node))
+					param.GetElemTypeRef() = AssetType::GetType(*elemtype);
+			}
+			auto index = effect_desc.effect_asset->GetParams().size();
+			auto optional_value = ReadParamValue(param_node,param.GetType());
+			if (optional_value.has_value())
+				effect_desc.effect_asset->BindValue(index, optional_value.value());
+			effect_desc.effect_asset->GetParamsRef().emplace_back(std::move(param));
+			return index;
+		}
+
+		static leo::math::float4 to_float4 (const std::string& value) {
+			leo::math::float4 result;
+			auto iter = result.begin();
+			leo::split(value.begin(), value.end(),
+				[](char c) {return c == ','; },
+				[&](decltype(value.begin()) b, decltype(value.end()) e) {
+				auto v = std::string(b, e);
+				*iter = std::stof(v);
+				++iter;
+			}
+			);
+			return result;
+		};
+
+		static leo::uint8 to_uint8(const std::string& value) {
+			return static_cast<leo::uint8>(std::stoul(value));
+		};
+		
+		std::optional<leo::any> ReadParamValue(const scheme::TermNode& param_node,asset::EffectParamType type) {
+#define AccessParam(name,expr) if (auto value = AccessPtr(name, param_node)) expr
+			using namespace Render;
+			if (type == asset::EPT_sampler) {
+				SamplerDesc sampler;
+				AccessParam("border_clr", sampler.border_clr = M::Color(to_float4(*value).data));
+
+				AccessParam("address_mode_u",sampler.address_mode_u = SamplerDesc::to_mode(*value));
+				AccessParam("address_mode_v", sampler.address_mode_v = SamplerDesc::to_mode(*value));
+				AccessParam("address_mode_w", sampler.address_mode_w = SamplerDesc::to_mode(*value));
+
+				AccessParam("filtering", sampler.filtering = SamplerDesc::to_op<TexFilterOp>(*value));
+
+				AccessParam("max_anisotropy", sampler.max_anisotropy = to_uint8(*value));
+
+				AccessParam("min_lod", sampler.min_lod = std::stof(*value));
+				AccessParam("max_lod", sampler.max_lod = std::stof(*value));
+				AccessParam("mip_map_lod_bias", sampler.mip_map_lod_bias = std::stof(*value));
+
+				AccessParam("cmp_func", sampler.cmp_func = SamplerDesc::to_op<CompareOp>(*value));
+
+				return leo::any(sampler);
+			}
+#undef AccessParam
+			return std::nullopt;
+		}
 	};
 
 	asset::EffectAsset platform::X::LoadEffectAsset(path const & effectpath)
 	{
 		return  std::move(*asset::SyncLoad<EffectLoadingDesc>(effectpath));
 	}
+}
 
+namespace platform {
 	std::vector<asset::EffectMacro> AppendCompileMacros(const std::vector<asset::EffectMacro>& macros, asset::ShaderBlobAsset::Type type)
 	{
 		using namespace  platform::Render;
@@ -862,7 +891,7 @@ namespace platform::X::Shader {
 			return std::move(blob);
 		}
 		//TODO error_blob
-		auto error =reinterpret_cast<char*>(error_blob->GetBufferPointer());
+		auto error = reinterpret_cast<char*>(error_blob->GetBufferPointer());
 		LE_LogError(error);
 		platform_ex::CheckHResult(hr);
 	}
