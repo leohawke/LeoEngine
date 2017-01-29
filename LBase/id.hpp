@@ -12,6 +12,7 @@
 #include <limits>
 #include <functional> //for std::hash
 #include <numeric> //for std::accmulate
+#include <string>
 
 namespace leo {
 
@@ -135,6 +136,22 @@ namespace leo {
 	{
 		return 0 == *str ? seed : constfn_hash(str + 1, seed ^ (*str + 0x9e3779b9 + (seed << 6) + (seed >> 2)));
 	}
+
+	lconstexpr size_t constfn_hash(size_t n,const char * str, size_t seed = 0)
+	{
+		return 0 == n ? seed : constfn_hash(n-1,str + 1, seed ^ (*str + 0x9e3779b9 + (seed << 6) + (seed >> 2)));
+	}
+
+	lconstexpr size_t constfn_hash(const std::string& str, size_t seed = 0)
+	{
+		return constfn_hash(str.c_str());
+	}
+
+	lconstexpr size_t constfn_hash(const std::string_view& str, size_t seed = 0)
+	{
+		return constfn_hash(str.size(),str.data());
+	}
+
 
 
 	using ucs2_t = char16_t; //!< UCS-2 ×Ö·ûÀàÐÍ¡£

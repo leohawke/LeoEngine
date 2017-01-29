@@ -11,11 +11,11 @@
 
 namespace platform_ex::Windows::D3D12 {
 
+	using ShaderInfo = platform::Render::ShaderInfo;
+
 	class ShaderCompose:public platform::Render::ShaderCompose
 	{
 	public:
-
-
 		 void Bind() override;
 		 void UnBind() override;
 

@@ -1,7 +1,16 @@
 #include "../../asset/EffectX.h"
 #include "../IContext.h"
 
+namespace platform::Render {
+	ShaderInfo::ShaderInfo(ShaderCompose::Type t)
+		:Type(t)
+	{}
+
+}
+
 namespace platform::Render::Effect {
+	
+
 	Pass & platform::Render::Effect::Technique::GetPass(leo::uint8 index)
 	{
 		return passes[index];
@@ -40,7 +49,7 @@ namespace platform::Render::Effect {
 
 	const Technique & Effect::GetTechnique(const std::string & name) const
 	{
-		auto hash = std::hash<std::string>()(name);
+		auto hash =leo::constfn_hash(name);
 		return GetTechnique(hash);
 	}
 
@@ -78,5 +87,42 @@ namespace platform::Render::Effect {
 
 	void Effect::LoadAsset(leo::observer_ptr<asset::EffectAsset> pEffectAsset)
 	{
+		std::set<size_t> expect_parameters;
+		auto params = pEffectAsset->GetParams();
+		for (auto & cbuff : pEffectAsset->GetCBuffersRef()) {
+			//Create GPU Buffer Depend reflect info
+			GraphicsBuffer* pGPUBuffer = nullptr;
+			
+			auto pConstantBuffer = std::make_shared<ConstantBuffer>(cbuff.GetName(), cbuff.GetNameHash());
+			
+			//pConstantBuffer->gpu_buffer.reset(pGPUBuffer);
+			pConstantBuffer->cpu_buffer.resize(2048);
+
+			for (auto& param_index : cbuff.GetParamIndices()) {
+				expect_parameters.insert(param_index);
+				auto& param = params[param_index];
+				Parameter Param { param.GetName(), param.GetNameHash() };
+				Param.var.Bind(pConstantBuffer, 0, 16);//Depend reflect info
+				parameters.emplace(Param.Hash, std::move(Param));\
+
+				//TODO bind values
+			}
+		}
+
+		//other param
+		for (size_t i = 0; i != params.size(); ++i) {
+			if (expect_parameters.count(i) > 0)
+				continue;
+
+			auto& param = params[i];
+			Parameter Param{ param.GetName(), param.GetNameHash() };
+			parameters.emplace(Param.Hash, std::move(Param)); \
+
+			//TODO bind values
+		}
+
+		//create shadercompose depend reflect
 	}
 }
+
+

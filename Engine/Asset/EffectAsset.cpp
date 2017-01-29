@@ -4,7 +4,7 @@
 void asset::EffectNodeAsset::SetName(const std::string & Name)
 {
 	name = Name;
-	hash = std::hash<std::string>()(name);
+	hash =leo::constfn_hash(name);
 }
 
 //TODO string_view
@@ -21,7 +21,7 @@ public:
 	{
 		auto lowername = name;
 		std::transform(lowername.begin(), lowername.end(), lowername.begin(), std::tolower);
-		size_t const name_hash = std::hash<std::string>()(lowername);
+		auto const name_hash =leo::constfn_hash(lowername);
 		for (uint32_t i = 0; i < hashs.size(); ++i)
 		{
 			if (hashs[i] == name_hash)

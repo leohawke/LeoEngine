@@ -6,11 +6,13 @@
 #define LE_RENDER_EFFECT_h 1
 
 #include <LBase/linttype.hpp>
+#include <LBase/lmathtype.hpp>
 #include <LBase/any.h>
 
 #include <tuple>
 #include <vector>
 #include <memory>
+#include <optional>
 
 #include "../PipleState.h"
 
@@ -34,11 +36,51 @@ namespace platform::Render {
 
 		const leo::uint8 NumTypes = (leo::uint8)Type::DomainShader + 1;
 
-
 		virtual void Bind() = 0;
 		virtual void UnBind() = 0;
 
 		using ShaderBlob = std::pair<std::unique_ptr<stdex::byte[]>, std::size_t>;
+	};
+
+	struct ShaderInfo {
+		ShaderCompose::Type Type;
+
+		ShaderInfo(ShaderCompose::Type t);
+
+		struct ConstantBufferInfo
+		{
+			struct VariableInfo
+			{
+				std::string name;
+				uint32_t start_offset;
+				uint8_t type;
+				uint8_t rows;
+				uint8_t columns;
+				uint16_t elements;
+			};
+			std::vector<VariableInfo> var_desc;
+
+			std::string name;
+			size_t name_hash;
+			uint32_t size = 0;
+		};
+		std::vector<ConstantBufferInfo> ConstantBufferInfos;
+
+		struct BoundResourceInfo
+		{
+			std::string name;
+			uint8_t type;
+			uint8_t dimension;
+			uint16_t bind_point;
+		};
+		std::vector<BoundResourceInfo> BoundResourceInfos;
+
+		uint16_t NumSamplers = 0;
+		uint16_t NumSrvs = 0;
+		uint16_t NumUavs = 0;
+
+		std::optional<size_t> InputSignature = std::nullopt;
+		std::optional<leo::math::data_storage<uint16,3>> CSBlockSize = std::nullopt;
 	};
 
 	class GraphicsBuffer;
@@ -99,7 +141,7 @@ namespace platform::Render::Effect {
 
 		friend class Variable;
 	private:
-		std::shared_ptr<GraphicsBuffer> gpu_buffer;
+		//std::unique_ptr<GraphicsBuffer> gpu_buffer;
 		std::vector<stdex::byte> cpu_buffer;
 		bool dirty;
 	};
@@ -154,6 +196,10 @@ namespace platform::Render::Effect {
 	class Parameter :public NameKey {
 	public:
 		using NameKey::NameKey;
+
+		friend class Effect;
+	private:
+		Variable var;
 	};
 
 	class Pass {

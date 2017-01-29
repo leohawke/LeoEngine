@@ -688,7 +688,7 @@ namespace platform {
 					asset::ShaderBlobAsset::Type compile_type;
 					string_view compile_entry_point = second;
 					size_t blob_hash = seed;
-					leo::hash_combine(blob_hash, std::hash<std::string>()(second));
+					leo::hash_combine(blob_hash,leo::constfn_hash(second));
 
 					switch (first_hash) {
 					case leo::constfn_hash("vertex_shader"):
@@ -711,8 +711,7 @@ namespace platform {
 #endif
 						, effect_desc.effect_path.string()
 					);
-					//TODO Support Reflect Infomation
-					X::Shader::ReflectDXBC(blob);
+					X::Shader::ReflectDXBC(blob, compile_type);
 					blob.swap(X::Shader::StripDXBC(blob, D3DFlags::D3DCOMPILER_STRIP_REFLECTION_DATA | D3DFlags::D3DCOMPILER_STRIP_DEBUG_INFO
 						| D3DFlags::D3DCOMPILER_STRIP_TEST_BLOBS | D3DFlags::D3DCOMPILER_STRIP_PRIVATE_DATA));
 
@@ -860,11 +859,11 @@ namespace platform {
 
 #ifdef LFL_Win32
 
+namespace platform_ex::Windows::D3D12 {
+	platform::Render::ShaderInfo * ReflectDXBC(const platform::Render::ShaderCompose::ShaderBlob & blob, platform::Render::ShaderCompose::Type type);
+}
+
 #include <UniversalDXSDK/d3dcompiler.h>
-#ifdef LFL_Win64
-#pragma comment(lib,"UniversalDXSDK/Lib/x64/d3dcompiler.lib")
-#else
-#endif
 namespace platform::X::Shader {
 	Render::ShaderCompose::ShaderBlob CompileToDXBC(Render::ShaderCompose::Type type, std::string_view code,
 		std::string_view entry_point, const std::vector<asset::EffectMacro>& macros,
@@ -895,10 +894,17 @@ namespace platform::X::Shader {
 		LE_LogError(error);
 		platform_ex::CheckHResult(hr);
 	}
-	void ReflectDXBC(const Render::ShaderCompose::ShaderBlob& blob) {
-		//TODO Support Reflect Infomation
-		//Find Variables;
+
+	Render::ShaderInfo * ReflectDXBC(const Render::ShaderCompose::ShaderBlob & blob, Render::ShaderCompose::Type type)
+	{
+		using namespace Render;
+		auto caps = Context::Instance().GetDevice().GetCaps();
+		switch (caps.type) {
+		case Caps::Type::D3D12:
+			return platform_ex::Windows::D3D12::ReflectDXBC(blob, type);
+		}
 	}
+	
 	Render::ShaderCompose::ShaderBlob StripDXBC(const Render::ShaderCompose::ShaderBlob& code_blob, leo::uint32 flags) {
 		platform_ex::COMPtr<ID3DBlob> stripped_blob;
 		platform_ex::CheckHResult(D3DStripShader(code_blob.first.get(), code_blob.second, flags, &stripped_blob));
