@@ -6,12 +6,17 @@
 #define LE_RENDER_EFFECT_h 1
 
 #include <LBase/linttype.hpp>
+#include <LBase/any.h>
+
 #include <tuple>
 #include <vector>
 #include <memory>
-#include <LBase/any.h>
 
 #include "../PipleState.h"
+
+namespace asset {
+	class EffectAsset;
+}
 
 namespace platform::Render {
 
@@ -40,7 +45,7 @@ namespace platform::Render {
 }
 
 namespace platform::Render::Effect {
-	struct NameKey {
+	struct NameKey{
 		NameKey(const std::string& name)
 			:NameKey(name,std::hash<std::string>()(name))
 		{}
@@ -48,6 +53,8 @@ namespace platform::Render::Effect {
 		NameKey(const std::string& name,size_t hash)
 			:Name(name),Hash(hash)
 		{}
+
+	
 
 		const std::string Name;
 		const size_t Hash;
@@ -162,8 +169,10 @@ namespace platform::Render::Effect {
 		leo::uint8 bind_index;
 	};
 
-	class Technique {
+	class Technique : public NameKey {
 	public:
+		using NameKey::NameKey;
+		
 		Pass& GetPass(leo::uint8 index);
 
 		friend class Effect;
@@ -182,16 +191,17 @@ namespace platform::Render::Effect {
 		const Technique& GetTechnique(size_t hash) const;
 		const Technique& GetTechniqueByIndex(size_t index) const;
 
-		Parameter& GetParameter(const std::string& name) const;
-		Parameter& GetParameter(size_t hash) const;
+		Parameter& GetParameter(const std::string& name);
+		Parameter& GetParameter(size_t hash);
+		
 	private:
+		void LoadAsset(leo::observer_ptr<asset::EffectAsset> pEffectAsset);
+	private:
+		std::vector<Technique> techniques;
+		std::unordered_map<size_t,Parameter> parameters;
 
-	private:
-		std::vector<ShaderCompose> shaders;
+		std::vector<std::unique_ptr<ShaderCompose>> shaders;
 	};
-
-	
-
 }
 
 #endif
