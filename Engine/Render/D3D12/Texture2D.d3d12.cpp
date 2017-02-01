@@ -1,6 +1,7 @@
 #include "Texture.h"
 #include "Convert.h"
 #include "RenderView.h"
+#include "Context.h"
 
 using namespace platform_ex::Windows::D3D12;
 using BTexture = platform::Render::Texture2D;

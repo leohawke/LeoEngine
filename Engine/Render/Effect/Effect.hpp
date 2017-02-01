@@ -36,7 +36,7 @@ namespace platform::Render {
 			DomainShader,
 		};
 
-		const leo::uint8 NumTypes = (leo::uint8)Type::DomainShader + 1;
+		static const leo::uint8 NumTypes = (leo::uint8)Type::DomainShader + 1;
 
 		virtual void Bind() = 0;
 		virtual void UnBind() = 0;
@@ -115,6 +115,8 @@ namespace platform::Render::Effect {
 			dirty = val;
 		}
 
+		GraphicsBuffer* GetGraphicsBuffer() const lnothrow;
+
 		friend class Effect;
 	protected:
 
@@ -166,8 +168,6 @@ namespace platform::Render::Effect {
 			return *this;
 		}
 
-#if ENGINE_TOOL
-		//why need get value?
 		template<typename T>
 		T Get() const {
 			if (bind.target)
@@ -176,6 +176,7 @@ namespace platform::Render::Effect {
 				return leo::any_cast<T>(value);
 		}
 
+#if ENGINE_TOOL
 		void Bind(std::shared_ptr<ConstantBuffer> target, uint32 offset, uint32 stride)
 		{
 			//save value?
@@ -242,6 +243,8 @@ namespace platform::Render::Effect {
 		Parameter& GetParameter(const std::string& name);
 		Parameter& GetParameter(size_t hash);
 		
+		ConstantBuffer& GetConstantBuffer(const std::string& name);
+		ConstantBuffer& GetConstantBuffer(size_t hash);
 	private:
 		void LoadAsset(leo::observer_ptr<asset::EffectAsset> pEffectAsset);
 	private:

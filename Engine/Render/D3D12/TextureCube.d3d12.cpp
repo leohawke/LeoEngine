@@ -1,5 +1,6 @@
 #include "Texture.h"
 #include "RenderView.h"
+#include "Context.h"
 #include "Convert.h"
 
 using namespace platform_ex::Windows::D3D12;

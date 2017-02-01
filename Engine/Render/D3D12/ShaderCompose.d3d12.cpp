@@ -1,10 +1,59 @@
 #include "ShaderCompose.h"
 #include "Context.h"
+#include "../../Asset/EffectAsset.h"
 
 using namespace platform_ex::Windows;
 
 platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect)
 {
+	for (auto& pair : pShaderBlob) {
+		auto index = static_cast<leo::uint8>(pair.first);
+		auto& BlobInfo = pair.second->GetInfo();
+
+		for (auto& ConstantBufferInfo : BlobInfo.ConstantBufferInfos) {
+			auto& ConstantBuffer = pEffect->GetConstantBuffer(ConstantBufferInfo.name_hash);
+			AllCBuffs.emplace_back(&ConstantBuffer);
+			CBuffs[index].emplace_back(ConstantBuffer.GetGraphicsBuffer());
+		}
+
+		Samplers[index].resize(BlobInfo.NumSamplers);
+		SrvSrcs[index].resize(BlobInfo.NumSrvs,std::make_tuple(static_cast<ID3D12Resource*>(nullptr),0,0));
+		Srvs[index].resize(BlobInfo.NumSrvs);
+		UavSrcs[index].resize(BlobInfo.NumUavs, std::make_pair<ID3D12Resource*, ID3D12Resource*>(nullptr, nullptr));
+		Uavs[index].resize(BlobInfo.NumUavs);
+
+		for (auto& BoundResourceInfo: BlobInfo.BoundResourceInfos) {
+			auto& Parameter = pEffect->GetParameter(BoundResourceInfo.name);
+
+			ShaderParameterHandle p_handle;
+			p_handle.shader_type = index;
+			p_handle.cbuff = 0;
+			p_handle.offset = BoundResourceInfo.bind_point;
+			p_handle.elements = 1;
+			p_handle.rows = 0;
+			p_handle.columns = 1;
+			if (D3D_SIT_SAMPLER == BoundResourceInfo.type)
+			{
+				p_handle.param_type = D3D_SVT_SAMPLER;
+
+			}
+			else
+			{
+				if (D3D_SRV_DIMENSION_BUFFER == BoundResourceInfo.dimension)
+				{
+					p_handle.param_type = D3D_SVT_BUFFER;
+				}
+				else
+				{
+					p_handle.param_type = D3D_SVT_TEXTURE;
+				}
+
+				ParamBinds[index].emplace_back(GetBindFunc(p_handle,&Parameter));
+			}
+		}
+	}
+
+	AllCBuffs.erase(std::unique(AllCBuffs.begin(), AllCBuffs.end()), AllCBuffs.end());
 }
 
 void platform_ex::Windows::D3D12::ShaderCompose::Bind()

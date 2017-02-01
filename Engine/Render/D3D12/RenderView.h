@@ -7,7 +7,6 @@
 #define LE_RENDER_D3D12_RenderView_h 1
 
 #include "d3d12_dxgi.h"
-#include "Context.h"
 #include "..\IRenderView.h"
 
 namespace platform_ex {
