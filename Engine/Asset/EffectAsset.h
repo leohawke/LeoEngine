@@ -115,6 +115,7 @@ namespace asset {
 
 	using EffectMacro = std::pair<std::string, std::string>;
 
+
 	class TechniquePassAsset :public EffectNodeAsset {
 	public:
 		using ShaderType = platform::Render::ShaderCompose::Type;
@@ -129,8 +130,12 @@ namespace asset {
 			blobindexs.insert_or_assign(type, blobhash);
 		}
 
-		size_t GetHash(ShaderType type) const {
+		size_t GetBlobHash(ShaderType type) const {
 			return blobindexs.find(type)->second;
+		}
+
+		const std::unordered_map<ShaderType, size_t>& GetBlobs() const lnothrow {
+			return blobindexs;
 		}
 	private:
 		platform::Render::PipleState piple_state;
@@ -155,8 +160,8 @@ namespace asset {
 		using Type = platform::Render::ShaderCompose::Type;
 		using ShaderBlob = platform::Render::ShaderCompose::ShaderBlob;
 
-		explicit ShaderBlobAsset(Type _type, ShaderBlob&& _blob)
-			:type(_type), blob(lforward(_blob))
+		explicit ShaderBlobAsset(Type _type, ShaderBlob&& _blob, platform::Render::ShaderInfo* pinfo)
+			:type(_type), blob(lforward(_blob)),pInfo(pinfo)
 		{}
 
 		ShaderBlobAsset() = default;
@@ -165,9 +170,12 @@ namespace asset {
 		DefGetter(const lnothrow, const Type&, ShaderType, type)
 
 			DefGetter(const lnothrow, const ShaderBlob&, Blob, blob)
+
+			DefGetter(const lnothrow,const platform::Render::ShaderInfo&,Info,*pInfo)
 	private:
 		Type type;
 		ShaderBlob blob;
+		std::unique_ptr<platform::Render::ShaderInfo> pInfo;
 	};
 
 	class EffectAsset : leo::noncopyable {
@@ -211,6 +219,8 @@ namespace asset {
 				return iter->second;
 			return std::nullopt;
 		}
+
+		std::optional<leo::any> GetInfo(const std::string& name) const;
 
 		static	std::string GetTypeName(EffectParamType type);
 		static EffectParamType GetType(const std::string&);

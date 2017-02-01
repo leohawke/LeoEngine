@@ -10,6 +10,7 @@
 #include "Adapter.h"
 #include "Display.h"
 #include "Texture.h"
+#include "ShaderCompose.h"
 
 #include <UniversalDXSDK/d3d12.h>
 
@@ -30,18 +31,20 @@ namespace platform_ex {
 				ID3D12Device* operator->() lnoexcept;
 
 				Texture1D* CreateTexture(uint16 width, uint8 num_mipmaps, uint8 array_size,
-					EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data = nullptr) override;
+					EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const *>  init_data = nullptr) override;
 
 				Texture2D* CreateTexture(uint16 width,uint16 height,uint8 num_mipmaps, uint8 array_size,
-					EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data = nullptr) override;
+					EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const *>  init_data = nullptr) override;
 				
 				Texture3D* CreateTexture(uint16 width, uint16 height,uint16 depth, uint8 num_mipmaps, uint8 array_size,
-					EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data = nullptr) override;
+					EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const *>  init_data = nullptr) override;
 				
 				TextureCube* CreateTextureCube(uint16 size, uint8 num_mipmaps, uint8 array_size,
-					EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data = nullptr) override;
+					EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const *>  init_data = nullptr) override;
 
 				platform::Render::Caps& GetCaps() override;
+
+				ShaderCompose* CreateShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect) override;
 
 				platform::Render::Effect::BlitEffect* BlitEffect();
 			public:

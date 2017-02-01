@@ -3,6 +3,10 @@
 
 using namespace platform_ex::Windows;
 
+platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect)
+{
+}
+
 void platform_ex::Windows::D3D12::ShaderCompose::Bind()
 {
 	std::vector<D3D12_RESOURCE_BARRIER> barriers;

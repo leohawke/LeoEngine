@@ -9,6 +9,10 @@
 #include "d3d12_dxgi.h"
 #include <optional>
 
+namespace asset {
+	class ShaderBlobAsset;
+}
+
 namespace platform_ex::Windows::D3D12 {
 
 	using ShaderInfo = platform::Render::ShaderInfo;
@@ -16,6 +20,8 @@ namespace platform_ex::Windows::D3D12 {
 	class ShaderCompose:public platform::Render::ShaderCompose
 	{
 	public:
+		ShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect);
+
 		 void Bind() override;
 		 void UnBind() override;
 

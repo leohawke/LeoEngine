@@ -904,19 +904,19 @@ namespace dds {
 			switch (data.type) {
 			case TextureType::T_1D:
 				texture =leo::share_raw(device.CreateTexture(data.width, data.mipmap_size, data.array_size,
-					data.format, desc.access, {1,0}, delayptr));
+					data.format, desc.access, {1,0}, std::nullopt));
 				break;
 			case TextureType::T_2D:
 				texture = leo::share_raw(device.CreateTexture(data.width, data.height, data.mipmap_size, data.array_size,
-					data.format, desc.access, {1,0}, delayptr));
+					data.format, desc.access, {1,0}, std::nullopt));
 				break;
 			case TextureType::T_3D:
 				texture = leo::share_raw(device.CreateTexture(data.width, data.height, data.depth, data.mipmap_size, data.array_size,
-					data.format, desc.access, {1,0}, delayptr));
+					data.format, desc.access, {1,0}, std::nullopt));
 				break;
 			case TextureType::T_Cube:
 				texture = leo::share_raw(device.CreateTextureCube(data.width, data.mipmap_size, data.array_size,
-					data.format, desc.access, {1,0}, delayptr));
+					data.format, desc.access, {1,0}, std::nullopt));
 				break;
 			default:
 				LAssert(false, "Out of TextureType");

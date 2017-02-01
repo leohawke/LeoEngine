@@ -187,7 +187,7 @@ void Texture1D::BuildMipSubLevels()
 	}
 }
 
-void Texture1D::HWResourceCreate(ElementInitData const * init_data)
+void Texture1D::HWResourceCreate(ElementInitData const *  init_data)
 {
 	Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION_TEXTURE1D,
 		width, 1, 1, array_size,

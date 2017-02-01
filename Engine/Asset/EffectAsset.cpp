@@ -94,7 +94,7 @@ public:
 		
 		for (auto type : types) {
 			std::transform(type.begin(), type.end(), type.begin(), std::tolower);
-			hashs.emplace_back(std::hash<decltype(type)>()(type));
+			hashs.emplace_back(leo::constfn_hash(type));
 		}
 	}
 
@@ -102,6 +102,33 @@ private:
 	std::vector<std::string> types;
 	std::vector<size_t> hashs;
 };
+
+std::optional<leo::any> asset::EffectAsset::GetInfo(const std::string & name) const
+{
+	using platform::Render::ShaderCompose;
+	using platform::Render::ShaderInfo;
+	auto hash = leo::constfn_hash(name);
+	for (auto & pair : blobs) {
+		auto& blob = pair.second;
+		auto& Info = blob.GetInfo();
+
+		for (auto info : Info.ConstantBufferInfos) {
+			if (info.name_hash == hash)
+				return leo::any(info);
+
+			for (auto varinfo : info.var_desc) {
+				if(varinfo.name == name)
+					return leo::any(varinfo);
+			}
+		}
+
+		for (auto  info : Info.BoundResourceInfos) {
+			if (info.name == name)
+				return info;
+		}
+	}
+	return std::nullopt;
+}
 
 std::string asset::EffectAsset::GetTypeName(EffectParamType type) {
 	return type_define::Instance().type_name(type);

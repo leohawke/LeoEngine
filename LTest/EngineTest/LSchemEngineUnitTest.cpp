@@ -2,6 +2,7 @@
 #include <LScheme/Configuration.h>
 
 #include "../../Engine/Asset/EffectX.h"
+#include "../../Engine/Render/Effect/Effect.hpp"
 
 #include <sstream>
 #include <LBase/Debug.h>
@@ -16,6 +17,7 @@ void unit_test::ExceuteLSchemEngineUnitTest()
 		std::ofstream fout("Bilt.lsl.hlsl");
 		fout << shader;
 	}
+	platform::Render::Effect::Effect blit{ "Bilt" };
 }
 
 

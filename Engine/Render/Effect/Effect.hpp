@@ -24,6 +24,8 @@ namespace platform::Render {
 
 	class ShaderCompose {
 	public:
+		virtual ~ShaderCompose();
+
 		enum class Type : leo::uint8
 		{
 			VertexShader,
@@ -188,8 +190,8 @@ namespace platform::Render::Effect {
 		leo::any value;
 		struct CBufferBind {
 			std::shared_ptr<ConstantBuffer> target;
-			uint32 offset;
-			uint32 stride;
+			uint32 offset =0;
+			uint32 stride =0;
 		} bind;
 	};
 

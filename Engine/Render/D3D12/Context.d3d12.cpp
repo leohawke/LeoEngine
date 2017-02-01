@@ -137,36 +137,41 @@ namespace platform_ex {
 					*(desc_heap_flag_iter + index - desc_heap_offset) = false;
 			}
 
-			Texture1D* Device::CreateTexture(uint16 width, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data)
+			Texture1D* Device::CreateTexture(uint16 width, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const *>  init_data)
 			{
-				auto texture = new Texture1D(width, num_mipmaps, array_size, format,access,sample_info);
-				if (init_data !=platform::Render::delayptr)
-					texture->HWResourceCreate(init_data);
-				return texture;
+				auto texture = std::make_unique<Texture1D>(width, num_mipmaps, array_size, format,access,sample_info);
+				if (init_data.has_value())
+					texture->HWResourceCreate(init_data.value());
+				return texture.release();
 			}
 
-			Texture2D* Device::CreateTexture(uint16 width, uint16 height, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data)
+			Texture2D* Device::CreateTexture(uint16 width, uint16 height, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const *>  init_data)
 			{
-				auto texture = new Texture2D(width,height, num_mipmaps, array_size, format, access, sample_info);
-				if (init_data != platform::Render::delayptr)
-					texture->HWResourceCreate(init_data);
-				return texture;
+				auto texture = std::make_unique<Texture2D>(width,height, num_mipmaps, array_size, format, access, sample_info);
+				if (init_data.has_value())
+					texture->HWResourceCreate(init_data.value());
+				return texture.release();
 			}
 
-			Texture3D* Device::CreateTexture(uint16 width, uint16 height, uint16 depth, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data)
+			Texture3D* Device::CreateTexture(uint16 width, uint16 height, uint16 depth, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const *>  init_data)
 			{
-				auto texture = new Texture3D(width,height,depth, num_mipmaps, array_size, format, access, sample_info);
-				if (init_data != platform::Render::delayptr)
-					texture->HWResourceCreate(init_data);
-				return texture;
+				auto texture = std::make_unique<Texture3D>(width,height,depth, num_mipmaps, array_size, format, access, sample_info);
+				if (init_data.has_value())
+					texture->HWResourceCreate(init_data.value());
+				return texture.release();
 			}
 
-			TextureCube* Device::CreateTextureCube(uint16 size, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, ElementInitData const * init_data)
+			TextureCube* Device::CreateTextureCube(uint16 size, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const *>  init_data)
 			{
-				auto texture = new TextureCube(size, num_mipmaps, array_size, format, access, sample_info);
-				if (init_data != platform::Render::delayptr)
-					texture->HWResourceCreate(init_data);
-				return texture;
+				auto texture = std::make_unique<TextureCube>(size, num_mipmaps, array_size, format, access, sample_info);
+				if (init_data.has_value())
+					texture->HWResourceCreate(init_data.value());
+				return texture.release();
+			}
+
+			ShaderCompose * platform_ex::Windows::D3D12::Device::CreateShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect)
+			{
+				return std::make_unique<ShaderCompose>(pShaderBlob,pEffect).release();
 			}
 
 			ID3D12Device*  Device::operator->() lnoexcept {

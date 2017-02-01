@@ -83,7 +83,7 @@ namespace platform {
 
 			virtual void BuildMipSubLevels() = 0;
 
-			virtual void HWResourceCreate(ElementInitData const * init_data) = 0;
+			virtual void HWResourceCreate(ElementInitData const *  init_data) = 0;
 			virtual void HWResourceDelete() = 0;
 			virtual bool HWResourceReady() const = 0;
 		protected:

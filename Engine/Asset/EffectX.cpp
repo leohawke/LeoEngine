@@ -711,11 +711,11 @@ namespace platform {
 #endif
 						, effect_desc.effect_path.string()
 					);
-					X::Shader::ReflectDXBC(blob, compile_type);
+					auto pInfo = leo::unique_raw(X::Shader::ReflectDXBC(blob, compile_type));
 					blob.swap(X::Shader::StripDXBC(blob, D3DFlags::D3DCOMPILER_STRIP_REFLECTION_DATA | D3DFlags::D3DCOMPILER_STRIP_DEBUG_INFO
 						| D3DFlags::D3DCOMPILER_STRIP_TEST_BLOBS | D3DFlags::D3DCOMPILER_STRIP_PRIVATE_DATA));
 
-					effect_desc.effect_asset->EmplaceBlob(blob_hash, asset::ShaderBlobAsset(compile_type, std::move(blob)));
+					effect_desc.effect_asset->EmplaceBlob(blob_hash, asset::ShaderBlobAsset(compile_type, std::move(blob),pInfo.release()));
 					pass.AssignOrInsertHash(compile_type, blob_hash);
 				}
 				CatchIgnore(leo::bad_any_cast &)

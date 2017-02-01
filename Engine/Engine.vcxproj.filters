@@ -179,6 +179,9 @@
     <ClInclude Include="Render\PipleState.h">
       <Filter>Render</Filter>
     </ClInclude>
+    <ClInclude Include="Render\IDevice.h">
+      <Filter>Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

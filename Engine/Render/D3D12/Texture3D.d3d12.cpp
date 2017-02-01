@@ -37,7 +37,7 @@ void Texture3D::BuildMipSubLevels() {
 	}
 }
 
-void Texture3D::HWResourceCreate(ElementInitData const * init_data) {
+void Texture3D::HWResourceCreate(ElementInitData const *  init_data) {
 	Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION_TEXTURE3D,
 		width, height,depth, array_size,
 		init_data);

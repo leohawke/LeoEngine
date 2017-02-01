@@ -38,7 +38,7 @@ void TextureCube::BuildMipSubLevels(){
 	}
 }
 
-void TextureCube::HWResourceCreate(ElementInitData const * init_data) {
+void TextureCube::HWResourceCreate(ElementInitData const *  init_data) {
 	DoCreateHWResource(D3D12_RESOURCE_DIMENSION_TEXTURE2D,
 		size, size, 1, array_size * 6, init_data);
 }

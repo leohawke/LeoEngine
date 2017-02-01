@@ -66,7 +66,7 @@ bool Texture::ReadyHWResource() const
 	return bool(texture);
 }
 
-void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uint16 height, uint16 depth, uint8 array_size, ElementInitData const * init_data)
+void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uint16 height, uint16 depth, uint8 array_size, ElementInitData const *  init_data)
 {
 	auto & device = Context::Instance().GetDevice();
 	auto base_this = dynamic_cast<platform::Render::Texture*>(this);

@@ -39,7 +39,7 @@ void Texture2D::BuildMipSubLevels()
 	//Wait Effect
 }
 
-void Texture2D::HWResourceCreate(ElementInitData const * init_data)
+void Texture2D::HWResourceCreate(ElementInitData const *  init_data)
 {
 	Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION_TEXTURE2D,
 		width,height,1,array_size,

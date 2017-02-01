@@ -81,6 +81,7 @@
     <ClInclude Include="Render\Effect\BlitEffect.h" />
     <ClInclude Include="Render\Effect\Effect.hpp" />
     <ClInclude Include="Render\IContext.h" />
+    <ClInclude Include="Render\IDevice.h" />
     <ClInclude Include="Render\IFormat.hpp" />
     <ClInclude Include="Render\IRenderView.h" />
     <ClInclude Include="Render\ITexture.hpp" />
