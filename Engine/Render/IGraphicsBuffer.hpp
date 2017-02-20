@@ -1,6 +1,6 @@
-/*! \file Engine\Render\IDevice.h
+/*! \file Engine\Render\IGraphicsBuffer.hpp
 \ingroup Engine
-\brief 创建接口类。
+\brief Buffer接口类。
 */
 #ifndef LE_RENDER_IGraphicsBuffer_hpp
 #define LE_RENDER_IGraphicsBuffer_hpp 1

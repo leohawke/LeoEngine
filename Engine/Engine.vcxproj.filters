@@ -80,6 +80,9 @@
     <ClCompile Include="Render\PipleState.cpp">
       <Filter>Render</Filter>
     </ClCompile>
+    <ClCompile Include="Render\D3D12\GraphicsBuffer.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -181,6 +184,12 @@
     </ClInclude>
     <ClInclude Include="Render\IDevice.h">
       <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IGraphicsBuffer.hpp">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\GraphicsBuffer.hpp">
+      <Filter>Render\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

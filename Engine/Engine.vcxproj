@@ -40,6 +40,7 @@
     <ClCompile Include="Render\D3D12\Convert.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\d3d12_dxgi.cpp" />
     <ClCompile Include="Render\D3D12\Display.d3d12.cpp" />
+    <ClCompile Include="Render\D3D12\GraphicsBuffer.cpp" />
     <ClCompile Include="Render\D3D12\RenderView.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\ShaderCompose.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Texture.d3d12.cpp" />
@@ -70,6 +71,7 @@
     <ClInclude Include="Render\D3D12\Adapter.h" />
     <ClInclude Include="Render\D3D12\Context.h" />
     <ClInclude Include="Render\D3D12\Convert.h" />
+    <ClInclude Include="Render\D3D12\GraphicsBuffer.hpp" />
     <ClInclude Include="Render\D3D12\PipleState.h" />
     <ClInclude Include="Render\D3D12\ShaderCompose.h" />
     <ClInclude Include="Render\D3D12\d3d12_dxgi.h" />
@@ -83,6 +85,7 @@
     <ClInclude Include="Render\IContext.h" />
     <ClInclude Include="Render\IDevice.h" />
     <ClInclude Include="Render\IFormat.hpp" />
+    <ClInclude Include="Render\IGraphicsBuffer.hpp" />
     <ClInclude Include="Render\IRenderView.h" />
     <ClInclude Include="Render\ITexture.hpp" />
     <ClInclude Include="Render\PipleState.h" />
