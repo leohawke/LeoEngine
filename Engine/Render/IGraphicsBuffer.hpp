@@ -35,7 +35,7 @@ namespace platform {
 
 			DefGetter(const lnothrow, leo::uint32, Size, size_in_byte)
 			
-			DefGetter(const lnothrow, Buffer::Usage, usage)
+			DefGetter(const lnothrow, Buffer::Usage,Usage, usage)
 
 			DefGetter(const lnothrow,leo::uint32,Access, access)
 			
