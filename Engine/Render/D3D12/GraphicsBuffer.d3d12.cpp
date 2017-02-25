@@ -24,6 +24,62 @@ namespace platform_ex::Windows::D3D12 {
 		src_barrier_before.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 		D3D12_HEAP_TYPE src_heap_type;
 
+		if (access == EAccessHint::EA_CPURead) {
+			src_barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+			src_heap_type = D3D12_HEAP_TYPE_READBACK;
+		}
+		else if ((rhs.GetAccess() & EAccessHint::EA_CPURead) || (rhs.GetAccess() & EAccessHint::EA_CPUWrite)) {
+			src_barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_GENERIC_READ;
+			src_heap_type = D3D12_HEAP_TYPE_UPLOAD;
+		}
+		else {
+			src_barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
+			src_heap_type = D3D12_HEAP_TYPE_DEFAULT;
+		}
+		src_barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_SOURCE;
+		src_barrier_before.Transition.pResource = buffer.Get();
+		src_barrier_before.Transition.Subresource = 0;
+
+		dst_barrier_before.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		dst_barrier_before.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		D3D12_HEAP_TYPE dst_heap_type;
+		if (rhs.GetAccess() == EAccessHint::EA_CPURead) {
+			src_barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+			src_heap_type = D3D12_HEAP_TYPE_READBACK;
+		}
+		else if ((rhs.GetAccess() & EAccessHint::EA_CPURead) || (rhs.GetAccess() & EAccessHint::EA_CPUWrite)) {
+			dst_barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_GENERIC_READ;
+			dst_heap_type = D3D12_HEAP_TYPE_UPLOAD;
+		}
+		else {
+			dst_barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
+			dst_heap_type = D3D12_HEAP_TYPE_DEFAULT;
+		}
+		dst_barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
+		dst_barrier_before.Transition.pResource = rhs.buffer.Get();
+		dst_barrier_before.Transition.Subresource = 0;
+
+		int n = 0;
+		D3D12_RESOURCE_BARRIER barrier_before[2];
+		if (src_heap_type != dst_heap_type) {
+			if (D3D12_HEAP_TYPE_DEFAULT == src_heap_type)
+				barrier_before[n++] = src_barrier_before;
+			if (D3D12_HEAP_TYPE_DEFAULT == dst_heap_type)
+				barrier_before[n++] = dst_barrier_before;
+		}
+
+		auto cmd_list = Context::Instance().GetCommandList(Device::Command_Resource);
+		if (n > 0)
+			cmd_list->ResourceBarrier(n,barrier_before);
+
+		cmd_list->CopyBufferRegion(rhs.buffer.Get(), 0, buffer.Get(), 0, size_in_byte);
+
+		D3D12_RESOURCE_BARRIER barrier_after[2] = { barrier_before[0],barrier_before[1] };
+		std::swap(barrier_after[0].Transition.StateBefore, barrier_after[0].Transition.StateAfter);
+		std::swap(barrier_after[1].Transition.StateBefore, barrier_after[1].Transition.StateAfter);
+		
+		if (n > 0)
+			cmd_list->ResourceBarrier(n, barrier_after);
 	}
 
 	void GraphicsBuffer::HWResourceCreate(void const * init_data)
