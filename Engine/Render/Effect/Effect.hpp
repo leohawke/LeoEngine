@@ -145,7 +145,7 @@ namespace platform::Render::Effect {
 
 		friend class Variable;
 	private:
-		//std::unique_ptr<GraphicsBuffer> gpu_buffer;
+		std::unique_ptr<GraphicsBuffer> gpu_buffer;
 		std::vector<stdex::byte> cpu_buffer;
 		bool dirty;
 	};
@@ -250,7 +250,7 @@ namespace platform::Render::Effect {
 	private:
 		std::vector<Technique> techniques;
 		std::unordered_map<size_t,Parameter> parameters;
-
+		std::vector<std::shared_ptr<ConstantBuffer>> constantbuffs;
 		std::vector<std::unique_ptr<ShaderCompose>> shaders;
 	};
 }

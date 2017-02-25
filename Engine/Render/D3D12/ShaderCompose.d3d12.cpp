@@ -122,6 +122,11 @@ void platform_ex::Windows::D3D12::ShaderCompose::SwapAndPresent()
 	}
 }
 
+platform_ex::Windows::D3D12::ShaderCompose::parameter_bind_t platform_ex::Windows::D3D12::ShaderCompose::GetBindFunc(ShaderParameterHandle const & p_handle, platform::Render::Effect::Parameter * param)
+{
+	return parameter_bind_t();
+}
+
 #include <UniversalDXSDK/d3dcompiler.h>
 #ifdef LFL_Win64
 #pragma comment(lib,"UniversalDXSDK/Lib/x64/d3dcompiler.lib")

@@ -8,6 +8,7 @@
 #include "DeviceCaps.h"
 #include "ITexture.hpp"
 #include "Effect/Effect.hpp"
+#include "IGraphicsBuffer.hpp"
 
 namespace asset {
 	class ShaderBlobAsset;
@@ -32,6 +33,8 @@ namespace platform {
 				EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const *>  init_data = nullptr) = 0;
 		
 			virtual ShaderCompose* CreateShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<Effect::Effect> pEffect) = 0;
+
+			virtual GraphicsBuffer* CreateConstantBuffer(Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format,std::optional<ElementInitData const *>  init_data = nullptr) = 0;
 		};
 	}
 }

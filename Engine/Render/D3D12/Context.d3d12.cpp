@@ -174,6 +174,19 @@ namespace platform_ex {
 				return std::make_unique<ShaderCompose>(pShaderBlob,pEffect).release();
 			}
 
+			GraphicsBuffer * Device::CreateConstantBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<ElementInitData const*> init_data)
+			{
+				return CreateBuffer(usage, access, size_in_byte,format, init_data);
+			}
+
+			GraphicsBuffer *Device::CreateBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<ElementInitData const*> init_data)
+			{
+				auto buffer = std::make_unique<GraphicsBuffer>(usage, access, (size_in_byte + 255)&~255, format);
+				if (init_data.has_value())
+					buffer->HWResourceCreate(init_data.value());
+				return buffer.release();
+			}
+
 			ID3D12Device*  Device::operator->() lnoexcept {
 				return d3d_device.Get();
 			}

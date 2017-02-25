@@ -11,6 +11,7 @@
 #include "Display.h"
 #include "Texture.h"
 #include "ShaderCompose.h"
+#include "GraphicsBuffer.hpp"
 
 #include <UniversalDXSDK/d3d12.h>
 
@@ -45,6 +46,11 @@ namespace platform_ex {
 				platform::Render::Caps& GetCaps() override;
 
 				ShaderCompose* CreateShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect) override;
+
+				//\brief D3D12 Buffer 创建时没有BIND_FLAG
+				GraphicsBuffer* CreateBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<ElementInitData const *>  init_data = nullptr);
+
+				GraphicsBuffer* CreateConstantBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<ElementInitData const *>  init_data = nullptr) override;
 
 				platform::Render::Effect::BlitEffect* BlitEffect();
 			public:

@@ -49,6 +49,7 @@
     <ClCompile Include="Render\D3D12\Texture3D.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\TextureCube.d3d12.cpp" />
     <ClCompile Include="Render\Effect\Effect.cpp" />
+    <ClCompile Include="Render\GraphicsBuffer.cpp" />
     <ClCompile Include="Render\IContext.cpp" />
     <ClCompile Include="Render\ITexture.cpp" />
     <ClCompile Include="Render\PipleState.cpp" />

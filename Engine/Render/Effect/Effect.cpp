@@ -1,6 +1,8 @@
 #include "../../asset/EffectX.h"
 #include "../IContext.h"
+#include "../IGraphicsBuffer.hpp"
 
+#include <LBase/Debug.h>
 namespace platform::Render {
 	ShaderInfo::ShaderInfo(ShaderCompose::Type t)
 		:Type(t)
@@ -33,6 +35,17 @@ namespace platform::Render::Effect {
 	{
 		return state;
 	}
+
+	void ConstantBuffer::Update() {
+		if (dirty) {
+			gpu_buffer->UpdateSubresource(0, static_cast<leo::uint32>(cpu_buffer.size()), cpu_buffer.data());
+			dirty = false;
+		}
+	}
+
+	GraphicsBuffer* ConstantBuffer::GetGraphicsBuffer() const lnothrow {
+		return gpu_buffer.get();
+	}
 }
 
 namespace platform::Render::Effect {
@@ -56,9 +69,9 @@ namespace platform::Render::Effect {
 
 	const Technique & Effect::GetTechnique(size_t hash) const
 	{
-		return *std::find_if(techniques.begin(), techniques.end(), [&](const NameKey& key) {
+		return Deref(std::find_if(techniques.begin(), techniques.end(), [&](const NameKey& key) {
 			return key.Hash == hash;
-		});
+		}));
 	}
 
 	const Technique & Effect::GetTechniqueByIndex(size_t index) const
@@ -74,6 +87,17 @@ namespace platform::Render::Effect {
 	Parameter & Effect::GetParameter(size_t hash)
 	{
 		return parameters.find(hash)->second;
+	}
+	ConstantBuffer & Effect::GetConstantBuffer(const std::string & name)
+	{
+		auto hash = leo::constfn_hash(name);
+		return GetConstantBuffer(hash);
+	}
+	ConstantBuffer & Effect::GetConstantBuffer(size_t hash)
+	{
+		return Deref(Deref(std::find_if(constantbuffs.begin(), constantbuffs.end(), [&](const std::shared_ptr<ConstantBuffer>& key) {
+			return key->Hash == hash;
+		})));
 	}
 }
 
@@ -92,11 +116,11 @@ namespace platform::Render::Effect {
 		auto asset_params = pEffectAsset->GetParams();
 		for (auto & cbuff : pEffectAsset->GetCBuffersRef()) {
 			auto ConstantBufferInfo = leo::any_cast<ShaderInfo::ConstantBufferInfo>(pEffectAsset->GetInfo(cbuff.GetName()).value());
-			GraphicsBuffer* pGPUBuffer = nullptr;
+			GraphicsBuffer* pGPUBuffer = Context::Instance().GetDevice().CreateConstantBuffer(platform::Render::Buffer::Usage::Dynamic,0, ConstantBufferInfo.size,EFormat::EF_Unknown);
 			
 			auto pConstantBuffer = std::make_shared<ConstantBuffer>(cbuff.GetName(), cbuff.GetNameHash());
 			
-			//pConstantBuffer->gpu_buffer.reset(pGPUBuffer);
+			pConstantBuffer->gpu_buffer.reset(pGPUBuffer);
 			pConstantBuffer->cpu_buffer.resize(ConstantBufferInfo.size);
 
 			for (auto& param_index : cbuff.GetParamIndices()) {
@@ -122,6 +146,8 @@ namespace platform::Render::Effect {
 
 				//TODO bind values
 			}
+
+			constantbuffs.emplace_back(pConstantBuffer);
 		}
 
 		//other param
@@ -149,7 +175,7 @@ namespace platform::Render::Effect {
 				for (auto&pair : asset_blob_hashs) {
 					asset_blobs.emplace(pair.first, &pEffectAsset->GetBlob(pair.second));
 				}
-				ShaderCompose* pCompose = nullptr;//create by Device
+				ShaderCompose* pCompose = Context::Instance().GetDevice().CreateShaderCompose(asset_blobs,leo::make_observer(this));
 				pass.bind_index =static_cast<leo::uint8>(shaders.size());
 				shaders.emplace_back(pCompose);
 				pass.state = asset_pass.GetPipleState();
