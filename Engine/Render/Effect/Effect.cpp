@@ -126,7 +126,7 @@ namespace platform::Render::Effect {
 			for (auto& param_index : cbuff.GetParamIndices()) {
 				expect_parameters.insert(param_index);
 				auto& asset_param = asset_params[param_index];
-				Parameter Param { asset_param.GetName(), asset_param.GetNameHash() };
+				Parameter Param { asset_param.GetName(), asset_param.GetNameHash(),asset_param.GetType() };
 				auto VariableInfo = leo::any_cast<ShaderInfo::ConstantBufferInfo::VariableInfo>(pEffectAsset->GetInfo(asset_param.GetName()).value());
 				uint32 stride;
 				if (VariableInfo.elements > 0) {

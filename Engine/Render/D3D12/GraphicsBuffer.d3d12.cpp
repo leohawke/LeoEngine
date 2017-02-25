@@ -183,7 +183,7 @@ namespace platform_ex::Windows::D3D12 {
 			desc.Buffer.StructureByteStride = /*(access & EAccessHint::EA_GPUStructured) ? structure_byte_stride :*/ 0;
 			desc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
-			srv = std::make_shared<ViewSimulation>(buffer, desc);
+			srv = std::make_unique<ViewSimulation>(buffer, desc);
 		}
 
 		if ((access & EAccessHint::EA_GPUWrite)
@@ -239,7 +239,7 @@ namespace platform_ex::Windows::D3D12 {
 				desc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
 			}
 
-			uav = std::make_shared<ViewSimulation>(buffer, desc);
+			uav = std::make_unique<ViewSimulation>(buffer, desc);
 		}
 	}
 
@@ -257,6 +257,14 @@ namespace platform_ex::Windows::D3D12 {
 		auto p = static_cast<stdex::byte*>(Map(platform::Render::Buffer::Write_Only));
 		memcpy(p + offset, data, size);
 		Unmap();
+	}
+	ID3D12Resource * GraphicsBuffer::Resource() const
+	{
+		return buffer.Get();
+	}
+	ViewSimulation * GraphicsBuffer::RetriveShaderResourceView()
+	{
+		return srv.get();
 	}
 	void * GraphicsBuffer::Map(platform::Render::Buffer::Access ba)
 	{

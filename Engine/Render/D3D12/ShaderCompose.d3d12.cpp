@@ -1,8 +1,86 @@
 #include "ShaderCompose.h"
 #include "Context.h"
+#include "../Effect/Effect.hpp"
 #include "../../Asset/EffectAsset.h"
+#include "../ITexture.hpp"
+#include "Texture.h"
 
 using namespace platform_ex::Windows;
+
+namespace {
+	class SetTextureSRV {
+	public:
+		SetTextureSRV(std::tuple<ID3D12Resource*,leo::uint32,leo::uint32>&srvsrc_,D3D12::ViewSimulation*& srv_, platform::Render::Effect::Parameter * param_)
+			:psrvsrc(&srvsrc_),ppsrv(&srv_),param(param_)
+		{}
+
+		void operator()() {
+			platform::Render::TextureSubresource tex_subres;
+			param->Value(tex_subres);
+			if (tex_subres.tex) {
+				*psrvsrc = std::make_tuple(dynamic_cast<D3D12::Texture*>(tex_subres.tex.get())->Resource(),
+					tex_subres.first_array_index * tex_subres.tex->GetNumMipMaps() + tex_subres.first_level,
+
+					tex_subres.num_items * tex_subres.num_levels);
+
+				*ppsrv = dynamic_cast<D3D12::Texture*>(tex_subres.tex.get())->RetriveShaderResourceView(
+					tex_subres.first_array_index, tex_subres.num_items,
+
+					tex_subres.first_level, tex_subres.num_levels);
+			}
+			else {
+				std::get<0>(*psrvsrc) = nullptr;
+			}
+		}
+	private:
+		std::tuple<ID3D12Resource*, leo::uint32, leo::uint32>* psrvsrc;
+		D3D12::ViewSimulation** ppsrv;
+		platform::Render::Effect::Parameter * param;
+	};
+
+	class SetBufferSRV {
+	public:
+		SetBufferSRV(std::tuple<ID3D12Resource*, leo::uint32, leo::uint32>&srvsrc_, D3D12::ViewSimulation*& srv_, platform::Render::Effect::Parameter * param_)
+			:psrvsrc(&srvsrc_), ppsrv(&srv_), param(param_)
+		{}
+		void operator()() {
+			std::shared_ptr<platform::Render::GraphicsBuffer> buffer;
+			param->Value(buffer);
+			if (buffer) {
+				auto pBuffer = static_cast<D3D12::GraphicsBuffer*>(buffer.get());
+				*psrvsrc = std::make_tuple(pBuffer->Resource(),0,1);
+				*ppsrv = pBuffer->RetriveShaderResourceView();
+			}
+			else {
+				std::get<0>(*psrvsrc) = nullptr;
+			}
+		}
+	private:
+		std::tuple<ID3D12Resource*, leo::uint32, leo::uint32>* psrvsrc;
+		D3D12::ViewSimulation** ppsrv;
+		platform::Render::Effect::Parameter * param;
+	};
+
+	class SetTextureUAV {
+	public:
+		SetTextureUAV(std::pair<ID3D12Resource*,ID3D12Resource*> uavsrc, D3D12::ViewSimulation*& uav, platform::Render::Effect::Parameter * param)
+		{}
+
+		void operator()() {
+
+		}
+	};
+
+	class SetBufferUAV {
+	public:
+		SetBufferUAV(std::pair<ID3D12Resource*, ID3D12Resource*> uavsrc, D3D12::ViewSimulation*& uav, platform::Render::Effect::Parameter * param)
+		{}
+
+		void operator()() {
+
+		}
+	};
+}
 
 platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect)
 {
@@ -124,7 +202,51 @@ void platform_ex::Windows::D3D12::ShaderCompose::SwapAndPresent()
 
 platform_ex::Windows::D3D12::ShaderCompose::parameter_bind_t platform_ex::Windows::D3D12::ShaderCompose::GetBindFunc(ShaderParameterHandle const & p_handle, platform::Render::Effect::Parameter * param)
 {
-	return parameter_bind_t();
+	using platform::Render::EffectParamType;
+
+	parameter_bind_t ret;
+	ret.param = param;
+	std::memcpy(&ret.p_handle, &p_handle, sizeof(p_handle));
+
+
+	switch (param->GetType())
+	{	
+	case EffectParamType::EPT_texture1D:
+	case EffectParamType::EPT_texture2D:
+	case EffectParamType::EPT_texture3D:
+	case EffectParamType::EPT_textureCUBE:
+	case EffectParamType::EPT_texture1DArray:
+	case EffectParamType::EPT_texture2DArray:
+	case EffectParamType::EPT_texture3DArray:
+	case EffectParamType::EPT_textureCUBEArray:
+		ret.func = ::SetTextureSRV(SrvSrcs[p_handle.shader_type][p_handle.offset], Srvs[p_handle.shader_type][p_handle.offset], param);
+		break;
+
+	case EffectParamType::EPT_buffer:
+	case EffectParamType::EPT_StructuredBuffer:
+	case EffectParamType::EPT_ConsumeStructuredBuffer:
+	case EffectParamType::EPT_AppendStructuredBuffer:
+	case EffectParamType::EPT_byteAddressBuffer:
+		ret.func = ::SetBufferSRV(SrvSrcs[p_handle.shader_type][p_handle.offset], Srvs[p_handle.shader_type][p_handle.offset], param);
+		break;
+
+
+	case EffectParamType::EPT_rwtexture1D:
+	case EffectParamType::EPT_rwtexture2D:
+	case EffectParamType::EPT_rwtexture3D:
+	case EffectParamType::EPT_rwtexture1DArray:
+	case EffectParamType::EPT_rwtexture2DArray:
+		ret.func = ::SetTextureUAV(UavSrcs[p_handle.shader_type][p_handle.offset], Uavs[p_handle.shader_type][p_handle.offset], param);
+		break;
+
+	case EffectParamType::EPT_rwbuffer:
+	case EffectParamType::EPT_rwstructured_buffer:
+	case EffectParamType::EPT_rwbyteAddressBuffer:
+		ret.func = ::SetBufferUAV(UavSrcs[p_handle.shader_type][p_handle.offset], Uavs[p_handle.shader_type][p_handle.offset], param);
+		break;
+	}
+
+	return ret;
 }
 
 #include <UniversalDXSDK/d3dcompiler.h>
