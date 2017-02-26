@@ -208,9 +208,8 @@ DXGI_FORMAT platform_ex::Windows::D3D12::Convert(platform::Render::EFormat forma
 	case EF_BC7_SRGB:
 		return DXGI_FORMAT_BC7_UNORM_SRGB;
 
-	default:
-		leo::raise_exception(leo::unsupported());
 	}
+	leo::raise_exception(leo::unsupported());
 }
 
 platform::Render::EFormat platform_ex::Windows::D3D12::Convert(DXGI_FORMAT format)
@@ -418,7 +417,143 @@ platform::Render::EFormat platform_ex::Windows::D3D12::Convert(DXGI_FORMAT forma
 	case DXGI_FORMAT_BC7_UNORM_SRGB:
 		return EF_BC7_SRGB;
 
-	default:
-		leo::raise_exception(leo::unsupported());
+
 	}
+	leo::raise_exception(leo::unsupported());
+}
+
+D3D12_SAMPLER_DESC platform_ex::Windows::D3D12::Convert(platform::Render::SamplerDesc desc)
+{
+	D3D12_SAMPLER_DESC sampler_desc;
+	sampler_desc.Filter = Convert(desc.filtering);
+	sampler_desc.AddressU = Convert(desc.address_mode_u);
+	sampler_desc.AddressV = Convert(desc.address_mode_v);
+	sampler_desc.AddressW = Convert(desc.address_mode_w);
+
+	sampler_desc.MipLODBias = desc.mip_map_lod_bias;
+	sampler_desc.MaxAnisotropy = desc.max_anisotropy;
+	sampler_desc.ComparisonFunc = Convert(desc.cmp_func);
+
+	sampler_desc.BorderColor[0] = desc.border_clr.r();
+	sampler_desc.BorderColor[1] = desc.border_clr.g();
+	sampler_desc.BorderColor[2] = desc.border_clr.b();
+	sampler_desc.BorderColor[3] = desc.border_clr.a();
+	sampler_desc.MinLOD = desc.min_lod;
+	sampler_desc.MaxLOD = desc.max_lod;
+
+	return sampler_desc;
+}
+
+D3D12_TEXTURE_ADDRESS_MODE platform_ex::Windows::D3D12::Convert(platform::Render::TexAddressingMode mode)
+{
+	switch (mode)
+	{
+	case platform::Render::TexAddressingMode::Wrap:
+		return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+		break;
+	case platform::Render::TexAddressingMode::Mirror:
+		return D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+		break;
+	case platform::Render::TexAddressingMode::Clamp:
+		return D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+		break;
+	case platform::Render::TexAddressingMode::Border:
+		return D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+		break;
+	}
+	leo::raise_exception(leo::unsupported());
+}
+
+D3D12_FILTER platform_ex::Windows::D3D12::Convert(platform::Render::TexFilterOp op)
+{
+	switch (op)
+	{
+	case platform::Render::TexFilterOp::Min_Mag_Mip_Point:
+		return D3D12_FILTER_MIN_MAG_MIP_POINT;
+		break;
+	case platform::Render::TexFilterOp::Min_Mag_Point_Mip_Linear:
+		return D3D12_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+		break;
+	case platform::Render::TexFilterOp::Min_Point_Mag_Linear_Mip_Point:
+		return D3D12_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
+		break;
+	case platform::Render::TexFilterOp::Min_Point_Mag_Mip_Linear:
+		return D3D12_FILTER_MIN_POINT_MAG_MIP_LINEAR;
+		break;
+	case platform::Render::TexFilterOp::Min_Linear_Mag_Mip_Point:
+		return D3D12_FILTER_MIN_LINEAR_MAG_MIP_POINT;
+		break;
+	case platform::Render::TexFilterOp::Min_Linear_Mag_Point_Mip_Linear:
+		return D3D12_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+		break;
+	case platform::Render::TexFilterOp::Min_Mag_Linear_Mip_Point:
+		return D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+		break;
+	case platform::Render::TexFilterOp::Min_Mag_Mip_Linear:
+		return D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+		break;
+	case platform::Render::TexFilterOp::Anisotropic:
+		return D3D12_FILTER_ANISOTROPIC;
+		break;
+	case platform::Render::TexFilterOp::Cmp_Min_Mag_Mip_Point:
+		return D3D12_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+		break;
+	case platform::Render::TexFilterOp::Cmp_Min_Mag_Point_Mip_Linear:
+		return D3D12_FILTER_COMPARISON_MIN_MAG_POINT_MIP_LINEAR;
+		break;
+	case platform::Render::TexFilterOp::Cmp_Min_Point_Mag_Linear_Mip_Point:
+		return D3D12_FILTER_COMPARISON_MIN_POINT_MAG_LINEAR_MIP_POINT;
+		break;
+	case platform::Render::TexFilterOp::Cmp_Min_Point_Mag_Mip_Linear:
+		return D3D12_FILTER_COMPARISON_MIN_POINT_MAG_MIP_LINEAR;
+		break;
+	case platform::Render::TexFilterOp::Cmp_Min_Linear_Mag_Mip_Point:
+		return D3D12_FILTER_COMPARISON_MIN_LINEAR_MAG_MIP_POINT;
+		break;
+	case platform::Render::TexFilterOp::Cmp_Min_Linear_Mag_Point_Mip_Linear:
+		return D3D12_FILTER_COMPARISON_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+		break;
+	case platform::Render::TexFilterOp::Cmp_Min_Mag_Linear_Mip_Point:
+		return D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+		break;
+	case platform::Render::TexFilterOp::Cmp_Min_Mag_Mip_Linear:
+		return D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+		break;
+	case platform::Render::TexFilterOp::Cmp_Anisotropic:
+		return D3D12_FILTER_COMPARISON_ANISOTROPIC;
+		break;
+	}
+	leo::raise_exception(leo::unsupported());
+}
+
+D3D12_COMPARISON_FUNC platform_ex::Windows::D3D12::Convert(platform::Render::CompareOp op)
+{
+	switch (op)
+	{
+	case platform::Render::CompareOp::Fail:
+		return D3D12_COMPARISON_FUNC_NEVER;
+		break;
+	case platform::Render::CompareOp::Pass:
+		return D3D12_COMPARISON_FUNC_ALWAYS;
+		break;
+	case platform::Render::CompareOp::Less:
+		return D3D12_COMPARISON_FUNC_LESS;
+		break;
+	case platform::Render::CompareOp::Less_Equal:
+		return D3D12_COMPARISON_FUNC_LESS_EQUAL;
+		break;
+	case platform::Render::CompareOp::Equal:
+		return D3D12_COMPARISON_FUNC_EQUAL;
+		break;
+	case platform::Render::CompareOp::NotEqual:
+		return D3D12_COMPARISON_FUNC_NOT_EQUAL;
+		break;
+	case platform::Render::CompareOp::GreaterEqual:
+		return D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+		break;
+	case platform::Render::CompareOp::Greater:
+		return D3D12_COMPARISON_FUNC_GREATER;
+		break;
+	}
+	leo::raise_exception(leo::unsupported());
 }

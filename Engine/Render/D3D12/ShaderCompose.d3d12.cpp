@@ -4,26 +4,28 @@
 #include "../../Asset/EffectAsset.h"
 #include "../ITexture.hpp"
 #include "Texture.h"
+#include "Convert.h"
 
 using namespace platform_ex::Windows;
 
 namespace {
 	class SetTextureSRV {
 	public:
-		SetTextureSRV(std::tuple<ID3D12Resource*,leo::uint32,leo::uint32>&srvsrc_,D3D12::ViewSimulation*& srv_, platform::Render::Effect::Parameter * param_)
-			:psrvsrc(&srvsrc_),ppsrv(&srv_),param(param_)
+		SetTextureSRV(std::tuple<ID3D12Resource*, leo::uint32, leo::uint32>&srvsrc_, D3D12::ViewSimulation*& srv_, platform::Render::Effect::Parameter * param_)
+			:psrvsrc(&srvsrc_), ppsrv(&srv_), param(param_)
 		{}
 
 		void operator()() {
 			platform::Render::TextureSubresource tex_subres;
 			param->Value(tex_subres);
 			if (tex_subres.tex) {
-				*psrvsrc = std::make_tuple(dynamic_cast<D3D12::Texture*>(tex_subres.tex.get())->Resource(),
+				auto pTexture = dynamic_cast<D3D12::Texture*>(tex_subres.tex.get());
+				*psrvsrc = std::make_tuple(pTexture->Resource(),
 					tex_subres.first_array_index * tex_subres.tex->GetNumMipMaps() + tex_subres.first_level,
 
 					tex_subres.num_items * tex_subres.num_levels);
 
-				*ppsrv = dynamic_cast<D3D12::Texture*>(tex_subres.tex.get())->RetriveShaderResourceView(
+				*ppsrv = pTexture->RetriveShaderResourceView(
 					tex_subres.first_array_index, tex_subres.num_items,
 
 					tex_subres.first_level, tex_subres.num_levels);
@@ -48,7 +50,7 @@ namespace {
 			param->Value(buffer);
 			if (buffer) {
 				auto pBuffer = static_cast<D3D12::GraphicsBuffer*>(buffer.get());
-				*psrvsrc = std::make_tuple(pBuffer->Resource(),0,1);
+				*psrvsrc = std::make_tuple(pBuffer->Resource(), 0, 1);
 				*ppsrv = pBuffer->RetriveShaderResourceView();
 			}
 			else {
@@ -63,22 +65,59 @@ namespace {
 
 	class SetTextureUAV {
 	public:
-		SetTextureUAV(std::pair<ID3D12Resource*,ID3D12Resource*> uavsrc, D3D12::ViewSimulation*& uav, platform::Render::Effect::Parameter * param)
+		SetTextureUAV(std::pair<ID3D12Resource*, ID3D12Resource*> uavsrc_, D3D12::ViewSimulation*& uav_, platform::Render::Effect::Parameter * param_)
+			:puavsrc(&uavsrc_), ppuav(&uav_), param(param_)
 		{}
 
 		void operator()() {
+			platform::Render::TextureSubresource tex_subres;
+			param->Value(tex_subres);
+			if (tex_subres.tex) {
+				auto pTexture = dynamic_cast<D3D12::Texture*>(tex_subres.tex.get());
+				puavsrc->first = pTexture->Resource();
+				puavsrc->second = nullptr;
 
+				*ppuav = pTexture->RetriveUnorderedAccessView(
+					tex_subres.first_array_index, tex_subres.num_items,
+
+					tex_subres.first_level, tex_subres.num_levels);
+			}
+			else {
+				puavsrc->first = nullptr;
+				puavsrc->second = nullptr;
+			}
 		}
+	private:
+		std::pair<ID3D12Resource*, ID3D12Resource*>* puavsrc;
+		D3D12::ViewSimulation** ppuav;
+		platform::Render::Effect::Parameter * param;
 	};
 
 	class SetBufferUAV {
 	public:
-		SetBufferUAV(std::pair<ID3D12Resource*, ID3D12Resource*> uavsrc, D3D12::ViewSimulation*& uav, platform::Render::Effect::Parameter * param)
+		SetBufferUAV(std::pair<ID3D12Resource*, ID3D12Resource*> uavsrc_, D3D12::ViewSimulation*& uav_, platform::Render::Effect::Parameter * param_)
+			:puavsrc(&uavsrc_), ppuav(&uav_), param(param_)
 		{}
 
 		void operator()() {
+			std::shared_ptr<platform::Render::GraphicsBuffer> buffer;
+			param->Value(buffer);
+			if (buffer) {
+				auto pBuffer = static_cast<D3D12::GraphicsBuffer*>(buffer.get());
+				puavsrc->first = pBuffer->Resource();
+				puavsrc->second = pBuffer->UploadResource();
 
+				*ppuav = pBuffer->RetriveUnorderedAccessView();
+			}
+			else {
+				puavsrc->first = nullptr;
+				puavsrc->second = nullptr;
+			}
 		}
+	private:
+		std::pair<ID3D12Resource*, ID3D12Resource*>* puavsrc;
+		D3D12::ViewSimulation** ppuav;
+		platform::Render::Effect::Parameter * param;
 	};
 }
 
@@ -95,12 +134,12 @@ platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<Sha
 		}
 
 		Samplers[index].resize(BlobInfo.NumSamplers);
-		SrvSrcs[index].resize(BlobInfo.NumSrvs,std::make_tuple(static_cast<ID3D12Resource*>(nullptr),0,0));
+		SrvSrcs[index].resize(BlobInfo.NumSrvs, std::make_tuple(static_cast<ID3D12Resource*>(nullptr), 0, 0));
 		Srvs[index].resize(BlobInfo.NumSrvs);
 		UavSrcs[index].resize(BlobInfo.NumUavs, std::make_pair<ID3D12Resource*, ID3D12Resource*>(nullptr, nullptr));
 		Uavs[index].resize(BlobInfo.NumUavs);
 
-		for (auto& BoundResourceInfo: BlobInfo.BoundResourceInfos) {
+		for (auto& BoundResourceInfo : BlobInfo.BoundResourceInfos) {
 			auto& Parameter = pEffect->GetParameter(BoundResourceInfo.name);
 
 			ShaderParameterHandle p_handle;
@@ -113,7 +152,9 @@ platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<Sha
 			if (D3D_SIT_SAMPLER == BoundResourceInfo.type)
 			{
 				p_handle.param_type = D3D_SVT_SAMPLER;
-
+				platform::Render::SamplerDesc sampler_desc;
+				Parameter.Value(sampler_desc);
+				Samplers[p_handle.shader_type][p_handle.offset] = Convert(sampler_desc);
 			}
 			else
 			{
@@ -126,30 +167,34 @@ platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<Sha
 					p_handle.param_type = D3D_SVT_TEXTURE;
 				}
 
-				ParamBinds[index].emplace_back(GetBindFunc(p_handle,&Parameter));
+				ParamBinds[index].emplace_back(GetBindFunc(p_handle, &Parameter));
 			}
 		}
 	}
 
 	AllCBuffs.erase(std::unique(AllCBuffs.begin(), AllCBuffs.end()), AllCBuffs.end());
+
+	CreateRootSignature();
 }
 
 void platform_ex::Windows::D3D12::ShaderCompose::Bind()
 {
-	std::vector<D3D12_RESOURCE_BARRIER> barriers;
 	for (leo::uint8 st = 0; st != NumTypes; ++st) {
 		//param bind
+		for (auto const & pb : ParamBinds[st]) {
+			pb.func();
+		}
 	}
-
+	CreateBarriers();
 	if (!barriers.empty()) {
 		D3D12::Context::Instance().GetCommandList(D3D12::Device::Command_Render)
-			->ResourceBarrier(static_cast<UINT>(barriers.size()),barriers.data());
+			->ResourceBarrier(static_cast<UINT>(barriers.size()), barriers.data());
 	}
 
-
-	SwapAndPresent();
-		
 	//update cbuffer
+	for (auto i = 0; i != AllCBuffs.size(); ++i) {
+		AllCBuffs[i]->Update();
+	}
 }
 
 void platform_ex::Windows::D3D12::ShaderCompose::UnBind()
@@ -159,16 +204,47 @@ void platform_ex::Windows::D3D12::ShaderCompose::UnBind()
 
 ID3D12RootSignature * platform_ex::Windows::D3D12::ShaderCompose::RootSignature() const
 {
-	return nullptr;
+	return root_signature.Get();
 }
 
 void platform_ex::Windows::D3D12::ShaderCompose::CreateRootSignature()
 {
+	std::array<size_t, NumTypes * 4> num;
+	size_t num_sampler = 0;
+	for (auto i = 0; i != NumTypes; ++i) {
+		num[i * 4 + 0] = CBuffs[i].size();
+		num[i * 4 + 1] = Srvs[i].size();
+		num[i * 4 + 2] = Uavs[i].size();
+		num[i * 4 + 3] = Samplers[i].size();
 
+		num_sampler += num[i * 4 + 3];
+	}
+
+	auto& Device = Context::Instance().GetDevice();
+	root_signature.ReleaseAndGetRef() = nullptr;  //Device.CreateRootSignature
+
+	if (num_sampler > 0) {
+		D3D12_DESCRIPTOR_HEAP_DESC sampler_heap_desc;
+		sampler_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+		sampler_heap_desc.NumDescriptors = static_cast<UINT>(num_sampler);
+		sampler_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		sampler_heap_desc.NodeMask = 0;
+		CheckHResult(Device->CreateDescriptorHeap(&sampler_heap_desc, COMPtr_RefParam(sampler_heap, IID_ID3D12DescriptorHeap)));
+
+		auto sampler_desc_size = Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+		auto cpu_sampler_handle = sampler_heap->GetCPUDescriptorHandleForHeapStart();
+		for (auto i = 0; i != NumTypes; ++i) {
+			for (auto j = 0; j != Samplers[i].size(); ++j) {
+				Device->CreateSampler(&Samplers[i][j], cpu_sampler_handle);
+				cpu_sampler_handle.ptr += sampler_desc_size;
+			}
+		}
+	}
 }
 
 void platform_ex::Windows::D3D12::ShaderCompose::CreateBarriers()
 {
+	barriers.clear();
 	for (leo::uint8 st = 0; st != NumTypes; ++st) {
 
 		D3D12_RESOURCE_BARRIER barrier_before;
@@ -180,11 +256,41 @@ void platform_ex::Windows::D3D12::ShaderCompose::CreateBarriers()
 			: D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
 
 		//srv barrier
+		for (auto j = 0; j != SrvSrcs[st].size(); ++j) {
+			for (auto subres = 0; subres != std::get<2>(SrvSrcs[st][j]); ++subres) {
+				barrier_before.Transition.pResource = std::get<0>(SrvSrcs[st][j]);
+				if (barrier_before.Transition.pResource != nullptr) {
+					barrier_before.Transition.Subresource = std::get<1>(SrvSrcs[st][j]);
+
+					if (std::find_if(barriers.begin(), barriers.end(),
+						[&](const D3D12_RESOURCE_BARRIER exist_barrier) {
+						return exist_barrier.Transition.pResource == barrier_before.Transition.pResource &&   exist_barrier.Transition.Subresource == barrier_before.Transition.Subresource;
+					}
+					) == barriers.end()) {
+						barriers.emplace_back(barrier_before);
+					}
+				}
+			}
+		}
 
 		barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
 		barrier_before.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
 		//uav barrier
+		for (auto j = 0; j != UavSrcs[st].size(); ++j) {
+			barrier_before.Transition.pResource = UavSrcs[st][j].first;
+			if (barrier_before.Transition.pResource != nullptr) {
+				LAssert(std::find_if(SrvSrcs[st].begin(), SrvSrcs[st].end(), [&](auto& tuple) {return std::get<0>(tuple) == barrier_before.Transition.pResource; }) == SrvSrcs[st].end(), "Resource Input&Ouput !!!");
+
+				if (std::find_if(barriers.begin(), barriers.end(),
+					[&](const D3D12_RESOURCE_BARRIER exist_barrier) {
+					return exist_barrier.Transition.pResource == barrier_before.Transition.pResource &&   exist_barrier.Transition.Subresource == barrier_before.Transition.Subresource;
+				}
+				) == barriers.end()) {
+					barriers.emplace_back(barrier_before);
+				}
+			}
+		}
 	}
 }
 
@@ -210,7 +316,7 @@ platform_ex::Windows::D3D12::ShaderCompose::parameter_bind_t platform_ex::Window
 
 
 	switch (param->GetType())
-	{	
+	{
 	case EffectParamType::EPT_texture1D:
 	case EffectParamType::EPT_texture2D:
 	case EffectParamType::EPT_texture3D:
@@ -257,11 +363,11 @@ platform_ex::Windows::D3D12::ShaderCompose::parameter_bind_t platform_ex::Window
 #endif
 
 namespace platform_ex::Windows::D3D12 {
-	platform::Render::ShaderInfo * ReflectDXBC(const ShaderCompose::ShaderBlob & blob,ShaderCompose::Type type)
+	platform::Render::ShaderInfo * ReflectDXBC(const ShaderCompose::ShaderBlob & blob, ShaderCompose::Type type)
 	{
 		auto pInfo = std::make_unique<ShaderInfo>(type);
 		platform_ex::COMPtr<ID3D12ShaderReflection> pReflection;
-		platform_ex::CheckHResult(D3DReflect(blob.first.get(), blob.second, IID_ID3D12ShaderReflection,reinterpret_cast<void**>(&pReflection)));
+		platform_ex::CheckHResult(D3DReflect(blob.first.get(), blob.second, IID_ID3D12ShaderReflection, reinterpret_cast<void**>(&pReflection)));
 
 		D3D12_SHADER_DESC desc;
 		pReflection->GetDesc(&desc);
@@ -341,14 +447,14 @@ namespace platform_ex::Windows::D3D12 {
 			case D3D_SIT_UAV_APPEND_STRUCTURED:
 			case D3D_SIT_UAV_CONSUME_STRUCTURED:
 			case D3D_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
-				{
-					ShaderInfo::BoundResourceInfo BoundResourceInfo;
-					BoundResourceInfo.name = input_bind_desc.Name;
-					BoundResourceInfo.type = static_cast<uint8_t>(input_bind_desc.Type);
-					BoundResourceInfo.bind_point = static_cast<uint16_t>(input_bind_desc.BindPoint);
-					pInfo->BoundResourceInfos.emplace_back(std::move(BoundResourceInfo));
-				}
-				break;
+			{
+				ShaderInfo::BoundResourceInfo BoundResourceInfo;
+				BoundResourceInfo.name = input_bind_desc.Name;
+				BoundResourceInfo.type = static_cast<uint8_t>(input_bind_desc.Type);
+				BoundResourceInfo.bind_point = static_cast<uint16_t>(input_bind_desc.BindPoint);
+				pInfo->BoundResourceInfos.emplace_back(std::move(BoundResourceInfo));
+			}
+			break;
 
 			default:
 				break;
@@ -373,7 +479,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		if (type == ShaderCompose::Type::ComputeShader) {
 			UINT x, y, z;
-			pReflection->GetThreadGroupSize(&x,&y,&z);
+			pReflection->GetThreadGroupSize(&x, &y, &z);
 			pInfo->CSBlockSize = leo::math::data_storage<uint16, 3>(static_cast<uint16>(x),
 				static_cast<uint16>(y), static_cast<uint16>(z));
 		}

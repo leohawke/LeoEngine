@@ -55,7 +55,7 @@ namespace platform {
 			}
 		protected:
 			//\brief encode = UTF-8
-			virtual std::string const & Description() const = 0;
+			virtual std::string  Description() const = 0;
 		public:
 			explicit Texture(Type type, uint8 numMipMaps, uint8 array_size,
 				EFormat format, uint32 access, SampleDesc sample_info);

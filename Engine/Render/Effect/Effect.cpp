@@ -1,6 +1,7 @@
 #include "../../asset/EffectX.h"
 #include "../IContext.h"
 #include "../IGraphicsBuffer.hpp"
+#include "../ITexture.hpp"
 
 #include <LBase/Debug.h>
 namespace platform::Render {
@@ -144,7 +145,12 @@ namespace platform::Render::Effect {
 				Param.var.Bind(pConstantBuffer, VariableInfo.start_offset,stride);//Depend reflect info
 				parameters.emplace(Param.Hash, std::move(Param));
 
-				//TODO bind values
+				//stride 必须正确！
+				//Design TODO [Material Also Have Values!]
+				auto optional_value = pEffectAsset->GetValue(param_index);
+				if (optional_value.has_value()) {
+					Param = optional_value.value().get();
+				}
 			}
 
 			constantbuffs.emplace_back(pConstantBuffer);
@@ -156,10 +162,13 @@ namespace platform::Render::Effect {
 				continue;
 
 			auto& param = asset_params[i];
-			Parameter Param{ param.GetName(), param.GetNameHash() };
-			parameters.emplace(Param.Hash, std::move(Param)); \
+			Parameter Param{ param.GetName(), param.GetNameHash(),param.GetType() };
+			parameters.emplace(Param.Hash, std::move(Param));
 
-			//TODO bind values
+			//其他类型的value不需要类型转换
+			auto optional_value = pEffectAsset->GetValue(i);
+			if (optional_value.has_value())
+				Param.var.value = optional_value.value();
 		}
 
 		auto asset_techns = pEffectAsset->GetTechniquesRef();

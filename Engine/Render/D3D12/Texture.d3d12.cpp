@@ -32,8 +32,8 @@ ViewSimulation* Texture::RetriveDepthStencilView(uint8 first_array_index, uint8 
 	throw leo::unsupported("Texture::RetriveDepthStencilView(uint8 first_array_index, uint8 num_items, uint8 level)");
 }
 
-ViewSimulation* Texture::RetriveUnorderedAccessView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) {
-	throw leo::unsupported("Texture::RetriveUnorderedAccessView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level)");
+ViewSimulation* Texture::RetriveUnorderedAccessView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 num_levels) {
+	throw leo::unsupported("Texture::RetriveUnorderedAccessView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 num_levels)");
 }
 
 ViewSimulation* Texture::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, TextureCubeFaces first_face, uint8 num_faces, uint8 level){
@@ -48,7 +48,7 @@ ViewSimulation* Texture::RetriveDepthStencilView(uint8 array_index, TextureCubeF
 	throw leo::unsupported("Texture::RetriveDepthStencilView(uint8 array_index, TextureCubeFaces face, uint8 level)");
 }
 
-std::string const & platform_ex::Windows::D3D12::Texture::HWDescription() const
+std::string  platform_ex::Windows::D3D12::Texture::HWDescription() const
 {
 	//TODO Format DXGI_FORMAT EFORMAT CREATE STATE
 	return "D3D12 Texture";
@@ -659,25 +659,25 @@ void TextureCube::CopyToSubTexture(platform::Render::TextureCube & base_target,
 }
 
 
-std::string const & Texture1D::Description() const
+std::string  Texture1D::Description() const
 {
 	// TODO FORMAT Width Infomation
 	return HWDescription();
 }
 
-std::string const & Texture2D::Description() const
+std::string  Texture2D::Description() const
 {
 	// TODO FORMAT Width Height Infomation
 	return HWDescription();
 }
 
-std::string const & Texture3D::Description() const
+std::string  Texture3D::Description() const
 {
 	// TODO FORMAT Width Height Depth Infomation
 	return HWDescription();
 }
 
-std::string const & TextureCube::Description() const
+std::string  TextureCube::Description() const
 {
 	// TODO FORMAT Size Infomation
 	return HWDescription();

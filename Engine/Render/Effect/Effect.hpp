@@ -73,9 +73,11 @@ namespace asset {
 }
 
 namespace platform::Render {
+	class Texture;
+
 	struct  TextureSubresource
 	{
-		TexturePtr tex;
+		std::shared_ptr<Texture> tex;
 
 		uint32_t first_array_index;
 
@@ -91,12 +93,11 @@ namespace platform::Render {
 		}
 
 
-		TextureSubresource(TexturePtr const & t, uint32_t fai, uint32_t ni, uint32_t fl, uint32_t nl)
+		TextureSubresource(std::shared_ptr<Texture> const & t, uint32_t fai, uint32_t ni, uint32_t fl, uint32_t nl)
 			: tex(t), first_array_index(fai), num_items(ni), first_level(fl), num_levels(nl)
 
 		{
 		}
-
 	};
 
 
@@ -267,6 +268,15 @@ namespace platform::Render::Effect {
 #endif
 
 		friend class Effect;
+		friend class Parameter;
+	private:
+		template<>
+		Variable& operator=<void*>(void*  const & pointer) {
+			LAssert(bind.target, "Memory Assign Must Has CBufferBind");
+			std::memcpy(&bind.target->cpu_buffer[bind.offset],pointer,bind.stride);
+			bind.target->Dirty(true);
+			return *this;
+		}
 	private:
 		leo::any value;
 		struct CBufferBind {
@@ -292,6 +302,13 @@ namespace platform::Render::Effect {
 		void Value(T& value) {
 			value = var.Get<T>();
 		}
+
+		template<typename T>
+		Parameter& operator=(T const & val) {
+			var = val;
+			return *this;
+		}
+
 		friend class Effect;
 	private:
 		Variable var;

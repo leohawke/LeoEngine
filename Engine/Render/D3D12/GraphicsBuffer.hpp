@@ -27,8 +27,10 @@ namespace platform_ex::Windows::D3D12 {
 		void UpdateSubresource(leo::uint32 offset, leo::uint32 size, void const * data) override;
 
 		ID3D12Resource* Resource() const;
+		ID3D12Resource* UploadResource() const;
 
 		ViewSimulation* RetriveShaderResourceView();
+		ViewSimulation* RetriveUnorderedAccessView();
 	private:
 		void* Map(platform::Render::Buffer::Access ba) override;
 		void Unmap() override;

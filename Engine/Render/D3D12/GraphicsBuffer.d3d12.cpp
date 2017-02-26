@@ -262,9 +262,17 @@ namespace platform_ex::Windows::D3D12 {
 	{
 		return buffer.Get();
 	}
+	ID3D12Resource * GraphicsBuffer::UploadResource() const
+	{
+		return buffer_counter_upload.Get();
+	}
 	ViewSimulation * GraphicsBuffer::RetriveShaderResourceView()
 	{
 		return srv.get();
+	}
+	ViewSimulation * GraphicsBuffer::RetriveUnorderedAccessView()
+	{
+		return uav.get();
 	}
 	void * GraphicsBuffer::Map(platform::Render::Buffer::Access ba)
 	{

@@ -903,7 +903,7 @@ namespace leo
 
 		//! \note LBase À©Õ¹¡£
 		//@{
-		//! \since build 352
+		//! \since build 1.4
 		void*
 			get() const lnothrow
 		{

@@ -52,7 +52,7 @@ namespace platform_ex {
 				virtual ViewSimulation* RetriveDepthStencilView(uint8 array_index, TextureCubeFaces face, uint8 level);
 
 			protected:
-				std::string const & HWDescription() const;
+				std::string HWDescription() const;
 
 				void DeleteHWResource();
 				bool ReadyHWResource() const;
@@ -103,7 +103,7 @@ namespace platform_ex {
 				explicit Texture1D(uint16 width, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
 			protected:
 				//\brief encode = UTF-8
-				std::string const & Description() const override;
+				std::string Description() const override;
 			public:
 				void BuildMipSubLevels() override;
 
@@ -150,7 +150,7 @@ namespace platform_ex {
 				explicit Texture2D(uint16 height, uint16 width, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
 			protected:
 				//\brief encode = UTF-8
-				std::string const & Description() const override;
+				std::string Description() const override;
 			public:
 				void BuildMipSubLevels() override;
 
@@ -198,7 +198,7 @@ namespace platform_ex {
 				explicit Texture3D(uint16 width, uint16 height, uint16 depth, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
 			protected:
 				//\brief encode = UTF-8
-				std::string const & Description() const override;
+				std::string  Description() const override;
 			public:
 				void BuildMipSubLevels() override;
 
@@ -250,7 +250,7 @@ namespace platform_ex {
 				explicit TextureCube(uint16 size, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
 			protected:
 				//\brief encode = UTF-8
-				std::string const & Description() const override;
+				std::string Description() const override;
 			public:
 				void BuildMipSubLevels() override;
 
