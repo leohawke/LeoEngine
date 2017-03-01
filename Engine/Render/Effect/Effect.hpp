@@ -8,6 +8,7 @@
 #include <LBase/linttype.hpp>
 #include <LBase/lmathtype.hpp>
 #include <LBase/any.h>
+#include <LBase/Debug.h>
 
 #include <tuple>
 #include <vector>
@@ -277,6 +278,14 @@ namespace platform::Render::Effect {
 			bind.target->Dirty(true);
 			return *this;
 		}
+
+		template<typename T>
+		T& Ref() {
+			if (bind.target)
+				return bind.target->template VariableInBuff<T>(bind.offset);
+			else
+				return Deref(*leo::any_cast<T*>(&value));
+		}
 	private:
 		leo::any value;
 		struct CBufferBind {
@@ -353,9 +362,18 @@ namespace platform::Render::Effect {
 
 		Parameter& GetParameter(const std::string& name);
 		Parameter& GetParameter(size_t hash);
+
+
 		
 		ConstantBuffer& GetConstantBuffer(const std::string& name);
 		ConstantBuffer& GetConstantBuffer(size_t hash);
+	protected:
+		Technique& GetTechnique(const std::string& name);
+
+		template<typename T>
+		T& GetParameterRef(const std::string& name){
+			return GetParameter(name).var.Ref<T>();
+		}
 	private:
 		void LoadAsset(leo::observer_ptr<asset::EffectAsset> pEffectAsset);
 	private:

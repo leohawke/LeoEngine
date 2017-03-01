@@ -123,6 +123,17 @@ namespace {
 
 platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect)
 {
+	auto CopyShader = [&](auto& shader,auto type) {
+		if (pShaderBlob.count(type)) {
+			auto pBlobAsset = pShaderBlob[type];
+			shader = std::make_pair(std::make_unique<byte[]>(pBlobAsset->GetBlob().second), pBlobAsset->GetBlob().second);
+			std::memcpy(shader.value().first.get(), pBlobAsset->GetBlob().first.get(), pBlobAsset->GetBlob().second);
+		}
+	};
+	
+	CopyShader(VertexShader, ShaderCompose::Type::VertexShader);
+	CopyShader(PixelShader, ShaderCompose::Type::PixelShader);
+
 	for (auto& pair : pShaderBlob) {
 		auto index = static_cast<leo::uint8>(pair.first);
 		auto& BlobInfo = pair.second->GetInfo();

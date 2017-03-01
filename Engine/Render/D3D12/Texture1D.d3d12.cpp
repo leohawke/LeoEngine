@@ -41,7 +41,7 @@ void Texture1D::BuildMipSubLevels()
 		auto & device = D3D12::Context::Instance().GetDevice();
 		auto & effect = *device.BlitEffect();
 		auto & tech = effect.BilinearCopy;
-		auto & pass = tech.GetPass(0);
+		auto & pass = tech.get().GetPass(0);
 		pass.Bind(effect);
 
 		auto& sc = static_cast<ShaderCompose&>(pass.GetShader(effect));

@@ -86,6 +86,9 @@
     <ClCompile Include="Render\GraphicsBuffer.cpp">
       <Filter>Render</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Effect\BlitEffect.cpp">
+      <Filter>Render\Effect</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -193,6 +196,9 @@
     </ClInclude>
     <ClInclude Include="Render\D3D12\GraphicsBuffer.hpp">
       <Filter>Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Effect\EffectProperty.h">
+      <Filter>Render\Effect</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

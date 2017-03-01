@@ -100,6 +100,13 @@ namespace platform::Render::Effect {
 			return key->Hash == hash;
 		})));
 	}
+	Technique & Effect::GetTechnique(const std::string & name)
+	{
+		auto hash = leo::constfn_hash(name);
+		return Deref(std::find_if(techniques.begin(), techniques.end(), [&](const NameKey& key) {
+			return key.Hash == hash;
+		}));
+	}
 }
 
 namespace platform::Render::Effect {
