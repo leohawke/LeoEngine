@@ -498,9 +498,11 @@ namespace platform_ex {
 				return d3d_caps;
 			}
 
-			platform::Render::Effect::BlitEffect * D3D12::Device::BlitEffect()
+			platform::Render::Effect::BiltEffect * D3D12::Device::BiltEffect()
 			{
-				return nullptr;
+				if (!bilt_effect)
+					bilt_effect = std::make_unique<platform::Render::Effect::BiltEffect>("Bilt");
+				return bilt_effect.get();
 			}
 
 			Context::Context()

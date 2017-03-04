@@ -11,31 +11,35 @@
 #include <LBase/lmathtype.hpp>
 
 namespace platform::Render::Effect {
-	class floatproperty {
+	template<typename T>
+	class scalarproperty {
 	public:
 		template<typename F>
-		floatproperty(leo::lref<float> v,F&& s,F && g)
+		scalarproperty(leo::lref<T> v,F&& s,F && g)
 			:ref(v),getter(g),setter(s)
 		{}
 
-		floatproperty(leo::lref<float> v)
+		scalarproperty(leo::lref<T> v)
 			:ref(v), getter([] {}), setter([] {})
 		{}
 
-		floatproperty& operator=(float v) {
+		scalarproperty& operator=(T v) {
 			ref = v;
 			setter();
 		}
 
-		operator float()  const lnothrow {
+		operator T()  const lnothrow {
 			getter();
 			return ref;
 		}
 	private:
-		leo::lref<float> ref;
+		leo::lref<T> ref;
 		std::function<void()> setter;
 		std::function<void()> getter;
 	};
+
+	using floatproperty = scalarproperty<float>;
+	using intproperty = scalarproperty<int>;
 
 	class float3property {
 	public:

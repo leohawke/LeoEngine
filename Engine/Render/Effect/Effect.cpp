@@ -82,7 +82,7 @@ namespace platform::Render::Effect {
 
 	Parameter & Effect::GetParameter(const std::string & name)
 	{
-		return GetParameter(std::hash<std::string>()(name));
+		return GetParameter(leo::constfn_hash(name));
 	}
 
 	Parameter & Effect::GetParameter(size_t hash)
@@ -116,6 +116,9 @@ namespace platform::Render::Effect {
 		//TODO Name Rule
 		auto EffectAsset = X::LoadEffectAsset(name + ".lsl");
 		LoadAsset(leo::make_observer(&EffectAsset));
+	}
+
+	Effect::~Effect() {
 	}
 
 	void Effect::LoadAsset(leo::observer_ptr<asset::EffectAsset> pEffectAsset)
@@ -170,12 +173,13 @@ namespace platform::Render::Effect {
 
 			auto& param = asset_params[i];
 			Parameter Param{ param.GetName(), param.GetNameHash(),param.GetType() };
-			parameters.emplace(Param.Hash, std::move(Param));
 
 			//其他类型的value不需要类型转换
 			auto optional_value = pEffectAsset->GetValue(i);
 			if (optional_value.has_value())
 				Param.var.value = optional_value.value();
+
+			parameters.emplace(Param.Hash, std::move(Param));
 		}
 
 		auto asset_techns = pEffectAsset->GetTechniquesRef();

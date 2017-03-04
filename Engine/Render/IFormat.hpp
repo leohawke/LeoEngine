@@ -483,6 +483,8 @@ namespace platform {
 				uint32 Count = 1;
 				uint32 Quality = 0;
 
+				SampleDesc() = default;
+
 				SampleDesc(uint32 count,uint32 quality)
 					:Count(count),Quality(quality)
 				{}

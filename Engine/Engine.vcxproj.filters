@@ -86,7 +86,7 @@
     <ClCompile Include="Render\GraphicsBuffer.cpp">
       <Filter>Render</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Effect\BlitEffect.cpp">
+    <ClCompile Include="Render\Effect\BiltEffect.cpp">
       <Filter>Render\Effect</Filter>
     </ClCompile>
   </ItemGroup>
@@ -173,9 +173,6 @@
     <ClInclude Include="Asset\EffectAsset.h">
       <Filter>Asset</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Effect\BlitEffect.h">
-      <Filter>Render\Effect</Filter>
-    </ClInclude>
     <ClInclude Include="Render\Effect\Effect.hpp">
       <Filter>Render\Effect</Filter>
     </ClInclude>
@@ -198,6 +195,9 @@
       <Filter>Render\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="Render\Effect\EffectProperty.h">
+      <Filter>Render\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Effect\BiltEffect.h">
       <Filter>Render\Effect</Filter>
     </ClInclude>
   </ItemGroup>

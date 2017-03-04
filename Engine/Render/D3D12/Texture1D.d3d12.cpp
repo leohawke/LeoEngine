@@ -39,7 +39,7 @@ void Texture1D::BuildMipSubLevels()
 	}
 	else {
 		auto & device = D3D12::Context::Instance().GetDevice();
-		auto & effect = *device.BlitEffect();
+		auto & effect = *device.BiltEffect();
 		auto & tech = effect.BilinearCopy;
 		auto & pass = tech.get().GetPass(0);
 		pass.Bind(effect);

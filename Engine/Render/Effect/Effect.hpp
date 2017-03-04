@@ -352,6 +352,7 @@ namespace platform::Render::Effect {
 	class Effect :public NameKey {
 	public:
 		Effect(const std::string& name);
+		virtual ~Effect();
 
 		void Bind(leo::uint8 index);
 		ShaderCompose& GetShader(leo::uint8 index);

@@ -5,7 +5,7 @@
 #ifndef LE_RENDER_D3D12_Context_h
 #define LE_RENDER_D3D12_Context_h 1
 
-#include "../Effect/BlitEffect.h"
+#include "../Effect/BiltEffect.h"
 #include "../IContext.h"
 #include "Adapter.h"
 #include "Display.h"
@@ -52,7 +52,7 @@ namespace platform_ex {
 
 				GraphicsBuffer* CreateConstantBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<ElementInitData const *>  init_data = nullptr) override;
 
-				platform::Render::Effect::BlitEffect* BlitEffect();
+				platform::Render::Effect::BiltEffect* BiltEffect();
 			public:
 				friend class Context;
 			
@@ -106,6 +106,8 @@ namespace platform_ex {
 				//@}
 
 				platform::Render::Caps d3d_caps;
+
+				std::unique_ptr<platform::Render::Effect::BiltEffect> bilt_effect;
 			};
 
 			class Context : public platform::Render::Context {

@@ -48,7 +48,7 @@
     <ClCompile Include="Render\D3D12\Texture2D.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Texture3D.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\TextureCube.d3d12.cpp" />
-    <ClCompile Include="Render\Effect\BlitEffect.cpp" />
+    <ClCompile Include="Render\Effect\BiltEffect.cpp" />
     <ClCompile Include="Render\Effect\Effect.cpp" />
     <ClCompile Include="Render\GraphicsBuffer.cpp" />
     <ClCompile Include="Render\IContext.cpp" />
@@ -82,7 +82,7 @@
     <ClInclude Include="Render\D3D12\test.h" />
     <ClInclude Include="Render\D3D12\Texture.h" />
     <ClInclude Include="Render\DeviceCaps.h" />
-    <ClInclude Include="Render\Effect\BlitEffect.h" />
+    <ClInclude Include="Render\Effect\BiltEffect.h" />
     <ClInclude Include="Render\Effect\Effect.hpp" />
     <ClInclude Include="Render\Effect\EffectProperty.h" />
     <ClInclude Include="Render\IContext.h" />
