@@ -545,9 +545,10 @@ namespace platform_ex {
 			{
 			}
 
-			void D3D12::Context::Push(const platform::Render::PipleState &)
+			void D3D12::Context::Push(const platform::Render::PipleState & ps)
 			{
-				throw leo::unimplemented();
+				d3d_cmd_lists[Device::Command_Render]->OMSetStencilRef(ps.DepthStencilState.front_stencil_ref);
+				d3d_cmd_lists[Device::Command_Render]->OMSetBlendFactor(ps.BlendState.blend_factor.begin());
 			}
 
 			void Context::ContextEx(ID3D12Device * d3d_device, ID3D12CommandQueue * cmd_queue)

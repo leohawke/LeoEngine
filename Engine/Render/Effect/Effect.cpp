@@ -21,7 +21,7 @@ namespace platform::Render::Effect {
 	}
 	void Pass::Bind(Effect & effect)
 	{
-		Context::Instance().Push(state);
+		Context::Instance().Push(*state);
 		effect.GetShader(bind_index).Bind();
 	}
 	void Pass::UnBind(Effect & effect)
@@ -34,7 +34,7 @@ namespace platform::Render::Effect {
 	}
 	PipleState & Pass::GetState()
 	{
-		return state;
+		return *state;
 	}
 
 	void ConstantBuffer::Update() {
@@ -198,7 +198,8 @@ namespace platform::Render::Effect {
 				ShaderCompose* pCompose = Context::Instance().GetDevice().CreateShaderCompose(asset_blobs,leo::make_observer(this));
 				pass.bind_index =static_cast<leo::uint8>(shaders.size());
 				shaders.emplace_back(pCompose);
-				pass.state = asset_pass.GetPipleState();
+				//TODO Create PipleState By Device!
+				pass.state =std::make_unique<PipleState>(asset_pass.GetPipleState());
 				technique.passes.emplace_back(std::move(pass));
 			}
 			techniques.emplace_back(std::move(technique));

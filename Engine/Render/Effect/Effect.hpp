@@ -334,7 +334,7 @@ namespace platform::Render::Effect {
 
 		friend class Effect;
 	private:
-		PipleState state;
+		std::unique_ptr<PipleState> state;
 		leo::uint8 bind_index;
 	};
 

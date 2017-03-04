@@ -79,4 +79,6 @@ namespace platform::Render {
 	{
 		return std::memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
 	}
+
+	PipleState::~PipleState() = default;
 }

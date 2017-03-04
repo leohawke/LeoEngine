@@ -89,6 +89,9 @@
     <ClCompile Include="Render\Effect\BiltEffect.cpp">
       <Filter>Render\Effect</Filter>
     </ClCompile>
+    <ClCompile Include="Render\InputLayout.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -199,6 +202,9 @@
     </ClInclude>
     <ClInclude Include="Render\Effect\BiltEffect.h">
       <Filter>Render\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\InputLayout.hpp">
+      <Filter>Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

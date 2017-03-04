@@ -380,6 +380,8 @@ namespace platform::Render {
 			:RasterizerState(r_desc), DepthStencilState(ds_desc), BlendState(b_desc)
 		{}
 
+		virtual ~PipleState();
+
 	public:
 		RasterizerDesc RasterizerState;
 		DepthStencilDesc DepthStencilState;
