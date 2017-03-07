@@ -1,5 +1,6 @@
 #include "EffectAsset.h"
 #include <LBase/string.hpp>
+#include <LBase/sutility.h>
 
 void asset::EffectNodeAsset::SetName(const std::string & Name)
 {
@@ -29,8 +30,7 @@ public:
 				return i;
 			}
 		}
-		LAssert(false,"Non't Support Name");
-		return 0xFFFFFFFF;
+		throw leo::unsupported();
 	}
 
 	std::string const & type_name(uint32_t code) const
@@ -39,8 +39,7 @@ public:
 		{
 			return types[code];
 		}
-		LAssert(false, "Non't Support Code");
-		return "";
+		throw leo::unsupported();
 	}
 
 	type_define()

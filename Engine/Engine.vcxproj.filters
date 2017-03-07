@@ -92,6 +92,9 @@
     <ClCompile Include="Render\InputLayout.cpp">
       <Filter>Render</Filter>
     </ClCompile>
+    <ClCompile Include="Render\D3D12\InputLayout.d3d12.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -205,6 +208,9 @@
     </ClInclude>
     <ClInclude Include="Render\InputLayout.hpp">
       <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\InputLayout.hpp">
+      <Filter>Render\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

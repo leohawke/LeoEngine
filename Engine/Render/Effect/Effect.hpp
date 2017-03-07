@@ -327,6 +327,8 @@ namespace platform::Render::Effect {
 
 	class Pass {
 	public:
+		Pass() = default;
+		Pass(Pass&&) = default;
 		void Bind(Effect &);
 		void UnBind(Effect &);
 		ShaderCompose& GetShader(Effect&);
@@ -340,6 +342,9 @@ namespace platform::Render::Effect {
 
 	class Technique : public NameKey {
 	public:
+		Technique() = default;
+		Technique(Technique&&) = default;
+
 		using NameKey::NameKey;
 		
 		Pass& GetPass(leo::uint8 index);

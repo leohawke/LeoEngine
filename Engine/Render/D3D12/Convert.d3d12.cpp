@@ -557,3 +557,56 @@ D3D12_COMPARISON_FUNC platform_ex::Windows::D3D12::Convert(platform::Render::Com
 	}
 	leo::raise_exception(leo::unsupported());
 }
+
+std::vector<D3D12_INPUT_ELEMENT_DESC> platform_ex::Windows::D3D12::Convert(const platform::Render::Vertex::Stream & stream)
+{
+	using platform::Render::Vertex::Usage;
+	std::vector<D3D12_INPUT_ELEMENT_DESC> result;
+
+	uint16 elem_offset = 0;
+	for (auto& element : stream.elements) {
+		D3D12_INPUT_ELEMENT_DESC d3d12_element;
+		d3d12_element.SemanticIndex = element.usage_index;
+		d3d12_element.Format = Convert(element.format);
+		d3d12_element.AlignedByteOffset = elem_offset;
+		if (stream.type == platform::Render::Vertex::Stream::Geomerty) {
+			d3d12_element.InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+			d3d12_element.InstanceDataStepRate = 0;
+		}
+
+		switch (element.usage) {
+		case Usage::Position:
+			d3d12_element.SemanticName = "POSITION";
+			break;
+		case Usage::Normal:
+			d3d12_element.SemanticName = "NORMAL";
+			break;
+		case Usage::Binoraml:
+			d3d12_element.SemanticName = "BINORMAL";
+			break;
+		case Usage::Tangent:
+			d3d12_element.SemanticName = "TANGENT";
+			break;
+
+		case Usage::Diffuse:
+		case Usage::Specular:
+			d3d12_element.SemanticName = "COLOR";
+			break;
+
+		case Usage::BlendIndex:
+			d3d12_element.SemanticName = "BLENDINDEX";
+			break;
+
+		case Usage::BlendWeight:
+			d3d12_element.SemanticName = "BLENDWEIGHT";
+
+		case Usage::TextureCoord:
+			d3d12_element.SemanticName = "TEXCOORD";
+		}
+
+		elem_offset += element.GetElementSize();
+		result.emplace_back(d3d12_element);
+	}
+
+	return result;
+}

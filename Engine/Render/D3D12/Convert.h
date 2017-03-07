@@ -8,6 +8,7 @@
 
 #include "../IFormat.hpp"
 #include "../PipleState.h"
+#include "../InputLayout.hpp"
 #include <dxgiformat.h>
 #include "d3d12_dxgi.h"
 
@@ -22,6 +23,8 @@ namespace platform_ex {
 			D3D12_TEXTURE_ADDRESS_MODE Convert(platform::Render::TexAddressingMode mode);
 			D3D12_FILTER Convert(platform::Render::TexFilterOp op);
 			D3D12_COMPARISON_FUNC Convert(platform::Render::CompareOp op);
+
+			std::vector<D3D12_INPUT_ELEMENT_DESC> Convert(const platform::Render::Vertex::Stream& stream);
 		}
 	}
 }

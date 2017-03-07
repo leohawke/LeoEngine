@@ -27,6 +27,8 @@ namespace platform::Render {
 			Specular,//¶¥µã¸ß¹â
 			BlendWeight,
 			BlendIndex,
+
+			TextureCoord,
 		};
 
 		struct Element {
@@ -51,8 +53,8 @@ namespace platform::Render {
 
 		struct Stream {
 			enum Type {
+				Geomerty,
 				//Instance,
-				Geomerty
 			} type;
 
 			std::shared_ptr<GraphicsBuffer> stream;

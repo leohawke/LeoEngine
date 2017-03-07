@@ -41,6 +41,7 @@
     <ClCompile Include="Render\D3D12\d3d12_dxgi.cpp" />
     <ClCompile Include="Render\D3D12\Display.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\GraphicsBuffer.d3d12.cpp" />
+    <ClCompile Include="Render\D3D12\InputLayout.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\RenderView.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\ShaderCompose.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Texture.d3d12.cpp" />
@@ -75,6 +76,7 @@
     <ClInclude Include="Render\D3D12\Context.h" />
     <ClInclude Include="Render\D3D12\Convert.h" />
     <ClInclude Include="Render\D3D12\GraphicsBuffer.hpp" />
+    <ClInclude Include="Render\D3D12\InputLayout.hpp" />
     <ClInclude Include="Render\D3D12\PipleState.h" />
     <ClInclude Include="Render\D3D12\ShaderCompose.h" />
     <ClInclude Include="Render\D3D12\d3d12_dxgi.h" />
