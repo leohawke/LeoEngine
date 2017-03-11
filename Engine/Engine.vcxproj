@@ -42,6 +42,7 @@
     <ClCompile Include="Render\D3D12\Display.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\GraphicsBuffer.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\InputLayout.d3d12.cpp" />
+    <ClCompile Include="Render\D3D12\PipleState.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\RenderView.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\ShaderCompose.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Texture.d3d12.cpp" />

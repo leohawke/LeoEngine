@@ -8,9 +8,14 @@
 extern HWND g_hwnd;
 #endif
 
+namespace Vertex = platform::Render::Vertex;
+namespace Buffer = platform::Render::Buffer;
+
 namespace platform_ex {
 	namespace Windows {
 		namespace D3D12 {
+
+
 			Device::Device(DXGI::Adapter & adapter)
 			{
 				std::vector<D3D_FEATURE_LEVEL> feature_levels = {
@@ -174,12 +179,17 @@ namespace platform_ex {
 				return std::make_unique<ShaderCompose>(pShaderBlob,pEffect).release();
 			}
 
-			GraphicsBuffer * Device::CreateConstantBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<ElementInitData const*> init_data)
+			GraphicsBuffer * Device::CreateConstantBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const*> init_data)
 			{
 				return CreateBuffer(usage, access, size_in_byte,format, init_data);
 			}
 
-			GraphicsBuffer *Device::CreateBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<ElementInitData const*> init_data)
+			PipleState * Device::CreatePipleState(const platform::Render::PipleState & state)
+			{
+				return std::make_unique<PipleState>(state).release();
+			}
+
+			GraphicsBuffer *Device::CreateBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const*> init_data)
 			{
 				auto buffer = std::make_unique<GraphicsBuffer>(usage, access, (size_in_byte + 255)&~255, format);
 				if (init_data.has_value())
@@ -498,11 +508,30 @@ namespace platform_ex {
 				return d3d_caps;
 			}
 
-			platform::Render::Effect::BiltEffect * D3D12::Device::BiltEffect()
+			platform::Render::Effect::BiltEffect& D3D12::Device::BiltEffect()
 			{
 				if (!bilt_effect)
 					bilt_effect = std::make_unique<platform::Render::Effect::BiltEffect>("Bilt");
-				return bilt_effect.get();
+				return Deref(bilt_effect);
+			}
+
+			platform::Render::InputLayout& D3D12::Device::PostProcessLayout()
+			{
+				if (!postprocess_layout)
+				{
+					postprocess_layout = std::make_unique<InputLayout>();
+					postprocess_layout->SetTopoType(platform::Render::InputLayout::TriangleStrip);
+					
+					math::float2 postprocess_pos[] = {
+						math::float2(-1,+1),
+						math::float2(+1,+1),
+						math::float2(-1,-1),
+						math::float2(+1,-1),
+					};
+
+					postprocess_layout->BindVertexStream(share_raw(CreateBuffer(Buffer::Usage::Static, EAccessHint::EA_GPURead | EAccessHint::EA_Immutable, sizeof(postprocess_pos), EFormat::EF_Unknown, postprocess_pos)), { Vertex::Element{ Vertex::Position,0,EFormat::EF_GR32F } });
+				}
+				return Deref(postprocess_layout);
 			}
 
 			Context::Context()

@@ -65,7 +65,7 @@ namespace platform::Render {
 		};
 	}
 
-	class InputLayout {
+	class InputLayout :public leo::noncopyable {
 	public:
 		enum TopologyType {
 			PointList,

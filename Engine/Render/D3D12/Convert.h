@@ -25,6 +25,20 @@ namespace platform_ex {
 			D3D12_COMPARISON_FUNC Convert(platform::Render::CompareOp op);
 
 			std::vector<D3D12_INPUT_ELEMENT_DESC> Convert(const platform::Render::Vertex::Stream& stream);
+
+			D3D12_PRIMITIVE_TOPOLOGY_TYPE Convert(platform::Render::InputLayout::TopologyType type);
+
+			D3D12_BLEND_DESC Convert(const platform::Render::BlendDesc& desc);
+			D3D12_RASTERIZER_DESC Convert(const platform::Render::RasterizerDesc& desc);
+			D3D12_DEPTH_STENCIL_DESC Convert(const platform::Render::DepthStencilDesc& desc);
+
+			D3D12_BLEND_OP Convert(platform::Render::BlendOp op);
+			D3D12_BLEND Convert(platform::Render::BlendFactor factor);
+
+			D3D12_FILL_MODE Convert(platform::Render::RasterizerMode mode);
+			D3D12_CULL_MODE Convert(platform::Render::CullMode mode);
+
+			D3D12_STENCIL_OP Convert(platform::Render::StencilOp op);
 		}
 	}
 }

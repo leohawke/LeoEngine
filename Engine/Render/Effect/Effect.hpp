@@ -171,7 +171,7 @@ namespace platform::Render {
 }
 
 namespace platform::Render::Effect {
-	struct NameKey{
+	struct NameKey : public leo::noncopyable{
 		NameKey(const std::string& name)
 			:NameKey(name,std::hash<std::string>()(name))
 		{}

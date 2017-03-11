@@ -39,14 +39,14 @@ void Texture1D::BuildMipSubLevels()
 	}
 	else {
 		auto & device = D3D12::Context::Instance().GetDevice();
-		auto & effect = *device.BiltEffect();
+		auto & effect = device.BiltEffect();
 		auto & tech = effect.BilinearCopy;
 		auto & pass = tech.get().GetPass(0);
 		pass.Bind(effect);
 
 		auto& sc = static_cast<ShaderCompose&>(pass.GetShader(effect));
 
-		//RenderLayout& rl = static_cast<RenderLayout&>(PostProcessLayout {});
+		auto & rl =static_cast<InputLayout&>(device.PostProcessLayout());
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC gps_desc {};
 		gps_desc.pRootSignature = sc.RootSignature();
 		{
@@ -65,10 +65,12 @@ void Texture1D::BuildMipSubLevels()
 		gps_desc.SampleMask = 0xFFFFFFFF;
 		gps_desc.RasterizerState = state.RasterizerState;
 		
-		//gps_desc.InputLayout << rl.InputLayout;
+		gps_desc.InputLayout.NumElements = static_cast<UINT>(rl.GetInputDesc().size());
+		gps_desc.InputLayout.pInputElementDescs = rl.GetInputDesc().data();
 
-		gps_desc.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFF;//rl.IndexFormat <=
-		gps_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		gps_desc.IBStripCutValue =rl.GetIndexFormat() == EFormat::EF_R16UI ?D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFF: D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFFFFFF;
+
+		gps_desc.PrimitiveTopologyType = Convert(rl.GetTopoType());
 
 		gps_desc.NumRenderTargets = 1;
 		gps_desc.RTVFormats[0] = dxgi_format;
@@ -87,36 +89,37 @@ void Texture1D::BuildMipSubLevels()
 		gps_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
 		COMPtr<ID3D12PipelineState> pso;
-		//<<device.CreateGraphicsPipelineState(pso):
 		device->CreateGraphicsPipelineState(&gps_desc, COMPtr_RefParam(pso, IID_ID3D12PipelineState));
 
 		auto& cmd_list = D3D12::Context::Instance().GetCommandList(Device::Command_Render);
 		cmd_list->SetPipelineState(pso.Get());
 		cmd_list->SetGraphicsRootSignature(gps_desc.pRootSignature);
 
-		/*
-		COMPtr<ID3D12DescriptorHeap> dynamic_heap = device.CreateDynamicCbcSRVUAVDescriptorHeap(array_size);
-		auto & sampler_heap = sc.SamplerHeap();
+		COMPtr<ID3D12DescriptorHeap> dynamic_heap;
+		D3D12_DESCRIPTOR_HEAP_DESC cbv_srv_heap_desc;
+		cbv_srv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		cbv_srv_heap_desc.NumDescriptors = array_size*(mipmap_size -1);
+		cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		cbv_srv_heap_desc.NodeMask = 0;
+		device->CreateDescriptorHeap(&cbv_srv_heap_desc,COMPtr_RefParam(dynamic_heap,IID_ID3D12DescriptorHeap));
+		auto  sampler_heap = sc.SamplerHeap();
 
-		*/
-		ID3D12DescriptorHeap* heaps[] = { nullptr,nullptr };/*dynamic_heap.Get(),sampler_heap.Get()*/
+		ID3D12DescriptorHeap* heaps[] = { dynamic_heap.Get(),sampler_heap };
 		cmd_list->SetDescriptorHeaps(static_cast<UINT>(leo::arrlen(heaps)), heaps);
 
-		/*
 		if(sampler_heap)
-			cmd_List->SetGraphicRootDescriptorTable(1,sampler_heap->GetGPUDescriptorHandleForHeapStart());
-		*/
+			cmd_list->SetGraphicsRootDescriptorTable(1,sampler_heap->GetGPUDescriptorHandleForHeapStart());
 
-		/*
-		auto & vb = static_cast<GraphicsBuffer&>(rl.GetVertexStream());
+		
+		auto & vb = static_cast<GraphicsBuffer&>(Deref(rl.GetVertexStream(0).stream));
 
 		D3D12_VERTEX_BUFFER_VIEW vbv;
-		vbv.BufferLocation = vb.GetGPUVirtualAddress();
-		vbv.SizeInBytes = vb.Size();
-		vbv.StrideInBytes = rl.VertexSize(0);
+		vbv.BufferLocation = vb.Resource()->GetGPUVirtualAddress();
+		vbv.SizeInBytes = vb.GetSize();
+		vbv.StrideInBytes = rl.GetVertexStream(0).vertex_size;
 
 		cmd_list->IASetVertexBuffers(0, 1, &vbv);
-		*/
+		
 		cmd_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 		D3D12_VIEWPORT vp;
@@ -145,14 +148,14 @@ void Texture1D::BuildMipSubLevels()
 		std::swap(barrier_after[0].Transition.StateBefore, barrier_after[0].Transition.StateAfter);
 		std::swap(barrier_after[1].Transition.StateBefore, barrier_after[1].Transition.StateAfter);
 
-		/*auto cpu_cbv_srv_uav_handle = dynamic_heap->GetCPUDescriptorHandleForHeapStart();
-		auto gpu_cbv_srv_uav_handle = dynamic_heap->GetGPUDescriptorHandleForHeapStart();*/
+		auto cpu_cbv_srv_uav_handle = dynamic_heap->GetCPUDescriptorHandleForHeapStart();
+		auto gpu_cbv_srv_uav_handle = dynamic_heap->GetGPUDescriptorHandleForHeapStart();
 		auto srv_desc_size = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		for (uint8_t index = 0; index < array_size; ++index)
 		{
 			for (uint8_t level = 1; level < mipmap_size; ++level)
 			{
-				/*cmd_list->SetGraphicsRootDescriptorTable(0, gpu_cbv_srv_uav_handle);*/
+				cmd_list->SetGraphicsRootDescriptorTable(0, gpu_cbv_srv_uav_handle);
 
 				barrier_before[0].Transition.Subresource = CalcSubresource(level - 1, index, 0, mipmap_size, array_size);
 				barrier_before[1].Transition.Subresource = CalcSubresource(level, index, 0, mipmap_size, array_size);
@@ -161,7 +164,7 @@ void Texture1D::BuildMipSubLevels()
 				auto const & rt_handle = Texture::RetriveRenderTargetView(index, 1, level)->GetHandle();
 
 				auto const & sr_handle = RetriveShaderResourceView(index, 1, level - 1, 1)->GetHandle();
-				/*device->CopyDescriptorsSimple(1, cpu_cbv_srv_uav_handle, sr_handle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);*/
+				device->CopyDescriptorsSimple(1, cpu_cbv_srv_uav_handle, sr_handle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 				cmd_list->OMSetRenderTargets(1, &rt_handle, false, nullptr);
 
@@ -179,8 +182,8 @@ void Texture1D::BuildMipSubLevels()
 				barrier_after[1].Transition.Subresource = barrier_before[1].Transition.Subresource;
 				cmd_list->ResourceBarrier(2, barrier_after);
 
-				/*cpu_cbv_srv_uav_handle.ptr += srv_desc_size;
-				gpu_cbv_srv_uav_handle.ptr += srv_desc_size;*/
+				cpu_cbv_srv_uav_handle.ptr += srv_desc_size;
+				gpu_cbv_srv_uav_handle.ptr += srv_desc_size;
 			}
 		}
 

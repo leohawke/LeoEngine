@@ -610,3 +610,200 @@ std::vector<D3D12_INPUT_ELEMENT_DESC> platform_ex::Windows::D3D12::Convert(const
 
 	return result;
 }
+
+D3D12_PRIMITIVE_TOPOLOGY_TYPE platform_ex::Windows::D3D12::Convert(platform::Render::InputLayout::TopologyType type)
+{
+	switch (type)
+	{
+	case platform::Render::InputLayout::PointList:
+		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+	case platform::Render::InputLayout::LineList:
+		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+	case platform::Render::InputLayout::LineStrip:
+		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+	case platform::Render::InputLayout::TriangleList:
+		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	case platform::Render::InputLayout::TriangleStrip:
+		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	}
+	return D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED;
+}
+
+D3D12_BLEND_DESC platform_ex::Windows::D3D12::Convert(const platform::Render::BlendDesc & desc)
+{
+	D3D12_BLEND_DESC result;
+	result.AlphaToCoverageEnable = desc.alpha_to_coverage_enable;
+	result.IndependentBlendEnable = desc.independent_blend_enable;
+	for (auto i = 0; i != leo::arrlen(result.RenderTarget); ++i) {
+		result.RenderTarget[i].BlendEnable = desc.blend_enable[i];
+		//TODO Support LogicOp
+		result.RenderTarget[i].LogicOpEnable = false/* desc.logic_op_enable[i]*/;
+		result.RenderTarget[i].LogicOp = D3D12_LOGIC_OP_NOOP;
+		result.RenderTarget[i].SrcBlend = Convert(desc.src_blend[i]);
+		result.RenderTarget[i].DestBlend = Convert(desc.dst_blend[i]);
+		result.RenderTarget[i].BlendOp = Convert(desc.blend_op[i]);
+		result.RenderTarget[i].SrcBlendAlpha = Convert(desc.src_blend_alpha[i]);
+		result.RenderTarget[i].DestBlendAlpha = Convert(desc.dst_blend_alpha[i]);
+		result.RenderTarget[i].BlendOpAlpha = Convert(desc.blend_op_alpha[i]);
+		result.RenderTarget[i].RenderTargetWriteMask = desc.color_write_mask[i];
+	}
+	return result;
+}
+
+
+D3D12_RASTERIZER_DESC platform_ex::Windows::D3D12::Convert(const platform::Render::RasterizerDesc & desc)
+{
+	D3D12_RASTERIZER_DESC result;
+	result.CullMode = Convert(desc.cull);
+	result.FillMode = Convert(desc.mode);
+	result.FrontCounterClockwise = desc.ccw;
+	result.DepthClipEnable = desc.depth_clip_enable;
+	result.MultisampleEnable = desc.multisample_enable;
+
+	//TODO Support DepthBias
+	result.DepthBias = 0;
+	result.DepthBiasClamp = 0;
+	result.SlopeScaledDepthBias = 0;
+
+	result.AntialiasedLineEnable = false;
+	result.ForcedSampleCount = 0;
+	result.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+
+	return result;
+}
+
+D3D12_STENCIL_OP platform_ex::Windows::D3D12::Convert(platform::Render::StencilOp op)
+{
+	switch (op)
+	{
+	case StencilOp::Keep:
+		return D3D12_STENCIL_OP_KEEP;
+	case StencilOp::Zero:
+		return D3D12_STENCIL_OP_ZERO;
+	case StencilOp::Replace:
+		return D3D12_STENCIL_OP_REPLACE;
+	case StencilOp::Incr:
+		return D3D12_STENCIL_OP_INCR_SAT;
+	case StencilOp::Decr:
+		return D3D12_STENCIL_OP_DECR_SAT;
+	case StencilOp::Invert:
+		return D3D12_STENCIL_OP_INVERT;
+	case StencilOp::Incr_Wrap:
+		return D3D12_STENCIL_OP_INCR;
+	case StencilOp::Decr_Wrap:
+		return D3D12_STENCIL_OP_DECR;
+
+	};
+	return D3D12_STENCIL_OP_KEEP;
+
+}
+
+D3D12_DEPTH_STENCIL_DESC platform_ex::Windows::D3D12::Convert(const platform::Render::DepthStencilDesc & desc)
+{
+	D3D12_DEPTH_STENCIL_DESC result;
+
+	result.DepthEnable = desc.depth_enable;
+	result.DepthWriteMask = (D3D12_DEPTH_WRITE_MASK)desc.depth_write_mask;
+	result.DepthFunc =Convert(desc.depth_func);
+	result.StencilEnable = desc.front_stencil_enable;
+	result.StencilReadMask =static_cast<UINT8>(desc.front_stencil_read_mask);
+	result.StencilWriteMask = static_cast<UINT8>(desc.front_stencil_write_mask);
+
+	result.BackFace.StencilFunc = Convert(desc.back_stencil_func);
+	result.BackFace.StencilDepthFailOp =Convert( desc.back_stencil_depth_fail);
+	result.BackFace.StencilFailOp = Convert( desc.back_stencil_fail);
+	result.BackFace.StencilPassOp = Convert(desc.back_stencil_pass);
+
+	result.FrontFace.StencilFunc = Convert(desc.front_stencil_func);
+	result.FrontFace.StencilDepthFailOp = Convert(desc.front_stencil_depth_fail);
+	result.FrontFace.StencilFailOp = Convert(desc.front_stencil_fail);
+	result.FrontFace.StencilPassOp = Convert(desc.front_stencil_pass);
+
+	return result;
+}
+
+D3D12_BLEND_OP platform_ex::Windows::D3D12::Convert(platform::Render::BlendOp op)
+{
+	switch (op)
+	{
+	case platform::Render::BlendOp::Add:
+		return D3D12_BLEND_OP_ADD;
+	case platform::Render::BlendOp::Sub:
+		return D3D12_BLEND_OP_SUBTRACT;
+	case platform::Render::BlendOp::Rev_Sub:
+		return D3D12_BLEND_OP_REV_SUBTRACT;
+	case platform::Render::BlendOp::Min:
+		return D3D12_BLEND_OP_MIN;
+	case platform::Render::BlendOp::Max:
+		return D3D12_BLEND_OP_MIN;
+	}
+	throw leo::unsupported();
+}
+
+D3D12_BLEND platform_ex::Windows::D3D12::Convert(platform::Render::BlendFactor factor)
+{
+	switch (factor)
+	{
+	case platform::Render::BlendFactor::Zero:
+		return D3D12_BLEND_ZERO;
+	case platform::Render::BlendFactor::One:
+		return D3D12_BLEND_ONE;
+	case platform::Render::BlendFactor::Src_Alpha:
+		return D3D12_BLEND_SRC_ALPHA;
+	case platform::Render::BlendFactor::Dst_Alpha:
+		return D3D12_BLEND_DEST_ALPHA;
+	case platform::Render::BlendFactor::Inv_Src_Alpha:
+		return D3D12_BLEND_SRC_ALPHA;
+	case platform::Render::BlendFactor::Inv_Dst_Alpha:
+		return D3D12_BLEND_INV_DEST_ALPHA;
+	case platform::Render::BlendFactor::Src_Color:
+		return D3D12_BLEND_SRC_COLOR;
+	case platform::Render::BlendFactor::Dst_Color:
+		return D3D12_BLEND_DEST_COLOR;
+	case platform::Render::BlendFactor::Inv_Src_Color:
+		return D3D12_BLEND_INV_SRC_COLOR;
+	case platform::Render::BlendFactor::Inv_Dst_Color:
+		return D3D12_BLEND_INV_DEST_COLOR;
+	case platform::Render::BlendFactor::Src_Alpha_Sat:
+		return D3D12_BLEND_SRC_ALPHA_SAT;
+	case platform::Render::BlendFactor::Factor:
+		return D3D12_BLEND_BLEND_FACTOR;
+	case platform::Render::BlendFactor::Inv_Factor:
+		return D3D12_BLEND_INV_BLEND_FACTOR;
+	case platform::Render::BlendFactor::Src1_Alpha:
+		return D3D12_BLEND_SRC1_ALPHA;
+	case platform::Render::BlendFactor::Inv_Src1_Alpha:
+		return D3D12_BLEND_INV_SRC_ALPHA;
+	case platform::Render::BlendFactor::Src1_Color:
+		return D3D12_BLEND_SRC1_COLOR;
+	case platform::Render::BlendFactor::Inv_Src1_Color:
+		return D3D12_BLEND_INV_SRC1_COLOR;
+	}
+	throw leo::unsupported();
+}
+
+D3D12_FILL_MODE platform_ex::Windows::D3D12::Convert(platform::Render::RasterizerMode mode)
+{
+	switch (mode) {
+		//unsupported??
+	case RasterizerMode::Point:
+	case RasterizerMode::Line:
+		return D3D12_FILL_MODE_WIREFRAME;
+	case RasterizerMode::Face:
+		return D3D12_FILL_MODE_SOLID;
+	}
+	throw leo::unsupported();
+}
+
+D3D12_CULL_MODE platform_ex::Windows::D3D12::Convert(platform::Render::CullMode mode)
+{
+	switch (mode) {
+	case CullMode::Back:
+		return D3D12_CULL_MODE_BACK;
+	case CullMode::Front:
+		return D3D12_CULL_MODE_FRONT;
+	case CullMode::None:
+		return D3D12_CULL_MODE_NONE;
+	}
+	throw leo::unsupported();
+}

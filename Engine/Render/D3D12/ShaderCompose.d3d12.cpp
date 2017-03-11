@@ -17,7 +17,12 @@ namespace {
 
 		void operator()() {
 			platform::Render::TextureSubresource tex_subres;
-			param->Value(tex_subres);
+			try {
+				param->Value(tex_subres);
+			}
+			catch (leo::bad_any_cast&) {
+				Trace(platform::Descriptions::RecordLevel::Warning, "SetTextureSRV Value Null!\n");
+			}
 			if (tex_subres.tex) {
 				auto pTexture = dynamic_cast<D3D12::Texture*>(tex_subres.tex.get());
 				*psrvsrc = std::make_tuple(pTexture->Resource(),
@@ -218,6 +223,11 @@ ID3D12RootSignature * platform_ex::Windows::D3D12::ShaderCompose::RootSignature(
 	return root_signature.Get();
 }
 
+ID3D12DescriptorHeap * platform_ex::Windows::D3D12::ShaderCompose::SamplerHeap() const
+{
+	return sampler_heap.Get();
+}
+
 void platform_ex::Windows::D3D12::ShaderCompose::CreateRootSignature()
 {
 	std::array<size_t, NumTypes * 4> num;
@@ -232,7 +242,7 @@ void platform_ex::Windows::D3D12::ShaderCompose::CreateRootSignature()
 	}
 
 	auto& Device = Context::Instance().GetDevice();
-	root_signature.ReleaseAndGetRef() = nullptr;  //Device.CreateRootSignature
+	Device->CreateRootSignature(0, nullptr,num_sampler, COMPtr_RefParam(root_signature,IID_ID3D12RootSignature));
 
 	if (num_sampler > 0) {
 		D3D12_DESCRIPTOR_HEAP_DESC sampler_heap_desc;

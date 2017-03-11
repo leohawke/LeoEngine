@@ -34,7 +34,9 @@ namespace platform {
 		
 			virtual ShaderCompose* CreateShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<Effect::Effect> pEffect) = 0;
 
-			virtual GraphicsBuffer* CreateConstantBuffer(Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format,std::optional<ElementInitData const *>  init_data = nullptr) = 0;
+			virtual GraphicsBuffer* CreateConstantBuffer(Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format,std::optional<void const *>  init_data = nullptr) = 0;
+
+			virtual PipleState* CreatePipleState(const PipleState& state) = 0;
 		};
 	}
 }

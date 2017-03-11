@@ -4,6 +4,7 @@
 #include "../ITexture.hpp"
 
 #include <LBase/Debug.h>
+#include <LBase/memory.hpp>
 namespace platform::Render {
 	ShaderInfo::ShaderInfo(ShaderCompose::Type t)
 		:Type(t)
@@ -21,7 +22,7 @@ namespace platform::Render::Effect {
 	}
 	void Pass::Bind(Effect & effect)
 	{
-		Context::Instance().Push(*state);
+		Context::Instance().Push(Deref(state));
 		effect.GetShader(bind_index).Bind();
 	}
 	void Pass::UnBind(Effect & effect)
@@ -34,7 +35,7 @@ namespace platform::Render::Effect {
 	}
 	PipleState & Pass::GetState()
 	{
-		return *state;
+		return Deref(state);
 	}
 
 	void ConstantBuffer::Update() {
@@ -198,8 +199,7 @@ namespace platform::Render::Effect {
 				ShaderCompose* pCompose = Context::Instance().GetDevice().CreateShaderCompose(asset_blobs,leo::make_observer(this));
 				pass.bind_index =static_cast<leo::uint8>(shaders.size());
 				shaders.emplace_back(pCompose);
-				//TODO Create PipleState By Device!
-				pass.state =std::make_unique<PipleState>(asset_pass.GetPipleState());
+				pass.state = leo::unique_raw(Context::Instance().GetDevice().CreatePipleState(asset_pass.GetPipleState()));
 				technique.passes.emplace_back(std::move(pass));
 			}
 			techniques.emplace_back(std::move(technique));

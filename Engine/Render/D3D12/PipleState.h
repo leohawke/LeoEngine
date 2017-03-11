@@ -7,6 +7,9 @@
 namespace platform_ex::Windows::D3D12 {
 	class PipleState : public platform::Render::PipleState {
 	public:
+		using base = platform::Render::PipleState;
+		PipleState(const base&);
+
 		D3D12_BLEND_DESC BlendState;
 		D3D12_RASTERIZER_DESC RasterizerState;
 		D3D12_DEPTH_STENCIL_DESC DepthStencilState;

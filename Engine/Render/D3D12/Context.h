@@ -7,10 +7,12 @@
 
 #include "../Effect/BiltEffect.h"
 #include "../IContext.h"
+#include "InputLayout.hpp"
 #include "Adapter.h"
 #include "Display.h"
 #include "Texture.h"
 #include "ShaderCompose.h"
+#include "PipleState.h"
 #include "GraphicsBuffer.hpp"
 
 #include <UniversalDXSDK/d3d12.h>
@@ -48,11 +50,15 @@ namespace platform_ex {
 				ShaderCompose* CreateShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect) override;
 
 				//\brief D3D12 Buffer 创建时没有BIND_FLAG
-				GraphicsBuffer* CreateBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<ElementInitData const *>  init_data = nullptr);
+				GraphicsBuffer* CreateBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const*>  init_data = nullptr);
 
-				GraphicsBuffer* CreateConstantBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<ElementInitData const *>  init_data = nullptr) override;
+				GraphicsBuffer* CreateConstantBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const *>  init_data = nullptr) override;
 
-				platform::Render::Effect::BiltEffect* BiltEffect();
+				PipleState* CreatePipleState(const platform::Render::PipleState& state) override;
+
+				platform::Render::Effect::BiltEffect& BiltEffect();
+
+				platform::Render::InputLayout& PostProcessLayout();
 			public:
 				friend class Context;
 			
@@ -108,6 +114,7 @@ namespace platform_ex {
 				platform::Render::Caps d3d_caps;
 
 				std::unique_ptr<platform::Render::Effect::BiltEffect> bilt_effect;
+				std::unique_ptr<InputLayout> postprocess_layout;
 			};
 
 			class Context : public platform::Render::Context {

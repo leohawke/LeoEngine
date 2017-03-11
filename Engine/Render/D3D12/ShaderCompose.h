@@ -29,6 +29,7 @@ namespace platform_ex::Windows::D3D12 {
 	public:
 		ID3D12RootSignature* RootSignature() const;
 
+		ID3D12DescriptorHeap* SamplerHeap() const;
 	public:
 		std::optional<ShaderBlob> VertexShader;
 		std::optional<ShaderBlob> PixelShader;
