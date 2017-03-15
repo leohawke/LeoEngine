@@ -155,7 +155,7 @@ void Texture1D::BuildMipSubLevels()
 		{
 			for (uint8_t level = 1; level < mipmap_size; ++level)
 			{
-				cmd_list->SetGraphicsRootDescriptorTable(0, gpu_cbv_srv_uav_handle);
+				cmd_list->SetGraphicsRootDescriptorTable(2, gpu_cbv_srv_uav_handle);
 
 				barrier_before[0].Transition.Subresource = CalcSubresource(level - 1, index, 0, mipmap_size, array_size);
 				barrier_before[1].Transition.Subresource = CalcSubresource(level, index, 0, mipmap_size, array_size);
