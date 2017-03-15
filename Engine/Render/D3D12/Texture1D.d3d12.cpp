@@ -89,7 +89,7 @@ void Texture1D::BuildMipSubLevels()
 		gps_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
 		COMPtr<ID3D12PipelineState> pso;
-		device->CreateGraphicsPipelineState(&gps_desc, COMPtr_RefParam(pso, IID_ID3D12PipelineState));
+		CheckHResult(device->CreateGraphicsPipelineState(&gps_desc, COMPtr_RefParam(pso, IID_ID3D12PipelineState)));
 
 		auto& cmd_list = D3D12::Context::Instance().GetCommandList(Device::Command_Render);
 		cmd_list->SetPipelineState(pso.Get());
@@ -101,14 +101,14 @@ void Texture1D::BuildMipSubLevels()
 		cbv_srv_heap_desc.NumDescriptors = array_size*(mipmap_size -1);
 		cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		cbv_srv_heap_desc.NodeMask = 0;
-		device->CreateDescriptorHeap(&cbv_srv_heap_desc,COMPtr_RefParam(dynamic_heap,IID_ID3D12DescriptorHeap));
+		CheckHResult(device->CreateDescriptorHeap(&cbv_srv_heap_desc,COMPtr_RefParam(dynamic_heap,IID_ID3D12DescriptorHeap)));
 		auto  sampler_heap = sc.SamplerHeap();
 
 		ID3D12DescriptorHeap* heaps[] = { dynamic_heap.Get(),sampler_heap };
 		cmd_list->SetDescriptorHeaps(static_cast<UINT>(leo::arrlen(heaps)), heaps);
 
 		if(sampler_heap)
-			cmd_list->SetGraphicsRootDescriptorTable(1,sampler_heap->GetGPUDescriptorHandleForHeapStart());
+			cmd_list->SetGraphicsRootDescriptorTable(3,sampler_heap->GetGPUDescriptorHandleForHeapStart());
 
 		
 		auto & vb = static_cast<GraphicsBuffer&>(Deref(rl.GetVertexStream(0).stream));

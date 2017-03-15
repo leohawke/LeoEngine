@@ -220,7 +220,7 @@ void platform_ex::Windows::D3D12::ShaderCompose::UnBind()
 
 ID3D12RootSignature * platform_ex::Windows::D3D12::ShaderCompose::RootSignature() const
 {
-	return root_signature.Get();
+	return root_signature.get();
 }
 
 ID3D12DescriptorHeap * platform_ex::Windows::D3D12::ShaderCompose::SamplerHeap() const
@@ -242,7 +242,7 @@ void platform_ex::Windows::D3D12::ShaderCompose::CreateRootSignature()
 	}
 
 	auto& Device = Context::Instance().GetDevice();
-	Device->CreateRootSignature(0, nullptr,num_sampler, COMPtr_RefParam(root_signature,IID_ID3D12RootSignature));
+	root_signature = Device.CreateRootSignature(num, VertexShader.has_value(), false);
 
 	if (num_sampler > 0) {
 		D3D12_DESCRIPTOR_HEAP_DESC sampler_heap_desc;

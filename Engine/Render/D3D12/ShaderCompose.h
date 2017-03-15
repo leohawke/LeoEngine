@@ -63,7 +63,7 @@ namespace platform_ex::Windows::D3D12 {
 		parameter_bind_t GetBindFunc(ShaderParameterHandle const & p_handle,platform::Render::Effect::Parameter* param);
 	private:
 
-		COMPtr<ID3D12RootSignature> root_signature;
+		leo::observer_ptr<ID3D12RootSignature> root_signature;
 		COMPtr<ID3D12DescriptorHeap> sampler_heap;
 
 		std::vector<D3D12_RESOURCE_BARRIER> barriers;

@@ -19,6 +19,8 @@
 
 #include <LBase/concurrency.h>
 
+#include <unordered_map>
+
 namespace platform_ex {
 	namespace Windows {
 		namespace D3D12 {
@@ -53,6 +55,8 @@ namespace platform_ex {
 				GraphicsBuffer* CreateBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const*>  init_data = nullptr);
 
 				GraphicsBuffer* CreateConstantBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const *>  init_data = nullptr) override;
+
+				leo::observer_ptr<ID3D12RootSignature> CreateRootSignature(std::array<size_t, ShaderCompose::NumTypes * 4> num, bool vertex_shader, bool stream_output);
 
 				PipleState* CreatePipleState(const platform::Render::PipleState& state) override;
 
@@ -115,6 +119,8 @@ namespace platform_ex {
 
 				std::unique_ptr<platform::Render::Effect::BiltEffect> bilt_effect;
 				std::unique_ptr<InputLayout> postprocess_layout;
+
+				std::unordered_map<size_t, COMPtr<ID3D12RootSignature>> root_signatures;
 			};
 
 			class Context : public platform::Render::Context {
