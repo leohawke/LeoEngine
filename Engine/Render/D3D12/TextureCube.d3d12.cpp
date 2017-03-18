@@ -24,19 +24,24 @@ TextureCube::TextureCube(uint16 size_,
 }
 
 void TextureCube::BuildMipSubLevels(){
-	for (uint8 index = 0; index < GetArraySize(); ++index)
+	if (IsDepthFormat(format) || IsCompressedFormat(format))
 	{
-		for (int f = 0; f < 6; ++f)
+		for (uint8 index = 0; index < GetArraySize(); ++index)
 		{
-			CubeFaces const face = static_cast<CubeFaces>(f);
-			for (uint8 level = 1; level < GetNumMipMaps(); ++level)
+			for (int f = 0; f < 6; ++f)
 			{
-				Resize(*this, {{index, level, 0, 0, GetWidth(level), GetHeight(level) },face },
-				{ {index,static_cast<uint8>(level - 1), 0, 0, GetWidth(level - 1), GetHeight(level - 1) }, face
-			}, true);
+				CubeFaces const face = static_cast<CubeFaces>(f);
+				for (uint8 level = 1; level < GetNumMipMaps(); ++level)
+				{
+					Resize(*this, { {index, level, 0, 0, GetWidth(level), GetHeight(level) },face },
+					{ {index,static_cast<uint8>(level - 1), 0, 0, GetWidth(level - 1), GetHeight(level - 1) }, face
+					}, true);
+				}
 			}
 		}
 	}
+	else
+		DoHWBuildMipSubLevels(array_size, mipmap_size, size, size, 6);
 }
 
 void TextureCube::HWResourceCreate(ElementInitData const *  init_data) {

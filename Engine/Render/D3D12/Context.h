@@ -14,6 +14,7 @@
 #include "ShaderCompose.h"
 #include "PipleState.h"
 #include "GraphicsBuffer.hpp"
+#include "Fence.h"
 
 #include <UniversalDXSDK/d3d12.h>
 
@@ -137,15 +138,23 @@ namespace platform_ex {
 				const COMPtr<ID3D12GraphicsCommandList>& GetCommandList(Device::CommandType) const;
 				std::mutex& GetCommandListMutex(Device::CommandType);
 
+				void SyncCommand(Device::CommandType);
+				void ResetCommand(Device::CommandType);
+
+				const COMPtr<ID3D12CommandQueue> GetCommandQueue(Device::CommandType) const;
+
 				void CommitCommandList(Device::CommandType);
 				friend class Device;
 
 				void Push(const platform::Render::PipleState&);
-			private:
-				void ContextEx(ID3D12Device* device, ID3D12CommandQueue* cmd_queue);
+
+				void ClearPSOCache();
+
 				void CreateDeviceAndDisplay() override;
 			private:
-
+				void ContextEx(ID3D12Device* device, ID3D12CommandQueue* cmd_queue);
+			private:
+				array<std::unique_ptr<Fence>, Device::CommandTypeCount> fences;
 				DXGI::AdapterList adapter_list;
 
 				shared_ptr<Device> device;
@@ -153,6 +162,8 @@ namespace platform_ex {
 
 				array<COMPtr<ID3D12GraphicsCommandList>,Device::CommandTypeCount> d3d_cmd_lists;
 				array<std::mutex, Device::CommandTypeCount> cmd_list_mutexs;
+
+				array<COMPtr<ID3D12CommandQueue>, Device::CommandTypeCount-1> d3d_cmd_queues;
 			public:
 				static Context& Instance();
 			};

@@ -76,6 +76,8 @@ namespace platform_ex {
 					void*& data, uint32& row_pitch, uint32& slice_pitch);
 				void DoUnmap(uint32 subres);
 
+				void DoHWBuildMipSubLevels(uint8 array_size, uint8 mipmap_size, uint16 width, uint16 height = 0, uint8 facecount = 1);
+
 				template<typename _type>
 				ViewSimulation* Retrive(_type& desc, std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>>& maps);
 
@@ -85,7 +87,7 @@ namespace platform_ex {
 				ViewSimulation*  RetriveDSV(D3D12_DEPTH_STENCIL_VIEW_DESC const & desc);
 			protected:
 				DXGI_FORMAT dxgi_format;
-
+				D3D12_RESOURCE_DESC resource_desc;
 				COMPtr<ID3D12Resource> texture;
 				COMPtr<ID3D12Resource> texture_upload_heaps;
 				COMPtr<ID3D12Resource> texture_readback_heaps;
@@ -126,6 +128,7 @@ namespace platform_ex {
 				ViewSimulation* RetriveShaderResourceView(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) override;
 
 				ViewSimulation* RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level) override;
+				ViewSimulation* RetriveRenderTargetView(uint8 first_array_index, uint8 num_items, uint8 level);
 
 				ViewSimulation* RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) override;
 				ViewSimulation* RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) override;

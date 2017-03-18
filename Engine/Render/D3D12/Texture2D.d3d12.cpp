@@ -27,17 +27,19 @@ Texture2D::Texture2D(uint16 height_, uint16 width_,
 
 void Texture2D::BuildMipSubLevels()
 {
-	for (uint8 index = 0; index != GetArraySize(); ++index)
+	if (IsDepthFormat(format) || IsCompressedFormat(format))
 	{
-		for (uint8 level = 1; level != GetNumMipMaps(); ++level)
+		for (uint8 index = 0; index != GetArraySize(); ++index)
 		{
-			Resize(*this, { index, level, 0, 0, GetWidth(level), GetHeight(level) },
-			{ index, static_cast<uint8>(level - 1), 0, 0, GetWidth(level - 1), GetHeight(level - 1) }, true);
+			for (uint8 level = 1; level != GetNumMipMaps(); ++level)
+			{
+				Resize(*this, { index, level, 0, 0, GetWidth(level), GetHeight(level) },
+				{ index, static_cast<uint8>(level - 1), 0, 0, GetWidth(level - 1), GetHeight(level - 1) }, true);
+			}
 		}
 	}
-
-	//TODO GPU Support
-	//Wait Effect
+	else
+		DoHWBuildMipSubLevels(array_size,mipmap_size,width,height);
 }
 
 void Texture2D::HWResourceCreate(ElementInitData const *  init_data)

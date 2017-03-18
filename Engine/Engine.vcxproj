@@ -40,6 +40,7 @@
     <ClCompile Include="Render\D3D12\Convert.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\d3d12_dxgi.cpp" />
     <ClCompile Include="Render\D3D12\Display.d3d12.cpp" />
+    <ClCompile Include="Render\D3D12\Fence.cpp" />
     <ClCompile Include="Render\D3D12\GraphicsBuffer.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\InputLayout.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\PipleState.d3d12.cpp" />
@@ -76,6 +77,7 @@
     <ClInclude Include="Render\D3D12\Adapter.h" />
     <ClInclude Include="Render\D3D12\Context.h" />
     <ClInclude Include="Render\D3D12\Convert.h" />
+    <ClInclude Include="Render\D3D12\Fence.h" />
     <ClInclude Include="Render\D3D12\GraphicsBuffer.hpp" />
     <ClInclude Include="Render\D3D12\InputLayout.hpp" />
     <ClInclude Include="Render\D3D12\PipleState.h" />

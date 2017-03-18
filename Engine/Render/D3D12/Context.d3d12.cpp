@@ -728,9 +728,6 @@ namespace platform_ex {
 					}
 				}
 #endif
-#if TEST_CODE
-				CreateDeviceAndDisplay();
-#endif
 			}
 
 			DXGI::Adapter & Context::DefaultAdapter()
@@ -740,6 +737,12 @@ namespace platform_ex {
 
 			void D3D12::Context::SyncCPUGPU(bool force)
 			{
+				CommitCommandList(Device::Command_Render);
+				SyncCommand(Device::Command_Render);
+
+				ResetCommand(Device::Command_Render);
+
+				ClearPSOCache();
 			}
 
 			const COMPtr<ID3D12GraphicsCommandList> & D3D12::Context::GetCommandList(Device::CommandType index) const
@@ -752,8 +755,35 @@ namespace platform_ex {
 				return cmd_list_mutexs[index];
 			}
 
-			void D3D12::Context::CommitCommandList(Device::CommandType)
+			void D3D12::Context::SyncCommand(Device::CommandType type)
 			{
+				auto val = fences[type]->Signal((Fence::Type)type);
+				fences[type]->Wait(val);
+			}
+
+			void D3D12::Context::ResetCommand(Device::CommandType type)
+			{
+				CheckHResult(GetDevice().d3d_cmd_allocators[type]->Reset());
+				CheckHResult(d3d_cmd_lists[type]->Reset(GetDevice().d3d_cmd_allocators[type].Get(), nullptr));
+			}
+
+			const COMPtr<ID3D12CommandQueue> D3D12::Context::GetCommandQueue(Device::CommandType type) const
+			{
+				return d3d_cmd_queues[type];
+			}
+
+			void D3D12::Context::CommitCommandList(Device::CommandType type)
+			{
+				CheckHResult(d3d_cmd_lists[type]->Close());
+				ID3D12CommandList* cmd_lists[] = { d3d_cmd_lists[type].Get() };
+				device->d3d_cmd_queue->ExecuteCommandLists(1, cmd_lists);
+
+				if (type == Device::CommandType::Command_Resource) {
+					auto val =fences[type]->Signal(Fence::Render);
+					fences[type]->Wait(val);
+
+					ResetCommand(type);
+				}
 			}
 
 			void D3D12::Context::Push(const platform::Render::PipleState & ps)
@@ -762,15 +792,25 @@ namespace platform_ex {
 				d3d_cmd_lists[Device::Command_Render]->OMSetBlendFactor(ps.BlendState.blend_factor.begin());
 			}
 
+			void D3D12::Context::ClearPSOCache()
+			{
+			}
+
 			void Context::ContextEx(ID3D12Device * d3d_device, ID3D12CommandQueue * cmd_queue)
 			{
+				d3d_cmd_queues[Device::Command_Render] = cmd_queue;
+				d3d_cmd_queues[Device::Command_Render]->AddRef();
 				CheckHResult(d3d_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT,
 					device->d3d_cmd_allocators[Device::Command_Render].Get(), nullptr,
 					COMPtr_RefParam(d3d_cmd_lists[Device::Command_Render], IID_ID3D12GraphicsCommandList)));
 
+
 				CheckHResult(d3d_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT,
 					device->d3d_cmd_allocators[Device::Command_Resource].Get(), nullptr,
 					COMPtr_RefParam(d3d_cmd_lists[Device::Command_Resource], IID_ID3D12GraphicsCommandList)));
+
+				for (auto& fence : fences)
+					fence.swap(std::make_unique<Fence>());
 			}
 
 			void Context::CreateDeviceAndDisplay() {

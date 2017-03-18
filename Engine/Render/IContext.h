@@ -15,7 +15,7 @@ namespace platform {
 			virtual Device& GetDevice() = 0;
 
 			virtual void Push(const PipleState&) = 0;
-		private:
+		public:
 			virtual void CreateDeviceAndDisplay() = 0;
 		public:
 			static Context& Instance();
