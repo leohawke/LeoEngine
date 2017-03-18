@@ -159,6 +159,7 @@ namespace platform_ex::Windows::D3D12 {
 			CheckHResult(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 				&res_desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
 				COMPtr_RefParam(buffer_upload, IID_ID3D12Resource)));
+			D3D::Debug(buffer_upload, "GraphicsBuffer::buffer_upload[TEMP]");
 
 			void* p;
 			buffer_upload->Map(0, nullptr, &p);

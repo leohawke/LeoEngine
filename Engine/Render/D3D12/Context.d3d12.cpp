@@ -41,6 +41,7 @@ namespace platform_ex {
 						CheckHResult(device->CreateCommandQueue(&queue_desc,
 							IID_ID3D12CommandQueue, reinterpret_cast<void**>(&cmd_queue)));
 
+
 						D3D12_FEATURE_DATA_FEATURE_LEVELS req_feature_levels;
 						req_feature_levels.NumFeatureLevels = static_cast<UINT>(feature_levels.size());
 						req_feature_levels.pFeatureLevelsRequested = &feature_levels[0];
@@ -387,13 +388,18 @@ namespace platform_ex {
 			{
 				d3d_device = device;
 				d3d_cmd_queue = cmd_queue;
+				D3D::Debug(d3d_cmd_queue, "Render_Command_Queue");
+				D3D::Debug(d3d_device, "Device");
+
 				d3d_feature_level = feature_level;
 
 				CheckHResult(d3d_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
 					COMPtr_RefParam(d3d_cmd_allocators[Command_Render], IID_ID3D12CommandAllocator)));
+				D3D::Debug(d3d_cmd_allocators[Command_Render], "Render_Command_Allocator");
 
 				CheckHResult(d3d_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
 					COMPtr_RefParam(d3d_cmd_allocators[Command_Resource], IID_ID3D12CommandAllocator)));
+				D3D::Debug(d3d_cmd_allocators[Command_Resource], "Resource_Command_Allocator");
 
 				auto create_desc_heap = [&](D3D12_DESCRIPTOR_HEAP_TYPE Type, UINT NumDescriptors,
 					D3D12_DESCRIPTOR_HEAP_FLAGS Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE, UINT NodeMask = 0)
@@ -437,6 +443,7 @@ namespace platform_ex {
 				d3d_device->CreateUnorderedAccessView(nullptr, nullptr, &null_uav_desc, null_uav_handle);
 
 				FillCaps();
+
 			}
 
 			void Device::FillCaps() {
@@ -803,11 +810,12 @@ namespace platform_ex {
 				CheckHResult(d3d_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT,
 					device->d3d_cmd_allocators[Device::Command_Render].Get(), nullptr,
 					COMPtr_RefParam(d3d_cmd_lists[Device::Command_Render], IID_ID3D12GraphicsCommandList)));
-
+				D3D::Debug(d3d_cmd_lists[Device::Command_Render], "Render_Command");
 
 				CheckHResult(d3d_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT,
 					device->d3d_cmd_allocators[Device::Command_Resource].Get(), nullptr,
 					COMPtr_RefParam(d3d_cmd_lists[Device::Command_Resource], IID_ID3D12GraphicsCommandList)));
+				D3D::Debug(d3d_cmd_lists[Device::Command_Resource], "Resource_Command");
 
 				for (auto& fence : fences)
 					fence.swap(std::make_unique<Fence>());

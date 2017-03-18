@@ -12,6 +12,7 @@
 #include <objbase.h>
 
 namespace platform_ex {
+
 	//! \since build 1.4
 	//@{
 	//! \brief COM È«¾Ö×´Ì¬¡£

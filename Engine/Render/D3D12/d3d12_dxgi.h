@@ -76,6 +76,16 @@ extern "C"
 
 namespace platform_ex {
 	namespace Windows {
+		namespace D3D {
+			template<typename DXCOM>
+			void Debug(DXCOM &com, const char * objectname)
+			{
+#if defined(_DEBUG)
+				com->SetPrivateData(::WKPDID_D3DDebugObjectName,static_cast<UINT>(std::strlen(objectname)), objectname);
+#endif
+			}
+		}
+
 		/*
 		\note 桌面平台这些函数是直接通过LoadProc来实现
 		\warning 引擎对于这些函数不会也不能频繁调用,无视LoadProc的开销

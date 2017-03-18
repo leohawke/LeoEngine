@@ -4,7 +4,7 @@
 
 namespace platform_ex::Windows::D3D12 {
 	Fence::Fence()
-		:last_completed_val(0),fence_val(0),fence_event(::CreateEventExW(nullptr,nullptr,0,EVENT_ALL_ACCESS))
+		:last_completed_val(0),fence_val(1),fence_event(::CreateEventExW(nullptr,nullptr,0,EVENT_ALL_ACCESS))
 	{
 		Context::Instance().GetDevice()->CreateFence(0, D3D12_FENCE_FLAG_NONE, COMPtr_RefParam(fence,IID_ID3D12Fence));
 	}
