@@ -206,6 +206,9 @@ namespace leo
 		//@}
 		DefDeCopyMoveCtorAssignment(ValueHolder)
 
+			PDefH(leo::any, Create, Creation c) const ImplI(IValueHolder)
+			ImplRet(CreateHolder(c, this->value))
+
 			PDefH(bool, Equals, const void* p) const ImplI(IValueHolder)
 			ImplRet(bool(p) && AreEqualHeld(this->value,
 				Deref(static_cast<const value_type*>(p))))
@@ -449,31 +452,7 @@ namespace leo
 			friend PDefHOp(bool, == , const ValueObject& x, const ValueObject& y)
 			ImplRet(x.Equals(y))
 
-			template<typename _type>
-		friend inline bool
-			operator==(const ValueObject& x, const _type& y)
-		{
-			return x.Equals(y);
-		}
-		template<typename _type>
-		friend inline bool
-			operator==(const _type& x, const ValueObject& y)
-		{
-			return y.Equals(x);
-		}
-
-		template<typename _type>
-		friend inline bool
-			operator!=(const ValueObject& x, const _type& y)
-		{
-			return !(x == y);
-		}
-		template<typename _type>
-		friend inline bool
-			operator!=(const _type& x, const ValueObject& y)
-		{
-			return !(x == y);
-		}
+		
 
 		/*!
 		\brief È¡´¢´æµÄÄÚÈÝ¡£
