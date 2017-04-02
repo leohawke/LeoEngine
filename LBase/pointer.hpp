@@ -1,7 +1,8 @@
 /*! \file pointer.hpp
 \ingroup LBase
 \brief 通用指针。
-
+\par 修改时间:
+2017-01-02 01:37 +0800
 间接扩展标准库头 <iterator> ，提供指针的迭代器适配器包装和其它模板。
 */
 
@@ -19,19 +20,9 @@ namespace leo
 	namespace details
 	{
 		template<typename _type>
-		struct nptr_eq1_help {
-			lconstexpr const static bool value = _type() == _type();
-		};
-
+		using nptr_eq1 = bool_<_type() == _type()>;
 		template<typename _type>
-		struct nptr_eq2_help {
-			lconstexpr const static bool value = _type(nullptr) == _type();
-		};
-
-		template<typename _type>
-		using nptr_eq1 = bool_constant<nptr_eq1_help<_type>::value>;
-		template<typename _type>
-		using nptr_eq2 = bool_constant<nptr_eq1_help<_type>::value>;
+		using nptr_eq2 = bool_<_type(nullptr) == nullptr>;
 
 	} // namespace details;
 
@@ -176,6 +167,147 @@ namespace leo
 	}
 	//@}
 
+	//! \since build 1.4
+	//@{
+	/*!
+	\brief 观察者指针：无所有权的智能指针。
+	\see WG21 N4529 8.12[memory.observer.ptr] 。
+	*/
+	template<typename _type>
+	class observer_ptr : private totally_ordered<observer_ptr<_type>>,
+		private equality_comparable<observer_ptr<_type>, nullptr_t>
+	{
+	public:
+		using element_type = _type;
+		using pointer = limpl(add_pointer_t<_type>);
+		using reference = limpl(add_lvalue_reference_t<_type>);
+
+	private:
+		_type* ptr{};
+
+	public:
+		//! \post <tt>get() == nullptr</tt> 。
+		//@{
+		lconstfn
+			observer_ptr() lnothrow limpl(= default);
+		lconstfn
+			observer_ptr(nullptr_t) lnothrow
+			: ptr()
+		{}
+		//@}
+		explicit lconstfn
+			observer_ptr(pointer p) lnothrow
+			: ptr(p)
+		{}
+		template<typename _tOther>
+		lconstfn
+			observer_ptr(observer_ptr<_tOther> other) lnothrow
+			: ptr(other.get())
+		{}
+
+		//! \pre 断言： <tt>get() != nullptr</tt> 。
+		lconstfn reference
+			operator*() const lnothrowv
+		{
+			return lconstraint(get() != nullptr), *ptr;
+		}
+
+		lconstfn pointer
+			operator->() const lnothrow
+		{
+			return ptr;
+		}
+
+		//! \since build 1.4
+		friend lconstfn bool
+			operator==(observer_ptr p, nullptr_t) lnothrow
+		{
+			return !p.ptr;
+		}
+
+		explicit lconstfn
+			operator bool() const lnothrow
+		{
+			return ptr;
+		}
+
+		explicit lconstfn
+			operator pointer() const lnothrow
+		{
+			return ptr;
+		}
+
+		lconstfn pointer
+			get() const lnothrow
+		{
+			return ptr;
+		}
+
+		lconstfn_relaxed pointer
+			release() lnothrow
+		{
+			const auto res(ptr);
+
+			reset();
+			return res;
+		}
+
+		lconstfn_relaxed void
+			reset(pointer p = {}) lnothrow
+		{
+			ptr = p;
+		}
+
+		lconstfn_relaxed void
+			swap(observer_ptr& other) lnothrow
+		{
+			std::swap(ptr, other.ptr);
+		}
+	};
+
+	//! \relates observer_ptr
+	//@{
+	//! \since build 1.4
+	//@{
+	template<typename _type1, typename _type2>
+	lconstfn bool
+		operator==(observer_ptr<_type1> p1, observer_ptr<_type2> p2) lnothrowv
+	{
+		return p1.get() == p2.get();
+	}
+
+	template<typename _type1, typename _type2>
+	lconstfn bool
+		operator!=(observer_ptr<_type1> p1, observer_ptr<_type2> p2) lnothrowv
+	{
+		return !(p1 == p2);
+	}
+
+	template<typename _type1, typename _type2>
+	lconstfn bool
+		operator<(observer_ptr<_type1> p1, observer_ptr<_type2> p2) lnothrowv
+	{
+		return std::less<common_type_t<_type1, _type2>>(p1.get(), p2.get());
+	}
+	//@}
+
+	template<typename _type>
+	inline void
+		swap(observer_ptr<_type>& p1, observer_ptr<_type>& p2) lnothrow
+	{
+		p1.swap(p2);
+	}
+	template<typename _type>
+	inline observer_ptr<_type>
+		make_observer(_type* p) lnothrow
+	{
+		return observer_ptr<_type>(p);
+	}
+	//@}
+	//@}
+
+	template<typename _type>
+	using tidy_ptr = nptr<observer_ptr<_type>>;
 
 	/*!
 	\ingroup iterator_adaptors

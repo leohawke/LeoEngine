@@ -1,7 +1,13 @@
+/*
+\par 修改时间:
+2016-11-27 00:56 +0800
+*/
+
 #ifndef LBase_linttype_hpp
 #define LBase_linttype_hpp 1
 
-#include "LBase/type_op.hpp"
+#include "LBase/iterator_op.hpp"
+#include <numeric>
 #include <limits>
 
 namespace leo
@@ -18,6 +24,43 @@ namespace leo
 		big = 3,
 		PDP = 4
 	};
+
+	//! \since build CPP17
+	//@{
+	namespace details
+	{
+		using byte = stdex::byte;
+
+		struct bit_order_tester
+		{
+			unsigned char le : 4, : CHAR_BIT - 4;
+		};
+
+		union byte_order_tester
+		{
+			std::uint_least32_t n;
+			byte p[4];
+		};
+
+	} // namespace details;
+
+	  //! \brief 测试本机字节序。
+	lconstfn_relaxed LB_STATELESS byte_order
+		native_byte_order()
+	{
+		lconstexpr const details::byte_order_tester x = { 0x01020304 };
+
+		return x.p[0] == 4 ? byte_order::little : (x.p[0] == 1 ? byte_order::big
+			: (x.p[0] == 2 ? byte_order::PDP : byte_order::unknown));
+	}
+
+	//! \brief 测试本机位序。
+	lconstfn LB_STATELESS bool
+		native_little_bit_order()
+	{
+		return bool(details::bit_order_tester{ 1 }.le & 1);
+	}
+	//@}
 
 	inline namespace inttype {
 		using stdex::byte;
@@ -39,17 +82,13 @@ namespace leo
 
 	template<typename _type, bool>
 	//有符号类型
-	struct make_signed_c
-	{
-		using type = make_signed_t<_type>;
-	};
+	struct make_signed_c : make_signed<_type>
+	{};
 
 	template<typename _type>
 	//无符号类型
-	struct make_signed_c<_type, false>
-	{
-		using type = make_unsigned_t<_type>;
-	};
+	struct make_signed_c<_type, false> : make_unsigned<_type>
+	{};
 
 	template<size_t _vWidth>
 	//取指定宽度的整数类型
@@ -165,6 +204,37 @@ namespace leo
 		_type1>::value) != 0 && uintmax_t(modular_arithmetic<_type1>::value)
 		== uintmax_t(modular_arithmetic<_type2>::value)>
 	{};
+
+	template<size_t _vWidth, typename _tIn>
+	typename make_width_int<_vWidth>::unsigned_type
+		pack_uint(_tIn first, _tIn last) lnothrowv
+	{
+		static_assert(_vWidth != 0 && _vWidth % std::numeric_limits<byte>::digits
+			== 0, "Invalid integer width found.");
+		using utype = typename make_width_int<_vWidth>::unsigned_type;
+
+		lconstraint(!is_undereferenceable(first));
+		return std::accumulate(first, last, utype(), [](utype x, byte y) {
+			return utype(x << std::numeric_limits<byte>::digits | y);
+		});
+	}
+
+	template<size_t _vWidth, typename _tOut>
+	void
+		unpack_uint(typename make_width_int<_vWidth>::unsigned_type value,
+			_tOut result) lnothrow
+	{
+		static_assert(_vWidth != 0 && _vWidth % std::numeric_limits<byte>::digits
+			== 0, "Invalid integer width found.");
+		auto n(_vWidth);
+
+		while (!(_vWidth < (n -= std::numeric_limits<byte>::digits)))
+		{
+			lconstraint(!is_undereferenceable(result));
+			*result = byte(value >> n);
+			++result;
+		}
+	}
 }
 
 #endif

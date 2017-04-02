@@ -1,7 +1,7 @@
 /*!	\file set.hpp
 \ingroup LBase
 \par 修改时间:
-2016-11-18 11:07 +0800
+2017-03-28 00:04 +0800
 \brief 集合容器。
 */
 
@@ -206,7 +206,7 @@ namespace leo {
 			amend_all();
 		}
 		mapped_set(mapped_set&& s, const _tAlloc& a)
-			: m_map(std::move(s), a)
+			: m_map(std::move(s.m_map), a)
 		{
 			amend_all();
 		}
@@ -226,7 +226,8 @@ namespace leo {
 		mapped_set&
 			operator=(const mapped_set& s)
 		{
-			mapped_set(s).swap(*this);
+			m_map = s.m_map;
+			amend_all();
 			return *this;
 		}
 		mapped_set&

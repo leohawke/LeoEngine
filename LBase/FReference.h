@@ -53,8 +53,7 @@ namespace platform
 
 		//@{
 		using leo::nptr;
-		template<typename _type>
-		using tidy_ptr = nptr<observer_ptr<_type>>;
+		using leo::tidy_ptr;
 		using leo::pointer_iterator;
 		//@}
 

@@ -43,6 +43,64 @@ namespace leo
 	}
 
 	/*!
+		\brief 交换非 volatile 左值和 volatile 左值。
+		\pre 可赋值。
+		*/
+		//@{
+		template<typename _type>
+	limpl(enable_if_t)<is_nothrow_constructible<_type, volatile _type&&>()
+		&& is_nothrow_assignable<_type&, volatile _type&&>()
+		&& is_nothrow_assignable<volatile _type&, _type&&>()>
+		swap_volatile(_type& x, volatile _type& y)
+		lnoexcept(is_nothrow_constructible<_type, volatile _type&>()
+			&& noexcept(x = std::move(y)) && noexcept(y = std::move(x)))
+	{
+		auto t(std::move(x));
+
+		x = std::move(y);
+		y = std::move(t);
+	}
+	template<typename _type>
+	inline auto
+		swap_volatile(volatile _type& x, _type& y)
+		lnoexcept_spec(swap_volatile(y, x))
+		-> decltype(swap_volatile(y, x))
+	{
+		leo::swap_volatile(y, x);
+	}
+	template<typename _type, size_t _vN>
+	void
+		swap_volatile(_type(&x)[_vN], add_volatile_t<_type[_vN]>& y)
+		lnoexcept(noexcept(swap_volatile(x[0], y[0])))
+	{
+		auto first(std::addressof(x[0]));
+		auto first2(std::addressof(y[0]));
+
+		for (const auto last(first + _vN); first != last; lunseq(++first, ++first2))
+			swap_volatile(*first, *first2);
+	}
+	//@}
+
+
+	namespace details
+	{
+
+		template<typename _type, typename _type2>
+		using swap_volatile_avail = bool_<is_volatile<remove_reference_t<_type>>::value
+			!= is_volatile<remove_reference_t<_type2>>::value>;
+
+#if LB_HAS_NOEXCEPT
+		template<typename _type, typename _type2>
+		using swap_volatile_noexcept = and_<swap_volatile_avail<_type, _type2>, bool_<
+			noexcept(swap_volatile(std::declval<_type>(), std::declval<_type2>()))>>;
+#else
+		template<typename _type, typename _type2>
+		using swap_volatile_noexcept = swap_volatile_avail<_type, _type2>;
+#endif
+
+	} // namespace details;
+
+	/*!
 	\brief 交换相同标准布局类型可修改左值的存储。
 	\since build 1.4
 	*/
@@ -56,6 +114,52 @@ namespace leo
 
 		std::swap(leo::aligned_replace_cast<utype&>(x),
 			leo::aligned_replace_cast<utype&>(y));
+	}
+
+	/*!
+	\brief 交换可能是 volatile 的左值或右值。
+	\pre 参数类型可交换，或具有一个 volatile 类型可用 swap_volatie 交换。
+	\since build 704
+	*/
+	//@{
+	//! \note 使用 ADL swap 或 std::swap 。
+	template<typename _type, typename _type2, limpl(typename
+		= enable_if_t<!details::swap_volatile_avail<_type, _type2>::value>)>
+		void
+		vswap(_type&& x, _type2&& y)
+		lnoexcept(is_nothrow_swappable_with<_type&&, _type2&&>())
+	{
+		using std::swap;
+
+		swap(lforward(x), lforward(y));
+	}
+	//! \note 使用 ADL swap_volatile 或 ystdex::swap_volatile 。
+	//@{
+	template<typename _type, typename _type2>
+	inline auto
+		vswap(_type&& x, _type2&& y) lnoexcept(detected_or_t<false_,
+			details::swap_volatile_noexcept, _type, _type2>())
+		->limpl(enable_if_t)<details::swap_volatile_avail<_type, _type2>::value>
+	{
+		swap_volatile(lforward(x), lforward(y));
+	}
+	//@}
+	//@}
+
+
+	/*!
+	\brief 复制后交换。
+	\note 使用 ADL swap 或 std::swap 。
+	*/
+	template<typename _type, typename _type2 = _type>
+	inline _type&
+		copy_and_swap(_type& obj, const _type2& new_val)
+	{
+		using std::swap;
+		auto t(new_val);
+
+		swap(t, obj);
+		return obj;
 	}
 
 

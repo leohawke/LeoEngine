@@ -1,7 +1,8 @@
 /*! \file sutility.h
 \ingroup LBase
 \brief 基础实用设施。
-
+\par 修改时间:
+2017-01-01 23:46 +0800
 */
 #ifndef LBase_sutility_h
 #define LBase_sutility_h 1
@@ -128,6 +129,35 @@ namespace leo
 		{
 			return *static_cast<const volatile _type*>(this);
 		}
+	};
+
+	/*!
+	\brief 派生类实体。
+	\note 附加的模板参数保证不同的类型。
+	\warning 可能非虚析构：当且仅当基类非虚析构。
+	\since build CPP17
+	*/
+	template<class _tBase, typename...>
+	class derived_entity : public _tBase
+	{
+	public:
+		using base = _tBase;
+
+		derived_entity() = default;
+		using base::base;
+		derived_entity(const base& b) lnoexcept_spec(base(b))
+			: base(b)
+		{}
+		derived_entity(base&& b) lnoexcept_spec(base(std::move(b)))
+			: base(std::move(b))
+		{}
+		derived_entity(const derived_entity&) = default;
+		derived_entity(derived_entity&&) = default;
+
+		derived_entity&
+			operator=(const derived_entity&) = default;
+		derived_entity&
+			operator=(derived_entity&&) = default;
 	};
 }
 

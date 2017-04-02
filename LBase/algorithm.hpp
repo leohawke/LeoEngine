@@ -127,17 +127,22 @@ namespace leo {
 	_func
 		for_each_equal(_tIn first, _tIn last, const _type& value, _func f)
 	{
-		for (first = std::find(first, last, value); first != last; first = std::find(++first, last, value))
+		for (; first != last; ++first)
+		{
+			first = std::find(first, last, value);
 			f(*first);
-		return f;
+		}
 	}
 
 	template<typename _tIn, typename _func, typename _fPred>
 	_func
 		for_each_if(_tIn first, _tIn last, _fPred pred, _func f)
 	{
-		for (first = std::find_if(first, last, pred); first != last; first = std::find_if(++first, last, pred))
+		for (; first != last; ++first)
+		{
+			first = std::find_if(++first, last, pred);
 			f(*first);
+		}
 		return f;
 	}
 	//@}

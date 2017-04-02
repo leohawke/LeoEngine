@@ -51,7 +51,7 @@ namespace scheme
 	string
 		ParseLSLANodeString(const ValueNode& node)
 	{
-		return leo::value_or<string>(AccessPtr<string>(node));
+		return leo::value_or(AccessPtr<string>(node));
 	}
 
 
@@ -251,7 +251,7 @@ namespace scheme
 		string
 			ConvertStringNode(const TermNode& term)
 		{
-			return leo::call_value_or<string>(EscapeXML, AccessPtr<string>(term));
+			return leo::call_value_or(EscapeXML, AccessPtr<string>(term));
 		}
 
 		void

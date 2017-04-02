@@ -2,7 +2,7 @@
 \ingroup LBase
 \brief 动态泛型类型。
 \par 修改时间:
-2016-12-07 13:17 +0800
+2017-01-11 14:00 +0800
 
 \see WG21 N4582 20.6[any] 。
 \see http://www.boost.org/doc/libs/1_60_0/doc/html/any/reference.html 。

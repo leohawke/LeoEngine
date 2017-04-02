@@ -22,8 +22,8 @@
 #	define LS_API
 #endif
 
-#define YSLIB_COMMIT dc0317b085bc99e8965b570ced94c00bfda9cd01
-#define YSLIB_BUILD 739
+#define YSLIB_COMMIT 9913de30226e25f06a47b5b418330c6567e382e5
+#define YSLIB_BUILD 777
 #define YSLIB_REV 11
 
 #endif

@@ -43,8 +43,7 @@ namespace leo
 	inline std::exception_ptr
 		get_nested_exception_ptr(const _tEx& e)
 	{
-		return leo::call_value_or<std::exception_ptr>(
-			std::mem_fn(&std::nested_exception::nested_ptr),
+		return leo::call_value_or(std::mem_fn(&std::nested_exception::nested_ptr),
 			dynamic_cast<const std::nested_exception*>(std::addressof(e)));
 	}
 

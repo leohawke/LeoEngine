@@ -15,10 +15,9 @@
 //	remove_reference_t, detected_or_t, is_void, remove_pointer_t,
 //	is_pointer, enable_if_t, is_array, extent, remove_extent_t;
 #include "LBase/type_op.hpp" // for is_class_type, is_nonconst_object;
-#include <iterator> // for std::iterator_traits;
-#include "LBase/cassert.h" // for lonstraint;
-#include "LBase/deref_op.hpp" // for is_undereferenceable;
-#include "LBase/operators.hpp" // for totally_ordered, equality_comparable;
+#include "LBase/pointer.hpp" // for is_undereferenceable;
+#include "LBase/exception.h" // for throw_invalid_construction;
+#include "LBase/ref.hpp" // for totally_ordered, equality_comparable;
 #include <new> // for placement ::operator new from standard library;
 #include <memory>
 
@@ -314,7 +313,7 @@ namespace leo
 	\since build 1.4
 
 	除使用 std::free 代替 \c ::operator delete，和 std::default_deleter
-	的非数组类型元相同。注意和直接使用 std::free 不同，会调用析构函数且不适用于数组。
+	的非数组类型相同。注意和直接使用 std::free 不同，会调用析构函数且不适用于数组。
 	*/
 	//@{
 	template<typename _type>
@@ -404,7 +403,7 @@ namespace leo
 		//! \throw std::bad_cast 取临时存储失败。
 		temporary_buffer(size_t n)
 			: buf([n] {
-			// NOTE: See http://wg21.cmeerw.net/lwg/issue2072.
+			// NOTE: See LWG 2072.
 			const auto pr(std::get_temporary_buffer<_type>(ptrdiff_t(n)));
 
 			if (pr.first)
@@ -493,9 +492,56 @@ namespace leo
 		return p.lock().get();
 	}
 
+	/*!	\defgroup owns_unique Owns Uniquely Check
+	\brief 检查是否是唯一所有者。
+	*/
+	//@{
+	template<typename _type>
+	lconstfn bool
+		owns_unique(const _type&) lnothrow
+	{
+		return !is_reference_wrapper<_type>();
+	}
+	template<typename _type, class _tDeleter>
+	inline bool
+		owns_unique(const std::unique_ptr<_type, _tDeleter>& p) lnothrow
+	{
+		return bool(p);
+	}
 	template<typename _type>
 	inline bool
-		reset(std::unique_ptr<_type>& p) lnothrow
+		owns_unique(const std::shared_ptr<_type>& p) lnothrow
+	{
+		return p.unique();
+	}
+
+	template<typename _type>
+	lconstfn bool
+		owns_unique_nonnull(const _type&) lnothrow
+	{
+		return !is_reference_wrapper<_type>();
+	}
+	//! \pre 参数非空。
+	//@{
+	template<typename _type, class _tDeleter>
+	inline bool
+		owns_unique_nonnull(const std::unique_ptr<_type, _tDeleter>& p) lnothrow
+	{
+		lconstraint(p);
+		return true;
+	}
+	template<typename _type>
+	inline bool
+		owns_unique_nonnull(const std::shared_ptr<_type>& p) lnothrow
+	{
+		lconstraint(p);
+		return p.unique();
+	}
+	//@}
+
+	template<typename _type, class _tDeleter>
+	inline bool
+		reset(std::unique_ptr<_type, _tDeleter>& p) lnothrow
 	{
 		if (p.get())
 		{
@@ -831,146 +877,6 @@ namespace leo
 			p ? leo::clone_polymorphic(*p) : decltype(clone_polymorphic(*p))();
 	}
 	//@}
-
-	//! \since build 1.4
-	//@{
-	/*!
-	\brief 观察者指针：无所有权的智能指针。
-	\see WG21 N4529 8.12[memory.observer.ptr] 。
-	*/
-	template<typename _type>
-	class observer_ptr : private totally_ordered<observer_ptr<_type>>,
-		private equality_comparable<observer_ptr<_type>, nullptr_t>
-	{
-	public:
-		using element_type = _type;
-		using pointer = limpl(add_pointer_t<_type>);
-		using reference = limpl(add_lvalue_reference_t<_type>);
-
-	private:
-		_type* ptr{};
-
-	public:
-		//! \post <tt>get() == nullptr</tt> 。
-		//@{
-		lconstfn
-			observer_ptr() lnothrow limpl(= default);
-		lconstfn
-			observer_ptr(nullptr_t) lnothrow
-			: ptr()
-		{}
-		//@}
-		explicit lconstfn
-			observer_ptr(pointer p) lnothrow
-			: ptr(p)
-		{}
-		template<typename _tOther>
-		lconstfn
-			observer_ptr(observer_ptr<_tOther> other) lnothrow
-			: ptr(other.get())
-		{}
-
-		//! \pre 断言： <tt>get() != nullptr</tt> 。
-		lconstfn reference
-			operator*() const lnothrowv
-		{
-			return lconstraint(get() != nullptr), *ptr;
-		}
-
-		lconstfn pointer
-			operator->() const lnothrow
-		{
-			return ptr;
-		}
-
-		//! \since build 1.4
-		friend lconstfn bool
-			operator==(observer_ptr p, nullptr_t) lnothrow
-		{
-			return !p.ptr;
-		}
-
-		explicit lconstfn
-			operator bool() const lnothrow
-		{
-			return ptr;
-		}
-
-		explicit lconstfn
-			operator pointer() const lnothrow
-		{
-			return ptr;
-		}
-
-		lconstfn pointer
-			get() const lnothrow
-		{
-			return ptr;
-		}
-
-		lconstfn_relaxed pointer
-			release() lnothrow
-		{
-			const auto res(ptr);
-
-			reset();
-			return res;
-		}
-
-		lconstfn_relaxed void
-			reset(pointer p = {}) lnothrow
-		{
-			ptr = p;
-		}
-
-		lconstfn_relaxed void
-			swap(observer_ptr& other) lnothrow
-		{
-			std::swap(ptr, other.ptr);
-		}
-	};
-
-	//! \relates observer_ptr
-	//@{
-	//! \since build 1.4
-	//@{
-	template<typename _type1, typename _type2>
-	lconstfn bool
-		operator==(observer_ptr<_type1> p1, observer_ptr<_type2> p2) lnothrowv
-	{
-		return p1.get() == p2.get();
-	}
-
-	template<typename _type1, typename _type2>
-	lconstfn bool
-		operator!=(observer_ptr<_type1> p1, observer_ptr<_type2> p2) lnothrowv
-	{
-		return !(p1 == p2);
-	}
-
-	template<typename _type1, typename _type2>
-	lconstfn bool
-		operator<(observer_ptr<_type1> p1, observer_ptr<_type2> p2) lnothrowv
-	{
-		return std::less<common_type_t<_type1, _type2>>(p1.get(), p2.get());
-	}
-	//@}
-
-	template<typename _type>
-	inline void
-		swap(observer_ptr<_type>& p1, observer_ptr<_type>& p2) lnothrow
-	{
-		p1.swap(p2);
-	}
-	template<typename _type>
-	inline observer_ptr<_type>
-		make_observer(_type* p) lnothrow
-	{
-		return observer_ptr<_type>(p);
-	}
-	//@}
-	//@}
-
 
 	//! \since build 1.4
 	//@{

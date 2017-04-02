@@ -522,7 +522,7 @@ namespace scheme {
 		ValueObject
 			FetchValue(const ContextNode& ctx, const _tKey& name)
 		{
-			return leo::call_value_or<ValueObject>(
+			return leo::call_value_or(
 				std::mem_fn(&ValueNode::Value),scheme::LookupName(ctx, name));
 		}
 
@@ -530,7 +530,7 @@ namespace scheme {
 		static observer_ptr<const ValueObject>
 			FetchValuePtr(const ContextNode& ctx, const _tKey& name)
 		{
-			return leo::call_value_or<observer_ptr<const ValueObject>>(
+			return leo::call_value_or(
 				[](const ValueNode& node) {
 				return make_observer(&node.Value);
 			}, scheme::LookupName(ctx, name));
@@ -689,7 +689,7 @@ namespace scheme {
 			InvokePasses(const string& name, TermNode& term, ContextNode& ctx,
 				_tParams&&... args)
 		{
-			return leo::call_value_or<typename _tPasses::result_type>(
+			return leo::call_value_or(
 				[&](_tPasses& passes) {
 				// XXX: Blocked. 'lforward' cause G++ 5.3 crash: internal compiler
 				//	error: Segmentation fault.

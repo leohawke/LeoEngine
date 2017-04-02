@@ -1,6 +1,8 @@
 /*!	\file type_traits.hpp
 \ingroup LBase
 \brief ISO C++ 类型特征扩展。
+\par 修改时间:
+2016-12-29 12:10 +0800
 */
 
 #ifndef Lbase_type_traits_hpp
@@ -945,6 +947,20 @@ namespace leo {
 	//@}
 
 	//! \since build 1.4
+	//@{
+	template<typename _type>
+	using id_t = _type;
+
+	template<typename _type>
+	using add_ptr_t = _type*;
+
+	template<typename _type>
+	using add_ref_t = _type&;
+
+	template<typename _type>
+	using add_rref_t = _type&&;
+	//@}
+
 	//@{
 	template<typename _type>
 	using addrof_t = decltype(&std::declval<_type>());

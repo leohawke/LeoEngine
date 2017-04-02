@@ -2,7 +2,7 @@
 \ingroup LBase
 \brief 函数和可调用对象。
 \par 修改时间:
-2016-11-17 21:53 +0800
+2017-02-18 17:11 +0800
 */
 
 #ifndef LBase_functional_hpp
@@ -227,38 +227,38 @@ namespace leo
 	namespace details
 	{
 
-		template<typename _tClass, typename _type>
+		template<typename _type, typename _tCallable>
 		struct is_callable_target
-			: is_base_of<member_target_type_t<_type>, _tClass>
+			: is_base_of<member_target_type_t<_tCallable>, decay_t<_type>>
 		{};
 
 		template<typename _fCallable, typename _type>
 		struct is_callable_case1 : and_<is_member_function_pointer<_fCallable>,
-			is_callable_target<_type&&, _fCallable>>
+			is_callable_target<_type, _fCallable>>
 		{};
 
 		template<typename _fCallable, typename _type>
 		struct is_callable_case2 : and_<is_member_function_pointer<_fCallable>,
-			not_<is_callable_target<_type&&, _fCallable>>>
+			not_<is_callable_target<_type, _fCallable>>>
 		{};
 
 		template<typename _fCallable, typename _type>
 		struct is_callable_case3 : and_<is_member_object_pointer<_fCallable>,
-			is_callable_target<_type&&, _fCallable>>
+			is_callable_target<_type, _fCallable>>
 		{};
 
 		template<typename _fCallable, typename _type>
 		struct is_callable_case4 : and_<is_member_object_pointer<_fCallable>,
-			not_<is_callable_target<_type&&, _fCallable>>>
+			not_<is_callable_target<_type, _fCallable>>>
 		{};
 
 		template<typename _fCallable, typename _type, typename... _tParams>
 		lconstfn auto
 			invoke_impl(_fCallable&& f, _type&& obj, _tParams&&... args)
 			-> enable_if_t<is_callable_case1<decay_t<_fCallable>, _type>::value,
-			decltype((obj.*f)(lforward(args)...))>
+			decltype((lforward(obj).*f)(lforward(args)...))>
 		{
-			return lconstraint(f), (obj.*f)(lforward(args)...);
+			return lconstraint(f), (lforward(obj).*f)(lforward(args)...);
 		}
 		template<typename _fCallable, typename _type, typename... _tParams>
 		lconstfn auto
@@ -272,9 +272,9 @@ namespace leo
 		lconstfn auto
 			invoke_impl(_fCallable&& f, _type&& obj)
 			-> enable_if_t<is_callable_case3<decay_t<_fCallable>, _type>::value,
-			decltype(obj.*f)>
+			decltype(lforward(obj).*f)>
 		{
-			return lconstraint(f), obj.*f;
+			return lconstraint(f), lforward(obj).*f;
 		}
 		template<typename _fCallable, typename _type>
 		lconstfn auto
@@ -302,6 +302,7 @@ namespace leo
   \see LWG 2013 。
   \see CWG 1581 。
   \see https://llvm.org/bugs/show_bug.cgi?id=23141 。
+  \todo 支持引用包装
   */
 	template<typename _fCallable, typename... _tParams>
 	limpl(lconstfn) result_of_t<_fCallable && (_tParams&&...)>
@@ -340,6 +341,38 @@ namespace leo
 			_fCallable && (_tParams&&...)>>(), lforward(f), lforward(args)...);
 	}
 
+	/*!
+	\brief 使用 invoke 调用非空值或取默认值。
+	\sa call_value_or
+	\sa invoke
+	*/
+	//@{
+	template<typename _type, typename _func>
+	lconstfn auto
+		invoke_value_or(_func f, _type&& p)
+		-> decay_t<decltype(invoke(f, *lforward(p)))>
+	{
+		return p ? invoke(f, *lforward(p))
+			: decay_t<decltype(invoke(f, *lforward(p)))>();
+	}
+	template<typename _tOther, typename _type, typename _func>
+	lconstfn auto
+		invoke_value_or(_func f, _type&& p, _tOther&& other)
+		->limpl(decltype(p ? invoke(f, *lforward(p)) : lforward(other)))
+	{
+		return p ? invoke(f, *lforward(p)) : lforward(other);
+	}
+	template<typename _tOther, typename _type, typename _func,
+		typename _tSentinal = nullptr_t>
+		lconstfn auto
+		invoke_value_or(_func f, _type&& p, _tOther&& other, _tSentinal&& last)
+		->limpl(decltype(!bool(p == lforward(last))
+			? invoke(f, *lforward(p)) : lforward(other)))
+	{
+		return !bool(p == lforward(last)) ? invoke(f, *lforward(p))
+			: lforward(other);
+	}
+	//@}
 
 	/*!
 	\ingroup metafunctions
@@ -892,7 +925,7 @@ namespace leo
 				decltype(lforward(f)(std::get<_vSeq>(std::move(args))...))>* = {}))
 			-> decltype(lforward(f)(std::get<_vSeq>(std::move(args))...))
 		{
-			return lforward(f)(std::get<_vSeq>(std::move(args))...);
+			return lforward(f)(std::get<_vSeq>(lforward(args))...);
 		}
 		//@{
 		template<typename _func>
@@ -910,9 +943,9 @@ namespace leo
 			invoke(_fCallable&& f, std::tuple<_tParams...>&& args,
 				limpl(decay_t<decltype(leo::invoke(lforward(f),
 					std::get<_vSeq>(std::move(args))...))>* = {})) -> decltype(
-						leo::invoke(lforward(f), std::get<_vSeq>(std::move(args))...))
+						leo::invoke(lforward(f), std::get<_vSeq>(lforward(args))...))
 		{
-			return leo::invoke(lforward(f), std::get<_vSeq>(std::move(args))...);
+			return leo::invoke(lforward(f), std::get<_vSeq>(lforward(args))...);
 		}
 		template<typename _func>
 		static lconstfn auto
@@ -947,7 +980,7 @@ namespace leo
 			call(_func&& f, std::tuple<_tParams...>&& args)
 			-> decltype(lforward(f)(std::get<_vSeq>(std::move(args))...))
 		{
-			return lforward(f)(std::get<_vSeq>(std::move(args))...);
+			return lforward(f)(std::get<_vSeq>(lforward(args))...);
 		}
 
 		//@{
@@ -958,7 +991,7 @@ namespace leo
 				std::forward_as_tuple(lforward(std::move(args))...)))
 		{
 			return call_projection::call(lforward(f),
-				std::forward_as_tuple(lforward(std::move(args))...));
+				std::forward_as_tuple(lforward(lforward(args))...));
 		}
 
 		template<typename _fCallable>

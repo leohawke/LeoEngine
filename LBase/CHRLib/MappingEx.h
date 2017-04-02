@@ -218,13 +218,13 @@ namespace CHRLib
 	using leo::enable_if_convertible_t;
 	//@{
 	template<Encoding, typename _tRet, typename... _tParams>
-	add_pointer_t<_tRet(_tParams...)>
+	lconstfn LB_STATELESS leo::add_ptr_t<_tRet(_tParams...)>
 		FetchMapperPtr_TryUCSMapper(...) lnothrow
 	{
 		return{};
 	}
 	template<Encoding _vEnc, typename _tRet, typename... _tParams>
-	add_pointer_t<_tRet(_tParams...)>
+	lconstfn LB_ATTR_returns_nonnull LB_STATELESS leo::add_ptr_t<_tRet(_tParams...)>
 		FetchMapperPtr_TryUCSMapper(limpl(enable_if_convertible_t<
 			decltype(GUCSMapper<_vEnc>::Decode(std::declval<_tParams>()...)), _tRet>*
 			= {})) lnothrow
@@ -232,7 +232,7 @@ namespace CHRLib
 		return GUCSMapper<_vEnc>::Decode;
 	}
 	template<Encoding _vEnc, typename _tRet, typename... _tParams>
-	add_pointer_t<_tRet(_tParams...)>
+	lconstfn LB_ATTR_returns_nonnull LB_STATELESS leo::add_ptr_t<_tRet(_tParams...)>
 		FetchMapperPtr_TryUCSMapper(limpl(enable_if_convertible_t<
 			decltype(GUCSMapper<_vEnc>::Encode(std::declval<_tParams>()...)), _tRet,
 			int>* = {})) lnothrow
@@ -240,9 +240,16 @@ namespace CHRLib
 		return GUCSMapper<_vEnc>::Encode;
 	}
 
+	template<typename _tRet, typename... _tParams>
+	lconstfn LB_STATELESS leo::add_ref_t<_tRet(_tParams...)>
+		FetchMapper_Default() lnothrow
+	{
+		return *FetchMapperPtr_TryUCSMapper<CS_Default, _tRet, _tParams...>(nullptr);
+	}
+
 	//! \brief 取指定编码映射的转换函数指针。
 	template<typename _tRet, typename... _tParams>
-	add_pointer_t<_tRet(_tParams...)>
+	lconstfn_relaxed leo::add_ptr_t<_tRet(_tParams...)>
 		FetchMapperPtr(Encoding enc)
 	{
 		using namespace CharSet;

@@ -265,7 +265,7 @@ public:
 	Decode(_tObj&& uc, _tIn&& i, ConversionState& st)
 		lnoexcept_spec(!FillByte(i, st))
 	{
-		byte b;
+		byte b(0);
 
 		if(LB_UNLIKELY(!FillByte(i, b)))
 			return ConversionResult::BadSource;

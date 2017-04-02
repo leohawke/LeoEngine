@@ -1,6 +1,8 @@
 /*!	\file functor.hpp
 \ingroup LBase
 \brief 通用仿函数。
+\par 修改时间:
+2016-12-29 12:09 +0800
 */
 
 #ifndef LBase_functor_hpp
@@ -80,6 +82,14 @@ namespace leo {
 		{
 			return x;
 		}
+
+		lconstfn
+			operator add_ptr_t<_type(_type)>() const lnothrow
+		{
+			return[](_type x) lnothrow->_type{
+				return x;
+			};
+		}
 	};
 
 	template<>
@@ -90,6 +100,15 @@ namespace leo {
 			operator()(_type&& x) const lnothrow
 		{
 			return lforward(x);
+		}
+
+		template<typename _type>
+		lconstfn
+			operator add_ptr_t<_type(_type)>() const lnothrow
+		{
+			return[](_type x) lnothrow->_type{
+				return x;
+			};
 		}
 	};
 	//@}
@@ -292,6 +311,7 @@ namespace leo {
 		using std::logical_not;
 
 		using std::bit_and;
+		using std::bit_or;
 		using std::bit_xor;
 		using std::bit_not;
 #else
