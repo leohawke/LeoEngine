@@ -4,24 +4,69 @@
 namespace leo {
 
 	ImplDeDtor(IValueHolder)
-		bool
-		operator==(const ValueObject& x, const ValueObject& y)
-	{
-		const auto p(x.content.get_holder());
 
-		if (const auto q = y.content.get_holder())
-			return p == q
-			|| (p && polymorphic_downcast<const IValueHolder&>(*p)
-				== polymorphic_downcast<const IValueHolder&>(*q));
-		else
-			return !p;
-		return{};
+	namespace
+	{
+
+		inline PDefH(IValueHolder&, HolderDownCast, leo::any_ops::holder& h)
+			lnothrowv
+			ImplRet(leo::polymorphic_downcast<IValueHolder&>(h))
+			inline PDefH(const IValueHolder&, HolderDownCast,
+				const leo::any_ops::holder& h) lnothrowv
+			ImplRet(leo::polymorphic_downcast<const IValueHolder&>(h))
+
+			inline PDefH(bool, HolderEquals, leo::any_ops::holder& h, const void* p)
+			ImplRet(HolderDownCast(h).Equals(p))
+
+	} // unnamed namespace;
+
+	IValueHolder*
+		ValueObject::GetHolderPtr() const
+	{
+		return leo::polymorphic_downcast<IValueHolder*>(content.get_holder());
+	}
+	IValueHolder&
+		ValueObject::GetHolderRef() const
+	{
+		return HolderDownCast(Deref(content.get_holder()));
 	}
 
 	ValueObject
-		ValueObject::MakeIndirect() const
+		ValueObject::Create(IValueHolder::Creation c) const
 	{
-		return ValueObject(leo::polymorphic_downcast<const IValueHolder&>(
-			Deref(content.get_holder())), holder_refer_tag());
+		return leo::call_value_or([c](const IValueHolder& h) {
+			return ValueObject(h, c);
+		}, GetHolderPtr());
+	}
+
+	bool
+		ValueObject::Equals(const ValueObject& x) const
+	{
+		const auto p_holder(content.get_holder());
+
+		if (const auto q = x.content.get_holder())
+			return p_holder == q || (p_holder && p_holder->type() == q->type()
+				&& HolderEquals(*p_holder, q->get()));
+		return !p_holder;
+	}
+
+	bool
+		ValueObject::EqualsRaw(const void* p) const
+	{
+		if (const auto p_holder = content.get_holder())
+			return HolderEquals(*p_holder, p);
+		return !p;
+	}
+
+	bool
+		ValueObject::EqualsUnchecked(const void* p) const
+	{
+		return HolderEquals(GetHolderRef(), p);
+	}
+
+	bool
+		ValueObject::OwnsUnique() const lnothrow
+	{
+		return leo::invoke_value_or(&IValueHolder::OwnsUnique, GetHolderPtr());
 	}
 }

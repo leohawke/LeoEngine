@@ -37,30 +37,105 @@ namespace leo
 	struct HasOwnershipOf : std::is_base_of<OwnershipTag<_type>, _tOwner>
 	{};
 
+	/*!
+	\brief 第一个参数指定的选项创建擦除类型的持有者或抛出异常。
+	*/
+	//@{
+	template<class _tHolder, typename... _tParams>
+	leo::any
+		CreateHolderInPlace(leo::true_, _tParams&&... args)
+	{
+		return leo::any(leo::any_ops::use_holder,
+			leo::in_place<_tHolder>, lforward(args)...);
+	}
+	//! \exception leo::invalid_construction 参数类型无法用于初始化持有者。
+	template<class _tHolder, typename... _tParams>
+	LB_NORETURN leo::any
+		CreateHolderInPlace(leo::false_, _tParams&&...)
+	{
+		leo::throw_invalid_construction();
+	}
+	//@}
+
 	DeclDerivedI(LS_API, IValueHolder, leo::any_ops::holder)
 
-		DeclIEntry(bool operator==(const IValueHolder&) const)
+		/*!
+		\brief 创建选项。
+		\sa Create
+		*/
+		enum Creation
+		{
+		/*!
+		\brief 创建引用的间接持有者。
+
+		派生实现应保证持有对应的 lref<T> 类型的值引用当前持有的 T 类型的值。
+		*/
+		Indirect,
+		/*!
+		\brief 创建引用的值的副本。
+
+		派生实现应保证持有对应的值从当前持有的值复制，
+		当且仅当当前持有者不是引用；否则，从引用的值复制。
+		*/
+		Copy,
+		/*!
+		\brief 创建引用的值转移的副本。
+
+		派生实现应保证持有对应的值从当前持有的值转移，
+		当且仅当当前持有者不是引用；否则，从引用的值转移。
+		*/
+		Move
+		};
 
 		/*!
-		\brief 创建引用。
+		\brief 判断相等。
+		\pre 参数为空指针值或持有的对象去除 const 后具有和参数相同动态类型的对象。
+		\return 持有的对象相等，或持有空对象且参数为空指针值。
 
-		创建引用持有对象。
-		派生实现应保证返回的值持有对应的 lref<T> 类型的值引用当前持有的 T 类型的值。
+		比较参数和持有的对象。
+		派生实现应保证返回的值满足 EqualityComparable 中对 == 操作的要求。
 		*/
-		DeclIEntry(leo::any Refer() const)
-		EndDecl
+		DeclIEntry(bool Equals(const void*) const)
+		/*!
+		\brief 判断是否是持有的对象的唯一所有者。
+		*/
+		DeclIEntry(bool OwnsUnique() const lnothrow)
+		/*!
+		\sa Creation
+		*/
+		//@{
+		/*!
+		\brief 创建新的持有者。
+		\return 包含新创建的持有者的动态泛型对象。
+		\exception leo::invalid_construction 参数类型无法用于初始化持有者。
+		\sa Creation
+		\sa CreateHolder
+
+		按参数指定的选项创建按指定选项持有的对象。
+		派生实现应保证返回的值满足选项指定的条件，且变换不改变当前逻辑状态，
+		除 mutable 的数据成员可被转移；否则，应抛出异常。
+		*/
+		DeclIEntry(leo::any Create(Creation) const)
+
+		/*!
+		\brief 提供创建持有者的默认实现。
+		\sa Create
+		*/
+		template<typename _type>
+		static leo::any
+		CreateHolder(Creation, _type&);
+		//@}
+	EndDecl
 
 
-
-
-		template<typename _type1, typename _type2>
-	struct HeldEqual : private examiners::equal_examiner
+	template<typename _type1, typename _type2>
+	struct HeldEqual : private leo::examiners::equal_examiner
 
 	{
 		using examiners::equal_examiner::are_equal;
 	};
 
-#ifdef LB_IMPL_MSCPP
+#if  defined(LB_IMPL_MSCPP) && 0
 	template<>
 	struct HeldEqual<std::ifstream, std::ifstream>
 	{
@@ -89,7 +164,6 @@ namespace leo
 			return x == y;
 		}
 	};
-
 
 
 	template<typename _type1, typename _type2, typename _type3, typename _type4>
@@ -132,12 +206,12 @@ namespace leo
 		//@}
 		DefDeCopyMoveCtorAssignment(ValueHolder)
 
-			PDefHOp(bool, == , const IValueHolder& obj) const ImplI(IValueHolder)
-			ImplRet(type() == obj.type() && AreEqualHeld(this->value,
-				Deref(static_cast<value_type*>(obj.get()))))
+			PDefH(bool, Equals, const void* p) const ImplI(IValueHolder)
+			ImplRet(bool(p) && AreEqualHeld(this->value,
+				Deref(static_cast<const value_type*>(p))))
 
-			leo::any
-			Refer() const ImplI(IValueHolder);
+			PDefH(bool, OwnsUnique, ) const lnothrow ImplI(IValueHolder)
+			ImplRet(true)
 
 			PDefH(ValueHolder*, clone, ) const ImplI(IValueHolder)
 			ImplRet(try_new<ValueHolder>(*this))
@@ -177,12 +251,20 @@ namespace leo
 			DefDeCopyAssignment(PointerHolder)
 			DefDeMoveAssignment(PointerHolder)
 
-			PDefHOp(bool, == , const IValueHolder& obj) const ImplI(IValueHolder)
-			ImplRet(type() == obj.type() && AreEqualHeld(*p_held,
-				Deref(static_cast<value_type*>(obj.get()))))
-
 			leo::any
-			Refer() const ImplI(IValueHolder);
+			Create(Creation c) const ImplI(IValueHolder)
+		{
+			if (const auto& p = p_held.get())
+				return CreateHolder(c, *p);
+			leo::throw_invalid_construction();
+		}
+
+		PDefH(bool, Equals, const void* p) const ImplI(IValueHolder)
+			ImplRet(p ? AreEqualHeld(*p_held,
+				Deref(static_cast<const value_type*>(p))) : !get())
+
+			PDefH(bool, OwnsUnique, ) const lnothrow ImplI(IValueHolder)
+			ImplRet(owns_unique(p_held))
 
 			DefClone(const ImplI(IValueHolder), PointerHolder)
 
@@ -218,15 +300,21 @@ namespace leo
 		{}
 		DefDeCopyMoveCtorAssignment(RefHolder)
 
-			PDefHOp(bool, == , const IValueHolder& obj) const ImplI(IValueHolder)
-			ImplRet(type() == obj.type() && AreEqualHeld(Deref(static_cast<
-				value_type*>(get())), Deref(static_cast<value_type*>(obj.get()))))
+			PDefH(leo::any, Create, Creation c) const ImplI(IValueHolder)
+			ImplRet(CreateHolder(c, Ref()))
 
-			PDefH(leo::any, Refer, ) const ImplI(IValueHolder)
-			ImplRet(leo::any(leo::any_ops::use_holder,
-				leo::in_place<RefHolder>, *this))
+			PDefH(bool, Equals, const void* p) const ImplI(IValueHolder)
+			ImplRet(bool(p) && AreEqualHeld(Deref(static_cast<const value_type*>(
+				get())), Deref(static_cast<const value_type*>(p))))
 
-			DefClone(const ImplI(IValueHolder), RefHolder)
+			PDefH(bool, OwnsUnique, ) const lnothrow ImplI(IValueHolder)
+			ImplRet({})
+
+	private:
+		PDefH(value_type&, Ref, ) const
+			ImplRet(Deref(static_cast<lref<value_type>*>(base.get())).get())
+	public:
+		DefClone(const ImplI(IValueHolder), RefHolder)
 
 			PDefH(void*, get, ) const ImplI(IValueHolder)
 			ImplRet(leo::pvoid(std::addressof(
@@ -239,20 +327,22 @@ namespace leo
 
 	template<typename _type>
 	leo::any
-		ValueHolder<_type>::Refer() const
+		IValueHolder::CreateHolder(Creation c, _type& obj)
 	{
-		return leo::any(leo::any_ops::use_holder, leo::in_place<RefHolder<
-			_type>>, leo::ref(this->value));
-	}
-
-	template<typename _type, class _tPointer>
-	leo::any
-		PointerHolder<_type, _tPointer>::Refer() const
-	{
-		if (const auto& p = p_held.get())
-			return leo::any(leo::any_ops::use_holder,
-				leo::in_place<RefHolder<_type>>, leo::ref(*p));
-		leo::throw_invalid_construction();
+		switch (c)
+		{
+		case Indirect:
+			return CreateHolderInPlace<RefHolder<_type>>(leo::true_(),
+				leo::ref(obj));
+		case Copy:
+			return CreateHolderInPlace<ValueHolder<_type>>(
+				std::is_copy_constructible<_type>(), obj);
+		case Move:
+			return CreateHolderInPlace<ValueHolder<_type>>(
+				std::is_move_constructible<_type>(), std::move(obj));
+		default:
+			leo::throw_invalid_construction();
+		}
 	}
 
 	class LS_API ValueObject : private equality_comparable<ValueObject>
@@ -300,8 +390,8 @@ namespace leo
 		/*!
 		\brief 构造：使用持有者。
 		*/
-		ValueObject(const IValueHolder& holder, holder_refer_tag)
-			: content(holder.Refer())
+		ValueObject(const IValueHolder& holder, IValueHolder::Creation c)
+			: content(holder.Create(c))
 		{}
 	public:
 		template<typename _type>
@@ -352,18 +442,52 @@ namespace leo
 			/*!
 			\brief 判断是否为空或非空。
 			*/
-			DefBoolNeg(explicit, content.get_holder())
+			DefBoolNeg(explicit, content.has_value())
 
 			//@{
 			//! \brief 比较相等：参数都为空或都非空且存储的对象相等。
-			LS_API friend bool
-			operator==(const ValueObject&, const ValueObject&);
+			friend PDefHOp(bool, == , const ValueObject& x, const ValueObject& y)
+			ImplRet(x.Equals(y))
 
+			template<typename _type>
+		friend inline bool
+			operator==(const ValueObject& x, const _type& y)
+		{
+			return x.Equals(y);
+		}
+		template<typename _type>
+		friend inline bool
+			operator==(const _type& x, const ValueObject& y)
+		{
+			return y.Equals(x);
+		}
+
+		template<typename _type>
+		friend inline bool
+			operator!=(const ValueObject& x, const _type& y)
+		{
+			return !(x == y);
+		}
+		template<typename _type>
+		friend inline bool
+			operator!=(const _type& x, const ValueObject& y)
+		{
+			return !(x == y);
+		}
 
 		/*!
 		\brief 取储存的内容。
 		*/
 		DefGetter(const lnothrow, const Content&, Content, content)
+
+		IValueHolder*
+			GetHolderPtr() const;
+		/*!
+		\build 取持有者引用。
+		\pre 持有者指针非空。
+		*/
+		IValueHolder&
+			GetHolderRef() const;
 
 		/*!
 		\brief 取指定类型的对象。
@@ -430,87 +554,153 @@ namespace leo
 		PDefH(void, Clear, ) lnothrow
 			ImplExpr(content.reset())
 
-			//@{
-			template<typename _type, typename... _tParams>
-		void
-			Emplace(_tParams&&... args)
+			/*!
+			\brief 取以指定持有者选项创建的副本。
+			*/
+			ValueObject
+			Create(IValueHolder::Creation) const;
+
+		/*!
+		\brief 判断相等。
+		\sa IValueHolder::Equals
+
+		比较参数和持有的对象。
+		*/
+		//@{
+		bool
+			Equals(const ValueObject&) const;
+		template<typename _type>
+		bool
+			Equals(const _type& x) const
 		{
-			using Holder = ValueHolder<decay_t<_type>>;
+			if (const auto p_holder = content.get_holder())
+				return p_holder->type() == leo::type_id<_type>()
+				&& EqualsRaw(std::addressof(x));
+			return {};
+		}
+
+		//! \pre 参数为空指针值或持有的对象去除 const 后具有和参数相同动态类型的对象。
+		bool
+			EqualsRaw(const void*) const;
+
+		/*!
+		\pre 间接断言：持有的对象非空。
+		\pre 持有的对象去除 const 后具有和参数相同动态类型的对象。
+		*/
+		bool
+			EqualsUnchecked(const void*) const;
+		//@}
+
+		/*!
+		\brief 取引用的值对象的副本。
+		*/
+		PDefH(ValueObject, MakeCopy, ) const
+			ImplRet(Create(IValueHolder::Copy))
+
+			/*!
+			\brief 取引用的值对象的转移副本。
+			*/
+			PDefH(ValueObject, MakeMove, ) const
+			ImplRet(Create(IValueHolder::Move))
+
+			/*!
+			\brief 取引用的值对象的初始化副本：按是否具有所有权选择转移或复制对象副本。
+			*/
+			PDefH(ValueObject, MakeMoveCopy, ) const
+			ImplRet(Create(OwnsUnique() ? IValueHolder::Move : IValueHolder::Copy))
+
+			/*!
+			\brief 取间接引用的值对象。
+			*/
+			PDefH(ValueObject, MakeIndirect, ) const
+			ImplRet(Create(IValueHolder::Indirect))
+
+			/*!
+			\brief 判断是否是持有的对象的唯一所有者。
+			*/
+			bool
+			OwnsUnique() const lnothrow;
+
+		//@{
+		template<typename _type, typename... _tParams>
+		void
+			emplace(_tParams&&... args)
+		{
+			using Holder = ValueHolder<leo::decay_t<_type>>;
 
 			content.emplace<Holder>(leo::any_ops::use_holder,
 				Holder(lforward(args)...));
 		}
 		template<typename _type>
 		void
-			Emplace(_type* p, PointerTag)
+			emplace(_type* p, PointerTag)
 		{
-			using Holder = PointerHolder<decay_t<_type>>;
+			using Holder = PointerHolder<leo::decay_t<_type>>;
 
 			content.emplace<Holder>(leo::any_ops::use_holder, Holder(p));
 		}
-
 		//@}
 
-			/*!
-			\brief 取间接引用的值对象。
-			*/
-			ValueObject
-			MakeIndirect() const;
-
-			/*!
-			\brief 交换。
-			*/
-			friend PDefH(void, swap, ValueObject& x, ValueObject& y) lnothrow
+		/*!
+		\brief 交换。
+		*/
+		friend PDefH(void, swap, ValueObject& x, ValueObject& y) lnothrow
 			ImplExpr(x.content.swap(y.content))
 	};
 
-	/*!
-	\relates ValueObject
-	*/
-	//@{
-	template<typename _func, typename... _tParams>
-	void
-		EmplaceFromCall(ValueObject&, leo::identity<void>, _func&& f,
-			_tParams&&... args)
+	template<typename _type>
+	inline observer_ptr<_type>
+		AccessPtr(ValueObject& vo) lnothrow
 	{
-		lforward(f)(lforward(args)...);
+		return vo.AccessPtr<_type>();
 	}
-	template<typename _type, typename _func, typename... _tParams>
-	void
-		EmplaceFromCall(ValueObject& vo, leo::identity<_type>, _func&& f,
-			_tParams&&... args)
+	template<typename _type>
+	inline observer_ptr<const _type>
+		AccessPtr(const ValueObject& vo) lnothrow
 	{
-		vo.Emplace<_type>(lforward(f)(lforward(args)...));
-	}
-	template<typename _func, typename... _tParams>
-	void
-		EmplaceFromCall(ValueObject& vo, _func&& f, _tParams&&... args)
-	{
-		leo::EmplaceFromCall(vo, leo::identity<leo::result_of_t<
-			_func && (_tParams&&...)>>(), lforward(f), lforward(args)...);
+		return vo.AccessPtr<_type>();
 	}
 
-	template<typename _fCallable, typename... _tParams>
+	/*!
+	\brief 以指定参数按需构造替换值。
+
+	默认对 ValueObject 及引用值会被直接复制或转移赋值；
+	其它情形调用 ValueObject::emplace 。
+	使用第三和第四个参数分别指定非默认情形下不忽略值及使用赋值。
+	*/
+	//@{
+	template<typename _type, typename... _tParams>
 	void
-		EmplaceFromInvoke(ValueObject&, leo::identity<void>, _fCallable&& f,
-			_tParams&&... args)
+		EmplaceCallResult(ValueObject&, _type&&, leo::false_) lnothrow
+	{}
+	template<typename _type, typename... _tParams>
+	inline void
+		EmplaceCallResult(ValueObject& vo, _type&& res, leo::true_, leo::true_)
+		lnoexcept_spec(vo = lforward(res))
 	{
-		leo::invoke(lforward(f), lforward(args)...);
+		vo = lforward(res);
 	}
-	template<typename _type, typename _fCallable, typename... _tParams>
-	void
-		EmplaceFromInvoke(ValueObject& vo, leo::identity<_type>, _fCallable&& f,
-			_tParams&&... args)
+	template<typename _type, typename... _tParams>
+	inline void
+		EmplaceCallResult(ValueObject& vo, _type&& res, leo::true_, leo::false_)
 	{
-		vo.Emplace<_type>(leo::invoke(lforward(f), lforward(args)...));
+		vo.emplace<leo::decay_t<_type>>(lforward(res));
 	}
-	template<typename _fCallable, typename... _tParams>
-	void
-		EmplaceFromInvoke(ValueObject& vo, _fCallable&& f, _tParams&&... args)
+	template<typename _type, typename... _tParams>
+	inline void
+		EmplaceCallResult(ValueObject& vo, _type&& res, leo::true_)
 	{
-		leo::EmplaceFromInvoke(leo::identity<decltype(leo::invoke(
-			lforward(f), lforward(args)...))>(), lforward(f), lforward(args)...);
+		leo::EmplaceCallResult(vo, lforward(res), leo::true_(),
+			std::is_same<leo::decay_t<_type>, ValueObject>());
 	}
+	template<typename _type, typename... _tParams>
+	inline void
+		EmplaceCallResult(ValueObject& vo, _type&& res)
+	{
+		leo::EmplaceCallResult(vo, lforward(res), leo::not_<
+			std::is_same<leo::decay_t<_type>, leo::pseudo_output>>());
+	}
+	//@}
 
 	template<typename _type, typename... _tParams>
 	_type&
@@ -518,7 +708,7 @@ namespace leo
 	{
 		if (!vo)
 		{
-			vo.Emplace<_type>(lforward(args)...);
+			vo.emplace<_type>(lforward(args)...);
 			return vo.GetObject<_type>();
 		}
 		return vo.Access<_type>();
@@ -527,6 +717,7 @@ namespace leo
 	//! \brief 判断是否持有相同对象。
 	inline PDefH(bool, HoldSame, const ValueObject& x, const ValueObject& y)
 		ImplRet(leo::hold_same(x.GetContent(), y.GetContent()))
+	//@}
 
 	/*!
 	\brief 依赖项模板。
