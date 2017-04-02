@@ -363,7 +363,7 @@ namespace leo
 		return p ? invoke(f, *lforward(p)) : lforward(other);
 	}
 	template<typename _tOther, typename _type, typename _func,
-		typename _tSentinal = nullptr_t>
+		typename _tSentinal = stdex::nullptr_t>
 		lconstfn auto
 		invoke_value_or(_func f, _type&& p, _tOther&& other, _tSentinal&& last)
 		->limpl(decltype(!bool(p == lforward(last))

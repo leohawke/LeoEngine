@@ -21,17 +21,21 @@ namespace leo {
 	}
 
 	void
-		ValueNode::SetContent(Container con, ValueObject vo) lnothrow
-	{
-		container.swap(con),
-			swap(Value, vo);
-	}
-
-	void
 		ValueNode::SetContentIndirect(Container con, const ValueObject& vo) lnothrow
 	{
 		container.swap(con),
 			Value = vo.MakeIndirect();
+	}
+
+	ValueNode::Container
+		ValueNode::CreateRecursively(const Container& con, IValueHolder::Creation c)
+	{
+		Container res;
+
+		for (auto& tm : con)
+			res.emplace(CreateRecursively(tm.GetContainer(), c), tm.GetName(),
+				tm.Value.Create(c));
+		return res;
 	}
 
 	void
@@ -96,14 +100,14 @@ namespace leo {
 	observer_ptr<ValueNode>
 		AccessNodePtr(ValueNode::Container& con, const string& name) lnothrow
 	{
-		return make_observer(call_value_or<ValueNode*>(addrof<>(),
+		return make_observer(leo::call_value_or<ValueNode*>(leo::addrof<>(),
 			con.find(name), {}, end(con)));
 	}
 	observer_ptr<const ValueNode>
 		AccessNodePtr(const ValueNode::Container& con, const string& name) lnothrow
 	{
-		return make_observer(call_value_or<const ValueNode*>(
-			addrof<>(), con.find(name), {}, end(con)));
+		return make_observer(leo::call_value_or<const ValueNode*>(
+			leo::addrof<>(), con.find(name), {}, end(con)));
 	}
 	observer_ptr<ValueNode>
 		AccessNodePtr(ValueNode& node, size_t n)
@@ -124,6 +128,18 @@ namespace leo {
 			: nullptr;
 	}
 
+	ValueObject
+		GetValueOf(observer_ptr<const ValueNode> p_node)
+	{
+		return leo::call_value_or(std::mem_fn(&ValueNode::Value), p_node);
+	}
+
+	observer_ptr<const ValueObject>
+		GetValuePtrOf(observer_ptr<const ValueNode> p_node)
+	{
+		return leo::call_value_or(leo::compose(make_observer<const ValueObject
+		>, leo::addrof<>(), std::mem_fn(&ValueNode::Value)), p_node);
+	}
 
 	void
 		RemoveEmptyChildren(ValueNode::Container& con) lnothrow

@@ -1,7 +1,8 @@
 /*! \file ValueNode.h
 \ingroup LScheme
 \brief 值类型节点。
-
+\par 修改时间:
+2017-03-24 09:50 +0800
 */
 #ifndef LScheme_ValueNode_H
 #define LScheme_ValueNode_H 1
@@ -10,7 +11,6 @@
 
 #include <LBase/set.hpp>
 #include <LBase/LPath.hpp>
-
 #include <numeric>
 
 namespace leo {
@@ -85,22 +85,22 @@ namespace leo {
 		template<typename... _tParams1>
 		inline
 			ValueNode(std::tuple<_tParams1...> args1)
-			: container(make_from_tuple<Container>(args1))
+			: container(leo::make_from_tuple<Container>(args1))
 		{}
 		template<typename... _tParams1, typename... _tParams2>
 		inline
 			ValueNode(std::tuple<_tParams1...> args1, std::tuple<_tParams2...> args2)
-			: name(make_from_tuple<string>(args2)),
-			container(make_from_tuple<Container>(args1))
+			: name(leo::make_from_tuple<string>(args2)),
+			container(leo::make_from_tuple<Container>(args1))
 		{}
 		template<typename... _tParams1, typename... _tParams2,
 			typename... _tParams3>
 			inline
 			ValueNode(std::tuple<_tParams1...> args1, std::tuple<_tParams2...> args2,
 				std::tuple<_tParams3...> args3)
-			: name(make_from_tuple<string>(args2)),
-			container(make_from_tuple<Container>(args1)),
-			Value(make_from_tuple<ValueObject>(args3))
+			: name(leo::make_from_tuple<string>(args2)),
+			container(leo::make_from_tuple<Container>(args1)),
+			Value(leo::make_from_tuple<ValueObject>(args3))
 		{}
 		//@}
 
@@ -110,7 +110,7 @@ namespace leo {
 			\brief 合一赋值：使用值参数和交换函数进行复制或转移赋值。
 			*/
 			PDefHOp(ValueNode&, =, ValueNode node) lnothrow
-			ImplRet(swap(node, *this), *this)
+			ImplRet(leo::copy_and_swap(*this,node))
 
 			DefBoolNeg(explicit, bool(Value) || !container.empty())
 
@@ -218,15 +218,27 @@ namespace leo {
 
 			//@{
 			//! \brief 设置子节点容器内容。
-			PDefH(void, SetChildren, Container con)
+			PDefH(void, SetChildren, const Container& con)
+			ImplExpr(container = con)
+			PDefH(void, SetChildren, Container&& con)
 			ImplExpr(container = std::move(con))
+			PDefH(void, SetChildren, ValueNode&& node)
+			ImplExpr(container = std::move(node.container))
 			/*!
 			\note 设置子节点容器和值的内容。
 			*/
 			//@{
-			void
-			SetContent(Container, ValueObject) lnothrow;
-		PDefH(void, SetContent, const ValueNode& node)
+			template<class _tCon, class _tValue>
+			limpl(leo::enable_if_t)<
+			leo::and_<std::is_assignable<Container, _tCon&&>,
+			std::is_assignable<ValueObject, _tValue&&>>::value>
+			SetContent(_tCon&& con, _tValue&& val) lnoexcept(leo::and_<
+				std::is_nothrow_assignable<Container, _tCon&&>,
+				std::is_nothrow_assignable<ValueObject, _tValue&&>>())
+			{
+				lunseq(container = lforward(con), Value = lforward(val));
+			}
+			PDefH(void, SetContent, const ValueNode& node)
 			ImplExpr(SetContent(node.GetContainer(), node.Value))
 			PDefH(void, SetContent, ValueNode&& node)
 			ImplExpr(SwapContent(node))
@@ -241,9 +253,39 @@ namespace leo {
 			ImplRet(insert(node).second)
 			PDefH(bool, Add, ValueNode&& node)
 			ImplRet(insert(std::move(node)).second)
+
+			//@{
+			template<typename _tKey>
+		bool
+			AddChild(_tKey&& k, const ValueNode& node)
+		{
+			return emplace(node.GetContainer(), lforward(k), node.Value).second;
+		}
+		template<typename _tKey>
+		bool
+			AddChild(_tKey&& k, ValueNode&& node)
+		{
+			return emplace(std::move(node.GetContainerRef()), lforward(k),
+				std::move(node.Value)).second;
+		}
+		template<typename _tKey>
+		void
+			AddChild(const_iterator hint, _tKey&& k, const ValueNode& node)
+		{
+			return emplace_hint(hint, node.GetContainer(), lforward(k), node.Value);
+		}
+		template<typename _tKey>
+		void
+			AddChild(const_iterator hint, _tKey&& k, ValueNode&& node)
+		{
+			return emplace_hint(hint, std::move(node.GetContainerRef()),
+				lforward(k), std::move(node.Value));
+		}
+		//@}
+
 			template<typename _tString, typename... _tParams>
 		inline bool
-			Add(_tString&& str, _tParams&&... args)
+			AddValue(_tString&& str, _tParams&&... args)
 		{
 			return AddValueTo(container, lforward(str), lforward(args)...);
 		}
@@ -288,6 +330,17 @@ namespace leo {
 			//@}
 
 			/*!
+			\brief 递归创建容器副本。
+			*/
+			//@{
+			static Container
+			CreateRecursively(const Container&, IValueHolder::Creation);
+
+			PDefH(Container, CreateWith, IValueHolder::Creation c) const
+			ImplRet(CreateRecursively(container, c))
+			//@}
+
+			/*!
 			\brief 若指定名称子节点不存在则按指定值初始化。
 			\return 按指定名称查找的指定类型的子节点的值的引用。
 			*/
@@ -296,12 +349,15 @@ namespace leo {
 			Place(_tString&& str, _tParams&&... args)
 		{
 			return this->try_emplace(str, NoContainer, lforward(str),
-				in_place<_type>, lforward(args)...).first->Value.template
+				leo::in_place<_type>, lforward(args)...).first->Value.template
 				GetObject<_type>();
 		}
 
 		PDefH(bool, Remove, const ValueNode& node)
 			ImplRet(container.erase(node) != 0)
+			PDefH(iterator, Remove, const_iterator i)
+			ImplRet(erase(i))
+
 			template<typename _tKey>
 		inline bool
 			Remove(const _tKey& k)
@@ -390,6 +446,9 @@ namespace leo {
 			PDefH(const_iterator, end, ) const
 			ImplRet(GetContainer().end())
 			//@}
+
+			DefFwdTmpl(-> decltype(container.erase(lforward(args)...)), auto,
+				erase, container.erase(lforward(args)...))
 
 			DefFwdTmpl(-> decltype(container.insert(lforward(args)...)), auto,
 				insert, container.insert(lforward(args)...))
@@ -499,22 +558,26 @@ namespace leo {
 	//@}
 	//! \brief 访问节点的指定类型对象指针。
 	//@{
-	template<typename _type>
-	inline observer_ptr<_type>
-		AccessPtr(observer_ptr<ValueNode> p_node) lnothrow
+	template<typename _type, typename _tNodeOrPointer>
+	inline auto
+		AccessPtr(observer_ptr<_tNodeOrPointer> p) lnothrow
+		-> decltype(leo::AccessPtr<_type>(*p))
 	{
-		return p_node ? AccessPtr<_type>(*p_node) : nullptr;
-	}
-	template<typename _type>
-	inline observer_ptr<const _type>
-		AccessPtr(observer_ptr<const ValueNode> p_node) lnothrow
-	{
-		return p_node ? AccessPtr<_type>(*p_node) : nullptr;
+		return p ? leo::AccessPtr<_type>(*p) : nullptr;
 	}
 	//@}
 	//@}
 	//@}
 
+	//@{
+	//! \brief 取指定名称指称的值。
+	LS_API ValueObject
+		GetValueOf(observer_ptr<const ValueNode>);
+
+	//! \brief 取指定名称指称的值的指针。
+	LS_API observer_ptr<const ValueObject>
+		GetValuePtrOf(observer_ptr<const ValueNode>);
+	//@}
 
 	//@{
 	template<typename _tKey>
