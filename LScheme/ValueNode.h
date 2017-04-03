@@ -354,15 +354,16 @@ namespace leo {
 		}
 
 		PDefH(bool, Remove, const ValueNode& node)
-			ImplRet(container.erase(node) != 0)
+			ImplRet(erase(node) != 0)
 			PDefH(iterator, Remove, const_iterator i)
 			ImplRet(erase(i))
 
-			template<typename _tKey>
+			template<typename _tKey, limpl(typename = leo::enable_if_t<
+				leo::is_interoperable<const _tKey&, const string&>::value>)>
 		inline bool
 			Remove(const _tKey& k)
 		{
-			return erase_first(container, k);
+			return leo::erase_first(container, k);
 		}
 
 		/*!

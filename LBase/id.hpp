@@ -146,14 +146,14 @@ namespace leo {
 		return 0 == n ? seed : constfn_hash(n-1,str + 1, seed ^ (*str + 0x9e3779b9 + (seed << 6) + (seed >> 2)));
 	}
 
-	size_t constfn_hash(const std::string& str, size_t seed = 0)
+	inline size_t constfn_hash(const std::string& str, size_t seed = 0)
 	{
 		return constfn_hash(str.c_str());
 	}
 
 #ifndef LB_IMPL_GNUCPP
 
-	size_t constfn_hash(const std::string_view& str, size_t seed = 0)
+	inline size_t constfn_hash(const std::string_view& str, size_t seed = 0)
 	{
 		return constfn_hash(str.size(),str.data());
 	}

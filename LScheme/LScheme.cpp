@@ -377,8 +377,7 @@ namespace scheme
 
 #ifndef LB_IMPL_MSCPP
 			// NOTE: Rewriting loop until the normal form is got.
-			return leo::retry_on_cond(leo::bind1(CheckReducible, std::ref(term)),
-				[&]() -> ReductionStatus {
+			return leo::retry_on_cond(CheckReducible,[&]() -> ReductionStatus {
 				if (IsBranch(term))
 				{
 					LAssert(term.size() != 0, "Invalid node found.");
