@@ -191,7 +191,7 @@ namespace scheme
 		size_t i(0);
 		list<string> result;
 
-		std::for_each(qlist.cbegin(), qlist.cend(), [&](const size_t& s) {
+		std::for_each(qlist.cbegin(), qlist.cend(), [&](size_t s) {
 			if (s != i)
 			{
 				result.push_back(cbuf.substr(i, s - i));

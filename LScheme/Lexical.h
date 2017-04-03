@@ -1,3 +1,7 @@
+/*\par 修改时间 :
+2017-02-05 21:11 +0800
+*/
+
 #ifndef LScheme_Lexical_H
 #define LScheme_Lexical_H 1
 
@@ -16,7 +20,11 @@ namespace scheme {
 	class LS_API UnescapeContext
 	{
 	public:
-		//! \brief 转义序列前缀。
+		/*!
+		\brief 转义序列前缀。
+		\note 上下文处理不直接修改，一般由转移序列前缀处理器设置。
+		\sa LexicalAnalyzer::PrefixHandler
+		*/
 		string Prefix;
 
 	private:
@@ -45,8 +53,7 @@ namespace scheme {
 		PDefH(bool, PopIf, byte uc)
 			ImplRet(PopIf(char(uc)))
 			PDefH(bool, PopIf, char c)
-			ImplRet(!sequence.empty() && sequence.back() == c
-				? (sequence.pop_back(), true) : false)
+			ImplRet(leo::pop_back_val(sequence,c))
 			PDefH(void, Push, byte uc)
 			ImplExpr(Push(char(uc)))
 			PDefH(void, Push, char c)
@@ -88,9 +95,9 @@ namespace scheme {
 	断行连接：反斜杠之后紧接换行符的双字符序列视为续行符，会被删除；
 	转义：转义序列替换为被转义字符；
 	字面量：分析至未被转义的单引号或双引号后进入字面量分析状态，无视以上规则，
-	直接逐字节输出原始输入，直至遇到对应的另一个引号。
+		直接逐字节输出原始输入，直至遇到对应的另一个引号。
 	窄字符空白符替换：单字节空格、水平/垂直制表符、换行符
-	被替换为单一空格；回车符会被忽略；
+		被替换为单一空格；回车符会被忽略；
 	原始输出：其它字符序列逐字节输出。
 	支持配置转义算法。默认实现参见 LSLUnescape 。
 	*/
@@ -173,6 +180,12 @@ namespace scheme {
 		void
 			ParseQuoted(char, Unescaper = LSLUnescape,
 				PrefixHandler = HandleBackslashPrefix);
+
+		/*!
+		\brief 直接添加字符。
+		*/
+		PDefH(void, ParseRaw, char c)
+			ImplExpr(cbuf += c);
 		//@}
 
 		/*!
@@ -253,8 +266,7 @@ namespace scheme {
 		IsGraphicalDelimeter(char c)
 	{
 		//	return std::ispunct(c);
-		return c == '(' || c == ')' || c == ':' || c == ',' || c == ';'
-			|| c == '#' || c == '%' || c == '!';
+		return c == '(' || c == ')' || c == ':' || c == ',' || c == ';';
 	}
 
 	/*!
