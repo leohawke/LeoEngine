@@ -192,7 +192,7 @@ LoadFunctions(REPLContext& context)
 
 	// NOTE: Interoperation library.
 	RegisterStrict(root, "display", leo::bind1(LogTree, Notice));
-	//RegisterStrict(root, "echo", Echo);
+	RegisterStrictUnary<const string>(root, "echo", Echo);
 	RegisterStrict(root, "eval",
 		leo::bind1(EvaluateUnit, std::ref(context)));
 
