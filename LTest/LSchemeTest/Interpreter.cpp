@@ -15,7 +15,7 @@ namespace scheme
 {
 
 #define LSL_NAME "LSL console"
-#define LSL_VER "1.40"
+#define LSL_VER "CPP17"
 #define LSL_PLATFORM "[Win32]"
 lconstexpr auto prompt("> ");
 lconstexpr auto title(LSL_NAME" " LSL_VER" @ (" __DATE__", " __TIME__") "

@@ -133,8 +133,8 @@ LoadFunctions(REPLContext& context)
 
 	// FIXME: Overflow?
 
-	//RegisterStrict(root, "+", std::bind(CallBinaryFold<int, leo::plus<>>,
-	//	leo::plus<>(), 0, _1));
+	RegisterStrict(root, "+", std::bind(CallBinaryFold<int, leo::plus<>>,
+		leo::plus<>(), 0, _1));
 
 	// FIXME: Overflow?
 
@@ -146,8 +146,8 @@ LoadFunctions(REPLContext& context)
 
 	// FIXME: Overflow?
 
-	/*RegisterStrict(root, "*", std::bind(CallBinaryFold<int,
-		leo::multiplies<>>, leo::multiplies<>(), 1, _1));*/
+	RegisterStrict(root, "*", std::bind(CallBinaryFold<int,
+		leo::multiplies<>>, leo::multiplies<>(), 1, _1));
 
 	// FIXME: Overflow?
 
@@ -167,34 +167,34 @@ LoadFunctions(REPLContext& context)
 
 	// NOTE: I/O library.
 
-	RegisterStrict(root, "ofs", [&](const string& path) {
+	RegisterStrictUnary<const string>(root, "ofs", [&](const string& path) {
 		if (ifstream ifs{ path })
 			return ifs;
 		throw LoggedEvent(
 			leo::sfmt("Failed opening file '%s'.", path.c_str()));
 	});
 
-	RegisterStrict(root, "oss", [&](const string& str) {
+	RegisterStrictUnary<const string>(root, "oss", [&](const string& str) {
 		return std::istringstream(str);
 	});
 
-	RegisterStrict(root, "parse-f", ParseStream);
-	RegisterStrict(root, "parse-lex", ParseOutput);
-	RegisterStrict(root, "parse-s", ParseStream);
-	RegisterStrict(root, "put", [&](const string& str) {
+	RegisterStrictUnary<ifstream>(root, "parse-f", ParseStream);
+	RegisterStrictUnary<LexicalAnalyzer>(root, "parse-lex", ParseOutput);
+	RegisterStrictUnary<std::istringstream>(root, "parse-s", ParseStream);
+	RegisterStrictUnary<const string>(root, "put", [&](const string& str) {
 		std::cout << EncodeArg(str);
 	});
-	RegisterStrict(root, "puts", [&](const string& str) {
+	RegisterStrictUnary<const string>(root, "puts", [&](const string& str) {
 		// XXX: Overridding.
 		std::cout << EncodeArg(str) << std::endl;
 
 	});
 
 	// NOTE: Interoperation library.
-	/*RegisterStrict(root, "display", leo::bind1(LogTree, Notice));*/
+	RegisterStrict(root, "display", leo::bind1(LogTree, Notice));
 	RegisterStrict(root, "echo", Echo);
-	/*RegisterStrict(root, "eval",
-		leo::bind1(Eval, std::ref(context)));*/
+	RegisterStrict(root, "eval",
+		leo::bind1(Eval, std::ref(context)));
 
 	RegisterStrict(root, "eval-in", [](TermNode& term) {
 		const auto i(std::next(term.begin()));
@@ -203,28 +203,28 @@ LoadFunctions(REPLContext& context)
 		EvaluateUnit(term, rctx);
 	}, leo::bind1(RetainN, 2));
 
-	RegisterStrict(root, "lex", [&](const string& unit) {
+	RegisterStrictUnary<const std::string>(root, "lex", [&](const string& unit) {
 		LexicalAnalyzer lex;
 		for (const auto& c : unit)
 			lex.ParseByte(c);
 		return lex;
 	});
 
-	RegisterStrict(root, "nameof",
+	RegisterStrictUnary<const std::type_index>(root, "nameof",
 		[](const std::type_index& ti) {
 		return string(ti.name());
 	});
 
 	// NOTE: Type operation library.
 
-	RegisterStrict(root, "typeid", [](TermNode& term) {
-		// FIXME: Get it work with %YB_Use_LightweightTypeID.
+	RegisterStrictUnary(root, "typeid", [](TermNode& term) {
+		// FIXME: Get it work with %LB_Use_LightweightTypeID.
 		return std::type_index(term.Value.GetType());
 	});
 
 	context.Perform("$define (ptype x) puts (nameof (typeid(x)))");
 
-	RegisterStrict(root, "get-typeid",
+	RegisterStrictUnary<string>(root, "get-typeid",
 		[&](const string& str) -> std::type_index {
 		if (str == "bool")
 			return typeid(bool);
@@ -248,11 +248,11 @@ LoadFunctions(REPLContext& context)
 
 	context.Perform(u8R"NPL($define (Retain-string str) ++ "\"" str "\"")NPL");
 
-	RegisterStrict(root, "itos", [](int x) {
+	RegisterStrictUnary<const int>(root, "itos", [](int x) {
 		return to_string(x);
 	});
 
-	RegisterStrict(root, "strlen", [&](const string& str) {
+	RegisterStrictUnary<const string>(root, "strlen", [&](const string& str) {
 		return int(str.length());
 	});
 

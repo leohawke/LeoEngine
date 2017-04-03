@@ -541,7 +541,7 @@ namespace scheme {
 		}
 
 		/*!
-		\brief 注册函数上下文处理器。
+		\brief 注册严格上下文处理器。
 		\note 使用 ADL ToContextHandler 。
 		*/
 		template<typename... _tParams>
@@ -991,6 +991,24 @@ namespace scheme {
 				}
 			};
 			//@}
+			//@}
+
+			/*!
+			\brief 注册一元严格求值上下文处理器。
+			*/
+			//@{
+			template<typename _func>
+			void
+				RegisterStrictUnary(ContextNode& node, const string& name, _func f)
+			{
+				RegisterStrict(node, name, UnaryExpansion<_func>{f});
+			}
+			template<typename _type, typename _func>
+			void
+				RegisterStrictUnary(ContextNode& node, const string& name, _func f)
+			{
+				RegisterStrict(node, name, UnaryAsExpansion<_type, _func>{f});
+			}
 			//@}
 
 			/*!
