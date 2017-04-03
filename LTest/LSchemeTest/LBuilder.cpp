@@ -133,8 +133,9 @@ LoadFunctions(REPLContext& context)
 
 	// FIXME: Overflow?
 
-	RegisterStrict(root, "+", std::bind(CallBinaryFold<int, leo::plus<>>,
-		leo::plus<>(), 0, _1));
+	RegisterStrict(root, "+", [](TermNode& term) {
+		CallBinaryFold<int, leo::plus<>>(leo::plus<>(), 0, term); 
+	});
 
 	// FIXME: Overflow?
 
@@ -146,8 +147,9 @@ LoadFunctions(REPLContext& context)
 
 	// FIXME: Overflow?
 
-	RegisterStrict(root, "*", std::bind(CallBinaryFold<int,
-		leo::multiplies<>>, leo::multiplies<>(), 1, _1));
+	RegisterStrict(root, "*", [](TermNode& term) {
+		CallBinaryFold<int, leo::multiplies<>>(leo::multiplies<>(), 1, term);
+	});
 
 	// FIXME: Overflow?
 
@@ -191,10 +193,13 @@ LoadFunctions(REPLContext& context)
 	});
 
 	// NOTE: Interoperation library.
-	RegisterStrict(root, "display", leo::bind1(LogTree, Notice));
+	RegisterStrict(root, "display", [](TermNode& term) {LogTree(term, Notice); });
 	RegisterStrictUnary<const string>(root, "echo", Echo);
-	RegisterStrict(root, "eval",
-		leo::bind1(EvaluateUnit, std::ref(context)));
+	RegisterStrict(root, "eval", [&](TermNode& term) 
+		{
+			EvaluateUnit(term, std::ref(context));
+		}
+	);
 
 	RegisterStrict(root, "eval-in", [](TermNode& term) {
 		const auto i(std::next(term.begin()));
