@@ -1,3 +1,10 @@
+/*!	\file SContext.h
+\ingroup LSL
+\brief S 表达式上下文。
+\par 修改时间:
+2017-03-12 12:40 +0800
+*/
+
 #ifndef LScheme_SContext_H
 #define LScheme_SContext_H 1
 
@@ -16,7 +23,7 @@ namespace scheme
 	using leo::LoggedEvent;
 
 	//! \brief 项节点：存储语法分析结果的值类型节点。
-	using TermNode = ValueNode;
+	using TermNode = limpl(ValueNode);
 
 	using TNIter = TermNode::iterator;
 	using TNCIter = TermNode::const_iterator;
@@ -33,6 +40,9 @@ namespace scheme
 
 		inline PDefH(bool, IsLeaf, const TermNode& term) lnothrow
 		ImplRet(term.empty())
+
+		inline PDefH(bool, IsList, const TermNode& term) lnothrow
+		ImplRet(!term.empty() || !term.Value)
 		//@}
 
 		inline PDefH(TermNode&, MapToTermNode, TermNode& term)
@@ -50,8 +60,12 @@ namespace scheme
 		/*!
 		\brief 检查项节点是否具有指定的值。
 		*/
-		inline PDefH(bool, HasValue, const TermNode& term, const ValueObject& vo)
-		ImplRet(term.Value == vo)
+		template<typename _type>
+		inline bool
+			HasValue(const TermNode& term, const _type& x)
+		{
+			return term.Value == x;
+		}
 
 
 		/*!
