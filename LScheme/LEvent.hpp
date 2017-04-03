@@ -60,15 +60,16 @@ namespace leo
 		struct GEquality
 		{
 			//@{
-			using Decayed = decay_t<_tFunctor>;
+			using Decayed = leo::decay_t<_tFunctor>;
 
 			static bool
 				AreEqual(const GHEvent& x, const GHEvent& y)
-				lnoexcept_spec(std::declval<const Decayed>()
-					== std::declval<const Decayed>())
+				lnoexcept_spec(leo::examiners::equal_examiner::are_equal(Deref(
+					x.template target<Decayed>()), Deref(y.template target<Decayed>())))
 			{
-				return Deref(x.template target<Decayed>())
-					== Deref(y.template target<Decayed>());
+				return leo::examiners::equal_examiner::are_equal(
+					Deref(x.template target<Decayed>()),
+					Deref(y.template target<Decayed>()));
 			}
 			//@}
 		};
@@ -88,9 +89,10 @@ namespace leo
 		*/
 		template<class _fCallable>
 		lconstfn
-			GHEvent(_fCallable f, enable_if_t<
+			GHEvent(_fCallable f, leo::enable_if_t<
 				std::is_constructible<BaseType, _fCallable>::value, int> = 0)
-			: BaseType(f), comp_eq(GetComparer(f, f))
+			: BaseType(f), 
+			comp_eq(GEquality<leo::decay_t<_fCallable>>::AreEqual)
 		{}
 		/*!
 		\brief 使用扩展函数对象。
@@ -101,7 +103,9 @@ namespace leo
 			GHEvent(_fCallable&& f,leo::enable_if_t<
 				!std::is_constructible<BaseType, _fCallable>::value, int> = 0)
 			: BaseType(leo::make_expanded<_tRet(_tParams...)>(lforward(f))),
-			comp_eq(GHEvent::AreAlwaysEqual)
+			comp_eq([](const GHEvent&, const GHEvent&) lnothrow{
+			return true;
+		)
 		{}
 		/*!
 		\brief 构造：使用对象引用和成员函数指针。
@@ -131,7 +135,7 @@ namespace leo
 #else
 				x.comp_eq == y.comp_eq
 #endif
-				&& (x.comp_eq(x, y));
+				&& (!bool(x) || x.comp_eq(x, y));
 		}
 
 		//! \brief 调用。
@@ -139,30 +143,9 @@ namespace leo
 
 		using BaseType::operator bool;
 
-	private:
-		//@{
-		template<typename _type>
-		static lconstfn Comparer
-			GetComparer(_type& x, _type& y, decltype(x == y) = {}) lnothrow
-		{
-			return GEquality<_type>::AreEqual;
-		}
-		template<typename _type, typename _tUnused>
-		static lconstfn Comparer
-			GetComparer(_type&, _tUnused&) lnothrow
-		{
-			return GHEvent::AreAlwaysEqual;
-		}
+		using BaseType::target;
 
-		static lconstfn bool
-			AreAlwaysEqual(const GHEvent&, const GHEvent&) lnothrow
-		{
-			return true;
-		}
-		//@}
-
-		public:
-			using BaseType::target_type;
+		using BaseType::target_type;
 	};
 	//@}
 
