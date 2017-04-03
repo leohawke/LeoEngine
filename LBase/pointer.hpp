@@ -42,7 +42,7 @@ namespace leo
 		static_assert(detected_or_t<true_, details::nptr_eq1, _type>::value,
 			"Invalid type found.");
 #ifndef LB_IMPL_MSCPP
-		static_assert(detected_or_t<true_t, details::nptr_eq2, _type>::value,
+		static_assert(detected_or_t<true_, details::nptr_eq2, _type>::value,
 			"Invalid type found.");
 #endif
 

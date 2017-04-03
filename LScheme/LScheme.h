@@ -375,7 +375,6 @@ namespace scheme {
 		{
 			_func Handler;
 
-			//! \since build 757
 			//@{
 			template<typename _tParam, limpl(typename
 				= leo::exclude_self_t<WrappedContextHandler, _tParam>)>

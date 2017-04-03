@@ -373,20 +373,16 @@ namespace leo {
 	struct and_;
 
 	template<>
-	struct and_<> : true_type
+	struct and_<> : true_
 	{};
 
 	template<typename _b1>
 	struct and_<_b1> : _b1
 	{};
 
-	template<typename _b1, typename _b2>
-	struct and_<_b1, _b2> : conditional_t<_b1::value, _b2, _b1>
-	{};
-
-	template<typename _b1, typename _b2, typename _b3, typename... _bn>
-	struct and_<_b1, _b2, _b3, _bn...>
-		: conditional_t<_b1::value, and_<_b2, _b3, _bn...>, _b1>
+	template<class _b1, class _b2, class... _bn>
+	struct and_<_b1, _b2, _bn...>
+		: conditional_t<_b1::value, and_<_b2, _bn...>, _b1>
 	{};
 
 
@@ -394,7 +390,7 @@ namespace leo {
 	struct or_;
 
 	template<>
-	struct or_<> : false_type
+	struct or_<> : false_
 	{
 
 	};
@@ -404,20 +400,15 @@ namespace leo {
 	{
 	};
 
-	template<typename _b1, typename _b2>
-	struct or_<_b1, _b2> : conditional_t<_b1::value, _b1, _b2>
-	{
-	};
 
-	template<typename _b1, typename _b2, typename _b3, typename... _bn>
-	struct or_<_b1, _b2, _b3, _bn...>
-		: conditional_t<_b1::value, _b1, or_<_b2, _b3, _bn...>>
-	{
-	};
+	template<class _b1, class _b2, class... _bn>
+	struct or_<_b1, _b2, _bn...>
+		: conditional_t<_b1::value, _b1, or_<_b2, _bn...>>
+	{};
 
 
 	template<typename _b>
-	struct not_ : bool_constant<!_b::value>
+	struct not_ : bool_<!_b::value>
 	{};
 	//@}
 
@@ -425,15 +416,15 @@ namespace leo {
 	{
 
 		template<typename _type>
-		struct is_referenceable_function : false_type
+		struct is_referenceable_function : false_
 		{};
 
 		template<typename _tRes, typename... _tParams>
-		struct is_referenceable_function<_tRes(_tParams...)> : true_type
+		struct is_referenceable_function<_tRes(_tParams...)> : true_
 		{};
 
 		template<typename _tRes, typename... _tParams>
-		struct is_referenceable_function<_tRes(_tParams..., ...)> : true_type
+		struct is_referenceable_function<_tRes(_tParams..., ...)> : true_
 		{};
 
 	} // namespace details;
