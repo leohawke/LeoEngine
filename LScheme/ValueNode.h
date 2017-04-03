@@ -432,7 +432,7 @@ namespace leo {
 			PDefH(const_iterator, begin, ) const
 			ImplRet(GetContainer().begin())
 
-			DefFwdTmpl(const, pair<iterator LPP_Comma bool>, emplace,
+			DefFwdTmpl(, pair<iterator LPP_Comma bool>, emplace,
 				container.emplace(lforward(args)...))
 
 			DefFwdTmpl(, iterator, emplace_hint,

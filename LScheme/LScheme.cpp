@@ -1,3 +1,9 @@
+/*!	\file LScheme.cpp
+\ingroup LSL
+\par 修改时间:
+2017-03-27 15:23 +0800
+*/
+
 #include "LScheme.h"
 #include "LSchemREPL.h"
 #include "SContext.h"
@@ -9,6 +15,26 @@ namespace scheme
 {
 	namespace v1
 	{
+		string
+			to_string(ValueToken vt)
+		{
+			switch (vt)
+			{
+			case ValueToken::Null:
+				return "null";
+			case ValueToken::Undefined:
+				return "undefined";
+			case ValueToken::Unspecified:
+				return "unspecified";
+			case ValueToken::GroupingAnchor:
+				return "grouping";
+			case ValueToken::OrderedAnchor:
+				return "ordered";
+			}
+			throw std::invalid_argument("Invalid value token found.");
+		}
+
+
 		void
 			InsertChild(TermNode&& term, TermNode::Container& con)
 		{
@@ -103,15 +129,8 @@ namespace scheme
 			lconstexpr const auto LeafTermName("__$$@");
 			lconstexpr const auto ListTermName("__$$");
 			lconstexpr const auto LiteralTermName("__$$@_");
+			lconstexpr const auto ParentContextName("__$@_parent");
 
-			// TODO: Use %ReductionStatus as pass invocation result directly instead of this
-			//	wrapper. This is not transformed yet to avoid G++ internal compiler error:
-			//	"error reporting routines re-entered".
-			lconstfn PDefH(ReductionStatus, ToStatus, bool res) lnothrow
-				ImplRet(res ? ReductionStatus::NeedRetry : ReductionStatus::Success)
-
-				lconstfn PDefH(bool, NeedsRetry, ReductionStatus res) lnothrow
-				ImplRet(res != ReductionStatus::Success)
 
 				template<typename _func>
 			TermNode
@@ -119,28 +138,182 @@ namespace scheme
 					const ValueObject& delim, const string& name)
 			{
 				using namespace std::placeholders;
-				auto res(AsNode(name, term.Value));
+				// NOTE: Explicit type 'TermNode' is intended.
+				TermNode res(AsNode(name, term.Value));
 
 				if (IsBranch(term))
 				{
-					res += AsIndexNode(res, pfx);
-					leo::split(term.begin(), term.end(), leo::bind1(HasValue,
-						std::ref(delim)), std::bind(f, std::ref(res), _1, _2));
+					// NOTE: Explicit type 'TermNode' is intended.
+					res += TermNode(AsIndexNode(res, pfx));
+					leo::split(term.begin(), term.end(),
+						leo::bind1(HasValue<ValueObject>, std::ref(delim)),
+						std::bind(f, std::ref(res), _1, _2));
 				}
 				return res;
+			}
+
+			ReductionStatus
+				AndOr(TermNode& term, ContextNode& ctx, bool is_and)
+			{
+				Forms::Retain(term);
+
+				auto i(term.begin());
+
+				if (++i != term.end())
+				{
+					if (std::next(i) == term.end())
+						LiftTerm(term, *i);
+					else
+					{
+						ReduceChecked(*i, ctx);
+						if (leo::value_or(i->Value.AccessPtr<bool>(), is_and) == is_and)
+							term.Remove(i);
+						else
+						{
+							if (is_and)
+								term.Value = false;
+							else
+								LiftTerm(term, i->Value);
+							term.Remove(i);
+							return ReductionStatus::Clean;
+						}
+					}
+					return ReductionStatus::Retrying;
+				}
+				term.Value = is_and;
+				return ReductionStatus::Clean;
 			}
 
 			template<typename _func>
 			void
 				EqualTerm(TermNode& term, _func f)
 			{
-				Forms::QuoteN(term, 2);
+				Forms::RetainN(term, 2);
 
 				auto i(term.begin());
 				const auto& x(Deref(++i));
 
 				term.Value = f(x.Value, Deref(++i).Value);
 			}
+
+			class VauHandler final
+			{
+			private:
+				/*!
+				\brief 动态上下文名称。
+				*/
+				string eformal{};
+				/*!
+				\brief 形式参数对象。
+				*/
+				shared_ptr<TermNode> p_formals;
+				//! \brief 捕获静态上下文，包含引入抽象时的静态环境。
+				shared_ptr<ContextNode> p_context;
+				//! \brief 闭包对象。
+				shared_ptr<TermNode> p_closure;
+
+			public:
+				VauHandler(TermNode& term, ContextNode& ctx, bool ignore)
+					: p_formals([&] {
+					using namespace Forms;
+
+					Retain(term);
+					if (term.size() > 2)
+					{
+						auto& con(term.GetContainerRef());
+						auto i(con.begin());
+						const auto& formals(Deref(++i));
+
+						if (!ignore)
+						{
+							const auto& eterm(Deref(++i));
+
+							if (const auto p = TermToNamePtr(eterm))
+							{
+								eformal = *p;
+								TraceDe(Debug, "Found context parameter name '%s'.",
+									eformal.c_str());
+								if (eformal == "#ignore")
+									eformal.clear();
+								else if (!IsLSLASymbol(eformal))
+									throw InvalidSyntax("Symbol or '#ignore' expected"
+										" for context parameter.");
+							}
+							else
+								throw InvalidSyntax("Invalid context parameter found.");
+						}
+						TraceDe(Debug, "Found operator with %zu parameter(s) to be"
+							" bound.", formals.size());
+						auto res(make_shared<TermNode>(std::move(formals)));
+
+						con.erase(con.cbegin(), ++i);
+						return res;
+					}
+					else
+						throw InvalidSyntax(
+							"Insufficient terms in function abstraction.");
+				}()),
+					// NOTE: Capturing by reference.
+					// TODO: Optimize. This does not need to be shared, since it would
+					//	always be copied, if used.
+					// TODO: Region inference?
+					// FIXME: This may be unsafe if the external owner is destroyed.
+					p_context(make_shared<ContextNode>(ctx)),
+					p_closure(make_shared<TermNode>(std::move(term)))
+				{}
+
+				ReductionStatus
+					operator()(TermNode& term, ContextNode& ctx) const
+				{
+					if (IsBranch(term))
+					{
+						// FIXME: Cyclic reference to context handler when the term value
+						//	(i.e. the closure) is copied upward?
+						using namespace Forms;
+						const auto& formals(Deref(p_formals));
+						// NOTE: Active record frame with outer scope bindings.
+						// TODO: Optimize for performance.
+						// NOTE: This is probably better to be copy-on-write. Since
+						//	no immutable reference would be accessed before
+						//	mutation, no care is needed for reference invalidation.
+						// TODO: Optimize using initialization from iterator pair?
+						// XXX: Referencing escaped variables (now only parameters need
+						//	to be cared) form the context would cause undefined behavior
+						//	(e.g. returning a reference to automatic object in the host
+						//	language).
+						// TODO: Reduce such undefined behavior resonably?
+						ContextNode comp_ctx;
+
+						// NOTE: Bind dynamic context.
+						if (!eformal.empty())
+							comp_ctx.AddValue(eformal, ValueObject(ctx, OwnershipTag<>()));
+						// NOTE: Since first term is expected to be saved (e.g. by
+						//	%ReduceCombined), it is safe to reduce directly.
+						RemoveHead(term);
+						BindParameter(comp_ctx, formals, term);
+						TraceDe(Debug, "Function called, with %ld shared term(s), %ld"
+							" shared context(s), %zu parameter(s).", p_closure.use_count(),
+							p_context.use_count(), formals.size());
+						LAssert(&comp_ctx != &Deref(p_context),
+							"Self reference of context found.");
+						// NOTE: Static context is bound by setting parent context pointer.
+						// NOTE: Shared ownership is necessary here to prevent the context
+						//	disposed too early after the vau handler has been destroyed. The
+						//	context has to live longer if there exists the child to capture
+						//	the context and then return. And there cannot be cyclic
+						//	reference.
+						comp_ctx.AddValue(ParentContextName, p_context);
+						// NOTE: Beta reduction.
+						// TODO: Implement accurate lifetime analysis rather than
+						//	'p_closure.unique()'.
+						ReduceCheckedClosure(term, comp_ctx, {}, *p_closure);
+						return CheckNorm(term);
+					}
+					else
+						throw LoggedEvent("Invalid composition found.", Alert);
+				}
+			};
+
 
 		} // unnamed namespace;
 
@@ -171,27 +344,29 @@ namespace scheme
 		Guard
 			InvokeGuard(TermNode& term, ContextNode& ctx)
 		{
-			return InvokePasses<GuardPasses>(GuardName, term, ctx);
+			return InvokePasses<GuardPasses>(ResolveName(ctx, GuardName), term, ctx);
 		}
 
 		ReductionStatus
 			InvokeLeaf(TermNode& term, ContextNode& ctx)
 		{
-			return ToStatus(InvokePasses<EvaluationPasses>(LeafTermName, term, ctx));
+			return InvokePasses<EvaluationPasses>(ResolveName(ctx, LeafTermName), term,
+				ctx);
 		}
 
 		ReductionStatus
 			InvokeList(TermNode& term, ContextNode& ctx)
 		{
-			return ToStatus(InvokePasses<EvaluationPasses>(ListTermName, term, ctx));
+			return InvokePasses<EvaluationPasses>(ResolveName(ctx, ListTermName), term,
+				ctx);
 		}
 
 		ReductionStatus
 			InvokeLiteral(TermNode& term, ContextNode& ctx, string_view id)
 		{
 			LAssertNonnull(id.data());
-			return
-				ToStatus(InvokePasses<LiteralPasses>(LiteralTermName, term, ctx, id));
+			return InvokePasses<LiteralPasses>(ResolveName(ctx, LiteralTermName), term,
+				ctx, id);
 		}
 
 
@@ -202,7 +377,7 @@ namespace scheme
 
 #ifndef LB_IMPL_MSCPP
 			// NOTE: Rewriting loop until the normal form is got.
-			return leo::retry_on_cond(leo::bind1(DetectReducible, std::ref(term)),
+			return leo::retry_on_cond(leo::bind1(CheckReducible, std::ref(term)),
 				[&]() -> ReductionStatus {
 				if (IsBranch(term))
 				{
@@ -218,20 +393,16 @@ namespace scheme
 						return Reduce(term, ctx);
 					}
 				}
-				else if (!term.Value)
-					// NOTE: Empty list.
-					term.Value = ValueToken::Null;
-				else if (AccessPtr<ValueToken>(term))
-					// TODO: Handle special value token.
-					;
-				else
-					return InvokeLeaf(term, ctx);
-				// NOTE: Exited loop has produced normal form by default.
-				return ReductionStatus::Success;
-			}) == ReductionStatus::Success ? ReductionStatus::Success
-				: ReductionStatus::NeedRetry;
+
+				const auto& tp(term.Value.GetType());
+
+				// NOTE: Empty list or special value token has no-op to do with.
+				// TODO: Handle special value token?
+				return tp != leo::type_id<void>() && tp != leo::type_id<
+					ValueToken>() ? InvokeLeaf(term, ctx) : ReductionStatus::Clean;
+		});
 #else
-			auto cond = leo::bind1(DetectReducible, std::ref(term));
+			auto cond =CheckReducible;
 			auto f = [&]() -> ReductionStatus {
 				if (IsBranch(term))
 				{
@@ -247,16 +418,12 @@ namespace scheme
 						return Reduce(term, ctx);
 					}
 				}
-				else if (!term.Value)
-					// NOTE: Empty list.
-					term.Value = ValueToken::Null;
-				else if (AccessPtr<ValueToken>(term))
-					// TODO: Handle special value token.
-					;
-				else
-					return InvokeLeaf(term, ctx);
-				// NOTE: Exited loop has produced normal form by default.
-				return ReductionStatus::Success;
+				const auto& tp(term.Value.GetType());
+
+				// NOTE: Empty list or special value token has no-op to do with.
+				// TODO: Handle special value token?
+				return tp != leo::type_id<void>() && tp != leo::type_id<
+					ValueToken>() ? InvokeLeaf(term, ctx) : ReductionStatus::Clean;
 			};
 
 			ReductionStatus res;
@@ -264,18 +431,17 @@ namespace scheme
 			do
 				res = f();
 			while (cond(res));
-			return res == ReductionStatus::Success ? ReductionStatus::Success
-				: ReductionStatus::NeedRetry;
+			return res;
 #endif
 		}
 
 		void
-			ReduceArguments(TermNode::Container& con, ContextNode& ctx)
+			ReduceArguments(TNIter first, TNIter last, ContextNode& ctx)
 		{
-			if (con.size() > 1)
+			if (first != last)
 				// NOTE: The order of evaluation is unspecified by the language
 				//	specification. It should not be depended on.
-				ReduceChildren(std::next(con.begin()), con.end(), ctx);
+				ReduceChildren(++first, last, ctx);
 			else
 				throw InvalidSyntax("Argument not found.");
 		}
@@ -310,6 +476,36 @@ namespace scheme
 			//	left-to-right.
 			// TODO: Use %ExecutionPolicy?
 			std::for_each(first, last, leo::bind1(Reduce, std::ref(ctx)));
+		}
+
+		ReductionStatus
+			ReduceChildrenOrdered(TNIter first, TNIter last, ContextNode& ctx)
+		{
+			const auto tr([&](TNIter iter) {
+				return leo::make_transform(iter, [&](TNIter i) {
+					return Reduce(*i, ctx);
+				});
+			});
+
+			return leo::default_last_value<ReductionStatus>()(tr(first), tr(last),
+				ReductionStatus::Clean);
+		}
+
+		ReductionStatus
+			ReduceFirst(TermNode& term, ContextNode& ctx)
+		{
+			return IsBranch(term) ? Reduce(Deref(term.begin()), ctx)
+				: ReductionStatus::Clean;
+		}
+
+		ReductionStatus
+			ReduceOrdered(TermNode& term, ContextNode& ctx)
+		{
+			const auto res(ReduceChildrenOrdered(term, ctx));
+
+			if (IsBranch(term))
+				LiftTerm(term, *term.rbegin());
+			return res;
 		}
 
 		ReductionStatus
@@ -374,20 +570,21 @@ namespace scheme
 				const ValueObject& delim)
 		{
 			if (std::find_if(term.begin(), term.end(),
-				leo::bind1(HasValue, std::ref(delim))) != term.end())
-				term = TransformForSeparator(term, name, delim, term.GetName());
-			return ReductionStatus::Success;
+				leo::bind1(HasValue<ValueObject>, std::ref(delim))) != term.end())
+				term = TransformForSeparator(term, name, delim, 
+					TokenValue(term.GetName()));
+			return ReductionStatus::Clean;
 		}
 
 
-		void
+		ReductionStatus
 			FormContextHandler::operator()(TermNode& term, ContextNode& ctx) const
 		{
 			// TODO: Is it worth matching specific builtin special forms here?
 			try
 			{
 				if (!Check || Check(term))
-					Handler(term, ctx);
+					return Handler(term, ctx);
 				else
 					// TODO: Use more specific exception type?
 					throw std::invalid_argument("Term check failed.");
@@ -399,100 +596,84 @@ namespace scheme
 						e.from(), e.to()), Warning))
 				// TODO: Use nested exceptions?
 				CatchThrow(std::exception& e, LoggedEvent(e.what(), Err))
+				// XXX: Use distinct status for failure?
+				return ReductionStatus::Clean;
 		}
 
 
-		void
-			FunctionContextHandler::operator()(TermNode& term, ContextNode& ctx) const
+		ReductionStatus
+			StrictContextHandler::operator()(TermNode& term, ContextNode& ctx) const
 		{
-			auto& con(term.GetContainerRef());
-
 			// NOTE: This implementes arguments evaluation in applicative order.
-			ReduceArguments(con, ctx);
-
-			const auto n(con.size());
-
-			if (n > 1)
-			{
-				// NOTE: Matching function calls.
-				auto i(con.begin());
-
-				// NOTE: Adjust null list argument application
-				//	to function call without arguments.
-				// TODO: Improve performance of comparison?
-				if (n == 2 && Deref(++i).Value == ValueToken::Null)
-					con.erase(i);
-				Handler(term, ctx);
-			}
-			else
-				// TODO: Use other exception type for this type of error?
-				// TODO: Capture contextual information in error.
-				throw ListReductionFailure(leo::sfmt("Invalid list form with"
-					" %zu term(s) not reduced found.", n), leo::Warning);
-			// TODO: Add unreduced form check? Is this better to be inserted in other
-			//	passes?
+			ReduceArguments(term, ctx);
+			LAssert(IsBranch(term), "Invalid state found.");
+			// NOTE: Matching function calls.
+			return Handler(term, ctx);
 #if false
-			if (con.empty())
-				TraceDe(Warning, "Empty reduced form found.");
-			else
-				TraceDe(Warning, "%zu term(s) not reduced found.", n);
+			// TODO: Use other exception type with more precise information for this
+			//	error? Also consider capture of contextual information in error.
+			throw ListReductionFailure(leo::sfmt("Invalid list form with"
+				" %zu term(s) not reduced found.", n), leo::Warning);
 #endif
 		}
 
 
 		void
 			RegisterSequenceContextTransformer(EvaluationPasses& passes, ContextNode& node,
-				const string& name, const ValueObject& delim)
+				const string& name, const ValueObject& delim, bool ordered)
 		{
 			// TODO: Simplify by using %ReductionStatus as invocation result directly.
 			//	passes += leo::bind1(ReplaceSeparatedChildren, name, delim);
 			passes += [name, delim](TermNode& term) {
-				return NeedsRetry(ReplaceSeparatedChildren(term, name, delim));
+				return ReplaceSeparatedChildren(term, name, delim);
 			};
-			RegisterFormContextHandler(node, name, [](TermNode& term, ContextNode& ctx) {
-				RemoveHead(term);
+			RegisterForm(node, name,
+				ordered ? ReduceOrdered : [](TermNode& term, ContextNode& ctx) {
 				ReduceChildren(term, ctx);
-			}, IsBranch);
+				return ReductionStatus::Retained;
+			});
 		}
-
 
 		ReductionStatus
-			EvaluateContextFirst(TermNode& term, ContextNode& ctx)
+			EvaluateDelayed(TermNode& term)
 		{
-			if (IsBranch(term))
-			{
-				const auto& fm(Deref(leo::as_const(term).begin()));
-
-				if (const auto p_handler = AccessPtr<ContextHandler>(fm))
-					(*p_handler)(term, ctx);
-				else
-				{
-					const auto p(AccessPtr<string>(fm));
-
-					// TODO: Capture contextual information in error.
-					throw ListReductionFailure(leo::sfmt("No matching form '%s'"
-						" with %zu argument(s) found.", p ? p->c_str()
-						: "#<unknown>", term.size()));
-				}
-			}
-			return ReductionStatus::Success;
+			return leo::call_value_or([&](DelayedTerm& delayed) {
+				return EvaluateDelayed(term, delayed);
+			}, AccessPtr<DelayedTerm>(term), ReductionStatus::Clean);
 		}
+		ReductionStatus
+			EvaluateDelayed(TermNode& term, DelayedTerm& delayed)
+		{
+			// NOTE: The referenced term is lived through the envaluation, which is
+			//	guaranteed by the evaluated parent term.
+			LiftDelayed(term, delayed);
+			// NOTE: To make it work with %DetectReducible.
+			return ReductionStatus::Retrying;
+		}
+	
 
 		ReductionStatus
 			EvaluateIdentifier(TermNode& term,const ContextNode& ctx, string_view id)
 		{
 			LAssertNonnull(id.data());
-
-			if (const auto p = FetchValuePtr(ctx, id))
+			if (const auto p = ResolveName(ctx, id))
 			{
-				LiftTermRef(term, *p);
+				// NOTE: The referenced term is lived through the envaluation, which is
+				//	guaranteed by the context.
+				if (p->empty())
+					LiftTermRef(term, p->Value);
+				else
+					// XXX: Children are copied.
+					term.SetContentIndirect(p->GetContainer(), p->Value);
 				if (const auto p_handler = AccessPtr<LiteralHandler>(term))
-					return ToStatus((*p_handler)(ctx));
+					return (*p_handler)(ctx);
+				// NOTE: Unevaluated term shall be detected and evaluated. See also
+				//	$2017-02 @ %Documentation::Workflow::Annual2017.
+				return IsLeaf(term) ? (term.Value.GetType()
+					!= leo::type_id<TokenValue>() ? EvaluateDelayed(term)
+					: ReductionStatus::Retrying) : ReductionStatus::Retained;
 			}
-			else
-				throw BadIdentifier(id);
-			
-			return EvaluateTermNode(term);
+			throw BadIdentifier(id);
 		}
 
 		ReductionStatus
@@ -505,41 +686,60 @@ namespace scheme
 				// NOTE: If necessary, there can be inserted some cleanup to remove
 				//	empty tokens, returning %ReductionStatus::NeedRetr. Separators
 				//	should have been handled in appropriate preprocess passes.
-				const auto lcat(CategorizeLiteral(id));
+				const auto lcat(CategorizeBasicLexeme(id));
 
 				switch (lcat)
 				{
-				case LiteralCategory::Code:
+				case LexemeCategory::Code:
 					// TODO: When do code literals need to be evaluated?
 					id = DeliteralizeUnchecked(id);
 					if (LB_UNLIKELY(id.empty()))
 						break;
-				case LiteralCategory::None:
-					return InvokeLiteral(term, ctx, id) == ReductionStatus::Success
-						? ReductionStatus::Success : EvaluateIdentifier(term, ctx, id);
+				case LexemeCategory::Symbol:
+					return CheckReducible(InvokeLiteral(term, ctx, id))
+						? EvaluateIdentifier(term, ctx, id) : ReductionStatus::Clean;
 					// XXX: Empty token is ignored.
 					// XXX: Remained reducible?
-				case LiteralCategory::Data:
-					term.Value =string(Deliteralize(id));
+				case LexemeCategory::Data:
+					// XXX: This should be prevented being passed to second pass in
+					//	%TermToNamePtr normally. This is guarded by normal form handling
+					//	in the loop in %Reduce.
+					term.Value.emplace<string>(Deliteralize(id));
 				default:
 					break;
 					// TODO: Handle other categories of literal.
 				}
 			}
-			return ReductionStatus::Success;
+			return ReductionStatus::Clean;
 		}
 
 		ReductionStatus
-			EvaluateTermNode(TermNode& term)
+			ReduceCombined(TermNode& term, ContextNode& ctx)
 		{
-			if (const auto p = AccessPtr<TermNode>(term))
+			if (IsBranch(term))
 			{
-				LiftTermRef(term, *p);
-				// NOTE: To make it work with %DetectReducible.
-				if (IsBranch(term))
-					return ReductionStatus::NeedRetry;
+				const auto& fm(Deref(leo::as_const(term).begin()));
+
+				if (const auto p_handler = AccessPtr<ContextHandler>(fm))
+				{
+					const auto handler(std::move(*p_handler));
+					const auto res(handler(term, ctx));
+
+					// NOTE: Normalization: Cleanup if necessary.
+					if (res == ReductionStatus::Clean)
+						term.ClearContainer();
+					return res;
+				}
+				// TODO: Capture contextual information in error.
+				// TODO: Extract general form information extractor function.
+				throw ListReductionFailure(
+					sfmt("No matching combiner '%s' for operand with %zu argument(s)"
+						" found.", [&](observer_ptr<const string> p) {
+					return
+						p ? *p : sfmt("#<unknown:%s>", fm.Value.GetType().name());
+				}(TermToNamePtr(fm)).c_str(), FetchArgumentN(term)));
 			}
-			return ReductionStatus::Success;
+			return ReductionStatus::Clean;
 		}
 
 		ReductionStatus
@@ -548,26 +748,50 @@ namespace scheme
 			return leo::call_value_or([&](string_view id) -> ReductionStatus {
 				return EvaluateLeafToken(term, ctx, id);
 				// FIXME: Success on node conversion failure?
-			}, TermToName(term), ReductionStatus::Success);
+			}, TermToNamePtr(term), ReductionStatus::Clean);
+		}
+
+		observer_ptr<const ValueNode>
+			ResolveName(const ContextNode& ctx, string_view id)
+		{
+			LAssertNonnull(id.data());
+
+			observer_ptr<const ValueNode> p;
+			auto ctx_ref(leo::ref(ctx));
+
+			leo::retry_on_cond(
+				[&](observer_ptr<const ContextNode> p_ctx) lnothrow -> bool{
+				if (p_ctx)
+				{
+					ctx_ref = leo::ref(Deref(p_ctx));
+					return true;
+				}
+			return {};
+			}, [&, id]() -> observer_ptr<const ContextNode> {
+				if ((p = LookupName(ctx_ref, id)))
+					return {};
+				if (const auto p_parent = FetchValuePtr(ctx_ref, ParentContextName))
+				{
+					if (const auto p_ctx
+						= p_parent->AccessPtr<observer_ptr<const ContextNode>>())
+						return *p_ctx;
+					if (const auto p_shared
+						= p_parent->AccessPtr<shared_ptr<ContextNode>>())
+						return make_observer(p_shared->get());
+				}
+				return {};
+			});
+			return p;
 		}
 
 		void
 			SetupDefaultInterpretation(ContextNode& root, EvaluationPasses passes)
 		{
-			// TODO: Simplify by using %ReductionStatus as invocation result directly
-			//	in leo. Otherwise current versions of G++ would crash here as internal
-			//	compiler error: "error reporting routines re-entered".
-			//	passes += ReduceFirst;
-			//passes += leo::compose(NeedsRetry, ReduceFirst);
-			passes += [](TermNode& term, ContextNode& ctx)->bool {return NeedsRetry(ReduceFirst(term, ctx));};
-			// TODO: Insert more form evaluation passes: macro expansion, etc.
-			//	passes += EvaluateContextFirst;
-			//passes += leo::compose(NeedsRetry, EvaluateContextFirst);
-			passes += [](TermNode& term, ContextNode& ctx)->bool {return NeedsRetry(EvaluateContextFirst(term, ctx)); };
+			passes += ReduceHeadEmptyList;
+			passes += [](TermNode& term, ContextNode& ctx)->ReductionStatus {return ReduceFirst(term, ctx);};
+			passes += [](TermNode& term, ContextNode& ctx)->ReductionStatus {return ReduceCombined(term, ctx); };
 			AccessListPassesRef(root) = std::move(passes);
-			//	AccessLeafPassesRef(root) = ReduceLeafToken;
-			//AccessLeafPassesRef(root) = leo::compose(NeedsRetry, ReduceLeafToken);
-			AccessLeafPassesRef(root) = [](TermNode& term, ContextNode& ctx)->bool {return NeedsRetry(ReduceLeafToken(term, ctx)); };
+			AccessLeafPassesRef(root) = [](TermNode& term, ContextNode& ctx)->ReductionStatus {return ReduceLeafToken(term, ctx); };
 		}
 
 
@@ -579,6 +803,27 @@ namespace scheme
 				std::bind(std::ref(ListTermPreprocess), _1, _2));
 			if (trace)
 				SetupTraceDepth(Root);
+		}
+
+		void
+			REPLContext::LoadFrom(std::istream& is)
+		{
+			if (is)
+			{
+				if (const auto p = is.rdbuf())
+					LoadFrom(*p);
+				else
+					throw std::invalid_argument("Invalid stream buffer found.");
+			}
+			else
+				throw std::invalid_argument("Invalid stream found.");
+		}
+		void
+			REPLContext::LoadFrom(std::streambuf& buf)
+		{
+			using s_it_t = std::istreambuf_iterator<char>;
+
+			Process(Session(s_it_t(&buf), s_it_t()));
 		}
 
 		TermNode
@@ -615,15 +860,105 @@ namespace scheme
 
 		namespace Forms
 		{
-
 			size_t
-				QuoteN(const TermNode& term, size_t m)
+				RetainN(const TermNode& term, size_t m)
 			{
 				const auto n(FetchArgumentN(term));
 
 				if (n != m)
 					throw ArityMismatch(m, n);
 				return n;
+			}
+
+
+			void
+				BindParameter(ContextNode& e, const TermNode& t, TermNode& o)
+			{
+				if (IsBranch(t))
+				{
+					if (IsBranch(o))
+					{
+						const auto n_p(t.size());
+						const auto n_o(o.size());
+						auto last(t.end());
+
+						if (n_p > 0)
+						{
+							const auto& back(Deref(std::prev(last)));
+
+							if (IsLeaf(back))
+							{
+								if (const auto p = AccessPtr<TokenValue>(back))
+									if (*p == "...")
+										--last;
+							}
+						}
+						if (n_p == n_o || (last != t.end() && n_o >= n_p - 1))
+						{
+							auto j(o.begin());
+
+							for (auto i(t.begin()); i != last; lunseq(++i, ++j))
+							{
+								LAssert(j != o.end(), "Invalid state of operand found.");
+								BindParameter(e, Deref(i), Deref(j));
+							}
+							if (last != t.end())
+							{
+								TermNode::Container con;
+
+								for (; j != o.end(); ++j)
+								{
+									auto& b(Deref(j));
+
+									// TODO: Merge with static binding implementation?
+									// TODO: How to reduce unnecessary copy of retained
+									//	list?
+									con.emplace(b.CreateWith(IValueHolder::Move),
+										MakeIndex(con), b.Value.MakeIndirect());
+								}
+								e.emplace(std::move(con), "...");
+								LAssert(++last == t.end(), "Invalid state found.");
+							}
+						}
+						else if (last == t.end())
+							throw ArityMismatch(n_p, n_o);
+						else
+							throw ParameterMismatch(
+								"Insufficient term found for list parameter.");
+					}
+					else
+						throw ParameterMismatch(
+							"Invalid leaf term found for non-empty list parameter.");
+				}
+				else if (!t.Value)
+				{
+					if (o)
+						throw ParameterMismatch(
+							"Invalid branch term found for empty list parameter.");
+				}
+				else if (const auto p = AccessPtr<TokenValue>(t))
+					BindParameterLeaf(e, *p, std::move(o));
+				else
+					throw ParameterMismatch("Invalid parameter value found.");
+			}
+
+			void
+				BindParameterLeaf(ContextNode& e, const TokenValue& n,
+					TermNode::Container&& con, ValueObject&& vo)
+			{
+				if (n != "#ignore")
+				{
+					if (!n.empty() && IsLSLASymbol(n))
+						// NOTE: The symbol can be rebound.
+						// NOTE: The operands should have been evaluated if this is
+						//	in a lambda. Children nodes in arguments retained are
+						//	also transferred.
+						// XXX: Moved. This is copy elision in object language.
+						e[n].SetContent(std::move(con), std::move(vo));
+					else
+						throw ParameterMismatch(
+							"Invalid token found for symbol parameter.");
+				}
 			}
 
 
@@ -636,7 +971,7 @@ namespace scheme
 					const auto i(std::next(con.cbegin()));
 
 					// XXX: Modifier is treated as special name.
-					if (const auto p = TermToName(Deref(i)))
+					if (const auto p = TermToNamePtr(Deref(i)))
 						if (*p == mod)
 						{
 							con.erase(i);
@@ -661,7 +996,7 @@ namespace scheme
 					{
 						const auto i_beg(i->begin());
 
-						if (const auto p_id = TermToName(Deref(i_beg)))
+						if (const auto p_id = TermToNamePtr(Deref(i_beg)))
 						{
 							const auto id(*p_id);
 
@@ -672,7 +1007,7 @@ namespace scheme
 						else
 							throw LSLException("Invalid node category found.");
 					}
-					else if (const auto p_id = TermToName(Deref(i)))
+					else if (const auto p_id = TermToNamePtr(Deref(i)))
 					{
 						const auto id(*p_id);
 
@@ -686,10 +1021,10 @@ namespace scheme
 							RemoveIdentifier(ctx, id, mod);
 						else
 							throw InvalidSyntax("Source operand not found.");
-						term.ClearTo(ValueToken::Unspecified);
 					}
 					else
 						throw LSLException("Invalid node category found.");
+					term.Value = ValueToken::Unspecified;
 				});
 			}
 
@@ -697,116 +1032,72 @@ namespace scheme
 				DefineOrSetFor(const string& id, TermNode& term, ContextNode& ctx, bool define,
 					bool mod)
 			{
-				if (CategorizeLiteral(id) == LiteralCategory::None)
+				LAssertNonnull(id.data());
+				if (!id.empty() && IsLSLASymbol(id))
 					// XXX: Moved.
 					// NOTE: Unevaluated term is directly saved.
 					(define ? DefineValue : RedefineValue)
-					(ctx, id, std::move(term), mod);
+					(ctx, id, std::move(term.Value), mod);
 				else
-					throw InvalidSyntax(define ? "Literal cannot be defined."
-						: "Literal cannot be set.");
+					throw InvalidSyntax(sfmt("Invalid token '%s' cannot be %s.", id.data(),
+						define ? "defined" : "set"));
 			}
 
-			shared_ptr<vector<string>>
-				ExtractLambdaParameters(const TermNode::Container& con)
+			ReductionStatus
+				If(TermNode& term, ContextNode& ctx)
 			{
-				TraceDe(Debug, "Found lambda abstraction form with %zu"
-					" parameter(s) to be bound.", con.size());
+				const auto size(term.size());
 
-				// TODO: Blocked. Use C++14 lambda initializers to reduce
-				//	initialization cost by directly moving.
-				auto p_params(make_shared<vector<string>>());
-				set<string_view> svs;
+				if (size == 3 || size == 4)
+				{
+					auto i(term.begin());
 
-				// TODO: Simplify?
-				std::for_each(con.begin(), con.end(), [&](decltype(*con.begin()) pv) {
-					const auto& name(Access<string>(pv));
-
-					// FIXME: Missing identifier syntax check.
-					// TODO: Throw %InvalidSyntax for invalid syntax.
-					if (svs.insert(name).second)
-						p_params->push_back(name);
-					else
-						throw InvalidSyntax(
-							sfmt("Duplicate parameter name '%s' found.", name.c_str()));
-				});
-				return p_params;
+					ReduceChecked(Deref(++i), ctx);
+					if (!leo::value_or(i->Value.AccessPtr<bool>()))
+						++i;
+					if (++i != term.end())
+					{
+						LiftTerm(term, *i);
+						return ReductionStatus::Retrying;
+					}
+				}
+				else
+					throw InvalidSyntax("Syntax error in conditional form.");
+				return ReductionStatus::Clean;
 			}
 
+			
 			void
 				Lambda(TermNode& term, ContextNode& ctx)
 			{
-				auto& con(term.GetContainerRef());
-				auto size(con.size());
+				// NOTE: %ToContextHandler implies strict evaluation of arguments in
+				//	%StrictContextHandler::operator().
+				term.Value = ToContextHandler(VauHandler(term, ctx, true));
+			}
 
-				LAssert(size != 0, "Invalid term found.");
-				if (size > 1)
-				{
-					auto i(con.begin());
-					const auto p_params(ExtractLambdaParameters((++i)->GetContainer()));
+			void
+				Vau(TermNode& term, ContextNode& ctx)
+			{
+				term.Value = ContextHandler(FormContextHandler(VauHandler(term, ctx, {})));
+			}
 
-					con.erase(con.cbegin(), ++i);
 
-					// TODO: Optimize. This does not need to be shared, since it would
-					//	always be copied, if used.
-					const auto p_ctx(make_shared<ContextNode>(ctx));
-					const auto p_closure(make_shared<TermNode>(std::move(con),
-						term.GetName(), std::move(term.Value)));
+			ReductionStatus
+				And(TermNode& term, ContextNode& ctx)
+			{
+				return AndOr(term, ctx, true);
+			}
 
-					// FIXME: Cyclic reference to '$lambda' context handler when the
-					//	term value (i.e. the closure) is copied upward?
-					term.Value = ToContextHandler([=](TermNode& app_term) {
-						auto& params(Deref(p_params));
-						const auto n_params(params.size());
-						const auto n_terms(app_term.size());
-
-						TraceDe(Debug, "Lambda called, with %ld shared term(s), %ld shared"
-							" context(s), %zu parameter(s).", p_closure.use_count(),
-							p_ctx.use_count(), n_params);
-						if (n_terms == 0)
-							throw LoggedEvent("Invalid application found.", Alert);
-
-						const auto n_args(n_terms - 1);
-
-						if (n_args == n_params)
-						{
-							auto j(app_term.begin());
-							// TODO: Optimize for performance.
-							// NOTE: This is probably better to be copy-on-write. Since
-							//	no immutable reference would be accessed before
-							//	mutation, no care is needed for reference invalidation.
-							auto app_ctx(Deref(p_ctx));
-
-							++j;
-							// NOTE: Introduce parameters as per lexical scoping rules.
-							for (const auto& param : params)
-							{
-								// XXX: Moved.
-								// NOTE: Unevaluated operands are directly saved.
-								app_ctx[param].Value = std::move(*j);
-								++j;
-							}
-							LAssert(j == app_term.end(),
-								"Invalid state found on passing arguments.");
-							// NOTE: Beta reduction.
-							ReduceCheckedClosure(app_term, app_ctx, p_closure.unique(),
-								*p_closure);
-						}
-						else
-							throw ArityMismatch(n_params, n_args);
-					});
-					con.clear();
-				}
-				else
-					throw InvalidSyntax("Syntax error in lambda abstraction.");
+			ReductionStatus
+				Or(TermNode& term, ContextNode& ctx)
+			{
+				return AndOr(term, ctx, {});
 			}
 
 			void
 				CallSystem(TermNode& term)
 			{
-				Forms::CallUnaryAs<const string>([&](const string& cmd) {
-					term.Value = usystem(cmd.c_str());
-				}, term);
+				CallUnaryAs<const string>(leo::compose(usystem, std::mem_fn(&string::c_str)), term);
 			}
 
 			void
@@ -821,12 +1112,36 @@ namespace scheme
 				EqualTerm(term, leo::equal_to<>());
 			}
 
-			void
-				Eval(TermNode& term, const REPLContext& ctx)
+			ReductionStatus
+				Eval(TermNode& term)
 			{
-				Forms::CallUnaryAs<const string>([ctx](const string& unit) {
+				RetainN(term, 2);
+
+				const auto i(std::next(term.begin()));
+				auto& ctx(Access<ContextNode>(Deref(std::next(i))));
+
+				LiftTerm(term, Deref(i));
+				return Reduce(term, ctx);
+			}
+
+			void
+				EvaluateUnit(TermNode& term, const REPLContext& ctx)
+			{
+				CallUnaryAs<const string>([ctx](const string& unit) {
 					REPLContext(ctx).Perform(unit);
 				}, term);
+			}
+
+			ReductionStatus
+				ValueOf(TermNode& term, const ContextNode& ctx)
+			{
+				RetainN(term);
+				LiftTerm(term, Deref(std::next(term.begin())));
+				if (const auto p_id = AccessPtr<string>(term))
+					TryRet(EvaluateIdentifier(term, ctx, *p_id))
+					CatchIgnore(BadIdentifier&)
+					term.Value = ValueToken::Null;
+				return ReductionStatus::Clean;
 			}
 
 		} // namespace Forms;

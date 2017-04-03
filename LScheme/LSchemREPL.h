@@ -33,6 +33,18 @@ namespace scheme {
 			REPLContext(bool = {});
 
 			/*!
+			\brief 加载：从指定参数指定的来源读取并处理源代码。
+			\sa Process
+			*/
+			//@{
+			//! \throw std::invalid_argument 流状态错误或缓冲区不存在。
+			void
+				LoadFrom(std::istream&);
+			void
+				LoadFrom(std::streambuf&);
+			//@}
+
+			/*!
 			\brief 处理：分析输入并预处理后进行规约。
 			\sa SContext::Analyze
 			\sa Preprocess
@@ -59,11 +71,11 @@ namespace scheme {
 
 		namespace Forms
 		{
-			/*!
-			\brief 创建 REPL 并对翻译单元规约以求值。
-			*/
+			//@{
+			//! \brief 创建参数指定的 REPL 的副本并在其中对翻译单元规约以求值。
 			LS_API void
-				Eval(TermNode&, const REPLContext&);
+				EvaluateUnit(TermNode&, const REPLContext&);
+			//@}
 		}
 	}
 }
