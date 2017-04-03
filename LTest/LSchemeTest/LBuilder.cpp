@@ -34,7 +34,7 @@ void
 RegisterLiteralSignal(ContextNode& node, const string& name, SSignal sig)
 {
 	RegisterLiteralHandler(node, name,
-		[=](const ContextNode&) LB_ATTR(noreturn) -> bool{
+		[=](const ContextNode&) LB_ATTR(noreturn) -> ReductionStatus{
 		throw sig;
 	});
 }
@@ -99,95 +99,181 @@ LoadFunctions(REPLContext& context)
 	RegisterLiteralSignal(root, "about", SSignal::About);
 	RegisterLiteralSignal(root, "help", SSignal::Help);
 	RegisterLiteralSignal(root, "license", SSignal::License);
-	RegisterFormContextHandler(root, "$quote", Quote, IsBranch);
-	RegisterFormContextHandler(root, "$quote1",
-		leo::bind1(QuoteN, 1), IsBranch);
-	RegisterFormContextHandler(root, "$define",
-		std::bind(DefineOrSet, _1, _2, true), IsBranch);
-	RegisterFormContextHandler(root, "$set",
-		std::bind(DefineOrSet, _1, _2, false), IsBranch);
-	RegisterFormContextHandler(root, "$lambda", Lambda, IsBranch);
-	RegisterFunction(root, "$display", leo::bind1(LogTree, Notice));
-	RegisterUnaryFunction(root, "$ifdef",
-		[](TermNode& term, const ContextNode& ctx){
-		return leo::call_value_or<bool>([&](string_view id){
-			return bool(LookupName(ctx, id));
-		}, AccessPtr<string>(term));
-	});
-	// NOTE: Examples.
+	// NOTE: Context builtins.
+
+	DefineValue(root, "REPL-context", ValueObject(context, OwnershipTag<>()),
+	{});
+
+	DefineValue(root, "root-context", ValueObject(root, OwnershipTag<>()),
+	{});
+
+	// NOTE: Literal expression forms.
+
+	RegisterForm(root, "$Retain", Retain);
+
+	//RegisterForm(root, "$Retain1",
+	//	leo::bind1(RetainN, 1));
+
+	// NOTE: Binding and control forms.
+
+	RegisterForm(root, "$lambda", Lambda);
+
+	// NOTE: Privmitive procedures.
+
+	RegisterForm(root, "$and", And);
+
+	RegisterForm(root, "begin", ReduceOrdered),
+
+		RegisterStrict(root, "eq?", EqualReference);
+
+	RegisterForm(root, "list",
+		static_cast<void(&)(TermNode&, ContextNode&)>(ReduceChildren));
+
+	// NOTE: Arithmetic procedures.
+
 	// FIXME: Overflow?
-	RegisterFunction(root, "+", std::bind(DoIntegerNAryArithmetics<
-		leo::plus<>>, leo::plus<>(), 0, _1), IsBranch);
+
+	//RegisterStrict(root, "+", std::bind(CallBinaryFold<int, leo::plus<>>,
+	//	leo::plus<>(), 0, _1));
+
 	// FIXME: Overflow?
-	RegisterFunction(root, "add2", std::bind(DoIntegerBinaryArithmetics<
-		leo::plus<>>, leo::plus<>(), _1), IsBranch);
+
+	RegisterStrictBinary<int>(root, "add2", leo::plus<>());
+
 	// FIXME: Underflow?
-	RegisterFunction(root, "-", std::bind(DoIntegerBinaryArithmetics<
-		leo::minus<>>, leo::minus<>(), _1), IsBranch);
+
+	RegisterStrictBinary<int>(root, "-", leo::minus<>());
+
 	// FIXME: Overflow?
-	RegisterFunction(root, "*", std::bind(DoIntegerNAryArithmetics<
-		leo::multiplies<>>, leo::multiplies<>(), 1, _1), IsBranch);
+
+	/*RegisterStrict(root, "*", std::bind(CallBinaryFold<int,
+		leo::multiplies<>>, leo::multiplies<>(), 1, _1));*/
+
 	// FIXME: Overflow?
-	RegisterFunction(root, "multiply2", std::bind(DoIntegerBinaryArithmetics<
-		leo::multiplies<>>, leo::multiplies<>(), _1), IsBranch);
-	RegisterFunction(root, "/", [](TermNode& term){
-		DoIntegerBinaryArithmetics([](int e1, int e2){
-			if(e2 != 0)
-				return e1 / e2;
-			throw std::domain_error("Runtime error: divided by zero.");
-		}, term);
-	}, IsBranch);
-	RegisterFunction(root, "%", [](TermNode& term){
-		DoIntegerBinaryArithmetics([](int e1, int e2){
-			if(e2 != 0)
-				return e1 % e2;
-			throw std::domain_error("Runtime error: divided by zero.");
-		}, term);
-	}, IsBranch);
-	RegisterFunction(root, "eval", leo::bind1(Eval, std::ref(context)));
-	RegisterFunction(root, "system", CallSystem);
-	RegisterUnaryFunction<const string>(root, "echo", Echo);
-	RegisterUnaryFunction<const string>(root, "ofs", [&](const string& path){
-		if(ifstream ifs{path})
+
+	RegisterStrictBinary<int>(root, "multiply2", leo::multiplies<>());
+
+	RegisterStrictBinary<int>(root, "/", [](int e1, int e2) {
+		if (e2 != 0)
+			return e1 / e2;
+		throw std::domain_error("Runtime error: divided by zero.");
+	});
+
+	RegisterStrictBinary<int>(root, "%", [](int e1, int e2) {
+		if (e2 != 0)
+			return e1 % e2;
+		throw std::domain_error("Runtime error: divided by zero.");
+	});
+
+	// NOTE: I/O library.
+
+	RegisterStrict(root, "ofs", [&](const string& path) {
+		if (ifstream ifs{ path })
 			return ifs;
 		throw LoggedEvent(
 			leo::sfmt("Failed opening file '%s'.", path.c_str()));
 	});
-	RegisterUnaryFunction<const string>(root, "oss", [&](const string& str){
+
+	RegisterStrict(root, "oss", [&](const string& str) {
 		return std::istringstream(str);
 	});
-	RegisterUnaryFunction<ifstream>(root, "parse-f", ParseStream);
-	RegisterUnaryFunction<std::istringstream>(root, "parse-s", ParseStream);
-	RegisterUnaryFunction<const string>(root, "lex", [&](const string& unit){
-		LexicalAnalyzer lex;
 
-		for(const auto& c : unit)
+	RegisterStrict(root, "parse-f", ParseStream);
+	RegisterStrict(root, "parse-lex", ParseOutput);
+	RegisterStrict(root, "parse-s", ParseStream);
+	RegisterStrict(root, "put", [&](const string& str) {
+		std::cout << EncodeArg(str);
+	});
+	RegisterStrict(root, "puts", [&](const string& str) {
+		// XXX: Overridding.
+		std::cout << EncodeArg(str) << std::endl;
+
+	});
+
+	// NOTE: Interoperation library.
+	/*RegisterStrict(root, "display", leo::bind1(LogTree, Notice));*/
+	RegisterStrict(root, "echo", Echo);
+	/*RegisterStrict(root, "eval",
+		leo::bind1(Eval, std::ref(context)));*/
+
+	RegisterStrict(root, "eval-in", [](TermNode& term) {
+		const auto i(std::next(term.begin()));
+		const auto& rctx(Access<REPLContext>(Deref(i)));
+		term.Remove(i);
+		EvaluateUnit(term, rctx);
+	}, leo::bind1(RetainN, 2));
+
+	RegisterStrict(root, "lex", [&](const string& unit) {
+		LexicalAnalyzer lex;
+		for (const auto& c : unit)
 			lex.ParseByte(c);
 		return lex;
 	});
-	RegisterUnaryFunction<LexicalAnalyzer>(root, "parse-lex", ParseOutput);
-	RegisterUnaryFunction<LexicalAnalyzer>(root, "parse-lex", ParseOutput);
 
-	RegisterUnaryFunction<const string>(root, "put", [&](const string& str) {
-		std::cout << str;
+	RegisterStrict(root, "nameof",
+		[](const std::type_index& ti) {
+		return string(ti.name());
 	});
 
-	RegisterUnaryFunction<const string>(root, "puts", [&](const string& str) {
-		std::cout << str << std::endl;
+	// NOTE: Type operation library.
+
+	RegisterStrict(root, "typeid", [](TermNode& term) {
+		// FIXME: Get it work with %YB_Use_LightweightTypeID.
+		return std::type_index(term.Value.GetType());
 	});
 
-	RegisterUnaryFunction(root, "typeid", [](TermNode& term) {
-		return term.Value.GetType().hash_code();
+	context.Perform("$define (ptype x) puts (nameof (typeid(x)))");
+
+	RegisterStrict(root, "get-typeid",
+		[&](const string& str) -> std::type_index {
+		if (str == "bool")
+			return typeid(bool);
+		if (str == "int")
+			return typeid(int);
+		if (str == "string")
+			return typeid(string);
+		return typeid(void);
 	});
 
-	RegisterUnaryFunction(root, "nameof",
-		[](TermNode& term) {
-		return std::string(term.Value.GetType().name());
+	context.Perform("$define (bool? x) eqv? (get-typeid \"bool\")"
+		" (typeid x)");
+
+	context.Perform("$define (int? x) eqv? (get-typeid \"int\")"
+		" (typeid x)");
+
+	context.Perform("$define (string? x) eqv? (get-typeid \"string\")"
+		" (typeid x)");
+
+	// NOTE: String library.
+
+	context.Perform(u8R"NPL($define (Retain-string str) ++ "\"" str "\"")NPL");
+
+	RegisterStrict(root, "itos", [](int x) {
+		return to_string(x);
 	});
 
-	RegisterFunction(root, "eq?", EqualReference);
+	RegisterStrict(root, "strlen", [&](const string& str) {
+		return int(str.length());
+	});
 
-	RegisterFunction(root, "eqv?", EqualValue);
+	// NOTE: SHBuild builitins.
+
+	// XXX: Overriding.
+
+	DefineValue(root, "SHBuild_BaseTerminalHook_",
+
+		ValueObject(std::function<void(const string&, const string&)>(
+			[](const string& n, const string& val) {
+		// XXX: Errors from stream operations are ignored.
+		using namespace std;
+		Terminal te;
+
+		cout << te.LockForeColor(DarkCyan) << n;
+		cout << " = \"";
+		cout << te.LockForeColor(DarkRed) << val;
+		cout << '"' << endl;
+
+	})), true);
 }
 
 } // unnamed namespace;

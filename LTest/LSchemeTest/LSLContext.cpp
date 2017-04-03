@@ -31,7 +31,7 @@ namespace scheme
 			LoadDeafultLiteralPasses(ContextNode& ctx)
 		{
 			AccessLiteralPassesRef(ctx)
-				= [](TermNode& term, ContextNode&, string_view id) -> bool {
+				= [](TermNode& term, ContextNode&, string_view id) -> ReductionStatus {
 				LAssertNonnull(id.data());
 				if (!id.empty())
 				{
@@ -72,6 +72,9 @@ namespace scheme
 							term.Value = std::numeric_limits<long double>::quiet_NaN();
 						else if (id == "-nan.t")
 							term.Value = -std::numeric_limits<long double>::quiet_NaN();
+						else if (f != '#')
+							return ReductionStatus::Retrying;
+
 					}
 					else if (std::isdigit(f))
 					{
@@ -85,9 +88,9 @@ namespace scheme
 							term.Value = int(ans);
 					}
 					else
-						return true;
+						return ReductionStatus::Retrying;
 				}
-				return{};
+				return ReductionStatus::Clean;
 			};
 		}
 

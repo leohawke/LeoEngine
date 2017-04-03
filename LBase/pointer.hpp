@@ -39,10 +39,12 @@ namespace leo
 		//! \since build 1.4
 		static_assert(is_nothrow_copyable<_type>::value, "Invalid type found.");
 		static_assert(is_destructible<_type>::value, "Invalid type found.");
-		static_assert(detected_or_t<true_type, details::nptr_eq1, _type>::value,
+		static_assert(detected_or_t<true_, details::nptr_eq1, _type>::value,
 			"Invalid type found.");
-		static_assert(detected_or_t<true_type, details::nptr_eq2, _type>::value,
+#ifndef LB_IMPL_MSCPP
+		static_assert(detected_or_t<true_t, details::nptr_eq2, _type>::value,
 			"Invalid type found.");
+#endif
 
 	public:
 		using pointer = _type;

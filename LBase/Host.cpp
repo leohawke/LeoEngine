@@ -161,6 +161,14 @@ namespace platform_ex
 
 #if !LFL_Android
 #	if LFL_Win32
+	template<typename _func, typename _tPointer, typename... _tParams>
+	bool
+		CallTe(_func pmf, _tPointer& p, _tParams&... args)
+	{
+		return leo::call_value_or(leo::bind1(pmf, std::ref(args)...), p);
+	}
+
+
 	class TerminalData : private Windows::WConsole
 	{
 	public:
@@ -170,6 +178,9 @@ namespace platform_ex
 
 		PDefH(bool, RestoreAttributes, )
 			ImplRet(WConsole::RestoreAttributes(), true)
+
+			PDefH(bool, Clear, )
+			ImplRet(WConsole::Clear(), true)
 
 			PDefH(bool, UpdateForeColor, std::uint8_t c)
 			ImplRet(WConsole::UpdateForeColor(c), true)
@@ -220,16 +231,16 @@ namespace platform_ex
 
 	Terminal::Guard::~Guard()
 	{
-		if (terminal)
+		if (p_terminal && *p_terminal)
 			FilterExceptions([this] {
-			if (!LB_LIKELY(terminal.p_term->RestoreAttributes()))
+			if (!LB_LIKELY(p_terminal->p_data->RestoreAttributes()))
 				throw LoggedEvent("Restoring terminal attributes failed.");
 		});
 	}
 
 
 	Terminal::Terminal(std::FILE* fp)
-		: p_term([fp]()->TerminalData* {
+		: p_data([fp]()->TerminalData* {
 #	if LFL_Win32
 		const int fd(::_fileno(Nonnull(fp)));
 
@@ -257,15 +268,27 @@ namespace platform_ex
 	ImplDeDtor(Terminal)
 
 		bool
+		Terminal::Clear()
+	{
+		return CallTe(&TerminalData::Clear, p_data);
+	}
+
+	Terminal::Guard
+		Terminal::LockForeColor(std::uint8_t c)
+	{
+		return Guard(*this, &Terminal::UpdateForeColor, c);
+	}
+
+		bool
 		Terminal::RestoreAttributes()
 	{
-		return p_term ? p_term->RestoreAttributes() : false;
+			return CallTe(&TerminalData::RestoreAttributes, p_data);
 	}
 
 	bool
 		Terminal::UpdateForeColor(std::uint8_t c)
 	{
-		return p_term ? p_term->UpdateForeColor(c) : false;
+		return CallTe(&TerminalData::UpdateForeColor, p_data, c);
 	}
 
 	bool

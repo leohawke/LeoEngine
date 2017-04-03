@@ -194,22 +194,30 @@ namespace platform_ex
 		class LB_API Guard final
 		{
 		private:
-			Terminal& terminal;
+			tidy_ptr<Terminal> p_terminal;
 
 		public:
-			template<typename _func>
-			Guard(Terminal& term, _func f)
-				: terminal(term)
+			template<typename _fCallable, typename... _tParams>
+			Guard(Terminal& te, _fCallable f, _tParams&&... args)
+				: p_terminal(make_observer(&te))
 			{
-				if (term)
-					f(term);
+				if (te)
+					leo::invoke(f, te, lforward(args)...);
 			}
+
+			DefDeMoveCtor(Guard)
+
 			//! \brief 析构：重置终端属性，截获并记录错误。
 			~Guard();
+
+			DefDeMoveAssignment(Guard)
+
+			DefCvt(const lnothrow, leo::add_ptr_t<
+					std::ios_base&(std::ios_base&)>, leo::id<std::ios_base&>())
 		};
 
 	private:
-		unique_ptr<TerminalData> p_term;
+		unique_ptr<TerminalData> p_data;
 
 	public:
 		/*!
@@ -221,7 +229,21 @@ namespace platform_ex
 		~Terminal();
 
 		//! \brief 判断终端有效或无效。
-		DefBoolNeg(explicit, bool(p_term))
+		DefBoolNeg(explicit, bool(p_data))
+
+
+			//@{
+			//! \brief 清除显示的内容。
+			bool
+			Clear();
+
+		/*!
+		\brief 临时固定前景色。
+		\sa UpdateForeColor
+		*/
+		Guard
+			LockForeColor(std::uint8_t);
+		//@}
 
 			bool
 			RestoreAttributes();

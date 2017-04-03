@@ -24,37 +24,6 @@ namespace v1
 void
 RegisterLiteralSignal(ContextNode&, const string&, SSignal);
 
-
-/// 696
-//@{
-template<typename _func>
-void
-DoIntegerBinaryArithmetics(_func f, TermNode& term)
-{
-	Forms::QuoteN(term, 2);
-
-	auto i(term.begin());
-	const int e1(Access<int>(Deref(++i)));
-
-	// TODO: Remove 'to_string'?
-	term.Value = to_string(f(e1, Access<int>(Deref(++i))));
-}
-
-template<typename _func>
-void
-DoIntegerNAryArithmetics(_func f, int val, TermNode& term)
-{
-	const auto n(Forms::FetchArgumentN(term));
-	auto i(term.begin());
-	const auto j(leo::make_transform(++i, [](TNIter i){
-		return Access<int>(Deref(i));
-	}));
-
-	// FIXME: Overflow?
-	term.Value = to_string(std::accumulate(j, std::next(j, n), val, f));
-}
-//@}
-
 } // namespace v1;
 
 } // namespace scheme;
