@@ -1,3 +1,8 @@
+/*
+\par ÐÞ¸ÄÊ±¼ä:
+2017-03-14 00:06 +0800
+*/
+
 #include "LSchemeA.h"
 #include "SContext.h"
 
@@ -313,6 +318,14 @@ namespace scheme
 
 		ImplDeDtor(InvalidSyntax)
 
+		ImplDeDtor(ParameterMismatch)
+
+		ArityMismatch::ArityMismatch(size_t e, size_t r, RecordLevel lv)
+		: LSLException(leo::sfmt("Arity mismatch: expected %zu, received %zu.",
+			e, r), lv),
+		expected(e), received(r)
+	{}
+	ImplDeDtor(ArityMismatch)
 
 		BadIdentifier::BadIdentifier(const char* id, size_t n, RecordLevel lv)
 		: LSLException(InitBadIdentifierExceptionString(id, n), lv),
@@ -325,34 +338,70 @@ namespace scheme
 	ImplDeDtor(BadIdentifier)
 
 
-		ArityMismatch::ArityMismatch(size_t e, size_t r, RecordLevel lv)
-		: LSLException(leo::sfmt("Arity mismatch: expected %zu, received %zu.",
-			e, r), lv),
-		expected(e), received(r)
-	{}
-	ImplDeDtor(ArityMismatch)
-
-
-		LiteralCategory
-		CategorizeLiteral(string_view sv)
+		LexemeCategory
+		CategorizeBasicLexeme(string_view id) lnothrowv
 	{
-		LAssertNonnull(sv.data());
-		if (!sv.empty())
-		{
-			const auto c(CheckLiteral(sv));
+		LAssertNonnull(id.data() && !id.empty());
 
-			if (c == '\'')
-				return LiteralCategory::Code;
-			if (c != char())
-				return LiteralCategory::Data;
-		}
-		return LiteralCategory::None;
+		const auto c(CheckLiteral(id));
+
+		if (c == '\'')
+			return LexemeCategory::Code;
+		if (c != char())
+			return LexemeCategory::Data;
+		return LexemeCategory::Symbol;
+	}
+
+	LexemeCategory
+		CategorizeLexeme(string_view id) lnothrowv
+	{
+		const auto res(CategorizeBasicLexeme(id));
+
+		return res == LexemeCategory::Symbol && IsLSLAExtendedLiteral(id)
+			? LexemeCategory::Extended : res;
+	}
+
+	bool
+		IsLSLAExtendedLiteral(string_view id) lnothrowv
+	{
+		LAssertNonnull(id.data() && !id.empty());
+
+		const char f(id.front());
+
+		return (id.size() > 1 && IsLSLAExtendedLiteralNonDigitPrefix(f)
+			&& id.find_first_not_of("+-") != string_view::npos)
+			|| std::isdigit(f);
 	}
 
 	observer_ptr<const string>
-		TermToName(const TermNode& term)
+		TermToNamePtr(const TermNode& term)
 	{
-		return AccessPtr<string>(term);
+		return AccessPtr<TokenValue>(term);
+	}
+
+
+	void
+		TokenizeTerm(TermNode& term)
+	{
+		for (auto& child : term)
+			TokenizeTerm(child);
+		if (const auto p = AccessPtr<string>(term))
+			term.Value.emplace<TokenValue>(std::move(*p));
+	}
+
+
+	ValueObject
+		ReferenceValue(const ValueObject& vo)
+	{
+		if (vo)
+		{
+			if (!vo.OwnsUnique())
+				return vo.MakeIndirect();
+			else
+				throw LSLException("Value of a temporary shall not be referenced.");
+		}
+		else
+			leo::throw_invalid_construction();
 	}
 
 	void
@@ -362,7 +411,7 @@ namespace scheme
 		if (forced)
 			// XXX: Self overwriting is possible.
 			ctx[id].Value = std::move(vo);
-		else if (!ctx.Add(id, std::move(vo)))
+		else if (!ctx.AddValue(id, std::move(vo)))
 			throw BadIdentifier(id, 2);
 	}
 
@@ -388,22 +437,27 @@ namespace scheme
 	bool
 		CheckReducible(ReductionStatus status)
 	{
-		if (status == ReductionStatus::Success)
-			return{};
-		if (LB_UNLIKELY(status != ReductionStatus::NeedRetry))
+		if (status == ReductionStatus::Clean
+			|| status == ReductionStatus::Retained)
+			return {};
+		if (LB_UNLIKELY(status != ReductionStatus::Retrying))
 			TraceDe(Warning, "Unexpected status found");
 		return true;
 	}
 
-	bool
-		DetectReducible(ReductionStatus status, TermNode& term)
+	ReductionStatus
+		ReduceHeadEmptyList(TermNode& term) lnothrow
 	{
-		// TODO: Use explicit continuation parameters?
-		//	if(bool(status))
-		//	k(term);
-		leo::RemoveEmptyChildren(term.GetContainerRef());
-		// NOTE: Only stopping on getting a normal form.
-		return CheckReducible(status) && IsBranch(term);
+		if (term.size() > 1 && IsEmpty(Deref(term.begin())))
+			RemoveHead(term);
+		return ReductionStatus::Clean;
 	}
 
+	ReductionStatus
+		ReduceToList(TermNode& term) lnothrow
+	{
+		return IsBranch(term) ? (void(RemoveHead(term)), ReductionStatus::Retained)
+			: ReductionStatus::Clean;
+	}
+	
 } // namespace scheme;

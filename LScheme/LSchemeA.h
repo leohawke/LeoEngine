@@ -1,16 +1,25 @@
 /*\par 修改时间 :
-	2016-11-13 22:15 + 0800
+	2017-03-27 15:14 +0800
 */
 
 #ifndef LScheme_LSchemeA_H
 #define LScheme_LSchemeA_H 1
 
 
-#include "SContext.h"
+#include "SContext.h" 
+#include <LBase/sutility.h> // for leo::derived_entity
 #include "LEvent.hpp"
-#include <LBase/any.h>
+#include <LBase/any.h> // for leo::any
 
 namespace scheme {
+
+	/*!	\defgroup ThunkType Thunk Types
+	\brief 中间值类型。
+
+	标记特定求值策略，储存于 TermNode 的 Value 数据成员中不直接表示宿主语言对象的类型。
+	*/
+
+
 		using leo::pair;
 		using leo::to_string;
 		using leo::MakeIndex;
@@ -379,6 +388,39 @@ namespace scheme {
 				~InvalidSyntax() override;
 		};
 
+		class LS_API ParameterMismatch : public InvalidSyntax
+		{
+		public:
+			using InvalidSyntax::InvalidSyntax;
+			DefDeCtor(ParameterMismatch)
+
+				//! \brief 虚析构：类定义外默认实现。
+				~ParameterMismatch() override;
+		};
+
+		/*!
+		\brief 元数不匹配错误。
+		\todo 支持范围匹配。
+		*/
+		class LS_API ArityMismatch : public LSLException
+		{
+		private:
+			size_t expected;
+			size_t received;
+
+		public:
+			DefDeCtor(ArityMismatch)
+				/*!
+				\note 前两个参数表示期望和实际的元数。
+				*/
+				ArityMismatch(size_t, size_t, leo::RecordLevel = leo::Err);
+
+			//! \brief 虚析构：类定义外默认实现。
+			~ArityMismatch() override;
+
+			DefGetter(const lnothrow, size_t, Expected, expected)
+				DefGetter(const lnothrow, size_t, Received, received)
+		};
 
 		/*!
 		\brief 标识符错误。
@@ -412,29 +454,7 @@ namespace scheme {
 		};
 
 
-		/*!
-		\brief 元数不匹配错误。
-		\todo 支持范围匹配。
-		*/
-		class LS_API ArityMismatch : public LSLException
-		{
-		private:
-			size_t expected;
-			size_t received;
-
-		public:
-			DefDeCtor(ArityMismatch)
-				/*!
-				\note 前两个参数表示期望和实际的元数。
-				*/
-				ArityMismatch(size_t, size_t, leo::RecordLevel = leo::Err);
-
-			//! \brief 虚析构：类定义外默认实现。
-			~ArityMismatch() override;
-
-			DefGetter(const lnothrow, size_t, Expected, expected)
-				DefGetter(const lnothrow, size_t, Received, received)
-		};
+		
 		//@}
 		//@}
 
@@ -444,21 +464,37 @@ namespace scheme {
 		*/
 		enum class ReductionStatus : limpl(size_t)
 		{
-			Success = 0,
-				NeedRetry
+			//@{
+			//! \brief 规约成功终止且不需要保留子项。
+			Clean = 0,
+				//! \brief 规约成功但需要保留子项。
+				Retained,
+				//! \brief 需要重规约。
+				Retrying
+				//@}
 		};
 
 
+		/*!
+		\ingroup ThunkType
+		\brief 延迟求值项。
+		\note 和被延迟求值的项及其它节点是不同的包装类型。
+		\warning 非空析构。
+
+		直接作为项的值对象包装被延迟求值的项。
+		*/
+		using DelayedTerm = leo::derived_entity<TermNode, LSLATag>;
+
 		//@{
 		//! \brief 上下文节点类型。
-		using ContextNode = ValueNode;
+		using ContextNode = limpl(ValueNode);
 
 		using leo::AccessChildPtr;
 
 		//! \brief 上下文处理器类型。
-		using ContextHandler = leo::GHEvent<void(TermNode&, ContextNode&)>;
+		using ContextHandler = leo::GHEvent<ReductionStatus(TermNode&, ContextNode&)>;
 		//! \brief 字面量处理器类型。
-		using LiteralHandler = leo::GHEvent<bool(const ContextNode&)>;
+		using LiteralHandler = leo::GHEvent<ReductionStatus(const ContextNode&)>;
 
 		//! \brief 注册上下文处理器。
 		inline PDefH(void, RegisterContextHandler, ContextNode& node,
@@ -474,10 +510,10 @@ namespace scheme {
 
 			//@{
 			//! \brief 字面量类别。
-			enum class LiteralCategory
+			enum class LexemeCategory
 		{
 			//! \brief 无：非字面量。
-			None,
+			Symbol,
 			//! \brief 代码字面量。
 			Code,
 			//! \brief 数据字面量。
@@ -489,17 +525,82 @@ namespace scheme {
 		};
 
 
+
+		//! \sa LexemeCategory
+		//@{
 		/*!
-		\brief 对字面量分类。
-		\pre 断言：字符串参数的数据指针非空。
+		\pre 断言：字符串参数的数据指针非空且字符串非空。
 		\return 判断的非扩展字面量分类。
-		\note 扩展字面量视为非字面量。
-		\sa LiteralCategory
 		*/
-		LS_API LiteralCategory
-			CategorizeLiteral(string_view);
+		//@{
+		/*!
+		\brief 对排除扩展字面量的词素分类。
+		\note 扩展字面量视为非字面量。
+		*/
+		LS_API LexemeCategory
+			CategorizeBasicLexeme(string_view) lnothrowv;
+
+		/*!
+		\brief 对词素分类。
+		\sa CategorizeBasicLexeme
+		*/
+		LS_API LexemeCategory
+			CategorizeLexeme(string_view) lnothrowv;
 		//@}
 
+		/*!
+		\brief 判断不是非扩展字面量的词素是否为 LSLA 扩展字面量。
+		\pre 断言：字符串参数的数据指针非空且字符串非空。
+		\pre 词素不是代码字面量或数据字面量。
+		*/
+		LS_API bool
+			IsLSLAExtendedLiteral(string_view) lnothrowv;
+
+		/*!
+		\brief 判断字符是否为 LSLA 扩展字面量非数字前缀。
+		*/
+		lconstfn PDefH(bool, IsLSLAExtendedLiteralNonDigitPrefix, char c) lnothrow
+			ImplRet(c == '#' || c == '+' || c == '-')
+
+			//! \brief 判断字符是否为 LSLA 扩展字面量前缀。
+			inline PDefH(bool, IsLSLAExtendedLiteralPrefix, char c) lnothrow
+			ImplRet(std::isdigit(c) || IsLSLAExtendedLiteralNonDigitPrefix(c))
+
+			/*!
+			\brief 判断词素是否为 LSLA 符号。
+			\pre 间接断言：字符串参数的数据指针非空且字符串非空。
+			*/
+			inline PDefH(bool, IsLSLASymbol, string_view id) lnothrowv
+			ImplRet(CategorizeLexeme(id) == LexemeCategory::Symbol)
+			//@}
+			//@}
+
+
+			/*!
+			\ingroup ThunkType
+			\brief 记号值。
+			\note 和被求值的字符串不同的包装类型。
+			\warning 非空析构。
+			*/
+			using TokenValue = leo::derived_entity<string, LSLATag>;
+
+
+		/*!
+		\brief 标记记号节点：递归变换节点，转换其中的词素为记号值。
+		\note 先变换子节点。
+		*/
+		LS_API void
+			TokenizeTerm(TermNode& term);
+
+
+		/*!
+		\brief 对表示值的 ValueObject 进行基于所有权的生存期检查并取表示其引用的间接值。
+		\throw LSLException 检查失败：参数具有对象的唯一所有权，不能被外部引用保存。
+		\throw leo::invalid_construction 参数不持有值。
+		\todo 使用具体的语义错误异常类型。
+		*/
+		LS_API ValueObject
+			ReferenceValue(const ValueObject&);
 
 		//@{
 		//! \brief 从指定上下文查找名称对应的节点。
@@ -522,18 +623,14 @@ namespace scheme {
 		ValueObject
 			FetchValue(const ContextNode& ctx, const _tKey& name)
 		{
-			return leo::call_value_or(
-				std::mem_fn(&ValueNode::Value),scheme::LookupName(ctx, name));
+			return GetValueOf(scheme::LookupName(ctx, name));
 		}
 
 		template<typename _tKey>
 		static observer_ptr<const ValueObject>
 			FetchValuePtr(const ContextNode& ctx, const _tKey& name)
 		{
-			return leo::call_value_or(
-				[](const ValueNode& node) {
-				return make_observer(&node.Value);
-			}, scheme::LookupName(ctx, name));
+			return GetValuePtrOf(scheme::LookupName(ctx, name));
 		}
 		//@}
 
@@ -542,9 +639,10 @@ namespace scheme {
 		\return 通过访问项的值取得的名称，或空指针表示无法取得名称。
 		*/
 		LS_API observer_ptr<const string>
-			TermToName(const TermNode&);
+			TermToNamePtr(const TermNode&);
 
 		/*!
+		//@{
 		\pre 字符串参数的数据指针非空。
 		\note 最后一个参数表示强制调用。
 		\throw BadIdentifier 非强制调用时发现标识符不存在或冲突。
@@ -576,6 +674,9 @@ namespace scheme {
 		LB_PURE LS_API bool
 			CheckReducible(ReductionStatus);
 
+		inline PDefH(ReductionStatus, CheckNorm, const TermNode& term) lnothrow
+			ImplRet(IsBranch(term) ? ReductionStatus::Retained : ReductionStatus::Clean)
+
 		/*!
 		\sa CheckReducible
 		*/
@@ -585,14 +686,6 @@ namespace scheme {
 		{
 			leo::retry_on_cond(CheckReducible, f, lforward(args)...);
 		}
-
-		/*!
-		\brief 移除节点的空子节点，然后判断是否可继续规约。
-		\return 可继续规约：第一参数指定非成功状态，且移除空子节点后的节点是枝节点。
-		\see CheckReducible
-		*/
-		LS_API bool
-			DetectReducible(ReductionStatus, TermNode&);
 
 
 		//@{
@@ -606,10 +699,16 @@ namespace scheme {
 			\note 对遍调用异常中立。
 			*/
 			template<typename _tIn>
-			bool
+			ReductionStatus
 				operator()(_tIn first, _tIn last) const
 			{
-				return leo::fast_any_of(first, last, leo::id<>());
+				auto res(ReductionStatus::Clean);
+
+				return leo::fast_any_of(first, last, [&](ReductionStatus r) lnothrow{
+					if (r == ReductionStatus::Retained)
+					res = r;
+				return r == ReductionStatus::Retrying;
+				}) ? ReductionStatus::Retrying : res;
 			}
 		};
 
@@ -621,8 +720,8 @@ namespace scheme {
 		//@{
 		//! \brief 一般合并遍。
 		template<typename... _tParams>
-		using GPasses = leo::GEvent<bool(_tParams...),
-			leo::GCombinerInvoker<bool, PassesCombiner>>;
+		using GPasses = leo::GEvent<ReductionStatus(_tParams...),
+			leo::GCombinerInvoker<ReductionStatus, PassesCombiner>>;
 		//! \brief 项合并遍。
 		using TermPasses = GPasses<TermNode&>;
 		//! \brief 求值合并遍。
@@ -645,12 +744,56 @@ namespace scheme {
 			leo::GDefaultLastValueInvoker<Guard>>;
 
 
+		/*!
+		\brief 调用处理遍：从指定名称的节点中访问指定类型的遍并以指定上下文调用。
+		//@{
+		*/
+		template<class _tPasses, typename... _tParams>
+		typename _tPasses::result_type
+			InvokePasses(observer_ptr<const ValueNode> p, TermNode& term, ContextNode& ctx,
+				_tParams&&... args)
+		{
+			return leo::call_value_or([&](const _tPasses& passes) {
+				// XXX: Blocked. 'yforward' cause G++ 5.3 crash: internal compiler
+				//	error: Segmentation fault.
+				return passes(term, ctx, std::forward<_tParams>(args)...);
+			}, leo::AccessPtr<const _tPasses>(p));
+		}
+		template<class _tPasses, typename... _tParams>
+		inline typename _tPasses::result_type
+			InvokePasses(const string& name, TermNode& term, ContextNode& ctx,
+				_tParams&&... args)
+		{
+			return scheme::InvokePasses<_tPasses>(leo::AccessNodePtr(
+				leo::as_const(ctx), name), term, ctx, lforward(args)...);
+		}
+		//@}
+
+		/*!
+		\brief 调整指定值对象的指针为 TermNode 类型的值。
+		\return 若成功则为调整后的指针，否则为指向原值对象的指针。
+		*/
+		//@{
+		inline PDefH(observer_ptr<const ValueObject>, AdjustTermValuePtr,
+			observer_ptr<const TermNode> p_term)
+			ImplRet(leo::nonnull_or(GetValuePtrOf(p_term)))
+			inline PDefH(observer_ptr<const ValueObject>, AdjustTermValuePtr,
+				observer_ptr<const ValueObject> p_vo)
+			ImplRet(leo::nonnull_or(
+				AdjustTermValuePtr(leo::AccessPtr<const TermNode>(p_vo)), p_vo))
+			template<typename _tKey>
+		observer_ptr<const ValueObject>
+			AdjustTermValuePtr(const ContextNode& ctx, const _tKey& name)
+		{
+			return AdjustTermValuePtr(scheme::FetchValuePtr(ctx, name));
+		}
+		//@}
+
 		//! \brief 使用第二个参数指定的项的内容替换第一个项的内容。
+		//@{
 		inline PDefH(void, LiftTerm, TermNode& term, TermNode& tm)
 			ImplExpr(term.SetContent(std::move(tm)))
-			//@}
 
-			//@{
 			inline PDefH(void, LiftTerm, ValueObject& term_v, ValueObject& vo)
 			ImplExpr(term_v = std::move(vo))
 			inline PDefH(void, LiftTerm, TermNode& term, ValueObject& vo)
@@ -664,38 +807,53 @@ namespace scheme {
 			ImplExpr(term_v = vo.MakeIndirect())
 			inline PDefH(void, LiftTermRef, TermNode& term, const ValueObject& vo)
 			ImplExpr(LiftTermRef(term.Value, vo))
+			//@}
+			//@}
+
+			/*!
+			\brief 提升延迟项。
+			*/
+			inline PDefH(void, LiftDelayed, TermNode& term, DelayedTerm& tm)
+			ImplExpr(LiftTermRef(term, tm))
 
 			//! \pre 断言：参数指定的项是枝节点。
 			//@{
 			/*!
-			\brief 使用首个子项替换项的内容。
+			\brief 提升首项：使用首个子项替换项的内容。
 			*/
 			inline PDefH(void, LiftFirst, TermNode& term)
 			ImplExpr(IsBranch(term), LiftTerm(term, Deref(term.begin())))
 
 			/*!
-			\brief 使用最后一个子项替换项的内容。
+			\brief 提升末项：使用最后一个子项替换项的内容。
 			*/
 			inline PDefH(void, LiftLast, TermNode& term)
 			ImplExpr(IsBranch(term), LiftTerm(term, Deref(term.rbegin())))
 			//@}
 
-
 			/*!
-			\brief 调用处理遍：从指定名称的节点中访问指定类型的遍并以指定上下文调用。
+			\sa RemoveHead
+			\note 使用 ADL RemoveHead 。
 			*/
-			template<class _tPasses, typename... _tParams>
-		typename _tPasses::result_type
-			InvokePasses(const string& name, TermNode& term, ContextNode& ctx,
-				_tParams&&... args)
-		{
-			return leo::call_value_or(
-				[&](_tPasses& passes) {
-				// XXX: Blocked. 'lforward' cause G++ 5.3 crash: internal compiler
-				//	error: Segmentation fault.
-				return passes(term, ctx, std::forward<_tParams>(args)...);
-			}, AccessChildPtr<_tPasses>(ctx, name));
-		}
+			//@{
+			/*!
+			\brief 规约第一个非结尾空列表子项。
+			\return ReductionStatus::Clean 。
+
+			若项具有不少于一个子项且第一个子项是空列表则移除。
+			允许空列表作为第一个子项以标记没有操作数的函数应用。
+			*/
+			LS_API ReductionStatus
+			ReduceHeadEmptyList(TermNode&) lnothrow;
+
+		/*!
+		\brief 规约为列表：对枝节点移除第一个子项，保留余下的子项作为列表。
+		\return 若成功移除项 ReductionStatus::Retained ，否则为 ReductionStatus::Clean。
+		*/
+		LS_API ReductionStatus
+			ReduceToList(TermNode&) lnothrow;
+		//@}
+
 
 } // namespace scheme;
 

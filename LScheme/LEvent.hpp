@@ -105,7 +105,7 @@ namespace leo
 			: BaseType(leo::make_expanded<_tRet(_tParams...)>(lforward(f))),
 			comp_eq([](const GHEvent&, const GHEvent&) lnothrow{
 			return true;
-		)
+		})
 		{}
 		/*!
 		\brief 构造：使用对象引用和成员函数指针。
