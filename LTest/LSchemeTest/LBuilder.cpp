@@ -108,11 +108,16 @@ LoadFunctions(REPLContext& context)
 	{});
 
 	// NOTE: Literal expression forms.
+	RegisterForm(root, "$define", [](TermNode& term, ContextNode& actx) {
+		DefineOrSet(term, actx, true); 
+	});
+	RegisterForm(root, "$if", If);
 
 	RegisterForm(root, "$Retain", Retain);
 
-	//RegisterForm(root, "$Retain1",
-	//	leo::bind1(RetainN, 1));
+	RegisterForm(root, "$Retain1", [](TermNode& term) {
+		RetainN(term, 1); 
+	});
 
 	// NOTE: Binding and control forms.
 

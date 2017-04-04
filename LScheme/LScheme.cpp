@@ -837,6 +837,7 @@ namespace scheme
 		void
 			REPLContext::Process(TermNode& term)
 		{
+			TokenizeTerm(term);
 			Preprocess(term);
 			Reduce(term, Root);
 		}
