@@ -7,20 +7,18 @@
 
 #include "IDevice.h"
 
-namespace platform {
-	namespace Render {
+namespace platform::Render {
 
-		class Context {
-		public:
-			virtual Device& GetDevice() = 0;
+	class Context {
+	public:
+		virtual Device& GetDevice() = 0;
 
-			virtual void Push(const PipleState&) = 0;
-		public:
-			virtual void CreateDeviceAndDisplay() = 0;
-		public:
-			static Context& Instance();
-		};
-	}
+		virtual void Push(const PipleState&) = 0;
+	public:
+		virtual void CreateDeviceAndDisplay() = 0;
+	public:
+		static Context& Instance();
+	};
 }
 
 #endif
