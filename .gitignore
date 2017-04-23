@@ -224,3 +224,8 @@ LTest/
 *.opendb
 *.o
 *.a
+
+#SWIG files
+Engine.Net/SWIG/*.cxx
+Engine.Net/SWIG/*.cpp
+Engine.Net/Engine.Net/*.cs

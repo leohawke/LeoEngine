@@ -10,7 +10,7 @@
 #define lnoexcept
 
 %include "..\..\Engine\emacro.h"
-%include "..\..\Engine\Render\IFormat.hpp"
+%include "IFormat.i"
 %include "..\..\Engine\Render\Color_T.hpp"
 
 %ignore platform::Render::DepthStencilDesc::to_op;
@@ -30,14 +30,13 @@
 %ignore operator-(const uint8& lhs,const CubeFaces& face);
 %include "..\..\Engine\Render\ITexture.hpp"
 
-%include "..\..\Engine\Render\IDevice.h"
-%include "..\..\Engine\Render\IContext.h"
-
 
 %{
 #include "..\..\Engine\emacro.h"
 #include "..\..\Engine\Render\IFormat.hpp"
+using namespace platform::Render::IFormat;
 #include "..\..\Engine\Render\Color_T.hpp"
+using namespace platform;
 #include "..\..\Engine\Render\PipleState.h"
 #include "..\..\Engine\Render\ITexture.hpp"
 #include "..\..\Engine\Render\IContext.h"

@@ -2,6 +2,7 @@
 
 %{
 #include "..\..\LBase\linttype.hpp"
+using namespace leo::inttype;
 %}
 
 typedef uint8_t uint8 ;

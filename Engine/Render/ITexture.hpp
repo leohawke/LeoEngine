@@ -168,17 +168,18 @@ namespace platform::Render {
 		struct Box2D :Texture1D::Box1D {
 			uint16 y_offset;
 			uint16 height;
+			using base = Texture1D::Box1D;
 
-			Box2D(const Box1D& box, uint16 yoffset_, uint16 height_)
-				:Box1D(box), y_offset(yoffset_), height(height_)
+			Box2D(const base& box, uint16 yoffset_, uint16 height_)
+				:base(box), y_offset(yoffset_), height(height_)
 			{}
 
 			explicit Box2D(uint16 width_, uint16 height_)
-				:Box1D(width_), height(height_)
+				:base(width_), height(height_)
 			{}
 
 			Box2D(uint8 array_index_, uint8 level_, uint16 x_offset_, uint16 y_offset_, uint16 width_, uint16 height_)
-				:Box1D({ array_index_,level_ }, x_offset_, width_), y_offset(y_offset_), height(height_)
+				:base({ array_index_,level_ }, x_offset_, width_), y_offset(y_offset_), height(height_)
 			{}
 		};
 
@@ -220,15 +221,16 @@ namespace platform::Render {
 		struct Box3D :Texture2D::Box2D {
 			uint16 z_offset;
 			uint16 depth;
+			using base = Texture2D::Box2D;
 
-			Box3D(const Box2D& box, uint16 zoffset_, uint16 depth_)
-				:Box2D(box), z_offset(zoffset_), depth(depth_)
+			Box3D(const base& box, uint16 zoffset_, uint16 depth_)
+				:base(box), z_offset(zoffset_), depth(depth_)
 			{}
 
 			Box3D(uint8 array_index_, uint8 level_,
 				uint16 x_offset_, uint16 y_offset_, uint16 z_offset_,
 				uint16 width_, uint16 height_, uint16 depth_)
-				:Box2D(array_index_, level_, x_offset_, y_offset_, width_, height_), z_offset(z_offset_), depth(depth_)
+				:base(array_index_, level_, x_offset_, y_offset_, width_, height_), z_offset(z_offset_), depth(depth_)
 			{}
 		};
 
@@ -267,9 +269,9 @@ namespace platform::Render {
 		using Sub1D = Texture1D::Sub1D;
 		struct BoxCube :Texture2D::Box2D {
 			CubeFaces face;
-
-			BoxCube(const Box2D& box, CubeFaces face_)
-				:Box2D(box), face(face)
+			using base = Texture2D::Box2D;
+			BoxCube(const base& box, CubeFaces face_)
+				:base(box), face(face)
 			{}
 		};
 
