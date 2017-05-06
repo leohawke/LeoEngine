@@ -40,10 +40,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Caps.cs" />
+    <Compile Include="DeviceCapsPINVOKE.cs" />
     <Compile Include="EChannel.cs" />
     <Compile Include="EChannelType.cs" />
     <Compile Include="EFormat.cs" />
+    <Compile Include="GraphicsBuffer.cs" />
+    <Compile Include="IGraphicsBufferPINVOKE.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Usage.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

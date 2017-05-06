@@ -154,11 +154,16 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </CustomBuild>
+    <None Include="..\SWIG\DeviceCaps.i" />
     <None Include="..\SWIG\IFormat.i" />
+    <None Include="..\SWIG\IGraphicsBuffer.i" />
+    <None Include="..\SWIG\LBase\ldef.i" />
     <None Include="..\SWIG\LBase\linttype.i" />
+    <None Include="..\SWIG\LBase\lmacro.i" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\SWIG\Engine_wrap.cxx" />
+    <ClCompile Include="..\SWIG\DeviceCaps_wrap.cxx" />
+    <ClCompile Include="..\SWIG\IGraphicsBuffer_wrap.cxx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Engine\Engine.vcxproj">

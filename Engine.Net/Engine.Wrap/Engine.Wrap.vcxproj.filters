@@ -12,19 +12,34 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\SWIG\Engine.i">
-      <Filter>SWIG</Filter>
-    </None>
     <None Include="..\SWIG\IFormat.i">
       <Filter>SWIG</Filter>
     </None>
     <None Include="..\SWIG\LBase\linttype.i">
       <Filter>SWIG\LBase</Filter>
     </None>
+    <None Include="..\SWIG\DeviceCaps.i">
+      <Filter>SWIG</Filter>
+    </None>
+    <None Include="..\SWIG\LBase\lmacro.i">
+      <Filter>SWIG\LBase</Filter>
+    </None>
+    <None Include="..\SWIG\LBase\ldef.i">
+      <Filter>SWIG\LBase</Filter>
+    </None>
+    <None Include="..\SWIG\IGraphicsBuffer.i">
+      <Filter>SWIG</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\SWIG\Engine_wrap.cxx">
+    <ClCompile Include="..\SWIG\DeviceCaps_wrap.cxx">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\SWIG\IGraphicsBuffer_wrap.cxx">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\SWIG\Engine.i" />
   </ItemGroup>
 </Project>
