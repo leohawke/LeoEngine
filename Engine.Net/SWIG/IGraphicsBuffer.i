@@ -17,4 +17,7 @@ using namespace leo::inttype;
 %import "LBase\ldef.i"
 %import "LBase\lmacro.i"
 
+%rename(BufferUsage) platform::Render::Buffer::Usage;
+%rename(BufferAccess) platform::Render::Buffer::Access;
+
 %include "..\..\Engine\Render\IGraphicsBuffer.hpp"

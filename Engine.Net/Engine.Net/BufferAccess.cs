@@ -10,9 +10,11 @@
 
 namespace Engine.Net {
 
-public enum Usage {
-  Static,
-  Dynamic
+public enum BufferAccess {
+  Read_Only,
+  Write_Only,
+  Read_Write,
+  Write_No_Overwrite
 }
 
 }

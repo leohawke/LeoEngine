@@ -45,8 +45,8 @@ public class GraphicsBuffer : global::System.IDisposable {
     return ret;
   }
 
-  public Usage GetUsage() {
-    Usage ret = (Usage)IGraphicsBufferPINVOKE.GraphicsBuffer_GetUsage(swigCPtr);
+  public BufferUsage GetUsage() {
+    BufferUsage ret = (BufferUsage)IGraphicsBufferPINVOKE.GraphicsBuffer_GetUsage(swigCPtr);
     return ret;
   }
 
