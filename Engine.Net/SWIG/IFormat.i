@@ -2,6 +2,7 @@
 
 %{
 #include "..\..\Engine\Render\IFormat.hpp"
+using namespace platform::Render::IFormat;
 %}
 
 #define EC_R 0UL
@@ -297,5 +298,24 @@ enum EChannelType
 	UNorm_SRGB = 5UL,
 	Typeless = 6UL,
 	SharedExp = 7UL
+};
+
+
+struct ElementInitData
+{
+	void const * data = nullptr;
+	uint32_t row_pitch = 0;
+	uint32_t slice_pitch = 0;
+};
+
+struct SampleDesc {
+	uint32 Count = 1;
+	uint32 Quality = 0;
+
+	SampleDesc() = default;
+
+	SampleDesc(uint32 count, uint32 quality)
+		:Count(count), Quality(quality)
+		{}
 };
 

@@ -30,12 +30,21 @@
     <None Include="..\SWIG\IGraphicsBuffer.i">
       <Filter>SWIG</Filter>
     </None>
+    <None Include="..\SWIG\ITexture.i">
+      <Filter>SWIG</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\SWIG\DeviceCaps_wrap.cxx">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\SWIG\IGraphicsBuffer_wrap.cxx">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SWIG\ITexture_wrap.cxx">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SWIG\IFormat_wrap.cxx">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
