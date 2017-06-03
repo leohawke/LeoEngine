@@ -9,6 +9,7 @@
 #include "ITexture.hpp"
 #include "Effect/Effect.hpp"
 #include "IGraphicsBuffer.hpp"
+#include "InputLayout.hpp"
 
 namespace asset {
 	class ShaderBlobAsset;

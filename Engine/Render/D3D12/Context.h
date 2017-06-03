@@ -25,6 +25,7 @@
 namespace platform_ex {
 	namespace Windows {
 		namespace D3D12 {
+			namespace  Effect = platform::Render::Effect;
 			using namespace platform::Render::IFormat;
 
 			class Device : platform::Render::Device {
@@ -151,6 +152,9 @@ namespace platform_ex {
 				void ClearPSOCache();
 
 				void CreateDeviceAndDisplay() override;
+
+				void Render(const Effect::Effect& effect, const Effect::Technique& tech, const platform::Render::InputLayout& layout) override;
+
 			private:
 				void ContextEx(ID3D12Device* device, ID3D12CommandQueue* cmd_queue);
 			private:

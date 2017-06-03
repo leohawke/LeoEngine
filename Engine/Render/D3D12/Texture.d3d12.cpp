@@ -377,7 +377,7 @@ void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_siz
 
 		gps_desc.IBStripCutValue = rl.GetIndexFormat() == EFormat::EF_R16UI ? D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFF : D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFFFFFF;
 
-		gps_desc.PrimitiveTopologyType = Convert(rl.GetTopoType());
+		gps_desc.PrimitiveTopologyType = Convert<D3D12_PRIMITIVE_TOPOLOGY_TYPE>(rl.GetTopoType());
 
 		gps_desc.NumRenderTargets = 1;
 		gps_desc.RTVFormats[0] = dxgi_format;

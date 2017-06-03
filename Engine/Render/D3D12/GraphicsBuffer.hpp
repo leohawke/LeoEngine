@@ -26,6 +26,8 @@ namespace platform_ex::Windows::D3D12 {
 
 		void UpdateSubresource(leo::uint32 offset, leo::uint32 size, void const * data) override;
 
+		bool UpdateResourceBarrier(D3D12_RESOURCE_BARRIER& barrier, D3D12_RESOURCE_STATES target_state);
+
 		ID3D12Resource* Resource() const;
 		ID3D12Resource* UploadResource() const;
 
@@ -47,6 +49,8 @@ namespace platform_ex::Windows::D3D12 {
 		leo::uint32 counter_offset;
 
 		platform::Render::EFormat format;
+
+		D3D12_RESOURCE_STATES curr_state;
 	};
 }
 

@@ -7,7 +7,7 @@ namespace platform_ex::Windows::D3D12 {
 	GraphicsBuffer::GraphicsBuffer(platform::Render::Buffer::Usage usage,
 		uint32_t access_hint, uint32_t size_in_byte,
 		platform::Render::EFormat fmt)
-		:platform::Render::GraphicsBuffer(usage, access_hint, size_in_byte),format(fmt)
+		:platform::Render::GraphicsBuffer(usage, access_hint, size_in_byte),format(fmt),curr_state(D3D12_RESOURCE_STATE_COMMON)
 	{
 	}
 
@@ -147,6 +147,7 @@ namespace platform_ex::Windows::D3D12 {
 		CheckHResult(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 			&res_desc, init_state, nullptr,
 			COMPtr_RefParam(buffer, IID_ID3D12Resource)));
+		curr_state = init_state;
 
 		if (init_data != nullptr) {
 			auto const & cmd_list = Context::Instance().GetCommandList(Device::Command_Resource);
@@ -258,6 +259,18 @@ namespace platform_ex::Windows::D3D12 {
 		auto p = static_cast<stdex::byte*>(Map(platform::Render::Buffer::Write_Only));
 		memcpy(p + offset, data, size);
 		Unmap();
+	}
+	bool GraphicsBuffer::UpdateResourceBarrier(D3D12_RESOURCE_BARRIER & barrier, D3D12_RESOURCE_STATES target_state)
+	{
+		if (curr_state == target_state)
+			return false;
+		else {
+			barrier.Transition.pResource = buffer.Get();
+			barrier.Transition.StateBefore = curr_state;
+			barrier.Transition.StateAfter = target_state;
+			curr_state = target_state;
+			return true;
+		}
 	}
 	ID3D12Resource * GraphicsBuffer::Resource() const
 	{

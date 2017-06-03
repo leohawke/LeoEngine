@@ -14,6 +14,7 @@ namespace platform::Render {
 		virtual Device& GetDevice() = 0;
 
 		virtual void Push(const PipleState&) = 0;
+		virtual void Render(const Effect::Effect&, const Effect::Technique&, const InputLayout&) = 0;
 	public:
 		virtual void CreateDeviceAndDisplay() = 0;
 	public:

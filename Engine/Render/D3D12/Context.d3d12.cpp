@@ -1,5 +1,6 @@
 ﻿#include <LBase/pointer.hpp>
 #include "Context.h"
+#include "Convert.h"
 #include "Display.h"
 #include "Texture.h"
 
@@ -145,7 +146,7 @@ namespace platform_ex {
 
 			Texture1D* Device::CreateTexture(uint16 width, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const *>  init_data)
 			{
-				auto texture = std::make_unique<Texture1D>(width, num_mipmaps, array_size, format,access,sample_info);
+				auto texture = std::make_unique<Texture1D>(width, num_mipmaps, array_size, format, access, sample_info);
 				if (init_data.has_value())
 					texture->HWResourceCreate(init_data.value());
 				return texture.release();
@@ -153,7 +154,7 @@ namespace platform_ex {
 
 			Texture2D* Device::CreateTexture(uint16 width, uint16 height, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const *>  init_data)
 			{
-				auto texture = std::make_unique<Texture2D>(width,height, num_mipmaps, array_size, format, access, sample_info);
+				auto texture = std::make_unique<Texture2D>(width, height, num_mipmaps, array_size, format, access, sample_info);
 				if (init_data.has_value())
 					texture->HWResourceCreate(init_data.value());
 				return texture.release();
@@ -161,7 +162,7 @@ namespace platform_ex {
 
 			Texture3D* Device::CreateTexture(uint16 width, uint16 height, uint16 depth, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const *>  init_data)
 			{
-				auto texture = std::make_unique<Texture3D>(width,height,depth, num_mipmaps, array_size, format, access, sample_info);
+				auto texture = std::make_unique<Texture3D>(width, height, depth, num_mipmaps, array_size, format, access, sample_info);
 				if (init_data.has_value())
 					texture->HWResourceCreate(init_data.value());
 				return texture.release();
@@ -177,12 +178,12 @@ namespace platform_ex {
 
 			ShaderCompose * platform_ex::Windows::D3D12::Device::CreateShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect)
 			{
-				return std::make_unique<ShaderCompose>(pShaderBlob,pEffect).release();
+				return std::make_unique<ShaderCompose>(pShaderBlob, pEffect).release();
 			}
 
 			GraphicsBuffer * Device::CreateConstantBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const*> init_data)
 			{
-				return CreateBuffer(usage, access, size_in_byte,format, init_data);
+				return CreateBuffer(usage, access, size_in_byte, format, init_data);
 			}
 
 			leo::observer_ptr<ID3D12RootSignature> Device::CreateRootSignature(std::array<size_t, ShaderCompose::NumTypes * 4> num, bool vertex_shader, bool stream_output)
@@ -196,7 +197,7 @@ namespace platform_ex {
 
 				size_t numcbv = 0;
 				for (auto i = 0; i != ShaderCompose::NumTypes; ++i)
-					numcbv += num[i * 4+0];
+					numcbv += num[i * 4 + 0];
 
 				std::vector<D3D12_ROOT_PARAMETER> root_params;
 				std::vector<D3D12_DESCRIPTOR_RANGE> ranges;
@@ -210,7 +211,7 @@ namespace platform_ex {
 						switch (type) {
 						case ShaderCompose::Type::VertexShader:
 							root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-							break; 
+							break;
 						case ShaderCompose::Type::PixelShader:
 							root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 							break;
@@ -355,7 +356,7 @@ namespace platform_ex {
 				root_signature_desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_NONE;
 				if (vertex_shader)
 					root_signature_desc.Flags |= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-				if(stream_output)
+				if (stream_output)
 					root_signature_desc.Flags |= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_STREAM_OUTPUT;
 
 				COMPtr<ID3DBlob> signature;
@@ -447,7 +448,7 @@ namespace platform_ex {
 			}
 
 			void Device::FillCaps() {
-				d3d_caps.type =platform::Render::Caps::Type::D3D12;
+				d3d_caps.type = platform::Render::Caps::Type::D3D12;
 				d3d_caps.max_texture_depth = D3D12_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
 
 				std::pair<EFormat, DXGI_FORMAT> fmts[] =
@@ -523,7 +524,7 @@ namespace platform_ex {
 
 				std::vector<EFormat> vertex_support_formats;
 				std::vector<EFormat> texture_support_formats;
-				std::unordered_map<EFormat,std::vector<SampleDesc>> rt_support_msaas;
+				std::unordered_map<EFormat, std::vector<SampleDesc>> rt_support_msaas;
 				D3D12_FEATURE_DATA_FORMAT_SUPPORT fmt_support;
 				for (size_t i = 0; i < sizeof(fmts) / sizeof(fmts[0]); ++i)
 				{
@@ -672,15 +673,15 @@ namespace platform_ex {
 					}
 				}
 
-				d3d_caps.TextureFormatSupport = [formats=std::move(texture_support_formats)](EFormat format) {
-					return std::find(formats.begin(),formats.end(),format) != formats.end();
+				d3d_caps.TextureFormatSupport = [formats = std::move(texture_support_formats)](EFormat format) {
+					return std::find(formats.begin(), formats.end(), format) != formats.end();
 				};
 
 				d3d_caps.VertexFormatSupport = [formats = std::move(vertex_support_formats)](EFormat format) {
 					return std::find(formats.begin(), formats.end(), format) != formats.end();
 				};
 
-				d3d_caps.RenderTargetMSAASupport = [formats = std::move(rt_support_msaas)](EFormat format,SampleDesc sample) {
+				d3d_caps.RenderTargetMSAASupport = [formats = std::move(rt_support_msaas)](EFormat format, SampleDesc sample) {
 					auto iter = formats.find(format);
 					if (iter != formats.end()) {
 						for (auto msaa : iter->second) {
@@ -710,7 +711,7 @@ namespace platform_ex {
 				{
 					postprocess_layout = std::make_unique<InputLayout>();
 					postprocess_layout->SetTopoType(platform::Render::InputLayout::TriangleStrip);
-					
+
 					math::float2 postprocess_pos[] = {
 						math::float2(-1,+1),
 						math::float2(+1,+1),
@@ -786,7 +787,7 @@ namespace platform_ex {
 				device->d3d_cmd_queue->ExecuteCommandLists(1, cmd_lists);
 
 				if (type == Device::CommandType::Command_Resource) {
-					auto val =fences[type]->Signal(Fence::Render);
+					auto val = fences[type]->Signal(Fence::Render);
 					fences[type]->Wait(val);
 
 					ResetCommand(type);
@@ -826,6 +827,62 @@ namespace platform_ex {
 				ContextEx(device->d3d_device.Get(), device->d3d_cmd_queue.Get());
 				DisplaySetting setting;
 				display = leo::make_shared<Display>(GetDXGIFactory4(), device->d3d_cmd_queue.Get(), setting, g_hwnd);//test code
+			}
+			void Context::Render(const Effect::Effect & effect, const Effect::Technique & tech, const platform::Render::InputLayout & layout)
+			{
+				//TODO Compute/Copy State -> SyncCPUGPU(true)
+
+				//TODO FrameBuffer?
+
+				std::vector<D3D12_RESOURCE_BARRIER> barriers;
+
+				//TODO StreamOuput
+
+				//Vertex Stream Barrier
+				auto num_vertex_streams = layout.GetVertexStreamsSize();
+				for (auto i = 0; i != num_vertex_streams; ++i) {
+					auto& stream = layout.GetVertexStream(i);
+					auto& vb = static_cast<GraphicsBuffer&>(*stream.stream);
+					if (!(vb.GetAccess() & (EAccessHint::EA_CPURead | EAccessHint::EA_CPUWrite))) {
+						D3D12_RESOURCE_BARRIER barrier;
+						barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+						barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+						barrier.Transition.Subresource = 0;
+						if (vb.UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER)) {
+							barriers.emplace_back(barrier);
+						}
+					}
+				}
+
+				//TODO Instance Stream Barrier
+
+				//optional Index Stream
+				if (layout.GetIndexStream()) {
+					auto& ib = static_cast<GraphicsBuffer&>(*layout.GetIndexStream());
+					D3D12_RESOURCE_BARRIER barrier;
+					barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+					barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+					barrier.Transition.Subresource = 0;
+					if (ib.UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_INDEX_BUFFER)) {
+						barriers.push_back(barrier);
+					}
+				}
+
+				if (!barriers.empty())
+					d3d_cmd_lists[Device::Command_Render]->ResourceBarrier(static_cast<UINT>(barriers.size()), barriers.data());
+
+				static_cast<const InputLayout&>(layout).Active();
+
+				auto vertex_count = layout.GetIndexStream() ? layout.GetNumIndices() : layout.GetNumVertices();
+
+
+				auto tt = layout.GetTopoType();
+				//TODO Tessllation
+
+				//State Cache?
+
+				d3d_cmd_lists[Device::Command_Render]->IASetPrimitiveTopology(Convert<D3D12_PRIMITIVE_TOPOLOGY>(tt));
+
 			}
 			Context & Context::Instance()
 			{

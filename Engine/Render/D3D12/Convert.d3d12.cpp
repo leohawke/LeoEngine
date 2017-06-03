@@ -611,7 +611,8 @@ std::vector<D3D12_INPUT_ELEMENT_DESC> platform_ex::Windows::D3D12::Convert(const
 	return result;
 }
 
-D3D12_PRIMITIVE_TOPOLOGY_TYPE platform_ex::Windows::D3D12::Convert(platform::Render::InputLayout::TopologyType type)
+template<>
+D3D12_PRIMITIVE_TOPOLOGY_TYPE platform_ex::Windows::D3D12::Convert<D3D12_PRIMITIVE_TOPOLOGY_TYPE>(platform::Render::InputLayout::TopologyType type)
 {
 	switch (type)
 	{
@@ -628,6 +629,31 @@ D3D12_PRIMITIVE_TOPOLOGY_TYPE platform_ex::Windows::D3D12::Convert(platform::Ren
 	}
 	return D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED;
 }
+
+template<>
+D3D12_PRIMITIVE_TOPOLOGY  platform_ex::Windows::D3D12::Convert<D3D12_PRIMITIVE_TOPOLOGY>(platform::Render::InputLayout::TopologyType type)
+{
+	switch (type)
+	{
+	case platform::Render::InputLayout::PointList:
+		return D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+
+	case platform::Render::InputLayout::LineList:
+		return D3D_PRIMITIVE_TOPOLOGY_LINELIST;
+
+	case platform::Render::InputLayout::LineStrip:
+		return D3D_PRIMITIVE_TOPOLOGY_LINESTRIP;
+
+	case platform::Render::InputLayout::TriangleList:
+		return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	case platform::Render::InputLayout::TriangleStrip:
+		return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+	}
+
+	return D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
+}
+
 
 D3D12_BLEND_DESC platform_ex::Windows::D3D12::Convert(const platform::Render::BlendDesc & desc)
 {

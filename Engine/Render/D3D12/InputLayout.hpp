@@ -14,14 +14,13 @@ namespace platform_ex::Windows::D3D12 {
 	class InputLayout : public platform::Render::InputLayout {
 	public:
 		InputLayout();
+		~InputLayout() override = default;
 
-		const std::vector<D3D12_INPUT_ELEMENT_DESC>& GetInputDesc();
+		const std::vector<D3D12_INPUT_ELEMENT_DESC>& GetInputDesc() const;
 
-		void Active();
+		void Active() const;
 	private:
-		 std::vector<D3D12_INPUT_ELEMENT_DESC> vertex_elems;
-		 std::vector<D3D12_VERTEX_BUFFER_VIEW> vbvs;
-		 D3D12_INDEX_BUFFER_VIEW ibv;
+		 mutable std::vector<D3D12_INPUT_ELEMENT_DESC> vertex_elems;
 	};
 }
 

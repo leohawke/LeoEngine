@@ -79,7 +79,7 @@ namespace platform::Render {
 
 	public:
 		InputLayout();
-		~InputLayout();
+		virtual ~InputLayout();
 
 		DefGetter(const lnothrow, TopologyType, TopoType, topology_type)
 			DefSetter(TopologyType, TopoType, topology_type)
