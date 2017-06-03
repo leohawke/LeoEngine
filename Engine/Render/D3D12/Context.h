@@ -155,6 +155,8 @@ namespace platform_ex {
 
 				void Render(const Effect::Effect& effect, const Effect::Technique& tech, const platform::Render::InputLayout& layout) override;
 
+
+				void UpdateRenderPSO(const Effect::Effect& effect, const Effect::Technique& tech,const Effect::Pass& pass, const platform::Render::InputLayout& layout);
 			private:
 				void ContextEx(ID3D12Device* device, ID3D12CommandQueue* cmd_queue);
 			private:

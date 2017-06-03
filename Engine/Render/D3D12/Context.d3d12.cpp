@@ -804,6 +804,31 @@ namespace platform_ex {
 			{
 			}
 
+			void D3D12::Context::UpdateRenderPSO(const Effect::Effect & effect, const Effect::Technique & tech, const Effect::Pass & pass, const platform::Render::InputLayout & layout)
+			{
+				auto& shader_compose = static_cast<ShaderCompose&>(pass.GetShader(effect));
+				auto& piple_state = static_cast<const PipleState&>(pass.GetState());
+
+				//TODO RetrieveGraphicsPSO
+				auto pso = COMPtr<ID3D12PipelineState>();
+
+				d3d_cmd_lists[Device::Command_Render]->SetPipelineState(pso.Get());
+				d3d_cmd_lists[Device::Command_Render]->SetGraphicsRootSignature(shader_compose.RootSignature());
+
+				if (pass.GetState().RasterizerState.scissor_enable) {
+					//TODO  RSSetScissorRects
+				}
+				else {
+					D3D12_RECT rc =
+					{
+							//TODO Viewport
+					};
+					//d3d_cmd_lists[Device::Command_Render]->RSSetScissorRects(1,&rc);
+				}
+
+				shader_compose;
+			}
+
 			void Context::ContextEx(ID3D12Device * d3d_device, ID3D12CommandQueue * cmd_queue)
 			{
 				d3d_cmd_queues[Device::Command_Render] = cmd_queue;
@@ -882,6 +907,62 @@ namespace platform_ex {
 				//State Cache?
 
 				d3d_cmd_lists[Device::Command_Render]->IASetPrimitiveTopology(Convert<D3D12_PRIMITIVE_TOPOLOGY>(tt));
+
+				auto prim_count = vertex_count;
+				switch (tt)
+				{
+				case platform::Render::InputLayout::LineList:
+					prim_count /= 2;
+					break;
+				case platform::Render::InputLayout::LineStrip:
+					--prim_count;
+					break;
+				case platform::Render::InputLayout::TriangleList:
+					prim_count /= 2;
+					break;
+				case platform::Render::InputLayout::TriangleStrip:
+					prim_count -= 2;
+					break;
+				}
+
+				//TODO Instance
+				auto num_instances = layout.GetVertexStream(0).instance_freq;
+
+				//Statistics Render Infomation
+
+				auto num_passes = tech.NumPasses();
+
+				//TODO Indirect Args
+				if (layout.GetIndexStream()) {
+					auto num_indices = layout.GetNumIndices();
+					for (auto i = 0; i != num_passes; ++i) {
+						auto& pass = tech.GetPass(i);
+						pass.Bind(effect);
+
+						UpdateRenderPSO(effect, tech, pass,layout);
+						d3d_cmd_lists[Device::Command_Render]->DrawIndexedInstanced(num_indices, 
+							num_instances,
+							layout.GetIndexStart(), layout.GetVertexStart(), 0);
+						pass.UnBind(effect);
+					}
+				}
+				else {
+					auto num_vertices = layout.GetNumVertices();
+					for (auto i = 0; i != num_passes; ++i) {
+						auto& pass = tech.GetPass(i);
+						pass.Bind(effect);
+
+						UpdateRenderPSO(effect, tech, pass,layout);
+						d3d_cmd_lists[Device::Command_Render]->DrawInstanced(num_vertices,
+							num_instances,
+							layout.GetVertexStart(),  0);
+						pass.UnBind(effect);
+					}
+				}
+
+				//Statistics Render Infomation
+
+				//FrameBuffer Barrier;
 
 			}
 			Context & Context::Instance()

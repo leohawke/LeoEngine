@@ -14,26 +14,31 @@ namespace platform::Render {
 }
 
 namespace platform::Render::Effect {
-	
+
+
+	const Pass & platform::Render::Effect::Technique::GetPass(leo::uint8 index) const
+	{
+		return passes[index];
+	}
 
 	Pass & platform::Render::Effect::Technique::GetPass(leo::uint8 index)
 	{
 		return passes[index];
 	}
-	void Pass::Bind(Effect & effect)
+	void Pass::Bind(const Effect & effect) const
 	{
 		Context::Instance().Push(Deref(state));
 		effect.GetShader(bind_index).Bind();
 	}
-	void Pass::UnBind(Effect & effect)
+	void Pass::UnBind(const Effect & effect) const
 	{
 		effect.GetShader(bind_index).UnBind();
 	}
-	ShaderCompose& Pass::GetShader(Effect & effect)
+	ShaderCompose& Pass::GetShader(const Effect & effect) const
 	{
 		return effect.GetShader(bind_index);
 	}
-	PipleState & Pass::GetState()
+	const PipleState & Pass::GetState() const
 	{
 		return Deref(state);
 	}
@@ -51,21 +56,21 @@ namespace platform::Render::Effect {
 }
 
 namespace platform::Render::Effect {
-	
+
 
 	void platform::Render::Effect::Effect::Bind(leo::uint8 index)
 	{
 		shaders[index]->Bind();
 	}
 
-	ShaderCompose& Effect::GetShader(leo::uint8 index)
+	ShaderCompose& Effect::GetShader(leo::uint8 index) const
 	{
 		return *shaders[index];
 	}
 
 	const Technique & Effect::GetTechnique(const std::string & name) const
 	{
-		auto hash =leo::constfn_hash(name);
+		auto hash = leo::constfn_hash(name);
 		return GetTechnique(hash);
 	}
 
@@ -128,17 +133,17 @@ namespace platform::Render::Effect {
 		auto asset_params = pEffectAsset->GetParams();
 		for (auto & cbuff : pEffectAsset->GetCBuffersRef()) {
 			auto ConstantBufferInfo = leo::any_cast<ShaderInfo::ConstantBufferInfo>(pEffectAsset->GetInfo(cbuff.GetName()).value());
-			GraphicsBuffer* pGPUBuffer = Context::Instance().GetDevice().CreateConstantBuffer(platform::Render::Buffer::Usage::Dynamic,0, ConstantBufferInfo.size,EFormat::EF_Unknown);
-			
+			GraphicsBuffer* pGPUBuffer = Context::Instance().GetDevice().CreateConstantBuffer(platform::Render::Buffer::Usage::Dynamic, 0, ConstantBufferInfo.size, EFormat::EF_Unknown);
+
 			auto pConstantBuffer = std::make_shared<ConstantBuffer>(cbuff.GetName(), cbuff.GetNameHash());
-			
+
 			pConstantBuffer->gpu_buffer.reset(pGPUBuffer);
 			pConstantBuffer->cpu_buffer.resize(ConstantBufferInfo.size);
 
 			for (auto& param_index : cbuff.GetParamIndices()) {
 				expect_parameters.insert(param_index);
 				auto& asset_param = asset_params[param_index];
-				Parameter Param { asset_param.GetName(), asset_param.GetNameHash(),asset_param.GetType() };
+				Parameter Param{ asset_param.GetName(), asset_param.GetNameHash(),asset_param.GetType() };
 				auto VariableInfo = leo::any_cast<ShaderInfo::ConstantBufferInfo::VariableInfo>(pEffectAsset->GetInfo(asset_param.GetName()).value());
 				uint32 stride;
 				if (VariableInfo.elements > 0) {
@@ -153,7 +158,7 @@ namespace platform::Render::Effect {
 					else
 						stride = 4;
 				}
-				Param.var.Bind(pConstantBuffer, VariableInfo.start_offset,stride);//Depend reflect info
+				Param.var.Bind(pConstantBuffer, VariableInfo.start_offset, stride);//Depend reflect info
 				parameters.emplace(Param.Hash, std::move(Param));
 
 				//stride ±ØÐëÕýÈ·£¡
@@ -185,7 +190,7 @@ namespace platform::Render::Effect {
 
 		auto asset_techns = pEffectAsset->GetTechniquesRef();
 		for (auto& asset_tech : asset_techns) {
-			Technique technique ={ asset_tech.GetName(),asset_tech.GetNameHash()};
+			Technique technique = { asset_tech.GetName(),asset_tech.GetNameHash() };
 
 			auto asset_passes = asset_tech.GetPasses();
 			for (auto& asset_pass : asset_passes) {
@@ -196,8 +201,8 @@ namespace platform::Render::Effect {
 				for (auto&pair : asset_blob_hashs) {
 					asset_blobs.emplace(pair.first, &pEffectAsset->GetBlob(pair.second));
 				}
-				ShaderCompose* pCompose = Context::Instance().GetDevice().CreateShaderCompose(asset_blobs,leo::make_observer(this));
-				pass.bind_index =static_cast<leo::uint8>(shaders.size());
+				ShaderCompose* pCompose = Context::Instance().GetDevice().CreateShaderCompose(asset_blobs, leo::make_observer(this));
+				pass.bind_index = static_cast<leo::uint8>(shaders.size());
 				shaders.emplace_back(pCompose);
 				pass.state = leo::unique_raw(Context::Instance().GetDevice().CreatePipleState(asset_pass.GetPipleState()));
 				technique.passes.emplace_back(std::move(pass));

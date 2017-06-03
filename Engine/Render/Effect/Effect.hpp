@@ -329,10 +329,10 @@ namespace platform::Render::Effect {
 	public:
 		Pass() = default;
 		Pass(Pass&&) = default;
-		void Bind(Effect &);
-		void UnBind(Effect &);
-		ShaderCompose& GetShader(Effect&);
-		PipleState& GetState();
+		void Bind(const Effect &) const;
+		void UnBind(const Effect &) const;
+		ShaderCompose& GetShader(const Effect&) const;
+		const PipleState& GetState() const;
 
 		friend class Effect;
 	private:
@@ -347,7 +347,12 @@ namespace platform::Render::Effect {
 
 		using NameKey::NameKey;
 		
+		const Pass& GetPass(leo::uint8 index) const;
 		Pass& GetPass(leo::uint8 index);
+
+		std::size_t NumPasses() const {
+			return passes.size();
+		}
 
 		friend class Effect;
 	private:
@@ -360,7 +365,7 @@ namespace platform::Render::Effect {
 		virtual ~Effect();
 
 		void Bind(leo::uint8 index);
-		ShaderCompose& GetShader(leo::uint8 index);
+		ShaderCompose& GetShader(leo::uint8 index) const ;
 
 		const Technique& GetTechnique(const std::string& name) const;
 		const Technique& GetTechnique(size_t hash) const;

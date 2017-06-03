@@ -366,7 +366,7 @@ void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_siz
 		}
 
 		gps_desc.StreamOutput << nullptr;
-		auto& state = static_cast<PipleState&>(pass.GetState());
+		auto& state = static_cast<const PipleState&>(pass.GetState());
 
 		gps_desc.BlendState = state.BlendState;
 		gps_desc.SampleMask = 0xFFFFFFFF;
