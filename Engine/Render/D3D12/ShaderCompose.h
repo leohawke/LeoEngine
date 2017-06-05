@@ -61,6 +61,15 @@ namespace platform_ex::Windows::D3D12 {
 		};
 	private:
 		parameter_bind_t GetBindFunc(ShaderParameterHandle const & p_handle,platform::Render::Effect::Parameter* param);
+	public:
+		using ShaderResourceViewSimulation = ViewSimulation;
+		std::array<std::vector<ShaderResourceViewSimulation*>, NumTypes> Srvs;
+		using UnorderedAccessViewSimulation = ViewSimulation;
+		std::array<std::vector<UnorderedAccessViewSimulation*>, NumTypes> Uavs;
+		std::array<std::vector<platform::Render::GraphicsBuffer*>, NumTypes> CBuffs;
+		std::array<std::vector<std::tuple<ID3D12Resource*, uint32_t, uint32_t>>, NumTypes> SrvSrcs;
+		std::array<std::vector<D3D12_SAMPLER_DESC>, NumTypes> Samplers;
+
 	private:
 
 		leo::observer_ptr<ID3D12RootSignature> root_signature;
@@ -69,14 +78,7 @@ namespace platform_ex::Windows::D3D12 {
 		std::vector<D3D12_RESOURCE_BARRIER> barriers;
 
 		std::array<std::vector<parameter_bind_t>, NumTypes> ParamBinds;
-		std::array<std::vector<D3D12_SAMPLER_DESC>, NumTypes> Samplers;
-		std::array<std::vector<std::tuple<ID3D12Resource*, uint32_t, uint32_t>>, NumTypes> SrvSrcs;
-		using ShaderResourceViewSimulation = ViewSimulation;
-		std::array<std::vector<ShaderResourceViewSimulation*>, NumTypes> Srvs;
 		std::array<std::vector<std::pair<ID3D12Resource*, ID3D12Resource*>>, NumTypes> UavSrcs;
-		using UnorderedAccessViewSimulation = ViewSimulation;
-		std::array<std::vector<UnorderedAccessViewSimulation*>, NumTypes> Uavs;
-		std::array<std::vector<platform::Render::GraphicsBuffer*>, NumTypes> CBuffs;
 
 		std::vector<leo::observer_ptr<platform::Render::Effect::ConstantBuffer>> AllCBuffs;
 	};

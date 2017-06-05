@@ -809,11 +809,13 @@ namespace platform_ex {
 				auto& shader_compose = static_cast<ShaderCompose&>(pass.GetShader(effect));
 				auto& piple_state = static_cast<const PipleState&>(pass.GetState());
 
+				auto& render_cmd_list = d3d_cmd_lists[Device::Command_Render];
+
 				//TODO RetrieveGraphicsPSO
 				auto pso = COMPtr<ID3D12PipelineState>();
 
-				d3d_cmd_lists[Device::Command_Render]->SetPipelineState(pso.Get());
-				d3d_cmd_lists[Device::Command_Render]->SetGraphicsRootSignature(shader_compose.RootSignature());
+				render_cmd_list->SetPipelineState(pso.Get());
+				render_cmd_list->SetGraphicsRootSignature(shader_compose.RootSignature());
 
 				if (pass.GetState().RasterizerState.scissor_enable) {
 					//TODO  RSSetScissorRects
@@ -826,7 +828,94 @@ namespace platform_ex {
 					//d3d_cmd_lists[Device::Command_Render]->RSSetScissorRects(1,&rc);
 				}
 
-				shader_compose;
+				std::size_t num_handle = 0;
+				for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
+					num_handle += shader_compose.Srvs[i].size() + shader_compose.Uavs[i].size();
+				}
+
+				ID3D12DescriptorHeap* heaps[2];
+				uint32 num_heaps = 0;
+				COMPtr<ID3D12DescriptorHeap> cbv_srv_uav_heap;
+				auto sampler_heap = shader_compose.SamplerHeap();
+				if (num_handle > 0) {
+					//hash cache
+					D3D12_DESCRIPTOR_HEAP_DESC cbv_srv_heap_desc;
+					cbv_srv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+					cbv_srv_heap_desc.NumDescriptors = num_handle;
+					cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+					cbv_srv_heap_desc.NodeMask = 0;
+					CheckHResult((*device)->CreateDescriptorHeap(&cbv_srv_heap_desc, COMPtr_RefParam(cbv_srv_uav_heap, IID_ID3D12DescriptorHeap)));
+					heaps[num_heaps++] = cbv_srv_uav_heap.Get();
+				}
+				if (sampler_heap)
+					heaps[num_heaps++] = sampler_heap;
+
+				if (num_heaps > 0)
+					render_cmd_list->SetDescriptorHeaps(num_heaps, heaps);
+
+				uint32 root_param_index = 0;
+				//CBuffer Bind
+				for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
+					for (auto & cbuffer : shader_compose.CBuffs[i]) {
+						auto& resource = static_cast<GraphicsBuffer*>(cbuffer)->buffer;
+						if (resource)
+							render_cmd_list->SetGraphicsRootConstantBufferView(root_param_index++, resource->GetGPUVirtualAddress());
+						else
+							render_cmd_list->SetGraphicsRootConstantBufferView(root_param_index, 0);
+					}
+				}
+
+				//SRV/UAV  Bind
+				if (cbv_srv_uav_heap) {
+					auto cbv_srv_uav_desc_size = (*device)->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+					auto cpu_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
+					auto gpu_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
+					for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
+						if (!shader_compose.Srvs[i].empty()) {
+							render_cmd_list->SetGraphicsRootDescriptorTable(root_param_index, gpu_handle);
+							for (auto& srv : shader_compose.Srvs[i]) {
+								//TODO null_srv_handle
+								(*device)->CopyDescriptorsSimple(1, cpu_handle,srv->GetHandle(),
+									D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+								cpu_handle.ptr += cbv_srv_uav_desc_size;
+								gpu_handle.ptr += cbv_srv_uav_desc_size;
+							}
+							++root_param_index;
+						}
+					}
+
+					for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
+						if (!shader_compose.Uavs[i].empty()) {
+							render_cmd_list->SetGraphicsRootDescriptorTable(root_param_index, gpu_handle);
+							for (auto& uav : shader_compose.Uavs[i]) {
+								//TODO null_srv_handle
+								(*device)->CopyDescriptorsSimple(1, cpu_handle, uav->GetHandle(),
+									D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+								cpu_handle.ptr += cbv_srv_uav_desc_size;
+								gpu_handle.ptr += cbv_srv_uav_desc_size;
+							}
+							++root_param_index;
+						}
+					}
+				}
+
+				//Sampler Bind
+				if (sampler_heap) {
+					auto sampler_desc_size = (*device)->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+
+					auto gpu_sampler_handle = sampler_heap->GetGPUDescriptorHandleForHeapStart();
+
+					for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
+						if (!shader_compose.Srvs[i].empty()) {
+							render_cmd_list->SetGraphicsRootDescriptorTable(root_param_index, gpu_sampler_handle);
+							gpu_sampler_handle.ptr += sampler_desc_size *  shader_compose.Samplers[i].size();
+
+							++root_param_index;
+						}
+					}
+				}
+				
 			}
 
 			void Context::ContextEx(ID3D12Device * d3d_device, ID3D12CommandQueue * cmd_queue)
