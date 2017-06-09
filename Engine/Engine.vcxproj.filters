@@ -101,6 +101,12 @@
     <ClCompile Include="Render\D3D12\Fence.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
+    <ClCompile Include="Render\IFrameBuffer.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\FrameBuffer.d3d12.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -219,6 +225,12 @@
       <Filter>Render\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="Render\D3D12\Fence.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IFrameBuffer.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\FrameBuffer.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
   </ItemGroup>

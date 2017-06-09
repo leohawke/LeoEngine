@@ -41,6 +41,7 @@
     <ClCompile Include="Render\D3D12\d3d12_dxgi.cpp" />
     <ClCompile Include="Render\D3D12\Display.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Fence.cpp" />
+    <ClCompile Include="Render\D3D12\FrameBuffer.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\GraphicsBuffer.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\InputLayout.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\PipleState.d3d12.cpp" />
@@ -55,6 +56,7 @@
     <ClCompile Include="Render\Effect\Effect.cpp" />
     <ClCompile Include="Render\GraphicsBuffer.cpp" />
     <ClCompile Include="Render\IContext.cpp" />
+    <ClCompile Include="Render\IFrameBuffer.cpp" />
     <ClCompile Include="Render\InputLayout.cpp" />
     <ClCompile Include="Render\ITexture.cpp" />
     <ClCompile Include="Render\PipleState.cpp" />
@@ -78,6 +80,7 @@
     <ClInclude Include="Render\D3D12\Context.h" />
     <ClInclude Include="Render\D3D12\Convert.h" />
     <ClInclude Include="Render\D3D12\Fence.h" />
+    <ClInclude Include="Render\D3D12\FrameBuffer.h" />
     <ClInclude Include="Render\D3D12\GraphicsBuffer.hpp" />
     <ClInclude Include="Render\D3D12\InputLayout.hpp" />
     <ClInclude Include="Render\D3D12\PipleState.h" />
@@ -94,6 +97,7 @@
     <ClInclude Include="Render\IContext.h" />
     <ClInclude Include="Render\IDevice.h" />
     <ClInclude Include="Render\IFormat.hpp" />
+    <ClInclude Include="Render\IFrameBuffer.h" />
     <ClInclude Include="Render\IGraphicsBuffer.hpp" />
     <ClInclude Include="Render\IRenderView.h" />
     <ClInclude Include="Render\ITexture.hpp" />
