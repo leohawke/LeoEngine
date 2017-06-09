@@ -219,7 +219,7 @@ namespace platform {
 
 		std::string Access(const char* name, const scheme::TermNode& node) {
 			auto it = std::find_if(node.begin(), node.end(), [&](const scheme::TermNode& child) {
-				if (child.size())
+				if (!child.empty())
 					return leo::Access<std::string>(*child.begin()) == name;
 				return false;
 			});
@@ -228,7 +228,7 @@ namespace platform {
 
 		leo::observer_ptr<const string> AccessPtr(const char* name, const scheme::TermNode& node) {
 			auto it = std::find_if(node.begin(), node.end(), [&](const scheme::TermNode& child) {
-				if (child.size())
+				if (!child.empty())
 					return leo::Access<std::string>(*child.begin()) == name;
 				return false;
 			});

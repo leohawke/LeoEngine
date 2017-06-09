@@ -841,7 +841,7 @@ namespace platform_ex {
 					//hash cache
 					D3D12_DESCRIPTOR_HEAP_DESC cbv_srv_heap_desc;
 					cbv_srv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-					cbv_srv_heap_desc.NumDescriptors = num_handle;
+					cbv_srv_heap_desc.NumDescriptors =static_cast<UINT>(num_handle);
 					cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 					cbv_srv_heap_desc.NodeMask = 0;
 					CheckHResult((*device)->CreateDescriptorHeap(&cbv_srv_heap_desc, COMPtr_RefParam(cbv_srv_uav_heap, IID_ID3D12DescriptorHeap)));

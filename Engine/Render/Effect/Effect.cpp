@@ -188,7 +188,7 @@ namespace platform::Render::Effect {
 			parameters.emplace(Param.Hash, std::move(Param));
 		}
 
-		auto asset_techns = pEffectAsset->GetTechniquesRef();
+		auto& asset_techns = pEffectAsset->GetTechniquesRef();
 		for (auto& asset_tech : asset_techns) {
 			Technique technique = { asset_tech.GetName(),asset_tech.GetNameHash() };
 
