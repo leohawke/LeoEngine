@@ -36,3 +36,7 @@ ViewSimulation::~ViewSimulation() {
 	auto & device = Context::Instance().GetDevice();
 	device.DeallocDescriptor(type, handle);
 }
+
+void UnorderedAccessView::ResetInitCount()
+{
+}

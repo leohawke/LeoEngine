@@ -127,12 +127,22 @@ namespace platform_ex {
 
 			class Context : public platform::Render::Context {
 			public:
+				DefGetter(override, Device&, Device, *device);
+
+				void Push(const platform::Render::PipleState&) override;
+
+				void Render(const Effect::Effect& effect, const Effect::Technique& tech, const platform::Render::InputLayout& layout) override;
+			public:
+				void CreateDeviceAndDisplay() override;
+			private:
+				void DoBindFrameBuffer(const std::shared_ptr<platform::Render::FrameBuffer>&) override;
+
+			public:
 				Context();
 
 				DXGI::Adapter& DefaultAdapter();
 
 				DefGetter(const lnothrow, IDXGIFactory4*, DXGIFactory4, adapter_list.GetDXGIFactory4());
-				DefGetter(, Device&, Device, *device);
 
 				void SyncCPUGPU(bool force = true);
 
@@ -147,14 +157,7 @@ namespace platform_ex {
 				void CommitCommandList(Device::CommandType);
 				friend class Device;
 
-				void Push(const platform::Render::PipleState&);
-
 				void ClearPSOCache();
-
-				void CreateDeviceAndDisplay() override;
-
-				void Render(const Effect::Effect& effect, const Effect::Technique& tech, const platform::Render::InputLayout& layout) override;
-
 
 				void UpdateRenderPSO(const Effect::Effect& effect, const Effect::Technique& tech,const Effect::Pass& pass, const platform::Render::InputLayout& layout);
 			private:

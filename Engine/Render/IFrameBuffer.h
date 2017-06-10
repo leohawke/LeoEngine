@@ -14,9 +14,11 @@ namespace platform {
 
 		class FrameBuffer {
 		public:
-			~FrameBuffer();
+			virtual ~FrameBuffer();
 
-		private:
+			virtual void OnBind();
+			virtual void OnUnBind();
+		protected:
 			std::vector<std::shared_ptr<RenderTargetView>> clr_views;
 			std::shared_ptr<DepthStencilView> ds_view;
 			std::vector<std::shared_ptr<UnorderedAccessView>> uav_views;

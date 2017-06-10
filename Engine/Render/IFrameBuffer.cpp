@@ -1,3 +1,23 @@
 #include "IFrameBuffer.h"
+#include "D3D12\FrameBuffer.h"
 
-platform::Render::FrameBuffer::~FrameBuffer() = default;
+namespace platform::Render {
+	RenderTargetView::~RenderTargetView() = default;
+	DepthStencilView::~DepthStencilView() = default;
+	UnorderedAccessView::~UnorderedAccessView() = default;
+
+
+	FrameBuffer::~FrameBuffer() = default;
+
+	void FrameBuffer::OnBind()
+	{
+	}
+
+	
+
+	void FrameBuffer::OnUnBind()
+	{
+	}
+}
+
+

@@ -8,9 +8,15 @@
 #include "..\IFrameBuffer.h"
 
 namespace platform_ex::Windows::D3D12 {
-	class FrameBuffer : platform::Render::FrameBuffer {
+	class FrameBuffer :public platform::Render::FrameBuffer {
 	public:
 		~FrameBuffer();
+
+		void OnBind() override;
+	public:
+		void SetRenderTargets();
+		void BindBarrier();
+		void UnBindBarrier();
 	};
 }
 

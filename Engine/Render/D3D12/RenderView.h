@@ -46,7 +46,10 @@ namespace platform_ex {
 
 			class DepthStencilView :public GPUDataStructView,public platform::Render::DepthStencilView {};
 
-			class UnorderedAccessView : public GPUDataStructView,public platform::Render::UnorderedAccessView {};
+			class UnorderedAccessView : public GPUDataStructView,public platform::Render::UnorderedAccessView {
+			public:
+				void ResetInitCount();
+			};
 		}
 	}
 }
