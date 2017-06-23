@@ -8,6 +8,7 @@
 
 #include "d3d12_dxgi.h"
 #include "..\IRenderView.h"
+#include <LBase/linttype.hpp>
 
 namespace platform_ex {
 	namespace Windows {
@@ -50,7 +51,12 @@ namespace platform_ex {
 
 			class DepthStencilView :public GPUDataStructView,public platform::Render::DepthStencilView {
 			public:
+				ID3D12Resource* Resource();
+
 				ViewSimulation* View();
+
+				uint32 FirstSubResIndex();
+				uint32 SubResNum();
 			};
 
 			class UnorderedAccessView : public GPUDataStructView,public platform::Render::UnorderedAccessView {
