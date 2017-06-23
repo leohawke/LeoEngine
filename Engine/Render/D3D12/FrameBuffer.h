@@ -6,6 +6,7 @@
 #define LE_RENDER_D3D12_FrameBuffer_h 1
 
 #include "..\IFrameBuffer.h"
+#include "d3d12_dxgi.h"
 
 namespace platform_ex::Windows::D3D12 {
 	class FrameBuffer :public platform::Render::FrameBuffer {
@@ -17,6 +18,9 @@ namespace platform_ex::Windows::D3D12 {
 		void SetRenderTargets();
 		void BindBarrier();
 		void UnBindBarrier();
+
+	private:
+		D3D12_VIEWPORT d3d12_viewport;
 	};
 }
 

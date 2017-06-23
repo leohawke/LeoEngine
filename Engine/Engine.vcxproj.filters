@@ -236,6 +236,9 @@
     <ClInclude Include="Render\D3D12\FrameBuffer.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="Core\ViewPort.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

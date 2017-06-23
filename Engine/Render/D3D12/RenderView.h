@@ -40,11 +40,18 @@ namespace platform_ex {
 
 			class RenderTargetView :public GPUDataStructView,public platform::Render::RenderTargetView {
 			public:
-
+				ID3D12Resource* Resource();
 			
+				uint32 FirstSubResIndex();
+				uint32 SubResNum();
+
+				ViewSimulation* View();
 			};
 
-			class DepthStencilView :public GPUDataStructView,public platform::Render::DepthStencilView {};
+			class DepthStencilView :public GPUDataStructView,public platform::Render::DepthStencilView {
+			public:
+				ViewSimulation* View();
+			};
 
 			class UnorderedAccessView : public GPUDataStructView,public platform::Render::UnorderedAccessView {
 			public:

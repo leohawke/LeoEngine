@@ -75,6 +75,7 @@
     <ClInclude Include="Asset\TexCompression.hpp" />
     <ClInclude Include="Asset\TextureX.h" />
     <ClInclude Include="Core\LFile.h" />
+    <ClInclude Include="Core\ViewPort.h" />
     <ClInclude Include="emacro.h" />
     <ClInclude Include="Render\Color_T.hpp" />
     <ClInclude Include="Render\D3D12\Adapter.h" />
