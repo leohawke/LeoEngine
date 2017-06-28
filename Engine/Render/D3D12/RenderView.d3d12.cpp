@@ -1,5 +1,7 @@
 #include "RenderView.h"
 #include "Context.h"
+#include "GraphicsBuffer.hpp"
+#include "Texture.h"
 
 using namespace platform_ex;
 using namespace platform_ex::Windows::D3D12;

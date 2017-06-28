@@ -7,11 +7,12 @@
 
 #include "../IFormat.hpp"
 #include "../IGraphicsBuffer.hpp"
-#include "RenderView.h"
 #include "d3d12_dxgi.h"
 #include "../../Win32/COM.h"
 
 namespace platform_ex::Windows::D3D12 {
+
+	class ViewSimulation;
 
 	class GraphicsBuffer : public platform::Render::GraphicsBuffer {
 	public:

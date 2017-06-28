@@ -8,6 +8,7 @@
 
 #include "d3d12_dxgi.h"
 #include "..\IRenderView.h"
+#include "..\ITexture.hpp"
 #include <LBase/linttype.hpp>
 
 namespace platform_ex {
@@ -15,6 +16,8 @@ namespace platform_ex {
 
 		namespace D3D12 {
 			class Device;
+			class GraphicsBuffer;
+			class Texture;
 
 			class ViewSimulation {
 			public:
@@ -37,30 +40,48 @@ namespace platform_ex {
 				Device& device;
 			};
 
-			class GPUDataStructView {};
+			class GPUDataStructView {
+			public:
+				ViewSimulation* View();
+
+
+				uint16 FirstSubResIndex();
+				uint16 SubResNum();
+
+				ID3D12Resource* Resource();
+			protected:
+				ViewSimulation* view;
+
+				uint16 first_subres;
+				uint16 num_subres;
+
+				COMPtr<ID3D12Resource> res;
+			};
 
 			class RenderTargetView :public GPUDataStructView,public platform::Render::RenderTargetView {
 			public:
-				ID3D12Resource* Resource();
-			
-				uint32 FirstSubResIndex();
-				uint32 SubResNum();
-
-				ViewSimulation* View();
+				RenderTargetView(Texture& texture_1d_2d_cube, uint8 first_array_index, uint8 array_size, uint8 level);
+				RenderTargetView(Texture& texture_3d, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level);
+				RenderTargetView(Texture& texture_cube, uint8 array_index, platform::Render::TextureCubeFaces face, uint8 level);
+				RenderTargetView(GraphicsBuffer& gb, uint8 width, uint8 height, platform::Render::EFormat pf);
 			};
 
 			class DepthStencilView :public GPUDataStructView,public platform::Render::DepthStencilView {
 			public:
-				ID3D12Resource* Resource();
-
-				ViewSimulation* View();
-
-				uint32 FirstSubResIndex();
-				uint32 SubResNum();
+				DepthStencilView(Texture& texture_1d_2d_cube, uint8 first_array_index, uint8 array_size, uint8 level);
+				DepthStencilView(Texture& texture_3d, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level);
+				DepthStencilView(Texture& texture_cube, uint8 array_index, platform::Render::TextureCubeFaces face, uint8 level);
+				DepthStencilView(uint16 width, uint16 height, platform::Render::EFormat pf, uint8 sample_count, uint8 sample_quality);
 			};
 
 			class UnorderedAccessView : public GPUDataStructView,public platform::Render::UnorderedAccessView {
 			public:
+				UnorderedAccessView(Texture& texture_1d_2d_cube, uint8 first_array_index, uint8 array_size, uint8 level);
+				UnorderedAccessView(Texture& texture_3d, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level);
+				UnorderedAccessView(Texture& texture_cube, uint8 array_index, platform::Render::TextureCubeFaces face, uint8 level);
+				UnorderedAccessView(GraphicsBuffer& gb, platform::Render::EFormat pf);
+
+
 				void ResetInitCount();
 			};
 		}
