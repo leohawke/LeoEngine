@@ -17,7 +17,9 @@ namespace platform_ex {
 		namespace D3D12 {
 			class Device;
 			class GraphicsBuffer;
-			class Texture;
+			class Texture2D;
+			class Texture3D;
+			class TextureCube;
 
 			class ViewSimulation {
 			public:
