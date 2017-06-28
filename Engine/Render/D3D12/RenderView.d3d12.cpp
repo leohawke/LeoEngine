@@ -42,3 +42,19 @@ ViewSimulation::~ViewSimulation() {
 void UnorderedAccessView::ResetInitCount()
 {
 }
+
+GPUDataStructView::GPUDataStructView(ID3D12Resource* res_,ViewSimulation * view_, uint16 first_subres_, uint16 num_subres_)
+{
+}
+
+RenderTargetView::RenderTargetView(Texture2D & texture, uint8 first_array_index, uint8 array_size, uint8 level)
+	:GPUDataStructView(
+		texture.Resource(),
+		texture.RetriveRenderTargetView(first_array_index,array_size,level),
+		first_array_index *texture.GetNumMipMaps() + level,
+		1)
+{
+	width = texture.GetWidth(level);
+	height = texture.GetWidth(level);
+	format = texture.GetFormat();
+}

@@ -110,6 +110,7 @@
     <ClCompile Include="Render\D3D12\Device.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
+    <ClCompile Include="Render\D3D12\RenderView.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">

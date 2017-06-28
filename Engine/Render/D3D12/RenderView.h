@@ -42,6 +42,8 @@ namespace platform_ex {
 
 			class GPUDataStructView {
 			public:
+				GPUDataStructView(ID3D12Resource* res,ViewSimulation* view, uint16 first_subres, uint16 num_subres);
+
 				ViewSimulation* View();
 
 
@@ -55,30 +57,30 @@ namespace platform_ex {
 				uint16 first_subres;
 				uint16 num_subres;
 
-				COMPtr<ID3D12Resource> res;
+				observer_ptr<ID3D12Resource> res;
 			};
 
 			class RenderTargetView :public GPUDataStructView,public platform::Render::RenderTargetView {
 			public:
-				RenderTargetView(Texture& texture_1d_2d_cube, uint8 first_array_index, uint8 array_size, uint8 level);
-				RenderTargetView(Texture& texture_3d, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level);
-				RenderTargetView(Texture& texture_cube, uint8 array_index, platform::Render::TextureCubeFaces face, uint8 level);
+				RenderTargetView(Texture2D& texture_2d, uint8 first_array_index, uint8 array_size, uint8 level);
+				RenderTargetView(Texture3D& texture_3d, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level);
+				RenderTargetView(TextureCube& texture_cube, uint8 array_index, platform::Render::TextureCubeFaces face, uint8 level);
 				RenderTargetView(GraphicsBuffer& gb, uint8 width, uint8 height, platform::Render::EFormat pf);
 			};
 
 			class DepthStencilView :public GPUDataStructView,public platform::Render::DepthStencilView {
 			public:
-				DepthStencilView(Texture& texture_1d_2d_cube, uint8 first_array_index, uint8 array_size, uint8 level);
-				DepthStencilView(Texture& texture_3d, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level);
-				DepthStencilView(Texture& texture_cube, uint8 array_index, platform::Render::TextureCubeFaces face, uint8 level);
+				DepthStencilView(Texture2D& texture_1d_2d_cube, uint8 first_array_index, uint8 array_size, uint8 level);
+				DepthStencilView(Texture3D& texture_3d, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level);
+				DepthStencilView(TextureCube& texture_cube, uint8 array_index, platform::Render::TextureCubeFaces face, uint8 level);
 				DepthStencilView(uint16 width, uint16 height, platform::Render::EFormat pf, uint8 sample_count, uint8 sample_quality);
 			};
 
 			class UnorderedAccessView : public GPUDataStructView,public platform::Render::UnorderedAccessView {
 			public:
-				UnorderedAccessView(Texture& texture_1d_2d_cube, uint8 first_array_index, uint8 array_size, uint8 level);
-				UnorderedAccessView(Texture& texture_3d, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level);
-				UnorderedAccessView(Texture& texture_cube, uint8 array_index, platform::Render::TextureCubeFaces face, uint8 level);
+				UnorderedAccessView(Texture2D& texture_1d_2d_cube, uint8 first_array_index, uint8 array_size, uint8 level);
+				UnorderedAccessView(Texture3D& texture_3d, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level);
+				UnorderedAccessView(TextureCube& texture_cube, uint8 array_index, platform::Render::TextureCubeFaces face, uint8 level);
 				UnorderedAccessView(GraphicsBuffer& gb, platform::Render::EFormat pf);
 
 
