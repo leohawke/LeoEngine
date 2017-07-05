@@ -162,31 +162,3 @@ ViewSimulation * platform_ex::Windows::D3D12::Texture1D::RetriveRenderTargetView
 
 	return RetriveRTV(desc);
 }
-
-ViewSimulation * Texture1D::RetriveRenderTargetView(uint8 first_array_index, uint16 first_slice, uint16 num_slices, uint8 level)
-{
-	return RetriveRenderTargetView(first_array_index, 0, level);
-}
-
-ViewSimulation * Texture1D::RetriveDepthStencilView(uint8 first_array_index, uint16 first_slice, uint16 num_slices, uint8 level)
-{
-	LAssert(GetAccessMode() & EA_GPUWrite, "Access mode must have EA_GPUWrite flag");
-
-	D3D12_DEPTH_STENCIL_VIEW_DESC desc;
-
-	desc.Format = Convert(format);
-	desc.Flags = D3D12_DSV_FLAG_NONE;
-
-	if (GetArraySize() > 1) {
-		desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE1DARRAY;
-		desc.Texture1DArray.MipSlice = level;
-		desc.Texture1DArray.ArraySize = array_size;
-		desc.Texture1DArray.FirstArraySlice = first_array_index;
-	}
-	else {
-		desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE1D;
-		desc.Texture1D.MipSlice = level;
-	}
-
-	return RetriveDSV(desc);
-}

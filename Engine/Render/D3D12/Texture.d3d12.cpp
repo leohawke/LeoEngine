@@ -25,6 +25,11 @@ platform_ex::Windows::D3D12::Texture::Texture(EFormat format)
 {
 }
 
+ViewSimulation * platform_ex::Windows::D3D12::Texture::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level)
+{
+	throw leo::unsupported("Texture::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level)");
+}
+
 ViewSimulation* Texture::RetriveRenderTargetView(uint8 first_array_index, uint8 num_items, uint8 level) {
 	throw leo::unsupported("Texture::RetriveRenderTargetView(uint8 first_array_index, uint8 num_items, uint8 level)");
 }
@@ -34,6 +39,16 @@ ViewSimulation* Texture::RetriveDepthStencilView(uint8 first_array_index, uint8 
 
 ViewSimulation* Texture::RetriveUnorderedAccessView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 num_levels) {
 	throw leo::unsupported("Texture::RetriveUnorderedAccessView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 num_levels)");
+}
+
+ViewSimulation * platform_ex::Windows::D3D12::Texture::RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level)
+{
+	throw leo::unsupported("Texture::RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level)");
+}
+
+ViewSimulation * platform_ex::Windows::D3D12::Texture::RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level)
+{
+	throw leo::unsupported("Texture::RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level)");
 }
 
 ViewSimulation* Texture::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, TextureCubeFaces first_face, uint8 num_faces, uint8 level){

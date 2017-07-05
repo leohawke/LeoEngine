@@ -39,30 +39,27 @@ ViewSimulation::~ViewSimulation() {
 	device.DeallocDescriptor(type, handle);
 }
 
-void UnorderedAccessView::ResetInitCount()
-{
-}
 
 GPUDataStructView::GPUDataStructView(ID3D12Resource* res_,ViewSimulation * view_, uint16 first_subres_, uint16 num_subres_)
 {
 }
 
-observer_ptr<ViewSimulation> platform_ex::Windows::D3D12::GPUDataStructView::View()
+observer_ptr<ViewSimulation> GPUDataStructView::View()
 {
 	return view;
 }
 
-uint16 platform_ex::Windows::D3D12::GPUDataStructView::FirstSubResIndex()
+uint16 GPUDataStructView::FirstSubResIndex()
 {
 	return first_subres;
 }
 
-uint16 platform_ex::Windows::D3D12::GPUDataStructView::SubResNum()
+uint16 GPUDataStructView::SubResNum()
 {
 	return num_subres;
 }
 
-ID3D12Resource * platform_ex::Windows::D3D12::GPUDataStructView::Resource()
+ID3D12Resource * GPUDataStructView::Resource()
 {
 	return res.get();
 }
@@ -77,7 +74,7 @@ RenderTargetView::RenderTargetView(Texture2D & texture, uint8 first_array_index,
 {
 }
 
-platform_ex::Windows::D3D12::RenderTargetView::RenderTargetView(Texture3D & texture, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level):GPUDataStructView(
+RenderTargetView::RenderTargetView(Texture3D & texture, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level):GPUDataStructView(
 	texture.Resource(),
 	texture.RetriveRenderTargetView(array_index,first_slice,num_slices,level),
 	(array_index * texture.GetDepth(level) + first_slice) * texture.GetNumMipMaps() + level,
@@ -86,7 +83,7 @@ platform_ex::Windows::D3D12::RenderTargetView::RenderTargetView(Texture3D & text
 {
 }
 
-platform_ex::Windows::D3D12::RenderTargetView::RenderTargetView(TextureCube & texture, uint8 array_index, platform::Render::TextureCubeFaces face, uint8 level):
+RenderTargetView::RenderTargetView(TextureCube & texture, uint8 array_index, platform::Render::TextureCubeFaces face, uint8 level):
 	GPUDataStructView(
 		texture.Resource(),
 		texture.RetriveRenderTargetView(array_index,face,level),
@@ -96,12 +93,86 @@ platform_ex::Windows::D3D12::RenderTargetView::RenderTargetView(TextureCube & te
 {
 }
 
-platform_ex::Windows::D3D12::RenderTargetView::RenderTargetView(GraphicsBuffer & gb, uint16 width, uint16 height, platform::Render::EFormat pf)
+RenderTargetView::RenderTargetView(GraphicsBuffer & gb, uint16 width, uint16 height, platform::Render::EFormat pf)
 	:GPUDataStructView(
 		gb.Resource(),
 		gb.RetriveRenderTargetView(width,height,pf),
 		0,
 		1)
 	, base(width,height, pf)
+{
+}
+
+DepthStencilView::DepthStencilView(Texture2D & texture, uint8 first_array_index, uint8 array_size, uint8 level)
+	:GPUDataStructView(
+		texture.Resource(),
+		texture.RetriveDepthStencilView(first_array_index, array_size, level),
+		first_array_index *texture.GetNumMipMaps() + level,
+		1)
+	, base(texture.GetWidth(level), texture.GetWidth(level), texture.GetFormat())
+{
+}
+
+DepthStencilView::DepthStencilView(Texture3D & texture, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level) :GPUDataStructView(
+	texture.Resource(),
+	texture.RetriveDepthStencilView(array_index, first_slice, num_slices, level),
+	(array_index * texture.GetDepth(level) + first_slice) * texture.GetNumMipMaps() + level,
+	num_slices * texture.GetNumMipMaps() + level)
+	, base(texture.GetWidth(level), texture.GetWidth(level), texture.GetFormat())
+{
+}
+
+DepthStencilView::DepthStencilView(TextureCube & texture, uint8 array_index, platform::Render::TextureCubeFaces face, uint8 level) :
+	GPUDataStructView(
+		texture.Resource(),
+		texture.RetriveDepthStencilView(array_index, face, level),
+		(array_index * 6 + face) * texture.GetNumMipMaps() + level,
+		1)
+	, base(texture.GetWidth(level), texture.GetWidth(level), texture.GetFormat())
+{
+}
+
+
+UnorderedAccessView::UnorderedAccessView(Texture2D & texture, uint8 first_array_index, uint8 array_size, uint8 level)
+	:GPUDataStructView(
+		texture.Resource(),
+		texture.RetriveUnorderedAccessView(first_array_index, array_size, level),
+		first_array_index *texture.GetNumMipMaps() + level,
+		1)
+	, base(texture.GetWidth(level), texture.GetWidth(level), texture.GetFormat())
+{
+}
+
+UnorderedAccessView::UnorderedAccessView(Texture3D & texture, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level) :GPUDataStructView(
+	texture.Resource(),
+	texture.RetriveUnorderedAccessView(array_index, first_slice, num_slices, level),
+	(array_index * texture.GetDepth(level) + first_slice) * texture.GetNumMipMaps() + level,
+	num_slices * texture.GetNumMipMaps() + level)
+	, base(texture.GetWidth(level), texture.GetWidth(level), texture.GetFormat())
+{
+}
+
+UnorderedAccessView::UnorderedAccessView(TextureCube & texture, uint8 array_index, platform::Render::TextureCubeFaces face, uint8 level)
+	:
+	GPUDataStructView(
+		texture.Resource(),
+		texture.RetriveUnorderedAccessView(array_index, 0,face,1, level),
+		(array_index * 6 + face) * texture.GetNumMipMaps() + level,
+		1)
+	, base(texture.GetWidth(level), texture.GetWidth(level), texture.GetFormat())
+{
+}
+
+UnorderedAccessView::UnorderedAccessView(GraphicsBuffer & gb, platform::Render::EFormat pf):
+GPUDataStructView(
+	gb.Resource(),
+	gb.RetriveUnorderedAccessView(),
+	0,
+	1)
+	, base(width, height, pf)
+{
+}
+
+void UnorderedAccessView::ResetInitCount()
 {
 }

@@ -151,7 +151,7 @@ ViewSimulation * Texture2D::RetriveUnorderedAccessView(uint8 first_array_index, 
 	return RetriveUAV(desc);
 }
 
-ViewSimulation * Texture2D::RetriveRenderTargetView(uint8 first_array_index, uint16 first_slice, uint16 num_slices, uint8 level)
+ViewSimulation * Texture2D::RetriveRenderTargetView(uint8 first_array_index, uint8 num_items, uint8 level)
 {
 	LAssert(GetAccessMode() & EA_GPUWrite, "Access mode must have EA_GPUWrite flag");
 
@@ -161,7 +161,7 @@ ViewSimulation * Texture2D::RetriveRenderTargetView(uint8 first_array_index, uin
 
 	if (sample_info.Count == 1) {
 		desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
-		desc.Texture2DArray.ArraySize = array_size;
+		desc.Texture2DArray.ArraySize = num_items;
 		desc.Texture2DArray.FirstArraySlice = first_array_index;
 		desc.Texture2DArray.MipSlice = level;
 		desc.Texture2DArray.PlaneSlice = 0;
@@ -169,13 +169,13 @@ ViewSimulation * Texture2D::RetriveRenderTargetView(uint8 first_array_index, uin
 	else {
 		desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMSARRAY;
 		desc.Texture2DMSArray.FirstArraySlice = first_array_index;
-		desc.Texture2DMSArray.ArraySize = array_size;
+		desc.Texture2DMSArray.ArraySize = num_items;
 	}
 
 	return RetriveRTV(desc);
 }
 
-ViewSimulation * Texture2D::RetriveDepthStencilView(uint8 first_array_index, uint16 first_slice, uint16 num_slices, uint8 level)
+ViewSimulation * Texture2D::RetriveDepthStencilView(uint8 first_array_index, uint8 num_items, uint8 level)
 {
 	LAssert(GetAccessMode() & EA_GPUWrite, "Access mode must have EA_GPUWrite flag");
 
@@ -187,12 +187,12 @@ ViewSimulation * Texture2D::RetriveDepthStencilView(uint8 first_array_index, uin
 	if (sample_info.Count == 1) {
 		desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
 		desc.Texture2DArray.MipSlice = level;
-		desc.Texture2DArray.ArraySize = array_size;
+		desc.Texture2DArray.ArraySize = num_items;
 		desc.Texture2DArray.FirstArraySlice = first_array_index;
 	}
 	else {
 		desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY;
-		desc.Texture2DMSArray.ArraySize = array_size;
+		desc.Texture2DMSArray.ArraySize = num_items;
 		desc.Texture2DMSArray.FirstArraySlice = first_array_index;
 	}
 

@@ -38,13 +38,13 @@ namespace platform_ex {
 
 				virtual ViewSimulation* RetriveShaderResourceView(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) = 0;
 
-				virtual ViewSimulation* RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level) = 0;
+				virtual ViewSimulation* RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level);
 				virtual ViewSimulation* RetriveRenderTargetView(uint8 first_array_index, uint8 num_items, uint8 level);
 				virtual ViewSimulation* RetriveDepthStencilView(uint8 first_array_index, uint8 num_items, uint8 level);
 
 				virtual ViewSimulation* RetriveUnorderedAccessView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level);
-				virtual ViewSimulation* RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) = 0;
-				virtual ViewSimulation* RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) = 0;
+				virtual ViewSimulation* RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level);
+				virtual ViewSimulation* RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level);
 
 				virtual ViewSimulation* RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, TextureCubeFaces first_face, uint8 num_faces, uint8 level);
 
@@ -128,10 +128,7 @@ namespace platform_ex {
 				ViewSimulation* RetriveShaderResourceView(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) override;
 
 				ViewSimulation* RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level) override;
-				ViewSimulation* RetriveRenderTargetView(uint8 first_array_index, uint8 num_items, uint8 level);
-
-				ViewSimulation* RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) override;
-				ViewSimulation* RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) override;
+				ViewSimulation* RetriveRenderTargetView(uint8 first_array_index, uint8 num_items, uint8 level) override;
 
 				template<typename _type>
 				static bool Equal(_type & lhs, _type & rhs) {
@@ -179,9 +176,8 @@ namespace platform_ex {
 
 				ViewSimulation* RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level) override;
 
-				using Texture::RetriveRenderTargetView;
-				ViewSimulation* RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) override;
-				ViewSimulation* RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) override;
+				ViewSimulation* RetriveRenderTargetView(uint8 first_array_index, uint8 num_items, uint8 level) override;
+				ViewSimulation* RetriveDepthStencilView(uint8 first_array_index, uint8 num_items, uint8 level) override;
 
 				template<typename _type>
 				static bool Equal(_type & lhs, _type & rhs) {

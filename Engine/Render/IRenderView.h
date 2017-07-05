@@ -37,16 +37,16 @@ namespace platform {
 
 		class DepthStencilView :public GPUView {
 		public:
-			virtual ~DepthStencilView();
+			using GPUView::GPUView;
 
-			
+			virtual ~DepthStencilView();
 		};
 
 		class UnorderedAccessView :public GPUView {
 		public:
-			virtual ~UnorderedAccessView();
+			using GPUView::GPUView;
 
-			
+			virtual ~UnorderedAccessView();
 		};
 	}
 }
