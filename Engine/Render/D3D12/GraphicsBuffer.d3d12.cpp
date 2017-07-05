@@ -280,6 +280,24 @@ namespace platform_ex::Windows::D3D12 {
 	{
 		return buffer_counter_upload.Get();
 	}
+	ViewSimulation * GraphicsBuffer::RetriveRenderTargetView(uint16 width, uint16 height, platform::Render::EFormat pf)
+	{
+		if (!rtv_maps)
+			rtv_maps = std::make_unique<std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>>>();
+		
+		auto key = hash_combine_seq(0, width, height, pf);
+		auto iter = rtv_maps->find(key);
+		if (iter != rtv_maps->end())
+			return iter->second.get();
+
+		D3D12_RENDER_TARGET_VIEW_DESC desc;
+		desc.Format = Convert(pf);
+		desc.ViewDimension = D3D12_RTV_DIMENSION_BUFFER;
+		desc.Buffer.FirstElement = 0;
+		desc.Buffer.NumElements = std::min<UINT>(width * height, GetSize()/ NumFormatBytes(pf));
+
+		return rtv_maps->emplace(key, std::make_unique<ViewSimulation>(buffer, desc)).first->second.get();
+	}
 	ViewSimulation * GraphicsBuffer::RetriveShaderResourceView()
 	{
 		return srv.get();

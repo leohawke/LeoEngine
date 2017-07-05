@@ -13,6 +13,8 @@ namespace platform {
 
 		class GPUView {
 		public:
+			GPUView(uint16 width, uint16 height, EFormat format);
+
 			virtual ~GPUView();
 
 			uint16 Width() const;
@@ -28,9 +30,9 @@ namespace platform {
 
 		class RenderTargetView :public GPUView  {
 		public:
-			virtual ~RenderTargetView();
+			using GPUView::GPUView;
 
-			
+			virtual ~RenderTargetView();
 		};
 
 		class DepthStencilView :public GPUView {

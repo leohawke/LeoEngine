@@ -32,6 +32,7 @@ namespace platform_ex::Windows::D3D12 {
 		ID3D12Resource* Resource() const;
 		ID3D12Resource* UploadResource() const;
 
+		ViewSimulation* RetriveRenderTargetView(uint16 width, uint16 height, platform::Render::EFormat pf);
 		ViewSimulation* RetriveShaderResourceView();
 		ViewSimulation* RetriveUnorderedAccessView();
 	private:
@@ -43,7 +44,8 @@ namespace platform_ex::Windows::D3D12 {
 
 		std::unique_ptr<ViewSimulation> srv;
 		std::unique_ptr<ViewSimulation> uav;
-		
+		std::unique_ptr<std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>>> rtv_maps;
+
 		COMPtr<ID3D12Resource> buffer;
 
 		COMPtr<ID3D12Resource> buffer_counter_upload;

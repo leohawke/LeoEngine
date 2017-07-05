@@ -46,7 +46,7 @@ namespace platform_ex {
 			public:
 				GPUDataStructView(ID3D12Resource* res,ViewSimulation* view, uint16 first_subres, uint16 num_subres);
 
-				ViewSimulation* View();
+				observer_ptr<ViewSimulation> View();
 
 
 				uint16 FirstSubResIndex();
@@ -54,7 +54,7 @@ namespace platform_ex {
 
 				ID3D12Resource* Resource();
 			protected:
-				ViewSimulation* view;
+				observer_ptr<ViewSimulation> view;
 
 				uint16 first_subres;
 				uint16 num_subres;
@@ -64,10 +64,12 @@ namespace platform_ex {
 
 			class RenderTargetView :public GPUDataStructView,public platform::Render::RenderTargetView {
 			public:
+				using base = platform::Render::RenderTargetView;
+
 				RenderTargetView(Texture2D& texture_2d, uint8 first_array_index, uint8 array_size, uint8 level);
 				RenderTargetView(Texture3D& texture_3d, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level);
 				RenderTargetView(TextureCube& texture_cube, uint8 array_index, platform::Render::TextureCubeFaces face, uint8 level);
-				RenderTargetView(GraphicsBuffer& gb, uint8 width, uint8 height, platform::Render::EFormat pf);
+				RenderTargetView(GraphicsBuffer& gb, uint16 width, uint16 height, platform::Render::EFormat pf);
 			};
 
 			class DepthStencilView :public GPUDataStructView,public platform::Render::DepthStencilView {
