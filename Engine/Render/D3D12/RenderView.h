@@ -77,7 +77,6 @@ namespace platform_ex {
 				DepthStencilView(Texture2D& texture_1d_2d_cube, uint8 first_array_index, uint8 array_size, uint8 level);
 				DepthStencilView(Texture3D& texture_3d, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level);
 				DepthStencilView(TextureCube& texture_cube, uint8 array_index, platform::Render::TextureCubeFaces face, uint8 level);
-				DepthStencilView(uint16 width, uint16 height, platform::Render::EFormat pf, uint8 sample_count, uint8 sample_quality);
 			};
 
 			class UnorderedAccessView : public GPUDataStructView,public platform::Render::UnorderedAccessView {
