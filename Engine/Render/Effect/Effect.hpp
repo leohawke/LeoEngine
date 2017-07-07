@@ -354,6 +354,10 @@ namespace platform::Render::Effect {
 			return passes.size();
 		}
 
+		bool HasTessellation() const{
+			return false;
+		}
+
 		friend class Effect;
 	private:
 		std::vector<Pass> passes;

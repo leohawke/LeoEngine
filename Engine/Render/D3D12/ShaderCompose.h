@@ -31,14 +31,52 @@ namespace platform_ex::Windows::D3D12 {
 
 		ID3D12DescriptorHeap* SamplerHeap() const;
 	public:
-		std::optional<ShaderBlob> VertexShader;
-		std::optional<ShaderBlob> PixelShader;
 	private:
 		void CreateRootSignature();
 		void CreateBarriers();
 		void SwapAndPresent();
 
 	private:
+		struct Template
+		{
+			leo::observer_ptr<ID3D12RootSignature> root_signature;
+			COMPtr<ID3D12DescriptorHeap> sampler_heap;
+
+			using ShaderBlobEx = ShaderBlob;
+
+			union {
+				struct {
+					std::optional<ShaderBlobEx> VertexShader;
+					std::optional<ShaderBlobEx> PixelShader;
+				};
+				std::array<std::optional<ShaderBlobEx>, NumTypes> Shaders;
+			};
+
+			union {
+				struct {
+					std::optional<ShaderInfo> VertexInfo;
+					std::optional<ShaderInfo> PixelInfo;
+				};
+				std::array<ShaderInfo, NumTypes> Infos;
+			};
+
+			union {
+				struct {
+					std::optional<std::vector<uint8>> VertexIndices;
+					std::optional<std::vector<uint8>> PixelIndices;
+				};
+				std::array<std::vector<uint8>, NumTypes> CBuffIndices;
+			};
+
+			std::vector<D3D12_SO_DECLARATION_ENTRY> so_decl;
+			bool vs_so = false;
+			bool ds_so = false;
+
+			uint32 rasterized_stream = 0;
+			uint32 vs_signature;
+		};
+
+
 		struct ShaderParameterHandle
 		{
 			uint32_t shader_type;
@@ -71,9 +109,7 @@ namespace platform_ex::Windows::D3D12 {
 		std::array<std::vector<D3D12_SAMPLER_DESC>, NumTypes> Samplers;
 
 	private:
-
-		leo::observer_ptr<ID3D12RootSignature> root_signature;
-		COMPtr<ID3D12DescriptorHeap> sampler_heap;
+		std::unique_ptr<Template> sc_template;
 
 		std::vector<D3D12_RESOURCE_BARRIER> barriers;
 
@@ -81,6 +117,8 @@ namespace platform_ex::Windows::D3D12 {
 		std::array<std::vector<std::pair<ID3D12Resource*, ID3D12Resource*>>, NumTypes> UavSrcs;
 
 		std::vector<leo::observer_ptr<platform::Render::Effect::ConstantBuffer>> AllCBuffs;
+
+		friend class PipleState;
 	};
 
 	inline void operator<<(D3D12_SHADER_BYTECODE& desc, std::nullptr_t)

@@ -98,8 +98,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		auto& render_cmd_list = d3d_cmd_lists[Device::Command_Render];
 
-		//TODO RetrieveGraphicsPSO
-		auto pso = COMPtr<ID3D12PipelineState>();
+		auto pso = piple_state.RetrieveGraphicsPSO(layout, shader_compose, GetCurrFrame(), tech.HasTessellation());
 
 		render_cmd_list->SetPipelineState(pso.Get());
 		render_cmd_list->SetGraphicsRootSignature(shader_compose.RootSignature());
