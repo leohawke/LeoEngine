@@ -126,6 +126,8 @@ namespace {
 	};
 }
 
+platform_ex::Windows::D3D12::ShaderCompose::Template::~Template() = default;
+
 platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect)
 {
 	auto CopyShader = [&](auto& shader,auto type) {
@@ -136,8 +138,8 @@ platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<Sha
 		}
 	};
 	
-	CopyShader(VertexShader, ShaderCompose::Type::VertexShader);
-	CopyShader(PixelShader, ShaderCompose::Type::PixelShader);
+	CopyShader(sc_template->VertexShader, ShaderCompose::Type::VertexShader);
+	CopyShader(sc_template->PixelShader, ShaderCompose::Type::PixelShader);
 
 	for (auto& pair : pShaderBlob) {
 		auto index = static_cast<leo::uint8>(pair.first);
@@ -220,12 +222,12 @@ void platform_ex::Windows::D3D12::ShaderCompose::UnBind()
 
 ID3D12RootSignature * platform_ex::Windows::D3D12::ShaderCompose::RootSignature() const
 {
-	return root_signature.get();
+	return sc_template->root_signature.get();
 }
 
 ID3D12DescriptorHeap * platform_ex::Windows::D3D12::ShaderCompose::SamplerHeap() const
 {
-	return sampler_heap.Get();
+	return sc_template->sampler_heap.Get();
 }
 
 void platform_ex::Windows::D3D12::ShaderCompose::CreateRootSignature()
@@ -242,7 +244,7 @@ void platform_ex::Windows::D3D12::ShaderCompose::CreateRootSignature()
 	}
 
 	auto& Device = Context::Instance().GetDevice();
-	root_signature = Device.CreateRootSignature(num, VertexShader.has_value(), false);
+	sc_template->root_signature = Device.CreateRootSignature(num, sc_template->VertexShader.has_value(), false);
 
 	if (num_sampler > 0) {
 		D3D12_DESCRIPTOR_HEAP_DESC sampler_heap_desc;
@@ -250,10 +252,10 @@ void platform_ex::Windows::D3D12::ShaderCompose::CreateRootSignature()
 		sampler_heap_desc.NumDescriptors = static_cast<UINT>(num_sampler);
 		sampler_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		sampler_heap_desc.NodeMask = 0;
-		CheckHResult(Device->CreateDescriptorHeap(&sampler_heap_desc, COMPtr_RefParam(sampler_heap, IID_ID3D12DescriptorHeap)));
+		CheckHResult(Device->CreateDescriptorHeap(&sampler_heap_desc, COMPtr_RefParam(sc_template->sampler_heap, IID_ID3D12DescriptorHeap)));
 
 		auto sampler_desc_size = Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-		auto cpu_sampler_handle = sampler_heap->GetCPUDescriptorHandleForHeapStart();
+		auto cpu_sampler_handle = sc_template->sampler_heap->GetCPUDescriptorHandleForHeapStart();
 		for (auto i = 0; i != NumTypes; ++i) {
 			for (auto j = 0; j != Samplers[i].size(); ++j) {
 				Device->CreateSampler(&Samplers[i][j], cpu_sampler_handle);

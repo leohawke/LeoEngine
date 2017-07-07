@@ -369,11 +369,13 @@ void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_siz
 		auto& sc = static_cast<ShaderCompose&>(pass.GetShader(effect));
 
 		auto & rl = static_cast<InputLayout&>(device.PostProcessLayout());
-		D3D12_GRAPHICS_PIPELINE_STATE_DESC gps_desc{};
+		
+		auto& state = static_cast<const PipleState&>(pass.GetState());
+		auto gps_desc = state.graphics_ps_desc;
 		gps_desc.pRootSignature = sc.RootSignature();
 		{
-			gps_desc.VS << sc.VertexShader;
-			gps_desc.PS << sc.PixelShader;
+			gps_desc.VS << sc.sc_template->VertexShader;
+			gps_desc.PS << sc.sc_template->PixelShader;
 
 			gps_desc.DS << nullptr;
 			gps_desc.HS << nullptr;
@@ -381,11 +383,7 @@ void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_siz
 		}
 
 		gps_desc.StreamOutput << nullptr;
-		auto& state = static_cast<const PipleState&>(pass.GetState());
-
-		gps_desc.BlendState = state.BlendState;
 		gps_desc.SampleMask = 0xFFFFFFFF;
-		gps_desc.RasterizerState = state.RasterizerState;
 
 		gps_desc.InputLayout.NumElements = static_cast<UINT>(rl.GetInputDesc().size());
 		gps_desc.InputLayout.pInputElementDescs = rl.GetInputDesc().data();

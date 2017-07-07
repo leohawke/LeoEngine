@@ -10,6 +10,7 @@
 #include "RenderView.h"
 #include <optional>
 
+
 namespace asset {
 	class ShaderBlobAsset;
 }
@@ -39,6 +40,8 @@ namespace platform_ex::Windows::D3D12 {
 	private:
 		struct Template
 		{
+			~Template();
+
 			leo::observer_ptr<ID3D12RootSignature> root_signature;
 			COMPtr<ID3D12DescriptorHeap> sampler_heap;
 
@@ -119,6 +122,7 @@ namespace platform_ex::Windows::D3D12 {
 		std::vector<leo::observer_ptr<platform::Render::Effect::ConstantBuffer>> AllCBuffs;
 
 		friend class PipleState;
+		friend class Texture;
 	};
 
 	inline void operator<<(D3D12_SHADER_BYTECODE& desc, std::nullptr_t)
