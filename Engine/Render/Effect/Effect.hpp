@@ -379,9 +379,9 @@ namespace platform::Render::Effect {
 		Parameter& GetParameter(size_t hash);
 
 
-		
-		ConstantBuffer& GetConstantBuffer(const std::string& name);
-		ConstantBuffer& GetConstantBuffer(size_t hash);
+		ConstantBuffer& GetConstantBuffer(size_t index);
+		size_t ConstantBufferIndex(const std::string& name);
+		size_t ConstantBufferIndex(size_t hash);
 	protected:
 		Technique& GetTechnique(const std::string& name);
 

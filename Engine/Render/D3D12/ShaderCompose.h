@@ -40,6 +40,7 @@ namespace platform_ex::Windows::D3D12 {
 	private:
 		struct Template
 		{
+			Template();
 			~Template();
 
 			leo::observer_ptr<ID3D12RootSignature> root_signature;
@@ -71,12 +72,14 @@ namespace platform_ex::Windows::D3D12 {
 				std::array<std::vector<uint8>, NumTypes> CBuffIndices;
 			};
 
+			//Todo Support
 			std::vector<D3D12_SO_DECLARATION_ENTRY> so_decl;
 			bool vs_so = false;
 			bool ds_so = false;
 
+			//When StreamOuput -> D3D12_SO_NO_RASTERIZED_STREAM
 			uint32 rasterized_stream = 0;
-			uint32 vs_signature;
+			size_t vs_signature;
 		};
 
 

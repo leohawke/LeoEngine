@@ -95,17 +95,23 @@ namespace platform::Render::Effect {
 	{
 		return parameters.find(hash)->second;
 	}
-	ConstantBuffer & Effect::GetConstantBuffer(const std::string & name)
+	
+
+	ConstantBuffer & Effect::GetConstantBuffer(size_t index)
 	{
+		return Deref(constantbuffs[index]);
+	}
+
+	size_t Effect::ConstantBufferIndex(const std::string& name) {
 		auto hash = leo::constfn_hash(name);
-		return GetConstantBuffer(hash);
+		return ConstantBufferIndex(hash);
 	}
-	ConstantBuffer & Effect::GetConstantBuffer(size_t hash)
-	{
-		return Deref(Deref(std::find_if(constantbuffs.begin(), constantbuffs.end(), [&](const std::shared_ptr<ConstantBuffer>& key) {
+	size_t Effect::ConstantBufferIndex(size_t hash) {
+		return std::distance(constantbuffs.begin(),std::find_if(constantbuffs.begin(), constantbuffs.end(), [&](const std::shared_ptr<ConstantBuffer>& key) {
 			return key->Hash == hash;
-		})));
+		}));
 	}
+
 	Technique & Effect::GetTechnique(const std::string & name)
 	{
 		auto hash = leo::constfn_hash(name);

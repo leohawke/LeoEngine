@@ -128,7 +128,10 @@ namespace {
 
 platform_ex::Windows::D3D12::ShaderCompose::Template::~Template() = default;
 
-platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect)
+platform_ex::Windows::D3D12::ShaderCompose::Template::Template() = default;
+
+platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect):
+sc_template(std::make_unique<Template>())
 {
 	auto CopyShader = [&](auto& shader,auto type) {
 		if (pShaderBlob.count(type)) {
@@ -141,14 +144,22 @@ platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<Sha
 	CopyShader(sc_template->VertexShader, ShaderCompose::Type::VertexShader);
 	CopyShader(sc_template->PixelShader, ShaderCompose::Type::PixelShader);
 
+	if (sc_template->VertexShader.has_value())
+		sc_template->vs_signature = pShaderBlob[ShaderCompose::Type::VertexShader]->GetInfo().InputSignature.value();
+
 	for (auto& pair : pShaderBlob) {
 		auto index = static_cast<leo::uint8>(pair.first);
 		auto& BlobInfo = pair.second->GetInfo();
 
+		sc_template->Infos[index] = BlobInfo;
+
 		for (auto& ConstantBufferInfo : BlobInfo.ConstantBufferInfos) {
-			auto& ConstantBuffer = pEffect->GetConstantBuffer(ConstantBufferInfo.name_hash);
+			auto index = pEffect->ConstantBufferIndex(ConstantBufferInfo.name_hash);
+			auto& ConstantBuffer = pEffect->GetConstantBuffer(index);
 			AllCBuffs.emplace_back(&ConstantBuffer);
 			CBuffs[index].emplace_back(ConstantBuffer.GetGraphicsBuffer());
+
+			sc_template->CBuffIndices[index].emplace_back(static_cast<uint8>(index));
 		}
 
 		Samplers[index].resize(BlobInfo.NumSamplers);
