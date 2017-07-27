@@ -18,6 +18,18 @@ namespace platform::Render {
 	void FrameBuffer::OnUnBind()
 	{
 	}
+	leo::observer_ptr<GPUView> FrameBuffer::Attached(Attachment which) const
+	{
+		switch (which)	
+		{
+		case platform::Render::FrameBuffer::DepthStencil:
+			return leo::make_observer(ds_view.get());
+		default:
+			return leo::make_observer(clr_views[which].get());
+			break;
+		}
+		throw std::invalid_argument("don't support enum argument");
+	}
 }
 
 

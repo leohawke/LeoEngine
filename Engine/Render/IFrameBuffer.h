@@ -15,10 +15,24 @@ namespace platform {
 
 		class FrameBuffer {
 		public:
+			enum Attachment : uint8{
+				Target0,
+				Target1,
+				Target2,
+				Target3,
+				Target4,
+				Target5,
+				Target6,
+				Target7,
+				DepthStencil,
+			};
+
 			virtual ~FrameBuffer();
 
 			virtual void OnBind();
 			virtual void OnUnBind();
+
+			leo::observer_ptr<GPUView> Attached(Attachment which) const;
 		protected:
 			std::vector<std::shared_ptr<RenderTargetView>> clr_views;
 			std::shared_ptr<DepthStencilView> ds_view;
