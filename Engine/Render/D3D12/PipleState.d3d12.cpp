@@ -3,6 +3,7 @@
 #include "FrameBuffer.h"
 #include "InputLayout.hpp"
 #include "ShaderCompose.h"
+#include "Context.h"
 
 namespace platform_ex::Windows::D3D12 {
 	PipleState::PipleState(const base & state)
@@ -37,7 +38,49 @@ namespace platform_ex::Windows::D3D12 {
 		if (iter == psos.end()) {
 			auto pso_desc = graphics_ps_desc;
 
+			pso_desc.pRootSignarture = shader_compose.RootSignarture();
+			pso_desc.VS << shader_compose.sc_template->VertexShader;
+			pso_desc.PS << shader_compose.sc_template->PixelShader;
+
+			//TODO StreamOutput
+			pso_desc.StreamOutput.pSoDeclaration = nullptr;
+			pso_desc.StreamOutput.NumEntries = 0;
+			pso_desc.StreamOutput.pBufferStrides = nullptr;
+			pso_desc.StreamOutput.NumStrides = 0;
+			pso_desc.StreamOutput.RasterizedStream = shader_compose.sc_template->rasterized_stream;
+
+			auto& input_desc = layout.GetInputDesc();
+			pso_desc.InputLayout.pInputElementDescs = input_desc.empty()?nullptr: leo::address_of(input_desc[0]);
+			pso_desc.InputLayout.NumElements = static_cast<UINT>(input_desc.size());
+			pso_Desc.IBStripCutValue = (EF_R16UI == layout.GetIndexFormat()) ?
+				D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFF : D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFFFFFF;
+
+			auto tt = layout.GetTopoType();
+			//TODO tessellation support
+			pso_desc.PrimitiveTopologyType = Convert<D3D12_PRIMITIVE_TOPOLOGY_TYPE>(tt);
+
+
+			for (auto i = std::size(pso_desc.RTVFormats) - 1; i >= 0; --i) {
+				if (frame->Attached(FrameBuffer::Target0 + i)) {
+					pso_desc.NumRenderTargets = i + 1;
+					break;
+				}
+			}
+			for (auto i = 0; i != pso_Desc.NumRenderTargets; ++i) {
+				pso_desc.RTVFormats[i] = Convert(frame->Attached(FrameBuffer::Target0+i)->Format());
+			}
+			for (auto i = pso_desc.NumRenderTargets; i != std::size(pso_desc.RTVFormats); ++i)
+				pso_desc.RTVFormats[i] = DXGI_FORMAT_UNKNOWN;
+			if (auto view = frame->Attached(FrameBuffer::DepthStencil))
+				pso_desc.DSVFormat = Convert(view->Format());
+			else
+				pso_desc.DSVFormat = DXGI_FORMAT_UNKNOWN;
+			pso_desc.SampleDesc.Count = 1;
+			pso_desc.SampleDesc.Quality = 0;
+
 			ID3D12PipelineState* pso;
+			CheckHResult(Context().GetDevice()->CreateGraphicsPipelineState(&pso_desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&pso)));
+
 			iter = psos.emplace(hash_val, COMPtr<ID3D12PipelineState>(pso)).first;
 		}
 		return iter->second;

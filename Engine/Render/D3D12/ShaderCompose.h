@@ -1,6 +1,6 @@
 /*! \file Engine\Render\D3D12\ShaderCompose.h
 \ingroup Engine
-\brief 绘制创建封装。
+\brief 一系列Shader组合。
 */
 #ifndef LE_RENDER_D3D12_ShaderCompose_h
 #define LE_RENDER_D3D12_ShaderCompose_h 1
@@ -26,6 +26,8 @@ namespace platform_ex::Windows::D3D12 {
 
 		 void Bind() override;
 		 void UnBind() override;
+
+		 const std::optional<Template::ShaderBlobEx>& ShaderBlob(Type shader_type) const;
 
 	public:
 		ID3D12RootSignature* RootSignature() const;

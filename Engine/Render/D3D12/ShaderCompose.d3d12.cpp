@@ -231,6 +231,11 @@ void platform_ex::Windows::D3D12::ShaderCompose::UnBind()
 	SwapAndPresent();
 }
 
+const std::optional<Template::ShaderBlobEx>& platform_ex::Windows::D3D12::ShaderCompose::ShaderBlob(Type shader_type) const
+{
+	return sc_template->Shaders[shader_type];
+}
+
 ID3D12RootSignature * platform_ex::Windows::D3D12::ShaderCompose::RootSignature() const
 {
 	return sc_template->root_signature.get();
