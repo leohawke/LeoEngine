@@ -22,23 +22,7 @@ namespace platform_ex::Windows::D3D12 {
 	class ShaderCompose:public platform::Render::ShaderCompose
 	{
 	public:
-		ShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect);
-
-		 void Bind() override;
-		 void UnBind() override;
-
-		 const std::optional<Template::ShaderBlobEx>& ShaderBlob(Type shader_type) const;
-
-	public:
-		ID3D12RootSignature* RootSignature() const;
-
-		ID3D12DescriptorHeap* SamplerHeap() const;
-	public:
-	private:
-		void CreateRootSignature();
-		void CreateBarriers();
-		void SwapAndPresent();
-
+		using base = platform::Render::ShaderCompose;
 	private:
 		struct Template
 		{
@@ -48,7 +32,7 @@ namespace platform_ex::Windows::D3D12 {
 			leo::observer_ptr<ID3D12RootSignature> root_signature;
 			COMPtr<ID3D12DescriptorHeap> sampler_heap;
 
-			using ShaderBlobEx = ShaderBlob;
+			using ShaderBlobEx = base::ShaderBlob;
 
 			union {
 				struct {
@@ -84,6 +68,26 @@ namespace platform_ex::Windows::D3D12 {
 			size_t vs_signature;
 		};
 
+	public:
+
+		ShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect);
+
+		 void Bind() override;
+		 void UnBind() override;
+
+		 const std::optional<Template::ShaderBlobEx>& GetShaderBlob(Type shader_type) const;
+
+	public:
+		ID3D12RootSignature* RootSignature() const;
+
+		ID3D12DescriptorHeap* SamplerHeap() const;
+	public:
+	private:
+		void CreateRootSignature();
+		void CreateBarriers();
+		void SwapAndPresent();
+
+	private:
 
 		struct ShaderParameterHandle
 		{

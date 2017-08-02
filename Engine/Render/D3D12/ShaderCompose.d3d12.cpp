@@ -231,9 +231,9 @@ void platform_ex::Windows::D3D12::ShaderCompose::UnBind()
 	SwapAndPresent();
 }
 
-const std::optional<Template::ShaderBlobEx>& platform_ex::Windows::D3D12::ShaderCompose::ShaderBlob(Type shader_type) const
+const std::optional<platform_ex::Windows::D3D12::ShaderCompose::Template::ShaderBlobEx>& platform_ex::Windows::D3D12::ShaderCompose::GetShaderBlob(Type shader_type) const
 {
-	return sc_template->Shaders[shader_type];
+	return sc_template->Shaders[static_cast<uint8>(shader_type)];
 }
 
 ID3D12RootSignature * platform_ex::Windows::D3D12::ShaderCompose::RootSignature() const

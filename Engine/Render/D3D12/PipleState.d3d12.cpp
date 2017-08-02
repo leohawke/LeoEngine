@@ -38,21 +38,21 @@ namespace platform_ex::Windows::D3D12 {
 		if (iter == psos.end()) {
 			auto pso_desc = graphics_ps_desc;
 
-			pso_desc.pRootSignarture = shader_compose.RootSignarture();
+			pso_desc.pRootSignature = shader_compose.RootSignature();
 			pso_desc.VS << shader_compose.sc_template->VertexShader;
 			pso_desc.PS << shader_compose.sc_template->PixelShader;
 
 			//TODO StreamOutput
-			pso_desc.StreamOutput.pSoDeclaration = nullptr;
+			pso_desc.StreamOutput.pSODeclaration = nullptr;
 			pso_desc.StreamOutput.NumEntries = 0;
 			pso_desc.StreamOutput.pBufferStrides = nullptr;
 			pso_desc.StreamOutput.NumStrides = 0;
 			pso_desc.StreamOutput.RasterizedStream = shader_compose.sc_template->rasterized_stream;
 
 			auto& input_desc = layout.GetInputDesc();
-			pso_desc.InputLayout.pInputElementDescs = input_desc.empty()?nullptr: leo::address_of(input_desc[0]);
+			pso_desc.InputLayout.pInputElementDescs = input_desc.empty()?nullptr: leo::addressof(input_desc[0]);
 			pso_desc.InputLayout.NumElements = static_cast<UINT>(input_desc.size());
-			pso_Desc.IBStripCutValue = (EF_R16UI == layout.GetIndexFormat()) ?
+			pso_desc.IBStripCutValue = (EF_R16UI == layout.GetIndexFormat()) ?
 				D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFF : D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFFFFFF;
 
 			auto tt = layout.GetTopoType();
@@ -61,13 +61,13 @@ namespace platform_ex::Windows::D3D12 {
 
 
 			for (auto i = std::size(pso_desc.RTVFormats) - 1; i >= 0; --i) {
-				if (frame->Attached(FrameBuffer::Target0 + i)) {
-					pso_desc.NumRenderTargets = i + 1;
+				if (frame->Attached((FrameBuffer::Attachment)(FrameBuffer::Target0 + i))) {
+					pso_desc.NumRenderTargets =static_cast<UINT>(i + 1);
 					break;
 				}
 			}
-			for (auto i = 0; i != pso_Desc.NumRenderTargets; ++i) {
-				pso_desc.RTVFormats[i] = Convert(frame->Attached(FrameBuffer::Target0+i)->Format());
+			for (auto i = 0; i != pso_desc.NumRenderTargets; ++i) {
+				pso_desc.RTVFormats[i] = Convert(frame->Attached((FrameBuffer::Attachment)(FrameBuffer::Target0+i))->Format());
 			}
 			for (auto i = pso_desc.NumRenderTargets; i != std::size(pso_desc.RTVFormats); ++i)
 				pso_desc.RTVFormats[i] = DXGI_FORMAT_UNKNOWN;
