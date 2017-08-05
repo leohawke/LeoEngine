@@ -128,7 +128,11 @@ namespace {
 
 platform_ex::Windows::D3D12::ShaderCompose::Template::~Template() = default;
 
-platform_ex::Windows::D3D12::ShaderCompose::Template::Template() = default;
+platform_ex::Windows::D3D12::ShaderCompose::Template::Template()
+:VertexShader(std::nullopt),PixelShader(std::nullopt),VertexInfo(std::nullopt),
+PixelInfo(std::nullopt),VertexIndices(std::nullopt),PixelIndices(std::nullopt){
+	//uname union uname struct init
+}
 
 platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect):
 sc_template(std::make_unique<Template>())
