@@ -101,14 +101,17 @@
     <ClCompile Include="Render\D3D12\Fence.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="Render\IFrameBuffer.cpp">
-      <Filter>Render</Filter>
-    </ClCompile>
     <ClCompile Include="Render\D3D12\FrameBuffer.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="Render\D3D12\Device.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\FrameBuffer.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\RenderView.cpp">
+      <Filter>Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

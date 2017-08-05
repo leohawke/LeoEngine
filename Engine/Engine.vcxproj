@@ -57,10 +57,11 @@
     <ClCompile Include="Render\Effect\Effect.cpp" />
     <ClCompile Include="Render\GraphicsBuffer.cpp" />
     <ClCompile Include="Render\IContext.cpp" />
-    <ClCompile Include="Render\IFrameBuffer.cpp" />
+    <ClCompile Include="Render\FrameBuffer.cpp" />
     <ClCompile Include="Render\InputLayout.cpp" />
     <ClCompile Include="Render\ITexture.cpp" />
     <ClCompile Include="Render\PipleState.cpp" />
+    <ClCompile Include="Render\RenderView.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="Win32\File.cpp" />
     <ClCompile Include="Win32\NTHandle.cpp" />

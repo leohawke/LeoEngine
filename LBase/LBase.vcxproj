@@ -124,7 +124,7 @@
     <ProjectGuid>{4F3AE107-3FFD-4D5C-82A8-5034C0041562}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>LBase</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
