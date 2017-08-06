@@ -22,9 +22,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR cmdLine, int nCmdShow)
 
 	auto swap_chain = Create(hwnd);
 
-	unit_test::ExceuteLSchemEngineUnitTest();
-
-	auto texture = platform::X::LoadTexture("bc5.dds", platform::Render::EA_Immutable);
+	//has some problem
+	//unit_test::ExceuteLSchemEngineUnitTest();
 
 	while (true)
 	{
