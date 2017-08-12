@@ -10,7 +10,7 @@
 #include "LObject.h"
 
 #include <LBase/set.hpp>
-#include <LBase/LPath.hpp>
+#include <LBase/path.hpp>
 #include <numeric>
 
 namespace leo {

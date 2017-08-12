@@ -106,7 +106,6 @@
     <ClInclude Include="Render\ITexture.hpp" />
     <ClInclude Include="Render\PipleState.h" />
     <ClInclude Include="Render\InputLayout.hpp" />
-    <ClInclude Include="Win32\COM.h" />
     <ClInclude Include="Win32\File.h" />
     <ClInclude Include="Win32\Handle.h" />
     <ClInclude Include="Win32\NTHandle.h" />

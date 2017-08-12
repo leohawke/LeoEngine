@@ -1,6 +1,7 @@
 #include <LBase/NativeAPI.h>
 #include <LBase/Win32/Mingw32.h>
 #include "../../Engine/Render/D3D12/test.h"
+#include "Initialization.h"
 
 #include <Engine/Asset/TextureX.h>
 
@@ -17,6 +18,8 @@ HWND Create(WORD width, WORD height);
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR cmdLine, int nCmdShow)
 {
 	leo::FetchCommonLogger().SetSender(platform_ex::SendDebugString);
+
+	TraceDe(platform::Descriptions::Notice, Test::LoadConfiguration().GetName().c_str());
 
 	auto hwnd = Create(800, 600);
 

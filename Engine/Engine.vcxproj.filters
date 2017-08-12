@@ -157,9 +157,6 @@
     <ClInclude Include="Render\ITexture.hpp">
       <Filter>Render</Filter>
     </ClInclude>
-    <ClInclude Include="Win32\COM.h">
-      <Filter>Win32</Filter>
-    </ClInclude>
     <ClInclude Include="Win32\File.h">
       <Filter>Win32</Filter>
     </ClInclude>

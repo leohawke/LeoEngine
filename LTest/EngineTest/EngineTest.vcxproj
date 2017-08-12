@@ -217,6 +217,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Initialization.cpp" />
     <ClCompile Include="LSchemEngineUnitTest.cpp" />
     <ClCompile Include="TestFramework.cpp" />
     <ClCompile Include="wWinMain.cpp" />
@@ -233,6 +234,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FileSystem.h" />
+    <ClInclude Include="Initialization.h" />
     <ClInclude Include="LSchemEngineUnitTest.h" />
     <ClInclude Include="TestFramework.h" />
   </ItemGroup>

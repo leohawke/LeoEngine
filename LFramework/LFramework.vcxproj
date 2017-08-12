@@ -18,92 +18,25 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="addressof.hpp" />
-    <ClInclude Include="algorithm.hpp" />
-    <ClInclude Include="any.h" />
-    <ClInclude Include="any_iterator.hpp" />
-    <ClInclude Include="array.hpp" />
-    <ClInclude Include="cache.hpp" />
-    <ClInclude Include="cast.hpp" />
-    <ClInclude Include="cctype.h" />
-    <ClInclude Include="concurrency.h" />
-    <ClInclude Include="container.hpp" />
-    <ClInclude Include="cstdio.h" />
-    <ClInclude Include="cstring.h" />
-    <ClInclude Include="cwctype.h" />
-    <ClInclude Include="deref_op.hpp" />
-    <ClInclude Include="enum.hpp" />
-    <ClInclude Include="examiner.hpp" />
-    <ClInclude Include="exception.h" />
-    <ClInclude Include="functional.hpp" />
-    <ClInclude Include="functor.hpp" />
-    <ClInclude Include="future.hpp" />
-    <ClInclude Include="id.hpp" />
-    <ClInclude Include="integer_sequence.hpp" />
-    <ClInclude Include="ios.hpp" />
-    <ClInclude Include="iterator.hpp" />
-    <ClInclude Include="iterator_op.hpp" />
-    <ClInclude Include="cassert.h" />
-    <ClInclude Include="iterator_trait.hpp" />
-    <ClInclude Include="lcompiler.h" />
-    <ClInclude Include="ldef.h" />
-    <ClInclude Include="lmathhalf.h" />
-    <ClInclude Include="lmathtype.hpp" />
-    <ClInclude Include="linttype.hpp" />
-    <ClInclude Include="lmacro.h" />
-    <ClInclude Include="lmemory.hpp" />
-    <ClInclude Include="path.hpp" />
-    <ClInclude Include="MCF\Abstract.hpp" />
-    <ClInclude Include="memory.hpp" />
-    <ClCompile Include="operators.hpp" />
-    <ClInclude Include="optional.hpp" />
-    <ClInclude Include="placement.hpp" />
-    <ClInclude Include="pointer.hpp" />
-    <ClInclude Include="pseudo_mutex.h" />
-    <ClInclude Include="range.hpp" />
-    <ClInclude Include="ref.hpp" />
-    <ClInclude Include="scope_gurad.hpp" />
-    <ClInclude Include="set.hpp" />
-    <ClInclude Include="string.hpp" />
-    <ClInclude Include="sutility.h" />
-    <ClInclude Include="tuple.hpp" />
-    <ClInclude Include="typeinfo.h" />
-    <ClInclude Include="type_op.hpp" />
-    <ClInclude Include="type_pun.hpp" />
-    <ClInclude Include="type_traits.hpp" />
-    <ClInclude Include="utility.hpp" />
-    <ClInclude Include="variadic.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="any.cpp" />
-    <ClCompile Include="cassert.cpp" />
-    <ClCompile Include="concurrency.cpp" />
-    <ClCompile Include="cstdio.cpp" />
-    <ClCompile Include="cwctype.cpp" />
-    <ClCompile Include="exception.cpp" />
-    <ClCompile Include="sutility.cpp" />
-    <ClCompile Include="LBase.cpp" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{4F3AE107-3FFD-4D5C-82A8-5034C0041562}</ProjectGuid>
-    <Keyword>Win32Proj</Keyword>
-    <RootNamespace>LBase</RootNamespace>
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{0515BC6D-3FFD-4D0E-87FF-86793DCB777E}</ProjectGuid>
+    <RootNamespace>LFramework</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -136,71 +69,36 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IntDir>$(SolutionDir)Inter\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir);$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IntDir>$(SolutionDir)Inter\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir);$(IncludePath)</IncludePath>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(SolutionDir);$(VC_IncludePath);$(WindowsSDK_IncludePath);$(IncludePath)</IncludePath>
-    <OutDir>$(ProjectDir)lib\$(Platform)\</OutDir>
-    <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir);$(VC_IncludePath);$(WindowsSDK_IncludePath);$(IncludePath)</IncludePath>
-    <OutDir>$(ProjectDir)lib\$(Platform)\</OutDir>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
-      <DisableSpecificWarnings>4180</DisableSpecificWarnings>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <DisableSpecificWarnings>4180</DisableSpecificWarnings>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <MinimalRebuild>false</MinimalRebuild>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>LB_Use_LightweightTypeID;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <DisableSpecificWarnings>4180</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
@@ -208,24 +106,60 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>LB_Use_LightweightTypeID;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <DisableSpecificWarnings>4180</DisableSpecificWarnings>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="Adaptor\LAdaptor.h" />
+    <ClInclude Include="CHRLib\CharacterMapping.h" />
+    <ClInclude Include="CHRLib\CharacterProcessing.h" />
+    <ClInclude Include="CHRLib\Convert.hpp" />
+    <ClInclude Include="CHRLib\Encoding.h" />
+    <ClInclude Include="CHRLib\MappingEx.h" />
+    <ClInclude Include="CHRLib\StaticMapping.hpp" />
+    <ClInclude Include="Core\LConsole.h" />
+    <ClInclude Include="Core\LCoreUtilities.h" />
+    <ClInclude Include="Core\LException.h" />
+    <ClInclude Include="Core\LFunc.hpp" />
+    <ClInclude Include="Core\LShellDefinition.h" />
+    <ClInclude Include="Helper\Initialization.h" />
+    <ClInclude Include="LCLib\Debug.h" />
+    <ClInclude Include="LCLib\FCommon.h" />
+    <ClInclude Include="LCLib\FContainer.h" />
+    <ClInclude Include="LCLib\FFileIO.h" />
+    <ClInclude Include="LCLib\FReference.h" />
+    <ClInclude Include="LCLib\Host.h" />
+    <ClInclude Include="LCLib\Mutex.h" />
+    <ClInclude Include="LCLib\NativeAPI.h" />
+    <ClInclude Include="LCLib\Platform.h" />
+    <ClInclude Include="Service\FileSystem.h" />
+    <ClInclude Include="Win32\LCLib\COM.h" />
+    <ClInclude Include="Win32\LCLib\Consoles.h" />
+    <ClInclude Include="Win32\LCLib\Mingw32.h" />
+    <ClInclude Include="Win32\LCLib\NLS.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="CHRLib\CharacterProcessing.cpp" />
+    <ClCompile Include="CHRLib\chrmap.cpp" />
+    <ClCompile Include="CHRLib\MappingEx.cpp" />
+    <ClCompile Include="Core\LException.cpp" />
+    <ClCompile Include="Helper\Initialization.cpp" />
+    <ClCompile Include="LCLib\Debug.cpp" />
+    <ClCompile Include="LCLib\FCommon.cpp" />
+    <ClCompile Include="LCLib\FFileIO.cpp" />
+    <ClCompile Include="LCLib\Host.cpp" />
+    <ClCompile Include="Win32\LCLib\Consoles.cpp" />
+    <ClCompile Include="Win32\LCLib\MinGW32.cpp" />
+    <ClCompile Include="Win32\LCLib\NLS.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

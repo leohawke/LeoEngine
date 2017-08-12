@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Win32">
+      <UniqueIdentifier>{72d528e0-0dda-4274-a97e-b081a17af977}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Win32\LCLib">
+      <UniqueIdentifier>{867ac9fd-057b-4682-8c93-32004254fc2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CHRLib">
+      <UniqueIdentifier>{4e380efc-f6da-4734-882b-b55f4e6cf98f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Adaptor">
+      <UniqueIdentifier>{7d7c92f8-9dcb-4ca7-8efa-8a7ec93ca281}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Helper">
+      <UniqueIdentifier>{766b376c-84fe-4dec-af44-8014ea2922e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LCLib">
+      <UniqueIdentifier>{67d679be-11d0-4e51-9744-ac87e325d999}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{003de9c5-0ace-4415-ad43-a77beb3f0c54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Service">
+      <UniqueIdentifier>{b411ec38-9d54-4566-96b4-ab1a386b973f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Win32\LCLib\COM.h">
+      <Filter>Win32\LCLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32\LCLib\Consoles.h">
+      <Filter>Win32\LCLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32\LCLib\Mingw32.h">
+      <Filter>Win32\LCLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32\LCLib\NLS.h">
+      <Filter>Win32\LCLib</Filter>
+    </ClInclude>
+    <ClInclude Include="CHRLib\CharacterMapping.h">
+      <Filter>CHRLib</Filter>
+    </ClInclude>
+    <ClInclude Include="CHRLib\CharacterProcessing.h">
+      <Filter>CHRLib</Filter>
+    </ClInclude>
+    <ClInclude Include="CHRLib\Convert.hpp">
+      <Filter>CHRLib</Filter>
+    </ClInclude>
+    <ClInclude Include="CHRLib\Encoding.h">
+      <Filter>CHRLib</Filter>
+    </ClInclude>
+    <ClInclude Include="CHRLib\MappingEx.h">
+      <Filter>CHRLib</Filter>
+    </ClInclude>
+    <ClInclude Include="CHRLib\StaticMapping.hpp">
+      <Filter>CHRLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LCLib\Debug.h">
+      <Filter>LCLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LCLib\FCommon.h">
+      <Filter>LCLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LCLib\FContainer.h">
+      <Filter>LCLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LCLib\FFileIO.h">
+      <Filter>LCLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LCLib\FReference.h">
+      <Filter>LCLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LCLib\Host.h">
+      <Filter>LCLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LCLib\Mutex.h">
+      <Filter>LCLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LCLib\NativeAPI.h">
+      <Filter>LCLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LCLib\Platform.h">
+      <Filter>LCLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Adaptor\LAdaptor.h">
+      <Filter>Adaptor</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LConsole.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LCoreUtilities.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LException.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LFunc.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LShellDefinition.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Helper\Initialization.h">
+      <Filter>Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Service\FileSystem.h">
+      <Filter>Service</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Win32\LCLib\Consoles.cpp">
+      <Filter>Win32\LCLib</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\LCLib\MinGW32.cpp">
+      <Filter>Win32\LCLib</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\LCLib\NLS.cpp">
+      <Filter>Win32\LCLib</Filter>
+    </ClCompile>
+    <ClCompile Include="CHRLib\CharacterProcessing.cpp">
+      <Filter>CHRLib</Filter>
+    </ClCompile>
+    <ClCompile Include="CHRLib\chrmap.cpp">
+      <Filter>CHRLib</Filter>
+    </ClCompile>
+    <ClCompile Include="CHRLib\MappingEx.cpp">
+      <Filter>CHRLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LCLib\Debug.cpp">
+      <Filter>LCLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LCLib\FCommon.cpp">
+      <Filter>LCLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LCLib\FFileIO.cpp">
+      <Filter>LCLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LCLib\Host.cpp">
+      <Filter>LCLib</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\LException.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Helper\Initialization.cpp">
+      <Filter>Helper</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
