@@ -17,8 +17,8 @@ IDXGISwapChain* LE_API Create(HWND hwnd) {
 	using namespace platform::Descriptions;
 	using namespace leo::inttype;
 	try {
-		LFL_CallWin32F(LoadLibraryW, L"d3d12.dll");
-		LFL_CallWin32F(LoadLibraryW, L"dxgi.dll");
+		LCL_CallF_Win32(LoadLibraryW, L"d3d12.dll");
+		LCL_CallF_Win32(LoadLibraryW, L"dxgi.dll");
 
 		platform_ex::Windows::D3D12::Context::Instance();
 	}

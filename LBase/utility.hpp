@@ -133,7 +133,7 @@ namespace leo
 
 		swap(lforward(x), lforward(y));
 	}
-	//! \note 使用 ADL swap_volatile 或 ystdex::swap_volatile 。
+	//! \note 使用 ADL swap_volatile 或 leo::swap_volatile 。
 	//@{
 	template<typename _type, typename _type2>
 	inline auto

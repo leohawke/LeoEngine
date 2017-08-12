@@ -20,7 +20,7 @@ namespace leo {
 	//@{
 	template<typename _type>
 	struct wrapped_enum_traits {
-		using type = underlying_type<_type>;
+		using type = underlying_type_t<_type>;
 	};
 
 	type_t(wrapped_enum_traits);

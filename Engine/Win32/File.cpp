@@ -162,7 +162,7 @@ namespace platform_ex {
 
 			const auto uSize = path.size() * sizeof(wchar_t);
 			if (uSize > USHRT_MAX) {
-				LFL_Raise_Win32Exception_On_Failure(ERROR_BUFFER_OVERFLOW, "File: 文件名太长。");
+				LCL_RaiseZ_Win32E(ERROR_BUFFER_OVERFLOW, "File: 文件名太长。");
 			}
 
 			::UNICODE_STRING ustrRawPath;
@@ -191,7 +191,7 @@ namespace platform_ex {
 				::RTL_PATH_TYPE ePathType;
 				const auto lPathStatus = ::RtlGetFullPathName_UstrEx(&ustrRawPath, &ustrStaticBuffer, &ustrDynamicBuffer, &pustrFullPath, nullptr, nullptr, &ePathType, nullptr);
 				if (!NT_SUCCESS(lPathStatus)) {
-					LFL_Raise_Win32Exception_On_Failure(::MCF_RtlNtStatusToDosError(lPathStatus), "File: RtlGetFullPathName_UstrEx() 失败。");
+					LCL_RaiseZ_Win32E(::MCF_RtlNtStatusToDosError(lPathStatus), "File: RtlGetFullPathName_UstrEx() 失败。");
 				}
 				if ((RtlPathTypeDriveAbsolute <= ePathType) && (ePathType <= RtlPathTypeRelative)) {
 					::UNICODE_STRING ustrName;
@@ -205,7 +205,7 @@ namespace platform_ex {
 					HANDLE hTemp;
 					const auto lStatus = ::NtOpenDirectoryObject(&hTemp, 0x0F, &vObjectAttributes);
 					if (!NT_SUCCESS(lStatus)) {
-						LFL_Raise_Win32Exception_On_Failure(::MCF_RtlNtStatusToDosError(lStatus), "File: NtOpenDirectoryObject() 失败。");
+						LCL_RaiseZ_Win32E(::MCF_RtlNtStatusToDosError(lStatus), "File: NtOpenDirectoryObject() 失败。");
 					}
 					hRootDirectory.Reset(hTemp);
 				}
@@ -272,7 +272,7 @@ namespace platform_ex {
 			HANDLE hTemp;
 			const auto lStatus = ::MCF_NtCreateFile(&hTemp, dwDesiredAccess, &vObjectAttributes, &vIoStatus, nullptr, FILE_ATTRIBUTE_NORMAL, dwSharedAccess, dwCreateDisposition, dwCreateOptions, nullptr, 0);
 			if (!NT_SUCCESS(lStatus)) {
-				LFL_Raise_Win32Exception_On_Failure(::MCF_RtlNtStatusToDosError(lStatus), "File: NtCreateFile() 失败。");
+				LCL_RaiseZ_Win32E(::MCF_RtlNtStatusToDosError(lStatus), "File: NtCreateFile() 失败。");
 			}
 			UniqueNtHandle hFile(hTemp);
 
@@ -308,17 +308,17 @@ namespace platform_ex {
 			::FILE_STANDARD_INFORMATION vStandardInfo;
 			const auto lStatus = ::NtQueryInformationFile(file.Get(), &vIoStatus, &vStandardInfo, sizeof(vStandardInfo), FileStandardInformation);
 			if (!NT_SUCCESS(lStatus)) {
-				LFL_Raise_Win32Exception_On_Failure(::MCF_RtlNtStatusToDosError(lStatus), "File: NtQueryInformationFile() 失败。");
+				LCL_RaiseZ_Win32E(::MCF_RtlNtStatusToDosError(lStatus), "File: NtQueryInformationFile() 失败。");
 			}
 			return static_cast<uint64>(vStandardInfo.EndOfFile.QuadPart);
 		}
 		void File::Resize(uint64 u64NewSize) {
 			if (!file) {
-				LFL_Raise_Win32Exception_On_Failure(ERROR_INVALID_HANDLE, "File: 尚未打开任何文件。");
+				LCL_RaiseZ_Win32E(ERROR_INVALID_HANDLE, "File: 尚未打开任何文件。");
 			}
 
 			if (u64NewSize >= static_cast<uint64>(INT64_MAX)) {
-				LFL_Raise_Win32Exception_On_Failure(ERROR_INVALID_PARAMETER, "File: 文件大小过大。");
+				LCL_RaiseZ_Win32E(ERROR_INVALID_PARAMETER, "File: 文件大小过大。");
 			}
 
 			::IO_STATUS_BLOCK vIoStatus;
@@ -326,7 +326,7 @@ namespace platform_ex {
 			vEofInfo.EndOfFile.QuadPart = static_cast<std::int64_t>(u64NewSize);
 			const auto lStatus = ::NtSetInformationFile(file.Get(), &vIoStatus, &vEofInfo, sizeof(vEofInfo), FileEndOfFileInformation);
 			if (!NT_SUCCESS(lStatus)) {
-				LFL_Raise_Win32Exception_On_Failure(::MCF_RtlNtStatusToDosError(lStatus), "File: NtSetInformationFile() 失败。");
+				LCL_RaiseZ_Win32E(::MCF_RtlNtStatusToDosError(lStatus), "File: NtSetInformationFile() 失败。");
 			}
 		}
 		void File::Clear() {
@@ -336,11 +336,11 @@ namespace platform_ex {
 		std::size_t File::Read(void *pBuffer, std::size_t uBytesToRead, uint64 u64Offset) const
 		{
 			if (!file) {
-				LFL_Raise_Win32Exception_On_Failure(ERROR_INVALID_HANDLE, "File: 尚未打开任何文件。");
+				LCL_RaiseZ_Win32E(ERROR_INVALID_HANDLE, "File: 尚未打开任何文件。");
 			}
 
 			if (u64Offset >= static_cast<uint64>(INT64_MAX)) {
-				LFL_Raise_Win32Exception_On_Failure(ERROR_SEEK, "File: 文件偏移量太大。");
+				LCL_RaiseZ_Win32E(ERROR_SEEK, "File: 文件偏移量太大。");
 			}
 
 			bool bIoPending = true;
@@ -355,7 +355,7 @@ namespace platform_ex {
 			
 			if (lStatus != STATUS_END_OF_FILE) {
 				if (!NT_SUCCESS(lStatus)) {
-					LFL_Raise_Win32Exception_On_Failure(::MCF_RtlNtStatusToDosError(lStatus), "File: NtReadFile() 失败。");
+					LCL_RaiseZ_Win32E(::MCF_RtlNtStatusToDosError(lStatus), "File: NtReadFile() 失败。");
 				}
 				do {
 					::LARGE_INTEGER liTimeout;
@@ -370,11 +370,11 @@ namespace platform_ex {
 		std::size_t File::Write(uint64 u64Offset, const void *pBuffer, std::size_t uBytesToWrite)
 		{
 			if (!file) {
-				LFL_Raise_Win32Exception_On_Failure(ERROR_INVALID_HANDLE, "File: 尚未打开任何文件。");
+				LCL_RaiseZ_Win32E(ERROR_INVALID_HANDLE, "File: 尚未打开任何文件。");
 			}
 
 			if (u64Offset >= static_cast<uint64>(INT64_MAX)) {
-				LFL_Raise_Win32Exception_On_Failure(ERROR_SEEK, "File: 文件偏移量太大。");
+				LCL_RaiseZ_Win32E(ERROR_SEEK, "File: 文件偏移量太大。");
 			}
 
 			bool bIoPending = true;
@@ -389,7 +389,7 @@ namespace platform_ex {
 
 			{
 				if (!NT_SUCCESS(lStatus)) {
-					LFL_Raise_Win32Exception_On_Failure(::MCF_RtlNtStatusToDosError(lStatus), "File: NtWriteFile() 失败。");
+					LCL_RaiseZ_Win32E(::MCF_RtlNtStatusToDosError(lStatus), "File: NtWriteFile() 失败。");
 				}
 				do {
 					lStatus = ::NtDelayExecution(true, nullptr);
@@ -401,13 +401,13 @@ namespace platform_ex {
 		}
 		void File::HardFlush() {
 			if (!file) {
-				LFL_Raise_Win32Exception_On_Failure(ERROR_INVALID_HANDLE, "File: 尚未打开任何文件。");
+				LCL_RaiseZ_Win32E(ERROR_INVALID_HANDLE, "File: 尚未打开任何文件。");
 			}
 
 			::IO_STATUS_BLOCK vIoStatus;
 			const auto lStatus = ::NtFlushBuffersFile(file.Get(), &vIoStatus);
 			if (!NT_SUCCESS(lStatus)) {
-				LFL_Raise_Win32Exception_On_Failure(::MCF_RtlNtStatusToDosError(lStatus), "File: NtFlushBuffersFile() 失败。");
+				LCL_RaiseZ_Win32E(::MCF_RtlNtStatusToDosError(lStatus), "File: NtFlushBuffersFile() 失败。");
 			}
 		}
 	}

@@ -65,7 +65,7 @@ HWND Create(WORD width, WORD height) {
 	GetModuleHandle(NULL),NULL,::LoadCursorW(NULL,IDC_ARROW),
 	NULL,NULL,L"LTest",NULL };
 
-	LFL_CallWin32F(RegisterClassExW, &wc);
+	LCL_CallF_Win32(RegisterClassExW, &wc);
 
 	RECT r{ 0, 0, width, height };
 	AdjustWindowRectEx(&r, WS_BORDER | WS_POPUP, false, 0);
@@ -80,7 +80,7 @@ HWND Create(WORD width, WORD height) {
 	if (sY > height)
 		Y = (sY - height) / 2;
 
-	auto result_v = LFL_CallWin32F(::CreateWindowExW,0, L"LTest", L"LTest", WS_BORDER | WS_POPUP,
+	auto result_v = LCL_CallF_Win32(::CreateWindowExW,0, L"LTest", L"LTest", WS_BORDER | WS_POPUP,
 		X, Y,
 		r.right - r.left,
 		r.bottom - r.top,

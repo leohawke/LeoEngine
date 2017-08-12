@@ -1113,7 +1113,7 @@ namespace scheme {
 
 			/*!
 			\brief vau 抽象：求值为一个捕获当前上下文的非严格求值的函数。
-			\note 动态环境的上下文参数被捕获为一个 ystdex::ref<ContextNode> 对象。
+			\note 动态环境的上下文参数被捕获为一个 leo::ref<ContextNode> 对象。
 			\throw InvalidSynta <eformal> 不符合要求。
 
 			初始化的 <eformal> 表示动态环境的上下文参数，应为一个符号或 #ignore 。

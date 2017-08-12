@@ -49,6 +49,31 @@ namespace leo {
 			throw LoggedEvent("Failed getting positive " + name + " value.", lv);
 		return CheckScalar<_tDst>(val, name, lv);
 	}
+
+	/*!
+	\brief 判断 i 是否在闭区间 [_type(0), b] 中。
+	\pre 断言： <tt>_type(0) < b</tt> 。
+	*/
+	template<typename _type>
+	inline LB_STATELESS bool
+		IsInClosedInterval(_type i, _type b) lnothrow
+	{
+		LAssert(_type(0) < b,
+			"Zero element as lower bound is not less than upper bound.");
+		return !(i < _type(0) || b < i);
+	}
+	/*!
+	\brief 判断 i 是否在闭区间 [a, b] 中。
+	\pre 断言： <tt>a < b</tt> 。
+	*/
+	template<typename _type>
+	inline LB_STATELESS bool
+		IsInClosedInterval(_type i, _type a, _type b) lnothrow
+	{
+		LAssert(a < b, "Lower bound is not less than upper bound.");
+		return !(i < a || b < i);
+	}
+
 	//@}
 }
 #endif

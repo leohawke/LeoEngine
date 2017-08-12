@@ -30,7 +30,7 @@ namespace platform_ex
 		{
 			::CONSOLE_SCREEN_BUFFER_INFO info;
 
-			LFL_CallWin32F(GetConsoleScreenBufferInfo, h_std, &info);
+			LCL_CallF_Win32(GetConsoleScreenBufferInfo, h_std, &info);
 			return info;
 		}
 
@@ -52,7 +52,7 @@ namespace platform_ex
 			WConsole::SetCursorPosition(::COORD pos)
 		{
 			// NOTE: %::SetConsoleCursorPosition expects 1-based.
-			LFL_CallWin32F(SetConsoleCursorPosition, h_std, { short(pos.X + 1), short(pos.Y + 1) });
+			LCL_CallF_Win32(SetConsoleCursorPosition, h_std, { short(pos.X + 1), short(pos.Y + 1) });
 		}
 		void
 			WConsole::SetForeColor(std::uint8_t fc) lnothrow
@@ -90,9 +90,9 @@ namespace platform_ex
 		void
 			WConsole::Fill(::COORD coord, unsigned long n, wchar_t c)
 		{
-			LFL_CallWin32F(FillConsoleOutputCharacterW, h_std, c, n, coord, {});
-			LFL_CallWin32F(FillConsoleOutputAttribute, h_std, Attributes, n, coord, {});
-			LFL_CallWin32F(SetConsoleCursorPosition, h_std, { coord.X, coord.Y });
+			LCL_CallF_Win32(FillConsoleOutputCharacterW, h_std, c, n, coord, {});
+			LCL_CallF_Win32(FillConsoleOutputAttribute, h_std, Attributes, n, coord, {});
+			LCL_CallF_Win32(SetConsoleCursorPosition, h_std, { coord.X, coord.Y });
 		}
 
 		void
@@ -110,7 +110,7 @@ namespace platform_ex
 		void
 			WConsole::Update(::WORD value)
 		{
-			LFL_CallWin32F(SetConsoleTextAttribute, h_std, value);
+			LCL_CallF_Win32(SetConsoleTextAttribute, h_std, value);
 		}
 
 		void
@@ -147,7 +147,7 @@ namespace platform_ex
 
 			unsigned long n;
 
-			LFL_CallWin32F(WriteConsoleW, h_std, sv.data(),
+			LCL_CallF_Win32(WriteConsoleW, h_std, sv.data(),
 				static_cast<unsigned long>(sv.length()), &n, limpl({}));
 			return size_t(n);
 		}

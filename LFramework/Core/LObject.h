@@ -16,8 +16,6 @@
 #include <sstream>
 #endif
 
-#include "sdef.h"
-
 namespace leo
 {
 	/*!
@@ -57,7 +55,7 @@ namespace leo
 	}
 	//@}
 
-	DeclDerivedI(LS_API, IValueHolder, leo::any_ops::holder)
+	DeclDerivedI(LF_API, IValueHolder, leo::any_ops::holder)
 
 		/*!
 		\brief 创建选项。
@@ -348,7 +346,7 @@ namespace leo
 		}
 	}
 
-	class LS_API ValueObject : private equality_comparable<ValueObject>
+	class LF_API ValueObject : private equality_comparable<ValueObject>
 	{
 	public:
 		/*!

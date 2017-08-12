@@ -11,7 +11,12 @@
 #include<LFramework/LCLib/Debug.h>
 #include<LFramework/LCLib/Mutex.h>
 #include<LFramework/LCLib/FReference.h>
-#include<LFramework/LCLib/FFileIO.h>
+#include<LFramework/LCLib/FFileIO.h>// for <array>, <deque>, <forward_list>, <istream>,
+//	<ostream>, <queue>, <set>, <stack>, <unordered_map>, <unordered_set>,
+//	<vector>, forward_as_tuple, '*string_view', get,
+//	ignore, make_pair, make_tuple, pair, tie, tuple, tuple_cat, size, uopen,
+//	'uf*', 'up*', etc;
+#include <LFramework/LCLib/FileSystem.h>
 
 namespace leo {
 	using platform::list;
@@ -118,9 +123,6 @@ namespace leo {
 	\brief 文件访问例程。
 	*/
 	//@{
-	using platform::upclose;
-	using platform::upopen;
-
 	using platform::basic_filebuf;
 	using platform::filebuf;
 	using platform::wfilebuf;
@@ -134,5 +136,50 @@ namespace leo {
 	using platform::wofstream;
 	using platform::wfstream;
 	//@}
+
+	namespace IO
+	{
+		/*!
+		\brief 文件访问和文件系统例程。
+		*/
+		//@{
+		using platform::MakePathString;
+		using platform::mode_t;
+		using platform::FileDescriptor;
+		using platform::UniqueFile;
+		using platform::DefaultPMode;
+		using platform::omode_conv;
+		using platform::omode_convb;
+		using platform::GetFileAccessTimeOf;
+		using platform::GetFileModificationTimeOf;
+		using platform::GetFileModificationAndAccessTimeOf;
+		using platform::FetchNumberOfLinks;
+		using platform::EnsureUniqueFile;
+		//@{
+		using platform::HaveSameContents;
+		using platform::IsNodeShared;
+
+		using platform::NodeCategory;
+
+		using platform::IsDirectory;
+
+		using platform::CreateHardLink;
+		using platform::CreateSymbolicLink;
+		//@}
+		using platform::ReadLink;
+		using platform::IterateLink;
+		//@{
+		using platform::DirectorySession;
+		using platform::HDirectory;
+		//@}
+		using platform::FetchSeparator;
+		using platform::IsSeparator;
+		using platform::IsAbsolute;
+		using platform::FetchRootNameLength;
+		using platform::TrimTrailingSeperator;
+		//@}
+		using NativePathView = basic_string_view<HDirectory::NativeChar>;
+
+	} // namespace IO;
 }
 #endif

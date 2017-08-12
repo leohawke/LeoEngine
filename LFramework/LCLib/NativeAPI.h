@@ -10,9 +10,9 @@
 #include <LBase/type_op.hpp>
 #include <LBase/lmacro.h>
 
-#ifndef  LB_Platform
+#ifndef  LF_Platform
 #error "Unknown platform found."
-#endif // ! LB_Platform
+#endif // ! LF_Platform
 
 namespace platform
 {
@@ -156,7 +156,7 @@ namespace platform
 #pragma warning(push)
 #pragma warning(disable:4800)
 #endif
-		lconstfn PDefH(bool, HasExtraMode, Mode m)
+		inline PDefH(bool, HasExtraMode, Mode m)
 		ImplRet(bool(m & ~(Mode::Access | Mode::FileType)))
 		//@}
 #ifdef LB_IMPL_MSCPP

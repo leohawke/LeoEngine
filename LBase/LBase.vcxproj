@@ -31,6 +31,7 @@
     <ClInclude Include="container.hpp" />
     <ClInclude Include="cstdio.h" />
     <ClInclude Include="cstring.h" />
+    <ClInclude Include="ctime.h" />
     <ClInclude Include="cwctype.h" />
     <ClInclude Include="deref_op.hpp" />
     <ClInclude Include="enum.hpp" />
@@ -65,6 +66,7 @@
     <ClInclude Include="ref.hpp" />
     <ClInclude Include="scope_gurad.hpp" />
     <ClInclude Include="set.hpp" />
+    <ClInclude Include="streambuf.hpp" />
     <ClInclude Include="string.hpp" />
     <ClInclude Include="sutility.h" />
     <ClInclude Include="tuple.hpp" />

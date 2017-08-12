@@ -7,7 +7,7 @@
 #define FrameWork_Mutex_h 1
 
 #include <LFramework/LCLib/FCommon.h>
-#if LB_Multithread == 1
+#if LF_Multithread == 1
 #include <LBase/concurrency.h>
 #define LFL_Mutex_Space std
 #define LFL_Threading_Space leo

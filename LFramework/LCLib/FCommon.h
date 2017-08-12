@@ -46,8 +46,8 @@ namespace platform
 	//! \brief 指定特定基类类型的 IDTag 特化。
 #define LFL_IDTag_Spec(_n, _base) \
 	template<> \
-	struct IDTag<LB_Platform_##_n> : virtual _base, \
-		virtual MetaID<LB_Platform_##_n> \
+	struct IDTag<LF_Platform_##_n> : virtual _base, \
+		virtual MetaID<LF_Platform_##_n> \
 	{};
 
 	//! \brief 指定宿主平台的 IDTag 特化。
@@ -56,7 +56,7 @@ namespace platform
 
 	//! \brief 指定基于特定平台的 IDTag 特化。
 #define LFL_IDTag_SpecOnBase(_n, _b) \
-	LFL_IDTag_Spec(_n, IDTag<LB_Platform_##_b>)
+	LFL_IDTag_Spec(_n, IDTag<LF_Platform_##_b>)
 
 	LFL_IDTag_SpecHost(Win32)
 		LFL_IDTag_SpecOnBase(Win64, Win32)
@@ -78,12 +78,15 @@ namespace platform
 #	pragma GCC diagnostic pop
 #endif
 
+#define LCL_Tag_constfn inline
+
+
 	/*!
 	\ingroup PlatformEmulation
 	\brief 定义用于平台模拟的传递模板。
 	*/
-#define LFL_DefPlatformFwdTmpl(_n, _fn) \
-	DefFwdTmplAuto(_n, _fn(platform::IDTag<LB_Platform>(), lforward(args)...))
+#define LCL_DefPlatformFwdTmpl(_n, _fn) \
+	DefFwdTmplAuto(_n, _fn(platform::IDTag<LF_Platform>(), lforward(args)...))
 
 
 	/*!
@@ -91,10 +94,10 @@ namespace platform
 	\sa leo::is_detected
 	*/
 	//@{
-#define LFL_CheckDecl_t(_fn) CheckDecl##_fn##_t
-#define LFL_DeclCheck_t(_fn, _call) \
+#define LCL_CheckDecl_t(_fn) CheckDecl##_fn##_t
+#define LCL_DeclCheck_t(_fn, _call) \
 	template<typename... _tParams> \
-	using LFL_CheckDecl_t(_fn) \
+	using LCL_CheckDecl_t(_fn) \
 		= decltype(_call(std::declval<_tParams&&>()...));
 	//@}
 

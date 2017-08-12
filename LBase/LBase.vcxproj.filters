@@ -62,6 +62,8 @@
     <ClInclude Include="cast.hpp" />
     <ClInclude Include="optional.hpp" />
     <ClInclude Include="path.hpp" />
+    <ClInclude Include="streambuf.hpp" />
+    <ClInclude Include="ctime.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="any.cpp" />

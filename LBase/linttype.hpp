@@ -235,6 +235,16 @@ namespace leo
 			++result;
 		}
 	}
+
+	template<size_t _vWidth>
+	inline LB_NONNULL(1) typename make_width_int<_vWidth>::unsigned_type
+		read_uint_le(const byte* buf) lnothrowv
+	{
+		lconstraint(buf);
+		return leo::pack_uint<_vWidth>(leo::make_reverse_iterator(
+			buf + _vWidth / std::numeric_limits<byte>::digits),
+			leo::make_reverse_iterator(buf));
+	}
 }
 
 #endif

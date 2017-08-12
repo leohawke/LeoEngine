@@ -113,11 +113,11 @@ namespace platform_ex
 #	if LFL_Win32
 		::HANDLE h_raw_read, h_raw_write;
 
-		LFL_CallWin32F(CreatePipe, &h_raw_read, &h_raw_write, {}, 0);
+		LCL_CallF_Win32(CreatePipe, &h_raw_read, &h_raw_write, {}, 0);
 
 		UniqueHandle h_read(h_raw_read), h_write(h_raw_write);
 
-		LFL_CallWin32F(SetHandleInformation, h_write.get(), HANDLE_FLAG_INHERIT,
+		LCL_CallF_Win32(SetHandleInformation, h_write.get(), HANDLE_FLAG_INHERIT,
 			HANDLE_FLAG_INHERIT);
 		return{ std::move(h_read), std::move(h_write) };
 //#	elif YCL_API_Has_unistd_h

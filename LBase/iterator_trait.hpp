@@ -35,6 +35,6 @@ namespace leo
 		using enable_for_iterator_t = enable_if_t<
 		is_same<decltype(++std::declval<_tParam&>()), _tParam&>::value, _type>;
 
-} // namespace ystdex;
+} // namespace leo;
 
 #endif

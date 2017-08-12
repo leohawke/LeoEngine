@@ -274,7 +274,7 @@ namespace platform
 } // namespace platform;
 
 namespace platform_ex {
-#if LB_Multithread == 1
+#if LF_Multithread == 1
 	/*!
 	\brief 日志断言函数。
 	\note 默认断言 leo::lassert 的替代。

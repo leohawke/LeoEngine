@@ -6,7 +6,7 @@
 #include <LFramework/Win32/LCLib/Consoles.h>
 #include <LFramework/Win32/LCLib/NLS.h>
 #endif
-#if LB_Multithread == 1
+#if LF_Multithread == 1
 #include <LBase/concurrency.h>
 #endif
 #include <iostream>
@@ -22,7 +22,7 @@ namespace platform
 			return s && *s != char() ? s : "<unknown>";
 		}
 
-#if LB_Multithread == 1
+#if LF_Multithread == 1
 		std::string
 			FetchCurrentThreadID() lnothrow
 		{
@@ -171,7 +171,7 @@ namespace platform
 	{
 		try
 		{
-#if LB_Multithread == 1
+#if LF_Multithread == 1
 			const auto& t_id(FetchCurrentThreadID());
 
 			if (!t_id.empty())
@@ -190,7 +190,7 @@ namespace platform
 		lnothrowv
 	{
 		LAssertNonnull(stream);
-#if LB_Multithread == 1
+#if LF_Multithread == 1
 		const auto& t_id(FetchCurrentThreadID());
 
 		if (!t_id.empty())
@@ -238,7 +238,7 @@ using namespace platform;
 
 namespace platform_ex
 {
-#if LB_Multithread == 1
+#if LF_Multithread == 1
 	void
 		LogAssert(const char* expr_str, const char* file, int line,
 			const char* msg) lnothrow

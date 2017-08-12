@@ -31,9 +31,6 @@
     <ClInclude Include="LSchemeA.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="LObject.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="ValueNode.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -58,9 +55,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sdef.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="LObject.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ValueNode.cpp">

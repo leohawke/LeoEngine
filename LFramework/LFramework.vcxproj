@@ -119,6 +119,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Adaptor\LAdaptor.h" />
+    <ClInclude Include="Adaptor\LTextBase.h" />
     <ClInclude Include="CHRLib\CharacterMapping.h" />
     <ClInclude Include="CHRLib\CharacterProcessing.h" />
     <ClInclude Include="CHRLib\Convert.hpp" />
@@ -129,36 +130,46 @@
     <ClInclude Include="Core\LCoreUtilities.h" />
     <ClInclude Include="Core\LException.h" />
     <ClInclude Include="Core\LFunc.hpp" />
+    <ClInclude Include="Core\LObject.h" />
     <ClInclude Include="Core\LShellDefinition.h" />
+    <ClInclude Include="Core\LString.h" />
     <ClInclude Include="Helper\Initialization.h" />
     <ClInclude Include="LCLib\Debug.h" />
     <ClInclude Include="LCLib\FCommon.h" />
     <ClInclude Include="LCLib\FContainer.h" />
     <ClInclude Include="LCLib\FFileIO.h" />
+    <ClInclude Include="LCLib\FileSystem.h" />
     <ClInclude Include="LCLib\FReference.h" />
     <ClInclude Include="LCLib\Host.h" />
     <ClInclude Include="LCLib\Mutex.h" />
     <ClInclude Include="LCLib\NativeAPI.h" />
     <ClInclude Include="LCLib\Platform.h" />
+    <ClInclude Include="Service\File.h" />
     <ClInclude Include="Service\FileSystem.h" />
     <ClInclude Include="Win32\LCLib\COM.h" />
     <ClInclude Include="Win32\LCLib\Consoles.h" />
     <ClInclude Include="Win32\LCLib\Mingw32.h" />
     <ClInclude Include="Win32\LCLib\NLS.h" />
+    <ClInclude Include="Win32\LCLib\Registry.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CHRLib\CharacterProcessing.cpp" />
     <ClCompile Include="CHRLib\chrmap.cpp" />
     <ClCompile Include="CHRLib\MappingEx.cpp" />
     <ClCompile Include="Core\LException.cpp" />
+    <ClCompile Include="Core\LObject.cpp" />
+    <ClCompile Include="Core\LString.cpp" />
     <ClCompile Include="Helper\Initialization.cpp" />
     <ClCompile Include="LCLib\Debug.cpp" />
     <ClCompile Include="LCLib\FCommon.cpp" />
     <ClCompile Include="LCLib\FFileIO.cpp" />
+    <ClCompile Include="LCLib\FileSystem.LCLib.cpp" />
     <ClCompile Include="LCLib\Host.cpp" />
+    <ClCompile Include="Service\FileSystem.cpp" />
     <ClCompile Include="Win32\LCLib\Consoles.cpp" />
     <ClCompile Include="Win32\LCLib\MinGW32.cpp" />
     <ClCompile Include="Win32\LCLib\NLS.cpp" />
+    <ClCompile Include="Win32\LCLib\Registry.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

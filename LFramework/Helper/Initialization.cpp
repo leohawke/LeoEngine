@@ -52,7 +52,7 @@ namespace {
 				// FIXME: What if link reading failed (i.e. permission denied)?
 				// XXX: Link content like 'node_type:[inode]' is not supported.
 				// TODO: Use implemnetation for BSD family OS, etc.
-				auto image(IO::ResolvePath<ystdex::path<vector<string>,
+				auto image(IO::ResolvePath<leo::path<vector<string>,
 					IO::PathTraits>>(string_view("/proc/self/exe")));
 
 				if (!image.empty())
@@ -60,7 +60,7 @@ namespace {
 					image.pop_back();
 
 					const auto& dir(IO::VerifyDirectoryPathTail(
-						ystdex::to_string_d(image)));
+						leo::to_string_d(image)));
 
 					if (!dir.empty() && dir.back() == FetchSeparator<char>())
 						return dir;

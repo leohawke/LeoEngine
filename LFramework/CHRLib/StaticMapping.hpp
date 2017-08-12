@@ -139,7 +139,7 @@ struct UCSMapperBase
 IsInvalid ：判断八元组是否被禁止的接口。
 Decode ：解码操作：从指定编码的字符序列映射到中间状态的字符。
 Encode ：编码操作：从中间状态的字符逆向映射到指定编码的字符序列。
-解码操作允许接受 ystdex::pseudo_object 忽略输出。
+解码操作允许接受 leo::pseudo_object 忽略输出。
 使用模板参数决定状态类型中，状态索引等于已解码的输入字节数；否则不予保证。
 */
 //@{

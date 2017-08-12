@@ -108,6 +108,24 @@
     <ClInclude Include="Service\FileSystem.h">
       <Filter>Service</Filter>
     </ClInclude>
+    <ClInclude Include="Core\LObject.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LString.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Adaptor\LTextBase.h">
+      <Filter>Adaptor</Filter>
+    </ClInclude>
+    <ClInclude Include="Service\File.h">
+      <Filter>Service</Filter>
+    </ClInclude>
+    <ClInclude Include="LCLib\FileSystem.h">
+      <Filter>LCLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32\LCLib\Registry.h">
+      <Filter>Win32\LCLib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Win32\LCLib\Consoles.cpp">
@@ -145,6 +163,21 @@
     </ClCompile>
     <ClCompile Include="Helper\Initialization.cpp">
       <Filter>Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\LObject.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\LString.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\FileSystem.cpp">
+      <Filter>Service</Filter>
+    </ClCompile>
+    <ClCompile Include="LCLib\FileSystem.LCLib.cpp">
+      <Filter>LCLib</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\LCLib\Registry.cpp">
+      <Filter>Win32\LCLib</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

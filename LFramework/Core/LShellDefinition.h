@@ -75,6 +75,13 @@ namespace leo {
 	template<typename _type, class _tMutex = typename unlock_delete<>::mutex_type,
 		class _tLock = typename unlock_delete<_tMutex>::lock_type>
 		using locked_ptr = unique_ptr<_type, unlock_delete<_tMutex, _tLock>>;
+
+	namespace Text
+	{
+		class String;
+	} // namespace Text;
+
+	using Text::String;
 }
 
 #endif
