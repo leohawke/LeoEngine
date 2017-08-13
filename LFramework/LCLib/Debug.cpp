@@ -60,7 +60,7 @@ namespace platform
 			if (n < wstr.length())
 				std::cout << &wstr[n];
 		return bool(std::cout.flush());
-#elif LB_Hosted
+#elif LF_Hosted
 		return bool(std::cout << platform_ex::EncodeArg(sv) << std::endl);
 #else
 		return bool(std::cout << sv << std::endl);

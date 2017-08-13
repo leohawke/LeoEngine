@@ -63,7 +63,6 @@ namespace leo
 		//@}
 
 
-		//! \since build 724
 		//@{
 		//! \brief 共享锁定的文件映射输入流。
 		class LF_API SharedInputMappedFileStream : private MappedFile,
@@ -74,7 +73,7 @@ namespace leo
 			LB_NONNULL(1)
 				SharedInputMappedFileStream(const char*);
 
-			explicit DefCvt(const ynothrow, bool, !fail())
+			explicit DefCvt(const lnothrow, bool, !fail())
 
 				//! \brief 虚析构：类定义外默认实现。
 				~SharedInputMappedFileStream() override;
@@ -102,7 +101,6 @@ namespace leo
 			{}
 			/*!
 			\note std::ios_base::openmode 可能是 int 。
-			\since build 727
 			*/
 			template<typename _tChar>
 			LB_NONNULL(1)

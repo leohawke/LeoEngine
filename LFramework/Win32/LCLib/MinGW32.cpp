@@ -486,6 +486,254 @@ namespace platform_ex {
 		{
 			p_node.reset();
 		}
+
+
+		struct ReparsePointData::Data final
+		{
+			struct tagSymbolicLinkReparseBuffer
+			{
+				unsigned short SubstituteNameOffset;
+				unsigned short SubstituteNameLength;
+				unsigned short PrintNameOffset;
+				unsigned short PrintNameLength;
+				unsigned long Flags;
+				wchar_t PathBuffer[1];
+
+				DefGetter(const lnothrow, wstring_view, PrintName,
+				{ PathBuffer + size_t(PrintNameOffset) / sizeof(wchar_t),
+					size_t(PrintNameLength / sizeof(wchar_t)) })
+			};
+			struct tagMountPointReparseBuffer
+			{
+				unsigned short SubstituteNameOffset;
+				unsigned short SubstituteNameLength;
+				unsigned short PrintNameOffset;
+				unsigned short PrintNameLength;
+				wchar_t PathBuffer[1];
+
+				DefGetter(const lnothrow, wstring_view, PrintName,
+				{ PathBuffer + size_t(PrintNameOffset) / sizeof(wchar_t),
+					size_t(PrintNameLength / sizeof(wchar_t)) })
+			};
+			struct tagGenericReparseBuffer
+			{
+				unsigned char DataBuffer[1];
+			};
+
+			unsigned long ReparseTag;
+			unsigned short ReparseDataLength;
+			unsigned short Reserved;
+			union
+			{
+				tagSymbolicLinkReparseBuffer SymbolicLinkReparseBuffer;
+				tagMountPointReparseBuffer MountPointReparseBuffer;
+				tagGenericReparseBuffer GenericReparseBuffer;
+			};
+		};
+
+
+		ReparsePointData::ReparsePointData()
+			: pun(leo::default_init, &target_buffer)
+		{
+			static_assert(leo::is_aligned_storable<decltype(target_buffer), Data>(),
+				"Invalid buffer found.");
+		}
+		ImplDeDtor(ReparsePointData)
+
+
+			wstring
+			ResolveReparsePoint(const wchar_t* path)
+		{
+			return wstring(ResolveReparsePoint(path, ReparsePointData().Get()));
+		}
+		wstring_view
+			ResolveReparsePoint(const wchar_t* path, ReparsePointData::Data& rdb)
+		{
+			return MakeFileToDo([=, &rdb](UniqueHandle::pointer h) {
+				return FetchFileInfo([&](::BY_HANDLE_FILE_INFORMATION& info)
+					-> wstring_view {
+					if (info.dwFileAttributes & ReparsePoint)
+					{
+						LCL_CallF_Win32(DeviceIoControl, h, FSCTL_GET_REPARSE_POINT, {},
+							0, &rdb, MAXIMUM_REPARSE_DATA_BUFFER_SIZE, {}, {});
+						switch (rdb.ReparseTag)
+						{
+						case IO_REPARSE_TAG_SYMLINK:
+							return rdb.SymbolicLinkReparseBuffer.GetPrintName();
+						case IO_REPARSE_TAG_MOUNT_POINT:
+							return rdb.MountPointReparseBuffer.GetPrintName();
+						default:
+							TraceDe(Warning, "Unsupported reparse tag '%lu' found",
+								rdb.ReparseTag);
+							leo::throw_error(std::errc::not_supported, lfsig);
+						}
+					}
+					throw std::invalid_argument(
+						"Specified file is not a reparse point.");
+				}, h);
+			}, path, FileAttributesAndFlags::NormalAll);
+		}
+
+
+		wstring
+			ExpandEnvironmentStrings(const wchar_t* p_src)
+		{
+			const auto w_len(LCL_CallF_Win32(ExpandEnvironmentStringsW, Nonnull(p_src),
+			{}, 0));
+			wstring wstr(w_len, wchar_t());
+
+			LCL_CallF_Win32(ExpandEnvironmentStringsW, p_src, &wstr[0], w_len);
+			return wstr;
+		}
+
+
+		size_t
+			QueryFileLinks(UniqueHandle::pointer h)
+		{
+			return FetchFileInfo([](::BY_HANDLE_FILE_INFORMATION& info) {
+				return size_t(info.nNumberOfLinks);
+			}, h);
+		}
+		size_t
+			QueryFileLinks(const wchar_t* path, bool follow_reparse_point)
+		{
+			return MakeFileToDo<size_t(UniqueHandle::pointer)>(QueryFileLinks, path,
+				FollowToAttr(follow_reparse_point));
+		}
+
+		pair<VolumeID, FileID>
+			QueryFileNodeID(UniqueHandle::pointer h)
+		{
+			return FetchFileInfo([](::BY_HANDLE_FILE_INFORMATION& info) lnothrow
+				->pair<VolumeID, FileID>{
+				return { VolumeID(info.dwVolumeSerialNumber),
+				FileID(info.nFileIndexHigh) << 32 | info.nFileIndexLow };
+			}, h);
+		}
+		pair<VolumeID, FileID>
+			QueryFileNodeID(const wchar_t* path, bool follow_reparse_point)
+		{
+			return MakeFileToDo<pair<VolumeID, FileID>(UniqueHandle::pointer)>(
+				QueryFileNodeID, path, FollowToAttr(follow_reparse_point));
+		}
+
+		std::uint64_t
+			QueryFileSize(UniqueHandle::pointer h)
+		{
+			::LARGE_INTEGER sz;
+
+			LCL_CallF_Win32(GetFileSizeEx, h, &sz);
+
+			if (sz.QuadPart >= 0)
+				return std::uint64_t(sz.QuadPart);
+			throw std::invalid_argument("Negative file size found.");
+		}
+		std::uint64_t
+			QueryFileSize(const wchar_t* path)
+		{
+			return MakeFileToDo<std::uint64_t(UniqueHandle::pointer)>(
+				QueryFileSize, path, FileAttributesAndFlags::NormalWithDirectory);
+		}
+
+		void
+			QueryFileTime(UniqueHandle::pointer h, ::FILETIME* p_ctime, ::FILETIME* p_atime,
+				::FILETIME* p_mtime)
+		{
+			LCL_CallF_Win32(GetFileTime, h, p_ctime, p_atime, p_mtime);
+		}
+		void
+			QueryFileTime(const wchar_t* path, ::FILETIME* p_ctime, ::FILETIME* p_atime,
+				::FILETIME* p_mtime, bool follow_reparse_point)
+		{
+			MakeFileToDo(std::bind<void(UniqueHandle::pointer, ::FILETIME*, ::FILETIME*,
+				::FILETIME*)>(QueryFileTime, std::placeholders::_1, p_ctime, p_atime,
+					p_mtime), path, AccessRights::GenericRead,
+				FollowToAttr(follow_reparse_point));
+		}
+
+		void
+			SetFileTime(UniqueHandle::pointer h, ::FILETIME* p_ctime, ::FILETIME* p_atime,
+				::FILETIME* p_mtime)
+		{
+			using ::SetFileTime;
+
+			LCL_CallF_Win32(SetFileTime, h, p_ctime, p_atime, p_mtime);
+		}
+		void
+			SetFileTime(const wchar_t* path, ::FILETIME* p_ctime, ::FILETIME* p_atime,
+				::FILETIME* p_mtime, bool follow_reparse_point)
+		{
+			MakeFileToDo(std::bind<void(UniqueHandle::pointer, ::FILETIME*, ::FILETIME*,
+				::FILETIME*)>(SetFileTime, std::placeholders::_1, p_ctime, p_atime,
+					p_mtime), path, AccessRights::GenericWrite,
+				FollowToAttr(follow_reparse_point));
+		}
+
+		std::chrono::nanoseconds
+			ConvertTime(const ::FILETIME& file_time)
+		{
+			if (file_time.dwLowDateTime != 0 || file_time.dwHighDateTime != 0)
+			{
+				// FIXME: Local time conversion for FAT volumes.
+				// NOTE: See $2014-10 @ %Documentation::Workflow::Annual2014.
+				::LARGE_INTEGER date;
+
+				// NOTE: The epoch is Jan. 1, 1601: 134774 days to Jan. 1, 1970, i.e.
+				//	11644473600 seconds, or 116444736000000000 * 100 nanoseconds.
+				// TODO: Strip away the magic number;
+				lunseq(date.HighPart = long(file_time.dwHighDateTime),
+					date.LowPart = file_time.dwLowDateTime);
+				return std::chrono::nanoseconds((date.QuadPart - 116444736000000000LL)
+					* 100U);
+			}
+			else
+				leo::throw_error(std::errc::not_supported, lfsig);
+		}
+		::FILETIME
+			ConvertTime(std::chrono::nanoseconds file_time)
+		{
+			::FILETIME res;
+			::LARGE_INTEGER date;
+
+			date.QuadPart = file_time.count() / 100LL + 116444736000000000LL;
+			lunseq(res.dwHighDateTime = static_cast<unsigned long>(date.HighPart),
+				res.dwLowDateTime = date.LowPart);
+			if (res.dwLowDateTime != 0 || res.dwHighDateTime != 0)
+				return res;
+			leo::throw_error(std::errc::not_supported, lfsig);
+		}
+
+
+		void
+			LockFile(UniqueHandle::pointer h, std::uint64_t off, std::uint64_t len,
+				bool exclusive, bool immediate)
+		{
+			if (LB_UNLIKELY(!TryLockFile(h, off, len, exclusive, immediate)))
+				LCL_Raise_Win32E("LockFileEx", lfsig);
+		}
+
+		bool
+			TryLockFile(UniqueHandle::pointer h, std::uint64_t off, std::uint64_t len,
+				bool exclusive, bool immediate) lnothrow
+		{
+			return DoWithDefaultOverlapped([=](::OVERLAPPED& overlapped) lnothrow{
+				// NOTE: Since it can always be checked as result and this is called by
+				//	%LockFile, no logging with %YCL_TraceCallF_Win32 is here.
+				return ::LockFileEx(h, (exclusive ? LOCKFILE_EXCLUSIVE_LOCK : 0UL)
+				| (immediate ? LOCKFILE_FAIL_IMMEDIATELY : 0UL), limpl(0),
+					Low32(len), High32(len), &overlapped);
+			}, off);
+		}
+
+		bool
+			UnlockFile(UniqueHandle::pointer h, std::uint64_t off, std::uint64_t len)
+			lnothrow
+		{
+			return DoWithDefaultOverlapped([=](::OVERLAPPED& overlapped) lnothrow{
+				return
+				::UnlockFileEx(h, limpl(0), Low32(len), High32(len), &overlapped);
+			}, off);
+		}
 	}
 #endif
 }

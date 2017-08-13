@@ -232,7 +232,7 @@ namespace CHRLib
 		inline _tDst
 		MakeUCS2LE(const _tString& str, Encoding enc = CS_Default)
 	{
-		return CHRLib::MakeUCS2LE<_tDst>(str.c_str(), str.length(), enc);
+		return CHRLib::MakeUCS2LE<_tDst>(str.data(), str.length(), enc);
 	}
 	//! \note 传递指定类型的 UCS2-LE 字符串：仅当源类型参数可直接构造目标类型时有效。
 	template<class _tString, class _tDst = std::basic_string<ucs2_t>,

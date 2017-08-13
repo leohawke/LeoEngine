@@ -141,6 +141,7 @@
     <ClInclude Include="LCLib\FileSystem.h" />
     <ClInclude Include="LCLib\FReference.h" />
     <ClInclude Include="LCLib\Host.h" />
+    <ClInclude Include="LCLib\MemoryMapping.h" />
     <ClInclude Include="LCLib\Mutex.h" />
     <ClInclude Include="LCLib\NativeAPI.h" />
     <ClInclude Include="LCLib\Platform.h" />
@@ -163,8 +164,13 @@
     <ClCompile Include="LCLib\Debug.cpp" />
     <ClCompile Include="LCLib\FCommon.cpp" />
     <ClCompile Include="LCLib\FFileIO.cpp" />
-    <ClCompile Include="LCLib\FileSystem.LCLib.cpp" />
+    <ClCompile Include="LCLib\FileSystem.LCLib.cpp">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</PreprocessToFile>
+    </ClCompile>
     <ClCompile Include="LCLib\Host.cpp" />
+    <ClCompile Include="LCLib\MemoryMapping.cpp" />
+    <ClCompile Include="LCLib\NativeAPI.cpp" />
     <ClCompile Include="Service\FileSystem.cpp" />
     <ClCompile Include="Win32\LCLib\Consoles.cpp" />
     <ClCompile Include="Win32\LCLib\MinGW32.cpp" />

@@ -101,15 +101,15 @@
 
 #if LF_Platform == LF_Platform_Win32
 #	define LFL_Win32 1
-#	define LB_Hosted 1
+#	define LF_Hosted 1
 #elif LF_Platform == LF_Platform_MinGW32
 #	define LFL_MinGW 1
 #	define LFL_Win32 1
-#	define LB_Hosted 1
+#	define LF_Hosted 1
 #elif LF_Platform == LF_Platform_Win64
 #	define LFL_Win32 1
 #	define LFL_Win64 1
-#	define LB_Hosted 1
+#	define LF_Hosted 1
 #	ifndef LB_Use_POSIXThread
 #		define LB_Use_POSIXThread 1
 #	endif
@@ -117,7 +117,7 @@
 #	define LFL_MinGW 1
 #	define LFL_Win32 1
 #	define LFL_Win64 1
-#	define LB_Hosted 1
+#	define LF_Hosted 1
 #	ifndef LB_Use_POSIXThread
 #		define LB_Use_POSIXThread 1
 #	endif

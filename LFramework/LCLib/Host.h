@@ -16,7 +16,7 @@
 using HANDLE = void *;
 #endif
 
-#if LB_Hosted
+#if LF_Hosted
 
 namespace platform_ex
 {

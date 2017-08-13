@@ -14,6 +14,23 @@
 #error "Unknown platform found."
 #endif // ! LF_Platform
 
+//@{
+/*!
+\def LCL_ReservedGlobal
+\brief 按实现修饰全局保留名称。
+\see ISO C11 7.1.3 和 WG21 N4594 17.6.4.3 。
+\see https://msdn.microsoft.com/en-us/library/ttcz0bys.aspx 。
+\see https://msdn.microsoft.com/en-us/library/ms235384(v=vs.100).aspx#Anchor_0 。
+*/
+#if LFL_Win32
+#	define LCL_ReservedGlobal(_n) _##_n
+#else
+#	define LCL_ReservedGlobal(_n) _n
+#endif
+//! \brief 调用按实现修饰的具有全局保留名称的函数。
+#define LCL_CallGlobal(_n, ...) ::LCL_ReservedGlobal(_n)(__VA_ARGS__)
+//@}
+
 namespace platform
 {
 #	if LFL_Win32
@@ -46,6 +63,7 @@ static_assert(std::is_signed<platform::ssize_t>(),
 
 #	include <Windows.h>
 #	include <direct.h>
+#   include <io.h>
 
 //! \ingroup name_collision_workarounds
 //@{
@@ -70,6 +88,18 @@ extern "C"
 #	endif
 
 } // extern "C";
+
+
+namespace platform_ex
+{
+
+	/*!
+	\brief 取文件描述符对应的句柄。
+	*/
+	inline PDefH(::HANDLE, ToHandle, int fd) lnothrow
+		ImplRet(::HANDLE(::_get_osfhandle(fd)))
+
+} // namespace platform_ex;
 #endif
 
 #if LFL_Win32 || LFL_API_POSIXFileSystem
@@ -158,11 +188,149 @@ namespace platform
 #endif
 		inline PDefH(bool, HasExtraMode, Mode m)
 		ImplRet(bool(m & ~(Mode::Access | Mode::FileType)))
+
+
+		//@{
+		//! \brief 打开模式。
+		enum class OpenMode : int
+	{
+#define YCL_Impl_OMode(_n, _nm) _n = LCL_ReservedGlobal(O_##_nm)
+#if LFL_Win32
+#	define YCL_Impl_OMode_POSIX(_n, _nm) _n = 0
+#	define YCL_Impl_OMode_Win32(_n, _nm) YCL_Impl_OMode(_n, _nm)
+#else
+#	define YCL_Impl_OMode_POSIX(_n, _nm) YCL_Impl_OMode(_n, _nm)
+#	define YCL_Impl_OMode_Win32(_n, _nm) _n = 0
+#endif
+#if O_CLOEXEC
+		YCL_Impl_OMode_POSIX(CloseOnExec, CLOEXEC),
+#endif
+		YCL_Impl_OMode(Create, CREAT),
+#if O_DIRECTORY
+		YCL_Impl_OMode_POSIX(Directory, DIRECTORY),
+#else
+		// FIXME: Platform %DS does not support this.
+		Directory = 0,
+#endif
+		YCL_Impl_OMode(Exclusive, EXCL),
+		CreateExclusive = Create | Exclusive,
+		YCL_Impl_OMode_POSIX(NoControllingTerminal, NOCTTY),
+#if O_NOFOLLOW
+		YCL_Impl_OMode_POSIX(NoFollow, NOFOLLOW),
+#else
+		// NOTE: Platform %DS does not support links.
+		// NOTE: Platform %Win32 does not support links for these APIs.
+		NoFollow = 0,
+#endif
+		YCL_Impl_OMode(Truncate, TRUNC),
+#if O_TTY_INIT
+		YCL_Impl_OMode_POSIX(TerminalInitialize, TTY_INIT),
+#endif
+		YCL_Impl_OMode(Append, APPEND),
+#if O_DSYNC
+		YCL_Impl_OMode_POSIX(DataSynchronized, DSYNC),
+#endif
+		YCL_Impl_OMode_POSIX(Nonblocking, NONBLOCK),
+#if O_RSYNC
+		YCL_Impl_OMode_POSIX(ReadSynchronized, RSYNC),
+#endif
+		YCL_Impl_OMode_POSIX(Synchronized, SYNC),
+#if O_EXEC
+		YCL_Impl_OMode_POSIX(Execute, EXEC),
+#endif
+		YCL_Impl_OMode(Read, RDONLY),
+		YCL_Impl_OMode(ReadWrite, RDWR),
+#if O_SEARCH
+		YCL_Impl_OMode_POSIX(Search, SEARCH),
+#endif
+		YCL_Impl_OMode(Write, WRONLY),
+		ReadWriteAppend = ReadWrite | Append,
+		ReadWriteTruncate = ReadWrite | Truncate,
+		WriteAppend = Write | Append,
+		WriteTruncate = Write | Truncate,
+		YCL_Impl_OMode_Win32(Text, TEXT),
+		YCL_Impl_OMode_Win32(Binary, BINARY),
+		Raw = Binary,
+		ReadRaw = Read | Raw,
+		ReadWriteRaw = ReadWrite | Raw,
+		// NOTE: On GNU/Hurd %O_ACCMODE can be zero.
+#if O_ACCMODE
+		YCL_Impl_OMode_POSIX(AccessMode, ACCMODE),
+#else
+		AccessMode = Read | Write | ReadWrite,
+#endif
+		YCL_Impl_OMode_Win32(WText, WTEXT),
+		YCL_Impl_OMode_Win32(U16Text, U16TEXT),
+		YCL_Impl_OMode_Win32(U8Text, U8TEXT),
+		YCL_Impl_OMode_Win32(NoInherit, NOINHERIT),
+		YCL_Impl_OMode_Win32(Temporary, TEMPORARY),
+		YCL_Impl_OMode_Win32(ShortLived, SHORT_LIVED),
+		CreateTemporary = Create | Temporary,
+		CreateShortLived = Create | ShortLived,
+		YCL_Impl_OMode_Win32(Sequential, SEQUENTIAL),
+		YCL_Impl_OMode_Win32(Random, RANDOM),
+#if O_NDELAY
+		YCL_Impl_OMode(NoDelay, NDELAY),
+#endif
+		//! \warning 库实现内部使用，需要特定的二进制支持。
+		//@{
+#if O_LARGEFILE
+		//! \note 指定 64 位文件大小。
+		YCL_Impl_OMode(LargeFile, LARGEFILE),
+#else
+		LargeFile = 0,
+#endif
+#if _O_OBTAIN_DIR
+		YCL_Impl_OMode(ObtainDirectory, OBTAIN_DIR),
+#else
+		//! \note 设置 FILE_FLAG_BACKUP_SEMANTICS 。
+		ObtainDirectory = Directory,
+#endif
+		//@}
+		None = 0
+#undef YCL_Impl_OMode_POSIX
+#undef YCL_Impl_OMode_Win32
+#undef YCL_Impl_OMode
+	};
+
+	//! \relates OpenMode
+	DefBitmaskEnum(OpenMode)
+		//@}
 		//@}
 #ifdef LB_IMPL_MSCPP
 #pragma warning(pop)
 #endif
 } // namespace platform;
+
+namespace platform_ex
+{
+
+	/*!
+	\note 第三参数表示是否跟随链接。
+	\pre 间接断言：指针参数非空。
+	\note DS 和 Win32 平台：忽略第三参数，始终不跟随链接。
+	*/
+	//@{
+	/*!
+	\brief 带检查的可跟随链接的 \c stat 调用。
+	\throw std::system_error 检查失败。
+	\note 最后一个参数表示调用签名。
+	*/
+	//@{
+	LF_API LB_NONNULL(2, 4) void
+		cstat(struct ::stat&, const char*, bool, const char*);
+	LF_API LB_NONNULL(3) void
+		cstat(struct ::stat&, int, const char*);
+	//@}
+
+	//! \brief 可跟随链接的 \c stat 调用。
+	LF_API LB_NONNULL(2) int
+		estat(struct ::stat&, const char*, bool) lnothrowv;
+	inline PDefH(int, estat, struct ::stat& st, int fd) lnothrow
+		ImplRet(::fstat(fd, &st))
+		//@}
+
+} // namespace platform_ex;
 #endif
 
 

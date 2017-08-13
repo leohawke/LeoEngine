@@ -245,6 +245,29 @@ namespace leo
 			buf + _vWidth / std::numeric_limits<byte>::digits),
 			leo::make_reverse_iterator(buf));
 	}
+
+	/*!
+	\brief 向字节缓冲区写入指定宽的大端序无符号整数。
+	*/
+	template<size_t _vWidth>
+	inline LB_NONNULL(1) void
+		write_uint_be(byte* buf, typename make_width_int<_vWidth>::unsigned_type
+			val) lnothrowv
+	{
+		lconstraint(buf);
+		leo::unpack_uint<_vWidth>(val, buf);
+	}
+
+	//! \brief 向字节缓冲区写入指定宽的小端序无符号整数。
+	template<size_t _vWidth>
+	inline LB_NONNULL(1) void
+		write_uint_le(byte* buf, typename make_width_int<_vWidth>::unsigned_type
+			val) lnothrowv
+	{
+		lconstraint(buf);
+		leo::unpack_uint<_vWidth>(val, leo::make_reverse_iterator(buf
+			+ _vWidth / std::numeric_limits<byte>::digits));
+	}
 }
 
 #endif

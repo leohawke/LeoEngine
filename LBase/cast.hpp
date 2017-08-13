@@ -107,6 +107,56 @@ namespace leo {
 			return d;
 		throw narrowing_error();
 	}
+
+	namespace details
+	{
+		template<typename _tDst, typename _tSrc>
+		lconstfn _tDst
+			not_widen_cast(_tSrc v, true_) lnothrow
+		{
+			return narrow_cast<_tDst>(v);
+		}
+		template<typename _tDst, typename _tSrc>
+		lconstfn _tDst
+			not_widen_cast(_tSrc v, false_) lnothrow
+		{
+			static_assert(is_arithmetic<_tDst>(), "Invalid destination type found.");
+			static_assert(is_arithmetic<_tSrc>(), "Invalid source type found.");
+			static_assert(std::numeric_limits<_tSrc>::max() == std::numeric_limits<
+				_tDst>::max() || std::numeric_limits<_tSrc>::min()
+				== std::numeric_limits<_tDst>::min(), "Invalid types found.");
+			return v;
+		}
+
+	} // namespace details;
+
+
+	/*!
+	\brief 可能缩小数值范围或数值范围最大和最小值保持不变的转换。
+	\note 使用 ADL narrow_cast 。
+	*/
+	template<typename _tDst, typename _tSrc>
+	lconstfn _tDst
+		not_widen_cast(_tSrc v) lnothrow
+	{
+		return details::not_widen_cast<_tDst>(v,
+			bool_<is_narrowing_from_floating<_tDst, _tSrc>()
+			|| details::test_narrow<_tDst>(std::numeric_limits<_tSrc>::max())
+			|| details::test_narrow<_tDst>(std::numeric_limits<_tSrc>::min())>());
+	}
+
+	//! \note 使用 ADL not_widen_cast 。
+	template<typename _tDst, typename _tSrc>
+	inline _tDst
+		not_widen(_tSrc v)
+	{
+		const auto d(not_widen_cast<_tDst>(v));
+
+		if (static_cast<_tSrc>(d) == v && ((is_signed<_tDst>()
+			== is_signed<_tSrc>()) || (d < _tDst()) == (v < _tSrc())))
+			return d;
+		throw narrowing_error();
+	}
 	//@}
 
 

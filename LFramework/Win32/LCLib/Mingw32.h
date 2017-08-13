@@ -23,6 +23,19 @@ namespace platform_ex {
 		using ErrorCode = unsigned long;
 
 		/*!
+		\brief 转换 Win32 错误为 errno 。
+		\return 当对应不存在时 EINVAL ，否则参数对应的 errno 。
+		*/
+		LF_API LB_STATELESS int
+			ConvertToErrno(ErrorCode) lnothrow;
+
+		/*!
+		\brief 取转换为 errno 的 Win32 错误。
+		*/
+		inline PDefH(int, GetErrnoFromWin32, ) lnothrow
+			ImplRet(ConvertToErrno(::GetLastError()))
+
+		/*!
 		\ingroup exceptions
 		\brief Win32 错误引起的宿主异常。
 		*/
@@ -95,7 +108,7 @@ namespace platform_ex {
 		/*!
 		\brief 跟踪 ::GetLastError 取得的调用状态结果。
 		*/
-#	define LFL_Trace_Win32Error(_lv, _fn, _msg) \
+#	define LCL_Trace_Win32E(_lv, _fn, _msg) \
 	TraceDe(_lv, "Error %lu: failed calling " #_fn " @ %s.", \
 		::GetLastError(), _msg)
 
@@ -126,7 +139,7 @@ namespace platform_ex {
 		/*!
 		\note 若失败跟踪 ::GetLastError 的结果。
 		\note 格式转换说明符置于最前以避免宏参数影响结果。
-		\sa LFL_Trace_Win32Error
+		\sa LCL_Trace_Win32E
 		*/
 		//@{
 #	define LCL_WrapCallWin32_Trace(_fn, ...) \
@@ -134,7 +147,7 @@ namespace platform_ex {
 		const auto res(_fn(__VA_ARGS__)); \
 	\
 		if(LB_UNLIKELY(!res)) \
-			LFL_Trace_Win32Error(platform::Descriptions::Warning, _fn, msg); \
+			LCL_Trace_Win32E(platform::Descriptions::Warning, _fn, msg); \
 		return res; \
 	}
 
@@ -603,6 +616,207 @@ namespace platform_ex {
 			void
 				Rewind() lnothrow;
 		};
+
+		/*!
+		\brief 重解析点数据。
+		\note 避免直接使用指针转换成显式不同的类型时引起未定义行为。
+		\warning 非虚析构。
+		*/
+		class LF_API ReparsePointData
+		{
+		public:
+			struct Data;
+
+		private:
+			leo::aligned_storage_t<MAXIMUM_REPARSE_DATA_BUFFER_SIZE,
+				lalignof(void*)> target_buffer;
+			//! \invariant <tt>&pun.get() == &target_buffer</tt>
+			leo::pun_ref<Data> pun;
+
+		public:
+			ReparsePointData();
+			/*!
+			\brief 析构：类定义外默认实现。
+			\note 允许 Data 作为不完整类型使用。
+			*/
+			~ReparsePointData();
+
+			DefGetter(const lnothrow, Data&, , pun.get())
+		};
+
+
+		/*!
+		\brief 读取重解析点内容。
+		\pre 断言：参数非空。
+		\exception Win32Exception 打开文件失败。
+		\throw std::invalid_argument 打开的文件不是重解析点。
+		\throw std::system_error 重解析点检查失败。
+		\li std::errc::not_supported 重解析点标签不被支持。
+		*/
+		//@{
+		LF_API LB_NONNULL(1) wstring
+			ResolveReparsePoint(const wchar_t*);
+		LF_API LB_NONNULL(1) wstring_view
+			ResolveReparsePoint(const wchar_t*, ReparsePointData::Data&);
+		//@}
+
+		/*!
+		\brief 展开字符串中的环境变量。
+		\pre 间接断言：参数非空。
+		\throw Win32Exception 调用失败。
+		*/
+		LF_API LB_NONNULL(1) wstring
+			ExpandEnvironmentStrings(const wchar_t*);
+
+
+		/*!
+		\see https://msdn.microsoft.com/zh-cn/library/windows/desktop/aa363788(v=vs.85).aspx 。
+		*/
+		//@{
+		//! \brief 文件标识。
+		using FileID = std::uint64_t;
+		//! \brief 卷序列号。
+		using VolumeID = std::uint32_t;
+		//@}
+
+		//! \throw Win32Exception 访问文件或查询文件元数据失败。
+		//@{
+		//@{
+		//! \brief 查询文件链接数。
+		//@{
+		LF_API size_t
+			QueryFileLinks(UniqueHandle::pointer);
+		/*!
+		\pre 间接断言：路径参数非空。
+		\note 最后参数表示跟踪重解析点。
+		*/
+		LF_API LB_NONNULL(1) size_t
+			QueryFileLinks(const wchar_t*, bool = {});
+		//@}
+
+		/*!
+		\brief 查询文件标识。
+		\return 卷标识和卷上文件的标识的二元组。
+		\bug ReFS 上不保证唯一。
+		\see https://msdn.microsoft.com/zh-cn/library/windows/desktop/aa363788(v=vs.85).aspx 。
+		*/
+		//@{
+		LF_API pair<VolumeID, FileID>
+			QueryFileNodeID(UniqueHandle::pointer);
+		/*!
+		\pre 间接断言：路径参数非空。
+		\note 最后参数表示跟踪重解析点。
+		*/
+		LF_API LB_NONNULL(1) pair<VolumeID, FileID>
+			QueryFileNodeID(const wchar_t*, bool = {});
+		//@}
+		//@}
+
+		/*!
+		\brief 查询文件大小。
+		\throw std::invalid_argument 查询文件得到的大小小于 0 。
+		*/
+		//@{
+		LF_API std::uint64_t
+			QueryFileSize(UniqueHandle::pointer);
+		//! \pre 间接断言：路径参数非空。
+		LF_API LB_NONNULL(1) std::uint64_t
+			QueryFileSize(const wchar_t*);
+		//@}
+
+		/*
+		\note 后三个参数可选，指针为空时忽略。
+		\note 最高精度取决于文件系统。
+		*/
+		//@{
+		//! \brief 查询文件的创建、访问和/或修改时间。
+		//@{
+		/*!
+		\pre 文件句柄不为 \c INVALID_HANDLE_VALUE ，
+		且具有 AccessRights::GenericRead 权限。
+		*/
+		LF_API void
+			QueryFileTime(UniqueHandle::pointer, ::FILETIME* = {}, ::FILETIME* = {},
+				::FILETIME* = {});
+		/*!
+		\pre 间接断言：路径参数非空。
+		\note 即使可选参数都为空指针时仍访问文件。最后参数表示跟踪重解析点。
+		*/
+		LF_API LB_NONNULL(1) void
+			QueryFileTime(const wchar_t*, ::FILETIME* = {}, ::FILETIME* = {},
+				::FILETIME* = {}, bool = {});
+		//@}
+
+		/*!
+		\brief 设置文件的创建、访问和/或修改时间。
+		*/
+		//@{
+		/*!
+		\pre 文件句柄不为 \c INVALID_HANDLE_VALUE ，
+		且具有 FileSpecificAccessRights::WriteAttributes 权限。
+		*/
+		LF_API void
+			SetFileTime(UniqueHandle::pointer, ::FILETIME* = {}, ::FILETIME* = {},
+				::FILETIME* = {});
+		/*!
+		\pre 间接断言：路径参数非空。
+		\note 即使可选参数都为空指针时仍访问文件。最后参数表示跟踪重解析点。
+		*/
+		LF_API LB_NONNULL(1) void
+			SetFileTime(const wchar_t*, ::FILETIME* = {}, ::FILETIME* = {},
+				::FILETIME* = {}, bool = {});
+		//@}
+		//@}
+		//@}
+
+		/*!
+		\throw std::system_error 调用失败。
+		\li std::errc::not_supported 输入的时间表示不被实现支持。
+		*/
+		//@{
+		/*!
+		\brief 转换文件时间为以 POSIX 历元起始度量的时间间隔。
+		*/
+		LF_API std::chrono::nanoseconds
+			ConvertTime(const ::FILETIME&);
+		/*!
+		\brief 转换以 POSIX 历元起始度量的时间间隔为文件时间。
+		*/
+		LF_API::FILETIME
+			ConvertTime(std::chrono::nanoseconds);
+		//@}
+
+
+		/*!
+		\pre 文件句柄不为 \c INVALID_HANDLE_VALUE ，
+		且具有 AccessRights::GenericRead 或 AccessRights::GenericWrite 权限。
+		*/
+		//@{
+		/*!
+		\brief 锁定文件。
+		\note 对内存映射文件为协同锁，其它文件为强制锁。
+		\note 第二和第三参数指定文件锁定范围的起始偏移量和大小。
+		\note 最后两个参数分别表示是否为独占锁和是否立刻返回。
+		*/
+		//@{
+		//! \throw Win32Exception 锁定失败。
+		void
+			LockFile(UniqueHandle::pointer, std::uint64_t = 0,
+				std::uint64_t = std::uint64_t(-1), bool = true, bool = {});
+
+		bool
+			TryLockFile(UniqueHandle::pointer, std::uint64_t = 0,
+				std::uint64_t = std::uint64_t(-1), bool = true, bool = true) lnothrow;
+		//@}
+
+		/*!
+		\brief 解锁文件。
+		\pre 文件已被锁定。
+		*/
+		bool
+			UnlockFile(UniqueHandle::pointer, std::uint64_t = 0,
+				std::uint64_t = std::uint64_t(-1)) lnothrow;
+		//@}
 
 		/*!
 		\brief 取系统目录路径。

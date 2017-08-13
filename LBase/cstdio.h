@@ -166,6 +166,28 @@ namespace leo
 	{
 		return !i.get_stream();
 	}
+
+	/*!
+	\brief ISO C/C++ 标准输入输出接口打开模式转换。
+	*/
+	//@{
+	/*!
+	\see ISO C++11 Table 132 。
+	\note 忽略 std::ios_base::ate 。
+	\see http://wg21.cmeerw.net/lwg/issue596 。
+	*/
+	LB_API LB_PURE const char*
+		openmode_conv(std::ios_base::openmode) lnothrow;
+	/*!
+	\brief ISO C/C++ 标准输入输出接口打开模式转换。
+	\return 若失败（包括空参数情形）为 std::ios_base::openmode() ，否则为对应的值。
+	\see ISO C11 7.21.5.3/3 。
+	\note 顺序严格限定。
+	\note 支持 x 转换。
+	*/
+	LB_API LB_PURE std::ios_base::openmode
+		openmode_conv(const char*) lnothrow;
+	//@}
 }
 
 

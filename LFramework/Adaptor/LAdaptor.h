@@ -17,6 +17,7 @@
 //	ignore, make_pair, make_tuple, pair, tie, tuple, tuple_cat, size, uopen,
 //	'uf*', 'up*', etc;
 #include <LFramework/LCLib/FileSystem.h>
+#include <LFramework/LCLib/MemoryMapping.h>
 
 namespace leo {
 	using platform::list;

@@ -126,6 +126,9 @@
     <ClInclude Include="Win32\LCLib\Registry.h">
       <Filter>Win32\LCLib</Filter>
     </ClInclude>
+    <ClInclude Include="LCLib\MemoryMapping.h">
+      <Filter>LCLib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Win32\LCLib\Consoles.cpp">
@@ -178,6 +181,12 @@
     </ClCompile>
     <ClCompile Include="Win32\LCLib\Registry.cpp">
       <Filter>Win32\LCLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LCLib\MemoryMapping.cpp">
+      <Filter>LCLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LCLib\NativeAPI.cpp">
+      <Filter>LCLib</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

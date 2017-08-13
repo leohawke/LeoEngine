@@ -4,7 +4,7 @@
 #include "ldef.h"
 #include <cctype>
 
-namespace stdex
+namespace leo
 {
 	/*!
 	\brief 使用 US-ASCII 字符集的 std::isprint 实现。
@@ -35,6 +35,38 @@ namespace stdex
 	{
 		return limpl(isprint_ISO8859_1(c));
 	}
+
+	/*!
+	\brief 转换大小写字符。
+	\note 和 ISO C 标准库对应接口不同而和 ISO C++ \<locale\> 中的接口类似，
+	参数和返回值是字符类型而不是对应的整数类型。
+	*/
+	//@{
+	template<typename _tChar>
+	inline _tChar
+		tolower(_tChar c) lnothrow
+	{
+		return _tChar(std::towupper(wint_t(c)));
+	}
+	inline char
+		tolower(char c) lnothrow
+	{
+		return char(std::tolower(c));
+	}
+
+
+	template<typename _tChar>
+	inline _tChar
+		toupper(_tChar c) lnothrow
+	{
+		return _tChar(std::towlower(wint_t(c)));
+	}
+	inline char
+		toupper(char c) lnothrow
+	{
+		return char(std::toupper(c));
+	}
+	//@}
 }
 
 #endif

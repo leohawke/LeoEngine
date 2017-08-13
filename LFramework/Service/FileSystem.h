@@ -8,6 +8,7 @@
 #define Framework_Service_FileSystem_h_ 1
 
 #include <LBase/lmacro.h>
+#include <LFramework/Service/File.h>
 #include <LFramework/Core/LString.h>
 #include <LBase/path.hpp> // for leo::path;
 
@@ -716,7 +717,6 @@ namespace leo
 			//@{
 			inline PDefH(void, DeleteTree, const Path& pth)
 			ImplExpr(ClearTree(pth), Remove(string(pth).c_str()))
-			//! \since build 593
 			inline PDefH(void, DeleteTree, const string& pth)
 			ImplExpr(DeleteTree(Path(pth)))
 			//@}

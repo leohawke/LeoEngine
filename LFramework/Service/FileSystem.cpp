@@ -34,7 +34,7 @@ namespace leo
 			if (IsRelative(res))
 				res = Path(FetchCurrentWorkingDirectory<char16_t>(init_size)) / res;
 			res.Normalize();
-			LTraceDe(Debug, "Converted path is '%s'.", res.VerifyAsMBCS().c_str());
+			TraceDe(Debug, "Converted path is '%s'.", res.VerifyAsMBCS().c_str());
 			LAssert(IsAbsolute(res), "Invalid path converted.");
 			return res;
 		}
@@ -53,7 +53,7 @@ namespace leo
 
 					return true;
 				}
-				CatchExpr(std::system_error& e, YTraceDe(Debug,
+				CatchExpr(std::system_error& e, TraceDe(Debug,
 					"Directory verfication failed."), ExtractAndTrace(e, Debug))
 					return {};
 			}
@@ -81,8 +81,8 @@ namespace leo
 				upath += MakeMBCS(name.c_str()) + FetchSeparator<char>();
 				if (!VerifyDirectory(upath) && !umkdir(upath.c_str()) && errno != EEXIST)
 				{
-					LTraceDe(Err, "Failed making directory path '%s'", upath.c_str());
-					leo::throw_error(errno, yfsig);
+					TraceDe(Err, "Failed making directory path '%s'", upath.c_str());
+					leo::throw_error(errno, lfsig);
 				}
 			}
 		}

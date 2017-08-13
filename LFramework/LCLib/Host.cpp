@@ -13,7 +13,7 @@ using platform::ThrowFileOperationFailure;
 using platform::string;
 using platform::string_view;
 
-#if LB_Hosted
+#if LF_Hosted
 
 namespace platform_ex
 {
