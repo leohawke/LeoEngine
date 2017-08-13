@@ -222,6 +222,9 @@ namespace platform_ex {
 	}
 		//@}
 
+		LF_API wstring
+			FetchModuleFileName(::HMODULE = {}, leo::RecordLevel = leo::Err);
+
 			/*!
 			\brief ¾Ö²¿´æ´¢É¾³ýÆ÷¡£
 			*/

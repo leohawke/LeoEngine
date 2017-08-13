@@ -5,8 +5,8 @@
 #ifndef LScheme_Lexical_H
 #define LScheme_Lexical_H 1
 
+#include <LFramework/Adaptor/LAdaptor.h>
 #include "inc_Sxml.h"
-#include <LBase/LAdaptor.h>
 #include <cctype>
 
 namespace scheme {

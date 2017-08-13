@@ -1,3 +1,9 @@
+#include <LBase/ldef.h>
+#ifdef LB_IMPL_MSCPP
+#pragma warning(push)
+#pragma warning(disable:4180)
+#endif
+
 #include "Host.h"
 #include "NativeAPI.h"
 #include "FFileIO.h"
@@ -16,6 +22,8 @@ using platform::string_view;
 
 namespace platform_ex
 {
+
+
 
 	Exception::Exception(std::error_code ec, const char* str, RecordLevel lv)
 		: system_error(ec, Nonnull(str)),
@@ -37,18 +45,59 @@ namespace platform_ex
 	{}
 	ImplDeDtor(Exception)
 
-	leo::RecordLevel Exception::GetLevel() const lnothrow
+		leo::RecordLevel Exception::GetLevel() const lnothrow
 	{
 		return level;
 	}
 
 #if LFL_Win32
-		void
+	void
 		HandleDelete::operator()(pointer h) const lnothrow
 	{
 		LFL_CallWin32F_Trace(CloseHandle, h);
 	}
 #endif
+
+
+	int
+		upclose(std::FILE* fp) lnothrowv
+	{
+		LAssertNonnull(fp);
+
+		return LCL_CallGlobal(pclose, fp);
+	}
+
+	std::FILE*
+		upopen(const char* filename, const char* mode) lnothrowv
+	{
+		LAssertNonnull(filename);
+		LAssert(Deref(mode) != char(), "Invalid argument found.");
+#if LFL_Win32
+		return platform::CallNothrow({}, [=] {
+			return ::_wpopen(MakePathStringW(filename).c_str(),
+				MakePathStringW(mode).c_str());
+		});
+#else
+		return ::popen(filename, mode);
+#endif
+	}
+	std::FILE*
+		upopen(const char16_t* filename, const char16_t* mode) lnothrowv
+	{
+		using namespace platform;
+
+		LAssertNonnull(filename);
+		LAssert(Deref(mode) != char(), "Invalid argument found.");
+#if LFL_Win32
+		return ::_wpopen(wcast(filename), wcast(mode));
+#else
+		return CallNothrow({}, [=] {
+			return ::popen(MakePathString(filename).c_str(),
+				MakePathString(mode).c_str());
+		});
+#endif
+	}
+
 
 	string
 		FetchCommandOutput(const char* cmd, size_t buf_size)
@@ -56,8 +105,8 @@ namespace platform_ex
 		if (LB_UNLIKELY(buf_size == 0))
 			throw std::invalid_argument("Zero buffer size found.");
 		// TODO: Improve Win32 implementation?
-		if (const auto fp = leo::unique_raw(platform::upopen(cmd, "r"),
-			platform::upclose))
+		if (const auto fp = leo::unique_raw(upopen(cmd, "r"),
+			upclose))
 		{
 			leo::setnbuf(fp.get());
 
@@ -69,9 +118,11 @@ namespace platform_ex
 				res.append(&p_buf[0], n);
 			return res;
 		}
-		throw std::system_error("Failed opening pipe.");
+		LCL_Raise_SysE(, "::popen", lfsig);
 	}
-
+#ifdef LB_IMPL_MSCPP
+#pragma warning(pop)
+#endif
 
 	leo::locked_ptr<CommandCache>
 		LockCommandCache()
@@ -119,24 +170,24 @@ namespace platform_ex
 		LCL_CallF_Win32(SetHandleInformation, h_write.get(), HANDLE_FLAG_INHERIT,
 			HANDLE_FLAG_INHERIT);
 		return{ std::move(h_read), std::move(h_write) };
-//#	elif YCL_API_Has_unistd_h
-//		int fds[2];
-//
-//		// TODO: Check whether '::socketpair' is available.
-//		if (::pipe(fds) != 0)
-//			throw std::system_error("Failed getting file size.");
-//
-//		auto pr(make_pair(UniqueHandle(fds[0]), UniqueHandle(fds[1])));
-//		auto check([](UniqueHandle& h, const char* msg) {
-//			// NOTE: %O_NONBLOCK is initially cleared on ::pipe results.
-//			//	See http://pubs.opengroup.org/onlinepubs/9699919799/.
-//			if (!(h && h->SetNonblocking()))
-//				throw std::system_error(msg);
-//		});
-//
-//		check(pr.first, "Failed making pipe for reading."),
-//			check(pr.second, "Failed making pipe for writing.");
-//		return pr;
+		//#	elif YCL_API_Has_unistd_h
+		//		int fds[2];
+		//
+		//		// TODO: Check whether '::socketpair' is available.
+		//		if (::pipe(fds) != 0)
+		//			throw std::system_error("Failed getting file size.");
+		//
+		//		auto pr(make_pair(UniqueHandle(fds[0]), UniqueHandle(fds[1])));
+		//		auto check([](UniqueHandle& h, const char* msg) {
+		//			// NOTE: %O_NONBLOCK is initially cleared on ::pipe results.
+		//			//	See http://pubs.opengroup.org/onlinepubs/9699919799/.
+		//			if (!(h && h->SetNonblocking()))
+		//				throw std::system_error(msg);
+		//		});
+		//
+		//		check(pr.first, "Failed making pipe for reading."),
+		//			check(pr.second, "Failed making pipe for writing.");
+		//		return pr;
 #	else
 #	error "Unsupported platform found."
 #	endif
@@ -278,10 +329,10 @@ namespace platform_ex
 		return Guard(*this, &Terminal::UpdateForeColor, c);
 	}
 
-		bool
+	bool
 		Terminal::RestoreAttributes()
 	{
-			return CallTe(&TerminalData::RestoreAttributes, p_data);
+		return CallTe(&TerminalData::RestoreAttributes, p_data);
 	}
 
 	bool

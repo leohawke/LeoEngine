@@ -1,6 +1,7 @@
 #ifndef LBase_cstring_h
 #define LBase_cstring_h 1
 
+#include <LBase/ldef.h>
 #include "LBase/type_pun.hpp" // for or_, is_same;
 #include "LBase/cassert.h" // for lconstraint;
 #include "LBase/cctype.h" // for stdex::tolower;

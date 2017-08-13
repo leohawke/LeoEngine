@@ -133,6 +133,7 @@
     <ClInclude Include="Core\LObject.h" />
     <ClInclude Include="Core\LShellDefinition.h" />
     <ClInclude Include="Core\LString.h" />
+    <ClInclude Include="Core\ValueNode.h" />
     <ClInclude Include="Helper\Initialization.h" />
     <ClInclude Include="LCLib\Debug.h" />
     <ClInclude Include="LCLib\FCommon.h" />
@@ -160,6 +161,7 @@
     <ClCompile Include="Core\LException.cpp" />
     <ClCompile Include="Core\LObject.cpp" />
     <ClCompile Include="Core\LString.cpp" />
+    <ClCompile Include="Core\ValueNode.cpp" />
     <ClCompile Include="Helper\Initialization.cpp" />
     <ClCompile Include="LCLib\Debug.cpp" />
     <ClCompile Include="LCLib\FCommon.cpp" />

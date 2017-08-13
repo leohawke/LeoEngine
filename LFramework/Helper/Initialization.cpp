@@ -1,85 +1,92 @@
+#include <LBase/scope_gurad.hpp>
+
 #include "Initialization.h"
 #include "LFramework/LCLib/Platform.h"
 #include "LFramework/Win32/LCLib/NLS.h"
+#include "LFramework/Service/Filesystem.h"
+#include "LFramework/Adaptor/LAdaptor.h"
+
+#include <LScheme/Configuration.h>
 
 using namespace Test;
-using namespace leo;
 using namespace platform_ex;
 
-namespace {
+namespace leo {
+	using namespace IO;
+	namespace {
 #undef CONF_PATH
 #undef DATA_DIRECTORY
 #undef DEF_FONT_DIRECTORY
 #undef DEF_FONT_PATH
 #if LFL_Win32 || LFL_Linux
-	const string&
-		FetchWorkingRoot()
-	{
-		static const struct Init
+		const string&
+			FetchWorkingRoot()
 		{
-			string Path;
+			static const struct Init
+			{
+				string Path;
 
-			Init()
-				: Path([] {
+				Init()
+					: Path([] {
 #	if LFL_Win32
-				IO::Path image(platform::ucast(
-					platform_ex::FetchModuleFileName().data()));
+					IO::Path image(platform::ucast(
+						platform_ex::Windows::FetchModuleFileName().data()));
 
-				if (!image.empty())
-				{
-					image.pop_back();
-
-					const auto& dir(image.Verify());
-
-					if (!dir.empty() && dir.back() == FetchSeparator<char16_t>())
-						return dir.GetMBCS();
-				}
-#	elif LFL_Android
-				const char*
-					sd_paths[]{ "/sdcard/", "/mnt/sdcard/", "/storage/sdcard0/" };
-
-				for (const auto& path : sd_paths)
-					if (IO::VerifyDirectory(path))
+					if (!image.empty())
 					{
-						YTraceDe(Informative, "Successfully found SD card path"
-							" '%s' as root path.", path);
-						return path;
+						image.pop_back();
+
+						const auto& dir(image.Verify());
+
+						if (!dir.empty() && dir.back() == FetchSeparator<char16_t>())
+							return dir.GetMBCS();
 					}
-					else
-						YTraceDe(Informative,
-							"Failed accessing SD card path '%s'.", path);
+#	elif LFL_Android
+					const char*
+						sd_paths[]{ "/sdcard/", "/mnt/sdcard/", "/storage/sdcard0/" };
+
+					for (const auto& path : sd_paths)
+						if (IO::VerifyDirectory(path))
+						{
+							YTraceDe(Informative, "Successfully found SD card path"
+								" '%s' as root path.", path);
+							return path;
+						}
+						else
+							YTraceDe(Informative,
+								"Failed accessing SD card path '%s'.", path);
 #	elif LFL_Linux
-				// FIXME: What if link reading failed (i.e. permission denied)?
-				// XXX: Link content like 'node_type:[inode]' is not supported.
-				// TODO: Use implemnetation for BSD family OS, etc.
-				auto image(IO::ResolvePath<leo::path<vector<string>,
-					IO::PathTraits>>(string_view("/proc/self/exe")));
+					// FIXME: What if link reading failed (i.e. permission denied)?
+					// XXX: Link content like 'node_type:[inode]' is not supported.
+					// TODO: Use implemnetation for BSD family OS, etc.
+					auto image(IO::ResolvePath<leo::path<vector<string>,
+						IO::PathTraits>>(string_view("/proc/self/exe")));
 
-				if (!image.empty())
-				{
-					image.pop_back();
+					if (!image.empty())
+					{
+						image.pop_back();
 
-					const auto& dir(IO::VerifyDirectoryPathTail(
-						leo::to_string_d(image)));
+						const auto& dir(IO::VerifyDirectoryPathTail(
+							leo::to_string_d(image)));
 
-					if (!dir.empty() && dir.back() == FetchSeparator<char>())
-						return dir;
-				}
+						if (!dir.empty() && dir.back() == FetchSeparator<char>())
+							return dir;
+					}
 #	else
 #		error "Unsupported platform found."
 #	endif
-				throw GeneralEvent("Failed finding working root path.");
-			}())
-			{
-				TraceDe(Informative, "Initialized root directory path '%s'.",
-					Path.c_str());
-			}
-		} init;
+					throw GeneralEvent("Failed finding working root path.");
+				}())
+				{
+					TraceDe(Informative, "Initialized root directory path '%s'.",
+						Path.c_str());
+				}
+			} init;
 
-		return init.Path;
-	}
+			return init.Path;
+		}
 
-	// TODO: Reduce overhead?
+		// TODO: Reduce overhead?
 #	define CONF_PATH (FetchWorkingRoot() + "lconf.lsl").c_str()
 #endif
 #if LFL_DS
@@ -90,10 +97,10 @@ namespace {
 #	define DATA_DIRECTORY FetchWorkingRoot()
 #	define DEF_FONT_PATH (FetchSystemFontDirectory_Win32() + "SimSun.ttc")
 	//! \since build 693
-	inline PDefH(string, FetchSystemFontDirectory_Win32, )
-		// NOTE: Hard-coded as Shell32 special path with %CSIDL_FONTS or
-		//	%CSIDL_FONTS. See https://msdn.microsoft.com/en-us/library/dd378457.aspx.
-		ImplRet(Windows::WCSToUTF8(Windows::FetchWindowsPath()) + "Fonts\\")
+		inline PDefH(string, FetchSystemFontDirectory_Win32, )
+			// NOTE: Hard-coded as Shell32 special path with %CSIDL_FONTS or
+			//	%CSIDL_FONTS. See https://msdn.microsoft.com/en-us/library/dd378457.aspx.
+			ImplRet(Windows::WCSToUTF8(Windows::FetchWindowsPath()) + "Fonts\\")
 #elif LFL_Android
 #	define DATA_DIRECTORY (FetchWorkingRoot() + "Data/")
 #	define DEF_FONT_DIRECTORY "/system/fonts/"
@@ -113,9 +120,34 @@ namespace {
 #ifndef DEF_FONT_DIRECTORY
 #	define DEF_FONT_DIRECTORY DATA_DIRECTORY
 #endif
+	}
+
 }
 
 namespace Test {
+	using namespace leo;
+
+	void
+		WriteNPLA1Stream(std::ostream& os, scheme::Configuration&& conf)
+	{
+		leo::write_literal(os, Text::BOM_UTF_8) << std::move(conf);
+	}
+
+	//! \since build 724
+	ValueNode
+		TryReadRawNPLStream(std::istream& is)
+	{
+		scheme::Configuration conf;
+
+		is >> conf;
+		TraceDe(Debug, "Plain configuration loaded.");
+		if (!conf.GetNodeRRef().empty())
+			return conf.GetNodeRRef();
+		TraceDe(Warning, "Empty configuration found.");
+		throw GeneralEvent("Invalid stream found when reading configuration.");
+	}
+
+
 
 	LB_NONNULL(1, 2)leo::ValueNode Test::LoadLSLV1File(const char * disp, const char * path, leo::ValueNode(*creator)(), bool show_info)
 	{
@@ -175,3 +207,4 @@ namespace Test {
 		}, show_info);
 	}
 }
+

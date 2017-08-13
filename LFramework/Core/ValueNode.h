@@ -4,12 +4,11 @@
 \par 修改时间:
 2017-03-24 09:50 +0800
 */
-#ifndef LScheme_ValueNode_H
-#define LScheme_ValueNode_H 1
-
-#include "LObject.h"
+#ifndef Framework_ValueNode_H
+#define Framework_ValueNode_H 1
 
 #include <LBase/set.hpp>
+#include <LFramework/Core/LObject.h>
 #include <LBase/path.hpp>
 #include <numeric>
 
@@ -18,7 +17,7 @@ namespace leo {
 
 	lconstexpr const struct NoContainerTag {} NoContainer{};
 
-	class LS_API ValueNode : private totally_ordered<ValueNode>,
+	class LF_API ValueNode : private totally_ordered<ValueNode>,
 		private totally_ordered<ValueNode, string>
 	{
 	public:
@@ -497,7 +496,7 @@ namespace leo {
 			/*!
 			\brief 交换。
 			*/
-			LS_API friend void
+			LF_API friend void
 			swap(ValueNode&, ValueNode&) lnothrow;
 
 		//@{
@@ -572,11 +571,11 @@ namespace leo {
 
 	//@{
 	//! \brief 取指定名称指称的值。
-	LS_API ValueObject
+	LF_API ValueObject
 		GetValueOf(observer_ptr<const ValueNode>);
 
 	//! \brief 取指定名称指称的值的指针。
-	LS_API observer_ptr<const ValueObject>
+	LF_API observer_ptr<const ValueObject>
 		GetValuePtrOf(observer_ptr<const ValueNode>);
 	//@}
 
@@ -593,9 +592,9 @@ namespace leo {
 	\throw std::out_of_range 未找到对应节点。
 	*/
 	//@{
-	LS_API ValueNode&
+	LF_API ValueNode&
 		AccessNode(ValueNode::Container*, const string&);
-	LS_API const ValueNode&
+	LF_API const ValueNode&
 		AccessNode(const ValueNode::Container*, const string&);
 	template<typename _tKey>
 	ValueNode&
@@ -641,9 +640,9 @@ namespace leo {
 	\note 时间复杂度 O(n) 。
 	*/
 	//@{
-	LS_API ValueNode&
+	LF_API ValueNode&
 		AccessNode(ValueNode&, size_t);
-	LS_API const ValueNode&
+	LF_API const ValueNode&
 		AccessNode(const ValueNode&, size_t);
 	//@}
 	template<typename _tKey, limpl(typename = leo::enable_if_t<
@@ -688,9 +687,9 @@ namespace leo {
 
 	//! \brief 访问节点指针。
 	//@{
-	LS_API observer_ptr<ValueNode>
+	LF_API observer_ptr<ValueNode>
 		AccessNodePtr(ValueNode::Container&, const string&) lnothrow;
-	LS_API observer_ptr<const ValueNode>
+	LF_API observer_ptr<const ValueNode>
 		AccessNodePtr(const ValueNode::Container&, const string&) lnothrow;
 	template<typename _tKey>
 	observer_ptr<ValueNode>
@@ -736,9 +735,9 @@ namespace leo {
 	\note 时间复杂度 O(n) 。
 	*/
 	//@{
-	LS_API observer_ptr<ValueNode>
+	LF_API observer_ptr<ValueNode>
 		AccessNodePtr(ValueNode&, size_t);
-	LS_API observer_ptr<const ValueNode>
+	LF_API observer_ptr<const ValueNode>
 		AccessNodePtr(const ValueNode&, size_t);
 	//@}
 	template<typename _tKey, limpl(typename = leo::enable_if_t<
@@ -933,7 +932,7 @@ namespace leo {
 
 	//@{
 	//! \brief 移除空子节点。
-	LS_API void
+	LF_API void
 		RemoveEmptyChildren(ValueNode::Container&) lnothrow;
 
 	/*!
@@ -941,7 +940,7 @@ namespace leo {
 	\pre 断言：节点非空。
 	*/
 	//@{
-	LS_API void
+	LF_API void
 		RemoveHead(ValueNode::Container&) lnothrowv;
 	inline PDefH(void, RemoveHead, ValueNode& term) lnothrowv
 		ImplExpr(RemoveHead(term.GetContainerRef()))
@@ -954,7 +953,7 @@ namespace leo {
 		\pre 断言：字符串参数的数据指针非空。
 		\note 仅测试能被 <tt>unsigned long</tt> 表示的整数。
 		*/
-		LS_API bool
+		LF_API bool
 		IsPrefixedIndex(string_view, char = '$');
 
 	/*!
@@ -964,7 +963,7 @@ namespace leo {
 	\note 重复使用作为新节点的名称，可用于插入不重复节点。
 	*/
 	//@{
-	LS_API string
+	LF_API string
 		MakeIndex(size_t);
 	inline PDefH(string, MakeIndex, const ValueNode::Container& con)
 		ImplRet(MakeIndex(con.size()))
@@ -991,7 +990,7 @@ namespace leo {
 	/*!
 	\brief 包装节点的组合字面量。
 	*/
-	class LS_API NodeLiteral final
+	class LF_API NodeLiteral final
 	{
 	private:
 		ValueNode node;

@@ -129,6 +129,9 @@
     <ClInclude Include="LCLib\MemoryMapping.h">
       <Filter>LCLib</Filter>
     </ClInclude>
+    <ClInclude Include="Core\ValueNode.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Win32\LCLib\Consoles.cpp">
@@ -187,6 +190,9 @@
     </ClCompile>
     <ClCompile Include="LCLib\NativeAPI.cpp">
       <Filter>LCLib</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ValueNode.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

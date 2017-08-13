@@ -1,3 +1,4 @@
+#include <LBase/ldef.h>
 #include "ValueNode.h"
 #include <cstdio>
 

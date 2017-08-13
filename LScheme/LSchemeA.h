@@ -5,9 +5,8 @@
 #ifndef LScheme_LSchemeA_H
 #define LScheme_LSchemeA_H 1
 
-
-#include "SContext.h" 
 #include <LBase/sutility.h> // for leo::derived_entity
+#include "SContext.h" 
 #include "LEvent.hpp"
 #include <LBase/any.h> // for leo::any
 
