@@ -255,6 +255,21 @@ namespace leo {
 		= cond_t<is_enum<_type>, vdefer<underlying_type_t, _type>, _type>;
 
 	/*!
+	\brief 条件判断，若失败使用默认类型。
+	\sa detected_or
+	\sa detected_or_t
+	*/
+	//@{
+	template<class _tCond, typename _tDefault, template<typename...> class _gOp,
+		typename... _tParams>
+		using cond_or = cond_t<_tCond, vdefer<_gOp, _tParams...>, _tDefault>;
+
+	template<class _tCond, typename _tDefault, template<typename...> class _gOp,
+		typename... _tParams>
+		using cond_or_t = _t<cond_or<_tCond, identity<_tDefault>, _gOp, _tParams...>>;
+	//@}
+
+	/*!
 	\brief 取公共非空类型：若第一参数为非空类型则为第一参数，否则从其余参数推断。
 	\since build 1.4
 	*/

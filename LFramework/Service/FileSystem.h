@@ -419,7 +419,7 @@ namespace leo
 			*/
 			template<class _tString>
 		inline leo::decay_t<_tString>
-			VerifyDirectorlpathTail(_tString&& str)
+			VerifyDirectoryPathTail(_tString&& str)
 		{
 			if (!(str.empty() || VerifyDirectory(str)))
 				str.pop_back();
@@ -568,7 +568,7 @@ namespace leo
 			TraverseChildren(const char* path, _func f)
 		{
 			IO::Traverse(path, [f](NodeCategory c, NativePathView npv)
-				ynoexcept_spec(f(c, npv)) {
+				lnoexcept_spec(f(c, npv)) {
 				if (!PathTraits::is_parent(npv))
 					f(c, npv);
 			});

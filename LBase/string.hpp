@@ -280,9 +280,9 @@ namespace leo
 	template<class _type>
 	lconstfn auto
 		//×Ö·û´®³¤¶È
-		string_length(const _type& str)->decltype(size(str))
+		string_length(const _type& str)->decltype(std::size(str))
 	{
-		return size(str);
+		return std::size(str);
 	}
 #if __cplusplus <= 201402L
 	//! \see http://wg21.cmeerw.net/cwg/issue1591 ¡£

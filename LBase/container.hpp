@@ -530,18 +530,21 @@ namespace leo
 			details::erase_remove(con, begin(con), end(con), value);
 		}
 
-		template<typename _tSeqCon, typename _fPred>
-		inline void
-			erase_all_if_in_seq(_tSeqCon& con, _fPred pred, true_type)
+		template<typename _tSeqCon, typename _fPred,typename = void>
+		struct erase_all_if_in_seq
 		{
-			con.remove_if(pred);
-		}
+			void operator()(_tSeqCon& con, _fPred pred) {
+				details::erase_remove_if(con, begin(con), end(con), pred);
+			}
+		};
+
 		template<typename _tSeqCon, typename _fPred>
-		inline void
-			erase_all_if_in_seq(_tSeqCon& con, _fPred pred, false_type)
+		struct erase_all_if_in_seq<_tSeqCon,_fPred,std::void_t<decltype(std::declval<_tSeqCon>().remove_if(std::declval<_fPred>()...))>>
 		{
-			details::erase_remove_if(con, begin(con), end(con), pred);
-		}
+			void operator()(_tSeqCon& con, _fPred pred) {
+				con.remove_if(pred);
+			}
+		};
 
 		template<typename _tCon, typename _type>
 		void
@@ -602,7 +605,7 @@ namespace leo
 		inline void
 			erase_all_if(_tCon& con, _fPred pred, false_type)
 		{
-			details::erase_all_if_in_seq(con, pred, has_mem_remove_if<_tCon>());
+			details::erase_all_if_in_seq<_tCon,_fPred>()(con, pred);
 		}
 		//@}
 

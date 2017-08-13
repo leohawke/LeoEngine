@@ -31,6 +31,9 @@
 #define LCL_CallGlobal(_n, ...) ::LCL_ReservedGlobal(_n)(__VA_ARGS__)
 //@}
 
+#include <stdio.h>
+#include <fcntl.h>
+
 namespace platform
 {
 #	if LFL_Win32
@@ -42,6 +45,196 @@ namespace platform
 
 static_assert(std::is_signed<platform::ssize_t>(),
 	"Invalid signed size type found.");
+
+
+/*!
+\ingroup name_collision_workarounds
+\see http://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html#tag_15_01 。
+*/
+//@{
+//! \note 定义在 <stdio.h> 。
+//@{
+#undef ctermid
+#undef dprintf
+#undef fdopen
+//! \note 已知 DS 平台的 newlib 可能使用宏。
+#undef fileno
+#undef flockfile
+#undef fmemopen
+#undef fseeko
+#undef ftello
+#undef ftrylockfile
+#undef funlockfile
+#undef getc_unlocked
+#undef getchar_unlocked
+#undef getdelim
+#undef getline
+#undef open_memstream
+#undef pclose
+#undef popen
+#undef putc_unlocked
+#undef putchar_unlocked
+#undef renameat
+#undef tempnam
+#undef vdprintf
+//@}
+//! \note 定义在 <dirent.h> 。
+//@{
+#undef alphasort
+#undef closedir
+#undef dirfd
+#undef fdopendir
+#undef opendir
+#undef readdir
+#undef readdir_r
+#undef rewinddir
+#undef scandir
+#undef seekdir
+#undef telldir
+//@}
+//! \note 定义在 <fcntl.h> 。
+//@{
+#undef creat
+#undef fcntl
+#undef open
+#undef openat
+#undef posix_fadvise
+#undef posix_fallocate
+//@}
+//! \note 定义在 <semaphore.h> 。
+#undef sem_close
+#undef sem_destroy
+#undef sem_getvalue
+#undef sem_init
+#undef sem_open
+#undef sem_post
+#undef sem_timedwait
+#undef sem_trywait
+#undef sem_unlink
+#undef sem_wait
+//! \note 定义在 <unistd.h> 。
+//@{
+#undef _exit
+#undef access
+#undef alarm
+#undef chdir
+#undef chown
+#undef close
+#undef confstr
+#undef crypt
+#undef dup
+#undef dup2
+#undef encrypt
+#undef execl
+#undef execle
+#undef execlp
+#undef execv
+#undef execve
+#undef execvp
+#undef faccessat
+#undef fchdir
+#undef fchown
+#undef fchownat
+#undef fdatasync
+#undef fexecve
+#undef fork
+#undef fpathconf
+#undef fsync
+#undef ftruncate
+#undef getcwd
+#undef getegid
+#undef geteuid
+#undef getgid
+#undef getgroups
+#undef gethostid
+#undef gethostname
+#undef getlogin
+#undef getlogin_r
+#undef getopt
+#undef getpgid
+#undef getpgrp
+#undef getpid
+#undef getppid
+#undef getsid
+#undef getuid
+#undef isatty
+#undef lchown
+#undef link
+#undef linkat
+#undef lockf
+#undef lseek
+#undef nice
+#undef pathconf
+#undef pause
+#undef pipe
+#undef pread
+#undef pwrite
+#undef read
+#undef readlink
+#undef readlinkat
+#undef rmdir
+#undef setegid
+#undef seteuid
+#undef setgid
+#undef setpgid
+#undef setpgrp
+#undef setregid
+#undef setreuid
+#undef setsid
+#undef setuid
+#undef sleep
+#undef swab
+#undef symlink
+#undef symlinkat
+#undef sync
+#undef sysconf
+#undef tcgetpgrp
+#undef tcsetpgrp
+#undef truncate
+#undef ttyname
+#undef ttyname_r
+#undef unlink
+#undef unlinkat
+#undef write
+//@}
+//! \note 定义在 <sys/mman.h> 。
+//@{
+#undef mlock
+#undef mlockall
+#undef mmap
+#undef mprotect
+#undef msync
+#undef munlock
+#undef munlockall
+#undef munmap
+#undef posix_madvise
+#undef posix_mem_offset
+#undef posix_typed_mem_get_info
+#undef posix_typed_mem_open
+#undef shm_open
+#undef shm_unlink
+//@}
+//! \note 定义在 <sys/stat.h> 。
+//@{
+#undef chmod
+#undef fchmod
+#undef fchmodat
+#undef fstat
+#undef fstatat
+#undef futimens
+#undef lstat
+#undef mkdir
+#undef mkdirat
+#undef mkfifo
+#undef mkfifoat
+#undef mknod
+#undef mknodat
+#undef stat
+#undef umask
+#undef utimensat
+//@}
+//@}
+
 
 #if LFL_Win32
 

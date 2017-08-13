@@ -99,6 +99,8 @@ namespace leo {
 	\brief 基本实用例程。
 	*/
 	//@{
+	using platform::SystemOption;
+	using platform::FetchLimit;
 	using platform::usystem;
 	//@}
 
@@ -124,6 +126,18 @@ namespace leo {
 	\brief 文件访问例程。
 	*/
 	//@{
+	using platform::uaccess;
+	using platform::uopen;
+	using platform::ufopen;
+	using platform::ufexists;
+	using platform::uchdir;
+	using platform::umkdir;
+	using platform::urmdir;
+	using platform::uunlink;
+	using platform::uremove;
+
+
+
 	using platform::basic_filebuf;
 	using platform::filebuf;
 	using platform::wfilebuf;
@@ -137,6 +151,9 @@ namespace leo {
 	using platform::wofstream;
 	using platform::wfstream;
 	//@}
+
+	using platform::FetchCurrentWorkingDirectory;
+	using platform::MappedFile;
 
 	namespace IO
 	{

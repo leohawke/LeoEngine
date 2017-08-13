@@ -8,8 +8,7 @@
 #endif
 
 using namespace leo;
-using platform::FileOperationFailure;
-using platform::ThrowFileOperationFailure;
+using std::system_error;
 using platform::string;
 using platform::string_view;
 
@@ -70,7 +69,7 @@ namespace platform_ex
 				res.append(&p_buf[0], n);
 			return res;
 		}
-		ThrowFileOperationFailure("Failed opening pipe.");
+		throw std::system_error("Failed opening pipe.");
 	}
 
 
@@ -101,7 +100,7 @@ namespace platform_ex
 				LB_UNLIKELY(cmd.empty()) ? string()
 				: FetchCommandOutput(cmd.c_str(), buf_size))).first)->second;
 		}
-		CatchExpr(FileOperationFailure& e,
+		CatchExpr(std::system_error& e,
 			TraceDe(Err, "Command execution failed: %s", e.what()))
 			return cache[string()];
 	}
@@ -125,14 +124,14 @@ namespace platform_ex
 //
 //		// TODO: Check whether '::socketpair' is available.
 //		if (::pipe(fds) != 0)
-//			ThrowFileOperationFailure("Failed getting file size.");
+//			throw std::system_error("Failed getting file size.");
 //
 //		auto pr(make_pair(UniqueHandle(fds[0]), UniqueHandle(fds[1])));
 //		auto check([](UniqueHandle& h, const char* msg) {
 //			// NOTE: %O_NONBLOCK is initially cleared on ::pipe results.
 //			//	See http://pubs.opengroup.org/onlinepubs/9699919799/.
 //			if (!(h && h->SetNonblocking()))
-//				ThrowFileOperationFailure(msg);
+//				throw std::system_error(msg);
 //		});
 //
 //		check(pr.first, "Failed making pipe for reading."),

@@ -204,6 +204,12 @@ namespace platform
 		}, f);
 	}
 
+	template<typename _func, typename _type = leo::result_of_t<_func&()>>
+	inline _type
+		RetryOnInterrupted(_func f)
+	{
+		return RetryOnError(f, errno, EINTR);
+	}
 
 	/*!
 	\brief 执行 UTF-8 字符串的环境命令。

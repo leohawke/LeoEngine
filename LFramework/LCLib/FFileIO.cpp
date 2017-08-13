@@ -125,7 +125,7 @@ namespace platform
 			const auto& wstr(wpath.c_str());
 			const auto attr(FileAttributes(::GetFileAttributesW(wstr)));
 
-			return attr != platform_ex::Invalid ? f(wstr, attr)
+			return attr != platform_ex::Windows::Invalid ? f(wstr, attr)
 				: (errno = GetErrnoFromWin32(), false);
 		}
 		//@}
@@ -224,14 +224,13 @@ namespace platform
 					errno = _vErr;
 					break;
 				}
-				yunseq(ptr += n, nbyte -= n);
+				lunseq(ptr += n, nbyte -= n);
 			}
 			return ptr;
 		}
 
-		//! \since build 709
 		//@{
-#if YCL_Win64
+#if LFL_Win64
 		using rwsize_t = unsigned;
 #else
 		using rwsize_t = size_t;
@@ -249,7 +248,6 @@ namespace platform
 		//@}
 
 #if !YCL_DS
-		//! \since build 721
 		LB_NONNULL(2) void
 			UnlockFileDescriptor(int fd, const char* sig) lnothrowv
 		{
@@ -954,7 +952,7 @@ namespace platform
 			// NOTE: Win32 guarantees there will be a separator if and only if when
 			//	the result is root directory for ::_wgetcwd, and actually it is
 			//	the same in ::%GetCurrentDirectoryW.
-			const auto n(::GetCurrentDirectoryW(len, wcast(buf)));
+			const auto n(::GetCurrentDirectoryW(static_cast<DWORD>(len), wcast(buf)));
 
 			if (n != 0)
 				return buf;
