@@ -6,7 +6,7 @@
 #ifndef LEO_LFunc_hpp
 #define LEO_LFunc_hpp 1
 
-#include "LBase/LShellDefinition.h"
+#include "LFramework/Core/LShellDefinition.h"
 
 namespace leo
 {

@@ -54,7 +54,7 @@ namespace leo {
 		template<typename _tDst>
 		struct narrow_test
 		{
-			_tDst i, j;
+			_tDst i;
 
 			lconstfn false_
 				get() const lnothrow
@@ -67,7 +67,7 @@ namespace leo {
 		lconstfn auto
 			test_narrow(_tSrc v) lnothrow -> decltype(narrow_test<_tDst>{v}.get())
 		{
-			return narrow_test<_tDst>{v};
+			return narrow_test<_tDst>{v}.get();
 		}
 		template<typename>
 		lconstfn true_

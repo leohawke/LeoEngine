@@ -112,7 +112,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SolutionDir);$(IncludePath);$(SolutionDir)SDKs</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64l$(SolutionDir)SDKs</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(SolutionDir)SDKs</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_TOOL|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -217,7 +217,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Initialization.cpp" />
     <ClCompile Include="LSchemEngineUnitTest.cpp" />
     <ClCompile Include="TestFramework.cpp" />
     <ClCompile Include="wWinMain.cpp" />
@@ -229,13 +228,15 @@
     <ProjectReference Include="..\..\LBase\LBase.vcxproj">
       <Project>{4f3ae107-3ffd-4d5c-82a8-5034c0041562}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\LFramework\LFramework.vcxproj">
+      <Project>{0515bc6d-3ffd-4d0e-87ff-86793dcb777e}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\LScheme\LScheme.vcxproj">
       <Project>{596f0cdd-56fd-406e-a5e4-2d3d5ec7ca78}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FileSystem.h" />
-    <ClInclude Include="Initialization.h" />
     <ClInclude Include="LSchemEngineUnitTest.h" />
     <ClInclude Include="TestFramework.h" />
   </ItemGroup>

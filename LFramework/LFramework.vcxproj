@@ -148,6 +148,7 @@
     <ClInclude Include="LCLib\Platform.h" />
     <ClInclude Include="Service\File.h" />
     <ClInclude Include="Service\FileSystem.h" />
+    <ClInclude Include="Service\TextFile.h" />
     <ClInclude Include="Win32\LCLib\COM.h" />
     <ClInclude Include="Win32\LCLib\Consoles.h" />
     <ClInclude Include="Win32\LCLib\Mingw32.h" />
@@ -173,7 +174,9 @@
     <ClCompile Include="LCLib\Host.cpp" />
     <ClCompile Include="LCLib\MemoryMapping.cpp" />
     <ClCompile Include="LCLib\NativeAPI.cpp" />
+    <ClCompile Include="Service\File.cpp" />
     <ClCompile Include="Service\FileSystem.cpp" />
+    <ClCompile Include="Service\TextFile.cpp" />
     <ClCompile Include="Win32\LCLib\Consoles.cpp" />
     <ClCompile Include="Win32\LCLib\MinGW32.cpp" />
     <ClCompile Include="Win32\LCLib\NLS.cpp" />

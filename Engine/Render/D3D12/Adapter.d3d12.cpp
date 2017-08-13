@@ -1,6 +1,6 @@
 #include "Adapter.h"
 #include "d3d12_dxgi.h"
-#include <LBase/Win32/NLS.h>
+#include <LFramework/Win32/LCLib/NLS.h>
 
 namespace platform_ex {
 	namespace Windows {

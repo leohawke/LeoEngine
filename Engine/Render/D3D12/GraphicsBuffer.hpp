@@ -8,7 +8,7 @@
 #include "../IFormat.hpp"
 #include "../IGraphicsBuffer.hpp"
 #include "d3d12_dxgi.h"
-#include "../../Win32/COM.h"
+#include "LFramework/Win32/LCLib/COM.h"
 
 namespace platform_ex::Windows::D3D12 {
 

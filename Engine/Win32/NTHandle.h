@@ -24,9 +24,9 @@ namespace platform_ex {
 			};
 		}
 
-		extern template class UniqueHandle<Kernel::NtHandleCloser>;
+		extern template class MCF::UniqueHandle<Kernel::NtHandleCloser>;
 
-		using UniqueNtHandle = UniqueHandle<Kernel::NtHandleCloser>;
+		using UniqueNtHandle = MCF::UniqueHandle<Kernel::NtHandleCloser>;
 	}
 }
 

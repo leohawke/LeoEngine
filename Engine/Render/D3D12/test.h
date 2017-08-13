@@ -1,12 +1,12 @@
 
-#include <LBase/NativeAPI.h>
+#include <LFramework/LCLib/NativeAPI.h>
 #include <LBase/linttype.hpp>
 #include <LBase/memory.hpp>
 
-#include <LBase/FContainer.h>
+#include <LFramework/LCLib/FContainer.h>
 
 #include "../../emacro.h"
-#include "../../Win32/COM.h"
+#include "LFramework/Win32/LCLib/COM.h"
 
 #include "Adapter.h"
 

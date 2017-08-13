@@ -6,7 +6,7 @@
 #include "../../Engine/Render/IContext.h"
 
 #include <sstream>
-#include <LBase/Debug.h>
+#include <LFramework/LCLib/Debug.h>
 
 using namespace platform::Descriptions;
 

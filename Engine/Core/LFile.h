@@ -6,7 +6,7 @@
 #ifndef LE_Core_File_H
 #define LE_Core_File_H 1
 
-#include <LBase/Platform.h>
+#include <LFramework/LCLib/Platform.h>
 
 #ifdef LFL_Win32
 #include "../Win32/File.h"

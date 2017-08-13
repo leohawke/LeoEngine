@@ -20,7 +20,6 @@
 
 #include "ldef.h"
 #include "lmathhalf.h"
-#include "Debug.h"
 
 #include <cmath>
 #include <algorithm> //std::max,std::min

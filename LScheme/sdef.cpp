@@ -1,5 +1,5 @@
 #include "sdef.h"
-#include <LBase/Platform.h>
+#include <LFramework/LCLib/Platform.h>
 
 #ifdef LS_BUILD_DLL
 #ifdef LFL_Win32

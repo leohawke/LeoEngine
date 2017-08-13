@@ -2,7 +2,7 @@
 // 有关具体授权说明，请参阅 MCFLicense.txt。
 
 #include "NTHandle.h"
-#include <LBase/Debug.h>
+#include <LFramework/LCLib/Debug.h>
 
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
@@ -23,7 +23,7 @@ extern "C" {
 
 namespace platform_ex {
 	namespace Windows {
-		template class UniqueHandle<Kernel::NtHandleCloser>;
+		template class MCF::UniqueHandle<Kernel::NtHandleCloser>;
 
 		namespace Kernel {
 			void NtHandleCloser::operator()(Handle hObject) const noexcept {

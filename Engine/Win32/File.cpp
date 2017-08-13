@@ -2,7 +2,7 @@
 // 有关具体授权说明，请参阅 MCFLicense.txt。
 #include "File.h"
 
-#include <LBase/Win32/Mingw32.h>
+#include <LFramework/Win32/LCLib/Mingw32.h>
 
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>

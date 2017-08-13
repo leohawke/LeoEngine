@@ -8,6 +8,7 @@
 
 #include "LBase/sutility.h" // for noncopyable, nonmovable, std::declval;
 #include "LBase/exception.h" // for throw_error, std::errc;
+#include "LBase/ref.hpp"
 #include <chrono> // for std::chrono::duration, std::chrono::time_point;
 
 namespace leo

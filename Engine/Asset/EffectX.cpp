@@ -8,7 +8,7 @@
 #include <iterator>
 
 #include "../Render/IContext.h"
-#include "../Win32/COM.h"
+#include "LFramework/Win32/LCLib/COM.h"
 
 #pragma warning(disable:4715) //return value or throw exception;
 
@@ -855,7 +855,7 @@ namespace platform {
 }
 
 
-#include <LBase/Platform.h>
+#include <LFramework/LCLib/Platform.h>
 
 #ifdef LFL_Win32
 

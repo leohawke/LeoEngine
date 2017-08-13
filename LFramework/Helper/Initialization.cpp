@@ -5,11 +5,13 @@
 #include "LFramework/Win32/LCLib/NLS.h"
 #include "LFramework/Service/Filesystem.h"
 #include "LFramework/Adaptor/LAdaptor.h"
+#include "LFramework/Service/TextFile.h"
 
 #include <LScheme/Configuration.h>
 
 using namespace Test;
 using namespace platform_ex;
+using namespace scheme;
 
 namespace leo {
 	using namespace IO;
@@ -127,13 +129,21 @@ namespace leo {
 namespace Test {
 	using namespace leo;
 
+	leo::ValueNode&
+		FetchRoot() lnothrow {
+		static ValueNode Root = LoadConfiguration(true);
+		if (Root.GetName() == "LFramework")
+			Root = PackNodes(string(), std::move(Root));
+		Trace(Debug, "Root lifetime began.");
+		return Root;
+	}
+
 	void
 		WriteNPLA1Stream(std::ostream& os, scheme::Configuration&& conf)
 	{
 		leo::write_literal(os, Text::BOM_UTF_8) << std::move(conf);
 	}
 
-	//! \since build 724
 	ValueNode
 		TryReadRawNPLStream(std::istream& is)
 	{
@@ -146,8 +156,6 @@ namespace Test {
 		TraceDe(Warning, "Empty configuration found.");
 		throw GeneralEvent("Invalid stream found when reading configuration.");
 	}
-
-
 
 	LB_NONNULL(1, 2)leo::ValueNode Test::LoadLSLV1File(const char * disp, const char * path, leo::ValueNode(*creator)(), bool show_info)
 	{

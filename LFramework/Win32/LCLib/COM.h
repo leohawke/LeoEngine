@@ -5,9 +5,8 @@
 #ifndef LE_WIN32_COM_H
 #define LE_WIN32_COM_H 1
 
-#include <LBase/Win32/Mingw32.h>
+#include <LFramework/Win32/LCLib/Mingw32.h>
 #include <LBase/type_traits.hpp>
-#include "../emacro.h"
 
 #include <objbase.h>
 
@@ -16,7 +15,7 @@ namespace platform_ex {
 	//! \since build 1.4
 	//@{
 	//! \brief COM 全局状态。
-	class LE_API COM
+	class LF_API COM
 	{
 	protected:
 		::HRESULT hResult;
@@ -36,7 +35,7 @@ namespace platform_ex {
 
 	//! \brief COM 异常基类。
 	// \todo fomratmessage
-	class LE_API COMException : public std::runtime_error
+	class LF_API COMException : public std::runtime_error
 	{
 	protected:
 		::HRESULT hResult;

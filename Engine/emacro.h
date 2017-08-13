@@ -7,7 +7,7 @@
 
 
 #include <LBase/ldef.h>
-#include <LBase/Debug.h>
+#include <LFramework/LCLib/Debug.h>
 
 /*!
 \def LE_DLL

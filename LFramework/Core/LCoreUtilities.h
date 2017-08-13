@@ -75,5 +75,32 @@ namespace leo {
 	}
 
 	//@}
+
+	//! \brief 检查算术类型数值不大于指定类型的上界。
+	template<typename _tDst, typename _type>
+	inline _tDst
+		CheckUpperBound(_type val, const std::string& name = {}, RecordLevel lv = Err)
+	{
+		using namespace leo;
+		// XXX: See WG21 N3387.
+		// TODO: Add and use safe %common_arithmetic_type interface instead?
+		using common_t = typename leo::common_int_type<_tDst, _type>::type;
+
+		if (!(common_t(std::numeric_limits<_tDst>::max()) < common_t(val)))
+			return _tDst(val);
+		throw LoggedEvent("Value of '" + name + "' is greater than upper boundary.",
+			lv);
+	}
+
+	//! \brief 检查非负算术类型数值在指定类型的范围内。
+	template<typename _tDst, typename _type>
+	inline _tDst
+		CheckNonnegative(_type val, const std::string& name = {}, RecordLevel lv = Err)
+	{
+		if (val < 0)
+			// XXX: Use more specified exception type.
+			throw LoggedEvent("Failed getting nonnegative " + name + " value.", lv);
+		return CheckUpperBound<_tDst>(val, name, lv);
+	}
 }
 #endif

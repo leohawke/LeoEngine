@@ -1,5 +1,5 @@
 #include "Lexical.h"
-#include <LBase/Debug.h>
+#include <LFramework/LCLib/Debug.h>
 
 
 namespace scheme

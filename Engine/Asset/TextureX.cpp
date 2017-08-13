@@ -6,7 +6,7 @@
 
 #include "../Render/Color_T.hpp"
 
-#include <LBase/Debug.h>
+#include <LFramework/LCLib/Debug.h>
 
 namespace platform {
 	using Render::TextureType;

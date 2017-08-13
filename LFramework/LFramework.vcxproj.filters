@@ -132,6 +132,9 @@
     <ClInclude Include="Core\ValueNode.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Service\TextFile.h">
+      <Filter>Service</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Win32\LCLib\Consoles.cpp">
@@ -193,6 +196,12 @@
     </ClCompile>
     <ClCompile Include="Core\ValueNode.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\File.cpp">
+      <Filter>Service</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\TextFile.cpp">
+      <Filter>Service</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

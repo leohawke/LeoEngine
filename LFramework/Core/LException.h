@@ -6,11 +6,13 @@
 #ifndef FrameWork__LException_h
 #define FrameWork__LException_h 1
 
+#include <LBase/functional.hpp>
+
 #include <exception>
 #include <stdexcept>
 #include <string>
 #include <LFramework/Core/LShellDefinition.h>
-#include <LBase/functional.hpp>
+#include <LFramework/Adaptor/LTextBase.h>
 
 namespace leo
 {

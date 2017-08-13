@@ -1,10 +1,9 @@
-#include <LBase/NativeAPI.h>
-#include <LBase/Win32/Mingw32.h>
+#include <LFramework/LCLib/NativeAPI.h>
+#include <LFramework/Win32/LCLib/Mingw32.h>
 #include "../../Engine/Render/D3D12/test.h"
-#include "Initialization.h"
 
 #include <Engine/Asset/TextureX.h>
-
+#include <LFramework/Helper/Initialization.h>
 
 #include "LSchemEngineUnitTest.h"
 

@@ -3,7 +3,7 @@
 #include "../IGraphicsBuffer.hpp"
 #include "../ITexture.hpp"
 
-#include <LBase/Debug.h>
+#include <LFramework/LCLib/Debug.h>
 #include <LBase/memory.hpp>
 namespace platform::Render {
 	ShaderInfo::ShaderInfo(ShaderCompose::Type t)

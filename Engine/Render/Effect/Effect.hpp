@@ -8,7 +8,7 @@
 #include <LBase/linttype.hpp>
 #include <LBase/lmathtype.hpp>
 #include <LBase/any.h>
-#include <LBase/Debug.h>
+#include <LFramework/LCLib/Debug.h>
 
 #include <tuple>
 #include <vector>

@@ -10,7 +10,7 @@
 #include <LBase/memory.hpp>
 
 namespace platform_ex {
-	namespace Windows {
+	namespace MCF {
 
 		// 这个代码部分是 MCF 的一部分。
 		// 有关具体授权说明，请参阅 MCFLicense.txt。
