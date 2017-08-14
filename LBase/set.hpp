@@ -129,20 +129,21 @@ namespace leo {
 		class _tAlloc = std::allocator<_type>>
 		class mapped_set
 	{
+	private:
+		using mapped_key_type = details::wrapped_key<_type>;
 	public:
 		using key_type = _type;
 		using value_type = _type;
 		using key_compare = _fComp;
 		using value_compare = _fComp;
-		using allocator_type = _tAlloc;
+		using allocator_type =typename std::allocator_traits<_tAlloc>::template rebind_alloc<std::pair<const mapped_key_type, value_type>>;
 		using reference = value_type&;
 		using const_reference = const value_type&;
 
 	private:
-		using mapped_key_type = details::wrapped_key<_type>;
 		using mapped_key_compare = details::tcompare<mapped_key_type, _fComp>;
 		using umap_type
-			= std::map<mapped_key_type, value_type, mapped_key_compare, _tAlloc>;
+			= std::map<mapped_key_type, value_type, mapped_key_compare, allocator_type>;
 		using umap_pair = typename umap_type::value_type;
 		// NOTE: Here %get_second cannot be used directory due to possible
 		//	incomplete value type and requirement on conversion between
