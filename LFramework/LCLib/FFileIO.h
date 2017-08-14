@@ -194,7 +194,6 @@ namespace platform
 		/*!
 		\return 以 POSIX 时间相同历元的时间间隔。
 		\note 当前 Windows 使用 \c ::GetFileTime 实现，其它只保证最高精确到秒。
-		\since build 628
 		*/
 		//@{
 		//! \brief 取修改时间。
@@ -658,7 +657,10 @@ namespace platform
 #	else
 				if (!this->is_open())
 					if (const auto mode_str = leo::openmode_conv(mode))
-						return open_file_ptr(::_fdopen(*p.get(), mode_str));
+						if (open_file_ptr(::_fdopen(*p.get(), mode_str))) {
+							p.release();
+							return this;
+						}
 #	endif
 			}
 			return {};

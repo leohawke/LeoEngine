@@ -4,6 +4,7 @@
 
 #include <Engine/Asset/TextureX.h>
 #include <LFramework/Helper/Initialization.h>
+#include <LFramework/LCLib/FFileIO.h>
 
 #include "LSchemEngineUnitTest.h"
 
