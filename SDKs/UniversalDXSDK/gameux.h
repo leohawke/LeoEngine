@@ -94,7 +94,7 @@ typedef struct GameStatistics GameStatistics;
 /* header files for imported files */
 #include "oaidl.h"
 #include "ocidl.h"
-#include "shobjidl.h"
+#include "shobjidl_core.h"
 
 #ifdef __cplusplus
 extern "C"{

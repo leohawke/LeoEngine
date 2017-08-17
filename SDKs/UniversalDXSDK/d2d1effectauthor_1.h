@@ -19,6 +19,10 @@
 #include <d2d1effectauthor.h>
 #endif // #ifndef _D2D1_EFFECT_AUTHOR_H_
 
+EXTERN_C CONST IID IID_ID2D1EffectContext1;
+EXTERN_C CONST IID IID_ID2D1EffectContext2;
+
+
 #ifndef D2D_USE_C_DEFINITIONS
 
 
@@ -45,17 +49,49 @@ interface DX_DECLARE_INTERFACE("84ab595a-fc81-4546-bacd-e8ef4d8abe7a") ID2D1Effe
 }; // interface ID2D1EffectContext1
 
 
+#if NTDDI_VERSION >= NTDDI_WIN10_RS2
+
+/// <summary>
+/// The internal context handed to effect authors to create transforms from effects
+/// and any other operation tied to context which is not useful to the application
+/// facing API.
+/// </summary>
+interface DX_DECLARE_INTERFACE("577ad2a0-9fc7-4dda-8b18-dab810140052") ID2D1EffectContext2  : public ID2D1EffectContext1
+{
+    
+    /// <summary>
+    /// Creates a color context from a DXGI color space type. It is only valid to use
+    /// this with the Color Management Effect in 'Best' mode.
+    /// </summary>
+    STDMETHOD(CreateColorContextFromDxgiColorSpace)(
+        DXGI_COLOR_SPACE_TYPE colorSpace,
+        _COM_Outptr_ ID2D1ColorContext1 **colorContext 
+        ) PURE;
+    
+    /// <summary>
+    /// Creates a color context from a simple color profile. It is only valid to use
+    /// this with the Color Management Effect in 'Best' mode.
+    /// </summary>
+    STDMETHOD(CreateColorContextFromSimpleColorProfile)(
+        _In_ CONST D2D1_SIMPLE_COLOR_PROFILE *simpleProfile,
+        _COM_Outptr_ ID2D1ColorContext1 **colorContext 
+        ) PURE;
+}; // interface ID2D1EffectContext2
+
 
 #endif
 
-
-EXTERN_C CONST IID IID_ID2D1EffectContext1;
+#endif
 
 
 #ifdef D2D_USE_C_DEFINITIONS
 
 
 typedef interface ID2D1EffectContext1 ID2D1EffectContext1;
+#if NTDDI_VERSION >= NTDDI_WIN10_RS2
+
+typedef interface ID2D1EffectContext2 ID2D1EffectContext2;
+#endif
 
 #endif
 

@@ -18,6 +18,9 @@
 #ifndef _D2D1_EFFECTS_2_
 #include <d2d1effects_2.h>
 #endif // #ifndef _D2D1_EFFECTS_2_
+#ifndef _D2D1_SVG_
+#include <d2d1svg.h>
+#endif // #ifndef _D2D1_SVG_
 
 /*#include <winapifamily.h>*/
 
@@ -385,10 +388,112 @@ typedef enum D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION
 } D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION;
 
 
+/// <summary>
+/// This determines what gamma is used for interpolation/blending.
+/// </summary>
+typedef enum D2D1_GAMMA1
+{
+    
+    /// <summary>
+    /// Colors are manipulated in 2.2 gamma color space.
+    /// </summary>
+    D2D1_GAMMA1_G22 = D2D1_GAMMA_2_2,
+    
+    /// <summary>
+    /// Colors are manipulated in 1.0 gamma color space.
+    /// </summary>
+    D2D1_GAMMA1_G10 = D2D1_GAMMA_1_0,
+    
+    /// <summary>
+    /// Colors are manipulated in ST.2084 PQ gamma color space.
+    /// </summary>
+    D2D1_GAMMA1_G2084 = 2,
+    D2D1_GAMMA1_FORCE_DWORD = 0xffffffff
+
+} D2D1_GAMMA1;
+
+
+/// <summary>
+/// Simple description of a color space.
+/// </summary>
+typedef struct D2D1_SIMPLE_COLOR_PROFILE
+{
+    
+    /// <summary>
+    /// The XY coordinates of the red primary in CIEXYZ space.
+    /// </summary>
+    D2D1_POINT_2F redPrimary;
+    
+    /// <summary>
+    /// The XY coordinates of the green primary in CIEXYZ space.
+    /// </summary>
+    D2D1_POINT_2F greenPrimary;
+    
+    /// <summary>
+    /// The XY coordinates of the blue primary in CIEXYZ space.
+    /// </summary>
+    D2D1_POINT_2F bluePrimary;
+    
+    /// <summary>
+    /// The X/Z tristimulus values for the whitepoint, normalized for relative
+    /// luminance.
+    /// </summary>
+    D2D1_POINT_2F whitePointXZ;
+    
+    /// <summary>
+    /// The gamma encoding to use for this color space.
+    /// </summary>
+    D2D1_GAMMA1 gamma;
+
+} D2D1_SIMPLE_COLOR_PROFILE;
+
+
+/// <summary>
+/// Specifies which way a color profile is defined.
+/// </summary>
+typedef enum D2D1_COLOR_CONTEXT_TYPE
+{
+    D2D1_COLOR_CONTEXT_TYPE_ICC = 0,
+    D2D1_COLOR_CONTEXT_TYPE_SIMPLE = 1,
+    D2D1_COLOR_CONTEXT_TYPE_DXGI = 2,
+    D2D1_COLOR_CONTEXT_TYPE_FORCE_DWORD = 0xffffffff
+
+} D2D1_COLOR_CONTEXT_TYPE;
+
+
                 
 typedef enum DWRITE_GLYPH_IMAGE_FORMATS DWRITE_GLYPH_IMAGE_FORMATS;
 
                  
+
+EXTERN_C CONST IID IID_ID2D1InkStyle;
+EXTERN_C CONST IID IID_ID2D1Ink;
+EXTERN_C CONST IID IID_ID2D1GradientMesh;
+EXTERN_C CONST IID IID_ID2D1ImageSource;
+EXTERN_C CONST IID IID_ID2D1ImageSourceFromWic;
+EXTERN_C CONST IID IID_ID2D1TransformedImageSource;
+EXTERN_C CONST IID IID_ID2D1LookupTable3D;
+EXTERN_C CONST IID IID_ID2D1DeviceContext2;
+EXTERN_C CONST IID IID_ID2D1Device2;
+EXTERN_C CONST IID IID_ID2D1Factory3;
+EXTERN_C CONST IID IID_ID2D1CommandSink2;
+EXTERN_C CONST IID IID_ID2D1GdiMetafile1;
+EXTERN_C CONST IID IID_ID2D1GdiMetafileSink1;
+EXTERN_C CONST IID IID_ID2D1SpriteBatch;
+EXTERN_C CONST IID IID_ID2D1DeviceContext3;
+EXTERN_C CONST IID IID_ID2D1Device3;
+EXTERN_C CONST IID IID_ID2D1Factory4;
+EXTERN_C CONST IID IID_ID2D1CommandSink3;
+EXTERN_C CONST IID IID_ID2D1SvgGlyphStyle;
+EXTERN_C CONST IID IID_ID2D1DeviceContext4;
+EXTERN_C CONST IID IID_ID2D1Device4;
+EXTERN_C CONST IID IID_ID2D1Factory5;
+EXTERN_C CONST IID IID_ID2D1CommandSink4;
+EXTERN_C CONST IID IID_ID2D1ColorContext1;
+EXTERN_C CONST IID IID_ID2D1DeviceContext5;
+EXTERN_C CONST IID IID_ID2D1Device5;
+EXTERN_C CONST IID IID_ID2D1Factory6;
+
 
 #ifndef D2D_USE_C_DEFINITIONS
 
@@ -1436,32 +1541,167 @@ interface DX_DECLARE_INTERFACE("c4349994-838e-4b0f-8cab-44997d9eeacc") ID2D1Fact
 
 
 #endif // #if NTDDI_VERSION >= NTDDI_WIN10_RS1
+#if NTDDI_VERSION >= NTDDI_WIN10_RS2
+
+interface DX_DECLARE_INTERFACE("c78a6519-40d6-4218-b2de-beeeb744bb3e") ID2D1CommandSink4  : public ID2D1CommandSink3
+{
+    
+    /// <summary>
+    /// A new function to set blend mode that respects the new MAX blend.
+    /// 
+    /// Implementers of SetPrimitiveBlend2 should expect and handle blend mode:
+    /// D2D1_PRIMITIVE_BLEND_MAX
+    /// 
+    /// Implementers of SetPrimitiveBlend1 should expect and handle blend modes:
+    /// D2D1_PRIMITIVE_BLEND_MIN and D2D1_PRIMITIVE_BLEND_ADD
+    /// 
+    /// Implementers of SetPrimitiveBlend should expect and handle blend modes:
+    /// D2D1_PRIMITIVE_BLEND_SOURCE_OVER and D2D1_PRIMITIVE_BLEND_COPY
+    /// </summary>
+    STDMETHOD(SetPrimitiveBlend2)(
+        D2D1_PRIMITIVE_BLEND primitiveBlend 
+        ) PURE;
+}; // interface ID2D1CommandSink4
+
+
+/// <summary>
+/// Represents a color context to be used with the Color Management Effect.
+/// </summary>
+interface DX_DECLARE_INTERFACE("1ab42875-c57f-4be9-bd85-9cd78d6f55ee") ID2D1ColorContext1  : public ID2D1ColorContext
+{
+    
+    /// <summary>
+    /// Retrieves the color context type.
+    /// </summary>
+    STDMETHOD_(D2D1_COLOR_CONTEXT_TYPE, GetColorContextType)(
+        ) CONST PURE;
+    
+    /// <summary>
+    /// Retrieves the DXGI color space of this context. Returns DXGI_COLOR_SPACE_CUSTOM
+    /// when color context type is ICC.
+    /// </summary>
+    STDMETHOD_(DXGI_COLOR_SPACE_TYPE, GetDXGIColorSpace)(
+        ) CONST PURE;
+    
+    /// <summary>
+    /// Retrieves a set simple color profile.
+    /// </summary>
+    STDMETHOD(GetSimpleColorProfile)(
+        _Out_ D2D1_SIMPLE_COLOR_PROFILE *simpleProfile 
+        ) CONST PURE;
+}; // interface ID2D1ColorContext1
+
+
+interface DX_DECLARE_INTERFACE("7836d248-68cc-4df6-b9e8-de991bf62eb7") ID2D1DeviceContext5  : public ID2D1DeviceContext4
+{
+    
+    /// <summary>
+    /// Creates an SVG document from a stream.
+    /// </summary>
+    /// <param name="inputXmlStream">An input stream containing the SVG XML document. If
+    /// null, an empty document is created.</param>
+    /// <param name="viewportSize">Size of the initial viewport of the document.</param>
+    /// <param name="svgDocument">When this method returns, contains a pointer to the
+    /// SVG document.</param>
+    STDMETHOD(CreateSvgDocument)(
+        _In_opt_ IStream *inputXmlStream,
+        D2D1_SIZE_F viewportSize,
+        _COM_Outptr_ ID2D1SvgDocument **svgDocument 
+        ) PURE;
+    
+    /// <summary>
+    /// Draw an SVG document.
+    /// </summary>
+    STDMETHOD_(void, DrawSvgDocument)(
+        _In_ ID2D1SvgDocument *svgDocument 
+        ) PURE;
+    
+    /// <summary>
+    /// Creates a color context from a DXGI color space type. It is only valid to use
+    /// this with the Color Management Effect in 'Best' mode.
+    /// </summary>
+    STDMETHOD(CreateColorContextFromDxgiColorSpace)(
+        DXGI_COLOR_SPACE_TYPE colorSpace,
+        _COM_Outptr_ ID2D1ColorContext1 **colorContext 
+        ) PURE;
+    
+    /// <summary>
+    /// Creates a color context from a simple color profile. It is only valid to use
+    /// this with the Color Management Effect in 'Best' mode.
+    /// </summary>
+    STDMETHOD(CreateColorContextFromSimpleColorProfile)(
+        _In_ CONST D2D1_SIMPLE_COLOR_PROFILE *simpleProfile,
+        _COM_Outptr_ ID2D1ColorContext1 **colorContext 
+        ) PURE;
+    
+    /// <summary>
+    /// Creates a color context from a simple color profile.
+    /// </summary>
+    COM_DECLSPEC_NOTHROW
+    HRESULT
+    CreateColorContextFromSimpleColorProfile(
+        CONST D2D1_SIMPLE_COLOR_PROFILE &simpleProfile,
+        _COM_Outptr_ ID2D1ColorContext1 **colorContext 
+        )  
+    {
+        return CreateColorContextFromSimpleColorProfile(&simpleProfile, colorContext);
+    }
+}; // interface ID2D1DeviceContext5
+
+
+interface DX_DECLARE_INTERFACE("d55ba0a4-6405-4694-aef5-08ee1a4358b4") ID2D1Device5  : public ID2D1Device4
+{
+    
+    /// <summary>
+    /// Creates a new device context with no initially assigned target.
+    /// </summary>
+    STDMETHOD(CreateDeviceContext)(
+        D2D1_DEVICE_CONTEXT_OPTIONS options,
+        _COM_Outptr_ ID2D1DeviceContext5 **deviceContext5 
+        ) PURE;
+    
+    using ID2D1Device4::CreateDeviceContext;
+    
+    using ID2D1Device3::CreateDeviceContext;
+    
+    using ID2D1Device2::CreateDeviceContext;
+    
+    using ID2D1Device1::CreateDeviceContext;
+    
+    using ID2D1Device::CreateDeviceContext;
+}; // interface ID2D1Device5
+
+
+/// <summary>
+/// Creates Direct2D resources. This interface also enables the creation of
+/// ID2D1Device5 objects.
+/// </summary>
+interface DX_DECLARE_INTERFACE("f9976f46-f642-44c1-97ca-da32ea2a2635") ID2D1Factory6  : public ID2D1Factory5
+{
+    
+    /// <summary>
+    /// This creates a new Direct2D device from the given IDXGIDevice.
+    /// </summary>
+    STDMETHOD(CreateDevice)(
+        _In_ IDXGIDevice *dxgiDevice,
+        _COM_Outptr_ ID2D1Device5 **d2dDevice5 
+        ) PURE;
+    
+    using ID2D1Factory5::CreateDevice;
+    
+    using ID2D1Factory4::CreateDevice;
+    
+    using ID2D1Factory3::CreateDevice;
+    
+    using ID2D1Factory2::CreateDevice;
+    
+    using ID2D1Factory1::CreateDevice;
+}; // interface ID2D1Factory6
+
 
 #endif
 
-
-EXTERN_C CONST IID IID_ID2D1InkStyle;
-EXTERN_C CONST IID IID_ID2D1Ink;
-EXTERN_C CONST IID IID_ID2D1GradientMesh;
-EXTERN_C CONST IID IID_ID2D1ImageSource;
-EXTERN_C CONST IID IID_ID2D1ImageSourceFromWic;
-EXTERN_C CONST IID IID_ID2D1TransformedImageSource;
-EXTERN_C CONST IID IID_ID2D1LookupTable3D;
-EXTERN_C CONST IID IID_ID2D1DeviceContext2;
-EXTERN_C CONST IID IID_ID2D1Device2;
-EXTERN_C CONST IID IID_ID2D1Factory3;
-EXTERN_C CONST IID IID_ID2D1CommandSink2;
-EXTERN_C CONST IID IID_ID2D1GdiMetafile1;
-EXTERN_C CONST IID IID_ID2D1GdiMetafileSink1;
-EXTERN_C CONST IID IID_ID2D1SpriteBatch;
-EXTERN_C CONST IID IID_ID2D1DeviceContext3;
-EXTERN_C CONST IID IID_ID2D1Device3;
-EXTERN_C CONST IID IID_ID2D1Factory4;
-EXTERN_C CONST IID IID_ID2D1CommandSink3;
-EXTERN_C CONST IID IID_ID2D1SvgGlyphStyle;
-EXTERN_C CONST IID IID_ID2D1DeviceContext4;
-EXTERN_C CONST IID IID_ID2D1Device4;
-EXTERN_C CONST IID IID_ID2D1Factory5;
+#endif
 
 
 #ifdef D2D_USE_C_DEFINITIONS

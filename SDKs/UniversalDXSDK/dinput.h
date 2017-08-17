@@ -638,6 +638,8 @@ extern const DIDATAFORMAT c_dfDIKeyboard;
 
 #if(DIRECTINPUT_VERSION >= 0x0500)
 extern const DIDATAFORMAT c_dfDIJoystick;
+extern LPCDIDATAFORMAT WINAPI GetdfDIJoystick();
+
 extern const DIDATAFORMAT c_dfDIJoystick2;
 #endif /* DIRECTINPUT_VERSION >= 0x0500 */
 
