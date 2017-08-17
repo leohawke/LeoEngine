@@ -29,13 +29,13 @@
 				
 				float4 Blit2DPS(float2 tc : TEXCOORD0) : SV_Target
 				{
-					return Tex2DSampleLevel(src_2d_tex,
-				#if LINEAR_SAMPLER
+						return src_2d_tex.SampleLevel(
+					#if LINEAR_SAMPLER
 						bilinear_sampler,
-				#else
+					#else
 						point_sampler,
-				#endif
-						tc, src_level, 0);
+					#endif
+						tc, src_level);
 				}
 				"
 	)
