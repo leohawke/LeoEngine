@@ -133,9 +133,6 @@
     <ClInclude Include="Render\D3D12\RenderView.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="Render\D3D12\test.h">
-      <Filter>Render\D3D12</Filter>
-    </ClInclude>
     <ClInclude Include="Render\D3D12\Texture.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
@@ -239,6 +236,7 @@
     <ClInclude Include="Core\ViewPort.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Render\D3D12\test.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

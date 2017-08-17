@@ -1,13 +1,12 @@
-#include <LFramework/LCLib/NativeAPI.h>
-#include "../../Engine/Render/D3D12/test.h"
+#include "../../Engine/test.h"
 
-#include <Engine/Asset/TextureX.h>
-#include <LFramework/Helper/Initialization.h>
-#include <LFramework/LCLib/FFileIO.h>
+#include "../../Engine/Render/IContext.h"
 #include "TestFramework.h"
 #include "LSchemEngineUnitTest.h"
 
 #define TEST_CODE 1
+
+using namespace platform::Render;
 
 class EngineTest : public Test::TestFrameWork {
 public:
@@ -20,6 +19,7 @@ private:
 	}
 	void OnCreate() override {
 		auto swap_chain = ::Create(host_hwnd);
+		Context::Instance().CreateDeviceAndDisplay();
 	}
 };
 

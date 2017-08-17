@@ -1,8 +1,5 @@
+#include "test.h"
 #include <LFramework/Win32/LCLib/Mingw32.h>
-#include "Render/D3D12/test.h"
-#include "Render/D3D12/Context.h"
-#include "Asset/TextureX.h"
-
 
 #define TEST_CODE 1
 
@@ -19,8 +16,6 @@ IDXGISwapChain* LE_API Create(HWND hwnd) {
 	try {
 		LCL_CallF_Win32(LoadLibraryW, L"d3d12.dll");
 		LCL_CallF_Win32(LoadLibraryW, L"dxgi.dll");
-
-		platform_ex::Windows::D3D12::Context::Instance();
 	}
 	CatchRet(platform_ex::Windows::Win32Exception&, TraceDe(Warning, "d3d12 win32 op failed."), nullptr)
 	CatchRet(platform_ex::COMException&, TraceDe(Warning, "d3d12 com op failed."), nullptr)
@@ -34,12 +29,6 @@ namespace platform_ex {
 	namespace Windows {
 		namespace D3D12 {
 			using namespace platform::Descriptions;
-
-
-
-
-
-
 
 			//\brief Device
 		}

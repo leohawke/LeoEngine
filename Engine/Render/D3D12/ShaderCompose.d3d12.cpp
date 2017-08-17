@@ -158,8 +158,8 @@ sc_template(std::make_unique<Template>())
 		sc_template->Infos[index] = BlobInfo;
 
 		for (auto& ConstantBufferInfo : BlobInfo.ConstantBufferInfos) {
-			auto index = pEffect->ConstantBufferIndex(ConstantBufferInfo.name_hash);
-			auto& ConstantBuffer = pEffect->GetConstantBuffer(index);
+			auto cbindex = pEffect->ConstantBufferIndex(ConstantBufferInfo.name_hash);
+			auto& ConstantBuffer = pEffect->GetConstantBuffer(cbindex);
 			AllCBuffs.emplace_back(&ConstantBuffer);
 			CBuffs[index].emplace_back(ConstantBuffer.GetGraphicsBuffer());
 

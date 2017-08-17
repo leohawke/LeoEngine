@@ -14,7 +14,6 @@ void unit_test::ExceuteLSchemEngineUnitTest()
 {
 	using namespace platform::Render;
 
-	Context::Instance().CreateDeviceAndDisplay();
 	auto& Device = Context::Instance().GetDevice();
 	auto pTex = leo::unique_raw(Device.CreateTexture(512,0, 1, EFormat::EF_ABGR8, EAccessHint::EA_GenMips | EAccessHint::EA_GPUWrite | EAccessHint::EA_GPURead, {}));
 	pTex->BuildMipSubLevels();
