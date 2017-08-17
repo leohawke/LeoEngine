@@ -268,6 +268,7 @@ static_assert(std::is_signed<platform::ssize_t>(),
 #	undef ExpandEnvironmentStrings
 #	undef FindWindow
 #	undef FormatMessage
+#	undef PeekMessage
 #	undef GetMessage
 #	undef GetObject
 #	undef PostMessage

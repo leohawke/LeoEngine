@@ -1,6 +1,5 @@
 #include <LBase/ldef.h>
 #ifdef LB_IMPL_MSCPP
-#pragma warning(push)
 #pragma warning(disable:4180)
 #endif
 
@@ -120,9 +119,6 @@ namespace platform_ex
 		}
 		LCL_Raise_SysE(, "::popen", lfsig);
 	}
-#ifdef LB_IMPL_MSCPP
-#pragma warning(pop)
-#endif
 
 	leo::locked_ptr<CommandCache>
 		LockCommandCache()

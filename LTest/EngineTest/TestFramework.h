@@ -7,6 +7,7 @@
 #else
 #include <experimental/string_view> //TODO:replace it
 #endif
+#include <LFramework/LCLib/NativeAPI.h>
 
 namespace Test {
 	//简化测试代码框架的基类,理论上:
@@ -27,7 +28,7 @@ namespace Test {
 		};
 
 	public:
-		explicit TestFrameWork(const std::string_view &name);
+		explicit TestFrameWork(const std::wstring_view &name);
 
 		virtual ~TestFrameWork();
 
@@ -40,5 +41,21 @@ namespace Test {
 		virtual void OnCreate();
 		virtual void OnDestroy();
 		virtual leo::uint32 DoUpdate(leo::uint32 pass) = 0;
+
+#ifdef LFL_Win32
+	public:
+		bool active;
+		HWND host_hwnd;
+
+		static LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+		LRESULT MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+#endif
+
+	private:
+#ifdef LFL_Win32
+		HWND
+#endif
+			MakeWindow(const std::wstring_view &name, leo::uint16 width, leo::uint16 height);
 	};
 }
