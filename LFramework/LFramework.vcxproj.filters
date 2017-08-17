@@ -138,6 +138,9 @@
     <ClInclude Include="Core\LEvent.hpp">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="LCLib\HostGUI.h">
+      <Filter>LCLib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Win32\LCLib\Consoles.cpp">

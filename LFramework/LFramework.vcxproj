@@ -143,6 +143,7 @@
     <ClInclude Include="LCLib\FileSystem.h" />
     <ClInclude Include="LCLib\FReference.h" />
     <ClInclude Include="LCLib\Host.h" />
+    <ClInclude Include="LCLib\HostGUI.h" />
     <ClInclude Include="LCLib\MemoryMapping.h" />
     <ClInclude Include="LCLib\Mutex.h" />
     <ClInclude Include="LCLib\NativeAPI.h" />
