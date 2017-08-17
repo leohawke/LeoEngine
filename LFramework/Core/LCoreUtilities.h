@@ -1,13 +1,13 @@
 /*!	\file LCoreUtilities.h
-\ingroup Core
+\ingroup LFrameWork/Core
 \brief 核心实用模块。
 */
 
-#ifndef FrameWork__LCoreUtilities_h
-#define FrameWork__LCoreUtilities_h 1
+#ifndef LFrameWork_Core_LCoreUtilities_h
+#define LFrameWork_Core_LCoreUtilities_h 1
 
-#include <LFramework/Core/LException.h>
 #include <LBase/algorithm.hpp>
+#include <LFramework/Core/LException.h>
 
 namespace leo {
 	/*!

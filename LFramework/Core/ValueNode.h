@@ -1,16 +1,16 @@
 /*! \file ValueNode.h
-\ingroup LScheme
+\ingroup LFrameWork/Core
 \brief 值类型节点。
 \par 修改时间:
 2017-03-24 09:50 +0800
 */
-#ifndef Framework_ValueNode_H
-#define Framework_ValueNode_H 1
+#ifndef LFramework_Core_ValueNode_H
+#define LFramework_Core_ValueNode_H 1
 
 #include <LBase/set.hpp>
-#include <LFramework/Core/LObject.h>
 #include <LBase/path.hpp>
 #include <numeric>
+#include <LFramework/Core/LObject.h>
 
 namespace leo {
 	lconstexpr const struct ListContainerTag {} ListContainer{};

@@ -1,10 +1,10 @@
 ﻿/*!	\file LString.h
-\ingroup Core
+\ingroup LFrameWork/Core
 \brief 基础字符串管理。
 */
 
-#ifndef Framework_Core_LString_h_
-#define Framework_Core_LString_h_ 1
+#ifndef LFramework_Core_LString_h_
+#define LFramework_Core_LString_h_ 1
 
 #include <LFramework/Core/LObject.h>
 #include <LFramework/Adaptor/LTextBase.h>

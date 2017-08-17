@@ -36,7 +36,7 @@ namespace leo {
 	public:
 		using char_type = _tChar;
 		using value_type = std::basic_string<_tChar, _tAlloc>;
-		using view_type = basic_string_view<char_type>;
+		using view_type = std::basic_string_view<char_type>;
 
 		static lconstfn bool
 			is_parent(view_type sv) lnothrow

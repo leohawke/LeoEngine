@@ -1,10 +1,10 @@
 /*!	\file LShellDefinition.h
-\ingroup FrameWork_
+\ingroup FrameWork/Core
 \brief 宏定义和类型描述。
 */
 
-#ifndef FrameWork__LShellDefinition_h
-#define FrameWork__LShellDefinition_h 1
+#ifndef LFrameWork_Core_LShellDefinition_h
+#define LFrameWork_Core_LShellDefinition_h 1
 
 #include <LFramework/Adaptor/LAdaptor.h>
 

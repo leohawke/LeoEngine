@@ -135,6 +135,9 @@
     <ClInclude Include="Service\TextFile.h">
       <Filter>Service</Filter>
     </ClInclude>
+    <ClInclude Include="Core\LEvent.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Win32\LCLib\Consoles.cpp">

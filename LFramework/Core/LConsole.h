@@ -1,10 +1,10 @@
 /*!	\file LConsole.h
-\ingroup LBase
+\ingroup LFrameWork/Core
 \brief ¿ØÖÆÌ¨¡£
 */
 
-#ifndef FrameWork_LConsole_h
-#define FrameWork_LConsole_h 1
+#ifndef LFrameWork__Core_LConsole_h
+#define LFrameWork__Core_LConsole_h 1
 
 namespace leo
 {

@@ -1,10 +1,10 @@
 /*!	\file LException.h
-\ingroup FrameWork
+\ingroup LFrameWork/Core
 \brief 异常处理模块。
 */
 
-#ifndef FrameWork__LException_h
-#define FrameWork__LException_h 1
+#ifndef LFrameWork_Core_LException_h
+#define LFrameWork_Core_LException_h 1
 
 #include <LBase/functional.hpp>
 

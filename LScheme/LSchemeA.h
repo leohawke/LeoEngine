@@ -7,7 +7,7 @@
 
 #include <LBase/sutility.h> // for leo::derived_entity
 #include "SContext.h" 
-#include "LEvent.hpp"
+#include "LFrameWork/Core/LEvent.hpp"
 #include <LBase/any.h> // for leo::any
 
 namespace scheme {

@@ -1,10 +1,10 @@
 /*!	\file LFunc.hpp
-\ingroup FrameWork
+\ingroup LFrameWork/Core
 \brief 函数调用和仿函数封装。
 */
 
-#ifndef LEO_LFunc_hpp
-#define LEO_LFunc_hpp 1
+#ifndef LFrameWork_Core_LFunc_Hpp
+#define LFrameWork_Core_LFunc_Hpp 1
 
 #include "LFramework/Core/LShellDefinition.h"
 

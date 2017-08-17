@@ -1,10 +1,10 @@
 /*! \file LEvent.hpp
-\ingroup LScheme
+\ingroup LFrameWork/Core
 \brief 事件回调。
 
 */
-#ifndef LScheme_LEvent_Hpp
-#define LScheme_LEvent_Hpp 1
+#ifndef LFrameWork_Core_LEvent_Hpp
+#define LFrameWork_Core_LEvent_Hpp 1
 
 #include <LBase/sutility.h>
 #include "LFramework/Core/LFunc.hpp"

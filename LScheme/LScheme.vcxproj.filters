@@ -37,9 +37,6 @@
     <ClInclude Include="SContext.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="LEvent.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="LScheme.h">
       <Filter>头文件</Filter>
     </ClInclude>
