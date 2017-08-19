@@ -281,6 +281,24 @@ namespace platform_ex {
 			});
 		}
 
+
+		void
+			GlobalDelete::operator()(pointer h) const lnothrow
+		{
+			// NOTE: %::GlobalFree does not ignore null handle value.
+			if (h && LB_UNLIKELY(::GlobalFree(h)))
+				LCL_Trace_Win32E(Warning, GlobalFree, lfsig);
+		}
+
+
+		GlobalLocked::GlobalLocked(::HGLOBAL h)
+			: p_locked(LCL_CallF_Win32(GlobalLock, h))
+		{}
+		GlobalLocked::~GlobalLocked()
+		{
+			LFL_CallWin32F_Trace(GlobalUnlock, p_locked);
+		}
+
 		void
 			LocalDelete::operator()(pointer h) const lnothrow
 		{
@@ -290,6 +308,8 @@ namespace platform_ex {
 				TraceDe(Warning, "Error %lu: failed calling LocalFree @ %s.",
 					::GetLastError(), lfsig);
 		}
+
+
 
 		wstring
 			FetchWindowsPath(size_t s) {
