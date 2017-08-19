@@ -22,9 +22,21 @@
 namespace leo {
 	using platform::list;
 	using platform::vector;
+
+	using platform::map;
 	using platform::unordered_map;
 	using platform::multimap;
+	using platform::multiset;
 	using platform::set;
+
+	using platform::unordered_map;
+	using platform::unordered_multimap;
+	using platform::unordered_multiset;
+	using platform::unordered_set;
+
+	using platform::stack;
+	using platform::priority_queue;
+	using platform::queue;
 
 	using platform::forward_as_tuple;
 	using platform::get;

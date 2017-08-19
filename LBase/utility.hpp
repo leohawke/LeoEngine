@@ -512,6 +512,7 @@ namespace leo
 		flag_type init_flag, uninit_flag;
 		replace_storage_t<_type> storage;
 
+	public:
 		template<typename... _tParams>
 		call_once_init(_tParams&&... args)
 		{

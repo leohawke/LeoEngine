@@ -147,6 +147,24 @@
     <ClInclude Include="LCLib\Input.h">
       <Filter>LCLib</Filter>
     </ClInclude>
+    <ClInclude Include="Helper\HostWindow.h">
+      <Filter>Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Helper\GUIApplication.h">
+      <Filter>Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LMessage.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\lmsgdef.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LShell.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Helper\WindowThread.h">
+      <Filter>Helper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Win32\LCLib\Consoles.cpp">
@@ -223,6 +241,18 @@
     </ClCompile>
     <ClCompile Include="LCLib\Input.cpp">
       <Filter>LCLib</Filter>
+    </ClCompile>
+    <ClCompile Include="Helper\GUIApplication.cpp">
+      <Filter>Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="Helper\WindowThread.cpp">
+      <Filter>Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="Helper\HostWindow.cpp">
+      <Filter>Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\LShell.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

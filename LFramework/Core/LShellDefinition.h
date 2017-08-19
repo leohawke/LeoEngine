@@ -76,10 +76,20 @@ namespace leo {
 		class _tLock = typename unlock_delete<_tMutex>::lock_type>
 		using locked_ptr = unique_ptr<_type, unlock_delete<_tMutex, _tLock>>;
 
+	namespace Shells
+	{
+		class Shell;
+	} // namespace Shells;
+
 	namespace Text
 	{
 		class String;
 	} // namespace Text;
+
+
+	class Application;
+
+	using Shells::Shell;
 
 	using Text::String;
 }
