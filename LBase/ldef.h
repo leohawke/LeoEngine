@@ -109,17 +109,22 @@
 #	define __has_attribute(...) 0
 #endif
 
+//! \since build 1.3
+#ifndef __has_builtin
+#	define __has_builtin(...) 0
+#endif
+
+
+#ifndef __has_cpp_attribute
+#	define __has_cpp_attribute(...) 0
+#endif
+
 #ifndef __has_feature
 #	define __has_feature(...) 0
 #endif
 
 #ifndef __has_extension
 #	define __has_extension(...) 0
-#endif
-
-//! \since build 1.3
-#ifndef __has_builtin
-#	define __has_builtin(...) 0
 #endif
 //@}
 
@@ -275,6 +280,7 @@
 #	define LB_ASSUME(_expr) (_expr) ? void(0) : LB_ABORT
 #endif
 
+
 //附加提示
 //保证忽略时不导致运行时语义差异的提示,主要用于便于实现可能的优化
 
@@ -286,7 +292,32 @@
 #endif
 
 /*!
-\def YB_ATTR_returns_nonnull
+\def LB_ATTR_STD
+\brief C++ 标准属性。
+\note 注意和 GNU 风格不同，在使用时受限，如不能修饰 lambda 表达式非类型的声明。
+\warning 不检查指令。用户应验证可能使用的指令中的标识符在宏替换后能保持正确。
+*/
+#if __cpp_attributes >= 200809 || __has_feature(cxx_attributes)
+#	define LB_ATTR_STD(...) [[__VA_ARGS__]]
+#else
+#	define LB_ATTR_STD(...)
+#endif
+
+#if __has_cpp_attribute(fallthrough)
+#	define LB_ATTR_fallthrough LB_ATTR_STD(fallthrough)
+#elif __has_cpp_attribute(clang::fallthrough)
+#	define LB_ATTR_fallthrough LB_ATTR_STD(clang::fallthrough)
+#elif __has_cpp_attribute(gnu::fallthrough)
+#	define LB_ATTR_fallthrough LB_ATTR_STD(gnu::fallthrough)
+#elif __has_attribute(fallthrough)
+#	define LB_ATTR_fallthrough LB_ATTR(fallthrough)
+#else
+#	define LB_ATTR_fallthrough
+#endif
+
+
+/*!
+\def LB_ATTR_returns_nonnull
 \brief 指示返回非空属性。
 \since build 1.4
 \see http://reviews.llvm.org/rL199626 。

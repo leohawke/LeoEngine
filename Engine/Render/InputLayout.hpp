@@ -82,7 +82,7 @@ namespace platform::Render {
 		virtual ~InputLayout();
 
 		DefGetter(const lnothrow, TopologyType, TopoType, topology_type)
-			DefSetter(TopologyType, TopoType, topology_type)
+			DefSetter(,TopologyType, TopoType, topology_type)
 
 		uint32 GetNumVertices() const lnothrow;
 

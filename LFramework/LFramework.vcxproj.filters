@@ -141,6 +141,12 @@
     <ClInclude Include="LCLib\HostGUI.h">
       <Filter>LCLib</Filter>
     </ClInclude>
+    <ClInclude Include="Win32\LCLib\GDI.h">
+      <Filter>Win32\LCLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LCLib\Input.h">
+      <Filter>LCLib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Win32\LCLib\Consoles.cpp">
@@ -208,6 +214,15 @@
     </ClCompile>
     <ClCompile Include="Service\TextFile.cpp">
       <Filter>Service</Filter>
+    </ClCompile>
+    <ClCompile Include="LCLib\HostGUI.cpp">
+      <Filter>LCLib</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\LCLib\GDI.cpp">
+      <Filter>Win32\LCLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LCLib\Input.cpp">
+      <Filter>LCLib</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

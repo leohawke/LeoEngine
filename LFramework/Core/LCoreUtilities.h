@@ -76,6 +76,21 @@ namespace leo {
 
 	//@}
 
+	template<typename _tDst, typename _type>
+	inline _tDst
+		CheckLowerBound(_type val, const std::string& name = {}, RecordLevel lv = Err)
+	{
+		using namespace leo;
+		// XXX: See WG21 N3387.
+		// TODO: Add and use safe %common_arithmetic_type interface instead?
+		using common_t = typename leo::common_int_type<_tDst, _type>::type;
+
+		if (!(common_t(val) < common_t(std::numeric_limits<_tDst>::min())))
+			return _tDst(val);
+		throw
+			LoggedEvent("Value of '" + name + "' is less than lower boundary.", lv);
+	}
+
 	//! \brief 检查算术类型数值不大于指定类型的上界。
 	template<typename _tDst, typename _type>
 	inline _tDst
@@ -92,6 +107,16 @@ namespace leo {
 			lv);
 	}
 
+	//! \brief 检查算术类型数值在指定类型的范围内。
+	template<typename _tDst, typename _type>
+	inline _tDst
+		CheckArithmetic(_type val, const std::string& name = {}, RecordLevel lv = Err)
+	{
+		return
+			CheckUpperBound<_tDst>(CheckLowerBound<_tDst>(val, name, lv), name, lv);
+	}
+
+
 	//! \brief 检查非负算术类型数值在指定类型的范围内。
 	template<typename _tDst, typename _type>
 	inline _tDst
@@ -100,6 +125,15 @@ namespace leo {
 		if (val < 0)
 			// XXX: Use more specified exception type.
 			throw LoggedEvent("Failed getting nonnegative " + name + " value.", lv);
+		return CheckUpperBound<_tDst>(val, name, lv);
+	}
+	template<typename _tDst, typename _type>
+	inline _tDst
+		CheckPositive(_type val, const std::string& name = {}, RecordLevel lv = Err)
+	{
+		if (!(0 < val))
+			// XXX: Use more specified exception type.
+			throw LoggedEvent("Failed getting positive " + name + " value.", lv);
 		return CheckUpperBound<_tDst>(val, name, lv);
 	}
 }

@@ -144,6 +144,7 @@
     <ClInclude Include="LCLib\FReference.h" />
     <ClInclude Include="LCLib\Host.h" />
     <ClInclude Include="LCLib\HostGUI.h" />
+    <ClInclude Include="LCLib\Input.h" />
     <ClInclude Include="LCLib\MemoryMapping.h" />
     <ClInclude Include="LCLib\Mutex.h" />
     <ClInclude Include="LCLib\NativeAPI.h" />
@@ -153,6 +154,7 @@
     <ClInclude Include="Service\TextFile.h" />
     <ClInclude Include="Win32\LCLib\COM.h" />
     <ClInclude Include="Win32\LCLib\Consoles.h" />
+    <ClInclude Include="Win32\LCLib\GDI.h" />
     <ClInclude Include="Win32\LCLib\Mingw32.h" />
     <ClInclude Include="Win32\LCLib\NLS.h" />
     <ClInclude Include="Win32\LCLib\Registry.h" />
@@ -174,12 +176,15 @@
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</PreprocessToFile>
     </ClCompile>
     <ClCompile Include="LCLib\Host.cpp" />
+    <ClCompile Include="LCLib\HostGUI.cpp" />
+    <ClCompile Include="LCLib\Input.cpp" />
     <ClCompile Include="LCLib\MemoryMapping.cpp" />
     <ClCompile Include="LCLib\NativeAPI.cpp" />
     <ClCompile Include="Service\File.cpp" />
     <ClCompile Include="Service\FileSystem.cpp" />
     <ClCompile Include="Service\TextFile.cpp" />
     <ClCompile Include="Win32\LCLib\Consoles.cpp" />
+    <ClCompile Include="Win32\LCLib\GDI.cpp" />
     <ClCompile Include="Win32\LCLib\MinGW32.cpp" />
     <ClCompile Include="Win32\LCLib\NLS.cpp" />
     <ClCompile Include="Win32\LCLib\Registry.cpp" />

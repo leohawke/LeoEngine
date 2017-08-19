@@ -220,29 +220,29 @@ _t type
 #define DefGetterMem(_q, _t, _n, _m) \
 	DefGetter(_q, _t, _n, (_m).LPP_Concat(Get, _n)())
 
-#define DefSetter(_t, _n, _m) \
-	void LPP_Concat(Set, _n)(_t _tempArgName) \
+#define DefSetter(_q,_t, _n, _m) \
+	void LPP_Concat(Set, _n)(_t _tempArgName) _q \
 	ImplExpr((_m) = _tempArgName)
-#define DefSetterDe(_t, _n, _m, _defv) \
-	void LPP_Concat(Set, _n)(_t _tempArgName = _defv) \
+#define DefSetterDe(_q,_t, _n, _m, _defv) \
+	void LPP_Concat(Set, _n)(_t _tempArgName = _defv) _q \
 	ImplExpr((_m) = _tempArgName)
-#define DefSetterBase(_t, _n, _b) \
-	void LPP_Concat(Set, _n)(_t _tempArgName) \
+#define DefSetterBase(_q,_t, _n, _b) \
+	void LPP_Concat(Set, _n)(_t _tempArgName) _q \
 	ImplExpr(_b::LPP_Concat(Set, _n)(_tempArgName))
-#define DefSetterBaseDe(_t, _n, _b, _defv) \
-	void LPP_Concat(Set, _n)(_t _tempArgName = _defv) \
+#define DefSetterBaseDe(_q,_t, _n, _b, _defv) \
+	void LPP_Concat(Set, _n)(_t _tempArgName = _defv) _q\
 	ImplExpr(_b::LPP_Concat(Set, _n)(_tempArgName))
-#define DefSetterMem(_t, _n, _m) \
-	void LPP_Concat(Set, _n)(_t _tempArgName) \
+#define DefSetterMem(_q,_t, _n, _m) \
+	void LPP_Concat(Set, _n)(_t _tempArgName) _q\
 	ImplExpr((_m).LPP_Concat(Set, _n)(_tempArgName))
-#define DefSetterMemDe(_t, _n, _m, _defv) \
-	void LPP_Concat(Set, _n)(_t _tempArgName = _defv) \
+#define DefSetterMemDe(_q,_t, _n, _m, _defv) \
+	void LPP_Concat(Set, _n)(_t _tempArgName = _defv) _q \
 	ImplExpr((_m).LPP_Concat(Set, _n)(_tempArgName))
-#define DefSetterEx(_t, _n, _m, ...) \
-	void LPP_Concat(Set, _n)(_t _tempArgName) \
+#define DefSetterEx(_q,_t, _n, _m, ...) \
+	void LPP_Concat(Set, _n)(_t _tempArgName) _q\
 	ImplExpr((_m) = (__VA_ARGS__))
-#define DefSetterDeEx(_t, _n, _m, _defv, ...) \
-	void LPP_Concat(Set, _n)(_t _tempArgName = _defv) \
+#define DefSetterDeEx(_q,_t, _n, _m, _defv, ...) \
+	void LPP_Concat(Set, _n)(_t _tempArgName = _defv) _q \
 	ImplExpr((_m) = (__VA_ARGS__))
 
 

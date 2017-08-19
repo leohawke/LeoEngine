@@ -826,6 +826,42 @@ namespace platform_ex {
 		*/
 		wstring
 			FetchWindowsPath(size_t = MAX_PATH);
+
+		struct LF_API GlobalDelete
+		{
+			using pointer = ::HGLOBAL;
+
+			void
+				operator()(pointer) const lnothrow;
+		};
+
+		class LF_API GlobalLocked
+		{
+		private:
+			//! \invariant <tt>bool(p_locked)</tt> 。
+			void* p_locked;
+
+		public:
+			/*!
+			\brief 构造：锁定存储。
+			\throw Win32Exception ::GlobalLock 调用失败。
+			*/
+			//@{
+			GlobalLocked(::HGLOBAL);
+			template<typename _tPointer>
+			GlobalLocked(const _tPointer& p)
+				: GlobalLocked(p.get())
+			{}
+			//@}
+			~GlobalLocked();
+
+			template<typename _type = void>
+			observer_ptr<_type>
+				GetPtr() const lnothrow
+			{
+				return make_observer(static_cast<_type*>(p_locked));
+			}
+		};
 	}
 }
 

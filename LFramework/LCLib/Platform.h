@@ -123,6 +123,22 @@
 #	endif
 #endif
 
+#ifndef LFL_HostedUI_XCB
+#	define LFL_HostedUI_XCB 0
+#endif
+#ifndef LFL_HostedUI
+#	if LFL_HostedUI_XCB || LFL_Win32 || LFL_Android
+#		define LFL_HostedUI 1
+#	else
+#		define LFL_HostedUI 0
+#	endif
+#endif
+
+#if LFL_HostedUI_XCB && !defined(LF_Use_XCB)
+#	define LF_Use_XCB 0x11100
+#endif
+
+
 #if __STDCPP_THREADS__
 #	define LF_Multithread 1
 #elif LFL_Win32 || LFL_Android || LFL_Linux || LFL_OS_X
