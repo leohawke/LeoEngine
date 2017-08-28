@@ -254,5 +254,8 @@
     <ClCompile Include="Core\LShell.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\LMessage.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

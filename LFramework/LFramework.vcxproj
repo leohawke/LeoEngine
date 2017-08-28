@@ -170,6 +170,7 @@
     <ClCompile Include="CHRLib\chrmap.cpp" />
     <ClCompile Include="CHRLib\MappingEx.cpp" />
     <ClCompile Include="Core\LException.cpp" />
+    <ClCompile Include="Core\LMessage.cpp" />
     <ClCompile Include="Core\LObject.cpp" />
     <ClCompile Include="Core\LShell.cpp" />
     <ClCompile Include="Core\LString.cpp" />

@@ -18,7 +18,7 @@ private:
 		return Nothing;
 	}
 	void OnCreate() override {
-		auto swap_chain = ::Create(host_hwnd);
+		auto swap_chain = ::Create(GetNativeHandle());
 		Context::Instance().CreateDeviceAndDisplay();
 	}
 };
