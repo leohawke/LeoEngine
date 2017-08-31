@@ -3,6 +3,10 @@
 namespace platform_ex {
 	namespace Windows {
 		namespace DXGI {
+			HRESULT CreateFactory2(UINT Flags,REFIID riid, void** ppFactory) {
+				return (LoadProc<decltype(::CreateDXGIFactory2)>(L"dxgi.dll", "CreateDXGIFactory2"))(Flags,riid, ppFactory);
+			}
+
 			HRESULT CreateFactory1(REFIID riid, void** ppFactory) {
 				return (LoadProc<decltype(::CreateDXGIFactory1)>(L"dxgi.dll", "CreateDXGIFactory1"))(riid, ppFactory);
 			}

@@ -95,6 +95,8 @@ namespace platform_ex {
 		namespace DXGI {
 			using namespace leo;
 
+			HRESULT CreateFactory2(UINT Flags, REFIID riid, void** ppFactory);
+
 			HRESULT CreateFactory1(REFIID riid, void** ppFactory);
 		}
 		namespace D3D12 {

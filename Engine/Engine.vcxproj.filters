@@ -113,6 +113,9 @@
     <ClCompile Include="Render\RenderView.cpp">
       <Filter>Render</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Effect\CopyEffect.cpp">
+      <Filter>Render\Effect</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -237,6 +240,9 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Render\D3D12\test.h" />
+    <ClInclude Include="Render\Effect\CopyEffect.h">
+      <Filter>Render\Effect</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
@@ -266,6 +272,9 @@
       <Filter>Render\Effect</Filter>
     </None>
     <None Include="Render\Effect\Util.lsl">
+      <Filter>Render\Effect</Filter>
+    </None>
+    <None Include="Render\Effect\Copy.lsl">
       <Filter>Render\Effect</Filter>
     </None>
   </ItemGroup>

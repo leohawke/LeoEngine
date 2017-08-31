@@ -14,7 +14,8 @@ public:
 	using base::base;
 private:
 	leo::uint32 DoUpdate(leo::uint32 pass) override {
-		unit_test::ExceuteLSchemEngineUnitTest();
+		static std::once_flag flag;
+		std::call_once(flag, unit_test::ExceuteLSchemEngineUnitTest);
 		return Nothing;
 	}
 	void OnCreate() override {

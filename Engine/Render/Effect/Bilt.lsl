@@ -39,7 +39,7 @@
 				}
 				"
 	)
-	(technique (name PointCopy)
+	(technique (name BlitPoint2D)
 		(pass (name p0)
 			(macro (name LINEAR_SAMPLER) (value 0))
 			(depth_enable false)
@@ -49,7 +49,7 @@
 			(pixel_shader Blit2DPS)
 		)
 	)
-	(technique (name BilinearCopy) (inherit PointCopy)
+	(technique (name BlitLinear2D) (inherit BlitPoint2D)
 		(pass (name p0)
 			(macro (name LINEAR_SAMPLER) (value 1))
 		)

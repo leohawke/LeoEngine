@@ -688,10 +688,10 @@ namespace platform_ex::Windows::D3D12 {
 		return d3d_caps;
 	}
 
-	platform::Render::Effect::BiltEffect& D3D12::Device::BiltEffect()
+	platform::Render::Effect::CopyEffect& D3D12::Device::BiltEffect()
 	{
 		if (!bilt_effect)
-			bilt_effect = std::make_unique<platform::Render::Effect::BiltEffect>("Bilt");
+			bilt_effect = std::make_unique<platform::Render::Effect::CopyEffect>("Copy");
 		return Deref(bilt_effect);
 	}
 

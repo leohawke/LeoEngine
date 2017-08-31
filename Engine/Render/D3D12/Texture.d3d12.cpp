@@ -428,7 +428,7 @@ void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_siz
 		cmd_list->SetDescriptorHeaps(static_cast<UINT>(leo::arrlen(heaps)), heaps);
 
 		if (sampler_heap)
-			cmd_list->SetGraphicsRootDescriptorTable(3, sampler_heap->GetGPUDescriptorHandleForHeapStart());
+			cmd_list->SetGraphicsRootDescriptorTable(1, sampler_heap->GetGPUDescriptorHandleForHeapStart());
 
 
 		auto & vb = static_cast<GraphicsBuffer&>(Deref(rl.GetVertexStream(0).stream));
@@ -476,7 +476,7 @@ void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_siz
 			for (uint8 face = 0; face != facecount; ++face) {
 				for (uint8_t level = 1; level < mipmap_size; ++level)
 				{
-					cmd_list->SetGraphicsRootDescriptorTable(2, gpu_cbv_srv_uav_handle);
+					cmd_list->SetGraphicsRootDescriptorTable(0, gpu_cbv_srv_uav_handle);
 
 					barrier_before[0].Transition.Subresource = CalcSubresource(level - 1, index*facecount+face, 0, mipmap_size, array_size);
 					barrier_before[1].Transition.Subresource = CalcSubresource(level, index*facecount + face, 0, mipmap_size, array_size);

@@ -62,7 +62,7 @@ namespace platform_ex::Windows::D3D12 {
 		CheckHResult(d3d_cmd_lists[type]->Reset(GetDevice().d3d_cmd_allocators[type].Get(), nullptr));
 	}
 
-	const COMPtr<ID3D12CommandQueue> D3D12::Context::GetCommandQueue(Device::CommandType type) const
+	const COMPtr<ID3D12CommandQueue>& D3D12::Context::GetCommandQueue(Device::CommandType type) const
 	{
 		return d3d_cmd_queues[type];
 	}

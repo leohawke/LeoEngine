@@ -16,7 +16,7 @@ namespace platform::Render::Effect {
 		float3property src_offset;
 		float3property src_scale;
 		intproperty src_level;
-		leo::lref<Technique> BilinearCopy;
+		leo::lref<Technique> BlitLinear2D;
 	};
 }
 

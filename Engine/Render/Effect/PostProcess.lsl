@@ -10,6 +10,13 @@
 			tex += 0.5;
 			return tex;
 		}
+		void PostProcessVS(float4 pos : POSITION,
+					out float2 oTex : TEXCOORD0,
+					out float4 oPos : SV_Position)
+		{
+			oTex = TexCoordFromPos(pos);
+			oPos = pos;
+		}
 		"
 	)
 )

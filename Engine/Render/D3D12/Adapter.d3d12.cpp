@@ -104,7 +104,12 @@ namespace platform_ex {
 			AdapterList::AdapterList()
 				:current_iterator(end())
 			{
-				CheckHResult(CreateFactory1(COMPtr_RefParam(dxgi_factory_4,IID_IDXGIFactory4)));
+				UINT dxgi_factory_flags = 0;
+#ifndef NDEBUG
+				dxgi_factory_flags |= DXGI_CREATE_FACTORY_DEBUG;
+#endif
+
+				CheckHResult(CreateFactory2(dxgi_factory_flags,COMPtr_RefParam(dxgi_factory_4,IID_IDXGIFactory4)));
 				CheckHResult(Enumerate());
 			}
 

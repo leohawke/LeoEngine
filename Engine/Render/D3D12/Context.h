@@ -5,7 +5,7 @@
 #ifndef LE_RENDER_D3D12_Context_h
 #define LE_RENDER_D3D12_Context_h 1
 
-#include "../Effect/BiltEffect.h"
+#include "../Effect/CopyEffect.h"
 #include "../IContext.h"
 #include "InputLayout.hpp"
 #include "Adapter.h"
@@ -62,7 +62,7 @@ namespace platform_ex {
 
 				PipleState* CreatePipleState(const platform::Render::PipleState& state) override;
 
-				platform::Render::Effect::BiltEffect& BiltEffect();
+				platform::Render::Effect::CopyEffect& BiltEffect();
 
 				platform::Render::InputLayout& PostProcessLayout();
 			public:
@@ -119,7 +119,7 @@ namespace platform_ex {
 
 				platform::Render::Caps d3d_caps;
 
-				std::unique_ptr<platform::Render::Effect::BiltEffect> bilt_effect;
+				std::unique_ptr<platform::Render::Effect::CopyEffect> bilt_effect;
 				std::unique_ptr<InputLayout> postprocess_layout;
 
 				std::unordered_map<size_t, COMPtr<ID3D12RootSignature>> root_signatures;
@@ -152,7 +152,7 @@ namespace platform_ex {
 				void SyncCommand(Device::CommandType);
 				void ResetCommand(Device::CommandType);
 
-				const COMPtr<ID3D12CommandQueue> GetCommandQueue(Device::CommandType) const;
+				const COMPtr<ID3D12CommandQueue>& GetCommandQueue(Device::CommandType) const;
 
 				void CommitCommandList(Device::CommandType);
 				friend class Device;
