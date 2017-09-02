@@ -408,23 +408,16 @@ void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_siz
 		gps_desc.CachedPSO.CachedBlobSizeInBytes = 0;
 		gps_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
-		COMPtr<ID3D12PipelineState> pso;
-		CheckHResult(device->CreateGraphicsPipelineState(&gps_desc, COMPtr_RefParam(pso, IID_ID3D12PipelineState)));
+		auto pso = device.CreateRenderPSO(gps_desc);
 
 		auto& cmd_list = D3D12::Context::Instance().GetCommandList(Device::Command_Render);
-		cmd_list->SetPipelineState(pso.Get());
+		cmd_list->SetPipelineState(pso.get());
 		cmd_list->SetGraphicsRootSignature(gps_desc.pRootSignature);
 
-		COMPtr<ID3D12DescriptorHeap> dynamic_heap;
-		D3D12_DESCRIPTOR_HEAP_DESC cbv_srv_heap_desc;
-		cbv_srv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		cbv_srv_heap_desc.NumDescriptors = array_size*(mipmap_size - 1);
-		cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		cbv_srv_heap_desc.NodeMask = 0;
-		CheckHResult(device->CreateDescriptorHeap(&cbv_srv_heap_desc, COMPtr_RefParam(dynamic_heap, IID_ID3D12DescriptorHeap)));
+		auto dynamic_heap = device.CreateDynamicCBVSRVUAVDescriptorHeap(array_size*(mipmap_size - 1));
 		auto  sampler_heap = sc.SamplerHeap();
 
-		ID3D12DescriptorHeap* heaps[] = { dynamic_heap.Get(),sampler_heap };
+		ID3D12DescriptorHeap* heaps[] = { dynamic_heap.get(),sampler_heap };
 		cmd_list->SetDescriptorHeaps(static_cast<UINT>(leo::arrlen(heaps)), heaps);
 
 		if (sampler_heap)
@@ -510,6 +503,8 @@ void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_siz
 		}
 
 		pass.UnBind(effect);
+
+		Context().Instance().SyncCPUGPU();
 }
 
 

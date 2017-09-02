@@ -71,7 +71,10 @@ namespace platform::Render {
 		uint32 GetAccessMode() const;
 
 
-
+		/*
+		\note 生成策略是尽可能采取GPU异步实现
+		\warning 如果在某贴图对象上调用了该函数,其生命周期应该延长至Contxt::EndFrame()之后
+		*/
 		virtual void BuildMipSubLevels() = 0;
 
 		virtual void HWResourceCreate(ElementInitData const *  init_data) = 0;

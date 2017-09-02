@@ -375,6 +375,37 @@ namespace platform_ex::Windows::D3D12 {
 		return d3d_device.Get();
 	}
 
+	leo::observer_ptr<ID3D12DescriptorHeap> Device::CreateDynamicCBVSRVUAVDescriptorHeap(uint32_t num) {
+		ID3D12DescriptorHeap* dynamic_heap = nullptr;
+		D3D12_DESCRIPTOR_HEAP_DESC cbv_srv_heap_desc;
+		cbv_srv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		cbv_srv_heap_desc.NumDescriptors = num;
+		cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		cbv_srv_heap_desc.NodeMask = 0;
+		CheckHResult(d3d_device->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap,leo::replace_cast<void**>(&dynamic_heap)));
+		cbv_srv_uav_heap_cache.emplace_back(dynamic_heap);
+		return leo::make_observer(dynamic_heap);
+	}
+
+	leo::observer_ptr<ID3D12PipelineState> Device::CreateRenderPSO(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& desc)
+	{
+		char const * p = reinterpret_cast<char const *>(&desc);
+		auto hash_val = leo::hash(p, p + sizeof(desc));
+
+		auto iter = graphics_psos.find(hash_val);
+		if (iter == graphics_psos.end())
+		{
+			ID3D12PipelineState* d3d_pso = nullptr;
+			CheckHResult(d3d_device->CreateGraphicsPipelineState(&desc, IID_ID3D12PipelineState, leo::replace_cast<void**>(&d3d_pso)));
+			return leo::make_observer(graphics_psos.emplace(hash_val,d3d_pso).first->second.Get());
+		}
+		else
+		{
+			return leo::make_observer(iter->second.Get());
+		}
+	}
+
+
 	void Device::DeviceEx(ID3D12Device * device, ID3D12CommandQueue * cmd_queue, D3D_FEATURE_LEVEL feature_level)
 	{
 		d3d_device = device;

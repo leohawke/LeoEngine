@@ -89,7 +89,10 @@ namespace platform_ex::Windows::D3D12 {
 
 	void D3D12::Context::ClearPSOCache()
 	{
+		device->cbv_srv_uav_heap_cache.clear();
 	}
+
+	
 
 	void D3D12::Context::UpdateRenderPSO(const Effect::Effect & effect, const Effect::Technique & tech, const Effect::Pass & pass, const platform::Render::InputLayout & layout)
 	{
@@ -344,6 +347,15 @@ namespace platform_ex::Windows::D3D12 {
 
 		framebuffer->UnBindBarrier();
 
+	}
+	void Context::BeginFrame()
+	{
+	}
+	void Context::EndFrame()
+	{
+		CommitCommandList(Device::Command_Render);
+		ResetCommand(Device::Command_Render);
+		ClearPSOCache();
 	}
 	Context & Context::Instance()
 	{

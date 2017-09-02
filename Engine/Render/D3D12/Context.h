@@ -65,6 +65,10 @@ namespace platform_ex {
 				platform::Render::Effect::CopyEffect& BiltEffect();
 
 				platform::Render::InputLayout& PostProcessLayout();
+
+				leo::observer_ptr<ID3D12DescriptorHeap> CreateDynamicCBVSRVUAVDescriptorHeap(uint32_t num);
+
+				leo::observer_ptr<ID3D12PipelineState> CreateRenderPSO(const D3D12_GRAPHICS_PIPELINE_STATE_DESC&);
 			public:
 				friend class Context;
 			
@@ -123,6 +127,10 @@ namespace platform_ex {
 				std::unique_ptr<InputLayout> postprocess_layout;
 
 				std::unordered_map<size_t, COMPtr<ID3D12RootSignature>> root_signatures;
+
+				std::vector<COMPtr<ID3D12DescriptorHeap>> cbv_srv_uav_heap_cache;
+
+				std::unordered_map<size_t,COMPtr<ID3D12PipelineState>> graphics_psos;
 			};
 
 			class Context : public platform::Render::Context {
@@ -132,6 +140,9 @@ namespace platform_ex {
 				void Push(const platform::Render::PipleState&) override;
 
 				void Render(const Effect::Effect& effect, const Effect::Technique& tech, const platform::Render::InputLayout& layout) override;
+
+				void BeginFrame() override;
+				void EndFrame() override;
 			public:
 				void CreateDeviceAndDisplay() override;
 			private:
@@ -160,6 +171,7 @@ namespace platform_ex {
 				void ClearPSOCache();
 
 				void UpdateRenderPSO(const Effect::Effect& effect, const Effect::Technique& tech,const Effect::Pass& pass, const platform::Render::InputLayout& layout);
+
 			private:
 				void ContextEx(ID3D12Device* device, ID3D12CommandQueue* cmd_queue);
 			private:
@@ -173,6 +185,7 @@ namespace platform_ex {
 				array<std::mutex, Device::CommandTypeCount> cmd_list_mutexs;
 
 				array<COMPtr<ID3D12CommandQueue>, Device::CommandTypeCount-1> d3d_cmd_queues;
+
 			public:
 				static Context& Instance();
 			};

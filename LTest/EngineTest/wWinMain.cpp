@@ -14,8 +14,11 @@ public:
 	using base::base;
 private:
 	leo::uint32 DoUpdate(leo::uint32 pass) override {
-		static std::once_flag flag;
-		std::call_once(flag, unit_test::ExceuteLSchemEngineUnitTest);
+		Context::Instance().BeginFrame();
+		auto& Device = Context::Instance().GetDevice();
+		auto pTex = leo::unique_raw(Device.CreateTexture(512, 0, 1, EFormat::EF_ABGR8, EAccessHint::EA_GenMips | EAccessHint::EA_GPUWrite | EAccessHint::EA_GPURead, {}));
+		pTex->BuildMipSubLevels();
+		Context::Instance().EndFrame();
 		return Nothing;
 	}
 	void OnCreate() override {
