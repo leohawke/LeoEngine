@@ -354,6 +354,7 @@ namespace platform_ex::Windows::D3D12 {
 	void Context::EndFrame()
 	{
 		CommitCommandList(Device::Command_Render);
+		SyncCommand(Device::Command_Render);
 		ResetCommand(Device::Command_Render);
 		ClearPSOCache();
 	}

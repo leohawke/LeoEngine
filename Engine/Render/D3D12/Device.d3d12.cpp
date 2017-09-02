@@ -64,7 +64,7 @@ namespace platform_ex::Windows::D3D12 {
 					feature_level_str = " D3D_FEATURE_LEVEL_UN_0";
 					break;
 				}
-				Trace(Notice, "%s Adapter Description:%s\n", lfname, desc.c_str());
+				Trace(Notice, "%s Adapter Description:%s", lfname, desc.c_str());
 
 				//todo if something
 

@@ -324,9 +324,9 @@ namespace platform_ex
 			const auto& t_id(FetchCurrentThreadID());
 
 			// TODO: Use %::WaitForDebugEventEx if possible. See https://msdn.microsoft.com/en-us/library/windows/desktop/mt171594(v=vs.85).aspx.
-			::OutputDebugStringA((!t_id.empty() ? leo::sfmt("[%s:%s]: %s",
+			::OutputDebugStringA((!t_id.empty() ? leo::sfmt("[%s:%s]: %s\n",
 				t_id.c_str(), sfmt(lv), Nonnull(str)) : leo::sfmt(
-					"[%s]: %s", sfmt(lv), Nonnull(str))).c_str());
+					"[%s]: %s\n", sfmt(lv), Nonnull(str))).c_str());
 		}
 		CatchIgnore(...)
 	}

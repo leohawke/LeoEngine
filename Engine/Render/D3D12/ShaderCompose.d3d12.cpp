@@ -21,7 +21,7 @@ namespace {
 				param->Value(tex_subres);
 			}
 			catch (leo::bad_any_cast&) {
-				Trace(platform::Descriptions::RecordLevel::Warning, "SetTextureSRV Value Null!\n");
+				Trace(platform::Descriptions::RecordLevel::Warning, "SetTextureSRV Value Null!");
 			}
 			if (tex_subres.tex) {
 				auto pTexture = dynamic_cast<D3D12::Texture*>(tex_subres.tex.get());
