@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="TestFramework.cpp" />
+    <ClCompile Include="wWinMain.cpp" />
+    <ClCompile Include="EntityComponentSystem\EntitySystem.cpp">
+      <Filter>EntityComponentSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityComponentSystem\Entity.cpp">
+      <Filter>EntityComponentSystem</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TestFramework.h" />
+    <ClInclude Include="EntityComponentSystem\ECSCommon.h">
+      <Filter>EntityComponentSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityComponentSystem\System.h">
+      <Filter>EntityComponentSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityComponentSystem\EntitySystem.h">
+      <Filter>EntityComponentSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityComponentSystem\Entity.h">
+      <Filter>EntityComponentSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityComponentSystem\ECSException.h">
+      <Filter>EntityComponentSystem</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="EntityComponentSystem">
+      <UniqueIdentifier>{0b0bc858-b528-4ab4-9458-c1807088b76a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

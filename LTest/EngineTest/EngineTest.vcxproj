@@ -226,6 +226,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="EntityComponentSystem\Entity.cpp" />
+    <ClCompile Include="EntityComponentSystem\EntitySystem.cpp" />
     <ClCompile Include="TestFramework.cpp" />
     <ClCompile Include="wWinMain.cpp" />
   </ItemGroup>
@@ -244,6 +246,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="EntityComponentSystem\ECSCommon.h" />
+    <ClInclude Include="EntityComponentSystem\ECSException.h" />
+    <ClInclude Include="EntityComponentSystem\Entity.h" />
+    <ClInclude Include="EntityComponentSystem\EntitySystem.h" />
+    <ClInclude Include="EntityComponentSystem\System.h" />
     <ClInclude Include="TestFramework.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -98,15 +98,14 @@ namespace leo
 
 
 	/*!
-	\brief 通过 YCL_TraceRaw 跟踪带空格缩进层次的异常信息的函数类型。
+	\brief 通过 LCL_TraceRaw 跟踪带空格缩进层次的异常信息的函数类型。
 	\pre 断言：第一参数非空。
 	*/
 	LB_API LB_NONNULL(1) void
 		TraceException(const char*, RecordLevel = Err, size_t level = 0) lnothrow;
 
 	/*!
-	\brief 通过 YCL_TraceRaw 跟踪记录异常类型。
-	\since build 658
+	\brief 通过 LCL_TraceRaw 跟踪记录异常类型。
 	\todo 处理类型名称。
 	*/
 	LB_API void
