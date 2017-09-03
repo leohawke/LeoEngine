@@ -49,12 +49,28 @@ namespace ecs {
 			using index_type = _type2;
 
 			lconstexpr static index_type end_index = std::numeric_limits<_type2>::max();
-			lconstexpr static index_type valid_index = end_index - 1;
+			lconstexpr static index_type invalid_index = end_index - 1;
 
 			static_assert(std::is_unsigned_v<_type2>);
 			static_assert(size != std::numeric_limits<_type2>::max());
-			static_assert(size != valid_index);
+			static_assert(size != invalid_index);
 
+
+			SaltHandleArray() {
+				index_type i;
+				for (i = size - 1; i > 1; --i)
+				{
+					buffer[i].salt = 0;
+					buffer[i].next_index = i - 1;
+				}
+				buffer[1].salt = 0;
+				buffer[1].next_index = end_index;     // end marker
+				free_index = size - 1;
+
+				// 0 is not used because it's nil
+				buffer[0].salt = ~0;
+				buffer[0].next_index = invalid_index;
+			}
 
 			SaltHandle<salt_type, index_type> RentDynamic() lnoexcept {
 				if (free_index == end_index)
@@ -66,7 +82,7 @@ namespace ecs {
 
 				free_index = element.next_index;
 
-				element.next_index = valid_index;
+				element.next_index = invalid_index;
 
 				return ret;
 			}
@@ -96,7 +112,7 @@ namespace ecs {
 			}
 
 			bool IsUsed(index_type index) const lnoexcept {
-				return buffer[index].next_index == valid_index;
+				return buffer[index].next_index == invalid_index;
 			}
 
 		private:
@@ -120,7 +136,7 @@ namespace ecs {
 						it = next;
 					}
 				}
-				buffer[index].next_index = valid_index;
+				buffer[index].next_index = invalid_index;
 			}
 
 
