@@ -228,6 +228,7 @@
   <ItemGroup>
     <ClCompile Include="EntityComponentSystem\Entity.cpp" />
     <ClCompile Include="EntityComponentSystem\EntitySystem.cpp" />
+    <ClCompile Include="EntityComponentSystem\System.cpp" />
     <ClCompile Include="TestFramework.cpp" />
     <ClCompile Include="wWinMain.cpp" />
   </ItemGroup>

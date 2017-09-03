@@ -65,6 +65,7 @@
     <ClInclude Include="streambuf.hpp" />
     <ClInclude Include="ctime.h" />
     <ClInclude Include="mixin.hpp" />
+    <ClInclude Include="typeindex.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="any.cpp" />

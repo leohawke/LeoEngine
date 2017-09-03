@@ -71,6 +71,7 @@
     <ClInclude Include="string.hpp" />
     <ClInclude Include="sutility.h" />
     <ClInclude Include="tuple.hpp" />
+    <ClInclude Include="typeindex.h" />
     <ClInclude Include="typeinfo.h" />
     <ClInclude Include="type_op.hpp" />
     <ClInclude Include="type_pun.hpp" />

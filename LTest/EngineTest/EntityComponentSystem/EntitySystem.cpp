@@ -1,4 +1,5 @@
 #include "EntitySystem.h"
+#include <LBase/typeindex.h>
 #include <LFramework/Adaptor/LAdaptor.h>
 
 using namespace ecs;
@@ -7,33 +8,23 @@ namespace ecs {
 	namespace details {
 		using namespace leo;
 
-		unordered_map<EntityId, std::unique_ptr<Entity>>& EntityBuffer() {
-			static unordered_map<EntityId, std::unique_ptr<Entity>> Instance;
-			return Instance;
-		}
-
-		vector<std::unique_ptr<System>>& SystemBuffer() {
-			static vector<std::unique_ptr<System>> Instance;
-			return Instance;
-		}
-
-		template<typename _type1 = leo::uint16,typename _type2 = leo::uint16>
+		template<typename _type1 = leo::uint16, typename _type2 = leo::uint16>
 		struct SaltHandle {
 			_type1 salt;
 			_type2 index;
 
-			lconstexpr SaltHandle(_type1 salt_,_type2 index_) lnoexcept
-				:salt(salt_),index(index_)
+			lconstexpr SaltHandle(_type1 salt_, _type2 index_) lnoexcept
+				:salt(salt_), index(index_)
 			{}
 
 			lconstexpr SaltHandle() lnoexcept
-				:salt(0),index(0)
+				: salt(0), index(0)
 			{}
 
 
 			lconstexpr bool operator==(const SaltHandle<_type1, _type2>& rhs) const lnoexcept
 			{
-				return m_Salt == rhs.m_Salt && m_Index == rhs.m_Index;
+				return salt == rhs.salt && index == rhs.index;
 			}
 
 			lconstexpr bool operator!=(const SaltHandle<_type1, _type2>& rhs) const lnoexcept
@@ -41,20 +32,19 @@ namespace ecs {
 				return !(*this == rhs);
 			}
 
-			static lconstexpr SaltHandle  nil = {};
-
 			// conversion to bool
 			// e.g. if(id){ ..nil.. } else { ..valid or not valid.. }
 			lconstexpr operator bool() const lnoexcept
 			{
-				return *this != nil;
+				return salt != 0 && index != 0;
 			}
 		};
 
 		lconstexpr auto salt_default_size = 64 * 1024u;
 
-		template<typename _type1 = leo::uint16, typename _type2 = leo::uint16,decltype(salt_default_size) size = salt_default_size-3>
+		template<typename _type1 = leo::uint16, typename _type2 = leo::uint16, decltype(salt_default_size) size = salt_default_size - 3>
 		class SaltHandleArray {
+		public:
 			using salt_type = _type1;
 			using index_type = _type2;
 
@@ -68,12 +58,12 @@ namespace ecs {
 
 			SaltHandle<salt_type, index_type> RentDynamic() lnoexcept {
 				if (free_index == end_index)
-					return SaltHandle<salt_type, index_type>::nil;
+					return SaltHandle<salt_type, index_type>();
 
 				SaltHandle<salt_type, index_type> ret{ buffer[free_index].salt,free_index };
 
 				auto& element = buffer[free_index];
-				
+
 				free_index = element.next_index;
 
 				element.next_index = valid_index;
@@ -81,13 +71,12 @@ namespace ecs {
 				return ret;
 			}
 
-
 			void Return(const SaltHandle<salt_type, index_type>& handle) lnoexcept {
 				auto index = handle.index;
-				LAssert(IsUsed(index)," Index was not used, Insert() wasn't called or Remove() called twice");
+				LAssert(IsUsed(index), " Index was not used, Insert() wasn't called or Remove() called twice");
 
 				auto& salt = buffer[index].salt;
-				LAssert(handle.salt == salt,"Handle Is't Valid");
+				LAssert(handle.salt == salt, "Handle Is't Valid");
 				++salt;
 
 				buffer[index].next_index = free_index;
@@ -145,33 +134,60 @@ namespace ecs {
 			index_type free_index;
 
 		};
-
 	}
+
+	details::SaltHandleArray<> SaltHandleArray;
+	leo::unordered_map<EntityId, std::unique_ptr<Entity>> EntityMap;
+	leo::unordered_multimap<leo::type_index, std::unique_ptr<System>> SystemMap;
+
+	leo::uint16              IdToIndex(const EntityId id) { return id & 0xffff; }
+	details::SaltHandle<>    IdToHandle(const EntityId id) { return details::SaltHandle<>(id >> 16, id & 0xffff); }
+	EntityId            HandleToId(const details::SaltHandle<> id) { return (((leo::uint32)id.salt) << 16) | ((leo::uint32)id.index); }
 }
 
 
 leo::uint32 ecs::EntitySystem::Update(const UpdateParams & params)
 {
-	//TODO Coroutine;
-	for(auto& pSystem : details::SystemBuffer())
+	for (auto& pSystem : SystemMap)
 	{
-		pSystem->Update(params);
+		pSystem.second->Update(params);
 	}
 
 	return {};
 }
 
-leo::observer_ptr<Entity> ecs::EntitySystem::SpawnEntity(const EntitySystemSpawnEntityParams & params)
+leo::observer_ptr<Entity> ecs::EntitySystem::Add(const leo::type_info& type_info, EntityId id, std::unique_ptr<Entity> pEntity)
 {
-	if (params.id != InvalidEntityId) {
-		if (details::EntityBuffer().find(params.id) != details::EntityBuffer().end()) {
-			details::EntityBuffer()[params.id]->ReSpawn(params.params);
-		}
-	}
-	return leo::observer_ptr<Entity>();
+	LAssert(SaltHandleArray.IsUsed(id), "SaltHandleArray Things go awry");
+	LAssert(EntityMap.count(id) == 0, "EntitySystem Things go awry");
+	return leo::make_observer(EntityMap.emplace(id, pEntity.release()).first->second.get());
 }
 
-leo::observer_ptr<System> ecs::EntitySystem::Add(std::unique_ptr<System> pSystem)
+EntityId EntitySystem::GenerateEntityId() const lnothrow {
+	auto ret = InvalidEntityId;
+
+	ret = HandleToId(SaltHandleArray.RentDynamic());
+
+	return ret;
+}
+
+void EntitySystem::RemoveEntity(EntityId id) lnothrow {
+	if (id == InvalidEntityId)
+		return;
+	LAssert(EntityMap.count(id) == 1, "Remove Same Entity Many Times");
+	EntityMap.erase(id);
+	SaltHandleArray.Return(IdToHandle(id));
+}
+
+
+
+EntitySystem & ecs::EntitySystem::Instance()
 {
-	return leo::observer_ptr<System>();
+	static EntitySystem Instance;
+	return Instance;
+}
+
+leo::observer_ptr<System> ecs::EntitySystem::Add(const leo::type_info& type_info, std::unique_ptr<System> pSystem)
+{
+	return leo::make_observer(SystemMap.emplace(leo::type_index(type_info), pSystem.release())->second.get());
 }

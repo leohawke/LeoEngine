@@ -1,5 +1,5 @@
 #include "Entity.h"
 
-void ecs::Entity::ReSpawn(const EntitySpawnParams & params)
-{
-}
+using namespace ecs;
+
+ImplDeDtor(Entity)

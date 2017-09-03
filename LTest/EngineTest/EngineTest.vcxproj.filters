@@ -9,6 +9,9 @@
     <ClCompile Include="EntityComponentSystem\Entity.cpp">
       <Filter>EntityComponentSystem</Filter>
     </ClCompile>
+    <ClCompile Include="EntityComponentSystem\System.cpp">
+      <Filter>EntityComponentSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TestFramework.h" />
