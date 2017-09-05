@@ -34,6 +34,10 @@ namespace ecs {
 
 		void RemoveEntity(EntityId id) lnothrow;
 
+		void PostMessage(const leo::Message& message);
+
+		void OnGotMessage(const leo::Message& message) override;
+
 		static EntitySystem& Instance();
 	private:
 		EntityId GenerateEntityId() const lnothrow;

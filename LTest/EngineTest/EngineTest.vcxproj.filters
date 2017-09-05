@@ -12,6 +12,9 @@
     <ClCompile Include="EntityComponentSystem\System.cpp">
       <Filter>EntityComponentSystem</Filter>
     </ClCompile>
+    <ClCompile Include="EntityComponentSystem\Component.cpp">
+      <Filter>EntityComponentSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TestFramework.h" />
@@ -28,6 +31,12 @@
       <Filter>EntityComponentSystem</Filter>
     </ClInclude>
     <ClInclude Include="EntityComponentSystem\ECSException.h">
+      <Filter>EntityComponentSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityComponentSystem\Component.h">
+      <Filter>EntityComponentSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityComponentSystem\ecsmsgdef.h">
       <Filter>EntityComponentSystem</Filter>
     </ClInclude>
   </ItemGroup>

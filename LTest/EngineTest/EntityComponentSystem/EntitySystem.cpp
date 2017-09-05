@@ -197,6 +197,19 @@ void EntitySystem::RemoveEntity(EntityId id) lnothrow {
 
 
 
+void ecs::EntitySystem::PostMessage(const leo::Message & message)
+{
+	OnGotMessage(message);
+}
+
+void ecs::EntitySystem::OnGotMessage(const leo::Message & message)
+{
+	for (auto& pSystem : SystemMap)
+	{
+		pSystem.second->OnGotMessage(message);
+	}
+}
+
 EntitySystem & ecs::EntitySystem::Instance()
 {
 	static EntitySystem Instance;

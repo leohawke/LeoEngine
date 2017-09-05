@@ -226,6 +226,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="EntityComponentSystem\Component.cpp" />
     <ClCompile Include="EntityComponentSystem\Entity.cpp" />
     <ClCompile Include="EntityComponentSystem\EntitySystem.cpp" />
     <ClCompile Include="EntityComponentSystem\System.cpp" />
@@ -247,8 +248,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="EntityComponentSystem\Component.h" />
     <ClInclude Include="EntityComponentSystem\ECSCommon.h" />
     <ClInclude Include="EntityComponentSystem\ECSException.h" />
+    <ClInclude Include="EntityComponentSystem\ecsmsgdef.h" />
     <ClInclude Include="EntityComponentSystem\Entity.h" />
     <ClInclude Include="EntityComponentSystem\EntitySystem.h" />
     <ClInclude Include="EntityComponentSystem\System.h" />
