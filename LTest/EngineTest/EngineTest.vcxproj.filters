@@ -39,10 +39,16 @@
     <ClInclude Include="EntityComponentSystem\ecsmsgdef.h">
       <Filter>EntityComponentSystem</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\SceneComponent.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="EntityComponentSystem">
       <UniqueIdentifier>{0b0bc858-b528-4ab4-9458-c1807088b76a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{b2099af2-f6e3-4d80-97ab-09a046886c9c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

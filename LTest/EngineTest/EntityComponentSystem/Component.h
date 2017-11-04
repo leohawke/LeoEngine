@@ -6,8 +6,7 @@
 
 namespace ecs {
 	
-	class Component {
-	public:
+	struct Component {
 		leo::type_index type_index;
 
 		template<typename... _tParams>

@@ -255,6 +255,7 @@
     <ClInclude Include="EntityComponentSystem\Entity.h" />
     <ClInclude Include="EntityComponentSystem\EntitySystem.h" />
     <ClInclude Include="EntityComponentSystem\System.h" />
+    <ClInclude Include="Scene\SceneComponent.h" />
     <ClInclude Include="TestFramework.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
