@@ -27,6 +27,11 @@ namespace ecs {
 			TryRet(leo::make_observer(static_cast<_type*>(Add(leo::type_id<_type>(), std::make_unique<_type>(leo::type_id<_type>(),lforward(args)...)).get())))
 				CatchThrow(ECSException& e, leo::LoggedEvent(leo::sfmt("AddComponent failed. (Inner %s)", e.message()), Warning))
 		}
+
+		template<typename _type>
+		leo::observer_ptr<_type> GetComponent() {
+			return {};
+		}
 	private:
 		leo::observer_ptr<Component> Add(const leo::type_info& type_info,std::unique_ptr<Component> pComponent);
 	private:

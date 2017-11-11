@@ -172,6 +172,14 @@ leo::uint32 ecs::EntitySystem::Update(const UpdateParams & params)
 	return {};
 }
 
+leo::observer_ptr<Entity> ecs::EntitySystem::GetEntity(EntityId id) {
+	if (id == InvalidEntityId)
+		return {};
+	LAssert(EntityMap.count(id) != 0, "EntitySystem Don't Exist this Entity");
+
+	return leo::make_observer(EntityMap.at(id).get());
+}
+
 leo::observer_ptr<Entity> ecs::EntitySystem::Add(const leo::type_info& type_info, EntityId id, std::unique_ptr<Entity> pEntity)
 {
 	LAssert(SaltHandleArray.IsUsed(id), "SaltHandleArray Things go awry");

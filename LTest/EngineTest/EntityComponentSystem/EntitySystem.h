@@ -32,6 +32,8 @@ namespace ecs {
 				CatchThrow(ECSException& e, leo::LoggedEvent(leo::sfmt("AddEntity failed. (Inner %s)", e.what()), Warning))
 		}
 
+		leo::observer_ptr<Entity> GetEntity(EntityId id);
+
 		void RemoveEntity(EntityId id) lnothrow;
 
 		void PostMessage(const leo::Message& message);

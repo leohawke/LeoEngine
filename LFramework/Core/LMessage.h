@@ -18,7 +18,6 @@ namespace Messaging
 
 /*!
 \brief 消息标识。
-\since build 175
 */
 using ID = limpl(std::uint32_t);
 

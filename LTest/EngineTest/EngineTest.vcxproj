@@ -230,6 +230,8 @@
     <ClCompile Include="EntityComponentSystem\Entity.cpp" />
     <ClCompile Include="EntityComponentSystem\EntitySystem.cpp" />
     <ClCompile Include="EntityComponentSystem\System.cpp" />
+    <ClCompile Include="Scene\SceneComponent.cpp" />
+    <ClCompile Include="Scene\SceneSystem.cpp" />
     <ClCompile Include="TestFramework.cpp" />
     <ClCompile Include="wWinMain.cpp" />
   </ItemGroup>
@@ -256,6 +258,7 @@
     <ClInclude Include="EntityComponentSystem\EntitySystem.h" />
     <ClInclude Include="EntityComponentSystem\System.h" />
     <ClInclude Include="Scene\SceneComponent.h" />
+    <ClInclude Include="Scene\SceneSystem.h" />
     <ClInclude Include="TestFramework.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

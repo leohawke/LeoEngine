@@ -7,7 +7,7 @@
 namespace ecs {
 	class Entity;
 	class System;
-	class Component;
+	struct Component;
 
 	using EntityId = leo::uint32;
 

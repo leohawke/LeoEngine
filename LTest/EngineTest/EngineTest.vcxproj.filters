@@ -15,6 +15,12 @@
     <ClCompile Include="EntityComponentSystem\Component.cpp">
       <Filter>EntityComponentSystem</Filter>
     </ClCompile>
+    <ClCompile Include="Scene\SceneComponent.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\SceneSystem.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TestFramework.h" />
@@ -40,6 +46,9 @@
       <Filter>EntityComponentSystem</Filter>
     </ClInclude>
     <ClInclude Include="Scene\SceneComponent.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\SceneSystem.h">
       <Filter>Scene</Filter>
     </ClInclude>
   </ItemGroup>

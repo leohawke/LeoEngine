@@ -13,9 +13,8 @@ namespace ecs {
 		SceneComponent(const leo::type_info& type_info, EntityId parent);
 
 		SceneComponent(const leo::type_info& type_info, leo::observer_ptr<Entity> pParent)
-			:SceneComponent(type_info, pParent->GetId()) {
-
-		}
+			:SceneComponent(type_info, pParent->GetId()) 
+		{}
 	};
 }
 
