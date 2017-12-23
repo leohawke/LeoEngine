@@ -369,6 +369,59 @@ namespace leo {
 	}
 	//@}
 	//@}
+
+	/*!
+	\brief 在简单 NTCTS 内查找字符。
+	\return 若未找到为空指针值，否则为指向首个查找到的字符的指针值。
+	*/
+	//@{
+	template<typename _tChar>
+	LB_NONNULL(1) LB_PURE _tChar*
+		ntctschr(_tChar* s, remove_const_t<_tChar> c) lnothrowv
+	{
+		lconstraint(s);
+		for (auto p(s); !leo::is_null(*p); ++p)
+			if (*p == c)
+				return p;
+		return {};
+	}
+	inline LB_NONNULL(1) LB_PURE char*
+		ntctschr(char* s, char c) lnothrowv
+	{
+		lconstraint(s);
+		return std::strchr(s, c);
+	}
+	inline LB_NONNULL(1) LB_PURE const char*
+		ntctschr(const char* s, char c) lnothrowv
+	{
+		lconstraint(s);
+		return std::strchr(s, c);
+	}
+	inline LB_NONNULL(1) LB_PURE wchar_t*
+		ntctschr(wchar_t* s, wchar_t c) lnothrowv
+	{
+		lconstraint(s);
+		return std::wcschr(s, c);
+	}
+	inline LB_NONNULL(1) LB_PURE const wchar_t*
+		ntctschr(const wchar_t* s, wchar_t c) lnothrowv
+	{
+		lconstraint(s);
+		return std::wcschr(s, c);
+	}
+	inline LB_NONNULL(1) LB_PURE uchar_t*
+		ntctschr(uchar_t* s, uchar_t c) lnothrowv
+	{
+		return replace_cast<uchar_t*>(
+			ntctschr(replace_cast<wchar_t*>(s), wchar_t(c)));
+	}
+	inline LB_NONNULL(1) LB_PURE const uchar_t*
+		ntctschr(const uchar_t* s, uchar_t c) lnothrowv
+	{
+		return replace_cast<const uchar_t*>(
+			ntctschr(replace_cast<const wchar_t*>(s), wchar_t(c)));
+	}
+	//@}
 }
 
 #endif

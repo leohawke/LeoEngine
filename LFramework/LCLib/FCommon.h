@@ -195,7 +195,7 @@ namespace platform
 	*/
 	template<typename _func, typename _tErrorRef,
 		typename _tError = leo::decay_t<_tErrorRef>,
-		typename _type = leo::result_of_t<_func&()>>
+		typename _type = leo::invoke_result_t<_func&()>>
 		_type
 		RetryOnError(_func f, _tErrorRef&& err, _tError e = _tError())
 	{
@@ -204,7 +204,7 @@ namespace platform
 		}, f);
 	}
 
-	template<typename _func, typename _type = leo::result_of_t<_func&()>>
+	template<typename _func, typename _type = leo::invoke_result_t<_func&()>>
 	inline _type
 		RetryOnInterrupted(_func f)
 	{

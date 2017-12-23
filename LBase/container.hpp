@@ -539,7 +539,7 @@ namespace leo
 		};
 
 		template<typename _tSeqCon, typename _fPred>
-		struct erase_all_if_in_seq<_tSeqCon,_fPred,std::void_t<decltype(std::declval<_tSeqCon>().remove_if(std::declval<_fPred>()...))>>
+		struct erase_all_if_in_seq<_tSeqCon,_fPred,std::void_t<decltype(std::declval<_tSeqCon>().remove_if(std::declval<_fPred>()))>>
 		{
 			void operator()(_tSeqCon& con, _fPred pred) {
 				con.remove_if(pred);

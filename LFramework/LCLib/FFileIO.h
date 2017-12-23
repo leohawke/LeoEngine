@@ -699,9 +699,9 @@ namespace platform
 			{
 				this->_M_allocate_internal_buffer();
 				this->_M_mode = mode;
-				yunseq(this->_M_reading = {}, this->_M_writing = {});
+				lunseq(this->_M_reading = {}, this->_M_writing = {});
 				this->_M_set_buffer(-1);
-				yunseq(this->_M_state_cur = this->_M_state_beg,
+				lunseq(this->_M_state_cur = this->_M_state_beg,
 					this->_M_state_last = this->_M_state_beg);
 				if ((mode & std::ios_base::ate) && this->seekoff(0,
 					std::ios_base::end) == pos_type(off_type(-1)))
@@ -1068,7 +1068,7 @@ namespace platform
 			const int err(errno);
 
 			if (err != ERANGE)
-				leo::throw_error(err, yfsig);
+				leo::throw_error(err, lfsig);
 			return true;
 		});
 	}
@@ -1175,7 +1175,7 @@ namespace platform
 	LCL_TraceWrapCall_CAPI(_fn, __VA_ARGS__)(_sig)
 
 #define LCL_TraceCallF_CAPI(_fn, ...) \
-	LCL_TraceCall_CAPI(_fn, yfsig, __VA_ARGS__)
+	LCL_TraceCall_CAPI(_fn, lfsig, __VA_ARGS__)
 	//@}
 	//@}
 	//@}
