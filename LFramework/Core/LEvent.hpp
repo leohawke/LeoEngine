@@ -64,8 +64,11 @@ namespace leo
 
 			static bool
 				AreEqual(const GHEvent& x, const GHEvent& y)
+				//	https://stackoverflow.com/questions/35790350/noexcept-inheriting-constructors-and-the-invalid-use-of-an-incomplete-type-that.
+#if !(LB_IMPL_GNUCPP >= 70000)
 				lnoexcept_spec(leo::examiners::equal_examiner::are_equal(Deref(
 					x.template target<Decayed>()), Deref(y.template target<Decayed>())))
+#endif
 			{
 				return leo::examiners::equal_examiner::are_equal(
 					Deref(x.template target<Decayed>()),

@@ -805,7 +805,24 @@ namespace leo
 			con.push_back(value);
 		return static_cast<_tCon&&>(con);
 	}
-	template<class _tCon, typename... _tParams>
+
+	namespace details {
+		//TODO 
+		template<size_t idx, typename... _tParams>
+		struct params_element
+		{
+			using tuple = std::tuple<_tParams...>;
+			using type = std::conditional_t<(idx >=sizeof(_tParams)), void, std::tuple_element_t<idx, tuple>>;
+		};
+	}
+
+	template<class _tCon, typename... _tParams,
+		typename = enable_if_t<(sizeof...(_tParams) > 1) ||
+		sizeof...(_tParams) == 1 &&
+			!std::is_same_v<
+				remove_cv_t<details::params_element<0,_tParams...>>,
+				typename decay_t<_tCon>::value_type
+	>>>
 	_tCon&&
 		trail(_tCon&& con, _tParams&&... args)
 	{

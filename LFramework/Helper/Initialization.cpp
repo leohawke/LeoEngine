@@ -157,7 +157,7 @@ namespace Test {
 		throw GeneralEvent("Invalid stream found when reading configuration.");
 	}
 
-	LB_NONNULL(1, 2)leo::ValueNode Test::LoadLSLV1File(const char * disp, const char * path, leo::ValueNode(*creator)(), bool show_info)
+	LB_NONNULL(1, 2)leo::ValueNode LoadLSLV1File(const char * disp, const char * path, leo::ValueNode(*creator)(), bool show_info)
 	{
 		auto res(TryInvoke([=]() -> ValueNode {
 			if (!ufexists(path))
@@ -206,7 +206,7 @@ namespace Test {
 		return TryReadRawNPLStream(ss);
 	}
 
-	leo::ValueNode Test::LoadConfiguration(bool show_info)
+	leo::ValueNode LoadConfiguration(bool show_info)
 	{
 		return LoadLSLV1File("configuration file", CONF_PATH, [] {
 			return leo::ValueNode(leo::NodeLiteral{ "LFramework",

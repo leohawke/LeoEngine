@@ -127,7 +127,7 @@ namespace leo
 		using size_type = typename traits::size_type;
 
 	private:
-		_tAlloc& alloc_ref;
+		_tAlloc & alloc_ref;
 		size_type size;
 
 	public:
@@ -359,8 +359,14 @@ namespace leo
 	//@}
 
 
+	template<class _type> inline
+		void return_temporary_buffer(_type * buff)
+	{	// delete raw temporary buffer
+		::operator delete(buff);
+	}
+
 	/*!
-	\brief 使用显式 std::return_temporary_buffer 的删除器。
+	\brief 使用显式 return_temporary_buffer 的删除器。
 	\note 非数组类型的特化无定义。
 	\since build 1.4
 	*/
@@ -376,11 +382,27 @@ namespace leo
 		void
 			operator()(_type* p) const lnothrowv
 		{
-			std::return_temporary_buffer(p);
+			leo::return_temporary_buffer(p);
 		}
 	};
 	//@}
 
+	template<class _type>
+	std::pair<_type *, ptrdiff_t> get_temporary_buffer(ptrdiff_t count) lnoexcept
+	{	// get raw temporary buffer of up to _Count elements
+		if (static_cast<size_t>(count) <= static_cast<size_t>(-1) / sizeof(_type))
+		{
+			for (; 0 < count; count /= 2)
+			{
+				_type * buff = static_cast<_type *>(::operator new(static_cast<size_t>(count) * sizeof(_type), std::nothrow));
+				if (buff)
+				{
+					return { buff, count };
+				}
+			}
+		}
+		return { nullptr, 0 };
+	}
 
 	/*!
 	\brief 临时缓冲区。
@@ -404,7 +426,7 @@ namespace leo
 		temporary_buffer(size_t n)
 			: buf([n] {
 			// NOTE: See LWG 2072.
-			const auto pr(std::get_temporary_buffer<_type>(ptrdiff_t(n)));
+			const auto pr(leo::get_temporary_buffer<_type>(ptrdiff_t(n)));
 
 			if (pr.first)
 				return std::pair<pointer, size_t>(pointer(pr.first),
@@ -437,7 +459,7 @@ namespace leo
 	};
 	//@}
 
-	
+
 
 
 	/*!
@@ -654,7 +676,7 @@ namespace leo
 			make_unique(_tParams&&... args)
 		{
 			return std::unique_ptr<_type>(new _type(lforward(args)...));
-		}
+}
 		template<typename _type, typename... _tParams>
 		lconstfn limpl(enable_if_t<is_array<_type>::value && extent<_type>::value == 0,
 			std::unique_ptr<_type>>)
@@ -882,7 +904,7 @@ namespace leo
 	//@{
 	/*!
 	\brief 打包对象：通过指定参数构造对象。
-	\since build 
+	\since build
 
 	对 std::unique_ptr 和 std::shared_ptr 的实例，使用 make_unique
 	和 std::make_shared 构造，否则直接使用参数构造。
