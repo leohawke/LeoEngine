@@ -191,40 +191,11 @@ namespace leo {
 	\see WG21 N4606 20.10.10.7[specialized.destroy] 。
 	*/
 	//@{
-	/*!
-	\see libstdc++ 5 和 Microsoft VC++ 2013 标准库在命名空间 std 内对指针类型的实现：
-	_Destroy 模板。
-	*/
-	template<typename _type>
-	inline void
-		destroy_at(_type* location)
-	{
-		lconstraint(location);
-		location->~_type();
-	}
+	using std::destroy_at;
 
-	//! \see libstdc++ 5 标准库在命名空间 std 内对迭代器范围的实现： _Destroy 模板。
-	template<typename _tFwd>
-	inline void
-		destroy(_tFwd first, _tFwd last)
-	{
-		for (; first != last; ++first)
-			destroy_at(std::addressof(*first));
-	}
+	using std::destroy;
 
-	template<typename _tFwd, typename _tSize>
-	inline _tFwd
-		destroy_n(_tFwd first, _tSize n)
-	{
-		// XXX: To reduce dependency on resolution of LWG 2598.
-		static_assert(is_lvalue_reference<decltype(*first)>(),
-			"Invalid iterator reference type found.");
-
-		// XXX: Excessive order refinment by ','?
-		for (; n > 0; static_cast<void>(++first), --n)
-			destroy_at(std::addressof(*first));
-		return first;
-	}
+	using std::destroy_n;
 	//@}
 	//@}
 
@@ -467,7 +438,6 @@ namespace leo {
 			placement_delete(const placement_delete<_type2>&) lnothrow
 		{}
 
-		//! \note 使用 ADL destroy_at 。
 		void
 			operator()(pointer p) const lnothrowv
 		{

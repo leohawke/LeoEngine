@@ -337,7 +337,7 @@ namespace leo
 	limpl(lconstfn) nonvoid_result_t<invoke_result_t<_fCallable && (_tParams&&...)>>
 		invoke_nonvoid(_fCallable&& f, _tParams&&... args)
 	{
-		return details::invoke_nonvoid_impl(is_void<result_of_t<
+		return details::invoke_nonvoid_impl(is_void<invoke_result_t<
 			_fCallable && (_tParams&&...)>>(), lforward(f), lforward(args)...);
 	}
 
@@ -1077,7 +1077,7 @@ namespace leo
 	invoke_result_t<_fCallable && (_tParams&&...)>
 		retry_on_cond(_fCond cond, _fCallable&& f, _tParams&&... args)
 	{
-		using res_t = result_of_t<_fCallable && (_tParams&&...)>;
+		using res_t = invoke_result_t<_fCallable && (_tParams&&...)>;
 		using obj_t = object_result_t<res_t>;
 		obj_t res;
 

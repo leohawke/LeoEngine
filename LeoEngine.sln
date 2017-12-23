@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LBase", "LBase\LBase.vcxproj", "{4F3AE107-3FFD-4D5C-82A8-5034C0041562}"
 EndProject
@@ -400,5 +400,8 @@ Global
 		{2EBBB8C0-9BBC-4EB0-A1D6-597F46B8D565} = {CB2E7065-C2DF-4BAF-B4EC-550568D9F56E}
 		{B40C855A-A115-4852-996D-A4CC61B29973} = {BE52721A-3113-49EF-980B-B0DFDCFF24AB}
 		{CF4F3C3A-3ECD-4A09-95D1-D8FA33F8CDB5} = {BE52721A-3113-49EF-980B-B0DFDCFF24AB}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1C85FA3C-C95F-4981-96BC-8082DAEDA622}
 	EndGlobalSection
 EndGlobal

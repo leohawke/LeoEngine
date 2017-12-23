@@ -1,8 +1,9 @@
 #ifndef LBase_cctype_h
-#define LBase_cctype_h
+#define LBase_cctype_h 1
 
 #include "ldef.h"
 #include <cctype>
+#include <cwctype>
 
 namespace leo
 {
