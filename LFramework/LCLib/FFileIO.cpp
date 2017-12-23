@@ -188,9 +188,9 @@ namespace platform
 		auto
 			FetchFileTime(_func f, _tParams... args)
 #if LFL_Win32
-			-> leo::invoke_result_t<_func(_tParams&...)>
+			-> leo::invoke_result_t<_func,_tParams&...>
 #else
-			-> leo::invoke_result_t<_func(struct ::stat&)>
+			-> leo::invoke_result_t<_func,struct ::stat&>
 #endif
 		{
 #if LFL_Win32

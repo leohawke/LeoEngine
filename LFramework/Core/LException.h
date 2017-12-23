@@ -141,7 +141,7 @@ namespace leo
 	\brief 调用函数并试图返回。
 	*/
 	template<typename _fCallable, typename... _tParams>
-	nonvoid_result_t<invoke_result_t<_fCallable && (_tParams&&...)>>
+	nonvoid_result_t<invoke_result_t<_fCallable ,_tParams...>>
 		TryInvoke(_fCallable&& f, _tParams&&... args) lnothrow
 	{
 		TryRet(leo::invoke_nonvoid(lforward(f), lforward(args)...))

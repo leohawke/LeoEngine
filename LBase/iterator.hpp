@@ -130,7 +130,7 @@ namespace leo
 			using iterator_type = _t<pointer_classify<_tIter>>;
 			using iterator_category
 				= typename std::iterator_traits<iterator_type>::iterator_category;
-			using transformed_type = invoke_result_t<_fTrans&(_tIter&)>;
+			using transformed_type = invoke_result_t<_fTrans&,_tIter&>;
 			using difference_type
 				= typename std::iterator_traits<iterator_type>::difference_type;
 			using reference
