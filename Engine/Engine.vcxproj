@@ -31,6 +31,7 @@
     <ClCompile Include="Asset\EffectAsset.cpp" />
     <ClCompile Include="Asset\EffectX.cpp" />
     <ClCompile Include="Asset\Loader.cpp" />
+    <ClCompile Include="Asset\MeshX.cpp" />
     <ClCompile Include="Asset\TexCompression.cpp" />
     <ClCompile Include="Asset\CompressionBC.cpp" />
     <ClCompile Include="Asset\TextureX.cpp" />
@@ -74,6 +75,8 @@
     <ClInclude Include="Asset\EffectAsset.h" />
     <ClInclude Include="Asset\EffectX.h" />
     <ClInclude Include="Asset\Loader.hpp" />
+    <ClInclude Include="Asset\MeshAsset.h" />
+    <ClInclude Include="Asset\MeshX.h" />
     <ClInclude Include="Asset\TexCompression.hpp" />
     <ClInclude Include="Asset\TextureX.h" />
     <ClInclude Include="Core\LFile.h" />

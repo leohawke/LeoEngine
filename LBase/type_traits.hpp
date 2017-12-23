@@ -117,7 +117,6 @@ namespace leo {
 		//	using std::is_trivially_copyable;
 		using std::is_standard_layout;
 		using std::is_pod;
-		using std::is_literal_type;
 		using std::is_empty;
 		using std::is_polymorphic;
 		using std::is_abstract;
@@ -204,7 +203,6 @@ namespace leo {
 		using std::conditional;
 		using std::common_type;
 		using std::underlying_type;
-		using std::result_of;
 		//@}
 	}
 
@@ -246,7 +244,6 @@ namespace leo {
 		using std::conditional_t;
 		using std::common_type_t;
 		using std::underlying_type_t;
-		using std::result_of_t;
 #else
 		//@{
 		template<typename _type>
@@ -331,7 +328,10 @@ namespace leo {
 
 	} // inline namespace cpp2014;
 
-
+	inline namespace cpp2017 {
+		using std::invoke_result;
+		using std::invoke_result_t;
+	}
 #define LB_Impl_DeclIntT(_n, _t) \
 	template<_t _vInt> \
 	using _n = std::integral_constant<_t, _vInt>;

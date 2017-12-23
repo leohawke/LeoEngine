@@ -116,6 +116,9 @@
     <ClCompile Include="Render\Effect\CopyEffect.cpp">
       <Filter>Render\Effect</Filter>
     </ClCompile>
+    <ClCompile Include="Asset\MeshX.cpp">
+      <Filter>Asset</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -242,6 +245,12 @@
     <ClInclude Include="Render\D3D12\test.h" />
     <ClInclude Include="Render\Effect\CopyEffect.h">
       <Filter>Render\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\MeshAsset.h">
+      <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\MeshX.h">
+      <Filter>Asset</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

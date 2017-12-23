@@ -16,7 +16,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 #ifndef LBase_ldef_h
-#define LBase_ldef_h
+#define LBase_ldef_h 1
 
 /*!	\defgroup lang_impl_versions Language Implementation Versions
 \brief 语言实现的版本。
@@ -97,6 +97,10 @@
 #undef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS 1
 #endif
+
+//TODO 更改相关代码
+#undef _SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING
+#define _SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING 1
 //@}
 
 /*!

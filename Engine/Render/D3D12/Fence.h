@@ -6,9 +6,9 @@
 #ifndef LE_RENDER_D3D12_Fence_h
 #define LE_RENDER_D3D12_Fence_h 1
 
+#include <LBase/linttype.hpp>
 #include <atomic>
 #include "d3d12_dxgi.h"
-#include <LBase/linttype.hpp>
 #include "../../Win32/NTHandle.h"
 
 

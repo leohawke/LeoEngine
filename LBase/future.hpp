@@ -57,11 +57,11 @@ namespace leo
 
 	template<typename _fCallable, typename... _tParams>
 	using future_result_t
-		= std::future<result_of_t<_fCallable && (_tParams&&...)>>;
+		= std::future<invoke_result_t<_fCallable && (_tParams&&...)>>;
 
 	template<typename _fCallable, typename... _tParams>
 	using packed_task_t
-		= std::packaged_task<result_of_t<_fCallable && (_tParams&&...)>()>;
+		= std::packaged_task<invoke_result_t<_fCallable && (_tParams&&...)>()>;
 
 
 	//@{

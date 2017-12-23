@@ -322,7 +322,7 @@ namespace leo
 			return leo::invoke(lforward(f), lforward(args)...), pseudo_output();
 		}
 		template<typename _fCallable, typename... _tParams>
-		inline result_of_t<_fCallable && (_tParams&&...)>
+		inline invoke_result_t<_fCallable && (_tParams&&...)>
 			invoke_nonvoid_impl(false_, _fCallable&& f, _tParams&&... args)
 		{
 			return leo::invoke(lforward(f), lforward(args)...);
@@ -334,7 +334,7 @@ namespace leo
 	  \brief 调用可调用对象，保证返回值非空。
 	  */
 	template<typename _fCallable, typename... _tParams>
-	limpl(lconstfn) nonvoid_result_t<result_of_t<_fCallable && (_tParams&&...)>>
+	limpl(lconstfn) nonvoid_result_t<invoke_result_t<_fCallable && (_tParams&&...)>>
 		invoke_nonvoid(_fCallable&& f, _tParams&&... args)
 	{
 		return details::invoke_nonvoid_impl(is_void<result_of_t<
@@ -889,7 +889,7 @@ namespace leo
 		template<typename _type, typename _fCallable, typename... _tParams>
 		auto
 			call_for_value(false_, _type&&, _fCallable&& f, _tParams&&... args)
-			-> result_of_t<_fCallable && (_tParams&&...)>
+			-> invoke_result_t<_fCallable && (_tParams&&...)>
 		{
 			return leo::invoke(lforward(f), lforward(args)...);
 		}
@@ -902,9 +902,9 @@ namespace leo
 	template<typename _type, typename _fCallable, typename... _tParams>
 	auto
 		call_for_value(_type&& val, _fCallable&& f, _tParams&&... args)
-		-> common_nonvoid_t<result_of_t<_fCallable && (_tParams&&...)>, _type>
+		-> common_nonvoid_t<invoke_result_t<_fCallable && (_tParams&&...)>, _type>
 	{
-		return details::call_for_value(is_void<result_of_t<_fCallable && (
+		return details::call_for_value(is_void<invoke_result_t<_fCallable && (
 			_tParams&&...)>>(), lforward(val), lforward(f), lforward(args)...);
 	}
 
@@ -1074,7 +1074,7 @@ namespace leo
 	\sa object_result_t
 	*/
 	template<typename _fCond, typename _fCallable, typename... _tParams>
-	result_of_t<_fCallable && (_tParams&&...)>
+	invoke_result_t<_fCallable && (_tParams&&...)>
 		retry_on_cond(_fCond cond, _fCallable&& f, _tParams&&... args)
 	{
 		using res_t = result_of_t<_fCallable && (_tParams&&...)>;

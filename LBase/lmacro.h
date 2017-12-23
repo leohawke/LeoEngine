@@ -1,5 +1,5 @@
 #ifndef LBase_lmacro_h
-#define Lbase_lmacro_h
+#define Lbase_lmacro_h 1
 
 #include "LBase/ldef.h"
 

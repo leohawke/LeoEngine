@@ -58,7 +58,7 @@ namespace leo
 			template<typename... _tParams>
 		auto
 			Call(const _tKey& key, _tParams&&... args)
-			-> result_of_t<_fHandler&(_tParams&&...)>
+			-> invoke_result_t<_fHandler&(_tParams&&...)>
 		{
 			if (const auto f = registered_map[key])
 			{
@@ -68,7 +68,7 @@ namespace leo
 
 				return f(lforward(args)...);
 			}
-			return result_of_t<_fHandler&(_tParams&&...)>();
+			return invoke_result_t<_fHandler&(_tParams&&...)>();
 		}
 
 		template<class _type>
