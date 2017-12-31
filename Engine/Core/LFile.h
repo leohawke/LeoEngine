@@ -27,6 +27,13 @@ namespace platform {
 			u64Offset += result;
 			return result;
 		}
+
+		template<typename type>
+		type Read() {
+			type Buffer;
+			Read(&Buffer, sizeof(Buffer));
+			return Buffer;
+		}
 	private:
 		File const & file;
 		uint64 u64Offset = 0;

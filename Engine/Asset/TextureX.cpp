@@ -25,7 +25,7 @@ namespace platform {
 		tex_res.Read(&desc, sizeof(desc));
 
 		dds::HEADER_DXT10 desc10;
-		if (four_cc_v<'D', 'X', '1', '0'> == desc.pixel_format.four_cc) {
+		if (asset::four_cc_v<'D', 'X', '1', '0'> == desc.pixel_format.four_cc) {
 			tex_res.Read(&desc10, sizeof(desc10));
 			array_size = desc10.array_size;
 		}
@@ -60,7 +60,7 @@ namespace platform {
 		num_mipmaps = desc.mip_map_count;
 
 
-		if ((four_cc<'D', 'X', '1', '0'>::value == desc.pixel_format.four_cc))
+		if ((asset::four_cc<'D', 'X', '1', '0'>::value == desc.pixel_format.four_cc))
 		{
 			if (dds::D3D_RESOURCE_MISC_TEXTURECUBE == desc10.misc_flag)
 			{

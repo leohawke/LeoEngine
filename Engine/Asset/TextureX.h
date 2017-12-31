@@ -14,14 +14,6 @@ namespace platform {
 	namespace X {
 		using path = std::experimental::filesystem::path;
 
-		template<unsigned char c0, unsigned char c1, unsigned char c2, unsigned char c3>
-		struct four_cc {
-			enum { value = (c0 << 0) + (c1 << 8) + (c2 << 16) + (c3 << 24)};
-		};
-
-		template<unsigned char c0, unsigned char c1, unsigned char c2, unsigned char c3>
-		lconstexpr uint32 four_cc_v = four_cc<c0,c1,c2,c3>::value;
-
 
 		void GetImageInfo(File const & file, Render::TextureType& type,
 			uint16& width, uint16& height, uint16& depth, uint8& num_mipmaps, uint8& array_size,

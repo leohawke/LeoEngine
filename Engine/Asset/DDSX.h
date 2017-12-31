@@ -20,7 +20,7 @@ namespace dds {
 	using namespace platform::Render;
 	using namespace bc;
 
-	lconstexpr auto header_magic = platform::X::four_cc_v<'D', 'D', 'S', ' '>;
+	lconstexpr auto header_magic = asset::four_cc_v<'D', 'D', 'S', ' '>;
 
 	enum
 	{
@@ -569,37 +569,37 @@ namespace dds {
 				format = EF_ABGR32F;
 				break;
 
-			case platform::X::four_cc<'D', 'X', 'T', '1'>::value:
+			case asset::four_cc<'D', 'X', 'T', '1'>::value:
 				format = EF_BC1;
 				break;
 
-			case platform::X::four_cc<'D', 'X', 'T', '3'>::value:
+			case asset::four_cc<'D', 'X', 'T', '3'>::value:
 				format = EF_BC2;
 				break;
 
-			case platform::X::four_cc<'D', 'X', 'T', '5'>::value:
+			case asset::four_cc<'D', 'X', 'T', '5'>::value:
 				format = EF_BC3;
 				break;
 
-			case platform::X::four_cc<'B', 'C', '4', 'U'>::value:
-			case platform::X::four_cc<'A', 'T', 'I', '1'>::value:
+			case asset::four_cc<'B', 'C', '4', 'U'>::value:
+			case asset::four_cc<'A', 'T', 'I', '1'>::value:
 				format = EF_BC4;
 				break;
 
-			case platform::X::four_cc<'B', 'C', '4', 'S'>::value:
+			case asset::four_cc<'B', 'C', '4', 'S'>::value:
 				format = EF_SIGNED_BC4;
 				break;
 
-			case platform::X::four_cc<'B', 'C', '5', 'U'>::value:
-			case platform::X::four_cc<'A', 'T', 'I', '2'>::value:
+			case asset::four_cc<'B', 'C', '5', 'U'>::value:
+			case asset::four_cc<'A', 'T', 'I', '2'>::value:
 				format = EF_BC5;
 				break;
 
-			case platform::X::four_cc<'B', 'C', '5', 'S'>::value:
+			case asset::four_cc<'B', 'C', '5', 'S'>::value:
 				format = EF_SIGNED_BC5;
 				break;
 
-			case platform::X::four_cc<'D', 'X', '1', '0'>::value:
+			case asset::four_cc<'D', 'X', '1', '0'>::value:
 				format = FromDXGIFormat(desc10.dxgi_format);
 				break;
 			}
