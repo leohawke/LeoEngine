@@ -2,6 +2,7 @@
 #include "Loader.hpp"
 #include<LBase/typeinfo.h>
 #include "../Core/LFile.h"
+#include <LBase/lmathtype.hpp>
 namespace platform {
 	//Mesh文件格式
 	struct MeshHeader
@@ -36,6 +37,13 @@ namespace platform {
 		};//保留支持，值应该是0
 	};
 
+	template<typename type>
+	type Read(FileRead& file) {
+		type value;
+		file.Read(&value, sizeof(type));
+		return value;
+	}
+
 
 	class MeshSectionLoading {
 	protected:
@@ -49,9 +57,11 @@ namespace platform {
 		virtual std::array<byte, 8> Name() = 0;
 	};
 
-	class GemoertySection :MeshSectionLoading {
+	class GemoertySection :public MeshSectionLoading {
 	public:
-		using MeshSectionLoading::MeshSectionLoading;
+		GemoertySection(std::shared_ptr<AssetType> target)
+		:MeshSectionLoading(target){
+		}
 		std::array<byte, 8> Name() {
 			static std::array<byte, 8> name = { 'G','E','M','O','E','R','T','Y' };
 			return name;
@@ -103,26 +113,87 @@ namespace platform {
 				co_return;
 			co_yield mesh_asset;
 
-			leo::uint8 VertexElmentsCount = 0;
-			file.Read(&VertexElmentsCount, 1);
+			leo::uint8 VertexElmentsCount = Read<leo::uint8>(file) ;
 			auto & vertex_elements = mesh_asset->GetVertexElementsRef();
 			vertex_elements.reserve(VertexElmentsCount);
 			for (auto i = 0; i != VertexElmentsCount; ++i) {
-				vertex_elements.emplace_back(file.Read<Render::Vertex::Element>());
+				vertex_elements.emplace_back(Read<Render::Vertex::Element>(file));
+			}
+			auto index_format = Read<Render::EFormat>(file);
+			mesh_asset->SetIndexFormat(index_format);
+
+			uint32 vertex_count = index_format == Render::EFormat::EF_R16UI ? Read<uint16>(file) : Read<uint32>(file);
+			uint32 index_count = index_format == Render::EFormat::EF_R16UI ? Read<uint16>(file) : Read<uint32>(file);
+
+			auto & vertex_streams = mesh_asset->GetVertexStreamsRef();
+			for (auto i = 0; i != VertexElmentsCount; ++i) {
+				auto vertex_stream = std::make_unique<stdex::byte[]>(vertex_elements[i].GetElementSize()*vertex_count);
+				file.Read(vertex_stream.get(), vertex_elements[i].GetElementSize()*vertex_count);
+				vertex_streams.emplace_back(std::move(vertex_stream));
+			}
+
+			auto index_stream = std::make_unique<stdex::byte[]>(Render::NumFormatBytes(index_format)*index_count);
+			file.Read(index_stream.get(), Render::NumFormatBytes(index_format)*index_count);
+			mesh_asset->GetIndexStreamsRef() = std::move(index_stream);
+
+			auto & sub_meshes = mesh_asset->GetSubMeshDescesRef();
+			auto sub_mesh_count = Read<leo::uint8>(file);
+			for (auto i = 0; i != sub_mesh_count; ++i) {
+				asset::MeshAsset::SubMeshDescrption mesh_desc;
+				mesh_desc.MaterialIndex = Read<leo::uint8>(file);
+				auto lods_count = Read<leo::uint8>(file);
+
+				auto pc = Read<leo::math::data_storage<float, 3>>(file);
+				auto po = Read<leo::math::data_storage<float, 3>>(file);
+				auto tc = Read<leo::math::data_storage<float, 2>>(file);
+				auto to = Read<leo::math::data_storage<float, 2>>(file);
+
+				for (auto lod_index = 0; lod_index != lods_count; ++lod_index) {
+					asset::MeshAsset::SubMeshDescrption::LodDescription lod_desc;
+					if (index_format == Render::EFormat::EF_R16UI) {
+						lod_desc.VertexNum = Read<leo::uint16>(file);
+						lod_desc.VertexBase = Read<leo::uint16>(file);
+						lod_desc.IndexNum = Read<leo::uint16>(file);
+						lod_desc.IndexBase = Read<leo::uint16>(file);
+					}
+					else {
+						lod_desc.VertexNum = Read<leo::uint32>(file);
+						lod_desc.VertexBase = Read<leo::uint32>(file);
+						lod_desc.IndexNum = Read<leo::uint32>(file);
+						lod_desc.IndexBase = Read<leo::uint32>(file);
+					}
+					mesh_desc.LodsDescription.emplace_back(lod_desc);
+				}
+				sub_meshes.emplace_back(std::move(mesh_desc));
 			}
 		}
 	};
 
+	template<typename... section_types>
 	class MeshLoadingDesc : public asset::AssetLoading<asset::MeshAsset> {
 	private:
 		struct MeshDesc {
 			X::path mesh_path;
 			std::shared_ptr<AssetType> mesh_asset;
+			std::vector<std::unique_ptr<MeshSectionLoading>> section_loaders;
 		} mesh_desc;
 	public:
 		explicit MeshLoadingDesc(X::path const & meshpath)
 		{
 			mesh_desc.mesh_path = meshpath;
+			mesh_desc.mesh_asset = std::make_shared<AssetType>();
+			ForEachSectionTypeImpl<std::tuple<section_types...>>(leo::make_index_sequence<sizeof...(section_types)>());
+		}
+
+		template<typename tuple,size_t... indices>
+		void ForEachSectionTypeImpl(leo::index_sequence<indices...>) {
+			int ignore[] = { (static_cast<void>(
+				mesh_desc.section_loaders
+				.emplace_back(
+					std::make_unique<std::tuple_element_t<indices,tuple>>(mesh_desc.mesh_asset))),0)
+				...
+			};
+			(void)ignore;
 		}
 
 		std::size_t Type() const override {
@@ -136,6 +207,6 @@ namespace platform {
 
 
 	asset::MeshAsset X::LoadMeshAsset(path const& meshpath) {
-		return  std::move(*asset::SyncLoad<MeshLoadingDesc>(meshpath));
+		return  std::move(*asset::SyncLoad<MeshLoadingDesc<GemoertySection>>(meshpath));
 	}
 }
