@@ -28,6 +28,14 @@ namespace platform {
 			return result;
 		}
 
+		void SkipTo(std::size_t uBytesTarget) {
+			u64Offset = uBytesTarget;
+		}
+
+		void Skip(std::size_t uBytesOffset) {
+			u64Offset += uBytesOffset;
+		}
+
 	private:
 		File const & file;
 		uint64 u64Offset = 0;

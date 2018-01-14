@@ -13,7 +13,7 @@ namespace platform {
 		leo::uint16 NumberOfSections;//主要的设计概念,SectionLoader将会加载出对应的资源,目前只实现一种Section
 		union {
 			leo::uint16 SizeOfOptional;//必须保证对齐 %16 == 0
-			leo::uint16 FirstSectionOffset;//该偏移为相对文件的偏移,注意一定会进行对齐
+			leo::uint16 FirstSectionOffset;//该偏移为Header的偏移,注意一定会进行对齐
 		};
 	};
 
@@ -33,7 +33,7 @@ namespace platform {
 		leo::uint32 CompressVersion;//保留支持,可能会引入内置压缩
 		union {
 			leo::uint16 SizeOfOptional;//必须保证对齐
-			leo::uint16 GeomertyOffset;//该偏移为相对文件的偏移,注意一定会进行对齐
+			leo::uint16 GeomertyOffset;//该偏移为相对Header的偏移,注意一定会进行对齐
 		};//保留支持，值应该是0
 	};
 
@@ -60,9 +60,9 @@ namespace platform {
 	class GemoertySection :public MeshSectionLoading {
 	public:
 		GemoertySection(std::shared_ptr<AssetType> target)
-		:MeshSectionLoading(target){
+			:MeshSectionLoading(target) {
 		}
-		std::array<byte, 8> Name() {
+		std::array<byte, 8> Name() override {
 			static std::array<byte, 8> name = { 'G','E','M','O','E','R','T','Y' };
 			return name;
 		}
@@ -111,9 +111,11 @@ namespace platform {
 			file.Read(&header.SizeOfOptional, sizeof(header.SizeOfOptional));
 			if (header.SizeOfOptional != 0)
 				co_return;
+
+			file.Skip(header.SizeOfOptional);
 			co_yield mesh_asset;
 
-			leo::uint8 VertexElmentsCount = Read<leo::uint8>(file) ;
+			leo::uint8 VertexElmentsCount = Read<leo::uint8>(file);
 			auto & vertex_elements = mesh_asset->GetVertexElementsRef();
 			vertex_elements.reserve(VertexElmentsCount);
 			for (auto i = 0; i != VertexElmentsCount; ++i) {
@@ -185,7 +187,7 @@ namespace platform {
 			ForEachSectionTypeImpl<std::tuple<section_types...>>(leo::make_index_sequence<sizeof...(section_types)>());
 		}
 
-		template<typename tuple,size_t... indices>
+		template<typename tuple, size_t... indices>
 		void ForEachSectionTypeImpl(leo::index_sequence<indices...>) {
 			int ignore[] = { (static_cast<void>(
 				mesh_desc.section_loaders
@@ -200,7 +202,46 @@ namespace platform {
 			return leo::type_id<MeshLoadingDesc>().hash_code();
 		}
 
+
 		std::experimental::generator<std::shared_ptr<AssetType>> Coroutine() override {
+			platform_ex::Windows::File interna_file{ mesh_desc.mesh_path.wstring(),platform::File::kToRead };
+
+			FileRead file{ interna_file };
+
+			MeshHeader header;
+			header.Signature = Read<leo::uint32>(file);
+			if (header.Signature != asset::four_cc_v <'M', 'E', 'S', 'H'>)
+				co_return;
+
+			header.Machine = Read<leo::uint16>(file);
+			header.NumberOfSections = Read<leo::uint16>(file);
+			header.FirstSectionOffset = Read<leo::uint16>(file);
+
+			file.Skip(header.FirstSectionOffset);
+
+			for (auto i = 0; i != header.NumberOfSections; ++i) {
+				SectionCommonHeader common_header;
+				common_header.SectionIndex = Read<leo::uint16>(file);
+				common_header.NextSectionOffset = Read<leo::uint32>(file);
+				file.Read(common_header.Name, sizeof(common_header.Name));
+				common_header.Size = Read<leo::uint32>(file);
+
+				//find loader
+				auto loader_iter = std::find_if(mesh_desc.section_loaders.begin(),
+					mesh_desc.section_loaders.end(), [&](const std::unique_ptr<MeshSectionLoading>& pLoader) {
+					auto name = pLoader->Name();
+					for (auto j = 0; j != 8; ++j)
+						if (name[j] != common_header.Name[j]) 
+							return false;
+					return true;
+				});
+				if (loader_iter != mesh_desc.section_loaders.end()) {
+					for (auto iter : (*loader_iter)->Coroutine(file))
+						co_yield nullptr;
+				}
+
+				file.SkipTo(common_header.NextSectionOffset);
+			}
 			co_yield mesh_desc.mesh_asset;
 		}
 	};
