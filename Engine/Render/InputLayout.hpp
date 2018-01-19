@@ -17,7 +17,7 @@
 namespace platform::Render {
 	namespace Vertex {
 		enum Usage {
-			Position,//位置\
+			Position,//位置
 
 			Normal,//法线
 			Tangent,
