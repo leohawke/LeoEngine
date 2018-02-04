@@ -504,7 +504,7 @@ void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_siz
 
 		pass.UnBind(effect);
 
-		Context().Instance().SyncCPUGPU();
+		D3D12::Context::Instance().SyncCPUGPU();
 }
 
 
