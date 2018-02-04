@@ -1,5 +1,5 @@
 #include "../../Engine/test.h"
-
+#include "../../Engine/Asset/MeshX.h"
 #include "../../Engine/Render/IContext.h"
 #include "TestFramework.h"
 #include "EntityComponentSystem/EntitySystem.h"
@@ -24,6 +24,9 @@ private:
 		Context::Instance().EndFrame();
 
 		ecs::EntitySystem::Instance().RemoveEntity(entityId);
+
+
+		platform::X::LoadMeshAsset("Broadleaf_Desktop_LOD0.asset");
 		return Nothing;
 	}
 	void OnCreate() override {
