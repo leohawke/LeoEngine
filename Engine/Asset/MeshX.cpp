@@ -128,8 +128,9 @@ namespace platform {
 			auto index_format = Read<Render::EFormat>(file);
 			mesh_asset->SetIndexFormat(index_format);
 
-			uint32 vertex_count = index_format == Render::EFormat::EF_R16UI ? Read<uint16>(file) : Read<uint32>(file);
-			uint32 index_count = index_format == Render::EFormat::EF_R16UI ? Read<uint16>(file) : Read<uint32>(file);
+			auto index16bit = index_format == Render::EFormat::EF_R16UI;
+			uint32 vertex_count = index16bit ? Read<uint16>(file) : Read<uint32>(file);
+			uint32 index_count = index16bit ? Read<uint16>(file) : Read<uint32>(file);
 
 			auto & vertex_streams = mesh_asset->GetVertexStreamsRef();
 			for (auto i = 0; i != VertexElmentsCount; ++i) {
@@ -156,7 +157,7 @@ namespace platform {
 
 				for (auto lod_index = 0; lod_index != lods_count; ++lod_index) {
 					asset::MeshAsset::SubMeshDescrption::LodDescription lod_desc;
-					if (index_format == Render::EFormat::EF_R16UI) {
+					if (index16bit) {
 						lod_desc.VertexNum = Read<leo::uint16>(file);
 						lod_desc.VertexBase = Read<leo::uint16>(file);
 						lod_desc.IndexNum = Read<leo::uint16>(file);
