@@ -57,13 +57,13 @@ namespace platform {
 		virtual std::array<byte, 8> Name() = 0;
 	};
 
-	class GemoertySection :public MeshSectionLoading {
+	class GeomertySection :public MeshSectionLoading {
 	public:
-		GemoertySection(std::shared_ptr<AssetType> target)
+		GeomertySection(std::shared_ptr<AssetType> target)
 			:MeshSectionLoading(target) {
 		}
 		std::array<byte, 8> Name() override {
-			static std::array<byte, 8> name = { 'G','E','M','O','E','R','T','Y' };
+			static std::array<byte, 8> name = { 'G','E','O','M','E','R','T','Y' };
 			return name;
 		}
 
@@ -119,7 +119,11 @@ namespace platform {
 			auto & vertex_elements = mesh_asset->GetVertexElementsRef();
 			vertex_elements.reserve(VertexElmentsCount);
 			for (auto i = 0; i != VertexElmentsCount; ++i) {
-				vertex_elements.emplace_back(Read<Render::Vertex::Element>(file));
+				Render::Vertex::Element element;
+				element.usage = (Render::Vertex::Usage)Read<byte>(file);
+				element.usage_index = Read<byte>(file);
+				element.format = Read<Render::EFormat>(file);
+				vertex_elements.emplace_back(element);
 			}
 			auto index_format = Read<Render::EFormat>(file);
 			mesh_asset->SetIndexFormat(index_format);
@@ -248,6 +252,6 @@ namespace platform {
 
 
 	asset::MeshAsset X::LoadMeshAsset(path const& meshpath) {
-		return  std::move(*asset::SyncLoad<MeshLoadingDesc<GemoertySection>>(meshpath));
+		return  std::move(*asset::SyncLoad<MeshLoadingDesc<GeomertySection>>(meshpath));
 	}
 }
