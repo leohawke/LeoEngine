@@ -33,6 +33,12 @@ namespace asset {
 			DefGetter(const lnothrow, platform::Render::EFormat, IndexFormat, index_format)
 			DefSetter(lnothrow, platform::Render::EFormat, IndexFormat, index_format)
 
+			DefGetter(const lnothrow, leo::uint32, VertexCount, vertex_count)
+			DefSetter(lnothrow, leo::uint32, VertexCount, vertex_count)
+
+			DefGetter(const lnothrow, leo::uint32, IndexCount, index_count)
+			DefSetter(lnothrow, leo::uint32, IndexCount, index_count)
+
 			DefGetter(lnothrow, std::vector<std::unique_ptr<stdex::byte[]>>&, VertexStreamsRef, vertex_streams)
 			DefGetter(const lnothrow,const std::vector<std::unique_ptr<stdex::byte[]>>&, VertexStreams, vertex_streams)
 	
@@ -47,6 +53,8 @@ namespace asset {
 		std::vector<std::unique_ptr<stdex::byte[]>> vertex_streams;
 		std::unique_ptr<stdex::byte[]> index_stream;
 		std::vector<SubMeshDescrption> sub_meshes;
+		leo::uint32 vertex_count;
+		leo::uint32 index_count;
 	};
 }
 

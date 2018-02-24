@@ -28,7 +28,6 @@ namespace platform::Render {
 
 	class GraphicsBuffer {
 	public:
-		GraphicsBuffer(Buffer::Usage usage, leo::uint32 access, leo::uint32 size_in_byte);
 		virtual ~GraphicsBuffer();
 
 
@@ -45,6 +44,8 @@ namespace platform::Render {
 		virtual void HWResourceDelete() = 0;
 
 		virtual void UpdateSubresource(leo::uint32 offset, leo::uint32 size, void const * data) = 0;
+	protected:
+		GraphicsBuffer(Buffer::Usage usage, leo::uint32 access, leo::uint32 size_in_byte);
 
 	private:
 		virtual void* Map(Buffer::Access ba) = 0;

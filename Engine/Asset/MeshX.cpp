@@ -132,6 +132,8 @@ namespace platform {
 			uint32 vertex_count = index16bit ? Read<uint16>(file) : Read<uint32>(file);
 			uint32 index_count = index16bit ? Read<uint16>(file) : Read<uint32>(file);
 
+			mesh_asset->SetVertexCount(vertex_count);
+			mesh_asset->SetIndexCount(index_count);
 			auto & vertex_streams = mesh_asset->GetVertexStreamsRef();
 			for (auto i = 0; i != VertexElmentsCount; ++i) {
 				auto vertex_stream = std::make_unique<stdex::byte[]>(vertex_elements[i].GetElementSize()*vertex_count);

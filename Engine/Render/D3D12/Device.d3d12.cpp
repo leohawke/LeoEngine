@@ -171,11 +171,6 @@ namespace platform_ex::Windows::D3D12 {
 		return std::make_unique<ShaderCompose>(pShaderBlob, pEffect).release();
 	}
 
-	GraphicsBuffer * Device::CreateConstantBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const*> init_data)
-	{
-		return CreateBuffer(usage, access, size_in_byte, format, init_data);
-	}
-
 	leo::observer_ptr<ID3D12RootSignature> Device::CreateRootSignature(std::array<size_t, ShaderCompose::NumTypes * 4> num, bool vertex_shader, bool stream_output)
 	{
 		auto hash_val = leo::hash(num.begin(), num.end());
