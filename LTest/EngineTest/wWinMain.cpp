@@ -1,6 +1,7 @@
 #include "../../Engine/test.h"
 #include "../../Engine/Asset/MeshX.h"
 #include "../../Engine/Render/IContext.h"
+#include "../../Engine/Core/Mesh.h"
 #include "TestFramework.h"
 #include "EntityComponentSystem/EntitySystem.h"
 #include "LSchemEngineUnitTest.h"
@@ -25,8 +26,7 @@ private:
 
 		ecs::EntitySystem::Instance().RemoveEntity(entityId);
 
-
-		platform::X::LoadMeshAsset("Broadleaf_Desktop_LOD0.asset");
+		auto pMesh = std::make_unique<platform::Mesh>(platform::X::LoadMeshAsset("Broadleaf_Desktop_LOD0.asset"),"Broadleaf_Desktop_LOD0");
 		return Nothing;
 	}
 	void OnCreate() override {

@@ -21,6 +21,16 @@ namespace platform {
 					element.format, stream.get()));
 			input_layout->BindVertexStream(vertex_stream, { element });
 		}
+
+		auto index_stream = leo::share_raw(
+			device.CreateBuffer(
+				Buffer::Usage::Static, Buffer::Access::Read_Only,
+				NumFormatBytes(asset.GetIndexFormat())*asset.GetIndexCount(),
+				asset.GetIndexFormat(), asset.GetIndexStreams().get()));
+		input_layout->BindIndexStream(index_stream, asset.GetIndexFormat());
+
+		//Topo
+		input_layout->SetTopoType(InputLayout::TriangleList);
 	}
 	const asset::MeshAsset::SubMeshDescrption::LodDescription & Mesh::GetSubMeshCurretnLodDescription(int submesh_index)
 	{

@@ -102,13 +102,15 @@ namespace platform::Render {
 
 		uint32 GetNumIndices() const;
 
-		void Dirty();
 
 		DefGetter(const lnothrow, uint32, VertexStart, start_vertex_location)
 		DefGetter(lnothrow, uint32&, VertexStartRef, start_vertex_location)
 
 		DefGetter(const lnothrow, uint32, IndexStart, start_index_location)
 		DefGetter(lnothrow, uint32&, IndexStartRef, start_index_location)
+	protected:
+		void Dirty();
+
 	protected:
 		TopologyType topology_type;
 
