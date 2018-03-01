@@ -139,7 +139,7 @@ namespace platform::Render::Effect {
 		auto asset_params = pEffectAsset->GetParams();
 		for (auto & cbuff : pEffectAsset->GetCBuffersRef()) {
 			auto ConstantBufferInfo = leo::any_cast<ShaderInfo::ConstantBufferInfo>(pEffectAsset->GetInfo(cbuff.GetName()).value());
-			GraphicsBuffer* pGPUBuffer = Context::Instance().GetDevice().CreateBuffer(platform::Render::Buffer::Usage::Dynamic, 0, ConstantBufferInfo.size, EFormat::EF_Unknown);
+			GraphicsBuffer* pGPUBuffer = Context::Instance().GetDevice().CreateConstanBuffer(platform::Render::Buffer::Usage::Dynamic, 0, ConstantBufferInfo.size, EFormat::EF_Unknown);
 
 			auto pConstantBuffer = std::make_shared<ConstantBuffer>(cbuff.GetName(), cbuff.GetNameHash());
 

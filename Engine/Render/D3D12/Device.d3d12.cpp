@@ -366,6 +366,21 @@ namespace platform_ex::Windows::D3D12 {
 		return buffer.release();
 	}
 
+	GraphicsBuffer * Device::CreateConstanBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const*> init_data)
+	{
+		return CreateBuffer(usage,access,size_in_byte,format,init_data);
+	}
+
+	GraphicsBuffer * Device::CreateVertexBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const*> init_data)
+	{
+		return CreateBuffer(usage, access, size_in_byte, format, init_data);
+	}
+
+	GraphicsBuffer * Device::CreateIndexBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const*> init_data)
+	{
+		return CreateBuffer(usage, access, size_in_byte, format, init_data);
+	}
+
 	ID3D12Device*  Device::operator->() lnoexcept {
 		return d3d_device.Get();
 	}

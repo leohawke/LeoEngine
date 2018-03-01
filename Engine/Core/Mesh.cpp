@@ -14,17 +14,17 @@ namespace platform {
 			auto& element = asset.GetVertexElements()[i];
 			auto& stream = asset.GetVertexStreams()[i];
 			auto vertex_stream =leo::share_raw(
-				device.CreateBuffer(
+				device.CreateVertexBuffer(
 					Buffer::Usage::Static,
-					Buffer::Access::Read_Only, 
+					EAccessHint::EA_GPURead|EAccessHint::EA_Immutable, 
 					element.GetElementSize()*asset.GetVertexCount(),
 					element.format, stream.get()));
 			input_layout->BindVertexStream(vertex_stream, { element });
 		}
 
 		auto index_stream = leo::share_raw(
-			device.CreateBuffer(
-				Buffer::Usage::Static, Buffer::Access::Read_Only,
+			device.CreateIndexBuffer(
+				Buffer::Usage::Static, EAccessHint::EA_GPURead | EAccessHint::EA_Immutable,
 				NumFormatBytes(asset.GetIndexFormat())*asset.GetIndexCount(),
 				asset.GetIndexFormat(), asset.GetIndexStreams().get()));
 		input_layout->BindIndexStream(index_stream, asset.GetIndexFormat());
