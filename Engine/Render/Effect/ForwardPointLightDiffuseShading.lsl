@@ -16,14 +16,15 @@
 	(cbuffer obj
 		(float4x4 worldviewporj)
 		(float4x4 worldview)
+		(float4x4 worldviewinvt)
 	)
 	(shader 
 		"
 		float AttenuationTerm(float3 light_source,float radius,float blubsize){
-				const float invRadius = 1/raidus;
+				float invRadius = 1/radius;
 				float d = length(light_source);
 				float fadeoutFactor = saturate((radius-d)*(invRadius/0.2h));
-				d = max(d-blubSize,0);
+				d = max(d-blubsize,0);
 				float dnom = 1+ d/blubsize;
 				float attenuation = fadeoutFactor * fadeoutFactor/(dnom*dnom);
 				return attenuation;
@@ -51,20 +52,31 @@
 		void ForawdVS(in float3 Postion:POSITION,
 						in float3 Normal:NORMAL,
 					out float4 ClipPos:SV_POSITION,
-					out float4 ViewPos:TEXCOORD1
+					out float4 ViewPos:TEXCOORD1,
+					out float3 ViewNormal:TEXCOORD2
 		)
 		{
 			ClipPos = mul(float4(Postion,1.0f),worldviewporj);
 			ViewPos = mul(float4(Postion,1.0f),worldview);
+			ViewNormal = mul(float4(Postion,1.0f),worldviewinvt).xyz;
 		}
 
 		void PointLightPS(in float4 ClipPos:SV_POSITION,
 			in float3 view_postion:TEXCOORD1,
+			in float3 view_normal:TEXCOORD2,
 			out float4 color :SV_Target
 		)
 		{
 			float3 view_dir = normalize(view_postion);
 			float shadow = 1;
+
+			Material material;
+			material.normal = normalize(view_normal);
+			material.albedo = albedo;
+			material.metalness = metalness;
+			material.specular = specular;
+			material.alpha = alpha;
+			material.smoothness = smoothness;
 
 			float3 diffuse,specular = 0;
 			ShadingMaterial(material,view_postion,view_dir,shadow,diffuse,specular);

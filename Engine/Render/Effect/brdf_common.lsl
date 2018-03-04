@@ -2,19 +2,16 @@
 	(refer material.lsl)
 	(shader 
 			"
-			
-
-
 			//https://github.com/ray-cast/ray-mmd/blob/master/Shader/BRDF.fxsub#L293
 			float BurleyBRDF(float nl,float nv,float vh,float roughness){
 				float energyBias = 0.5*roughness;
 				float energyFactor = lerp(1,1/1.51,roughness);
 
 				float Fd90 = energyBias + 2.0*vh*vh*roughness;
-				float FdV = lerp(1,Fd90,pow(1-max(nv,0.1)));
+				float FdV = lerp(1,Fd90,pow5(1-max(nv,0.1)));
 				float FdL = lerp(1,Fd90,pow5(1-nl));
 				
-				return FdV * Fdl * engrgyFactor;
+				return FdV * FdL * energyFactor;
 			}
 
 
@@ -31,7 +28,7 @@
 				float roughness = max(SmoothnessToRoughness(material.smoothness),0.001f);
 				float occlusion = 1.f;
 
-				float3 diffuse = BurleyBRDF(nl,nv,vh,rougness)*nl*occlusion;
+				float3 diffuse = BurleyBRDF(nl,nv,vh,roughness)*nl*occlusion;
 
 				float3 specular = 0;
 
