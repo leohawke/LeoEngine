@@ -132,8 +132,17 @@ namespace platform {
 				auto cbuffer_nodes = SelectNodes("cbuffer", effect_node);
 				for (auto & cbuffer_node : cbuffer_nodes) {
 					asset::EffectConstantBufferAsset cbuffer;
-					cbuffer.SetName(Access("name", cbuffer_node));
-					auto param_nodes = SelectNodes("parameter", cbuffer_node);
+					cbuffer.SetName(AccessLastNoChild<std::string>(cbuffer_node));
+					auto param_nodes = cbuffer_node.SelectChildren([&](const scheme::TermNode& child) {
+						if (child.empty())
+							return false;
+						try {
+							return  AssetType::GetType(leo::Access<std::string>(*child.begin())) != asset::EPT_shader;
+						}
+						catch (leo::unsupported&) {
+							return false;
+						}
+					});
 					std::vector<leo::uint32> ParamIndices;
 					for (auto & param_node : param_nodes) {
 						auto param_index = ParseParam(param_node);
@@ -143,8 +152,18 @@ namespace platform {
 					effect_desc.effect_asset->GetCBuffersRef().emplace_back(std::move(cbuffer));
 				}
 			}
+			//parser params
 			{
-				auto param_nodes = SelectNodes("parameter", effect_node);
+				auto param_nodes = effect_node.SelectChildren([&](const scheme::TermNode& child) {
+					if (child.empty())
+						return false;
+					try {
+						return  AssetType::GetType(leo::Access<std::string>(*child.begin())) != asset::EPT_shader;
+					}
+					catch (leo::unsupported&) {
+						return false;
+					}
+				});
 				for (auto & param_node : param_nodes)
 					ParseParam(param_node);
 			}
@@ -217,6 +236,18 @@ namespace platform {
 			});
 		}
 
+		template<typename _type,typename _func>
+		const _type& ReverseAccess(_func f, const scheme::TermNode& node) {
+			auto it = std::find_if(node.rbegin(), node.rend(),f);
+			return leo::Access<_type>(*it);
+		}
+
+		template<typename _type>
+		const _type& AccessLastNoChild(const scheme::TermNode& node) {
+			return ReverseAccess<_type>([&](const scheme::TermNode& child) {return child.empty(); }, node);
+		}
+
+		//根据name判断 取尾部
 		std::string Access(const char* name, const scheme::TermNode& node) {
 			auto it = std::find_if(node.begin(), node.end(), [&](const scheme::TermNode& child) {
 				if (!child.empty())
@@ -741,8 +772,9 @@ namespace platform {
 
 		size_t ParseParam(const scheme::TermNode& param_node) {
 			asset::EffectParameterAsset param;
-			param.SetName(Access("name", param_node));
-			param.GetTypeRef() = AssetType::GetType(Access("type", param_node));
+			param.SetName(AccessLastNoChild<std::string>(param_node));
+			//don't need check type again
+			param.GetTypeRef() = AssetType::GetType(leo::Access<std::string>(*param_node.begin()));
 			if (param.GetType() >= asset::EPT_bool) {
 				if (auto p = leo::AccessChildPtr<std::string>(param_node, "arraysize"))
 					param.GetArraySizeRef() = std::stoul(*p);
