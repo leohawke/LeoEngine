@@ -23,6 +23,8 @@ namespace platform {
 		DefGetter(const lnothrow, const std::vector<asset::MeshAsset::SubMeshDescrption>&, SubMeshDesces, sub_meshes)
 		DefGetter(const lnothrow, leo::uint8, GeometryLod, mesh_lod)
 		DefSetter(lnothrow,leo::uint8,GeometryLod, mesh_lod)
+
+		DefGetter(const lnothrow,const Render::InputLayout&,InputLayout, *input_layout)
 	private:
 		std::unique_ptr<Render::InputLayout> input_layout;
 		std::vector<asset::MeshAsset::SubMeshDescrption> sub_meshes;

@@ -295,6 +295,15 @@
     <None Include="Render\Effect\Copy.lsl">
       <Filter>Render\Effect</Filter>
     </None>
+    <None Include="Render\Effect\brdf_common.lsl">
+      <Filter>Render\Effect</Filter>
+    </None>
+    <None Include="Render\Effect\material.lsl">
+      <Filter>Render\Effect</Filter>
+    </None>
+    <None Include="Render\Effect\ForwardPointLightDiffuseShading.lsl">
+      <Filter>Render\Effect</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Render\Effect\Bilt.lsl">
