@@ -1,22 +1,22 @@
 (effect
 	(refer PostProcess.lsl)
 	(refer Util.lsl)
-	(parameter (type sampler) (name point_sampler)
+	(sampler point_sampler
 		(filtering min_mag_mip_point)
 		(address_u clamp)
 		(address_v clamp)
 	)
-	(parameter (type sampler) (name bilinear_sampler)
+	(sampler bilinear_sampler
 		(filtering min_mag_linear_mip_point)
 		(address_u clamp)
 		(address_v clamp)
 	)
-	(cbuffer (name from_tex)
-		(parameter (type float3) (name src_offset))
-		(parameter (type float3) (name src_scale))
-		(parameter (type int) (name src_level))
+	(cbuffer from_tex
+		(float3 src_offset)
+		(float3 src_scale)
+		(int src_level)
 	)
-	(parameter (type texture2D) (name src_2d_tex))
+	(texture2D src_2d_tex)
 	(shader
 				"
 				void Blit2DVS(float4 pos : POSITION,

@@ -1,16 +1,16 @@
 (effect
 	(refer PostProcess.lsl)
-	(parameter (type sampler) (name point_sampler)
+	(sampler point_sampler
 		(filtering min_mag_mip_point)
 		(address_u clamp)
 		(address_v clamp)
 	)
-	(parameter (type sampler) (name bilinear_sampler)
+	(sampler bilinear_sampler
 		(filtering min_mag_linear_mip_point)
 		(address_u clamp)
 		(address_v clamp)
 	)
-	(parameter (type texture2D) (name src_tex))
+	(texture2D src_tex)
 	(shader
 				"
 				float4 CopyPS(float2 tc0 : TEXCOORD0) : SV_Target

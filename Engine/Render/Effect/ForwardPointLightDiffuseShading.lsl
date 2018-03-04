@@ -1,21 +1,21 @@
 (effect
 	(refer brdf_common.lsl)
-	(cbuffer (name mat)
-		(parameter (type float3 albedo))
-		(parameter (type float metalness))
-		(parameter (type float3 specular))
-		(parameter (type float alpha))
-		(parameter (type float smoothness))
+	(cbuffer mat
+		(float3 albedo)
+		(float metalness)
+		(float3 specular)
+		(float alpha)
+		(float smoothness)
 	)
-	(cbuffer (name light)
-		(parameter (type float3 view_light_pos))
-		(parameter (type float light_radius))
-		(parameter (type float3 light_color))
-		(parameter (type float light_blubsize))
+	(cbuffer light
+		(float3 view_light_pos)
+		(float light_radius)
+		(float3 light_color)
+		(float light_blubsize)
 	)
-	(cbuffer (name obj)
-		(parameter (type float4x4 worldviewporj))
-		(parameter (type float4x4 worldview))
+	(cbuffer obj
+		(float4x4 worldviewporj)
+		(float4x4 worldview)
 	)
 	(shader 
 		"
