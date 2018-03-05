@@ -8,6 +8,9 @@
 
 #include <LBase/linttype.hpp>
 #include "d3d12_dxgi.h"
+#include "FrameBuffer.h"
+#include "Texture.h"
+#include "RenderView.h"
 
 namespace platform_ex {
 	namespace Windows {
@@ -36,9 +39,13 @@ namespace platform_ex {
 				//todo Get Window's HWND by Other API.
 				Display(IDXGIFactory4 *factory_4,ID3D12CommandQueue* cmd_queue,const DisplaySetting& setting = {},HWND = NULL);
 
+
+				DefGetter(const lnothrow,std::shared_ptr<FrameBuffer>,FrameBuffer,frame_buffer)
 				lconstexpr static UINT const NUM_BACK_BUFFERS = 3;
 			private:
 				HRESULT CreateSwapChain(IDXGIFactory4* factory_4,ID3D12CommandQueue* cmd_queue);
+
+				void UpdateFramewBufferView();
 			private:
 				HWND hwnd;
 
@@ -60,6 +67,13 @@ namespace platform_ex {
 				UINT left, top, width, height;//Win32 Coord Space
 
 				COMPtr<IDXGISwapChain3> swap_chain;
+
+				std::array<std::shared_ptr<Texture>, NUM_BACK_BUFFERS> render_targets_texs;
+				std::array<std::shared_ptr<RenderTargetView>, NUM_BACK_BUFFERS> render_target_views;
+				std::shared_ptr<Texture> depth_stencil;
+
+				UINT back_buffer_index;
+				std::shared_ptr<FrameBuffer> frame_buffer;
 			};
 		}
 	}

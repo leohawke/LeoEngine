@@ -6,12 +6,12 @@
 using namespace platform_ex::Windows::D3D12;
 using BTexture = platform::Render::Texture2D;
 
-Texture2D::Texture2D(uint16 height_, uint16 width_, 
-	uint8 numMipMaps, uint8 array_size_, 
+Texture2D::Texture2D(uint16 height_, uint16 width_,
+	uint8 numMipMaps, uint8 array_size_,
 	EFormat format_, uint32 access_hint, platform::Render::SampleDesc sample_info)
-	:BTexture(numMipMaps,array_size_,format_,access_hint,sample_info),
-	Texture(format_),
-	width(width_),height(height_)
+	:Texture(format_),
+	BTexture(numMipMaps, array_size_, format_, access_hint, sample_info),
+	width(width_), height(height_)
 {
 	if (0 == mipmap_size) {
 		mipmap_size = 1;
@@ -25,6 +25,31 @@ Texture2D::Texture2D(uint16 height_, uint16 width_,
 	}
 }
 
+static EFormat ConvertWrap(DXGI_FORMAT format) {
+	switch (format) {
+	case DXGI_FORMAT_R16_TYPELESS:
+		return EF_D16;
+	case DXGI_FORMAT_R24G8_TYPELESS:
+		return EF_D24S8;
+	case DXGI_FORMAT_R32_TYPELESS:
+		return EF_D32F;
+	}
+	return Convert(format);
+}
+
+platform_ex::Windows::D3D12::Texture2D::Texture2D(const COMPtr<ID3D12Resource>& pResource)
+	:Texture(pResource),
+	BTexture(
+		static_cast<leo::uint8>(resource_desc.MipLevels),
+		static_cast<leo::uint8>(resource_desc.DepthOrArraySize), 
+		ConvertWrap(dxgi_format), 
+		EA_GPURead,//FIXME
+		{resource_desc.SampleDesc.Count,resource_desc.SampleDesc.Quality}
+	),
+	width(static_cast<leo::uint16>(resource_desc.Width)), height(static_cast<leo::uint16>(resource_desc.Height))
+{
+}
+
 void Texture2D::BuildMipSubLevels()
 {
 	if (IsDepthFormat(format) || IsCompressedFormat(format))
@@ -34,18 +59,18 @@ void Texture2D::BuildMipSubLevels()
 			for (uint8 level = 1; level != GetNumMipMaps(); ++level)
 			{
 				Resize(*this, { index, level, 0, 0, GetWidth(level), GetHeight(level) },
-				{ index, static_cast<uint8>(level - 1), 0, 0, GetWidth(level - 1), GetHeight(level - 1) }, true);
+					{ index, static_cast<uint8>(level - 1), 0, 0, GetWidth(level - 1), GetHeight(level - 1) }, true);
 			}
 		}
 	}
 	else
-		DoHWBuildMipSubLevels(array_size,mipmap_size,width,height);
+		DoHWBuildMipSubLevels(array_size, mipmap_size, width, height);
 }
 
 void Texture2D::HWResourceCreate(ElementInitData const *  init_data)
 {
 	Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION_TEXTURE2D,
-		width,height,1,array_size,
+		width, height, 1, array_size,
 		init_data);
 }
 
@@ -62,7 +87,7 @@ bool Texture2D::HWResourceReady() const
 uint16 Texture2D::GetWidth(uint8 level) const
 {
 	LAssert(level < mipmap_size, "level out of range");
-	return std::max(1,width>>level);
+	return std::max(1, width >> level);
 }
 
 uint16 Texture2D::GetHeight(uint8 level) const
@@ -71,12 +96,12 @@ uint16 Texture2D::GetHeight(uint8 level) const
 	return std::max(1, height >> level);
 }
 
-void Texture2D::Map(TextureMapAccess tma,void *& data, uint32 & row_pitch,const Box2D& box)
+void Texture2D::Map(TextureMapAccess tma, void *& data, uint32 & row_pitch, const Box2D& box)
 {
 	auto subres = CalcSubresource(box.level, box.array_index, 0, mipmap_size, array_size);
 
 	uint32 slice_pitch;
-	DoMap(format,subres, tma, box.x_offset, box.y_offset, 0, box.height, 1, data, row_pitch, slice_pitch);
+	DoMap(format, subres, tma, box.x_offset, box.y_offset, 0, box.height, 1, data, row_pitch, slice_pitch);
 }
 
 void Texture2D::UnMap(const Sub1D& sub)
@@ -133,7 +158,7 @@ ViewSimulation * Texture2D::RetriveShaderResourceView(uint8 first_array_index, u
 ViewSimulation * Texture2D::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level)
 {
 	LAssert(GetAccessMode() & EA_GPUUnordered, "Access mode must have EA_GPUUnordered flag");
-	
+
 	D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
 
 	desc.Format = dxgi_format;

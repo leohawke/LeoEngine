@@ -82,6 +82,9 @@ Display::Display(IDXGIFactory4 * factory_4, ID3D12CommandQueue* cmd_queue, const
 	sc_fs_desc.Windowed = !full_screen;
 
 	CheckHResult(CreateSwapChain(factory_4,cmd_queue));
+
+	back_buffer_index = swap_chain->GetCurrentBackBufferIndex();
+	UpdateFramewBufferView();
 }
 
 HRESULT Display::CreateSwapChain(IDXGIFactory4 *factory_4,ID3D12CommandQueue* cmd_queue)
@@ -91,4 +94,18 @@ HRESULT Display::CreateSwapChain(IDXGIFactory4 *factory_4,ID3D12CommandQueue* cm
 		&sc_desc, &sc_fs_desc, nullptr, &swap_chain1.GetRef()));
 
 	return swap_chain1->QueryInterface(IID_IDXGISwapChain3, reinterpret_cast<void**>(&swap_chain.GetRef()));
+}
+
+void Display::UpdateFramewBufferView()
+{
+	//TODO
+	swap_chain->SetRotation(DXGI_MODE_ROTATION_IDENTITY);
+
+	UINT rt_tex_index = 0;
+	for (auto& rt_tex : render_targets_texs) {
+		COMPtr<ID3D12Resource> pResources = nullptr;
+		swap_chain->GetBuffer(rt_tex_index, COMPtr_RefParam(pResources,IID_ID3D12Resource));
+		rt_tex = make_shared<Texture2D>(pResources);
+		++rt_tex_index;
+	}
 }

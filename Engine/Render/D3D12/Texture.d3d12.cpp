@@ -63,10 +63,15 @@ ViewSimulation* Texture::RetriveDepthStencilView(uint8 array_index, TextureCubeF
 	throw leo::unsupported("Texture::RetriveDepthStencilView(uint8 array_index, TextureCubeFaces face, uint8 level)");
 }
 
+platform_ex::Windows::D3D12::Texture::Texture(const COMPtr<ID3D12Resource>& pResource)
+	:texture(pResource), resource_desc(pResource->GetDesc())
+{
+	dxgi_format = resource_desc.Format;
+}
+
 std::string  platform_ex::Windows::D3D12::Texture::HWDescription() const
 {
-	//TODO Format DXGI_FORMAT EFORMAT CREATE STATE
-	return "D3D12 Texture";
+	return leo::sfmt("[D3D12] Texture pResource=%p",texture.Get());
 }
 
 void Texture::DeleteHWResource()

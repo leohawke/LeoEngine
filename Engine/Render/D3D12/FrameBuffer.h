@@ -19,6 +19,7 @@ namespace platform_ex::Windows::D3D12 {
 		void BindBarrier();
 		void UnBindBarrier();
 
+		friend class Display;
 	private:
 		D3D12_VIEWPORT d3d12_viewport;
 	};

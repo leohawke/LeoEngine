@@ -52,6 +52,8 @@ namespace platform_ex {
 				virtual ViewSimulation* RetriveDepthStencilView(uint8 array_index, TextureCubeFaces face, uint8 level);
 
 			protected:
+				Texture(const COMPtr<ID3D12Resource>& pResource);
+
 				std::string HWDescription() const;
 
 				void DeleteHWResource();
@@ -100,7 +102,7 @@ namespace platform_ex {
 				std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>> dsv_maps;
 			};
 
-			class Texture1D :public platform::Render::Texture1D, public Texture {
+			class Texture1D :public Texture,public platform::Render::Texture1D{
 			public:
 				explicit Texture1D(uint16 width, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
 			protected:
@@ -145,9 +147,11 @@ namespace platform_ex {
 				uint16 width;
 			};
 
-			class Texture2D :public platform::Render::Texture2D, public Texture {
+			class Texture2D :public Texture,public platform::Render::Texture2D {
 			public:
 				explicit Texture2D(uint16 height, uint16 width, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
+
+				explicit Texture2D(const COMPtr<ID3D12Resource>& pResource);
 			protected:
 				//\brief encode = UTF-8
 				std::string Description() const override;
@@ -193,7 +197,7 @@ namespace platform_ex {
 				uint16 height;
 			};
 
-			class Texture3D :public platform::Render::Texture3D, public Texture {
+			class Texture3D : public Texture,public platform::Render::Texture3D{
 			public:
 				explicit Texture3D(uint16 width, uint16 height, uint16 depth, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
 			protected:
@@ -245,7 +249,7 @@ namespace platform_ex {
 				uint16 depth;
 			};
 
-			class TextureCube :public platform::Render::TextureCube, public Texture {
+			class TextureCube : public Texture ,public platform::Render::TextureCube{
 			public:
 				explicit TextureCube(uint16 size, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
 			protected:

@@ -28,6 +28,12 @@ private:
 
 		auto pMesh = std::make_unique<platform::Mesh>(platform::X::LoadMeshAsset("Broadleaf_Desktop_LOD0.asset"),"Broadleaf_Desktop_LOD0");
 		auto pEffect = std::make_unique<platform::Render::Effect::Effect>("ForwardPointLightDiffuseShading");
+
+		Context::Instance().BeginFrame();
+		Context::Instance().Render(*pEffect, pEffect->GetTechniqueByIndex(0), pMesh->GetInputLayout());
+		Context::Instance().EndFrame();
+
+
 		return Nothing;
 	}
 	void OnCreate() override {

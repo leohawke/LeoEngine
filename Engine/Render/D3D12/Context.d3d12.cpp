@@ -230,6 +230,7 @@ namespace platform_ex::Windows::D3D12 {
 		ContextEx(device->d3d_device.Get(), device->d3d_cmd_queue.Get());
 		DisplaySetting setting;
 		display = leo::make_shared<Display>(GetDXGIFactory4(), device->d3d_cmd_queue.Get(), setting, g_hwnd);//test code
+		SetFrame(display->GetFrameBuffer());
 	}
 	void Context::DoBindFrameBuffer(const std::shared_ptr<platform::Render::FrameBuffer>&)
 	{
