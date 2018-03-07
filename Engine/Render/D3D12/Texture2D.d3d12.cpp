@@ -37,13 +37,28 @@ static EFormat ConvertWrap(DXGI_FORMAT format) {
 	return Convert(format);
 }
 
+static leo::uint32 ResloveEAccessHint(const D3D12_RESOURCE_DESC& desc) {
+	leo::uint32 access = EA_GPURead;
+	if (desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) {
+		access |= EA_GPUWrite;
+	}
+	if (desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) {
+		access |= EA_GPUWrite;
+	}
+	if (desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS) {
+		access |= EA_GPUUnordered;
+	}
+
+	return access;
+}
+
 platform_ex::Windows::D3D12::Texture2D::Texture2D(const COMPtr<ID3D12Resource>& pResource)
 	:Texture(pResource),
 	BTexture(
 		static_cast<leo::uint8>(resource_desc.MipLevels),
 		static_cast<leo::uint8>(resource_desc.DepthOrArraySize), 
 		ConvertWrap(dxgi_format), 
-		EA_GPURead,//FIXME
+		ResloveEAccessHint(resource_desc),
 		{resource_desc.SampleDesc.Count,resource_desc.SampleDesc.Quality}
 	),
 	width(static_cast<leo::uint16>(resource_desc.Width)), height(static_cast<leo::uint16>(resource_desc.Height))
