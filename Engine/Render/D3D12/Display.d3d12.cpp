@@ -1,4 +1,6 @@
 #include "Display.h"
+#include "Convert.h"
+#include "Context.h"
 
 using namespace platform_ex::Windows::D3D12;
 using namespace platform_ex;
@@ -27,8 +29,10 @@ Display::Display(IDXGIFactory4 * factory_4, ID3D12CommandQueue* cmd_queue, const
 		width = r.right - r.left;
 		height = r.bottom - r.top;
 	}
-	back_format = DXGI_FORMAT_R8G8B8A8_UNORM;//test code
+	back_format = Convert(setting.color_format);
+	depth_stencil_format =setting.depth_stencil_format;
 
+	stereo_method = setting.stereo_method;
 	stereo_feature = factory_4->IsWindowedStereoEnabled();
 
 	//TODO:
@@ -107,5 +111,19 @@ void Display::UpdateFramewBufferView()
 		swap_chain->GetBuffer(rt_tex_index, COMPtr_RefParam(pResources,IID_ID3D12Resource));
 		rt_tex = make_shared<Texture2D>(pResources);
 		++rt_tex_index;
+	}
+
+	auto stereo = (Stereo_LCDShutter == stereo_method) && stereo_feature;
+
+	if (depth_stencil_format != EF_Unknown) {
+		depth_stencil = leo::share_raw(Context::Instance().GetDevice().CreateTexture(
+			static_cast<leo::uint16>(GetWidth()),
+			static_cast<leo::uint16>(GetHeight()),
+			1u,
+			stereo?2u:1u,
+			depth_stencil_format,
+			EA_GPURead | EA_GPUWrite,
+			render_targets_texs[0]->GetSampleInfo()
+		));
 	}
 }

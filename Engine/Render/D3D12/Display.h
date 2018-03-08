@@ -32,6 +32,9 @@ namespace platform_ex {
 				leo::uint32  screen_width,screen_height;//属于用户设置
 
 				StereoMethod stereo_method = Stereo_None;
+
+				EFormat depth_stencil_format = EF_D16;
+				EFormat color_format = EF_ARGB8;
 			};
 
 			class Display {
@@ -39,7 +42,8 @@ namespace platform_ex {
 				//todo Get Window's HWND by Other API.
 				Display(IDXGIFactory4 *factory_4,ID3D12CommandQueue* cmd_queue,const DisplaySetting& setting = {},HWND = NULL);
 
-
+				DefGetter(const lnothrow, UINT, Width, width)
+				DefGetter(const lnothrow,UINT,Height,height)
 				DefGetter(const lnothrow,std::shared_ptr<FrameBuffer>,FrameBuffer,frame_buffer)
 				lconstexpr static UINT const NUM_BACK_BUFFERS = 3;
 			private:
@@ -59,7 +63,7 @@ namespace platform_ex {
 				DXGI_SWAP_CHAIN_FULLSCREEN_DESC sc_fs_desc;
 
 				DXGI_FORMAT back_format;
-				DXGI_FORMAT depth_stencil_format;
+				EFormat depth_stencil_format;
 
 				bool full_screen;
 				bool sync_interval;
@@ -68,12 +72,14 @@ namespace platform_ex {
 
 				COMPtr<IDXGISwapChain3> swap_chain;
 
-				std::array<std::shared_ptr<Texture>, NUM_BACK_BUFFERS> render_targets_texs;
+				std::array<std::shared_ptr<Texture2D>, NUM_BACK_BUFFERS> render_targets_texs;
 				std::array<std::shared_ptr<RenderTargetView>, NUM_BACK_BUFFERS> render_target_views;
-				std::shared_ptr<Texture> depth_stencil;
+				std::shared_ptr<Texture2D> depth_stencil;
 
 				UINT back_buffer_index;
 				std::shared_ptr<FrameBuffer> frame_buffer;
+
+				StereoMethod stereo_method;
 			};
 		}
 	}

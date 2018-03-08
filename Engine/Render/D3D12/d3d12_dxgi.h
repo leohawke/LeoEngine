@@ -5,10 +5,12 @@
 #ifndef LE_RENDER_D3D12_d3d12_dxgi_h
 #define LE_RENDER_D3D12_d3d12_dxgi_h 1
 
-#include "LFramework/Win32/LCLib/COM.h"
+#include <LFramework/Win32/LCLib/Mingw32.h>
 
 #include <UniversalDXSDK/d3d12.h>
 #include <UniversalDXSDK/dxgi1_5.h>
+
+#include <LFramework/Win32/LCLib/COM.h>
 
 extern "C"
 {
