@@ -305,7 +305,7 @@ namespace leo
   \todo 支持引用包装
   */
 	template<typename _fCallable, typename... _tParams>
-	limpl(lconstfn) result_of_t<_fCallable && (_tParams&&...)>
+	limpl(lconstfn) invoke_result_t<_fCallable, _tParams&&...>
 		invoke(_fCallable&& f, _tParams&&... args)
 	{
 		return details::invoke_impl(lforward(f), lforward(args)...);

@@ -10,10 +10,10 @@
 #define LBase_Optional_hpp 1
 
 #include "LBase/functional.hpp"
-#ifdef LB_IMPL_MSCPP
-#include <optional>
-#else
+#ifdef __cpp_lib_experimental_optional
 #include <experimental/optional>
+#else
+#include <optional>
 #endif
 
 namespace leo {

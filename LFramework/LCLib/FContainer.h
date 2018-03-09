@@ -8,11 +8,7 @@
 
 #include <LFramework/LCLib/FCommon.h>
 #include <LBase/string.hpp>
-#ifdef LB_IMPL_MSCPP
 #include <string_view>
-#else
-#include <experimental/string_view>
-#endif
 #include <LBase/array.hpp>
 #include <deque>
 #include <forward_list>
@@ -78,17 +74,11 @@ namespace platform
 		using wstring = basic_string<wchar_t>;
 
 		//@{
-#ifndef LB_IMPL_MSCPP
-		using std::experimental::basic_string_view;
-		using std::experimental::string_view;
-		using std::experimental::u16string_view;
-		using std::experimental::wstring_view;
-#else
+
 		using std::basic_string_view;
 		using std::string_view;
 		using std::u16string_view;
 		using std::wstring_view;
-#endif
 		//@}
 		//@{
 		//using leo::basic_tstring_view;

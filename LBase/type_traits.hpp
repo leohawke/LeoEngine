@@ -9,6 +9,7 @@
 #define Lbase_type_traits_hpp 1
 
 #include "LBase/lcompiler.h" // type_traits.std::delval
+#include <type_traits>
 
 namespace leo {
 	/*!

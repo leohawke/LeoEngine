@@ -1,3 +1,8 @@
+#include <type_traits>
+#include <functional>
+
+using std::invoke_result;
+
 #include "LBase/pseudo_mutex.h"
 #include "LBase/scope_gurad.hpp"
 #include "LBase/cache.hpp"

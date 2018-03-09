@@ -812,7 +812,7 @@ namespace leo
 		struct params_element
 		{
 			using tuple = std::tuple<_tParams...>;
-			using type = std::conditional_t<(idx >=sizeof(_tParams)), void, std::tuple_element_t<idx, tuple>>;
+			using type = std::conditional_t<(idx >=sizeof...(_tParams)), void, std::tuple_element_t<idx, tuple>>;
 		};
 	}
 

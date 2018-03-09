@@ -114,8 +114,8 @@ namespace platform::Render {
 			uint8 array_index;
 			uint8 level;
 
-			Sub1D(uint8 arrary_index_, uint8 level_)
-				:array_index(array_index), level(level_)
+			Sub1D(uint8 array_index_, uint8 level_)
+				:array_index(array_index_), level(level_)
 			{}
 
 			Sub1D() = default;
@@ -274,7 +274,7 @@ namespace platform::Render {
 			CubeFaces face;
 			using base = Texture2D::Box2D;
 			BoxCube(const base& box, CubeFaces face_)
-				:base(box), face(face)
+				:base(box), face(face_)
 			{}
 		};
 

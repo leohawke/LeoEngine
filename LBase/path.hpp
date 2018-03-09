@@ -11,11 +11,7 @@
 #include "LBase/operators.hpp"
 #include <limits>
 #include <stdexcept>
-#ifdef LB_IMPL_MSCPP
 #include <string_view>
-#else
-#include <experimental/string_view>
-#endif
 
 namespace leo {
 
