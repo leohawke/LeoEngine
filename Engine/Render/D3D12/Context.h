@@ -150,10 +150,10 @@ namespace platform_ex {
 			public:
 				void CreateDeviceAndDisplay() override;
 			private:
-				void DoBindFrameBuffer(const std::shared_ptr<platform::Render::FrameBuffer>&) override;
-
-			public:
 				Context();
+
+				void DoBindFrameBuffer(const std::shared_ptr<platform::Render::FrameBuffer>&) override;
+			public:
 
 				DXGI::Adapter& DefaultAdapter();
 

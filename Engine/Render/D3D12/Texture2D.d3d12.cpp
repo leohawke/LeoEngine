@@ -6,7 +6,7 @@
 using namespace platform_ex::Windows::D3D12;
 using BTexture = platform::Render::Texture2D;
 
-Texture2D::Texture2D(uint16 height_, uint16 width_,
+Texture2D::Texture2D(uint16 width_, uint16 height_,
 	uint8 numMipMaps, uint8 array_size_,
 	EFormat format_, uint32 access_hint, platform::Render::SampleDesc sample_info)
 	:Texture(format_),

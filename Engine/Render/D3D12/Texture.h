@@ -149,7 +149,7 @@ namespace platform_ex {
 
 			class Texture2D :public Texture,public platform::Render::Texture2D {
 			public:
-				explicit Texture2D(uint16 height, uint16 width, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
+				explicit Texture2D(uint16 width, uint16 height, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
 
 				explicit Texture2D(const COMPtr<ID3D12Resource>& pResource);
 			protected:

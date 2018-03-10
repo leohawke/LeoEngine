@@ -79,7 +79,7 @@ namespace platform_ex::Windows::D3D12 {
 			pso_desc.SampleDesc.Quality = 0;
 
 			ID3D12PipelineState* pso;
-			CheckHResult(Context().GetDevice()->CreateGraphicsPipelineState(&pso_desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&pso)));
+			CheckHResult(Context::Instance().GetDevice()->CreateGraphicsPipelineState(&pso_desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&pso)));
 
 			iter = psos.emplace(hash_val, COMPtr<ID3D12PipelineState>(pso)).first;
 		}
