@@ -2,11 +2,12 @@
 #include "Convert.h"
 #include "Context.h"
 
+
 using namespace platform_ex::Windows::D3D12;
 using namespace platform_ex;
 
-Display::Display(IDXGIFactory4 * factory_4, ID3D12CommandQueue* cmd_queue, const DisplaySetting& setting,HWND hWnd)
-	:hwnd(hWnd)
+Display::Display(IDXGIFactory4 * factory_4, ID3D12CommandQueue* cmd_queue, const DisplaySetting& setting, HWND hWnd)
+	:hwnd(hWnd), frame_buffer(std::make_shared<FrameBuffer>())
 {
 	full_screen = setting.full_screen;
 	sync_interval = setting.sync_interval;
@@ -30,7 +31,7 @@ Display::Display(IDXGIFactory4 * factory_4, ID3D12CommandQueue* cmd_queue, const
 		height = r.bottom - r.top;
 	}
 	back_format = Convert(setting.color_format);
-	depth_stencil_format =setting.depth_stencil_format;
+	depth_stencil_format = setting.depth_stencil_format;
 
 	stereo_method = setting.stereo_method;
 	stereo_feature = factory_4->IsWindowedStereoEnabled();
@@ -85,13 +86,13 @@ Display::Display(IDXGIFactory4 * factory_4, ID3D12CommandQueue* cmd_queue, const
 	sc_fs_desc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	sc_fs_desc.Windowed = !full_screen;
 
-	CheckHResult(CreateSwapChain(factory_4,cmd_queue));
+	CheckHResult(CreateSwapChain(factory_4, cmd_queue));
 
 	back_buffer_index = swap_chain->GetCurrentBackBufferIndex();
 	UpdateFramewBufferView();
 }
 
-HRESULT Display::CreateSwapChain(IDXGIFactory4 *factory_4,ID3D12CommandQueue* cmd_queue)
+HRESULT Display::CreateSwapChain(IDXGIFactory4 *factory_4, ID3D12CommandQueue* cmd_queue)
 {
 	COMPtr<IDXGISwapChain1>  swap_chain1 = nullptr;
 	CheckHResult(factory_4->CreateSwapChainForHwnd(cmd_queue, hwnd,
@@ -108,8 +109,9 @@ void Display::UpdateFramewBufferView()
 	UINT rt_tex_index = 0;
 	for (auto& rt_tex : render_targets_texs) {
 		COMPtr<ID3D12Resource> pResources = nullptr;
-		swap_chain->GetBuffer(rt_tex_index, COMPtr_RefParam(pResources,IID_ID3D12Resource));
+		swap_chain->GetBuffer(rt_tex_index, COMPtr_RefParam(pResources, IID_ID3D12Resource));
 		rt_tex = make_shared<Texture2D>(pResources);
+		render_target_views[rt_tex_index] = make_shared<RenderTargetView>(*rt_tex, 0, 1, 0);
 		++rt_tex_index;
 	}
 
@@ -120,10 +122,17 @@ void Display::UpdateFramewBufferView()
 			static_cast<leo::uint16>(GetWidth()),
 			static_cast<leo::uint16>(GetHeight()),
 			1u,
-			stereo?2u:1u,
+			stereo ? 2u : 1u,
 			depth_stencil_format,
 			EA_GPURead | EA_GPUWrite,
 			render_targets_texs[0]->GetSampleInfo()
 		));
+	}
+
+	frame_buffer->Attach(FrameBuffer::Target0, render_target_views[0]);
+	if (depth_stencil_format != EF_Unknown) {
+		frame_buffer->Attach(FrameBuffer::DepthStencil, make_shared<DepthStencilView>(*depth_stencil,0,1,0));
+		if(stereo)
+			frame_buffer->Attach(FrameBuffer::DepthStencil, make_shared<DepthStencilView>(*depth_stencil, 1, 1, 0));
 	}
 }
