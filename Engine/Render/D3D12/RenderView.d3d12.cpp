@@ -41,6 +41,7 @@ ViewSimulation::~ViewSimulation() {
 
 
 GPUDataStructView::GPUDataStructView(ID3D12Resource* res_,ViewSimulation * view_, uint16 first_subres_, uint16 num_subres_)
+	:view(view_),first_subres(first_subres_),num_subres(num_subres_),res(res_)
 {
 }
 

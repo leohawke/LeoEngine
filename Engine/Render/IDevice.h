@@ -39,6 +39,8 @@ namespace platform::Render {
 		virtual GraphicsBuffer* CreateIndexBuffer(Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const *>  init_data = nullptr) = 0;
 
 		virtual PipleState* CreatePipleState(const PipleState& state) = 0;
+
+		virtual InputLayout* CreateInputLayout() = 0;
 	};
 }
 

@@ -19,7 +19,11 @@ namespace platform::Render {
 		case platform::Render::FrameBuffer::DepthStencil:
 			return leo::make_observer(ds_view.get());
 		default:
-			return leo::make_observer(clr_views[which].get());
+			leo::uint32 clr_index = which - Target0;
+			if (clr_index < clr_views.size())
+				return leo::make_observer(clr_views[which].get());
+			else
+				return {};
 			break;
 		}
 		throw std::invalid_argument("don't support enum argument");
@@ -35,7 +39,7 @@ namespace platform::Render {
 			leo::uint32 clr_index = which - Target0;
 			if ((clr_index < clr_views.size()) && clr_views[clr_index])
 				this->Detach(which);
-			if (clr_views.size() > clr_index + 1)
+			if (clr_views.size() < clr_index + 1)
 				clr_views.resize(clr_index + 1);
 			clr_views[clr_index] = view;
 

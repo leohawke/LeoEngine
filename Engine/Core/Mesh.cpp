@@ -8,7 +8,7 @@ namespace platform {
 		:Resources(name),sub_meshes(asset.GetSubMeshDesces())
 	{
 		auto& device = Context::Instance().GetDevice();
-		input_layout = std::make_unique<InputLayout>();
+		input_layout = unique_raw(device.CreateInputLayout());
 		
 		for (std::size_t i = 0; i != asset.GetVertexElements().size(); ++i) {
 			auto& element = asset.GetVertexElements()[i];

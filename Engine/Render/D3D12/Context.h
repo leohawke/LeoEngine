@@ -64,6 +64,8 @@ namespace platform_ex {
 
 				PipleState* CreatePipleState(const platform::Render::PipleState& state) override;
 
+				InputLayout* CreateInputLayout() override;
+
 				platform::Render::Effect::CopyEffect& BiltEffect();
 
 				platform::Render::InputLayout& PostProcessLayout();
