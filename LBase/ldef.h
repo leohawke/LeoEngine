@@ -68,7 +68,7 @@
 #define VC_STL 1
 #elif __clang__
 #	undef LB_IMPL_CLANGPP
-#	define LB_IMPL_CLANGPP (__clang__ * 10000 + __clang_minor__ * 100 \
+#	define LB_IMPL_CLANGPP (__clang_major__ * 10000 + __clang_minor__ * 100 \
 			+ __clang_patchlevel__)
 #	elif defined(__GNUC__)
 #		undef LB_IMPL_GNUCPP
@@ -82,7 +82,7 @@
 #define VC_STL 1
 #endif
 #	undef LB_IMPL_CLANGPP
-#	define LB_IMPL_CLANGPP (__clang__ * 10000 + __clang_minor__ * 100 \
+#	define LB_IMPL_CLANGPP (__clang_major__ * 10000 + __clang_minor__ * 100 \
 			+ __clang_patchlevel__)
 #endif
 

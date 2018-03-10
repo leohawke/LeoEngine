@@ -67,14 +67,16 @@ namespace leo {
 		return !(x == y);
 	}
 
-
-	/*!
-	\brief 独占所有权的锁定指针：使用线程模型对应的互斥量和锁以及 unique_ptr 。
-	\sa leo::threading::locked_ptr
-	*/
-	template<typename _type, class _tMutex = typename unlock_delete<>::mutex_type,
-		class _tLock = typename unlock_delete<_tMutex>::lock_type>
-		using locked_ptr = unique_ptr<_type, unlock_delete<_tMutex, _tLock>>;
+	namespace  alter{
+		/*!
+		\brief 独占所有权的锁定指针：使用线程模型对应的互斥量和锁以及 unique_ptr 。
+		\sa leo::threading::locked_ptr
+		*/
+		template<typename _type, class _tMutex = typename unlock_delete<>::mutex_type,
+			class _tLock = typename unlock_delete<_tMutex>::lock_type>
+			using locked_ptr = unique_ptr<_type, unlock_delete<_tMutex, _tLock>>;
+	
+	}
 
 	namespace Shells
 	{

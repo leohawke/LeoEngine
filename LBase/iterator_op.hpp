@@ -159,9 +159,7 @@ namespace leo
 	  \warning 实例作为实现迭代器的基类时不应使用默认参数，因为此时无法访问成员类型。
 	  */
 	template<typename _tIter, typename _tTraits = std::iterator_traits<_tIter>>
-	//using iterator_operators_t = _t<details::iterator_operators<_tIter, _tTraits>>;
-	using iterator_operators_t =typename details::iterator_operators<_tIter, _tTraits>::type;
-
+	using iterator_operators_t = _t<details::iterator_operators<_tIter, _tTraits>>;
 }
 
 #endif

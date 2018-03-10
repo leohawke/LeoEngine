@@ -11,26 +11,6 @@
 //	exclude_self_t, cond_t, not_, is_object;
 #include <functional> // for std::reference_wrapper;
 
-/*!
-\brief \<functional\> ÌØÐÔ²âÊÔºê¡£
-\see WG21 P0096R1 3.5 ¡£
-\see https://blogs.msdn.microsoft.com/vcblog/2015/06/19/c111417-features-in-vs-2015-rtm/ ¡£
-\since build 1.4
-*/
-//@{
-#if LB_IMPL_MSCPP >= 1800
-#	ifndef __cpp_lib_transparent_operators
-#		define __cpp_lib_transparent_operators 201210
-#	endif
-#endif
-#if LB_IMPL_MSCPP >= 1900
-#	ifndef __cpp_lib_invoke
-#		define __cpp_lib_invoke 201411
-#	endif
-#endif
-//@}
-
-
 namespace leo
 {
 	//!

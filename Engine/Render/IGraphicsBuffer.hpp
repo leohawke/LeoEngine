@@ -62,7 +62,7 @@ namespace platform::Render {
 	namespace Buffer {
 		class Mapper : leo::noncopyable
 		{
-			friend class GraphicsBuffer;
+			friend class ::platform::Render::GraphicsBuffer;
 
 		public:
 			Mapper(GraphicsBuffer& buffer_, Access ba)

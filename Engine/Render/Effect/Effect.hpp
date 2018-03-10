@@ -271,8 +271,7 @@ namespace platform::Render::Effect {
 		friend class Effect;
 		friend class Parameter;
 	private:
-		template<>
-		Variable& operator=<void*>(void*  const & pointer) {
+		Variable& operator=(void*  const & pointer) {
 			LAssert(bind.target, "Memory Assign Must Has CBufferBind");
 			std::memcpy(&bind.target->cpu_buffer[bind.offset],pointer,bind.stride);
 			bind.target->Dirty(true);
