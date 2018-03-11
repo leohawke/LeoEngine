@@ -106,17 +106,26 @@ namespace platform_ex::Windows::D3D12 {
 		render_cmd_list->SetPipelineState(pso.Get());
 		render_cmd_list->SetGraphicsRootSignature(shader_compose.RootSignature());
 
+		D3D12_RECT scissor_rc;
 		if (pass.GetState().RasterizerState.scissor_enable) {
-			//TODO  RSSetScissorRects
+			throw leo::unsupported();
 		}
 		else {
-			D3D12_RECT rc =
+			scissor_rc  =
 			{
-				//TODO Viewport
+				static_cast<LONG>(curr_viewport.TopLeftX),
+				static_cast<LONG>(curr_viewport.TopLeftY),
+				static_cast<LONG>(curr_viewport.TopLeftX + curr_viewport.Width),
+				static_cast<LONG>(curr_viewport.TopLeftY + curr_viewport.Height)
 			};
-			//d3d_cmd_lists[Device::Command_Render]->RSSetScissorRects(1,&rc);
 		}
+		render_cmd_list->RSSetScissorRects(1,&scissor_rc);
+		UpdateCbvSrvUavSamplerHeaps(shader_compose);
+	}
 
+	void Context::UpdateCbvSrvUavSamplerHeaps(const ShaderCompose & shader_compose)
+	{
+		auto& render_cmd_list = d3d_cmd_lists[Device::Command_Render];
 		std::size_t num_handle = 0;
 		for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
 			num_handle += shader_compose.Srvs[i].size() + shader_compose.Uavs[i].size();
@@ -198,13 +207,29 @@ namespace platform_ex::Windows::D3D12 {
 			for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
 				if (!shader_compose.Srvs[i].empty()) {
 					render_cmd_list->SetGraphicsRootDescriptorTable(root_param_index, gpu_sampler_handle);
-					gpu_sampler_handle.ptr += sampler_desc_size *  shader_compose.Samplers[i].size();
+					gpu_sampler_handle.ptr += sampler_desc_size * shader_compose.Samplers[i].size();
 
 					++root_param_index;
 				}
 			}
 		}
+	}
 
+	void Context::RSSetViewports(UINT NumViewports, D3D12_VIEWPORT const * pViewports)
+	{
+		if (NumViewports == 1)
+		{
+			if (memcmp(&curr_viewport, pViewports, sizeof(pViewports[0])) != 0)
+			{
+				d3d_cmd_lists[Device::Command_Render]->RSSetViewports(NumViewports, pViewports);
+				curr_viewport = pViewports[0];
+			}
+		}
+		else
+		{
+			d3d_cmd_lists[Device::Command_Render]->RSSetViewports(NumViewports, pViewports);
+			curr_viewport = pViewports[0];
+		}
 	}
 
 	void Context::ContextEx(ID3D12Device * d3d_device, ID3D12CommandQueue * cmd_queue)
@@ -289,8 +314,8 @@ namespace platform_ex::Windows::D3D12 {
 		//TODO Tessllation
 
 		//State Cache?
-
-		d3d_cmd_lists[Device::Command_Render]->IASetPrimitiveTopology(Convert<D3D12_PRIMITIVE_TOPOLOGY>(tt));
+		D3D12_PRIMITIVE_TOPOLOGY curr_topology = Convert<D3D12_PRIMITIVE_TOPOLOGY>(tt);
+		d3d_cmd_lists[Device::Command_Render]->IASetPrimitiveTopology(curr_topology);
 
 		auto prim_count = vertex_count;
 		switch (tt)

@@ -176,6 +176,9 @@ namespace platform_ex {
 
 				void UpdateRenderPSO(const Effect::Effect& effect, const Effect::Technique& tech,const Effect::Pass& pass, const platform::Render::InputLayout& layout);
 
+				void UpdateCbvSrvUavSamplerHeaps(const ShaderCompose&);
+
+				void RSSetViewports(UINT NumViewports, D3D12_VIEWPORT const *pViewports);
 			private:
 				void ContextEx(ID3D12Device* device, ID3D12CommandQueue* cmd_queue);
 			private:
@@ -190,6 +193,7 @@ namespace platform_ex {
 
 				array<COMPtr<ID3D12CommandQueue>, Device::CommandTypeCount-1> d3d_cmd_queues;
 
+				D3D12_VIEWPORT curr_viewport;
 			public:
 				static Context& Instance();
 			};

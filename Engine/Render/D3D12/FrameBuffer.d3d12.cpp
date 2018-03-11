@@ -52,7 +52,8 @@ namespace platform_ex::Windows::D3D12 {
 		d3d12_viewport.Width = static_cast<float>(viewport.width);
 		d3d12_viewport.Height = static_cast<float>(viewport.height);
 
-		cmd_list->RSSetViewports(1, &d3d12_viewport);
+		//×´Ì¬×ªÒÆ
+		Context::Instance().RSSetViewports(1, &d3d12_viewport);
 	}
 	void FrameBuffer::BindBarrier()
 	{
