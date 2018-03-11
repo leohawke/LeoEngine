@@ -21,7 +21,7 @@
 // GUID definitions by defining the INITGUID preprocessor constant or by linking
 // to a GUID library.  This works in either C or C++.
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && defined(_MSC_VER)
 
     #define DECLSPEC_UUID_WRAPPER(x) __declspec(uuid(#x))
     #ifdef INITGUID

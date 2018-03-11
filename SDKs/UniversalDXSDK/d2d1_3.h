@@ -461,11 +461,6 @@ typedef enum D2D1_COLOR_CONTEXT_TYPE
 } D2D1_COLOR_CONTEXT_TYPE;
 
 
-                
-typedef enum DWRITE_GLYPH_IMAGE_FORMATS DWRITE_GLYPH_IMAGE_FORMATS;
-
-                 
-
 EXTERN_C CONST IID IID_ID2D1InkStyle;
 EXTERN_C CONST IID IID_ID2D1Ink;
 EXTERN_C CONST IID IID_ID2D1GradientMesh;
@@ -493,6 +488,10 @@ EXTERN_C CONST IID IID_ID2D1ColorContext1;
 EXTERN_C CONST IID IID_ID2D1DeviceContext5;
 EXTERN_C CONST IID IID_ID2D1Device5;
 EXTERN_C CONST IID IID_ID2D1Factory6;
+EXTERN_C CONST IID IID_ID2D1CommandSink5;
+EXTERN_C CONST IID IID_ID2D1DeviceContext6;
+EXTERN_C CONST IID IID_ID2D1Device6;
+EXTERN_C CONST IID IID_ID2D1Factory7;
 
 
 #ifndef D2D_USE_C_DEFINITIONS
@@ -1697,6 +1696,92 @@ interface DX_DECLARE_INTERFACE("f9976f46-f642-44c1-97ca-da32ea2a2635") ID2D1Fact
     
     using ID2D1Factory1::CreateDevice;
 }; // interface ID2D1Factory6
+
+
+#endif
+#if NTDDI_VERSION >= NTDDI_WIN10_RS3
+
+interface DX_DECLARE_INTERFACE("7047dd26-b1e7-44a7-959a-8349e2144fa8") ID2D1CommandSink5  : public ID2D1CommandSink4
+{
+    
+    STDMETHOD(BlendImage)(
+        _In_ ID2D1Image *image,
+        D2D1_BLEND_MODE blendMode,
+        _In_opt_ CONST D2D1_POINT_2F *targetOffset,
+        _In_opt_ CONST D2D1_RECT_F *imageRectangle,
+        D2D1_INTERPOLATION_MODE interpolationMode 
+        ) PURE;
+}; // interface ID2D1CommandSink5
+
+
+interface DX_DECLARE_INTERFACE("985f7e37-4ed0-4a19-98a3-15b0edfde306") ID2D1DeviceContext6  : public ID2D1DeviceContext5
+{
+    
+    /// <summary>
+    /// Draw an image to the device context.
+    /// </summary>
+    STDMETHOD_(void, BlendImage)(
+        _In_ ID2D1Image *image,
+        D2D1_BLEND_MODE blendMode,
+        _In_opt_ CONST D2D1_POINT_2F *targetOffset = NULL,
+        _In_opt_ CONST D2D1_RECT_F *imageRectangle = NULL,
+        D2D1_INTERPOLATION_MODE interpolationMode = D2D1_INTERPOLATION_MODE_LINEAR 
+        ) PURE;
+}; // interface ID2D1DeviceContext6
+
+
+interface DX_DECLARE_INTERFACE("7bfef914-2d75-4bad-be87-e18ddb077b6d") ID2D1Device6  : public ID2D1Device5
+{
+    
+    /// <summary>
+    /// Creates a new device context with no initially assigned target.
+    /// </summary>
+    STDMETHOD(CreateDeviceContext)(
+        D2D1_DEVICE_CONTEXT_OPTIONS options,
+        _COM_Outptr_ ID2D1DeviceContext6 **deviceContext6 
+        ) PURE;
+    
+    using ID2D1Device5::CreateDeviceContext;
+    
+    using ID2D1Device4::CreateDeviceContext;
+    
+    using ID2D1Device3::CreateDeviceContext;
+    
+    using ID2D1Device2::CreateDeviceContext;
+    
+    using ID2D1Device1::CreateDeviceContext;
+    
+    using ID2D1Device::CreateDeviceContext;
+}; // interface ID2D1Device6
+
+
+/// <summary>
+/// Creates Direct2D resources. This interface also enables the creation of
+/// ID2D1Device6 objects.
+/// </summary>
+interface DX_DECLARE_INTERFACE("bdc2bdd3-b96c-4de6-bdf7-99d4745454de") ID2D1Factory7  : public ID2D1Factory6
+{
+    
+    /// <summary>
+    /// This creates a new Direct2D device from the given IDXGIDevice.
+    /// </summary>
+    STDMETHOD(CreateDevice)(
+        _In_ IDXGIDevice *dxgiDevice,
+        _COM_Outptr_ ID2D1Device6 **d2dDevice6 
+        ) PURE;
+    
+    using ID2D1Factory6::CreateDevice;
+    
+    using ID2D1Factory5::CreateDevice;
+    
+    using ID2D1Factory4::CreateDevice;
+    
+    using ID2D1Factory3::CreateDevice;
+    
+    using ID2D1Factory2::CreateDevice;
+    
+    using ID2D1Factory1::CreateDevice;
+}; // interface ID2D1Factory7
 
 
 #endif

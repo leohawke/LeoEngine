@@ -1072,11 +1072,11 @@ interface DX_DECLARE_INTERFACE("ac7b67a6-183e-49c1-a823-0ebe40b0db29") ID2D1SvgE
     /// children. Returns an error if this element cannot accept children of the
     /// specified type.
     /// </summary>
-    /// <param name="tagName">The tag name of the new child. A NULL tagName or an empty
-    /// string is interpreted to be a text content element.</param>
+    /// <param name="tagName">The tag name of the new child. An empty string is
+    /// interpreted to be a text content element.</param>
     /// <param name="newChild">The new child element.</param>
     STDMETHOD(CreateChild)(
-        _In_opt_ PCWSTR tagName,
+        _In_ PCWSTR tagName,
         _COM_Outptr_ ID2D1SvgElement **newChild 
         ) PURE;
     

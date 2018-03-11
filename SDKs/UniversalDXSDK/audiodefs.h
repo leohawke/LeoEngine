@@ -194,7 +194,7 @@ typedef const WAVEFORMATEXTENSIBLE *PCWAVEFORMATEXTENSIBLE, *LPCWAVEFORMATEXTENS
  *
  ***************************************************************************/
 
-#ifdef __cplusplus // uuid() and __uuidof() are only available in C++
+#if defined(__cplusplus) && defined(_MSC_VER) // uuid() and __uuidof() are only available in C++
 
     #ifndef KSDATAFORMAT_SUBTYPE_PCM
         struct __declspec(uuid("00000001-0000-0010-8000-00aa00389b71")) KSDATAFORMAT_SUBTYPE_PCM_STRUCT;

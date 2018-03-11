@@ -315,7 +315,6 @@ namespace platform_ex::Windows::D3D12 {
 
 		//State Cache?
 		D3D12_PRIMITIVE_TOPOLOGY curr_topology = Convert<D3D12_PRIMITIVE_TOPOLOGY>(tt);
-		d3d_cmd_lists[Device::Command_Render]->IASetPrimitiveTopology(curr_topology);
 
 		auto prim_count = vertex_count;
 		switch (tt)
@@ -349,6 +348,7 @@ namespace platform_ex::Windows::D3D12 {
 				pass.Bind(effect);
 
 				UpdateRenderPSO(effect, tech, pass, layout);
+				d3d_cmd_lists[Device::Command_Render]->IASetPrimitiveTopology(curr_topology);
 				d3d_cmd_lists[Device::Command_Render]->DrawIndexedInstanced(num_indices,
 					num_instances,
 					layout.GetIndexStart(), layout.GetVertexStart(), 0);
@@ -362,6 +362,7 @@ namespace platform_ex::Windows::D3D12 {
 				pass.Bind(effect);
 
 				UpdateRenderPSO(effect, tech, pass, layout);
+				d3d_cmd_lists[Device::Command_Render]->IASetPrimitiveTopology(curr_topology);
 				d3d_cmd_lists[Device::Command_Render]->DrawInstanced(num_vertices,
 					num_instances,
 					layout.GetVertexStart(), 0);
@@ -372,7 +373,6 @@ namespace platform_ex::Windows::D3D12 {
 		//Statistics Render Infomation
 
 		framebuffer->UnBindBarrier();
-
 	}
 	void Context::BeginFrame()
 	{
