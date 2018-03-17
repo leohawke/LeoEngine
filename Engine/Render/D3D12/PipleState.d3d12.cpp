@@ -13,7 +13,7 @@ namespace platform_ex::Windows::D3D12 {
 		graphics_ps_desc.RasterizerState = Convert(base::RasterizerState);
 		graphics_ps_desc.DepthStencilState = Convert(base::DepthStencilState);
 	}
-	COMPtr<ID3D12PipelineState> PipleState::RetrieveGraphicsPSO(const platform::Render::InputLayout & _layout, ShaderCompose & shader_compose, const std::shared_ptr<platform::Render::FrameBuffer>& _frame, bool HasTessellation) const
+	leo::observer_ptr<ID3D12PipelineState> PipleState::RetrieveGraphicsPSO(const platform::Render::InputLayout & _layout, ShaderCompose & shader_compose, const std::shared_ptr<platform::Render::FrameBuffer>& _frame, bool HasTessellation) const
 	{
 		auto& layout = static_cast<const InputLayout&>(_layout);
 		auto& frame = std::static_pointer_cast<FrameBuffer>(_frame);
@@ -83,6 +83,6 @@ namespace platform_ex::Windows::D3D12 {
 
 			iter = psos.emplace(hash_val, COMPtr<ID3D12PipelineState>(pso)).first;
 		}
-		return iter->second;
+		return leo::make_observer(iter->second.Get());
 	}
 }

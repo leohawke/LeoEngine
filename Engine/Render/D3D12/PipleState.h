@@ -13,7 +13,7 @@ namespace platform_ex::Windows::D3D12 {
 		using base = platform::Render::PipleState;
 		PipleState(const base&);
 
-		COMPtr<ID3D12PipelineState> RetrieveGraphicsPSO(const platform::Render::InputLayout & layout, ShaderCompose& shader_compose, const std::shared_ptr<platform::Render::FrameBuffer>&, bool HasTessellation) const;
+		leo::observer_ptr<ID3D12PipelineState> RetrieveGraphicsPSO(const platform::Render::InputLayout & layout, ShaderCompose& shader_compose, const std::shared_ptr<platform::Render::FrameBuffer>&, bool HasTessellation) const;
 
 		union {
 			D3D12_GRAPHICS_PIPELINE_STATE_DESC graphics_ps_desc;

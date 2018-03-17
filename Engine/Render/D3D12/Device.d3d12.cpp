@@ -365,7 +365,7 @@ namespace platform_ex::Windows::D3D12 {
 
 	GraphicsBuffer *Device::CreateBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const*> init_data)
 	{
-		auto buffer = std::make_unique<GraphicsBuffer>(usage, access, (size_in_byte + 255)&~255, format);
+		auto buffer = std::make_unique<GraphicsBuffer>(usage, access, size_in_byte, format);
 		if (init_data.has_value())
 			buffer->HWResourceCreate(init_data.value());
 		return buffer.release();

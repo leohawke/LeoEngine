@@ -132,6 +132,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		friend class PipleState;
 		friend class Texture;
+		friend class Context;
 	};
 
 	inline void operator<<(D3D12_SHADER_BYTECODE& desc, std::nullptr_t)

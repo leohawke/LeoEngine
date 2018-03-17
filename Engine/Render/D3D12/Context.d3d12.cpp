@@ -103,7 +103,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		auto pso = piple_state.RetrieveGraphicsPSO(layout, shader_compose, GetCurrFrame(), tech.HasTessellation());
 
-		render_cmd_list->SetPipelineState(pso.Get());
+		render_cmd_list->SetPipelineState(pso.get());
 		render_cmd_list->SetGraphicsRootSignature(shader_compose.RootSignature());
 
 		D3D12_RECT scissor_rc;
@@ -340,6 +340,8 @@ namespace platform_ex::Windows::D3D12 {
 		//Statistics Render Infomation
 
 		auto num_passes = tech.NumPasses();
+
+	
 
 		//TODO Indirect Args
 		if (layout.GetIndexStream()) {
