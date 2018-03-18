@@ -97,6 +97,16 @@ namespace platform_ex {
 				void FillCaps();
 
 				void DeviceEx(ID3D12Device* device, ID3D12CommandQueue* cmd_queue, D3D_FEATURE_LEVEL feature_level);
+
+				struct CmdAllocatorDependencies
+				{
+					COMPtr<ID3D12CommandAllocator> cmd_allocator;
+					std::vector<COMPtr<ID3D12DescriptorHeap>> cbv_srv_uav_heap_cache;
+					std::vector<std::pair<COMPtr<ID3D12Resource>, uint32_t>> recycle_after_sync_upload_buffs;
+					std::vector<std::pair<COMPtr<ID3D12Resource>, uint32_t>> recycle_after_sync_readback_buffs;
+				};
+				std::shared_ptr<CmdAllocatorDependencies> CmdAllocatorAlloc();
+				void CmdAllocatorRecycle(std::shared_ptr<CmdAllocatorDependencies> const & cmd_allocator, uint64_t fence_val);
 			private:
 				//@{
 				//\brief base object for swapchain
@@ -109,7 +119,8 @@ namespace platform_ex {
 				//@{
 				//\brief object for create object
 				
-
+				std::list<std::pair<std::shared_ptr<CmdAllocatorDependencies>, uint64_t>> d3d_render_cmd_allocators;
+				std::shared_ptr<CmdAllocatorDependencies> curr_render_cmd_allocator;
 				array<COMPtr<ID3D12CommandAllocator>, CommandTypeCount> d3d_cmd_allocators;
 				//COMPtr<ID3D12CommandQueue> d3d_cmd_compute_quque;
 				//COMPtr<ID3D12CommandQueue> d3d_cmd_copy_quque;
@@ -132,9 +143,12 @@ namespace platform_ex {
 
 				std::unordered_map<size_t, COMPtr<ID3D12RootSignature>> root_signatures;
 
-				std::vector<COMPtr<ID3D12DescriptorHeap>> cbv_srv_uav_heap_cache;
-
 				std::unordered_map<size_t,COMPtr<ID3D12PipelineState>> graphics_psos;
+
+				std::multimap<uint32_t, COMPtr<ID3D12Resource>> upload_resources;
+				std::multimap<uint32_t, COMPtr<ID3D12Resource>> readback_resources;
+
+				array<std::unique_ptr<Fence>, Device::CommandTypeCount> fences;
 			};
 
 			class Context : public platform::Render::Context {
@@ -199,8 +213,9 @@ namespace platform_ex {
 
 				COMPtr<ID3D12Resource> InnerResourceAlloc(InnerReourceType type, leo::uint32 size);
 				void InnerResourceRecycle(InnerReourceType type, COMPtr<ID3D12Resource> resource, leo::uint32 size);
+
+				Fence& GetFence(Device::CommandType);
 			private:
-				array<std::unique_ptr<Fence>, Device::CommandTypeCount> fences;
 				DXGI::AdapterList adapter_list;
 
 				shared_ptr<Device> device;

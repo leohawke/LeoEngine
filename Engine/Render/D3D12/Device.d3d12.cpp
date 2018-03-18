@@ -398,7 +398,7 @@ namespace platform_ex::Windows::D3D12 {
 		cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		cbv_srv_heap_desc.NodeMask = 0;
 		CheckHResult(d3d_device->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap,leo::replace_cast<void**>(&dynamic_heap)));
-		cbv_srv_uav_heap_cache.emplace_back(dynamic_heap);
+		curr_render_cmd_allocator->cbv_srv_uav_heap_cache.emplace_back(dynamic_heap);
 		return leo::make_observer(dynamic_heap);
 	}
 
@@ -430,8 +430,8 @@ namespace platform_ex::Windows::D3D12 {
 
 		d3d_feature_level = feature_level;
 
-		CheckHResult(d3d_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
-			COMPtr_RefParam(d3d_cmd_allocators[Command_Render], IID_ID3D12CommandAllocator)));
+		curr_render_cmd_allocator = CmdAllocatorAlloc();
+		d3d_cmd_allocators[Command_Render] = curr_render_cmd_allocator->cmd_allocator;
 		D3D::Debug(d3d_cmd_allocators[Command_Render], "Render_Command_Allocator");
 
 		CheckHResult(d3d_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
@@ -481,6 +481,40 @@ namespace platform_ex::Windows::D3D12 {
 
 		FillCaps();
 
+	}
+
+	std::shared_ptr<Device::CmdAllocatorDependencies> Device::CmdAllocatorAlloc()
+	{
+		std::shared_ptr<CmdAllocatorDependencies> ret;
+		for (auto iter = d3d_render_cmd_allocators.begin(); iter != d3d_render_cmd_allocators.end(); ++iter)
+		{
+			if (fences[Command_Render]->Completed(iter->second))
+			{
+				ret = iter->first;
+				d3d_render_cmd_allocators.erase(iter);
+				ret->cmd_allocator->Reset();
+				break;
+			}
+		}
+
+		if (!ret)
+		{
+			ret = make_shared<CmdAllocatorDependencies>();
+
+			COMPtr<ID3D12CommandAllocator> d3d_render_cmd_allocator {};
+			CheckHResult(d3d_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
+				COMPtr_RefParam(d3d_render_cmd_allocator,IID_ID3D12CommandAllocator)));
+			ret->cmd_allocator = d3d_render_cmd_allocator;
+		}
+		return ret;
+	}
+
+	void Device::CmdAllocatorRecycle(std::shared_ptr<Device::CmdAllocatorDependencies> const & cmd_allocator, uint64_t fence_val)
+	{
+		if (cmd_allocator)
+		{
+			d3d_render_cmd_allocators.emplace_back(cmd_allocator, fence_val);
+		}
 	}
 
 	void Device::FillCaps() {
