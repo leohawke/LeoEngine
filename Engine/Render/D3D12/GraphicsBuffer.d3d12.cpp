@@ -68,7 +68,7 @@ namespace platform_ex::Windows::D3D12 {
 				barrier_before[n++] = dst_barrier_before;
 		}
 
-		auto cmd_list = Context::Instance().GetCommandList(Device::Command_Resource);
+		auto& cmd_list = Context::Instance().GetCommandList(Device::Command_Resource);
 		if (n > 0)
 			cmd_list->ResourceBarrier(n,barrier_before);
 
@@ -256,9 +256,37 @@ namespace platform_ex::Windows::D3D12 {
 	}
 	void GraphicsBuffer::UpdateSubresource(leo::uint32 offset, leo::uint32 size, void const * data)
 	{
-		auto p = static_cast<stdex::byte*>(Map(platform::Render::Buffer::Write_Only));
-		memcpy(p + offset, data, size);
-		Unmap();
+		if ((0 == access) || (access & EAccessHint::EA_CPURead) || (access & EAccessHint::EA_CPUWrite)) {
+			auto p = static_cast<stdex::byte*>(Map(platform::Render::Buffer::Write_Only));
+			memcpy(p + offset, data, size);
+			Unmap();
+		}
+		else {
+			auto& context = Context::Instance();
+			auto& cmd_list =context.GetCommandList(Device::Command_Render);
+
+			auto upload_buff = context.InnerResourceAlloc<Context::Upload>(size);
+
+			D3D12_RANGE read_range;
+			read_range.Begin = 0;
+			read_range.End = 0;
+
+			void* p = nullptr;
+			CheckHResult(upload_buff->Map(0, &read_range, &p));
+			memcpy(p, data, size);
+			upload_buff->Unmap(0, nullptr);
+
+			D3D12_RESOURCE_BARRIER barrier;
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			if (UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_COPY_DEST)) {
+				cmd_list->ResourceBarrier(1, &barrier);
+			}
+
+			cmd_list->CopyBufferRegion(Resource(), offset, upload_buff.Get(), 0, size);
+
+			context.InnerResourceRecycle<Context::Upload>(upload_buff, size);
+		}
 	}
 	bool GraphicsBuffer::UpdateResourceBarrier(D3D12_RESOURCE_BARRIER & barrier, D3D12_RESOURCE_STATES target_state)
 	{
@@ -323,7 +351,7 @@ namespace platform_ex::Windows::D3D12 {
 		}
 
 		void* p = nullptr;
-		buffer->Map(0, nullptr, &p);
+		CheckHResult(buffer->Map(0, nullptr, &p));
 		return p;
 	}
 	void GraphicsBuffer::Unmap()

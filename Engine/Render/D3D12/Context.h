@@ -179,8 +179,26 @@ namespace platform_ex {
 				void UpdateCbvSrvUavSamplerHeaps(const ShaderCompose&);
 
 				void RSSetViewports(UINT NumViewports, D3D12_VIEWPORT const *pViewports);
+
+				enum  InnerReourceType{
+					Upload,
+					Readback
+				};
+
+				template<InnerReourceType type>
+				COMPtr<ID3D12Resource> InnerResourceAlloc(leo::uint32 size) {
+					return InnerResourceAlloc(type, size);
+				}
+
+				template<InnerReourceType type>
+				void InnerResourceRecycle(COMPtr<ID3D12Resource> resource, leo::uint32 size) {
+					return InnerResourceRecycle(type,resource, size);
+				}
 			private:
 				void ContextEx(ID3D12Device* device, ID3D12CommandQueue* cmd_queue);
+
+				COMPtr<ID3D12Resource> InnerResourceAlloc(InnerReourceType type, leo::uint32 size);
+				void InnerResourceRecycle(InnerReourceType type, COMPtr<ID3D12Resource> resource, leo::uint32 size);
 			private:
 				array<std::unique_ptr<Fence>, Device::CommandTypeCount> fences;
 				DXGI::AdapterList adapter_list;
