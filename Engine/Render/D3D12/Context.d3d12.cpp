@@ -89,10 +89,16 @@ namespace platform_ex::Windows::D3D12 {
 	void D3D12::Context::ClearPSOCache()
 	{
 		device->curr_render_cmd_allocator->cbv_srv_uav_heap_cache.clear();
+
+		for (auto const & item : device->curr_render_cmd_allocator->recycle_after_sync_upload_buffs)
+			device->upload_resources.emplace(item.second, item.first);
+		device->curr_render_cmd_allocator->recycle_after_sync_upload_buffs.clear();
+		for (auto const & item : device->curr_render_cmd_allocator->recycle_after_sync_readback_buffs)
+			device->readback_resources.emplace(item.second, item.first);
+		device->curr_render_cmd_allocator->recycle_after_sync_readback_buffs.clear();
 	}
 
 	
-
 	void D3D12::Context::UpdateRenderPSO(const Effect::Effect & effect, const Effect::Technique & tech, const Effect::Pass & pass, const platform::Render::InputLayout & layout)
 	{
 		auto& shader_compose = static_cast<ShaderCompose&>(pass.GetShader(effect));
@@ -301,6 +307,11 @@ namespace platform_ex::Windows::D3D12 {
 
 	void Context::InnerResourceRecycle(InnerReourceType type, COMPtr<ID3D12Resource> resource, leo::uint32 size)
 	{
+		if (resource) {
+			bool is_upload = type == Upload;
+			auto& resources =is_upload?device->curr_render_cmd_allocator->recycle_after_sync_upload_buffs:device->curr_render_cmd_allocator->recycle_after_sync_readback_buffs;
+			resources.emplace_back(resource, size);
+		}
 	}
 
 	Fence & Context::GetFence(Device::CommandType index)
