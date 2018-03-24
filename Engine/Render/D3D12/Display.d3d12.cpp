@@ -9,7 +9,7 @@ using namespace platform_ex::Windows::D3D12;
 using namespace platform_ex;
 
 Display::Display(IDXGIFactory4 * factory_4, ID3D12CommandQueue* cmd_queue, const DisplaySetting& setting, HWND hWnd)
-	:hwnd(hWnd), frame_buffer(std::make_shared<FrameBuffer>())
+	:hwnd(hWnd), frame_buffer(std::make_shared<FrameBuffer>()), frame_waitable_object(nullptr)
 {
 	full_screen = setting.full_screen;
 	sync_interval = setting.sync_interval;
@@ -88,7 +88,7 @@ Display::Display(IDXGIFactory4 * factory_4, ID3D12CommandQueue* cmd_queue, const
 	sc_fs_desc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	sc_fs_desc.Windowed = !full_screen;
 
-	CheckHResult(CreateSwapChain(factory_4, cmd_queue));
+	CreateSwapChain(factory_4, cmd_queue);
 
 	back_buffer_index = swap_chain->GetCurrentBackBufferIndex();
 	UpdateFramewBufferView();
@@ -100,19 +100,20 @@ void platform_ex::Windows::D3D12::Display::SwapBuffers()
 		D3D12_RESOURCE_BARRIER barrier;
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		barrier.Transition.Subresource = 0;
 		auto rt_tex = render_targets_texs[back_buffer_index].get();
-		if (rt_tex->UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_PRESENT))
+		if (rt_tex->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_PRESENT))
 		{
 			Context::Instance().GetCommandList(Device::Command_Render)->ResourceBarrier(1, &barrier);
 		}
 
-		Context::Instance()CommitCommandList(Device::Command_Render)
+		Context::Instance().CommitCommandList(Device::Command_Render);
 
 		bool allow_tearing = tearing_allow;
 #ifdef LF_Hosted
 		UINT const present_flags = allow_tearing ? DXGI_PRESENT_ALLOW_TEARING : 0;
 #endif
-		CheckHResult(swap_chian->Present(0, present_flags));
+		CheckHResult(swap_chain->Present(0, present_flags));
 
 		back_buffer_index = swap_chain->GetCurrentBackBufferIndex();
 		frame_buffer->Attach(FrameBuffer::Target0, render_target_views[back_buffer_index]);
@@ -121,16 +122,23 @@ void platform_ex::Windows::D3D12::Display::SwapBuffers()
 
 void platform_ex::Windows::D3D12::Display::WaitOnSwapBuffers()
 {
-
+	if (swap_chain) {
+		::WaitForSingleObjectEx(frame_waitable_object, 1000, true);
+	}
 }
 
-HRESULT Display::CreateSwapChain(IDXGIFactory4 *factory_4, ID3D12CommandQueue* cmd_queue)
+void Display::CreateSwapChain(IDXGIFactory4 *factory_4, ID3D12CommandQueue* cmd_queue)
 {
 	COMPtr<IDXGISwapChain1>  swap_chain1 = nullptr;
 	CheckHResult(factory_4->CreateSwapChainForHwnd(cmd_queue, hwnd,
 		&sc_desc, &sc_fs_desc, nullptr, &swap_chain1.GetRef()));
 
-	return swap_chain1->QueryInterface(IID_IDXGISwapChain3, reinterpret_cast<void**>(&swap_chain.GetRef()));
+	CheckHResult(swap_chain1->QueryInterface(IID_IDXGISwapChain3, reinterpret_cast<void**>(&swap_chain.GetRef())));
+
+	if (frame_waitable_object != nullptr)
+		::CloseHandle(frame_waitable_object);
+
+	frame_waitable_object = swap_chain->GetFrameLatencyWaitableObject();
 }
 
 void Display::UpdateFramewBufferView()

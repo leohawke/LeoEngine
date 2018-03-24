@@ -21,8 +21,21 @@ static DXGI_FORMAT ConvertWrap(EFormat format) {
 }
 
 platform_ex::Windows::D3D12::Texture::Texture(EFormat format)
-	:dxgi_format(ConvertWrap(format))
+	:dxgi_format(ConvertWrap(format)),curr_state(D3D12_RESOURCE_STATE_COMMON)
 {
+}
+
+bool platform_ex::Windows::D3D12::Texture::UpdateResourceBarrier(D3D12_RESOURCE_BARRIER & barrier, D3D12_RESOURCE_STATES target_state)
+{
+	if (curr_state == target_state)
+		return false;
+	else {
+		barrier.Transition.pResource = texture.Get();
+		barrier.Transition.StateBefore = curr_state;
+		barrier.Transition.StateAfter = target_state;
+		curr_state = target_state;
+		return true;
+	}
 }
 
 ViewSimulation * platform_ex::Windows::D3D12::Texture::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level)
@@ -64,7 +77,7 @@ ViewSimulation* Texture::RetriveDepthStencilView(uint8 array_index, TextureCubeF
 }
 
 platform_ex::Windows::D3D12::Texture::Texture(const COMPtr<ID3D12Resource>& pResource)
-	:texture(pResource), resource_desc(pResource->GetDesc())
+	:texture(pResource), resource_desc(pResource->GetDesc()),curr_state(D3D12_RESOURCE_STATE_COMMON)
 {
 	dxgi_format = resource_desc.Format;
 }
@@ -127,6 +140,13 @@ void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uin
 	heap_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
 	heap_prop.CreationNodeMask = 0;
 	heap_prop.VisibleNodeMask = 0;
+
+	D3D12_RESOURCE_STATES init_state = D3D12_RESOURCE_STATE_COMMON;
+	if (IsDepthFormat(base_this->GetFormat()) && (base_this->GetAccessMode() & EA_GPUWrite))
+	{
+		init_state = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+		curr_state = init_state;
+	}
 
 	CheckHResult(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 		&tex_desc, D3D12_RESOURCE_STATE_COMMON, nullptr,

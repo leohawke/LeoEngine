@@ -10,6 +10,7 @@
 #include "d3d12_dxgi.h"
 #include "FrameBuffer.h"
 #include "Texture.h"
+#include "../IDisplay.h"
 #include "RenderView.h"
 
 namespace platform_ex {
@@ -37,7 +38,7 @@ namespace platform_ex {
 				EFormat color_format = EF_ARGB8;
 			};
 
-			class Display : platform::Render::Display {
+			class Display :public platform::Render::Display {
 			public:
 				//todo Get Window's HWND by Other API.
 				Display(IDXGIFactory4 *factory_4,ID3D12CommandQueue* cmd_queue,const DisplaySetting& setting = {},HWND = NULL);
@@ -50,7 +51,7 @@ namespace platform_ex {
 				void SwapBuffers() override;
 				void WaitOnSwapBuffers() override;
 			private:
-				HRESULT CreateSwapChain(IDXGIFactory4* factory_4,ID3D12CommandQueue* cmd_queue);
+				void CreateSwapChain(IDXGIFactory4* factory_4,ID3D12CommandQueue* cmd_queue);
 
 				void UpdateFramewBufferView();
 			private:
@@ -81,6 +82,7 @@ namespace platform_ex {
 
 				UINT back_buffer_index;
 				std::shared_ptr<FrameBuffer> frame_buffer;
+				HANDLE frame_waitable_object;
 
 				StereoMethod stereo_method;
 			};

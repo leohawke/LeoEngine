@@ -36,6 +36,9 @@ namespace platform_ex {
 					return dxgi_format;
 				}
 
+				bool UpdateResourceBarrier(D3D12_RESOURCE_BARRIER& barrier, D3D12_RESOURCE_STATES target_state);
+
+
 				virtual ViewSimulation* RetriveShaderResourceView(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) = 0;
 
 				virtual ViewSimulation* RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level);
@@ -100,6 +103,8 @@ namespace platform_ex {
 				std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>> uav_maps;
 				std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>> rtv_maps;
 				std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>> dsv_maps;
+
+				D3D12_RESOURCE_STATES curr_state;
 			};
 
 			class Texture1D :public Texture,public platform::Render::Texture1D{
