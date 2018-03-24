@@ -261,6 +261,9 @@
     <ClInclude Include="Core\Resource.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Render\IDisplay.h">
+      <Filter>Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

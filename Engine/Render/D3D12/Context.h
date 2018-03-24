@@ -161,6 +161,8 @@ namespace platform_ex {
 
 				void BeginFrame() override;
 				void EndFrame() override;
+
+				Display& GetDisplay() override;
 			public:
 				void CreateDeviceAndDisplay() override;
 			private:

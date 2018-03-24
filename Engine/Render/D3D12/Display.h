@@ -37,7 +37,7 @@ namespace platform_ex {
 				EFormat color_format = EF_ARGB8;
 			};
 
-			class Display {
+			class Display : platform::Render::Display {
 			public:
 				//todo Get Window's HWND by Other API.
 				Display(IDXGIFactory4 *factory_4,ID3D12CommandQueue* cmd_queue,const DisplaySetting& setting = {},HWND = NULL);
@@ -46,6 +46,9 @@ namespace platform_ex {
 				DefGetter(const lnothrow,UINT,Height,height)
 				DefGetter(const lnothrow,std::shared_ptr<FrameBuffer>,FrameBuffer,frame_buffer)
 				lconstexpr static UINT const NUM_BACK_BUFFERS = 3;
+
+				void SwapBuffers() override;
+				void WaitOnSwapBuffers() override;
 			private:
 				HRESULT CreateSwapChain(IDXGIFactory4* factory_4,ID3D12CommandQueue* cmd_queue);
 

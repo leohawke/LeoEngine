@@ -33,9 +33,9 @@ namespace platform_ex::Windows::D3D12 {
 	void D3D12::Context::SyncCPUGPU(bool force)
 	{
 		CommitCommandList(Device::Command_Render);
-		SyncCommand(Device::Command_Render);
-
 		ResetCommand(Device::Command_Render);
+
+		SyncCommand(Device::Command_Render);
 
 		ClearPSOCache();
 	}
@@ -456,6 +456,10 @@ namespace platform_ex::Windows::D3D12 {
 
 		ResetCommand(Device::Command_Render);
 		ClearPSOCache();
+	}
+	Display & Context::GetDisplay()
+	{
+		return *display;
 	}
 	Context & Context::Instance()
 	{

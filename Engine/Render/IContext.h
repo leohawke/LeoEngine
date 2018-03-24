@@ -6,6 +6,7 @@
 #define LE_RENDER_IContext_h 1
 
 #include "IDevice.h"
+#include "IDisplay.h"
 
 namespace platform::Render {
 
@@ -14,6 +15,7 @@ namespace platform::Render {
 	class Context {
 	public:
 		virtual Device& GetDevice() = 0;
+		virtual Display& GetDisplay() = 0;
 
 		virtual void Push(const PipleState&) = 0;
 		virtual void Render(const Effect::Effect&, const Effect::Technique&, const InputLayout&) = 0;

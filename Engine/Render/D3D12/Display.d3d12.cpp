@@ -1,6 +1,8 @@
 #include "Display.h"
 #include "Convert.h"
 #include "Context.h"
+#include <LFramework/LCLib/Platform.h>
+
 
 
 using namespace platform_ex::Windows::D3D12;
@@ -90,6 +92,36 @@ Display::Display(IDXGIFactory4 * factory_4, ID3D12CommandQueue* cmd_queue, const
 
 	back_buffer_index = swap_chain->GetCurrentBackBufferIndex();
 	UpdateFramewBufferView();
+}
+
+void platform_ex::Windows::D3D12::Display::SwapBuffers()
+{
+	if (swap_chain) {
+		D3D12_RESOURCE_BARRIER barrier;
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		auto rt_tex = render_targets_texs[back_buffer_index].get();
+		if (rt_tex->UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_PRESENT))
+		{
+			Context::Instance().GetCommandList(Device::Command_Render)->ResourceBarrier(1, &barrier);
+		}
+
+		Context::Instance()CommitCommandList(Device::Command_Render)
+
+		bool allow_tearing = tearing_allow;
+#ifdef LF_Hosted
+		UINT const present_flags = allow_tearing ? DXGI_PRESENT_ALLOW_TEARING : 0;
+#endif
+		CheckHResult(swap_chian->Present(0, present_flags));
+
+		back_buffer_index = swap_chain->GetCurrentBackBufferIndex();
+		frame_buffer->Attach(FrameBuffer::Target0, render_target_views[back_buffer_index]);
+	}
+}
+
+void platform_ex::Windows::D3D12::Display::WaitOnSwapBuffers()
+{
+
 }
 
 HRESULT Display::CreateSwapChain(IDXGIFactory4 *factory_4, ID3D12CommandQueue* cmd_queue)

@@ -107,6 +107,7 @@
     <ClInclude Include="Render\Effect\EffectProperty.h" />
     <ClInclude Include="Render\IContext.h" />
     <ClInclude Include="Render\IDevice.h" />
+    <ClInclude Include="Render\IDisplay.h" />
     <ClInclude Include="Render\IFormat.hpp" />
     <ClInclude Include="Render\IFrameBuffer.h" />
     <ClInclude Include="Render\IGraphicsBuffer.hpp" />

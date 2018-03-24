@@ -22,7 +22,6 @@ private:
 		auto& Device = Context::Instance().GetDevice();
 		auto pTex = leo::unique_raw(Device.CreateTexture(512, 0, 1, EFormat::EF_ABGR8, EAccessHint::EA_GenMips | EAccessHint::EA_GPUWrite | EAccessHint::EA_GPURead, {}));
 		pTex->BuildMipSubLevels();
-		Context::Instance().EndFrame();
 
 		ecs::EntitySystem::Instance().RemoveEntity(entityId);
 
@@ -31,8 +30,12 @@ private:
 
 		Context::Instance().BeginFrame();
 		Context::Instance().Render(*pEffect, pEffect->GetTechniqueByIndex(0), pMesh->GetInputLayout());
-		Context::Instance().EndFrame();
 
+		Context::Instance().GetDisplay().SwapBuffers();
+		//what can i do in this duration?
+		Context::Instance().GetDisplay().WaitOnSwapBuffers();
+
+		Context::Instance().EndFrame();
 
 		return Nothing;
 	}
