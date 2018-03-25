@@ -5,10 +5,12 @@
 #include "TestFramework.h"
 #include "EntityComponentSystem/EntitySystem.h"
 #include "LSchemEngineUnitTest.h"
-
+#include "../../Engine/Core/Camera.h"
 #define TEST_CODE 1
 
 using namespace platform::Render;
+
+namespace lm = leo::math;
 
 class EngineTest : public Test::TestFrameWork {
 public:
@@ -28,7 +30,26 @@ private:
 		auto pMesh = std::make_unique<platform::Mesh>(platform::X::LoadMeshAsset("Broadleaf_Desktop_LOD0.asset"),"Broadleaf_Desktop_LOD0");
 		auto pEffect = std::make_unique<platform::Render::Effect::Effect>("ForwardPointLightDiffuseShading");
 
-		Context::Instance().BeginFrame();
+		lm::float4x4 worldmatrix = {
+			{1,0,0,0},
+			{0,1,0,0},
+			{0,0,1,0},
+			{0,0,0,1}
+		};
+		auto projmatrix = platform::X::perspective_fov_lh(3.14f / 6, 384 / 256.f, 1, 1000);
+		auto viewmatrix = platform::X::look_at_lh({ 0,0,-10 }, { 0,0,0 }, { 0,1,0 });
+
+		auto worldview = worldmatrix * viewmatrix;
+		auto worldviewproj = worldview * projmatrix;
+		auto worldviewinvt = worldview;
+
+		using namespace std::literals;
+		auto hash = leo::constfn_hash(std::string("worldview"));
+		auto hash_c = leo::constfn_hash("worldview"sv);
+		pEffect->GetParameter("worldview"sv) = lm::transpose(worldview);
+		pEffect->GetParameter("worldviewproj"sv) = lm::transpose(worldviewproj);
+		pEffect->GetParameter("worldviewinvt"sv) = lm::transpose(worldviewinvt);
+
 		Context::Instance().Render(*pEffect, pEffect->GetTechniqueByIndex(0), pMesh->GetInputLayout());
 
 		Context::Instance().GetDisplay().SwapBuffers();

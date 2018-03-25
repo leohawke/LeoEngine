@@ -91,6 +91,11 @@ namespace platform::Render::Effect {
 		return GetParameter(leo::constfn_hash(name));
 	}
 
+	Parameter & Effect::GetParameter(const std::string_view & name)
+	{
+		return GetParameter(leo::constfn_hash(name));
+	}
+
 	Parameter & Effect::GetParameter(size_t hash)
 	{
 		return parameters.find(hash)->second;

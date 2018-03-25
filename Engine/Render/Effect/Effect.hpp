@@ -375,6 +375,7 @@ namespace platform::Render::Effect {
 		const Technique& GetTechniqueByIndex(size_t index) const;
 
 		Parameter& GetParameter(const std::string& name);
+		Parameter& GetParameter(const std::string_view& name);
 		Parameter& GetParameter(size_t hash);
 
 

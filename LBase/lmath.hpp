@@ -38,7 +38,7 @@ namespace leo {
 			l.w += r.w;
 			return l;
 		}
-		
+
 		inline float4& operator-=(float4& l, const float4& r) {
 			l.x -= r.x;
 			l.y -= r.y;
@@ -113,7 +113,7 @@ namespace leo {
 		}
 
 		inline float3 cross(const float3&l, const float3& r) {
-			return { 
+			return {
 				l.y*r.z - l.z*r.y,
 				l.z*r.x - l.x*r.z,
 				l.x*r.y - l.y*r.x };
@@ -157,7 +157,7 @@ namespace leo {
 			return dot(l, l);
 		}
 
-		template<typename _type,limpl(typename = enable_if_t<is_lmathtype_v<_type>>)>
+		template<typename _type, limpl(typename = enable_if_t<is_lmathtype_v<_type>>)>
 		inline _type normalize(const _type& l) noexcept {
 			auto mod = length(l);
 			auto ret = l;
@@ -170,7 +170,7 @@ namespace leo {
 		{
 			return l * (1.f - t) + r * t;
 		}
-		
+
 		inline float4x4 transpose(const float4x4& m) {
 			return{
 				{ m[0][0],m[1][0] ,m[2][0] ,m[3][0] },
@@ -195,6 +195,17 @@ namespace leo {
 				l[1] - r[1],
 				l[2] - r[2],
 				l[3] - r[3],
+			};
+		}
+
+		inline float4x4 operator*(const float4x4& lhs, const float4x4& rhs) {
+			auto tmp(transpose(rhs));
+
+			return {
+				{dot(lhs[0],tmp[0]),dot(lhs[0],tmp[1]),dot(lhs[0],tmp[2]),dot(lhs[0],tmp[3])},
+				{ dot(lhs[1],tmp[0]),dot(lhs[1],tmp[1]),dot(lhs[1],tmp[2]),dot(lhs[1],tmp[3]) },
+				{ dot(lhs[2],tmp[0]),dot(lhs[2],tmp[1]),dot(lhs[2],tmp[2]),dot(lhs[2],tmp[3]) },
+				{ dot(lhs[3],tmp[0]),dot(lhs[3],tmp[1]),dot(lhs[3],tmp[2]),dot(lhs[3],tmp[3]) },
 			};
 		}
 

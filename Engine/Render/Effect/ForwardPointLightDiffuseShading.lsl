@@ -14,7 +14,7 @@
 		(float light_blubsize)
 	)
 	(cbuffer obj
-		(float4x4 worldviewporj)
+		(float4x4 worldviewproj)
 		(float4x4 worldview)
 		(float4x4 worldviewinvt)
 	)
@@ -56,7 +56,7 @@
 					out float3 ViewNormal:TEXCOORD2
 		)
 		{
-			ClipPos = mul(float4(Postion,1.0f),worldviewporj);
+			ClipPos = mul(float4(Postion,1.0f),worldviewproj);
 			ViewPos = mul(float4(Postion,1.0f),worldview);
 			ViewNormal = mul(float4(Postion,1.0f),worldviewinvt).xyz;
 		}
