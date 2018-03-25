@@ -78,6 +78,15 @@ namespace leo {
 		}
 		//@}
 
+		inline bool operator==(const float3& l, const float3& r) noexcept {
+			return float_equal(l.x, r.x) && float_equal(l.y, r.y)
+				&& float_equal(l.z, r.z);
+		}
+
+		inline bool operator!=(const float3& l, const float3& r) noexcept {
+			return !(l == r);
+		}
+
 		inline float3& operator+=(float3& l, const float3& r) {
 			l.x += r.x;
 			l.y += r.y;
@@ -169,6 +178,15 @@ namespace leo {
 		inline _type lerp(const _type& l, const _type& r, float t)
 		{
 			return l * (1.f - t) + r * t;
+		}
+
+		inline bool operator==(const float4x4& l, const float4x4& r) noexcept {
+			return (l[0]==r[0]) && (l[1]==r[1])
+				&& (l[2]==r[2]) && (l[3]==r[3]);
+		}
+
+		inline bool operator!=(const float4x4& l, const float4x4& r) noexcept {
+			return !(l == r);
 		}
 
 		inline float4x4 transpose(const float4x4& m) {

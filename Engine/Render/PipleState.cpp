@@ -7,7 +7,8 @@ namespace platform::Render {
 		cull(CullMode::Back),
 		depth_clip_enable(true),
 		scissor_enable(false),
-		multisample_enable(true)
+		multisample_enable(true),
+		ccw(false)
 	{
 	}
 
