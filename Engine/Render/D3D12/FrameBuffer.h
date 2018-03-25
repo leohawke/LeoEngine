@@ -11,6 +11,7 @@
 namespace platform_ex::Windows::D3D12 {
 	class FrameBuffer :public platform::Render::FrameBuffer {
 	public:
+		FrameBuffer();
 		~FrameBuffer();
 
 		void OnBind() override;

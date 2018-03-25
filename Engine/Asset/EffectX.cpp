@@ -624,7 +624,7 @@ namespace platform {
 						ds_desc.depth_enable = to_bool(second);
 						break;
 					case constfn_hash("depth_write_mask"):
-						ds_desc.depth_enable = to_bool(second);
+						ds_desc.depth_write_mask = to_bool(second);
 						break;
 					case constfn_hash("depth_func"):
 						ds_desc.depth_func = DepthStencilDesc::to_op<CompareOp>(second);

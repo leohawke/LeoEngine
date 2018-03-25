@@ -88,7 +88,7 @@
 	)
 	(technique (name PointLight)
 		(pass (name p0)
-			(depth_enable false)
+			(depth_enable true)
 			(depth_write_mask false)
 			(vertex_shader ForawdVS)
 			(pixel_shader PointLightPS)

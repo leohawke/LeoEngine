@@ -86,10 +86,6 @@ namespace platform::Render::Effect {
 		return techniques[index];
 	}
 
-	Parameter & Effect::GetParameter(const std::string & name)
-	{
-		return GetParameter(leo::constfn_hash(name));
-	}
 
 	Parameter & Effect::GetParameter(const std::string_view & name)
 	{

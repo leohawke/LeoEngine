@@ -44,9 +44,21 @@ private:
 		auto worldviewinvt = worldview;
 
 		using namespace std::literals;
+		//obj
 		pEffect->GetParameter("worldview"sv) = lm::transpose(worldview);
 		pEffect->GetParameter("worldviewproj"sv) = lm::transpose(worldviewproj);
 		pEffect->GetParameter("worldviewinvt"sv) = lm::transpose(worldviewinvt);
+		//mat
+		pEffect->GetParameter("albedo"sv) = lm::float3(0.8f, 0.6f, 0.4f);
+		pEffect->GetParameter("metalness"sv) = 0.6f;
+		pEffect->GetParameter("specular"sv) = lm::float3(1.0f, 0.2f, 0.1f);
+		pEffect->GetParameter("alpha"sv) = 1.0f;
+		pEffect->GetParameter("smoothness"sv) =0.8f;
+		//light
+		pEffect->GetParameter("view_light_pos"sv) = lm::float3(0, 0, -10);
+		pEffect->GetParameter("light_radius"sv) =20.f;
+		pEffect->GetParameter("light_color"sv) = lm::float3(0.8f, 0.8f, 0.6f);
+		pEffect->GetParameter("light_blubsize"sv) = 0.5f;
 
 		Context::Instance().Render(*pEffect, pEffect->GetTechniqueByIndex(0), pMesh->GetInputLayout());
 

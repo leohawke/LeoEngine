@@ -3,6 +3,10 @@
 #include "Context.h"
 
 namespace platform_ex::Windows::D3D12 {
+	FrameBuffer::FrameBuffer()
+		:d3d12_viewport({0,0,0,0,0,1})
+	{
+	}
 	FrameBuffer::~FrameBuffer() = default;
 
 	void FrameBuffer::SetRenderTargets()
