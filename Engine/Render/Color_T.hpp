@@ -7,7 +7,7 @@
 #define LE_RENDER_ColorT_hpp 1
 
 #include <LBase/operators.hpp>
-#include <LBase/lmathtype.hpp>
+#include <LBase/lmath.hpp>
 
 #include "../emacro.h"
 #include "IFormat.hpp"

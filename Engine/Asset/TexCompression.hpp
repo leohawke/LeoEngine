@@ -7,7 +7,6 @@
 
 #include <LBase/linttype.hpp>
 #include <LBase/operators.hpp>
-#include <LBase/lmathtype.hpp>
 #include "../emacro.h"
 #include "../Render/IFormat.hpp"
 #include "../Render/ITexture.hpp"

@@ -51,6 +51,9 @@
     <ClInclude Include="Scene\SceneSystem.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\CameraComponent.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="EntityComponentSystem">

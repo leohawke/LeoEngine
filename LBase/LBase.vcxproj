@@ -49,6 +49,7 @@
     <ClInclude Include="iterator_trait.hpp" />
     <ClInclude Include="lcompiler.h" />
     <ClInclude Include="ldef.h" />
+    <ClInclude Include="lmath.hpp" />
     <ClInclude Include="lmathhalf.h" />
     <ClInclude Include="lmathtype.hpp" />
     <ClInclude Include="linttype.hpp" />

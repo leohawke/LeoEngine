@@ -35,6 +35,7 @@
     <ClCompile Include="Asset\TexCompression.cpp" />
     <ClCompile Include="Asset\CompressionBC.cpp" />
     <ClCompile Include="Asset\TextureX.cpp" />
+    <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Core\Mesh.cpp" />
     <ClCompile Include="Render\Color_T.cpp" />
     <ClCompile Include="Render\D3D12\Adapter.d3d12.cpp" />
@@ -80,6 +81,7 @@
     <ClInclude Include="Asset\MeshX.h" />
     <ClInclude Include="Asset\TexCompression.hpp" />
     <ClInclude Include="Asset\TextureX.h" />
+    <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core\LFile.h" />
     <ClInclude Include="Core\Mesh.h" />
     <ClInclude Include="Core\Resource.h" />

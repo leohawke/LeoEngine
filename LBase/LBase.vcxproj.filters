@@ -66,6 +66,7 @@
     <ClInclude Include="ctime.h" />
     <ClInclude Include="mixin.hpp" />
     <ClInclude Include="typeindex.h" />
+    <ClInclude Include="lmath.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="any.cpp" />

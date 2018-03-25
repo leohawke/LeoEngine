@@ -122,6 +122,9 @@
     <ClCompile Include="Core\Mesh.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Camera.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -263,6 +266,9 @@
     </ClInclude>
     <ClInclude Include="Render\IDisplay.h">
       <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Camera.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
