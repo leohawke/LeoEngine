@@ -71,7 +71,7 @@ RenderTargetView::RenderTargetView(Texture2D & texture, uint8 first_array_index,
 		texture.RetriveRenderTargetView(first_array_index,array_size,level),
 		first_array_index *texture.GetNumMipMaps() + level,
 		1)
-	, base(texture.GetWidth(level), texture.GetWidth(level), texture.GetFormat())
+	, base(texture.GetWidth(level), texture.GetHeight(level), texture.GetFormat())
 {
 }
 
@@ -80,7 +80,7 @@ RenderTargetView::RenderTargetView(Texture3D & texture, uint8 array_index, uint8
 	texture.RetriveRenderTargetView(array_index,first_slice,num_slices,level),
 	(array_index * texture.GetDepth(level) + first_slice) * texture.GetNumMipMaps() + level,
 	num_slices * texture.GetNumMipMaps() + level)
-	, base(texture.GetWidth(level), texture.GetWidth(level), texture.GetFormat())
+	, base(texture.GetWidth(level), texture.GetHeight(level), texture.GetFormat())
 {
 }
 
@@ -90,7 +90,7 @@ RenderTargetView::RenderTargetView(TextureCube & texture, uint8 array_index, pla
 		texture.RetriveRenderTargetView(array_index,face,level),
 		(array_index * 6 + face) * texture.GetNumMipMaps() + level,
 		1)
-	, base(texture.GetWidth(level), texture.GetWidth(level), texture.GetFormat())
+	, base(texture.GetWidth(level), texture.GetHeight(level), texture.GetFormat())
 {
 }
 
@@ -110,7 +110,7 @@ DepthStencilView::DepthStencilView(Texture2D & texture, uint8 first_array_index,
 		texture.RetriveDepthStencilView(first_array_index, array_size, level),
 		first_array_index *texture.GetNumMipMaps() + level,
 		1)
-	, base(texture.GetWidth(level), texture.GetWidth(level), texture.GetFormat())
+	, base(texture.GetWidth(level), texture.GetHeight(level), texture.GetFormat())
 {
 }
 
@@ -119,7 +119,7 @@ DepthStencilView::DepthStencilView(Texture3D & texture, uint8 array_index, uint8
 	texture.RetriveDepthStencilView(array_index, first_slice, num_slices, level),
 	(array_index * texture.GetDepth(level) + first_slice) * texture.GetNumMipMaps() + level,
 	num_slices * texture.GetNumMipMaps() + level)
-	, base(texture.GetWidth(level), texture.GetWidth(level), texture.GetFormat())
+	, base(texture.GetWidth(level), texture.GetHeight(level), texture.GetFormat())
 {
 }
 
@@ -129,7 +129,7 @@ DepthStencilView::DepthStencilView(TextureCube & texture, uint8 array_index, pla
 		texture.RetriveDepthStencilView(array_index, face, level),
 		(array_index * 6 + face) * texture.GetNumMipMaps() + level,
 		1)
-	, base(texture.GetWidth(level), texture.GetWidth(level), texture.GetFormat())
+	, base(texture.GetWidth(level), texture.GetHeight(level), texture.GetFormat())
 {
 }
 
@@ -140,7 +140,7 @@ UnorderedAccessView::UnorderedAccessView(Texture2D & texture, uint8 first_array_
 		texture.RetriveUnorderedAccessView(first_array_index, array_size, level),
 		first_array_index *texture.GetNumMipMaps() + level,
 		1)
-	, base(texture.GetWidth(level), texture.GetWidth(level), texture.GetFormat())
+	, base(texture.GetWidth(level), texture.GetHeight(level), texture.GetFormat())
 {
 }
 
@@ -149,7 +149,7 @@ UnorderedAccessView::UnorderedAccessView(Texture3D & texture, uint8 array_index,
 	texture.RetriveUnorderedAccessView(array_index, first_slice, num_slices, level),
 	(array_index * texture.GetDepth(level) + first_slice) * texture.GetNumMipMaps() + level,
 	num_slices * texture.GetNumMipMaps() + level)
-	, base(texture.GetWidth(level), texture.GetWidth(level), texture.GetFormat())
+	, base(texture.GetWidth(level), texture.GetHeight(level), texture.GetFormat())
 {
 }
 
@@ -160,7 +160,7 @@ UnorderedAccessView::UnorderedAccessView(TextureCube & texture, uint8 array_inde
 		texture.RetriveUnorderedAccessView(array_index, 0,face,1, level),
 		(array_index * 6 + face) * texture.GetNumMipMaps() + level,
 		1)
-	, base(texture.GetWidth(level), texture.GetWidth(level), texture.GetFormat())
+	, base(texture.GetWidth(level), texture.GetHeight(level), texture.GetFormat())
 {
 }
 

@@ -44,8 +44,6 @@ private:
 		auto worldviewinvt = worldview;
 
 		using namespace std::literals;
-		auto hash = leo::constfn_hash(std::string("worldview"));
-		auto hash_c = leo::constfn_hash("worldview"sv);
 		pEffect->GetParameter("worldview"sv) = lm::transpose(worldview);
 		pEffect->GetParameter("worldviewproj"sv) = lm::transpose(worldviewproj);
 		pEffect->GetParameter("worldviewinvt"sv) = lm::transpose(worldviewinvt);
