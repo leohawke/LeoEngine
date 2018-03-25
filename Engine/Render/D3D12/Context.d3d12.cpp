@@ -224,7 +224,7 @@ namespace platform_ex::Windows::D3D12 {
 	{
 		if (NumViewports == 1)
 		{
-			if (memcmp(&curr_viewport, pViewports, sizeof(pViewports[0])) != 0)
+			//if (memcmp(&curr_viewport, pViewports, sizeof(pViewports[0])) != 0)
 			{
 				d3d_cmd_lists[Device::Command_Render]->RSSetViewports(NumViewports, pViewports);
 				curr_viewport = pViewports[0];
