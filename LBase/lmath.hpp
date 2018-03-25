@@ -112,31 +112,38 @@ namespace leo {
 			return l.x*r.x + l.y*r.y + l.z*r.z;
 		}
 
+		inline float3 cross(const float3&l, const float3& r) {
+			return { 
+				l.y*r.z - l.z*r.y,
+				l.z*r.x - l.x*r.z,
+				l.x*r.y - l.y*r.x };
+		}
+
 		template<typename _type, limpl(typename = enable_if_t<is_lmathtype_v<_type>>)>
 		inline _type operator+(const _type& l, const _type& r) noexcept {
 			auto ret = l;
-			l += r;
+			ret += r;
 			return ret;
 		}
 
 		template<typename _type, limpl(typename = enable_if_t<is_lmathtype_v<_type>>)>
 		inline _type operator-(const _type& l, const _type& r) noexcept {
 			auto ret = l;
-			l -= r;
+			ret -= r;
 			return ret;
 		}
 
 		template<typename _type, limpl(typename = enable_if_t<is_lmathtype_v<_type>>)>
 		inline _type operator*(const _type& l, float r) {
 			auto ret = l;
-			l *= r;
+			ret *= r;
 			return ret;
 		}
 
 		template<typename _type, limpl(typename = enable_if_t<is_lmathtype_v<_type>>)>
 		inline _type operator*(float r, const _type& l) {
 			auto ret = l;
-			l *= r;
+			ret *= r;
 			return ret;
 		}
 

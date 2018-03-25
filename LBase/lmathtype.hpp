@@ -210,18 +210,12 @@ namespace leo {
 #ifdef LB_IMPL_MSCPP
 #pragma warning(pop)
 #endif
-
-		namespace details {
-			template<typename _type>
-			constexpr false_ is_lmathtype_f(_type&&);
-
-			template<typename scalar, size_t multi>
-			constexpr true_ is_lmathtype_f(data_storage<scalar, multi>&&);
-		}
-
 		template<typename _type>
-		constexpr auto is_lmathtype_v = decltype(details::is_lmathtype_f(std::declval<_type>()))::value;
-
+		struct is_lmathtype:false_
+		{};
+	
+		template<typename _type>
+		constexpr auto is_lmathtype_v = is_lmathtype<_type>::value;
 
 		//The float2 data type
 		struct lalignas(16) float2 :data_storage<float, 2>
@@ -380,6 +374,18 @@ namespace leo {
 			}
 
 		};
+
+		template<>
+		struct is_lmathtype<float2> :true_
+		{};
+
+		template<>
+		struct is_lmathtype<float3> :true_
+		{};
+
+		template<>
+		struct is_lmathtype<float4> :true_
+		{};
 
 		//The float3x3 data type
 		struct lalignas(16) float3x3 {

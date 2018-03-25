@@ -28,7 +28,7 @@ namespace platform {
 		inline lm::float4x4 look_at_lh(const lm::float3& eye, const lm::float3& at, const lm::float3& up) noexcept {
 			auto z = lm::normalize(at - eye);
 			auto x = lm::normalize(lm::cross(up, z));
-			auto y = lm::cross(z, y);
+			auto y = lm::cross(z, x);
 
 			return {
 				{ x.x,y.x,z.x,0 },
