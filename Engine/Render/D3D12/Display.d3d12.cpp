@@ -57,7 +57,7 @@ Display::Display(IDXGIFactory4 * factory_4, ID3D12CommandQueue* cmd_queue, const
 	sc_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	sc_desc.BufferCount = NUM_BACK_BUFFERS;
 	sc_desc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
-	sc_desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+	sc_desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH | DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
 	if (stereo) {
 		sc_desc.SampleDesc.Count = 1;
 		sc_desc.SampleDesc.Quality = 0;

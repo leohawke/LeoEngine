@@ -7,6 +7,9 @@
 
 #include "IRenderView.h"
 #include "../Core/ViewPort.h"
+
+#include <LBase/lmathtype.hpp>
+
 #include <vector>
 #include <memory>
 
@@ -27,6 +30,12 @@ namespace platform {
 				DepthStencil,
 			};
 
+			enum ClearFlag : uint8 {
+				Color = 1<<0,
+				Depth = 1<<1,
+				Stencil = 1<<2,
+			};
+
 			virtual ~FrameBuffer();
 
 			virtual void OnBind();
@@ -40,6 +49,8 @@ namespace platform {
 
 			void Detach(Attachment which);
 			void DetachUAV(leo::uint8 which);
+
+			virtual void Clear(leo::uint32 flags, const leo::math::float4  & clr, float depth, leo::int32 stencil) = 0;
 		protected:
 			std::vector<std::shared_ptr<RenderTargetView>> clr_views;
 			std::shared_ptr<DepthStencilView> ds_view;

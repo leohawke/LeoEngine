@@ -160,7 +160,7 @@ namespace platform_ex::Windows::D3D12 {
 		//CBuffer Bind
 		for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
 			for (auto & cbuffer : shader_compose.CBuffs[i]) {
-				auto& resource = static_cast<GraphicsBuffer*>(cbuffer)->buffer;
+				auto& resource = static_cast<GraphicsBuffer*>(cbuffer)->resource;
 				if (resource)
 					render_cmd_list->SetGraphicsRootConstantBufferView(root_param_index++, resource->GetGPUVirtualAddress());
 				else
@@ -324,6 +324,7 @@ namespace platform_ex::Windows::D3D12 {
 		ContextEx(device->d3d_device.Get(), device->d3d_cmd_queue.Get());
 		DisplaySetting setting;
 		display = leo::make_shared<Display>(GetDXGIFactory4(), device->d3d_cmd_queue.Get(), setting, g_hwnd);//test code
+		screen_frame_buffer = display->GetFrameBuffer();
 		SetFrame(display->GetFrameBuffer());
 	}
 	void Context::DoBindFrameBuffer(const std::shared_ptr<platform::Render::FrameBuffer>&)
@@ -441,8 +442,6 @@ namespace platform_ex::Windows::D3D12 {
 		}
 
 		//Statistics Render Infomation
-
-		framebuffer->UnBindBarrier();
 	}
 	void Context::BeginFrame()
 	{

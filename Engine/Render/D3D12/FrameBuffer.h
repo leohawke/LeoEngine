@@ -15,6 +15,8 @@ namespace platform_ex::Windows::D3D12 {
 		~FrameBuffer();
 
 		void OnBind() override;
+
+		void Clear(leo::uint32 flags, const leo::math::float4  & clr, float depth, leo::int32 stencil) override;
 	public:
 		void SetRenderTargets();
 		void BindBarrier();

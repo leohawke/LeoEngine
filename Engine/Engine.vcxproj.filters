@@ -125,6 +125,9 @@
     <ClCompile Include="Core\Camera.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Render\D3D12\ResourceHolder.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -269,6 +272,9 @@
     </ClInclude>
     <ClInclude Include="Core\Camera.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\ResourceHolder.h">
+      <Filter>Render\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

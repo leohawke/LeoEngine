@@ -34,8 +34,7 @@ namespace platform::Render {
 
 	public:
 		static Context& Instance();
-
-	private:
+	protected:
 		std::shared_ptr<FrameBuffer> curr_frame_buffer;
 		std::shared_ptr<FrameBuffer> screen_frame_buffer;
 	};

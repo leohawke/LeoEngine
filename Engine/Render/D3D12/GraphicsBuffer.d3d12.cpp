@@ -7,7 +7,7 @@ namespace platform_ex::Windows::D3D12 {
 	GraphicsBuffer::GraphicsBuffer(platform::Render::Buffer::Usage usage,
 		uint32_t access_hint, uint32_t size_in_byte,
 		platform::Render::EFormat fmt)
-		:platform::Render::GraphicsBuffer(usage, access_hint, size_in_byte), format(fmt), curr_state(D3D12_RESOURCE_STATE_COMMON)
+		:platform::Render::GraphicsBuffer(usage, access_hint, size_in_byte), format(fmt)
 	{
 	}
 
@@ -37,7 +37,7 @@ namespace platform_ex::Windows::D3D12 {
 			src_heap_type = D3D12_HEAP_TYPE_DEFAULT;
 		}
 		src_barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_SOURCE;
-		src_barrier_before.Transition.pResource = buffer.Get();
+		src_barrier_before.Transition.pResource = resource.Get();
 		src_barrier_before.Transition.Subresource = 0;
 
 		dst_barrier_before.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -56,7 +56,7 @@ namespace platform_ex::Windows::D3D12 {
 			dst_heap_type = D3D12_HEAP_TYPE_DEFAULT;
 		}
 		dst_barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
-		dst_barrier_before.Transition.pResource = rhs.buffer.Get();
+		dst_barrier_before.Transition.pResource = rhs.resource.Get();
 		dst_barrier_before.Transition.Subresource = 0;
 
 		int n = 0;
@@ -72,7 +72,7 @@ namespace platform_ex::Windows::D3D12 {
 		if (n > 0)
 			cmd_list->ResourceBarrier(n, barrier_before);
 
-		cmd_list->CopyBufferRegion(rhs.buffer.Get(), 0, buffer.Get(), 0, size_in_byte);
+		cmd_list->CopyBufferRegion(rhs.resource.Get(), 0, resource.Get(), 0, size_in_byte);
 
 		D3D12_RESOURCE_BARRIER barrier_after[2] = { barrier_before[0],barrier_before[1] };
 		std::swap(barrier_after[0].Transition.StateBefore, barrier_after[0].Transition.StateAfter);
@@ -146,7 +146,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		CheckHResult(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 			&res_desc, init_state, nullptr,
-			COMPtr_RefParam(buffer, IID_ID3D12Resource)));
+			COMPtr_RefParam(resource, IID_ID3D12Resource)));
 		curr_state = init_state;
 
 		if (init_data != nullptr) {
@@ -167,7 +167,7 @@ namespace platform_ex::Windows::D3D12 {
 			memcpy(p, init_data, size_in_byte);
 			buffer_upload->Unmap(0, nullptr);
 
-			cmd_list->CopyResource(buffer.Get(), buffer_upload.Get());
+			cmd_list->CopyResource(resource.Get(), buffer_upload.Get());
 
 			Context::Instance().CommitCommandList(Device::Command_Resource);
 		}
@@ -185,7 +185,7 @@ namespace platform_ex::Windows::D3D12 {
 			desc.Buffer.StructureByteStride = /*(access & EAccessHint::EA_GPUStructured) ? structure_byte_stride :*/ 0;
 			desc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
-			srv = std::make_unique<ViewSimulation>(buffer, desc);
+			srv = std::make_unique<ViewSimulation>(resource, desc);
 		}
 
 		if ((access & EAccessHint::EA_GPUWrite)
@@ -241,7 +241,7 @@ namespace platform_ex::Windows::D3D12 {
 				desc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
 			}
 
-			uav = std::make_unique<ViewSimulation>(buffer, desc);
+			uav = std::make_unique<ViewSimulation>(resource, desc);
 		}
 	}
 
@@ -252,7 +252,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		counter_offset = 0;
 		Reset(buffer_counter_upload);
-		Reset(buffer);
+		Reset(resource);
 	}
 	void GraphicsBuffer::UpdateSubresource(leo::uint32 offset, leo::uint32 size, void const * data)
 	{
@@ -279,6 +279,7 @@ namespace platform_ex::Windows::D3D12 {
 			D3D12_RESOURCE_BARRIER barrier;
 			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 			if (UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_COPY_DEST)) {
 				cmd_list->ResourceBarrier(1, &barrier);
 			}
@@ -288,22 +289,7 @@ namespace platform_ex::Windows::D3D12 {
 			context.InnerResourceRecycle<Context::Upload>(upload_buff, size);
 		}
 	}
-	bool GraphicsBuffer::UpdateResourceBarrier(D3D12_RESOURCE_BARRIER & barrier, D3D12_RESOURCE_STATES target_state)
-	{
-		if (curr_state == target_state)
-			return false;
-		else {
-			barrier.Transition.pResource = buffer.Get();
-			barrier.Transition.StateBefore = curr_state;
-			barrier.Transition.StateAfter = target_state;
-			curr_state = target_state;
-			return true;
-		}
-	}
-	ID3D12Resource * GraphicsBuffer::Resource() const
-	{
-		return buffer.Get();
-	}
+	
 	ID3D12Resource * GraphicsBuffer::UploadResource() const
 	{
 		return buffer_counter_upload.Get();
@@ -324,7 +310,7 @@ namespace platform_ex::Windows::D3D12 {
 		desc.Buffer.FirstElement = 0;
 		desc.Buffer.NumElements = std::min<UINT>(width * height, GetSize() / NumFormatBytes(pf));
 
-		return rtv_maps->emplace(key, std::make_unique<ViewSimulation>(buffer, desc)).first->second.get();
+		return rtv_maps->emplace(key, std::make_unique<ViewSimulation>(resource, desc)).first->second.get();
 	}
 	ViewSimulation * GraphicsBuffer::RetriveShaderResourceView()
 	{
@@ -345,8 +331,8 @@ namespace platform_ex::Windows::D3D12 {
 		case platform::Render::Buffer::Write_Only:
 			if ((0 == access) || (EAccessHint::EA_CPUWrite == access) || ((EAccessHint::EA_CPUWrite | EAccessHint::EA_GPURead) == access)) {
 				auto& context = Context::Instance();
-				context.InnerResourceRecycle<Context::Upload>(buffer, size_in_byte);
-				buffer = context.InnerResourceAlloc<Context::Upload>(size_in_byte);
+				context.InnerResourceRecycle<Context::Upload>(resource, size_in_byte);
+				resource = context.InnerResourceAlloc<Context::Upload>(size_in_byte);
 			}
 			else {
 				Context::Instance().SyncCPUGPU();
@@ -363,11 +349,11 @@ namespace platform_ex::Windows::D3D12 {
 		read_range.End = (ba == platform::Render::Buffer::Write_Only) ? 0 : size_in_byte;
 
 		void* p = nullptr;
-		CheckHResult(buffer->Map(0, &read_range, &p));
+		CheckHResult(resource->Map(0, &read_range, &p));
 		return p;
 	}
 	void GraphicsBuffer::Unmap()
 	{
-		buffer->Unmap(0, nullptr);
+		resource->Unmap(0, nullptr);
 	}
 }

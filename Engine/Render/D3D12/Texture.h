@@ -8,8 +8,7 @@
 
 
 #include "../ITexture.hpp"
-#include "d3d12_dxgi.h"
-
+#include "ResourceHolder.h"
 #include <unordered_map>
 
 namespace platform_ex {
@@ -23,21 +22,15 @@ namespace platform_ex {
 
 			class ViewSimulation;
 
-			class Texture
+			class Texture:public ResourceHolder
 			{
 			public:
 				explicit Texture(EFormat format);
 
-				ID3D12Resource* Resource() const {
-					return texture.Get();
-				}
 
 				DXGI_FORMAT GetDXGIFormat() const {
 					return dxgi_format;
 				}
-
-				bool UpdateResourceBarrier(D3D12_RESOURCE_BARRIER& barrier, D3D12_RESOURCE_STATES target_state);
-
 
 				virtual ViewSimulation* RetriveShaderResourceView(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) = 0;
 
@@ -93,7 +86,7 @@ namespace platform_ex {
 			protected:
 				DXGI_FORMAT dxgi_format;
 				D3D12_RESOURCE_DESC resource_desc;
-				COMPtr<ID3D12Resource> texture;
+				
 				COMPtr<ID3D12Resource> texture_upload_heaps;
 				COMPtr<ID3D12Resource> texture_readback_heaps;
 
@@ -103,8 +96,6 @@ namespace platform_ex {
 				std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>> uav_maps;
 				std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>> rtv_maps;
 				std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>> dsv_maps;
-
-				D3D12_RESOURCE_STATES curr_state;
 			};
 
 			class Texture1D :public Texture,public platform::Render::Texture1D{

@@ -21,21 +21,8 @@ static DXGI_FORMAT ConvertWrap(EFormat format) {
 }
 
 platform_ex::Windows::D3D12::Texture::Texture(EFormat format)
-	:dxgi_format(ConvertWrap(format)),curr_state(D3D12_RESOURCE_STATE_COMMON)
+	:dxgi_format(ConvertWrap(format))
 {
-}
-
-bool platform_ex::Windows::D3D12::Texture::UpdateResourceBarrier(D3D12_RESOURCE_BARRIER & barrier, D3D12_RESOURCE_STATES target_state)
-{
-	if (curr_state == target_state)
-		return false;
-	else {
-		barrier.Transition.pResource = texture.Get();
-		barrier.Transition.StateBefore = curr_state;
-		barrier.Transition.StateAfter = target_state;
-		curr_state = target_state;
-		return true;
-	}
 }
 
 ViewSimulation * platform_ex::Windows::D3D12::Texture::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level)
@@ -77,26 +64,26 @@ ViewSimulation* Texture::RetriveDepthStencilView(uint8 array_index, TextureCubeF
 }
 
 platform_ex::Windows::D3D12::Texture::Texture(const COMPtr<ID3D12Resource>& pResource)
-	:texture(pResource), resource_desc(pResource->GetDesc()),curr_state(D3D12_RESOURCE_STATE_COMMON)
+	:ResourceHolder(pResource), resource_desc(pResource->GetDesc())
 {
 	dxgi_format = resource_desc.Format;
 }
 
 std::string  platform_ex::Windows::D3D12::Texture::HWDescription() const
 {
-	return leo::sfmt("[D3D12] Texture pResource=%p",texture.Get());
+	return leo::sfmt("[D3D12] Texture pResource=%p",resource.Get());
 }
 
 void Texture::DeleteHWResource()
 {
-	texture = nullptr;
+	resource = nullptr;
 	texture_upload_heaps = nullptr;
 	texture_readback_heaps = nullptr;
 }
 
 bool Texture::ReadyHWResource() const
 {
-	return bool(texture);
+	return bool(resource);
 }
 
 void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uint16 height, uint16 depth, uint8 array_size, ElementInitData const *  init_data)
@@ -150,7 +137,7 @@ void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uin
 
 	CheckHResult(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 		&tex_desc, D3D12_RESOURCE_STATE_COMMON, nullptr,
-		COMPtr_RefParam(texture, IID_ID3D12Resource)));
+		COMPtr_RefParam(resource, IID_ID3D12Resource)));
 
 	auto num_subres = array_size * base_this->GetNumMipMaps();
 	uint64 upload_buffer_size = 0;
@@ -199,7 +186,7 @@ void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uin
 		D3D12_RESOURCE_BARRIER barrier_before;
 		barrier_before.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier_before.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_before.Transition.pResource = texture.Get();
+		barrier_before.Transition.pResource = resource.Get();
 		barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
 		barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
 		barrier_before.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
@@ -207,7 +194,7 @@ void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uin
 		D3D12_RESOURCE_BARRIER barrier_after;
 		barrier_after.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier_after.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_after.Transition.pResource = texture.Get();
+		barrier_after.Transition.pResource = resource.Get();
 		barrier_after.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
 		barrier_after.Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
 		barrier_after.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
@@ -258,7 +245,7 @@ void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uin
 			src.PlacedFootprint = layouts[i];
 
 			D3D12_TEXTURE_COPY_LOCATION dst;
-			dst.pResource = texture.Get();
+			dst.pResource = resource.Get();
 			dst.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
 			dst.SubresourceIndex = i;
 
@@ -281,7 +268,7 @@ void Texture::DoMap(EFormat format, uint32 subres, TextureMapAccess tma,
 
 	last_tma = tma;
 
-	auto tex_desc = texture->GetDesc();
+	auto tex_desc = resource->GetDesc();
 	D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
 	uint32 num_rows;
 	uint64 row_sizes_in_bytes;
@@ -293,13 +280,13 @@ void Texture::DoMap(EFormat format, uint32 subres, TextureMapAccess tma,
 
 		TransitionBarrier barrier = {
 			{D3D12_RESOURCE_STATE_COMMON,D3D12_RESOURCE_STATE_COPY_SOURCE},
-			texture,
+			resource,
 			subres
 		};
 		cmd_list->ResourceBarrier(1, barrier);
 
 		D3D12_TEXTURE_COPY_LOCATION src = {
-			texture.Get(),
+			resource.Get(),
 			D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX,
 			subres
 		};
@@ -346,7 +333,7 @@ void Texture::DoUnmap(uint32 subres)
 	texture_upload_heaps->Unmap(0, nullptr);
 
 
-	auto tex_desc = texture->GetDesc();
+	auto tex_desc = resource->GetDesc();
 	D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
 	uint32 num_rows;
 	uint64 row_sizes_in_bytes;
@@ -358,7 +345,7 @@ void Texture::DoUnmap(uint32 subres)
 
 		TransitionBarrier barrier{
 			{D3D12_RESOURCE_STATE_COMMON,D3D12_RESOURCE_STATE_COPY_SOURCE},
-			texture,
+			resource,
 			subres
 		};
 
@@ -371,7 +358,7 @@ void Texture::DoUnmap(uint32 subres)
 		};
 
 		D3D12_TEXTURE_COPY_LOCATION dst = {
-			texture.Get(),
+			resource.Get(),
 			D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX,
 			subres
 		};
@@ -473,12 +460,12 @@ void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_siz
 		D3D12_RESOURCE_BARRIER barrier_before[2];
 		barrier_before[0].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier_before[0].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_before[0].Transition.pResource = texture.Get();
+		barrier_before[0].Transition.pResource = resource.Get();
 		barrier_before[0].Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
 		barrier_before[0].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 		barrier_before[1].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier_before[1].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_before[1].Transition.pResource = texture.Get();
+		barrier_before[1].Transition.pResource = resource.Get();
 		barrier_before[1].Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
 		barrier_before[1].Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
@@ -541,7 +528,7 @@ ViewSimulation * Texture::Retrive(_type & desc, std::unordered_map<std::size_t, 
 		if (iter != maps.end())
 			return iter->second.get();
 
-		return maps.emplace(key, std::make_unique<ViewSimulation>(texture, desc)).first->second.get();
+		return maps.emplace(key, std::make_unique<ViewSimulation>(resource, desc)).first->second.get();
 	}
 	return nullptr;
 }

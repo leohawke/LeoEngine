@@ -9,7 +9,8 @@
 #include "d3d12_dxgi.h"
 #include "..\IRenderView.h"
 #include "..\ITexture.hpp"
-#include <LBase/linttype.hpp>
+#include "ResourceHolder.h"
+#include <LBase/lmathtype.hpp>
 
 namespace platform_ex {
 	namespace Windows {
@@ -44,7 +45,7 @@ namespace platform_ex {
 
 			class GPUDataStructView {
 			public:
-				GPUDataStructView(ID3D12Resource* res,ViewSimulation* view, uint16 first_subres, uint16 num_subres);
+				GPUDataStructView(ResourceHolder* res,ViewSimulation* view, uint16 first_subres, uint16 num_subres);
 
 				observer_ptr<ViewSimulation> View();
 
@@ -52,14 +53,15 @@ namespace platform_ex {
 				uint16 FirstSubResIndex();
 				uint16 SubResNum();
 
-				ID3D12Resource* Resource();
+				ID3D12Resource* Resource() const;
+				ResourceHolder* GetResourceHolder() const;
 			protected:
 				observer_ptr<ViewSimulation> view;
 
 				uint16 first_subres;
 				uint16 num_subres;
 
-				observer_ptr<ID3D12Resource> res;
+				observer_ptr<ResourceHolder> res;
 			};
 
 			class RenderTargetView :public GPUDataStructView,public platform::Render::RenderTargetView {
@@ -70,6 +72,8 @@ namespace platform_ex {
 				RenderTargetView(Texture3D& texture_3d, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level);
 				RenderTargetView(TextureCube& texture_cube, uint8 array_index, platform::Render::TextureCubeFaces face, uint8 level);
 				RenderTargetView(GraphicsBuffer& gb, uint16 width, uint16 height, platform::Render::EFormat pf);
+
+				void ClearColor(const leo::math::float4& clr);
 			};
 
 			class DepthStencilView :public GPUDataStructView,public platform::Render::DepthStencilView {
@@ -79,6 +83,10 @@ namespace platform_ex {
 				DepthStencilView(Texture2D& texture_1d_2d_cube, uint8 first_array_index, uint8 array_size, uint8 level);
 				DepthStencilView(Texture3D& texture_3d, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level);
 				DepthStencilView(TextureCube& texture_cube, uint8 array_index, platform::Render::TextureCubeFaces face, uint8 level);
+
+				void ClearDepthStencil(float depth, leo::int32 stencil);
+				void ClearDepth(float depth);
+				void ClearStencil(leo::int32 stencil);
 			};
 
 			class UnorderedAccessView : public GPUDataStructView,public platform::Render::UnorderedAccessView {
