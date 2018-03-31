@@ -58,7 +58,7 @@
 		{
 			ClipPos = mul(float4(Postion,1.0f),worldviewproj);
 			ViewPos = mul(float4(Postion,1.0f),worldview);
-			ViewNormal = mul(float4(Postion,1.0f),worldviewinvt).xyz;
+			ViewNormal = mul(float4(Normal,1.0f),worldviewinvt).xyz;
 		}
 
 		void PointLightPS(in float4 ClipPos:SV_POSITION,

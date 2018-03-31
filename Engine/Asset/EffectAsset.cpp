@@ -5,7 +5,7 @@
 void asset::EffectNodeAsset::SetName(const std::string & Name)
 {
 	name = Name;
-	hash =leo::constfn_hash(name);
+	hash = leo::constfn_hash(name);
 }
 
 //TODO string_view
@@ -22,7 +22,7 @@ public:
 	{
 		auto lowername = name;
 		std::transform(lowername.begin(), lowername.end(), lowername.begin(), std::tolower);
-		auto const name_hash =leo::constfn_hash(lowername);
+		auto const name_hash = leo::constfn_hash(lowername);
 		for (uint32_t i = 0; i < hashs.size(); ++i)
 		{
 			if (hashs[i] == name_hash)
@@ -66,7 +66,7 @@ public:
 		types.emplace_back("ByteAddressBuffer");
 		types.emplace_back("RWByteAddressBuffer");
 		types.emplace_back("sampler");
-		types.emplace_back("shader"); 
+		types.emplace_back("shader");
 		types.emplace_back("bool");
 		types.emplace_back("string");
 		types.emplace_back("uint");
@@ -90,7 +90,7 @@ public:
 		types.emplace_back("float4x2");
 		types.emplace_back("float4x3");
 		types.emplace_back("float4x4");
-		
+
 		for (auto type : types) {
 			std::transform(type.begin(), type.end(), type.begin(), std::tolower);
 			hashs.emplace_back(leo::constfn_hash(type));
@@ -102,8 +102,9 @@ private:
 	std::vector<size_t> hashs;
 };
 
-std::optional<leo::any> asset::EffectAsset::GetInfo(const std::string & name) const
-{
+
+template<>
+std::optional<platform::Render::ShaderInfo::ConstantBufferInfo> asset::EffectAsset::GetInfo<platform::Render::ShaderInfo::ConstantBufferInfo>(const std::string_view& name) const {
 	using platform::Render::ShaderCompose;
 	using platform::Render::ShaderInfo;
 	auto hash = leo::constfn_hash(name);
@@ -111,29 +112,41 @@ std::optional<leo::any> asset::EffectAsset::GetInfo(const std::string & name) co
 		auto& blob = pair.second;
 		auto& Info = blob.GetInfo();
 
-		for (auto info : Info.ConstantBufferInfos) {
+		for (auto& info : Info.ConstantBufferInfos) {
 			if (info.name_hash == hash)
-				return leo::any(info);
-
-			for (auto varinfo : info.var_desc) {
-				if(varinfo.name == name)
-					return leo::any(varinfo);
-			}
-		}
-
-		for (auto  info : Info.BoundResourceInfos) {
-			if (info.name == name)
 				return info;
 		}
 	}
-	return std::nullopt;
+	return {};
 }
+
+template<>
+std::optional<platform::Render::ShaderInfo::ConstantBufferInfo::VariableInfo> asset::EffectAsset::GetInfo<platform::Render::ShaderInfo::ConstantBufferInfo::VariableInfo>(const std::string_view& name) const {
+	using platform::Render::ShaderCompose;
+	using platform::Render::ShaderInfo;
+	auto hash = leo::constfn_hash(name);
+	for (auto & pair : blobs) {
+		auto& blob = pair.second;
+		auto& Info = blob.GetInfo();
+
+		for (auto& info : Info.ConstantBufferInfos) {
+			for (auto& varinfo : info.var_desc) {
+				if (varinfo.name == name)
+					return varinfo;
+			}
+		}
+	}
+	return {};
+}
+
+template std::optional<platform::Render::ShaderInfo::ConstantBufferInfo> asset::EffectAsset::GetInfo(const std::string_view& name) const;
+template std::optional<platform::Render::ShaderInfo::ConstantBufferInfo::VariableInfo> asset::EffectAsset::GetInfo(const std::string_view& name) const;
 
 std::string asset::EffectAsset::GetTypeName(EffectParamType type) {
 	return type_define::Instance().type_name(type);
 }
 
-asset::EffectParamType asset::EffectAsset::GetType(const std::string & name) 
+asset::EffectParamType asset::EffectAsset::GetType(const std::string & name)
 {
 	return (EffectParamType)type_define::Instance().type_code(name);
 }
@@ -175,14 +188,14 @@ std::string asset::EffectAsset::GenHLSLShader() const
 		if (except_set.count(param.GetNameHash()) > 0)
 			continue;
 		std::string elem_type;
-		if (param.GetType() <= EPT_ConsumeStructuredBuffer &&param.GetElemType() != EPT_ElemEmpty) {
+		if (param.GetType() <= EPT_ConsumeStructuredBuffer && param.GetElemType() != EPT_ElemEmpty) {
 			elem_type = GetTypeName(param.GetElemType());
 			ss << leo::sfmt("%s<%s> %s", GetTypeName(param.GetType()).c_str(),
 				elem_type.c_str(), param.GetName().c_str())
 				<< ';'
-				<<endl;
+				<< endl;
 		}
-		else  {
+		else {
 			ss << leo::sfmt("%s %s", GetTypeName(param.GetType()).c_str(),
 				param.GetName().c_str())
 				<< ';'

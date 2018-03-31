@@ -139,44 +139,49 @@ namespace platform::Render::Effect {
 		std::set<size_t> expect_parameters;
 		auto asset_params = pEffectAsset->GetParams();
 		for (auto & cbuff : pEffectAsset->GetCBuffersRef()) {
-			auto ConstantBufferInfo = leo::any_cast<ShaderInfo::ConstantBufferInfo>(pEffectAsset->GetInfo(cbuff.GetName()).value());
-			GraphicsBuffer* pGPUBuffer = Context::Instance().GetDevice().CreateConstanBuffer(platform::Render::Buffer::Usage::Dynamic, 0, ConstantBufferInfo.size, EFormat::EF_Unknown);
+			auto OptionalCBInfo = pEffectAsset->GetInfo<ShaderInfo::ConstantBufferInfo>(cbuff.GetName());
+			if (OptionalCBInfo.has_value()) {
+				auto ConstantBufferInfo = OptionalCBInfo.value();
+				GraphicsBuffer* pGPUBuffer = Context::Instance().GetDevice().CreateConstanBuffer(platform::Render::Buffer::Usage::Dynamic, 0, ConstantBufferInfo.size, EFormat::EF_Unknown);
 
-			auto pConstantBuffer = std::make_shared<ConstantBuffer>(cbuff.GetName(), cbuff.GetNameHash());
+				auto pConstantBuffer = std::make_shared<ConstantBuffer>(cbuff.GetName(), cbuff.GetNameHash());
 
-			pConstantBuffer->gpu_buffer.reset(pGPUBuffer);
-			pConstantBuffer->cpu_buffer.resize(ConstantBufferInfo.size);
+				pConstantBuffer->gpu_buffer.reset(pGPUBuffer);
+				pConstantBuffer->cpu_buffer.resize(ConstantBufferInfo.size);
 
-			for (auto& param_index : cbuff.GetParamIndices()) {
-				expect_parameters.insert(param_index);
-				auto& asset_param = asset_params[param_index];
-				Parameter Param{ asset_param.GetName(), asset_param.GetNameHash(),asset_param.GetType() };
-				auto VariableInfo = leo::any_cast<ShaderInfo::ConstantBufferInfo::VariableInfo>(pEffectAsset->GetInfo(asset_param.GetName()).value());
-				uint32 stride;
-				if (VariableInfo.elements > 0) {
-					if (asset_param.GetType() == asset::EPT_float4x4)
-						stride = 64;
-					else
-						stride = 16;
+				for (auto& param_index : cbuff.GetParamIndices()) {
+					expect_parameters.insert(param_index);
+					auto& asset_param = asset_params[param_index];
+					Parameter Param{ asset_param.GetName(), asset_param.GetNameHash(),asset_param.GetType() };
+					//当CB存在时,其param必须存在
+					//TODO:支持宏屏蔽
+					auto VariableInfo =pEffectAsset->GetInfo<ShaderInfo::ConstantBufferInfo::VariableInfo>(asset_param.GetName()).value();
+					uint32 stride;
+					if (VariableInfo.elements > 0) {
+						if (asset_param.GetType() == asset::EPT_float4x4)
+							stride = 64;
+						else
+							stride = 16;
+					}
+					else {
+						if (asset_param.GetType() == asset::EPT_float4x4)
+							stride = 16;
+						else
+							stride = 4;
+					}
+					Param.var.Bind(pConstantBuffer, VariableInfo.start_offset, stride);//Depend reflect info
+					parameters.emplace(Param.Hash, std::move(Param));
+
+					//stride 必须正确！
+					//Design TODO [Material Also Have Values!]
+					auto optional_value = pEffectAsset->GetValue(param_index);
+					if (optional_value.has_value()) {
+						Param = optional_value.value().get();
+					}
 				}
-				else {
-					if (asset_param.GetType() == asset::EPT_float4x4)
-						stride = 16;
-					else
-						stride = 4;
-				}
-				Param.var.Bind(pConstantBuffer, VariableInfo.start_offset, stride);//Depend reflect info
-				parameters.emplace(Param.Hash, std::move(Param));
 
-				//stride 必须正确！
-				//Design TODO [Material Also Have Values!]
-				auto optional_value = pEffectAsset->GetValue(param_index);
-				if (optional_value.has_value()) {
-					Param = optional_value.value().get();
-				}
+				constantbuffs.emplace_back(pConstantBuffer);
 			}
-
-			constantbuffs.emplace_back(pConstantBuffer);
 		}
 
 		//other param

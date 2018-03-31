@@ -170,7 +170,8 @@ namespace asset {
 			return std::nullopt;
 		}
 
-		std::optional<leo::any> GetInfo(const std::string& name) const;
+		template<typename T>
+		std::optional<T> GetInfo(const std::string_view& name) const;
 
 		static	std::string GetTypeName(EffectParamType type);
 		static EffectParamType GetType(const std::string&);
