@@ -91,6 +91,7 @@ namespace platform {
 		{
 			effect_desc.data = std::make_shared<EffectDesc::Data>();
 			effect_desc.effect_asset = std::make_shared<AssetType>();
+			effect_desc.effect_asset->SetName(effect_desc.effect_path.string());
 			return nullptr;
 		}
 

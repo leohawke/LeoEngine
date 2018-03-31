@@ -96,7 +96,7 @@ namespace platform::Render::Effect {
 	{
 		return parameters.find(hash)->second;
 	}
-	
+
 
 	ConstantBuffer & Effect::GetConstantBuffer(size_t index)
 	{
@@ -108,7 +108,7 @@ namespace platform::Render::Effect {
 		return ConstantBufferIndex(hash);
 	}
 	size_t Effect::ConstantBufferIndex(size_t hash) {
-		return std::distance(constantbuffs.begin(),std::find_if(constantbuffs.begin(), constantbuffs.end(), [&](const std::shared_ptr<ConstantBuffer>& key) {
+		return std::distance(constantbuffs.begin(), std::find_if(constantbuffs.begin(), constantbuffs.end(), [&](const std::shared_ptr<ConstantBuffer>& key) {
 			return key->Hash == hash;
 		}));
 	}
@@ -155,7 +155,7 @@ namespace platform::Render::Effect {
 					Parameter Param{ asset_param.GetName(), asset_param.GetNameHash(),asset_param.GetType() };
 					//当CB存在时,其param必须存在
 					//TODO:支持宏屏蔽
-					auto VariableInfo =pEffectAsset->GetInfo<ShaderInfo::ConstantBufferInfo::VariableInfo>(asset_param.GetName()).value();
+					auto VariableInfo = pEffectAsset->GetInfo<ShaderInfo::ConstantBufferInfo::VariableInfo>(asset_param.GetName()).value();
 					uint32 stride;
 					if (VariableInfo.elements > 0) {
 						if (asset_param.GetType() == asset::EPT_float4x4)
@@ -181,6 +181,96 @@ namespace platform::Render::Effect {
 				}
 
 				constantbuffs.emplace_back(pConstantBuffer);
+			}
+			else {
+				auto& param_indices = cbuff.GetParamIndices();
+				std::vector<ShaderInfo::ConstantBufferInfo::VariableInfo> pseudo_varinfos;
+				std::vector<leo::uint32> pseudo_strides;
+				auto cbuff_size = std::accumulate(param_indices.begin(), param_indices.end(), 0, [&](leo::uint32 init, leo::uint32 param_index) {
+					auto& asset_param = asset_params[param_index];
+
+					ShaderInfo::ConstantBufferInfo::VariableInfo VariableInfo;
+					VariableInfo.name = asset_param.GetName();
+					VariableInfo.start_offset = init;
+					pseudo_varinfos.emplace_back(VariableInfo);
+					auto value = 0;
+					switch (asset_param.GetType()) {
+					case asset::EPT_bool:
+						value = 1;
+						break;
+					case asset::EPT_uint:
+					case asset::EPT_int:
+					case asset::EPT_float:
+						value = 4;
+						break;
+					case asset::EPT_uint2:
+					case asset::EPT_int2:
+					case asset::EPT_float2:
+						value = 8;
+						break;
+					case asset::EPT_uint3:
+					case asset::EPT_int3:
+					case asset::EPT_float3:
+						value = 12;
+						break;
+					case asset::EPT_uint4:
+					case asset::EPT_int4:
+					case asset::EPT_float2x2:
+					case asset::EPT_float4:
+						value = 16;
+						break;
+					case asset::EPT_float2x3:
+						value = 20;
+						break;
+					case asset::EPT_float2x4:
+					case asset::EPT_float3x2:
+						value = 24;
+						break;
+					case asset::EPT_float4x2:
+						value = 32;
+						break; 
+					case asset::EPT_float3x3:
+						value = 36;
+						break;
+					case asset::EPT_float3x4:
+					case asset::EPT_float4x3:
+						value = 48;
+						break;
+					case asset::EPT_float4x4:
+						value = 64;
+						break;
+					default:
+						break;
+					}
+					if(asset_param.GetArraySize() != 0)
+						value *= asset_param.GetArraySize();
+					pseudo_strides.emplace_back(value);
+					return init + value;
+				});
+				GraphicsBuffer* pGPUBuffer = Context::Instance().GetDevice().CreateConstanBuffer(platform::Render::Buffer::Usage::Dynamic, 0, cbuff_size, EFormat::EF_Unknown);
+
+				auto pConstantBuffer = std::make_shared<ConstantBuffer>(cbuff.GetName(), cbuff.GetNameHash());
+
+				pConstantBuffer->gpu_buffer.reset(pGPUBuffer);
+				pConstantBuffer->cpu_buffer.resize(cbuff_size);
+
+				auto pseudo_index = 0;
+				for (auto& param_index : cbuff.GetParamIndices()) {
+					expect_parameters.insert(param_index);
+					auto& asset_param = asset_params[param_index];
+					Parameter Param{ asset_param.GetName(), asset_param.GetNameHash(),asset_param.GetType() };
+					auto VariableInfo = pseudo_varinfos[pseudo_index];
+					uint32 stride = pseudo_strides[pseudo_index++];
+					Param.var.Bind(pConstantBuffer, VariableInfo.start_offset, stride);
+					parameters.emplace(Param.Hash, std::move(Param));
+
+					auto optional_value = pEffectAsset->GetValue(param_index);
+					if (optional_value.has_value()) {
+						Param = optional_value.value().get();
+					}
+				}
+				constantbuffs.emplace_back(pConstantBuffer);
+				Trace(platform::Descriptions::Warning, "The Effect(%s) ctor pseudo constanbuffer[name:%s,size:%d] ,It's waste videomemory!", pEffectAsset->GetName().c_str(),cbuff.GetName().c_str(),cbuff_size);
 			}
 		}
 

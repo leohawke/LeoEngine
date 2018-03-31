@@ -128,7 +128,7 @@ namespace asset {
 		std::unique_ptr<platform::Render::ShaderInfo> pInfo;
 	};
 
-	class EffectAsset : leo::noncopyable {
+	class EffectAsset : leo::noncopyable,public  EffectNodeAsset {
 	public:
 		EffectAsset() = default;
 
