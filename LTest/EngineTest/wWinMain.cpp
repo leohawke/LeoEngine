@@ -57,10 +57,10 @@ private:
 		pEffect->GetParameter("alpha"sv) = 1.0f;
 		pEffect->GetParameter("smoothness"sv) =0.8f;
 		//light
-		pEffect->GetParameter("view_light_pos"sv) = lm::float3(0, 0, -10);
+		pEffect->GetParameter("view_light_pos"sv) = lm::float3(0, 0,0);
 		pEffect->GetParameter("light_radius"sv) =20.f;
 		pEffect->GetParameter("light_color"sv) = lm::float3(0.8f, 0.8f, 0.6f);
-		pEffect->GetParameter("light_blubsize"sv) = 0.5f;
+		pEffect->GetParameter("light_blubsize"sv) = 10.f;
 
 		Context::Instance().Render(*pEffect, pEffect->GetTechniqueByIndex(0), pMesh->GetInputLayout());
 

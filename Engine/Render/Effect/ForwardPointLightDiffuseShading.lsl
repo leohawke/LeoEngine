@@ -58,7 +58,7 @@
 		{
 			ClipPos = mul(float4(Postion,1.0f),worldviewproj);
 			ViewPos = mul(float4(Postion,1.0f),worldview);
-			ViewNormal = mul(float4(Normal,1.0f),worldviewinvt).xyz;
+			ViewNormal = mul(float4(Normal,0.0f),worldviewinvt).xyz;
 		}
 
 		void PointLightPS(in float4 ClipPos:SV_POSITION,
@@ -81,7 +81,7 @@
 			float3 diffuse,specular = 0;
 			ShadingMaterial(material,view_postion,view_dir,shadow,diffuse,specular);
 
-			color.xyz = diffuse + specular;
+			color.xyz = diffuse*material.albedo + specular;
 			color.w = 1.0f;
 		}
 		"
