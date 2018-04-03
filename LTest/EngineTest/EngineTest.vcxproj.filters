@@ -54,6 +54,9 @@
     <ClInclude Include="Scene\CameraComponent.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\MeshRendererComponent.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="EntityComponentSystem">

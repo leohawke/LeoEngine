@@ -78,12 +78,14 @@
     <ClInclude Include="Asset\EffectAsset.h" />
     <ClInclude Include="Asset\EffectX.h" />
     <ClInclude Include="Asset\Loader.hpp" />
+    <ClInclude Include="Asset\MaterialAsset.h" />
     <ClInclude Include="Asset\MeshAsset.h" />
     <ClInclude Include="Asset\MeshX.h" />
     <ClInclude Include="Asset\TexCompression.hpp" />
     <ClInclude Include="Asset\TextureX.h" />
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core\LFile.h" />
+    <ClInclude Include="Core\Materail.h" />
     <ClInclude Include="Core\Mesh.h" />
     <ClInclude Include="Core\Resource.h" />
     <ClInclude Include="Core\ViewPort.h" />

@@ -276,6 +276,12 @@
     <ClInclude Include="Render\D3D12\ResourceHolder.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="Asset\MaterialAsset.h">
+      <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Materail.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

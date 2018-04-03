@@ -261,6 +261,7 @@
     <ClInclude Include="EntityComponentSystem\EntitySystem.h" />
     <ClInclude Include="EntityComponentSystem\System.h" />
     <ClInclude Include="Scene\CameraComponent.h" />
+    <ClInclude Include="Scene\MeshRendererComponent.h" />
     <ClInclude Include="Scene\SceneComponent.h" />
     <ClInclude Include="Scene\SceneSystem.h" />
     <ClInclude Include="TestFramework.h" />
