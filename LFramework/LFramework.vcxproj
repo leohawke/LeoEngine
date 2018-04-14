@@ -128,6 +128,7 @@
     <ClInclude Include="CHRLib\Encoding.h" />
     <ClInclude Include="CHRLib\MappingEx.h" />
     <ClInclude Include="CHRLib\StaticMapping.hpp" />
+    <ClInclude Include="Core\LClock.h" />
     <ClInclude Include="Core\LConsole.h" />
     <ClInclude Include="Core\LCoreUtilities.h" />
     <ClInclude Include="Core\LEvent.hpp" />
@@ -143,6 +144,7 @@
     <ClInclude Include="Helper\GUIApplication.h" />
     <ClInclude Include="Helper\HostWindow.h" />
     <ClInclude Include="Helper\Initialization.h" />
+    <ClInclude Include="Helper\ShellHelper.h" />
     <ClInclude Include="Helper\WindowThread.h" />
     <ClInclude Include="LCLib\Debug.h" />
     <ClInclude Include="LCLib\FCommon.h" />
@@ -157,6 +159,7 @@
     <ClInclude Include="LCLib\Mutex.h" />
     <ClInclude Include="LCLib\NativeAPI.h" />
     <ClInclude Include="LCLib\Platform.h" />
+    <ClInclude Include="LCLib\Timer.h" />
     <ClInclude Include="Service\File.h" />
     <ClInclude Include="Service\FileSystem.h" />
     <ClInclude Include="Service\TextFile.h" />
@@ -180,6 +183,7 @@
     <ClCompile Include="Helper\GUIApplication.cpp" />
     <ClCompile Include="Helper\HostWindow.cpp" />
     <ClCompile Include="Helper\Initialization.cpp" />
+    <ClCompile Include="Helper\ShellHelper.cpp" />
     <ClCompile Include="Helper\WindowThread.cpp" />
     <ClCompile Include="LCLib\Debug.cpp" />
     <ClCompile Include="LCLib\FCommon.cpp" />
@@ -193,6 +197,7 @@
     <ClCompile Include="LCLib\Input.cpp" />
     <ClCompile Include="LCLib\MemoryMapping.cpp" />
     <ClCompile Include="LCLib\NativeAPI.cpp" />
+    <ClCompile Include="LCLib\Timer.cpp" />
     <ClCompile Include="Service\File.cpp" />
     <ClCompile Include="Service\FileSystem.cpp" />
     <ClCompile Include="Service\TextFile.cpp" />

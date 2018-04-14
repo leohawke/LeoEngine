@@ -3,8 +3,8 @@
 \brief ¿ØÖÆÌ¨¡£
 */
 
-#ifndef LFrameWork__Core_LConsole_h
-#define LFrameWork__Core_LConsole_h 1
+#ifndef LFrameWork_Core_LConsole_h
+#define LFrameWork_Core_LConsole_h 1
 
 namespace leo
 {

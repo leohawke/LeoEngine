@@ -20,6 +20,23 @@ namespace platform_ex::Windows::D3D12 {
 			if (SUCCEEDED(D3D12::CreateDevice(adapter.Get(),
 				level, IID_ID3D12Device, reinterpret_cast<void**>(&device)))) {
 
+#ifndef NDEBUG
+				COMPtr<ID3D12InfoQueue> info_queue;
+				if (SUCCEEDED(device->QueryInterface(COMPtr_RefParam(info_queue, IID_ID3D12InfoQueue)))) {
+					D3D12_INFO_QUEUE_FILTER filter;
+					ZeroMemory(&filter, sizeof(filter));
+
+					D3D12_MESSAGE_ID denyIds[] =
+					{
+						D3D12_MESSAGE_ID_CLEARDEPTHSTENCILVIEW_MISMATCHINGCLEARVALUE
+					};
+					filter.DenyList.NumIDs = sizeof(denyIds) / sizeof(D3D12_MESSAGE_ID);
+					filter.DenyList.pIDList = denyIds;
+
+					CheckHResult(info_queue->AddStorageFilterEntries(&filter));
+				}
+#endif
+
 				D3D12_COMMAND_QUEUE_DESC queue_desc =
 				{
 					D3D12_COMMAND_LIST_TYPE_DIRECT, //Type

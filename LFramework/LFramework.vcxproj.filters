@@ -165,6 +165,15 @@
     <ClInclude Include="Helper\WindowThread.h">
       <Filter>Helper</Filter>
     </ClInclude>
+    <ClInclude Include="Helper\ShellHelper.h">
+      <Filter>Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LClock.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="LCLib\Timer.h">
+      <Filter>LCLib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Win32\LCLib\Consoles.cpp">
@@ -256,6 +265,12 @@
     </ClCompile>
     <ClCompile Include="Core\LMessage.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Helper\ShellHelper.cpp">
+      <Filter>Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="LCLib\Timer.cpp">
+      <Filter>LCLib</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

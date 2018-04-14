@@ -9,6 +9,7 @@
 
 #include "../Render/IContext.h"
 #include "LFramework/Win32/LCLib/COM.h"
+#include "LFramework/Helper/ShellHelper.h"
 
 #pragma warning(disable:4715) //return value or throw exception;
 
@@ -733,7 +734,8 @@ namespace platform {
 						continue;
 					}
 					string_view profile = CompileProfile(compile_type);
-
+					using namespace leo;
+					LFL_DEBUG_DECL_TIMER(ComposePassShader,sfmt("CompilerReflectStrip Type:%s ", first.c_str()))
 					auto blob = X::Shader::CompileToDXBC(compile_type, effect_desc.effect_code, compile_entry_point, AppendCompileMacros(macros, compile_type), profile,
 						D3DFlags::D3DCOMPILE_ENABLE_STRICTNESS |
 #ifndef NDEBUG
