@@ -282,6 +282,9 @@
     <ClInclude Include="Core\Materail.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Core\AssetResourceScheduler.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

@@ -83,6 +83,7 @@
     <ClInclude Include="Asset\MeshX.h" />
     <ClInclude Include="Asset\TexCompression.hpp" />
     <ClInclude Include="Asset\TextureX.h" />
+    <ClInclude Include="Core\AssetResourceScheduler.h" />
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core\LFile.h" />
     <ClInclude Include="Core\Materail.h" />
