@@ -18,7 +18,7 @@ namespace platform_ex::Windows::D3D12 {
 	public:
 		GraphicsBuffer(platform::Render::Buffer::Usage usage, uint32_t access_hint,
 			uint32_t size_in_byte,platform::Render::EFormat fmt);
-		virtual ~GraphicsBuffer();
+		~GraphicsBuffer() override;
 
 		void CopyToBuffer(platform::Render::GraphicsBuffer& rhs) override;
 

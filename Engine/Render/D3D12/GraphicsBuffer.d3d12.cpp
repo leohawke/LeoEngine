@@ -162,10 +162,22 @@ namespace platform_ex::Windows::D3D12 {
 				COMPtr_RefParam(buffer_upload, IID_ID3D12Resource)));
 			D3D::Debug(buffer_upload, "GraphicsBuffer::buffer_upload[TEMP]");
 
+			D3D12_RANGE read_range{ 0,0 };
+
 			void* p;
-			buffer_upload->Map(0, nullptr, &p);
+			buffer_upload->Map(0, &read_range, &p);
 			memcpy(p, init_data, size_in_byte);
 			buffer_upload->Unmap(0, nullptr);
+
+			D3D12_RESOURCE_BARRIER barrier;
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+			if (UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_COPY_DEST)) {
+				cmd_list->ResourceBarrier(1, &barrier);
+			}
+
+			curr_state = init_state;
 
 			cmd_list->CopyResource(resource.Get(), buffer_upload.Get());
 
