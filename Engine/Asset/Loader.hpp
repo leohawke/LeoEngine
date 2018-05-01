@@ -35,9 +35,6 @@ namespace asset {
 	public:
 		using AssetType = T;
 
-		virtual ~AssetLoading()
-		{}
-
 		//wait Coroutine()
 		//返回值非空 已完成
 		virtual std::experimental::generator<std::shared_ptr<AssetType>> Coroutine() = 0;

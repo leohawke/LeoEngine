@@ -13,7 +13,7 @@ namespace platform {
 	namespace X {
 		using path = std::experimental::filesystem::path;
 
-		asset::MeshAsset LoadMeshAsset(path const& meshpath);
+		std::shared_ptr<asset::MeshAsset> LoadMeshAsset(path const& meshpath);
 	}
 }
 #endif

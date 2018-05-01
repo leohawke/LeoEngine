@@ -151,6 +151,9 @@ _t type
 #define ImplDeDtor(_t) \
 	_t::DefDeDtor(_t)
 
+#define ImplDeCtor(_t) \
+	_t::DefDeCtor(_t)
+
 #define DefVrDtor(_t) \
 	virtual ~_t() = default;
 #define ImplEmptyDtor(_t) \

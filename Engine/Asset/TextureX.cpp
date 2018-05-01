@@ -5,6 +5,8 @@
 #include "CompressionETC.hpp"
 
 #include "../Render/Color_T.hpp"
+#include "../Core/AssetResourceScheduler.h"
+
 
 #include <LFramework/LCLib/Debug.h>
 
@@ -132,7 +134,7 @@ namespace platform {
 
 
 	Render::TexturePtr LoadDDSTexture(File && file, uint32 access) {
-		return asset::SyncLoad<dds::DDSLoadingDesc>(std::move(file), access);
+		return platform::AssetResourceScheduler::Instance().SyncLoad<dds::DDSLoadingDesc>(std::move(file), access);
 	}
 
 	Render::TexturePtr X::LoadTexture(X::path const& texpath, uint32 access) {

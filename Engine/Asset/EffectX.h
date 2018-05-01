@@ -13,7 +13,7 @@ namespace platform {
 	namespace X {
 		using path = std::experimental::filesystem::path;
 
-		asset::EffectAsset LoadEffectAsset(path const& effectpath);
+		std::shared_ptr<asset::EffectAsset> LoadEffectAsset(path const& effectpath);
 
 		namespace Shader {
 			Render::ShaderCompose::ShaderBlob CompileToDXBC(Render::ShaderCompose::Type type, std::string_view Code,

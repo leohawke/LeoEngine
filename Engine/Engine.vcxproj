@@ -35,6 +35,7 @@
     <ClCompile Include="Asset\TexCompression.cpp" />
     <ClCompile Include="Asset\CompressionBC.cpp" />
     <ClCompile Include="Asset\TextureX.cpp" />
+    <ClCompile Include="Core\AssetResourceScheduler.cpp" />
     <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Core\Mesh.cpp" />
     <ClCompile Include="Render\Color_T.cpp" />

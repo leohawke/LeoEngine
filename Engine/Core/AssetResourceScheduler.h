@@ -16,7 +16,7 @@ namespace platform {
 	public:
 		template<typename Loading, typename... _tParams>
 		std::shared_ptr<typename Loading::AssetType> SyncLoad(_tParams&&... args) {
-			auto loading = std::make_shared<Loading>(lforward(args)...);
+			auto loading = std::make_unique<Loading>(lforward(args)...);
 
 			/*TODO 
 			auto task = TaskScheduler::Instance().CreateTask(loading->Coroutine());
@@ -47,11 +47,11 @@ namespace platform {
 			leo::uint32 loaded_tick;
 			leo::uint8 delay_tick;
 			//@}
-			std::shared_ptr<void>;
+			std::shared_ptr<void> loaded_asset;
 		};
 
 		//todo thread safe
-		leo::used_list_cache<asset::IAssetLoading, AssetLoadedDesc> asset_loaded_caches;
+		leo::used_list_cache<std::unique_ptr<asset::IAssetLoading>, AssetLoadedDesc,std::hash<std::unique_ptr<asset::IAssetLoading>>> asset_loaded_caches;
 	};
 }
 

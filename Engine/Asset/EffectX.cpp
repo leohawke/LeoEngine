@@ -1,15 +1,20 @@
+#include<LBase/typeinfo.h>
+
+#include <LScheme/LScheme.h>
+
+#include "LFramework/Win32/LCLib/COM.h"
+#include "LFramework/Helper/ShellHelper.h"
+
+#include "../Render/IContext.h"
+#include "../Core/AssetResourceScheduler.h"
+
 #include "EffectX.h"
 #include "Loader.hpp"
 
-#include<LBase/typeinfo.h>
-#include <LScheme/LScheme.h>
 #include <memory>
 #include <fstream>
 #include <iterator>
 
-#include "../Render/IContext.h"
-#include "LFramework/Win32/LCLib/COM.h"
-#include "LFramework/Helper/ShellHelper.h"
 
 #pragma warning(disable:4715) //return value or throw exception;
 
@@ -840,9 +845,9 @@ namespace platform {
 		}
 	};
 
-	asset::EffectAsset platform::X::LoadEffectAsset(path const & effectpath)
+	std::shared_ptr<asset::EffectAsset> platform::X::LoadEffectAsset(path const & effectpath)
 	{
-		return  std::move(*asset::SyncLoad<EffectLoadingDesc>(effectpath));
+		return  platform::AssetResourceScheduler::Instance().SyncLoad<EffectLoadingDesc>(effectpath);
 	}
 }
 

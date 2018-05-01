@@ -1,5 +1,5 @@
 #include "MeshX.h"
-#include "Loader.hpp"
+#include "../Core/AssetResourceScheduler.h"
 #include<LBase/typeinfo.h>
 #include "../Core/LFile.h"
 #include <LBase/lmathtype.hpp>
@@ -254,7 +254,7 @@ namespace platform {
 	};
 
 
-	asset::MeshAsset X::LoadMeshAsset(path const& meshpath) {
-		return  std::move(*asset::SyncLoad<MeshLoadingDesc<GeomertySection>>(meshpath));
+	std::shared_ptr<asset::MeshAsset> X::LoadMeshAsset(path const& meshpath) {
+		return  platform::AssetResourceScheduler::Instance().SyncLoad<MeshLoadingDesc<GeomertySection>>(meshpath);
 	}
 }

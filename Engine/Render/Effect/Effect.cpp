@@ -128,7 +128,7 @@ namespace platform::Render::Effect {
 	{
 		//TODO Name Rule
 		auto EffectAsset = X::LoadEffectAsset(name + ".lsl");
-		LoadAsset(leo::make_observer(&EffectAsset));
+		LoadAsset(leo::make_observer(EffectAsset.get()));
 	}
 
 	Effect::~Effect() {

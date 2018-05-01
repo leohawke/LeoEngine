@@ -184,7 +184,6 @@
       <SDLCheck>true</SDLCheck>
       <DisableSpecificWarnings>4180</DisableSpecificWarnings>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalOptions>-m64 -fmsc-version=1912 /std:c++latest -D_HAS_CXX17=1 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
