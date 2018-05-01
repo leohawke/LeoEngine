@@ -8,11 +8,14 @@
 #include <LBase/ldef.h>
 #include <LBase/exception.h>
 #include <LBase/typeinfo.h>
+#include <LBase/id.hpp>
 
 #include "TextureX.h"
 #include "Loader.hpp"
 #include "CompressionBC.hpp"
 #include "..\Render\IContext.h"
+
+#include <experimental/filesystem>
 
 namespace dds {
 	using namespace leo::inttype;
@@ -786,9 +789,11 @@ namespace dds {
 
 	class DDSLoadingDesc : public asset::AssetLoading<Texture> {
 	private:
+		using path = std::experimental::filesystem::path;
 		struct DDSDesc {
 			uint32 access;
 			platform::File file;
+			path tex_path;
 
 			struct Data {
 
@@ -806,8 +811,9 @@ namespace dds {
 
 		static EFormat convert_fmts[][2];
 	public:
-		DDSLoadingDesc(platform::File && file, uint32 access) {
-			desc.file.Swap(file);
+		DDSLoadingDesc(path const& texpath, uint32 access) {
+			desc.tex_path = texpath;
+			desc.file = platform::File{ texpath.wstring(), platform::File::kToRead };
 			desc.access = access;
 			desc.data = std::make_shared<DDSDesc::Data>();
 			desc.tex = std::make_shared<TexturePtr>();
@@ -815,6 +821,10 @@ namespace dds {
 
 		std::size_t Type() const override {
 			return leo::type_id<DDSLoadingDesc>().hash_code();
+		}
+
+		std::size_t Hash() const override {
+			return leo::hash_combine_seq(Type(), desc.tex_path.wstring(), desc.access);
 		}
 
 		std::experimental::generator<TexturePtr> Coroutine() override {

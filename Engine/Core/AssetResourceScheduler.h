@@ -10,6 +10,7 @@
 #include "../Asset/Loader.hpp"
 
 namespace platform {
+
 	/*! \brief 主要职责是负责分发任务到TaskScheduler(TODO),也负责延迟资源的生命周期
 	*/
 	class AssetResourceScheduler :leo::nonmovable, leo::noncopyable {
@@ -18,7 +19,7 @@ namespace platform {
 		std::shared_ptr<typename Loading::AssetType> SyncLoad(_tParams&&... args) {
 			auto loading = std::make_unique<Loading>(lforward(args)...);
 
-			/*TODO 
+			/*TODO
 			auto task = TaskScheduler::Instance().CreateTask(loading->Coroutine());
 			auto ret = task.Wait();
 			*/
@@ -50,8 +51,14 @@ namespace platform {
 			std::shared_ptr<void> loaded_asset;
 		};
 
+		struct IAssetLoadingHash {
+			std::size_t operator()(const std::unique_ptr<asset::IAssetLoading>& iasset) const lnoexcept {
+				return iasset->Hash();
+			}
+		};
+
 		//todo thread safe
-		leo::used_list_cache<std::unique_ptr<asset::IAssetLoading>, AssetLoadedDesc,std::hash<std::unique_ptr<asset::IAssetLoading>>> asset_loaded_caches;
+		leo::used_list_cache<std::unique_ptr<asset::IAssetLoading>, AssetLoadedDesc,IAssetLoadingHash> asset_loaded_caches;
 	};
 }
 

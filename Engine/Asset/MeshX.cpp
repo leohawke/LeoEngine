@@ -1,8 +1,12 @@
-#include "MeshX.h"
-#include "../Core/AssetResourceScheduler.h"
 #include<LBase/typeinfo.h>
-#include "../Core/LFile.h"
 #include <LBase/lmathtype.hpp>
+#include <LBase/id.hpp>
+
+#include "../Core/AssetResourceScheduler.h"
+#include "../Core/LFile.h"
+
+#include "MeshX.h"
+
 namespace platform {
 	//Mesh文件格式
 	struct MeshHeader
@@ -207,6 +211,10 @@ namespace platform {
 
 		std::size_t Type() const override {
 			return leo::type_id<MeshLoadingDesc>().hash_code();
+		}
+
+		std::size_t Hash() const override {
+			return leo::hash_combine_seq(Type(), mesh_desc.mesh_path.wstring());
 		}
 
 

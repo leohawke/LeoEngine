@@ -26,6 +26,8 @@ namespace asset {
 		virtual ~IAssetLoading();
 
 		virtual std::size_t Type() const = 0;
+
+		virtual std::size_t Hash() const = 0;
 	};
 
 

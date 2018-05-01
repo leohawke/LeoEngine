@@ -133,12 +133,12 @@ namespace platform {
 	{}
 
 
-	Render::TexturePtr LoadDDSTexture(File && file, uint32 access) {
-		return platform::AssetResourceScheduler::Instance().SyncLoad<dds::DDSLoadingDesc>(std::move(file), access);
+	Render::TexturePtr LoadDDSTexture(X::path const& texpath, uint32 access) {
+		return platform::AssetResourceScheduler::Instance().SyncLoad<dds::DDSLoadingDesc>(texpath, access);
 	}
 
 	Render::TexturePtr X::LoadTexture(X::path const& texpath, uint32 access) {
-		return LoadDDSTexture({ texpath.wstring(), platform::File::kToRead }, access);
+		return LoadDDSTexture(texpath, access);
 	}
 
 

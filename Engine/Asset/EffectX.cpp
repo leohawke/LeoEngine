@@ -1,4 +1,5 @@
 #include<LBase/typeinfo.h>
+#include <LBase/id.hpp>
 
 #include <LScheme/LScheme.h>
 
@@ -84,6 +85,10 @@ namespace platform {
 
 		std::size_t Type() const override {
 			return leo::type_id<EffectLoadingDesc>().hash_code();
+		}
+
+		std::size_t Hash() const override {
+			return leo::hash_combine_seq(Type(), effect_desc.effect_path.wstring());
 		}
 
 		std::experimental::generator<std::shared_ptr<AssetType>> Coroutine() override {
