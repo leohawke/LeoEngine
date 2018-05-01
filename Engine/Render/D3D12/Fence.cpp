@@ -12,8 +12,10 @@ namespace platform_ex::Windows::D3D12 {
 
 	uint64 Fence::Signal(Type type)
 	{
-		Context::Instance().GetCommandQueue((Device::CommandType)type)->Signal(fence.Get(), fence_val);
-		return fence_val++;
+		uint64 const id = fence_val;
+		Context::Instance().GetCommandQueue((Device::CommandType)type)->Signal(fence.Get(),id);
+		++fence_val;
+		return id;
 	}
 	void Fence::Wait(uint64 id)
 	{

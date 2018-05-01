@@ -76,6 +76,7 @@ namespace platform_ex::Windows::D3D12 {
 			auto val = GetFence(type).Signal(Fence::Render);
 			GetFence(type).Wait(val);
 
+			GetDevice().d3d_cmd_allocators[type]->Reset();
 			ResetCommand(type);
 		}
 	}
