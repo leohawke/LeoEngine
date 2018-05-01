@@ -5,6 +5,8 @@
 #include "CompressionETC.hpp"
 
 #include "../Render/Color_T.hpp"
+#include "../Render/IContext.h"
+
 #include "../Core/AssetResourceScheduler.h"
 
 
@@ -134,7 +136,25 @@ namespace platform {
 
 
 	Render::TexturePtr LoadDDSTexture(X::path const& texpath, uint32 access) {
-		return platform::AssetResourceScheduler::Instance().SyncLoad<dds::DDSLoadingDesc>(texpath, access);
+		auto pAsset = platform::AssetResourceScheduler::Instance().SyncLoad<dds::DDSLoadingDesc>(texpath);
+		auto& device = Render::Context::Instance().GetDevice();
+		switch (pAsset->GetTextureType()) {
+		case TextureType::T_1D:
+			return leo::share_raw(device.CreateTexture(pAsset->GetWidth(), pAsset->GetMipmapSize(), pAsset->GetArraySize(),
+				pAsset->GetFormat(), access, { 1,0 },pAsset->GetElementInitDatas().data()));
+		case TextureType::T_2D:
+			return leo::share_raw(device.CreateTexture(pAsset->GetWidth(), pAsset->GetHeight(), pAsset->GetMipmapSize(), pAsset->GetArraySize(),
+				pAsset->GetFormat(), access, { 1,0 }, pAsset->GetElementInitDatas().data()));
+		case TextureType::T_3D:
+			return leo::share_raw(device.CreateTexture(pAsset->GetWidth(), pAsset->GetHeight(), pAsset->GetDepth(), pAsset->GetMipmapSize(), pAsset->GetArraySize(),
+				pAsset->GetFormat(), access, { 1,0 }, pAsset->GetElementInitDatas().data()));
+		case TextureType::T_Cube:
+			return leo::share_raw(device.CreateTextureCube(pAsset->GetWidth(), pAsset->GetMipmapSize(), pAsset->GetArraySize(),
+				pAsset->GetFormat(), access, { 1,0 }, pAsset->GetElementInitDatas().data()));
+		}
+
+		LAssert(false, "Out of TextureType");
+		return {};
 	}
 
 	Render::TexturePtr X::LoadTexture(X::path const& texpath, uint32 access) {

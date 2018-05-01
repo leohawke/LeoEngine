@@ -13,7 +13,7 @@
 #include "TextureX.h"
 #include "Loader.hpp"
 #include "CompressionBC.hpp"
-#include "..\Render\IContext.h"
+#include "../Render/IContext.h"
 
 #include <experimental/filesystem>
 
@@ -787,36 +787,61 @@ namespace dds {
 		return format;
 	}
 
-	class DDSLoadingDesc : public asset::AssetLoading<Texture> {
+	class DDSAsset :leo::noncopyable {
+	public:
+		DDSAsset() = default;
+
+		DefGetter(const lnothrow, platform::Render::TextureType, TextureType, type)
+			DefGetter(lnothrow, platform::Render::TextureType&, TextureTypeRef, type)
+
+			DefGetter(const lnothrow, uint16, Width, width)
+			DefGetter(lnothrow, uint16&, WidthRef, width)
+
+			DefGetter(const lnothrow, uint16, Height, height)
+			DefGetter(lnothrow, uint16&, HeightRef, height)
+
+			DefGetter(const lnothrow, uint16, Depth, depth)
+			DefGetter(lnothrow, uint16&, DepthRef, depth)
+
+			DefGetter(const lnothrow, uint8, MipmapSize, mipmap_size)
+			DefGetter(lnothrow, uint8&, MipmapSizeRef, mipmap_size)
+
+			DefGetter(const lnothrow, uint8, ArraySize, array_size)
+			DefGetter(lnothrow, uint8&, ArraySizeRef, array_size)
+
+			DefGetter(const lnothrow, EFormat, Format, format)
+			DefGetter(lnothrow, EFormat&, FormatRef, format)
+
+			DefGetter(const lnothrow, const std::vector<ElementInitData>&, ElementInitDatas, init_data)
+			DefGetter(lnothrow, std::vector<ElementInitData>&, ElementInitDatasRef, init_data)
+
+			DefGetter(const lnothrow, const std::vector<uint8>&, DataBlock, data_block)
+			DefGetter(lnothrow, std::vector<uint8>&, DataBlockRef, data_block)
+
+	private:
+		platform::Render::TextureType type;
+		uint16 width, height, depth;
+		uint8  mipmap_size, array_size;
+		EFormat format;
+		std::vector<ElementInitData> init_data;
+		std::vector<uint8> data_block;
+	};
+
+	class DDSLoadingDesc : public asset::AssetLoading<DDSAsset> {
 	private:
 		using path = std::experimental::filesystem::path;
 		struct DDSDesc {
-			uint32 access;
 			platform::File file;
-			path tex_path;
+			path dds_path;
 
-			struct Data {
-
-				platform::Render::TextureType type;
-				uint16 width, height, depth;
-				uint8  mipmap_size, array_size;
-				EFormat format;
-				std::vector<ElementInitData> init_data;
-				std::vector<uint8> data_block;
-			};
-
-			std::shared_ptr<Data> data;
-			std::shared_ptr<platform::Render::TexturePtr> tex;
-		} desc;
+			std::shared_ptr<AssetType> dds_asset;
+		} dds_desc;
 
 		static EFormat convert_fmts[][2];
 	public:
-		DDSLoadingDesc(path const& texpath, uint32 access) {
-			desc.tex_path = texpath;
-			desc.file = platform::File{ texpath.wstring(), platform::File::kToRead };
-			desc.access = access;
-			desc.data = std::make_shared<DDSDesc::Data>();
-			desc.tex = std::make_shared<TexturePtr>();
+		DDSLoadingDesc(path const& texpath) {
+			dds_desc.dds_path = texpath;
+			dds_desc.file = platform::File{ texpath.wstring(), platform::File::kToRead };
 		}
 
 		std::size_t Type() const override {
@@ -824,197 +849,98 @@ namespace dds {
 		}
 
 		std::size_t Hash() const override {
-			return leo::hash_combine_seq(Type(), desc.tex_path.wstring(), desc.access);
+			return leo::hash_combine_seq(Type(), dds_desc.dds_path.wstring());
 		}
 
-		std::experimental::generator<TexturePtr> Coroutine() override {
-			co_yield CreateTexture();
+		std::experimental::generator<std::shared_ptr<AssetType>> Coroutine() override {
 			co_yield ReadDDS();
-			co_yield HWResourceCreate();
+			co_yield ConvertFormat();
 		}
 
 	private:
-		TexturePtr CreateTexture() {
+		std::shared_ptr<AssetType> ReadDDS() {
+			auto pAsset = dds_desc.dds_asset = std::make_shared<AssetType>();
 			{
-				auto& data = *desc.data;
-
-				{
-					uint32 row_pitch, slice_pitch;
-					platform::X::GetImageInfo(desc.file, data.type,
-						data.width, data.height, data.depth, data.mipmap_size, data.array_size,
-						data.format, row_pitch, slice_pitch);
-				}
-
-				auto& caps = Context::Instance().GetDevice().GetCaps();
-
-				if ((TextureType::T_3D == data.type) && (caps.max_texture_depth < data.depth))
-				{
-					data.type = TextureType::T_2D;
-					data.height *= data.depth;
-					data.depth = 1;
-					data.mipmap_size = 1;
-					data.init_data.resize(1);
-				}
-
-				auto array_size = data.array_size;
-				if (TextureType::T_Cube == data.type)
-					array_size *= 6;
-
-				if (((EF_BC5 == data.format) && !caps.TextureFormatSupport(EF_BC5))
-					|| ((EF_BC5_SRGB == data.format) && !caps.TextureFormatSupport(EF_BC5_SRGB)))
-				{
-					if (IsSRGB(data.format))
-					{
-						data.format = EF_BC3_SRGB;
-					}
-					else
-					{
-						data.format = EF_BC3;
-					}
-				}
-				if (((EF_BC4 == data.format) && !caps.TextureFormatSupport(EF_BC4))
-					|| ((EF_BC4_SRGB == data.format) && !caps.TextureFormatSupport(EF_BC4_SRGB)))
-				{
-					if (IsSRGB(data.format))
-					{
-						data.format = EF_BC1_SRGB;
-					}
-					else
-					{
-						data.format = EF_BC1;
-					}
-				}
-
-
-				while (!caps.TextureFormatSupport(data.format))
-				{
-					bool found = false;
-					for (size_t i = 0; i != 27; ++i)
-					{
-						if (convert_fmts[i][0] == data.format)
-						{
-							data.format = convert_fmts[i][1];
-							found = true;
-							break;
-						}
-					}
-
-					if (!found)
-					{
-						LE_LogError("format (%ld) is not supported.", data.format);
-						break;
-					}
-				}
+				platform::X::GetImageInfo(dds_desc.file, pAsset->GetTextureTypeRef(),
+					pAsset->GetWidthRef(), pAsset->GetHeightRef(), pAsset->GetDepthRef(), pAsset->GetMipmapSizeRef(), pAsset->GetArraySizeRef(),
+					pAsset->GetFormatRef(), pAsset->GetElementInitDatasRef(), pAsset->GetDataBlockRef());
 			}
-			auto& device = Context::Instance().GetDevice();
-
-			auto& data = *desc.data;
-
-			TexturePtr texture;
-			switch (data.type) {
-			case TextureType::T_1D:
-				texture =leo::share_raw(device.CreateTexture(data.width, data.mipmap_size, data.array_size,
-					data.format, desc.access, {1,0}, std::nullopt));
-				break;
-			case TextureType::T_2D:
-				texture = leo::share_raw(device.CreateTexture(data.width, data.height, data.mipmap_size, data.array_size,
-					data.format, desc.access, {1,0}, std::nullopt));
-				break;
-			case TextureType::T_3D:
-				texture = leo::share_raw(device.CreateTexture(data.width, data.height, data.depth, data.mipmap_size, data.array_size,
-					data.format, desc.access, {1,0}, std::nullopt));
-				break;
-			case TextureType::T_Cube:
-				texture = leo::share_raw(device.CreateTextureCube(data.width, data.mipmap_size, data.array_size,
-					data.format, desc.access, {1,0}, std::nullopt));
-				break;
-			default:
-				LAssert(false, "Out of TextureType");
-			}
-
-			*desc.tex = texture;
 			return nullptr;
 		}
 
-		TexturePtr ReadDDS() {
-			auto& tex_data = *desc.data;
-
-			platform::X::GetImageInfo(desc.file, tex_data.type,
-				tex_data.width, tex_data.height, tex_data.depth,
-				tex_data.mipmap_size, tex_data.array_size, tex_data.format,
-				tex_data.init_data, tex_data.data_block);
-
+		std::shared_ptr<AssetType> ConvertFormat() {
+			auto pAsset = dds_desc.dds_asset;
 			auto caps = Context::Instance().GetDevice().GetCaps();
-			if ((TextureType::T_3D == tex_data.type) && (caps.max_texture_depth < tex_data.depth))
+			if ((TextureType::T_3D == pAsset->GetTextureType()) && (caps.max_texture_depth < pAsset->GetDepth()))
 			{
-				tex_data.type = TextureType::T_2D;
-				tex_data.height *= tex_data.depth;
-				tex_data.depth = 1;
-				tex_data.mipmap_size = 1;
-				tex_data.init_data.resize(1);
+				pAsset->GetTextureTypeRef() = TextureType::T_2D;
+				pAsset->GetHeightRef() *= pAsset->GetDepth();
+				pAsset->GetDepthRef() = 1;
+				pAsset->GetMipmapSizeRef() = 1;
+				pAsset->GetElementInitDatasRef().resize(1);
 			}
 
-			uint32_t array_size = tex_data.array_size;
-			if (TextureType::T_Cube == tex_data.type)
+			uint32_t array_size = pAsset->GetArraySize();
+			if (TextureType::T_Cube == pAsset->GetTextureType())
 			{
 				array_size *= 6;
 			}
 
-			if (((EF_BC5 == tex_data.format) && !caps.TextureFormatSupport(EF_BC5))
-				|| ((EF_BC5_SRGB == tex_data.format) && !caps.TextureFormatSupport(EF_BC5_SRGB)))
+			if (((EF_BC5 == pAsset->GetFormat()) && !caps.TextureFormatSupport(EF_BC5))
+				|| ((EF_BC5_SRGB == pAsset->GetFormat()) && !caps.TextureFormatSupport(EF_BC5_SRGB)))
 			{
 				BC1Block tmp;
-				for (size_t i = 0; i < tex_data.init_data.size(); ++i)
+				for (size_t i = 0; i < pAsset->GetElementInitDatas().size(); ++i)
 				{
-					for (size_t j = 0; j < tex_data.init_data[i].slice_pitch; j += sizeof(BC4Block) * 2)
+					for (size_t j = 0; j < pAsset->GetElementInitDatas()[i].slice_pitch; j += sizeof(BC4Block) * 2)
 					{
-						char* p = static_cast<char*>(const_cast<void*>(tex_data.init_data[i].data)) + j;
+						char* p = static_cast<char*>(const_cast<void*>(pAsset->GetElementInitDatasRef()[i].data)) + j;
 
 						BC4ToBC1G(tmp, *reinterpret_cast<BC4Block const *>(p + sizeof(BC4Block)));
 						std::memcpy(p + sizeof(BC4Block), &tmp, sizeof(BC1Block));
 					}
 				}
 
-				if (IsSRGB(tex_data.format))
+				if (IsSRGB(pAsset->GetFormat()))
 				{
-					tex_data.format = EF_BC3_SRGB;
+					pAsset->GetFormatRef() = EF_BC3_SRGB;
 				}
 				else
 				{
-					tex_data.format = EF_BC3;
+					pAsset->GetFormatRef() = EF_BC3;
 				}
 			}
-			if (((EF_BC4 == tex_data.format) && !caps.TextureFormatSupport(EF_BC4))
-				|| ((EF_BC4_SRGB == tex_data.format) && !caps.TextureFormatSupport(EF_BC4_SRGB)))
+			if (((EF_BC4 == pAsset->GetFormat()) && !caps.TextureFormatSupport(EF_BC4))
+				|| ((EF_BC4_SRGB == pAsset->GetFormat()) && !caps.TextureFormatSupport(EF_BC4_SRGB)))
 			{
 				BC1Block tmp;
-				for (size_t i = 0; i < tex_data.init_data.size(); ++i)
+				for (size_t i = 0; i < pAsset->GetElementInitDatas().size(); ++i)
 				{
-					for (size_t j = 0; j < tex_data.init_data[i].slice_pitch; j += sizeof(BC4Block))
+					for (size_t j = 0; j < pAsset->GetElementInitDatas()[i].slice_pitch; j += sizeof(BC4Block))
 					{
-						char* p = static_cast<char*>(const_cast<void*>(tex_data.init_data[i].data)) + j;
+						char* p = static_cast<char*>(const_cast<void*>(pAsset->GetElementInitDatasRef()[i].data)) + j;
 
 						BC4ToBC1G(tmp, *reinterpret_cast<BC4Block const *>(p));
 						std::memcpy(p, &tmp, sizeof(BC1Block));
 					}
 				}
 
-				if (IsSRGB(tex_data.format))
+				if (IsSRGB(pAsset->GetFormat()))
 				{
-					tex_data.format = EF_BC1_SRGB;
+					pAsset->GetFormatRef() = EF_BC1_SRGB;
 				}
 				else
 				{
-					tex_data.format = EF_BC1;
+					pAsset->GetFormatRef() = EF_BC1;
 				}
 			}
 
-			while (!caps.TextureFormatSupport(tex_data.format))
+			while (!caps.TextureFormatSupport(pAsset->GetFormat()))
 			{
 				bool found = false;
 				for (size_t i = 0; i != 27; ++i)
 				{
-					if (convert_fmts[i][0] == tex_data.format)
+					if (convert_fmts[i][0] == pAsset->GetFormat())
 					{
 						uint32_t const src_elem_size = NumFormatBytes(convert_fmts[i][0]);
 						uint32_t const dst_elem_size = NumFormatBytes(convert_fmts[i][1]);
@@ -1027,13 +953,13 @@ namespace dds {
 						if (needs_new_data_block)
 						{
 							uint32_t new_data_block_size = 0;
-							new_sub_res_start.resize(array_size * tex_data.mipmap_size);
+							new_sub_res_start.resize(array_size * pAsset->GetMipmapSize());
 
 							for (size_t index = 0; index < array_size; ++index)
 							{
-								uint32_t width = tex_data.width;
-								uint32_t height = tex_data.height;
-								for (size_t level = 0; level < tex_data.mipmap_size; ++level)
+								uint32_t width = pAsset->GetWidth();
+								uint32_t height = pAsset->GetHeight();
+								for (size_t level = 0; level < pAsset->GetMipmapSize(); ++level)
 								{
 									uint32_t slice_pitch;
 									if (IsCompressedFormat(convert_fmts[i][1]))
@@ -1045,7 +971,7 @@ namespace dds {
 										slice_pitch = width * height * dst_elem_size;
 									}
 
-									size_t sub_res = index * tex_data.mipmap_size + level;
+									size_t sub_res = index * pAsset->GetMipmapSize() + level;
 									new_sub_res_start[sub_res] = new_data_block_size;
 									new_data_block_size += slice_pitch;
 
@@ -1059,10 +985,10 @@ namespace dds {
 
 						for (size_t index = 0; index < array_size; ++index)
 						{
-							uint32_t width = tex_data.width;
-							uint32_t height = tex_data.height;
-							uint32_t depth = tex_data.depth;
-							for (size_t level = 0; level < tex_data.mipmap_size; ++level)
+							uint32_t width = pAsset->GetWidth();
+							uint32_t height = pAsset->GetHeight();
+							uint32_t depth = pAsset->GetDepth();
+							for (size_t level = 0; level < pAsset->GetMipmapSize(); ++level)
 							{
 								uint32_t row_pitch, slice_pitch;
 								if (IsCompressedFormat(convert_fmts[i][1]))
@@ -1076,7 +1002,7 @@ namespace dds {
 									slice_pitch = height * row_pitch;
 								}
 
-								size_t sub_res = index * tex_data.mipmap_size + level;
+								size_t sub_res = index * pAsset->GetMipmapSize() + level;
 								uint8_t* sub_data_block;
 								if (needs_new_data_block)
 								{
@@ -1085,31 +1011,31 @@ namespace dds {
 								else
 								{
 									sub_data_block = static_cast<uint8_t*>(
-										const_cast<void*>(tex_data.init_data[sub_res].data));
+										const_cast<void*>(pAsset->GetElementInitDatas()[sub_res].data));
 								}
 								platform::X::ResizeTexture(sub_data_block, row_pitch, slice_pitch,
 									convert_fmts[i][1], width, height, depth,
-									tex_data.init_data[sub_res].data,
-									tex_data.init_data[sub_res].row_pitch,
-									tex_data.init_data[sub_res].slice_pitch,
+									pAsset->GetElementInitDatas()[sub_res].data,
+									pAsset->GetElementInitDatas()[sub_res].row_pitch,
+									pAsset->GetElementInitDatas()[sub_res].slice_pitch,
 									convert_fmts[i][0], width, height, depth, false);
 
 								width = std::max<uint32_t>(1U, width / 2);
 								height = std::max<uint32_t>(1U, height / 2);
 								depth = std::max<uint32_t>(1U, depth / 2);
 
-								tex_data.init_data[sub_res].row_pitch = row_pitch;
-								tex_data.init_data[sub_res].slice_pitch = slice_pitch;
-								tex_data.init_data[sub_res].data = sub_data_block;
+								pAsset->GetElementInitDatasRef()[sub_res].row_pitch = row_pitch;
+								pAsset->GetElementInitDatasRef()[sub_res].slice_pitch = slice_pitch;
+								pAsset->GetElementInitDatasRef()[sub_res].data = sub_data_block;
 							}
 						}
 
 						if (needs_new_data_block)
 						{
-							tex_data.data_block.swap(new_data_block);
+							pAsset->GetDataBlockRef().swap(new_data_block);
 						}
 
-						tex_data.format = convert_fmts[i][1];
+						pAsset->GetFormatRef() = convert_fmts[i][1];
 						found = true;
 						break;
 					}
@@ -1117,24 +1043,16 @@ namespace dds {
 
 				if (!found)
 				{
+					LE_LogError("format (%ld) is not supported.", pAsset->GetFormat());
 					break;
 				}
 			}
 
-			return nullptr;
-		}
-
-		TexturePtr HWResourceCreate() {
-			auto & tex = *desc.tex;
-			if (!tex || !tex->HWResourceReady()) {
-				tex->HWResourceCreate(desc.data->init_data.data());
-				desc.data.reset();
-			}
-			return tex;
+			return pAsset;
 		}
 	};
 
-	EFormat DDSLoadingDesc::convert_fmts[][2]=
+	EFormat DDSLoadingDesc::convert_fmts[][2] =
 	{
 		{ EF_BC1, EF_ARGB8 },
 		{ EF_BC1_SRGB, EF_ARGB8_SRGB },
