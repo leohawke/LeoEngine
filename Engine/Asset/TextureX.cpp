@@ -13,8 +13,10 @@
 #include <LFramework/LCLib/Debug.h>
 
 namespace platform {
+	using namespace Render::IFormat;
 	using Render::TextureType;
-	void X::GetImageInfo(File const & file, Render::TextureType & type, 
+	using Render::Texture;
+	uint64 X::GetImageInfo(File const & file, Render::TextureType & type,
 		uint16 & width, uint16 & height, uint16 & depth, 
 		uint8 & num_mipmaps, uint8 & array_size, Render::EFormat & format, 
 		uint32 & row_pitch, uint32 & slice_pitch)
@@ -125,6 +127,8 @@ namespace platform {
 				}
 			}
 		}
+
+		return tex_res.GetOffset();
 	}
 
 	void X::GetImageInfo(File const & file, Render::TextureType& type,
@@ -132,7 +136,191 @@ namespace platform {
 		uint8& num_mipmaps, uint8& array_size,Render::EFormat& format,
 		std::vector<Render::ElementInitData> & init_data,
 		std::vector<uint8>& data_block)
-	{}
+	{
+		uint32 row_pitch, slice_pitch;
+		auto offset = GetImageInfo(file, type, width, height, depth, num_mipmaps, array_size, format,
+			row_pitch, slice_pitch);
+
+		FileRead tex_res{ file };
+		tex_res.SkipTo(offset);
+
+		auto const fmt_size = NumFormatBytes(format);
+		bool padding = false;
+		if (!IsCompressedFormat(format)) {
+			if (row_pitch != width * fmt_size) {
+				LAssert(row_pitch == ((width + 3) & ~3) * fmt_size, "padding error");
+				padding = true;
+			}
+		}
+
+		std::vector<size_t> base;
+		switch (type)
+		{
+		case TextureType::T_1D:
+		{
+			init_data.resize(array_size * num_mipmaps);
+			base.resize(array_size * num_mipmaps);
+			for (uint32 array_index = 0; array_index < array_size; ++array_index)
+			{
+				uint32 the_width = width;
+				for (uint32 level = 0; level < num_mipmaps; ++level)
+				{
+					size_t const index = array_index * num_mipmaps + level;
+					uint32 image_size;
+					if (IsCompressedFormat(format))
+					{
+						uint32 const block_size = NumFormatBytes(format) * 4;
+						image_size = ((the_width + 3) / 4) * block_size;
+					}
+					else
+					{
+						image_size = (padding ? ((the_width + 3) & ~3) : the_width) * fmt_size;
+					}
+
+					base[index] = data_block.size();
+					data_block.resize(base[index] + image_size);
+					init_data[index].row_pitch = image_size;
+					init_data[index].slice_pitch = image_size;
+
+					tex_res.Read(&data_block[base[index]], static_cast<std::streamsize>(image_size));
+
+					the_width = std::max<uint32>(the_width / 2, 1);
+				}
+			}
+		}
+		break;
+
+		case TextureType::T_2D:
+		{
+			init_data.resize(array_size * num_mipmaps);
+			base.resize(array_size * num_mipmaps);
+			for (uint32 array_index = 0; array_index < array_size; ++array_index)
+			{
+				uint32 the_width = width;
+				uint32 the_height = height;
+				for (uint32 level = 0; level < num_mipmaps; ++level)
+				{
+					size_t const index = array_index * num_mipmaps + level;
+					if (IsCompressedFormat(format))
+					{
+						uint32 const block_size = NumFormatBytes(format) * 4;
+						uint32 image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * block_size;
+
+						base[index] = data_block.size();
+						data_block.resize(base[index] + image_size);
+						init_data[index].row_pitch = (the_width + 3) / 4 * block_size;
+						init_data[index].slice_pitch = image_size;
+
+						tex_res.Read(&data_block[base[index]], static_cast<std::streamsize>(image_size));
+					}
+					else
+					{
+						init_data[index].row_pitch = (padding ? ((the_width + 3) & ~3) : the_width) * fmt_size;
+						init_data[index].slice_pitch = init_data[index].row_pitch * the_height;
+						base[index] = data_block.size();
+						data_block.resize(base[index] + init_data[index].slice_pitch);
+
+						tex_res.Read(&data_block[base[index]], static_cast<std::streamsize>(init_data[index].slice_pitch));
+					}
+
+					the_width = std::max<uint32>(the_width / 2, 1);
+					the_height = std::max<uint32>(the_height / 2, 1);
+				}
+			}
+		}
+		break;
+
+		case TextureType::T_3D:
+		{
+			init_data.resize(array_size * num_mipmaps);
+			base.resize(array_size * num_mipmaps);
+			for (uint32 array_index = 0; array_index < array_size; ++array_index)
+			{
+				uint32 the_width = width;
+				uint32 the_height = height;
+				uint32 the_depth = depth;
+				for (uint32 level = 0; level < num_mipmaps; ++level)
+				{
+					size_t const index = array_index * num_mipmaps + level;
+					if (IsCompressedFormat(format))
+					{
+						uint32 const block_size = NumFormatBytes(format) * 4;
+						uint32 image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * the_depth * block_size;
+
+						base[index] = data_block.size();
+						data_block.resize(base[index] + image_size);
+						init_data[index].row_pitch = (the_width + 3) / 4 * block_size;
+						init_data[index].slice_pitch = ((the_width + 3) / 4) * ((the_height + 3) / 4) * block_size;
+
+						tex_res.Read(&data_block[base[index]], static_cast<std::streamsize>(image_size));
+					}
+					else
+					{
+						init_data[index].row_pitch = (padding ? ((the_width + 3) & ~3) : the_width) * fmt_size;
+						init_data[index].slice_pitch = init_data[index].row_pitch * the_height;
+						base[index] = data_block.size();
+						data_block.resize(base[index] + init_data[index].slice_pitch * the_depth);
+
+						tex_res.Read(&data_block[base[index]], static_cast<std::streamsize>(init_data[index].slice_pitch * the_depth));
+					}
+
+					the_width = std::max<uint32>(the_width / 2, 1);
+					the_height = std::max<uint32>(the_height / 2, 1);
+					the_depth = std::max<uint32>(the_depth / 2, 1);
+				}
+			}
+		}
+		break;
+
+		case TextureType::T_Cube:
+		{
+			init_data.resize(array_size * 6 * num_mipmaps);
+			base.resize(array_size * 6 * num_mipmaps);
+			for (uint32 array_index = 0; array_index < array_size; ++array_index)
+			{
+				for (uint32 face = (uint8)Texture::CubeFaces::Positive_X; face <= (uint8)Texture::CubeFaces::Negative_Z; ++face)
+				{
+					uint32 the_width = width;
+					uint32 the_height = height;
+					for (uint32 level = 0; level < num_mipmaps; ++level)
+					{
+						size_t const index = (array_index * 6 + face - Texture::CubeFaces::Positive_X) * num_mipmaps + level;
+						if (IsCompressedFormat(format))
+						{
+							uint32 const block_size = NumFormatBytes(format) * 4;
+							uint32 image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * block_size;
+
+							base[index] = data_block.size();
+							data_block.resize(base[index] + image_size);
+							init_data[index].row_pitch = (the_width + 3) / 4 * block_size;
+							init_data[index].slice_pitch = image_size;
+
+							tex_res.Read(&data_block[base[index]], static_cast<std::streamsize>(image_size));
+						}
+						else
+						{
+							init_data[index].row_pitch = (padding ? ((the_width + 3) & ~3) : the_width) * fmt_size;
+							init_data[index].slice_pitch = init_data[index].row_pitch * the_width;
+							base[index] = data_block.size();
+							data_block.resize(base[index] + init_data[index].slice_pitch);
+
+							tex_res.Read(&data_block[base[index]], static_cast<std::streamsize>(init_data[index].slice_pitch));
+						}
+
+						the_width = std::max<uint32>(the_width / 2, 1);
+						the_height = std::max<uint32>(the_height / 2, 1);
+					}
+				}
+			}
+		}
+		break;
+		}
+
+		for (size_t i = 0; i < base.size(); ++i)
+		{
+			init_data[i].data = &data_block[base[i]];
+		}
+	}
 
 
 	Render::TexturePtr LoadDDSTexture(X::path const& texpath, uint32 access) {
@@ -162,12 +350,11 @@ namespace platform {
 	}
 
 
-	using namespace Render::IFormat;
 	using namespace bc;
 	using namespace etc;
-	void EncodeTexture(void* dst_data, uint32_t dst_row_pitch, uint32_t dst_slice_pitch, EFormat dst_format,
-		void const * src_data, uint32_t src_row_pitch, uint32_t src_slice_pitch, EFormat src_format,
-		uint32_t src_width, uint32_t src_height, uint32_t src_depth)
+	void EncodeTexture(void* dst_data, uint32 dst_row_pitch, uint32 dst_slice_pitch, EFormat dst_format,
+		void const * src_data, uint32 src_row_pitch, uint32 src_slice_pitch, EFormat src_format,
+		uint32 src_width, uint32 src_height, uint32 src_depth)
 	{
 		LAssert(IsCompressedFormat(dst_format) && !IsCompressedFormat(src_format),"format does not meet the compress requirements");
 
@@ -256,7 +443,7 @@ namespace platform {
 
 		uint8_t const * src = static_cast<uint8_t const *>(src_data);
 		uint8_t* dst = static_cast<uint8_t*>(dst_data);
-		for (uint32_t z = 0; z < src_depth; ++z)
+		for (uint32 z = 0; z < src_depth; ++z)
 		{
 			codec->EncodeMem(src_width, src_height, dst, dst_row_pitch, dst_slice_pitch,
 				src, src_row_pitch, src_slice_pitch, TCM_Quality);
@@ -266,9 +453,9 @@ namespace platform {
 		}
 	}
 
-	void DecodeTexture(std::vector<uint8_t>& dst_data_block, uint32_t& dst_row_pitch, uint32_t& dst_slice_pitch, EFormat& dst_format,
-		void const * src_data, uint32_t src_row_pitch, uint32_t src_slice_pitch, EFormat src_format,
-		uint32_t src_width, uint32_t src_height, uint32_t src_depth)
+	void DecodeTexture(std::vector<uint8_t>& dst_data_block, uint32& dst_row_pitch, uint32& dst_slice_pitch, EFormat& dst_format,
+		void const * src_data, uint32 src_row_pitch, uint32 src_slice_pitch, EFormat src_format,
+		uint32 src_width, uint32 src_height, uint32 src_depth)
 	{
 		LAssert(IsCompressedFormat(src_format),"format does not meet the compress requirements");
 
@@ -422,7 +609,7 @@ namespace platform {
 
 		uint8_t const * src = static_cast<uint8_t const *>(src_data);
 		uint8_t* dst = static_cast<uint8_t*>(&dst_data_block[0]);
-		for (uint32_t z = 0; z < src_depth; ++z)
+		for (uint32 z = 0; z < src_depth; ++z)
 		{
 			codec->DecodeMem(src_width, src_height, dst, dst_row_pitch, dst_slice_pitch,
 				src, src_row_pitch, src_slice_pitch);

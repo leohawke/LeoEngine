@@ -36,6 +36,10 @@ namespace platform {
 			u64Offset += uBytesOffset;
 		}
 
+		uint64 GetOffset() const {
+			return u64Offset;
+		}
+
 	private:
 		File const & file;
 		uint64 u64Offset = 0;
