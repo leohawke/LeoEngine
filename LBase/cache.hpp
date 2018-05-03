@@ -110,13 +110,13 @@ namespace leo
 
 	//! \brief 最近刷新策略的缓存特征。
 	//@{
-	template<typename _tKey, typename _tMapped, typename _fHash = std::hash<_tKey>,
+	template<typename _tKey, typename _tMapped, typename _tPred, typename _fHash = std::hash<_tKey>,
 	class _tAlloc = std::allocator<std::pair<const _tKey, _tMapped>>,
 	class _tList = recent_used_list<_tKey, _tMapped, _tAlloc >>
 	struct used_list_cache_traits
 	{
 		using map_type = std::unordered_map<_tKey, _tMapped, _fHash,
-			std::equal_to<_tKey>, _tAlloc>;
+			_tPred, _tAlloc>;
 		using used_list_type = _tList;
 		using used_cache_type = std::unordered_map<_tKey,
 			typename _tList::iterator, _fHash, typename map_type::key_equal,
@@ -124,13 +124,13 @@ namespace leo
 			rebind<std::pair<const _tKey, typename _tList::iterator>>::other>;
 	};
 
-	template<typename _tKey, typename _tMapped, class _tAlloc, class _tList>
-	struct used_list_cache_traits<_tKey, _tMapped, void, _tAlloc, _tList>
+	template<typename _tKey, typename _tMapped, typename _tPred, class _tAlloc, class _tList>
+	struct used_list_cache_traits<_tKey, _tMapped, _tPred, void, _tAlloc, _tList>
 	{
-		using map_type = std::map<_tKey, _tMapped, _tAlloc>;
+		using map_type = std::map<_tKey, _tMapped, _tPred, _tAlloc>;
 		using used_list_type = _tList;
 		using used_cache_type = std::map<_tKey, typename _tList::iterator,
-			std::less<_tKey>, typename _tAlloc::template
+			typename map_type::key_compare, typename _tAlloc::template
 			rebind<std::pair<const _tKey, typename _tList::iterator>>::other>;
 	};
 	//@}
@@ -142,8 +142,8 @@ namespace leo
 	\todo 加入异常安全的复制构造函数和复制赋值操作符。
 	\todo 支持其它刷新策略。
 	*/
-	template<typename _tKey, typename _tMapped, typename _fHash = void,
-		typename _tTraits = used_list_cache_traits<_tKey, _tMapped, _fHash >>
+	template<typename _tKey, typename _tMapped,typename _tPred = std::less<_tKey>, typename _fHash = void,
+		typename _tTraits = used_list_cache_traits<_tKey, _tMapped, _tPred, _fHash >>
 	class used_list_cache
 	{
 	public:

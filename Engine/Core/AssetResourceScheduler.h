@@ -65,8 +65,14 @@ namespace platform {
 			}
 		};
 
+		struct IAssetLoadingEqual {
+			bool operator()(const std::shared_ptr<asset::IAssetLoading>& lhs, const std::shared_ptr<asset::IAssetLoading>& rhs) const lnoexcept {
+				return lhs->Hash() == rhs->Hash();
+			}
+		};
+
 		//todo thread safe
-		leo::used_list_cache<std::shared_ptr<asset::IAssetLoading>, AssetLoadedDesc,IAssetLoadingHash> asset_loaded_caches;
+		leo::used_list_cache<std::shared_ptr<asset::IAssetLoading>, AssetLoadedDesc, IAssetLoadingEqual,IAssetLoadingHash> asset_loaded_caches;
 	};
 }
 
