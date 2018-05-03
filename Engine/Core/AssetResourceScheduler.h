@@ -11,24 +11,32 @@
 
 namespace platform {
 
-	/*! \brief 主要职责是负责分发任务到TaskScheduler(TODO),也负责延迟资源的生命周期
+	/*! \brief 主要职责是负责分发任务到TaskScheduler(TODO),也负责延迟资产的生命周期
 	*/
 	class AssetResourceScheduler :leo::nonmovable, leo::noncopyable {
 	public:
 		template<typename Loading, typename... _tParams>
 		std::shared_ptr<typename Loading::AssetType> SyncLoad(_tParams&&... args) {
-			auto loading = std::make_unique<Loading>(lforward(args)...);
+			std::shared_ptr<asset::IAssetLoading> key{ new Loading(lforward(args)...) };
 
-			/*TODO
-			auto task = TaskScheduler::Instance().CreateTask(loading->Coroutine());
-			auto ret = task.Wait();
-			*/
+			auto itr = asset_loaded_caches.find(key);
+			if (itr != asset_loaded_caches.end()) {
+				//TODO Refresh Ticks
+				return std::static_pointer_cast<typename Loading::AssetType>(itr->second.loaded_asset);
+			}
+
+			std::shared_ptr<Loading> loading = std::static_pointer_cast<Loading>(key);
+			std::shared_ptr<typename Loading::AssetType> ret{};
 			auto coroutine = loading->Coroutine();
-			auto iter = coroutine.begin();
-			while (!*iter)
-				++iter;
+			for (auto yiled : coroutine)
+				ret = yiled;
 
-			return *iter;
+			AssetLoadedDesc desc;
+			desc.loaded_asset = std::static_pointer_cast<void>(ret);
+			desc.loaded_tick = 0;
+			desc.delay_tick = 0;
+			asset_loaded_caches.emplace(std::static_pointer_cast<asset::IAssetLoading>(loading), desc);
+			return ret;
 		}
 
 		template<typename _type, typename... _tParams>
@@ -52,13 +60,13 @@ namespace platform {
 		};
 
 		struct IAssetLoadingHash {
-			std::size_t operator()(const std::unique_ptr<asset::IAssetLoading>& iasset) const lnoexcept {
+			std::size_t operator()(const std::shared_ptr<asset::IAssetLoading>& iasset) const lnoexcept {
 				return iasset->Hash();
 			}
 		};
 
 		//todo thread safe
-		leo::used_list_cache<std::unique_ptr<asset::IAssetLoading>, AssetLoadedDesc,IAssetLoadingHash> asset_loaded_caches;
+		leo::used_list_cache<std::shared_ptr<asset::IAssetLoading>, AssetLoadedDesc,IAssetLoadingHash> asset_loaded_caches;
 	};
 }
 

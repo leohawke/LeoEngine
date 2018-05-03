@@ -32,7 +32,7 @@ namespace asset {
 
 
 	template<typename T>
-	class AssetLoading : IAssetLoading
+	class AssetLoading :public IAssetLoading
 	{
 	public:
 		using AssetType = T;

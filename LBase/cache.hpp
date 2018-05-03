@@ -118,7 +118,7 @@ namespace leo
 		using map_type = std::unordered_map<_tKey, _tMapped, _fHash,
 			std::equal_to<_tKey>, _tAlloc>;
 		using used_list_type = _tList;
-		using used_cache_type = std::unordered_multimap<_tKey,
+		using used_cache_type = std::unordered_map<_tKey,
 			typename _tList::iterator, _fHash, typename map_type::key_equal,
 			typename _tAlloc::template
 			rebind<std::pair<const _tKey, typename _tList::iterator>>::other>;
@@ -256,7 +256,7 @@ namespace leo
 		{
 			check_max_used();
 
-			const auto i(used_list.emplace_front(lforward(args)...));
+			const auto i(used_list.emplace(lforward(args)...));
 
 			try
 			{
@@ -265,7 +265,7 @@ namespace leo
 				if (!pr.second)
 				{
 					used_list.undo_emplace();
-					return{ pr.first, false };
+					return  { pr.first->second, false };
 				}
 			}
 			catch (...)
@@ -273,7 +273,7 @@ namespace leo
 				used_list.undo_emplace();
 				throw;
 			}
-			return{ i, true };
+			return { i, true };
 		}
 
 		//@{
