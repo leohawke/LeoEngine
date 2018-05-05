@@ -26,14 +26,23 @@ namespace platform_ex::Windows::D3D12 {
 					D3D12_INFO_QUEUE_FILTER filter;
 					ZeroMemory(&filter, sizeof(filter));
 
+					D3D12_MESSAGE_SEVERITY denySeverity = D3D12_MESSAGE_SEVERITY_INFO;
+					filter.DenyList.NumSeverities = 1;
+					filter.DenyList.pSeverityList = &denySeverity;
+
 					D3D12_MESSAGE_ID denyIds[] =
 					{
-						D3D12_MESSAGE_ID_CLEARDEPTHSTENCILVIEW_MISMATCHINGCLEARVALUE
+						//      This warning gets triggered by ClearDepthStencilView/ClearRenderTargetView because when the resource was created
+						//      it wasn't passed an optimized clear color (see CreateCommitedResource). This shows up a lot and is very noisy.
+						D3D12_MESSAGE_ID_CLEARDEPTHSTENCILVIEW_MISMATCHINGCLEARVALUE,
+						D3D12_MESSAGE_ID_CLEARDEPTHSTENCILVIEW_MISMATCHINGCLEARVALUE,
 					};
 					filter.DenyList.NumIDs = sizeof(denyIds) / sizeof(D3D12_MESSAGE_ID);
 					filter.DenyList.pIDList = denyIds;
 
-					CheckHResult(info_queue->AddStorageFilterEntries(&filter));
+					CheckHResult(info_queue->PushStorageFilter(&filter));
+
+					info_queue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
 				}
 #endif
 
