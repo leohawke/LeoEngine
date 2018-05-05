@@ -10,8 +10,8 @@
 #define LTEST_LScheme_Interpreter_h_ 1
 
 #include "LSLContext.h"
-#include <LBase/Win32/Consoles.h>
-#include <LBase/LConsole.h>
+#include <LFramework/Win32/LCLib/Consoles.h>
+#include <LFramework/Core/LConsole.h>
 #include "LApplication.h"
 #include <iosfwd>
 #include <functional>

@@ -14,10 +14,10 @@
 #include <typeindex>
 //#include YFM_NPL_Configuration
 //#include YFM_Helper_Initialization
-#include <LBase/Debug.h>
-#include <LBase/Win32/Mingw32.h>
+#include <LFramework/LCLib/Debug.h>
+#include <LFramework/Win32/LCLib/Mingw32.h>
 //#include YFM_YSLib_Service_TextFile
-#include <LBase/Win32/NLS.h>
+#include <LFramework/Win32/LCLib/NLS.h>
 
 namespace leo
 {

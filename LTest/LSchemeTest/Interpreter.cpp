@@ -1,7 +1,7 @@
 ﻿#include "Interpreter.h"
 #include <iostream>
 
-#include <LBase/FCommon.h>
+#include <LFramework/LCLib/FCommon.h>
 
 //#include YFM_Helper_Environment
 //#include YFM_YSLib_Service_TextFile

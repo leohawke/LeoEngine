@@ -317,13 +317,13 @@ namespace leo
 
 		template<typename _fCallable, typename... _tParams>
 		lconstfn pseudo_output
-			invoke_nonvoid_impl(true_, _fCallable&& f, _tParams&&... args)
+			invoke_nonvoid_impl(true_type, _fCallable&& f, _tParams&&... args)
 		{
 			return leo::invoke(lforward(f), lforward(args)...), pseudo_output();
 		}
 		template<typename _fCallable, typename... _tParams>
-		inline invoke_result_t<_fCallable,_tParams&&...>
-			invoke_nonvoid_impl(false_, _fCallable&& f, _tParams... args)
+		inline invoke_result_t<_fCallable&&,_tParams&&...>
+			invoke_nonvoid_impl(false_type, _fCallable&& f, _tParams&&... args)
 		{
 			return leo::invoke(lforward(f), lforward(args)...);
 		}
@@ -334,11 +334,11 @@ namespace leo
 	  \brief 调用可调用对象，保证返回值非空。
 	  */
 	template<typename _fCallable, typename... _tParams>
-	limpl(lconstfn) nonvoid_result_t<invoke_result_t<_fCallable,_tParams...>>
+	limpl(lconstfn) nonvoid_result_t<invoke_result_t<_fCallable&&,_tParams&&...>>
 		invoke_nonvoid(_fCallable&& f, _tParams&&... args)
 	{
 		return details::invoke_nonvoid_impl(is_void<invoke_result_t<
-			_fCallable , _tParams...>>(), lforward(f), lforward(args)...);
+			_fCallable&& , _tParams&&...>>(), lforward(f), lforward(args)...);
 	}
 
 	/*!

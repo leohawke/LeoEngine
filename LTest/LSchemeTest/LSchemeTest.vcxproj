@@ -22,7 +22,7 @@
     <ProjectGuid>{2EBBB8C0-9BBC-4EB0-A1D6-597F46B8D565}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>LSchemeTest</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -47,7 +47,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>LLVM-vs2017</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -158,6 +158,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\LBase\LBase.vcxproj">
       <Project>{4f3ae107-3ffd-4d5c-82a8-5034c0041562}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\LFramework\LFramework.vcxproj">
+      <Project>{0515bc6d-3ffd-4d0e-87ff-86793dcb777e}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\LScheme\LScheme.vcxproj">
       <Project>{596f0cdd-56fd-406e-a5e4-2d3d5ec7ca78}</Project>
