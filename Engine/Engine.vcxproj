@@ -38,6 +38,7 @@
     <ClCompile Include="Core\AssetResourceScheduler.cpp" />
     <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Core\Mesh.cpp" />
+    <ClCompile Include="Core\ResourcesHolder.cpp" />
     <ClCompile Include="Render\Color_T.cpp" />
     <ClCompile Include="Render\D3D12\Adapter.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Context.d3d12.cpp" />
@@ -90,6 +91,7 @@
     <ClInclude Include="Core\Materail.h" />
     <ClInclude Include="Core\Mesh.h" />
     <ClInclude Include="Core\Resource.h" />
+    <ClInclude Include="Core\ResourcesHolder.h" />
     <ClInclude Include="Core\ViewPort.h" />
     <ClInclude Include="emacro.h" />
     <ClInclude Include="Render\Color_T.hpp" />

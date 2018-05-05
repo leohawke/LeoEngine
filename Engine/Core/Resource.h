@@ -1,4 +1,4 @@
-/*! \file Core\Resources.h
+/*! \file Core\Resource.h
 \ingroup Engine
 \brief 公共资源描述。
 */
@@ -11,15 +11,11 @@
 
 namespace platform {
 
-	class Resources:leo::noncopyable {
+	class Resource:leo::noncopyable {
 	public:
-		Resources(const std::string& name) :
-			name(name) {
-		}
+		virtual ~Resource();
 
-		DefGetter(const lnothrow,const std::string&, Name,name)
-	private:
-		std::string name;
+		virtual  const std::string& GetName() const lnothrow = 0;
 	};
 }
 

@@ -1,10 +1,13 @@
+#include <LFramework/LCLib/Debug.h>
+#include <LBase/memory.hpp>
+
 #include "../../asset/EffectX.h"
 #include "../IContext.h"
 #include "../IGraphicsBuffer.hpp"
 #include "../ITexture.hpp"
 
-#include <LFramework/LCLib/Debug.h>
-#include <LBase/memory.hpp>
+#include "../../Core/AssetResourceScheduler.h"
+
 namespace platform::Render {
 	ShaderInfo::ShaderInfo(ShaderCompose::Type t)
 		:Type(t)
@@ -312,6 +315,68 @@ namespace platform::Render::Effect {
 			techniques.emplace_back(std::move(technique));
 		}
 	}
+
+	const std::string& Effect::GetName() const lnothrow {
+		return Name;
+	}
+
+	EffectsHolder::EffectsHolder()
+		:loaded_effects(pool_resource.upstream_resource())
+	{
+	}
+
+	EffectsHolder::~EffectsHolder()
+	{
+	}
+
+	std::shared_ptr<void> EffectsHolder::FindResource(const leo::any& key) {
+		if (auto pstr = leo::any_cast<std::string>(&key))
+			return FindResource(*pstr);
+		if (auto passet = leo::any_cast<std::shared_ptr<asset::EffectAsset>>(&key))
+			return FindResource(*passet);
+		return {};
+	}
+	std::shared_ptr<Effect> EffectsHolder::FindResource(const std::string& name) {
+		for(auto& pair : loaded_effects)
+		{
+			if (pair.second->GetName() == name)
+				return pair.second;
+			if (auto sp = pair.first.lock())
+				if (sp->GetName() == name)
+					return pair.second;
+		}
+		return {};
+	}
+
+	std::shared_ptr<Effect> EffectsHolder::FindResource(const std::shared_ptr<asset::EffectAsset>& asset) {
+		return FindResource(asset->GetName());//Name reslove
+	}
+
+	void EffectsHolder::Connect(const std::shared_ptr<asset::EffectAsset>& asset, const std::shared_ptr<Effect>& effect)
+	{
+		loaded_effects.emplace_back(asset, effect);
+	}
+
+	EffectsHolder& EffectsHolder::Instance() {
+		static EffectsHolder instance;
+		return instance;
+	}
+}
+
+namespace platform {
+	using namespace Render::Effect;
+
+	template<>
+	std::shared_ptr<Effect> AssetResourceScheduler::SyncSpawnResource<Effect,const std::string&>(const std::string& name) {
+		if (auto pEffect = EffectsHolder::Instance().FindResource(name))
+			return pEffect;
+		auto pAsset = X::LoadEffectAsset(name + ".lsl");
+		auto pEffect = std::make_shared<Effect>(name);
+		EffectsHolder::Instance().Connect(pAsset, pEffect);
+		return pEffect;
+	}
+
+	template std::shared_ptr<Effect> AssetResourceScheduler::SyncSpawnResource<Effect, const std::string&>(const std::string& name);
 }
 
 

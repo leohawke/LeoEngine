@@ -4,8 +4,8 @@
 namespace platform {
 	using namespace Render;
 
-	Mesh::Mesh(const asset::MeshAsset & asset, const std::string & name)
-		:Resources(name),sub_meshes(asset.GetSubMeshDesces())
+	Mesh::Mesh(const asset::MeshAsset & asset, const std::string & _name)
+		:name(_name),sub_meshes(asset.GetSubMeshDesces())
 	{
 		auto& device = Context::Instance().GetDevice();
 		input_layout = unique_raw(device.CreateInputLayout());
@@ -43,5 +43,9 @@ namespace platform {
 	leo::uint8 Mesh::GetSubMeshMaterialIndex(int submesh_index)
 	{
 		return sub_meshes[submesh_index].MaterialIndex;
+	}
+
+	const std::string& Mesh::GetName() const lnothrow {
+		return name;
 	}
 }

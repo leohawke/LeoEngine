@@ -2,8 +2,8 @@
 \ingroup Engine
 \brief Mesh IO ...
 */
-#ifndef LE_ASSET_EFFECT_X_H
-#define LE_ASSET_EFFECT_X_H 1
+#ifndef LE_ASSET_MESH_X_H
+#define LE_ASSET_MESH_X_H 1
 
 
 #include "MeshAsset.h"

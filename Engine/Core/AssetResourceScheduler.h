@@ -1,4 +1,4 @@
-/*! \file Core\Camera.h
+/*! \file Core\AssetResourceScheduler.h
 \ingroup Engine
 \brief 提供资产(Asset)的管理与资源的实例化(Resource)。
 */
@@ -35,12 +35,12 @@ namespace platform {
 			desc.loaded_asset = std::static_pointer_cast<void>(ret);
 			desc.loaded_tick = 0;
 			desc.delay_tick = 0;
-			asset_loaded_caches.emplace(std::static_pointer_cast<asset::IAssetLoading>(loading), desc);
+			asset_loaded_caches.emplace(key, desc);
 			return ret;
 		}
 
 		template<typename _type, typename... _tParams>
-		std::shared_ptr<_type> SpawnResource(_tParams&&... args);
+		std::shared_ptr<_type> SyncSpawnResource(_tParams&&... args);
 
 		static AssetResourceScheduler& Instance();
 	private:

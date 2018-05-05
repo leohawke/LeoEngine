@@ -131,6 +131,9 @@
     <ClCompile Include="Core\AssetResourceScheduler.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\ResourcesHolder.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -286,6 +289,9 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\AssetResourceScheduler.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ResourcesHolder.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

@@ -10,7 +10,6 @@
 #include "../Core/AssetResourceScheduler.h"
 
 #include "EffectX.h"
-#include "Loader.hpp"
 
 #include <memory>
 #include <fstream>
@@ -850,9 +849,13 @@ namespace platform {
 		}
 	};
 
-	std::shared_ptr<asset::EffectAsset> platform::X::LoadEffectAsset(path const & effectpath)
+	std::shared_ptr<asset::EffectAsset> X::LoadEffectAsset(path const & effectpath)
 	{
-		return  platform::AssetResourceScheduler::Instance().SyncLoad<EffectLoadingDesc>(effectpath);
+		return  AssetResourceScheduler::Instance().SyncLoad<EffectLoadingDesc>(effectpath);
+	}
+	std::shared_ptr<Render::Effect::Effect> platform::X::LoadEffect(std::string const & name)
+	{
+		return  AssetResourceScheduler::Instance().SyncSpawnResource<Render::Effect::Effect>(name);
 	}
 }
 

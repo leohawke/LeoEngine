@@ -10,12 +10,13 @@
 #include <LBase/any.h>
 #include <LFramework/LCLib/Debug.h>
 
+#include "../PipleState.h"
+#include "../../Core/ResourcesHolder.h"
+
 #include <tuple>
 #include <vector>
 #include <memory>
 #include <optional>
-
-#include "../PipleState.h"
 
 namespace asset {
 	class EffectAsset;
@@ -362,10 +363,12 @@ namespace platform::Render::Effect {
 		std::vector<Pass> passes;
 	};
 
-	class Effect :public NameKey {
+	class Effect :public NameKey,public Resource {
 	public:
 		Effect(const std::string& name);
 		virtual ~Effect();
+
+		const std::string& GetName()  const lnothrow override;
 
 		void Bind(leo::uint8 index);
 		ShaderCompose& GetShader(leo::uint8 index) const ;
@@ -395,6 +398,22 @@ namespace platform::Render::Effect {
 		std::unordered_map<size_t,Parameter> parameters;
 		std::vector<std::shared_ptr<ConstantBuffer>> constantbuffs;
 		std::vector<std::unique_ptr<ShaderCompose>> shaders;
+	};
+
+	class EffectsHolder :ResourcesHolder<Effect> {
+	public:
+		EffectsHolder();
+		~EffectsHolder();
+		
+		std::shared_ptr<void> FindResource(const leo::any& key) override;
+		std::shared_ptr<Effect> FindResource(const std::string& name);
+		std::shared_ptr<Effect> FindResource(const std::shared_ptr<asset::EffectAsset>& asset);
+
+		void Connect(const std::shared_ptr<asset::EffectAsset>& asset, const std::shared_ptr<Effect>& effect);
+
+		static EffectsHolder& Instance();
+	private:
+		std::pmr::vector<std::pair<std::weak_ptr<asset::EffectAsset>,std::shared_ptr<Effect>>> loaded_effects;
 	};
 }
 

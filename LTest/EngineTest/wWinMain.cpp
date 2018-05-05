@@ -3,6 +3,7 @@
 #include "../../Engine/Render/IContext.h"
 #include "../../Engine/Core/Mesh.h"
 #include "../../Engine/Render/IFrameBuffer.h"
+#include "../../Engine/Asset/EffectX.h"
 #include "TestFramework.h"
 #include "EntityComponentSystem/EntitySystem.h"
 #include "LSchemEngineUnitTest.h"
@@ -29,7 +30,7 @@ private:
 		ecs::EntitySystem::Instance().RemoveEntity(entityId);
 
 		auto pMesh = std::make_unique<platform::Mesh>(*platform::X::LoadMeshAsset("Broadleaf_Desktop_LOD0.asset"),"Broadleaf_Desktop_LOD0");
-		auto pEffect = std::make_unique<platform::Render::Effect::Effect>("ForwardPointLightDiffuseShading");
+		auto pEffect = platform::X::LoadEffect("ForwardPointLightDiffuseShading");
 
 		lm::float4x4 worldmatrix = {
 			{1,0,0,0},

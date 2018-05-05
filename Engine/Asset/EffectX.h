@@ -7,6 +7,7 @@
 
 
 #include "EffectAsset.h"
+#include "../Render/Effect/Effect.hpp"
 #include <experimental/filesystem>
 #include <string_view>
 namespace platform {
@@ -14,6 +15,7 @@ namespace platform {
 		using path = std::experimental::filesystem::path;
 
 		std::shared_ptr<asset::EffectAsset> LoadEffectAsset(path const& effectpath);
+		std::shared_ptr<Render::Effect::Effect> LoadEffect(std::string const& name);
 
 		namespace Shader {
 			Render::ShaderCompose::ShaderBlob CompileToDXBC(Render::ShaderCompose::Type type, std::string_view Code,
