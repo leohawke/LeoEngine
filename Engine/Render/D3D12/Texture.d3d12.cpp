@@ -136,7 +136,7 @@ void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uin
 	}
 
 	CheckHResult(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
-		&tex_desc, D3D12_RESOURCE_STATE_COMMON, nullptr,
+		&tex_desc, init_state, nullptr,
 		COMPtr_RefParam(resource, IID_ID3D12Resource)));
 
 	auto num_subres = array_size * base_this->GetNumMipMaps();
