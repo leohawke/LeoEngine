@@ -265,4 +265,8 @@ namespace platform {
 	std::shared_ptr<asset::MeshAsset> X::LoadMeshAsset(path const& meshpath) {
 		return  platform::AssetResourceScheduler::Instance().SyncLoad<MeshLoadingDesc<GeomertySection>>(meshpath);
 	}
+	std::shared_ptr<Mesh> X::LoadMesh(path const & meshpath, const std::string & name)
+	{
+		return  platform::AssetResourceScheduler::Instance().SyncSpawnResource<Mesh>(meshpath, name);
+	}
 }

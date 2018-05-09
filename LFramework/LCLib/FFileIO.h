@@ -719,7 +719,11 @@ namespace platform
 			if (p_file)
 			{
 				this->_Init(p_file, std::basic_filebuf<_tChar, _tTraits>::_Openfl);
-				this->_Initcvt(&std::use_facet<std::codecvt<_tChar, char,
+				this->_Initcvt(
+#if LB_IMPL_MSCPP < 1914 
+					&
+#endif
+					std::use_facet<std::codecvt<_tChar, char,
 					typename _tTraits::state_type>>(
 						std::basic_streambuf<_tChar, _tTraits>::getloc()));
 				return this;

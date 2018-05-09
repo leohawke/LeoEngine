@@ -29,7 +29,7 @@ private:
 
 		ecs::EntitySystem::Instance().RemoveEntity(entityId);
 
-		auto pMesh = std::make_unique<platform::Mesh>(*platform::X::LoadMeshAsset("Broadleaf_Desktop_LOD0.asset"),"Broadleaf_Desktop_LOD0");
+		auto pMesh = platform::X::LoadMesh("Broadleaf_Desktop_LOD0.asset","Broadleaf_Desktop_LOD0");
 		auto pEffect = platform::X::LoadEffect("ForwardPointLightDiffuseShading");
 
 		lm::float4x4 worldmatrix = {

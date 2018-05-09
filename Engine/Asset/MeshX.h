@@ -6,7 +6,7 @@
 #define LE_ASSET_MESH_X_H 1
 
 
-#include "MeshAsset.h"
+#include "../Core/Mesh.h"
 #include <experimental/filesystem>
 #include <string_view>
 namespace platform {
@@ -14,6 +14,7 @@ namespace platform {
 		using path = std::experimental::filesystem::path;
 
 		std::shared_ptr<asset::MeshAsset> LoadMeshAsset(path const& meshpath);
+		std::shared_ptr<Mesh> LoadMesh(path const& meshpath,const std::string& name);
 	}
 }
 #endif

@@ -8,10 +8,11 @@
 #include "../Asset/MeshAsset.h"
 #include "Resource.h"
 #include "../Render/InputLayout.hpp"
+#include "ResourcesHolder.h"
 
 namespace platform {
 
-	class Mesh :Resource {
+	class Mesh :public Resource {
 	public:
 		Mesh(const asset::MeshAsset& asset, const std::string& name);
 
@@ -33,6 +34,22 @@ namespace platform {
 		leo::uint8 mesh_lod = 0;
 		std::string name;
 	};
+
+	class MeshesHolder :ResourcesHolder<Mesh> {
+	public:
+		MeshesHolder();
+		~MeshesHolder();
+
+		std::shared_ptr<void> FindResource(const leo::any& key) override;
+		std::shared_ptr<Mesh> FindResource(const std::shared_ptr<asset::MeshAsset>& asset, const std::string& name);
+
+		void Connect(const std::shared_ptr<asset::MeshAsset>& asset, const std::shared_ptr<Mesh>& mesh);
+
+		static MeshesHolder& Instance();
+	private:
+		std::pmr::vector<std::pair<std::weak_ptr<asset::MeshAsset>, std::shared_ptr<Mesh>>> loaded_meshes;
+	};
+
 }
 
 #endif
