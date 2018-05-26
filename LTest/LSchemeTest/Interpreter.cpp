@@ -81,12 +81,12 @@ LogTree(const ValueNode& node, Logger::Level lv)
 
 	PrintNode(oss, node, [](const ValueNode& node){
 		return EscapeLiteral([&]() -> string{
-			if (node.Value != A1::ValueToken::Null) {
+			if (node.Value != v1::ValueToken::Null) {
 				if (const auto p = AccessPtr<string>(node))
 					return *p;
 				if (const auto p = AccessPtr<TokenValue>(node))
 					return sfmt("[TokenValue] %s", p->c_str());
-				if (const auto p = AccessPtr<A1::ValueToken>(node))
+				if (const auto p = AccessPtr<v1::ValueToken>(node))
 					return sfmt("[ValueToken] %s", to_string(*p).c_str());
 				if (const auto p = AccessPtr<bool>(node))
 					return *p ? "[bool] #t" : "[bool] #f";

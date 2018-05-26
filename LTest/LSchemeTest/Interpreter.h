@@ -12,7 +12,6 @@
 #include "LSLContext.h"
 #include <LFramework/Win32/LCLib/Consoles.h>
 #include <LFramework/Core/LConsole.h>
-#include "LApplication.h"
 #include <iosfwd>
 #include <functional>
 

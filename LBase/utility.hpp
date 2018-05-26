@@ -147,9 +147,10 @@ namespace leo
 	//@}
 
 
+	//! \note 使用 ADL swap 或 std::swap 。
+	//@{
 	/*!
 	\brief 复制后交换。
-	\note 使用 ADL swap 或 std::swap 。
 	*/
 	template<typename _type, typename _type2 = _type>
 	inline _type&
@@ -162,6 +163,20 @@ namespace leo
 		return obj;
 	}
 
+	/*!
+	\brief 转移后交换。
+	*/
+	template<typename _type, typename _type2 = _type>
+	inline _type&
+		move_and_swap(_type& obj, _type2&& new_val)
+	{
+		using std::swap;
+		auto t(std::move(new_val));
+
+		swap(t, obj);
+		return obj;
+	}
+	//@}
 
 	inline namespace cpp2014
 	{
