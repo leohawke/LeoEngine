@@ -868,11 +868,34 @@ namespace leo
 
 	/*!
 	\ingroup functors
-	\brief get 成员小于仿函数。
 	*/
-	template<typename _type>
-	using get_less
-		= composed_n<less<_type*>, composed<addressof_op<_type>, mem_get<>>>;
+	//@{
+	//! \brief get 成员等于仿函数。
+	//@{
+	template<typename _type = void>
+	struct get_equal_to
+		: composed_n<equal_to<_type*>, composed<addressof_op<_type>, mem_get<>>>
+	{};
+
+	template<>
+	struct get_equal_to<void>
+		: composed_n<equal_to<>, composed<addressof_op<>, mem_get<>>>
+	{};
+	//@}
+
+	//! \brief get 成员小于仿函数。
+	//@{
+	template<typename _type = void>
+	struct get_less
+		: composed_n<less<_type*>, composed<addressof_op<_type>, mem_get<>>>
+	{};
+
+	template<>
+	struct get_less<void>
+		: composed_n<less<>, composed<addressof_op<>, mem_get<>>>
+	{};
+	//@}
+	//@}
 
 
 	namespace details
