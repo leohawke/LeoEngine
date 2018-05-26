@@ -145,13 +145,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Interpreter.cpp" />
-    <ClCompile Include="LApplication.cpp" />
     <ClCompile Include="LBuilder.cpp" />
     <ClCompile Include="LSLContext.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Interpreter.h" />
-    <ClInclude Include="LApplication.h" />
     <ClInclude Include="LBuilder.h" />
     <ClInclude Include="LSLContext.h" />
   </ItemGroup>
