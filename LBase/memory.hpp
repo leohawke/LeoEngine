@@ -757,10 +757,12 @@ namespace leo
 
 	/*!
 	\ingroup helper_functions
-	\brief 使用指定类型的初始化列表构造指定类型的 std::shared_ptr 对象。
 	\tparam _type 被指向类型。
-	\tparam _tValue 初始化列表的元素类型。
-	\since build 1.4
+	*/
+	//@{
+	/*!
+		\brief 使用指定类型的初始化列表构造指定类型的 std::shared_ptr 对象。
+		\tparam _tValue 初始化列表的元素类型。
 	*/
 	template<typename _type, typename _tValue>
 	lconstfn std::shared_ptr<_type>
@@ -768,6 +770,17 @@ namespace leo
 	{
 		return std::make_shared<_type>(il);
 	}
+
+	/*!
+	\brief 使用指定的 std::shared_ptr 实例的对象创建对应的 std::weak_ptr 实例的对象。
+	*/
+	template<typename _type>
+	inline std::weak_ptr<_type>
+		make_weak(const std::shared_ptr<_type>& p) lnothrow
+	{
+		return p;
+	}
+	//@}
 
 	/*!
 	\brief 智能指针转换。
