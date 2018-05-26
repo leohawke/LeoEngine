@@ -355,8 +355,6 @@ namespace leo
 		using Content = leo::any;
 
 	private:
-		struct holder_refer_tag
-		{};
 
 		Content content;
 
@@ -386,6 +384,13 @@ namespace leo
 		ValueObject(leo::in_place_type_t<_type>, _tParams&&... args)
 			: content(leo::any_ops::use_holder,
 				leo::in_place<ValueHolder<_type>>, lforward(args)...)
+		{}
+
+		template<typename _tHolder, typename... _tParams>
+		ValueObject(leo::any_ops::use_holder_t,
+			leo::in_place_type_t<_tHolder>, _tParams&&... args)
+			: content(leo::any_ops::use_holder,
+				leo::in_place<_tHolder>, lforward(args)...)
 		{}
 	private:
 		/*!
@@ -450,6 +455,10 @@ namespace leo
 			friend PDefHOp(bool, == , const ValueObject& x, const ValueObject& y)
 			ImplRet(x.Equals(y))
 
+		//@{
+		//! \brief 比较相等：存储的对象值相等。
+		//@}
+		//@}
 		
 
 		/*!
@@ -485,14 +494,13 @@ namespace leo
 		}
 		//@}
 		//@}
-		DefGetter(const lnothrow, const type_info&, Type, content.type())
 
-			/*!
-			\brief 访问指定类型对象。
-			\exception std::bad_cast 空实例或类型检查失败 。
-			*/
-			//@{
-			template<typename _type>
+		/*!
+		\brief 访问指定类型对象。
+		\exception std::bad_cast 空实例或类型检查失败 。
+		*/
+		//@{
+		template<typename _type>
 		inline _type&
 			Access()
 		{
@@ -530,6 +538,12 @@ namespace leo
 		*/
 		PDefH(void, Clear, ) lnothrow
 			ImplExpr(content.reset())
+
+		/*!
+		\brief 取自身的复制初始化转移结果：按是否具有唯一所有权选择转移或复制值对象。
+		*/
+		PDefH(ValueObject, CopyMove, )
+			ImplRet(leo::copy_or_move(!OwnsUnique(), *this))
 
 			/*!
 			\brief 取以指定持有者选项创建的副本。
@@ -593,10 +607,16 @@ namespace leo
 			ImplRet(Create(IValueHolder::Indirect))
 
 			/*!
-			\brief 判断是否是持有的对象的唯一所有者。
+			\brief 取所有者持有的对象的共享所有者的总数。
 			*/
-			bool
-			OwnsUnique() const lnothrow;
+			size_t
+			OwnsCount() const lnothrow;
+
+		/*!
+		\brief 判断是否是持有的对象的唯一所有者。
+		*/
+		PDefH(bool, OwnsUnique, ) const lnothrow
+			ImplRet(OwnsCount() == 1)
 
 		//@{
 		template<typename _type, typename... _tParams>
@@ -623,6 +643,13 @@ namespace leo
 		*/
 		friend PDefH(void, swap, ValueObject& x, ValueObject& y) lnothrow
 			ImplExpr(x.content.swap(y.content))
+
+		/*!
+		\brief 取持有的对象的类型。
+		\sa leo::any::type
+		*/
+		PDefH(const type_info&, type, ) const lnothrow
+			ImplRet(content.type())
 	};
 
 	template<typename _type>

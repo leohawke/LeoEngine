@@ -16,8 +16,10 @@
 //#include YFM_Helper_Initialization
 #include <LFramework/LCLib/Debug.h>
 #include <LFramework/Win32/LCLib/Mingw32.h>
+#include <LFramework/Helper/GUIApplication.h>
 //#include YFM_YSLib_Service_TextFile
 #include <LFramework/Win32/LCLib/NLS.h>
+#include <LBase/scope_gurad.hpp>
 
 namespace leo
 {
@@ -96,12 +98,12 @@ namespace
 		getline(std::cin, cmd);
 		if (cmd == "r")
 			return ReductionStatus::Retrying;
-		else fi(p_context && !cmd.empty()) {
-			const bool u(uss_debug);
+		else if (p_context && !cmd.empty()) {
+			const bool u(use_debug);
 
 			use_debug = {};
-			FilterException([&] {
-				LogTermValue(p->context->Perfrom(cmd));
+			FilterExceptions([&] {
+				LogTermValue(p_context->Perform(cmd));
 			}, lfsig);
 			use_debug = u;
 			goto begin;
@@ -155,20 +157,20 @@ namespace
 	}
 
 	void
-		LoadExternmal(REPLContext& context, const string& name, ContextNode& ctx) {
+		LoadExternal(REPLContext& context, const string& name, ContextNode& ctx) {
 		/*const auto p_sifs(Text::OpenSkippedBOMtream<
 			IO::SharedInputMappedFileStream>(Text::BOM_UTF_8, name.c_str()));
 		std::istream& is(*p_sifs);*/
-		std::istream is(name);
+		std::ifstream is(name);
 
 		if (is) {
-			TraceDe(Notice, "Test unit '%s' found.", name.c_st());
-			FilterException([&] {
+			TraceDe(Notice, "Test unit '%s' found.", name.c_str());
+			FilterExceptions([&] {
 				TryLoadSource(context, name.c_str(), is, ctx);
-			})
+			});
 		}
 		else
-			TraceDE(Notice, "Test unit '%s' not found.", name.c_str());
+			TraceDe(Notice, "Test unit '%s' not found.", name.c_str());
 
 	}
 
@@ -187,12 +189,10 @@ namespace
 		using namespace std::placeholders;
 		using namespace Forms;
 		auto& root(context.Root);
-
-		);
 		auto& root_env(root.GetRecordRef());
 
 		p_context = make_observer(&context);
-		LoadLSLContextForSHBuild(context);
+		//LoadLSLContextForSHBuild(context);
 		// TODO: Extract literal configuration API.
 		{
 			// TODO: Blocked. Use C++14 lambda initializers to simplify
@@ -205,7 +205,7 @@ namespace
 				const auto res(lit_ext(term, ctx, id));
 
 				if (res == ReductionStatus::Clean
-					&& term.Value.type() == ystdex::type_id<TokenValue>())
+					&& term.Value.type() == leo::type_id<TokenValue>())
 					return lit_base(term, ctx, id);
 				return res;
 			};
@@ -222,7 +222,8 @@ namespace
 		root_env.Define("root-context", ValueObject(root, OwnershipTag<>()), {});
 		// NOTE: Literal expression forms.
 		RegisterForm(root, "$retain", Retain);
-		RegisterForm(root, "$retain1", ystdex::bind1(RetainN, 1));
+		//leo::bind1(RetainN, 1)
+		RegisterForm(root, "$retain1", [](const TermNode& term) {return RetainN(term, 1); });
 #if true
 		// NOTE: Primitive features, listed as RnRK, except mentioned above. See
 		//	%LFramework.LSL.Dependency.
@@ -239,8 +240,9 @@ namespace
 		// NOTE: Environment mutation is optional in Kernel and supported here.
 		// NOTE: Definitions of $deflazy!, $def!, $defrec! are in
 		//	%LFramework.LSL.Dependency.
-		RegisterForm(root, "$undef!", ystdex::bind1(Undefine, _2, true));
-		RegisterForm(root, "$undef-checked!", ystdex::bind1(Undefine, _2, false));
+		//leo::bind1(Undefine, _2, true)
+		RegisterForm(root, "$undef!", [](TermNode& term, ContextNode& ctx) {return Undefine(term, ctx, true); });
+		RegisterForm(root, "$undef-checked!", [](TermNode& term, ContextNode& ctx) {return Undefine(term, ctx, false); });
 		// NOTE: Definitions of $vau, $vaue, wrap are in %LFramework.LSL.Dependency.
 		// NOTE: The applicative 'wrap1' does check before wrapping.
 		RegisterStrictUnary<ContextHandler>(root, "wrap1", WrapOnce);
@@ -446,15 +448,20 @@ namespace
 		$defv! $binds? (&expr .&ss) env $let ((&senv eval expr env))
 			foldl1 $and? #t (map1 ($lambda (s) (wrap $binds1?) senv s) ss);
 	)LSL");
-		RegisterStrict(root, "eval-u",
-			ystdex::bind1(EvaluateUnit, std::ref(context)));
+		//leo::bind1(EvaluateUnit, std::ref(context))
+		RegisterStrict(root, "eval-u", [&](TermNode& term) {
+			return EvaluateUnit(term, std::ref(context));
+		});
+		//leo::bind1(RetainN, 2)
 		RegisterStrict(root, "eval-u-in", [](TermNode& term) {
 			const auto i(std::next(term.begin()));
 			const auto& rctx(Access<REPLContext>(Deref(i)));
 
 			term.Remove(i);
 			EvaluateUnit(term, rctx);
-		}, ystdex::bind1(RetainN, 2));
+		}, [](const TermNode& term) {
+			return RetainN(term, 2);
+		});
 		RegisterStrictUnary<const string>(root, "lex", [&](const string& unit) {
 			LexicalAnalyzer lex;
 
@@ -483,7 +490,7 @@ namespace
 			if (str == "environment")
 				return typeid(EnvironmentReference);
 			if (str == "environment#owned")
-				return typeid(shared_ptr<LSL::Environment>);
+				return typeid(shared_ptr<scheme::Environment>);
 			if (str == "int")
 				return typeid(int);
 			if (str == "operative")
@@ -527,36 +534,40 @@ namespace
 		// NOTE: String library.
 		// NOTE: Definitions of ++, string-empty?, string<- are in
 		//	%LFramework.LSL.Dependency.
-		RegisterStrictBinary<string>(root, "string=?", ystdex::equal_to<>());
+		RegisterStrictBinary<string>(root, "string=?", leo::equal_to<>());
 		context.Perform(u8R"LSL($defl! retain-string (&str) ++ "\"" str "\"")LSL");
 		RegisterStrictUnary<const int>(root, "itos", [](int x) {
 			return to_string(x);
 		});
 		RegisterStrictUnary<const string>(root, "string-length",
-			[&](const string& str) ynothrow{
+			[&](const string& str) lnothrow{
 				return int(str.length());
 			});
 		// NOTE: Definitions of string->symbol, symbol->string, string->regex,
 		//	regex-match? are in %LFramework.LSL.Dependency.
 		// NOTE: Comparison.
-		RegisterStrictBinary<int>(root, "=?", ystdex::equal_to<>());
-		RegisterStrictBinary<int>(root, "<?", ystdex::less<>());
-		RegisterStrictBinary<int>(root, "<=?", ystdex::less_equal<>());
-		RegisterStrictBinary<int>(root, ">=?", ystdex::greater_equal<>());
-		RegisterStrictBinary<int>(root, ">?", ystdex::greater<>());
+		RegisterStrictBinary<int>(root, "=?", leo::equal_to<>());
+		RegisterStrictBinary<int>(root, "<?", leo::less<>());
+		RegisterStrictBinary<int>(root, "<=?", leo::less_equal<>());
+		RegisterStrictBinary<int>(root, ">=?", leo::greater_equal<>());
+		RegisterStrictBinary<int>(root, ">?", leo::greater<>());
 		// NOTE: Arithmetic procedures.
 		// FIXME: Overflow?
-		RegisterStrict(root, "+", std::bind(CallBinaryFold<int, ystdex::plus<>>,
-			ystdex::plus<>(), 0, _1));
+		//std::bind(CallBinaryFold<int, leo::plus<>>,leo::plus<>(), 0, _1)
+		RegisterStrict(root, "+", [](TermNode& term) {
+			return CallBinaryFold<int, leo::plus<>>(leo::plus<>(),0, term);
+		});
 		// FIXME: Overflow?
-		RegisterStrictBinary<int>(root, "add2", ystdex::plus<>());
+		RegisterStrictBinary<int>(root, "add2", leo::plus<>());
 		// FIXME: Underflow?
-		RegisterStrictBinary<int>(root, "-", ystdex::minus<>());
+		RegisterStrictBinary<int>(root, "-", leo::minus<>());
 		// FIXME: Overflow?
-		RegisterStrict(root, "*", std::bind(CallBinaryFold<int,
-			ystdex::multiplies<>>, ystdex::multiplies<>(), 1, _1));
+		//std::bind(CallBinaryFold<int,leo::multiplies< >> , leo::multiplies<>(), 1, _1)
+		RegisterStrict(root, "*", [](TermNode& term) {
+			return CallBinaryFold<int, leo::multiplies<>>(leo::multiplies<>(),1, term);
+		});
 		// FIXME: Overflow?
-		RegisterStrictBinary<int>(root, "multiply2", ystdex::multiplies<>());
+		RegisterStrictBinary<int>(root, "multiply2", leo::multiplies<>());
 		RegisterStrictBinary<int>(root, "/", [](int e1, int e2) {
 			if (e2 != 0)
 				return e1 / e2;
@@ -568,13 +579,19 @@ namespace
 			throw std::domain_error("Runtime error: divided by zero.");
 		});
 		// NOTE: I/O library.
-		RegisterStrict(root, "display", ystdex::bind1(LogTermValue, Notice));
+		//leo::bind1(LogTermValue, Notice)
+		RegisterStrict(root, "display", [](const TermNode& term) {
+			return LogTermValue(term, Notice);
+		});
 		RegisterStrictUnary<const string>(root, "echo", Echo);
+		//std::bind(LoadExternalRoot, std::ref(context), _1)
 		RegisterStrictUnary<const string>(root, "load",
-			std::bind(LoadExternalRoot, std::ref(context), _1));
+			[&](const std::string&name){
+			return LoadExternalRoot(std::ref(context), name);
+		});
 		RegisterStrictUnary<const string>(root, "load-at-root",
 			[&](const string& name) {
-			const ystdex::guard<EnvironmentSwitcher>
+			const leo::guard<EnvironmentSwitcher>
 				gd(root, root.SwitchEnvironment(root_env.shared_from_this()));
 
 			LoadExternalRoot(context, name);
@@ -589,7 +606,7 @@ namespace
 			if (ifstream ifs{ path })
 				return ifs;
 			throw LoggedEvent(
-				ystdex::sfmt("Failed opening file '%s'.", path.c_str()));
+				leo::sfmt("Failed opening file '%s'.", path.c_str()));
 		});
 		RegisterStrictUnary<const string>(root, "oss", [&](const string& str) {
 			return std::istringstream(str);
@@ -624,7 +641,7 @@ namespace
 				auto res(FetchCommandOutput(cmd.c_str()));
 
 				term.Clear();
-				term.AddValue(MakeIndex(0), ystdex::trim(std::move(res.first)));
+				term.AddValue(MakeIndex(0), leo::trim(std::move(res.first)));
 				term.AddValue(MakeIndex(1), res.second);
 			}, term);
 			return ReductionStatus::Retained;
@@ -648,8 +665,6 @@ namespace
 		root.EvaluateList.Add(DefaultDebugAction, 255);
 		root.EvaluateLeaf.Add(DefaultLeafDebugAction, 255);
 	}
-
-}
 
 } // unnamed namespace;
 

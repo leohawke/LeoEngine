@@ -95,12 +95,13 @@ namespace platform_ex
 	/*!
 	\brief 取命令在标准输出上的执行结果。
 	\pre 间接断言：第一参数非空。
-	\return 读取的二进制存储。
+	\return 读取的二进制存储和关闭管道的返回值（可来自被调用的命令）。
+	\exception std::system_error 读取失败。
 	\throw std::invalid_argument 第二参数的值等于 \c 0 。
 	\throw std::system_error 表示读取失败的派生类异常对象。
 	\note 第一参数指定命令；第二参数指定每次读取的缓冲区大小，先于执行命令进行检查。
 	*/
-	LB_API LB_NONNULL(1) string
+	LB_API LB_NONNULL(1) pair<string, int>
 		FetchCommandOutput(const char*, size_t = DefaultCommandBufferSize);
 
 

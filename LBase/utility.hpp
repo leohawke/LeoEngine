@@ -178,6 +178,18 @@ namespace leo
 	}
 	//@}
 
+	/*!
+	\brief 按参数复制或转移。
+	*/
+	template<typename _type, typename _type2 = _type>
+	inline _type
+		copy_or_move(bool copy, _type& obj)
+	{
+		if (copy)
+			return leo::as_const(obj);
+		return std::move(obj);
+	}
+
 	inline namespace cpp2014
 	{
 

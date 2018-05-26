@@ -833,8 +833,6 @@ namespace scheme {
 			/*!
 			\brief 访问节点并调用一元函数。
 			\sa leo::EmplaceCallResult
-			\since build 756
-
 			确定项具有一个实际参数后展开调用参数指定的函数。
 			若被调用的函数返回类型非 void ，返回值作为项的值被构造。
 			调用 leo::EmplaceCallResult 对 ValueObject 及引用值处理不同。

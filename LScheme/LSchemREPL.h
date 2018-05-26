@@ -34,30 +34,27 @@ namespace scheme {
 
 			/*!
 			\brief 加载：从指定参数指定的来源读取并处理源代码。
-			\sa Process
-			*/
-			//@{
-			//! \throw std::invalid_argument 流状态错误或缓冲区不存在。
-			void
-				LoadFrom(std::istream&);
-			void
-				LoadFrom(std::streambuf&);
-			//@}
-
-			/*!
-			\brief 处理：分析输入并预处理后进行规约。
-			\sa SContext::Analyze
-			\sa Preprocess
+			\exception std::invalid_argument 异常中立：由 ReadFrom 抛出。
+			\sa ReadFrom
 			\sa Reduce
 			*/
 			//@{
+			template<class _type>
 			void
-				Process(TermNode&);
-			TermNode
-				Process(const TokenList&);
-			TermNode
-				Process(const Session&);
+				LoadFrom(_type& input)
+			{
+				LoadFrom(input, Root);
+			}
+			template<class _type>
+			void
+				LoadFrom(_type& input, ContextNode& ctx) const
+			{
+				auto term(ReadFrom(input));
+
+				Reduce(term, ctx);
+			}
 			//@}
+
 
 			/*!
 			\brief 执行循环：对非空输入进行翻译。
@@ -65,8 +62,74 @@ namespace scheme {
 			\throw LoggedEvent 输入为空串。
 			\sa Process
 			*/
+			//@{
+			PDefH(TermNode, Perform, string_view unit)
+				ImplRet(Perform(unit, Root))
 			TermNode
-				Perform(string_view);
+			Perform(string_view, ContextNode&);
+			//@}
+
+			/*!
+			\brief 处理：分析输入并预处理后进行规约。
+			\sa Preprocess
+			\sa TokenizeTerm
+			*/
+			//@{
+			void
+				Prepare(TermNode&) const;
+			/*!
+			\return 从参数输入读取的准备的项。
+			\sa SContext::Analyze
+			*/
+			//@{
+			TermNode
+				Prepare(const TokenList&) const;
+			TermNode
+				Prepare(const Session&) const;
+			//@}
+			//@}
+
+			/*!
+			\brief 处理：准备规约项并进行规约。
+			\sa Prepare
+			\sa Reduce
+			*/
+			//@{
+			PDefH(void, Process, TermNode& term)
+				ImplExpr(Process(term, Root))
+			//@{
+			void
+			Process(TermNode&, ContextNode&) const;
+			template<class _type>
+			TermNode
+				Process(const _type& input)
+			{
+				return Process(input, Root);
+			}
+			template<class _type>
+			TermNode
+				Process(const _type& input, ContextNode& ctx) const
+			{
+				auto term(Prepare(input));
+
+				Reduce(term, ctx);
+				return term;
+			}
+			//@}
+			//@}
+
+			/*!
+			\brief 读取：从指定参数指定的来源输入源代码并准备规约项。
+			\return 从参数输入读取的准备的项。
+			\sa Prepare
+			*/
+			//@{
+			//! \throw std::invalid_argument 流状态错误或缓冲区不存在。
+			TermNode
+				ReadFrom(std::istream&) const;
+			TermNode
+				ReadFrom(std::streambuf&) const;
+			//@}
 		};
 
 		/*!

@@ -313,37 +313,73 @@ namespace leo {
 		PDefH(void, Clear, ) lnothrow
 			ImplExpr(Value.Clear(), ClearContainer())
 
-			/*!
-			\brief 清除容器并设置值。
-			*/
-			PDefH(void, ClearTo, ValueObject vo) lnothrow
-			ImplExpr(ClearContainer(), Value = std::move(vo))
-			//@}
+		/*!
+		\brief 清除容器并设置值。
+		*/
+		PDefH(void, ClearTo, ValueObject vo) lnothrow
+		ImplExpr(ClearContainer(), Value = std::move(vo))
+		//@}
 
-			/*!
-			\brief 清除节点容器。
-			\post \c empty() 。
-			*/
-			PDefH(void, ClearContainer, ) lnothrow
-			ImplExpr(container.clear())
-			//@}
+		/*!
+		\brief 清除节点容器。
+		\post \c empty() 。
+		*/
+		PDefH(void, ClearContainer, ) lnothrow
+		ImplExpr(container.clear())
+		//@}
 
-			/*!
-			\brief 递归创建容器副本。
-			*/
-			//@{
-			static Container
-			CreateRecursively(const Container&, IValueHolder::Creation);
+		/*!
+		\brief 递归创建容器副本。
+		*/
+		//@{
+		static Container
+		CreateRecursively(const Container&, IValueHolder::Creation);
+		template<typename _fCallable>
+		static Container
+			CreateRecursively(Container& con, _fCallable f)
+		{
+			Container res;
 
-			PDefH(Container, CreateWith, IValueHolder::Creation c) const
-			ImplRet(CreateRecursively(container, c))
-			//@}
+			for (auto& tm : con)
+				res.emplace(CreateRecursively(tm.GetContainerRef(), f),
+					tm.GetName(), leo::invoke(f, tm.Value));
+			return res;
+		}
+		template<typename _fCallable>
+		static Container
+			CreateRecursively(const Container& con, _fCallable f)
+		{
+			Container res;
 
-			/*!
-			\brief 若指定名称子节点不存在则按指定值初始化。
-			\return 按指定名称查找的指定类型的子节点的值的引用。
-			*/
-			template<typename _type, typename _tString, typename... _tParams>
+			for (auto& tm : con)
+				res.emplace(CreateRecursively(tm.GetContainer(), f), tm.GetName(),
+					leo::invoke(f, tm.Value));
+			return res;
+		}
+
+		PDefH(Container, CreateWith, IValueHolder::Creation c) const
+		ImplRet(CreateRecursively(container, c))
+
+
+		template<typename _fCallable>
+		Container
+			CreateWith(_fCallable f)
+		{
+			return CreateRecursively(container, f);
+		}
+		template<typename _fCallable>
+		Container
+			CreateWith(_fCallable f) const
+		{
+			return CreateRecursively(container, f);
+		}
+		//@}
+
+		/*!
+		\brief 若指定名称子节点不存在则按指定值初始化。
+		\return 按指定名称查找的指定类型的子节点的值的引用。
+		*/
+		template<typename _type, typename _tString, typename... _tParams>
 		inline _type&
 			Place(_tString&& str, _tParams&&... args)
 		{
@@ -947,14 +983,23 @@ namespace leo {
 		//@}
 		//@}
 
+	template<typename _tNode, typename _fCallable>
+	void
+		SetContentWith(ValueNode& dst, _tNode& node, _fCallable f)
+	{
+		lunseq(
+			dst.Value = leo::invoke(f, node.Value),
+			dst.GetContainerRef() = node.CreateWith(f)
+		);
+	}
 
-		/*!
-		\brief 判断字符串是否是一个指定字符和非负整数的组合。
-		\pre 断言：字符串参数的数据指针非空。
-		\note 仅测试能被 <tt>unsigned long</tt> 表示的整数。
-		*/
-		LF_API bool
-		IsPrefixedIndex(string_view, char = '$');
+	/*!
+	\brief 判断字符串是否是一个指定字符和非负整数的组合。
+	\pre 断言：字符串参数的数据指针非空。
+	\note 仅测试能被 <tt>unsigned long</tt> 表示的整数。
+	*/
+	LF_API bool
+	IsPrefixedIndex(string_view, char = '$');
 
 	/*!
 	\brief 转换节点大小为新的节点索引值。
