@@ -695,12 +695,33 @@ namespace scheme {
 		LS_API void
 			SetupDefaultInterpretation(ContextNode&, EvaluationPasses);
 
-
 		/*!
 		\brief LSLV1 语法形式对应的功能实现。
 		*/
 		namespace Forms
 		{
+			/*!
+			\brief 判断字符串值是否可构成符号。
+			参考文法：
+
+			symbol? <object>
+			*/
+			LS_API bool
+				IsSymbol(const string&) lnothrow;
+
+			//@{
+			/*!
+			\brief 创建等于指定字符串值的记号值。
+			\note 不检查值是否符合符号要求。
+			*/
+			LS_API TokenValue
+				StringToSymbol(const string&);
+
+			//! \brief 取符号对应的名称字符串。
+			LS_API const string&
+				SymbolToString(const TokenValue&) lnothrow;
+			//@}
+
 
 			/*!
 			\pre 断言：项或容器对应枝节点。
@@ -1028,46 +1049,21 @@ namespace scheme {
 			}
 			//@}
 
-
-			//@{
 			/*!
-			\note 在节点后的 bool 参数指定使用定义而不是设置（重定义）。
-			\note 支持修饰符。
-			\note 实现特殊形式。值以项的形式被转移，在标识符替换时可能进一步求值。
-			\sa ReduceWithModifier
-			*/
-			//@{
-			/*!
-			\brief 定义或设置项。
-			\throw InvalidSyntax 节点分类非法，或由 DefineOrSetFor 抛出的异常。
-			\sa DefineOrSetFor
-			\sa Lambda
+			\brief 移除名称绑定。
+			\exception BadIdentifier 非强制时移除不存在的名称。
+			\throw InvalidSyntax 标识符不是符号。
+			\sa IsNPLASymbol
+			\sa RemoveIdentifier
 
-			限定第三参数后可使用 RegisterFormContextHandler 注册上下文处理器。
-			特殊形式参考文法：
-			$define|$set [!] <variable> <expression>
-			$define|$set [!] (<variable> <formals>) <body>
+			移除名称和关联的值，返回是否被移除。
+			第三个参数表示是否强制。若非强制，移除不存在的名称抛出异常。
+			参考调用文法：
+			$undef! <symbol>
+			$undef-checked! <symbol>
 			*/
 			LS_API void
-				DefineOrSet(TermNode&, ContextNode&, bool);
-
-			/*!
-			\brief 定义或设置标识符的值为指定的项。
-			\note 参数分别为标识符、被规约的项、上下文、使用定义以及是否存在修饰符。
-			\throw InvalidSyntax 标识符是字面量。
-			\sa CategorizeLiteral
-			\sa DefineValue
-			\sa EvaluateIdentifier
-			\sa RedefineValue
-
-			定义或设置参数指定的值：首先检查标识符不是字面量。
-			排除可选项外，若第二子项是列表，
-			则定义或设置以此列表第一子项为名称、剩余项为参数的 λ 抽象。
-			否则，直接定义值。
-			*/
-			LS_API void
-				DefineOrSetFor(const string&, TermNode&, ContextNode&, bool, bool);
-			//@}
+				Undefine(TermNode&, ContextNode&, bool);
 
 
 			/*
@@ -1201,6 +1197,39 @@ namespace scheme {
 			*/
 			LS_API ReductionStatus
 				ValueOf(TermNode&, const ContextNode&);
+
+
+			//@{
+			/*!
+			\brief 包装合并子为应用子。
+
+			参考调用文法：
+			wrap <combiner>
+			*/
+			LS_API ContextHandler
+				Wrap(const ContextHandler&);
+
+			//! \exception LSLException 类型不符合要求。
+			//@{
+			/*!
+			\brief 包装操作子为应用子。
+
+			参考调用文法：
+			wrap1 <operative>
+			*/
+			LS_API ContextHandler
+				WrapOnce(const ContextHandler&);
+
+			/*!
+			\brief 解包装应用子为合并子。
+
+			参考调用文法：
+			unwrap <applicative>
+			*/
+			LS_API ContextHandler
+				Unwrap(const ContextHandler&);
+			//@}
+			//@}
 
 		} // namespace Forms;
 	} // namspace v1;

@@ -69,6 +69,21 @@ namespace scheme {
 				Perform(string_view);
 		};
 
+		/*!
+		\brief 尝试加载源代码。
+		\exception NPLException 嵌套异常：加载失败。
+		\note 第二个参数表示来源，仅用于诊断消息。
+		\relates REPLContext
+		*/
+		template<typename... _tParams>
+		LB_NONNULL(2) void
+			TryLoadSource(REPLContext& context, const char* name, _tParams&&... args)
+		{
+			TryExpr(context.LoadFrom(lforward(args)...))
+				CatchExpr(..., std::throw_with_nested(LSLException(
+					leo::sfmt("Failed loading external unit '%s'.", name))));
+		}
+
 		namespace Forms
 		{
 			//@{

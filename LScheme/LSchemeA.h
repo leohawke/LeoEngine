@@ -720,14 +720,37 @@ namespace scheme {
 	//@}
 	//@}
 
+
+	//@{
+	//! \brief 引用项操作。
+	struct ReferenceTermOp
+	{
+		template<typename _type>
+		auto
+			operator()(_type&& term) const -> decltype(ReferenceTerm(yforward(term)))
+		{
+			return ReferenceTerm(lforward(term));
+		}
+	};
+
 	/*!
-	\brief 对表示值的 ValueObject 进行基于所有权的生存期检查并取表示其引用的间接值。
-	\throw LSLException 检查失败：参数具有对象的唯一所有权，不能被外部引用保存。
-	\throw leo::invalid_construction 参数不持有值。
-	\todo 使用具体的语义错误异常类型。
+	\relates ReferenceTermOp
 	*/
-	LS_API ValueObject
-		ReferenceValue(const ValueObject&);
+	template<typename _func>
+	auto
+		ComposeReferencedTermOp(_func f)
+		->limpl(decltype(leo::compose_n(f, ReferenceTermOp())))
+	{
+		return leo::compose_n(f, ReferenceTermOp());
+	}
+	//@}
+
+
+	/*!
+	\brief 检查视为范式的节点并提取规约状态。
+	*/
+	inline PDefH(ReductionStatus, CheckNorm, const TermNode& term) lnothrow
+		ImplRet(IsBranch(term) ? ReductionStatus::Retained : ReductionStatus::Clean)
 
 	/*!
 	\brief 根据规约状态检查是否可继续规约。
@@ -735,17 +758,16 @@ namespace scheme {
 
 	只根据输入状态确定结果。当且仅当规约成功时不视为继续规约。
 	若发现不支持的状态视为不成功，输出警告。
+	不直接和 ReductionStatus::Retrying 比较以分离依赖 ReductionStatus 的具体值的实现。
+	派生实现可使用类似的接口指定多个不同的状态。
 	*/
 	LB_PURE LS_API bool
 		CheckReducible(ReductionStatus);
 
-	inline PDefH(ReductionStatus, CheckNorm, const TermNode& term) lnothrow
-		ImplRet(IsBranch(term) ? ReductionStatus::Retained : ReductionStatus::Clean)
-
-		/*!
-		\sa CheckReducible
-		*/
-		template<typename _func, typename... _tParams>
+	/*!
+	\sa CheckReducible
+	*/
+	template<typename _func, typename... _tParams>
 	void
 		CheckedReduceWith(_func f, _tParams&&... args)
 	{
@@ -771,6 +793,52 @@ namespace scheme {
 	inline PDefH(void, LiftTermRef, TermNode& term, const ValueObject& vo)
 		ImplExpr(LiftTermRef(term.Value, vo))
 	//@}
+
+	/*!
+	\brief 提升项对象为引用。
+	\throw LSLException 检查失败：非左值且不具有对象的唯一所有权，不能被外部引用保存。
+	\throw leo::invalid_construction 参数不持有值。
+	\sa LiftTerm
+	\todo 使用具体的语义错误异常类型。
+	*/
+	LS_API void
+		LiftToReference(TermNode&, TermNode&);
+
+	/*!
+	\brief 递归提升项及其子项或递归创建项和子项对应的包含间接值的引用项到自身。
+	\note 先提升项的值再提升子项以确保子项表示引用值时被提升。
+	\sa LiftTermRefToSelf
+	*/
+	LS_API void
+		LiftToSelf(TermNode&);
+
+	/*!
+	\brief 递归提升项及其子项或递归创建项和子项对应的包含间接值的间接引用项到自身。
+	\sa LiftToSelf
+	\sa LiftTermIndirection
+
+	调用 LiftToSelf ，然后递归地以相同参数调用 LiftTermIndirection 复制或转移自身。
+	*/
+	LS_API void
+		LiftToSelfSafe(TermNode&);
+
+	/*!
+	\brief 递归提升项及其子项或递归创建项和子项对应的包含间接值的引用项到其它项。
+	\sa LiftTerm
+	\sa LiftToSelf
+
+	以第二参数调用 LiftToSelf 后再调用 LiftTerm 。
+	*/
+	LS_API void
+		LiftToOther(TermNode&, TermNode&);
+	//@}
+
+	/*!
+	\brief 对每个子项调用 LiftToSelfSafe 。
+	\since build 822
+	*/
+	inline PDefH(void, LiftSubtermsToSelfSafe, TermNode& term)
+		ImplExpr(std::for_each(term.begin(), term.end(), LiftToSelfSafe))
 
 	/*!
 	\brief 提升延迟项。
