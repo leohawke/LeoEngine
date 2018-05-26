@@ -953,28 +953,36 @@ namespace scheme {
 			//@{
 			//! \sa Forms::CallUnary
 			template<typename _func>
-			struct UnaryExpansion
+			struct UnaryExpansion : private leo::equality_comparable<UnaryExpansion<_func>>
 			{
 				_func Function;
+
+				UnaryExpansion(_func f)
+					: Function(f)
+				{}
 
 				friend PDefHOp(bool, == , const UnaryExpansion& x, const UnaryExpansion& y)
 					ImplRet(leo::examiners::equal_examiner::are_equal(x.Function,
 						y.Function))
 
 				template<typename... _tParams>
-				void
-					operator()(TermNode& term, _tParams&&... args)
+				inline void
+					operator()(_tParams&&... args)
 				{
-					Forms::CallUnary(Function, term, lforward(args)...);
+					Forms::CallUnary(Function, lforward(args)...);
 				}
 			};
 
 
 			//! \sa Forms::CallUnaryAs
 			template<typename _type, typename _func>
-			struct UnaryAsExpansion
+			struct UnaryAsExpansion : private leo::equality_comparable<UnaryAsExpansion<_type, _func>>
 			{
 				_func Function;
+
+				UnaryAsExpansion(_func f)
+					: Function(f)
+				{}
 
 				friend PDefHOp(bool, == , const UnaryAsExpansion& x,
 					const UnaryAsExpansion& y)
@@ -982,10 +990,10 @@ namespace scheme {
 						y.Function))
 
 				template<typename... _tParams>
-				void
-					operator()(TermNode& term, _tParams&&... args)
+				inline void
+					operator()( _tParams&&... args)
 				{
-					Forms::CallUnaryAs<_type>(Function, term, lforward(args)...);
+					Forms::CallUnaryAs<_type>(Function, lforward(args)...);
 				}
 			};
 			//@}
@@ -995,8 +1003,13 @@ namespace scheme {
 			//! \sa Forms::CallBinary
 			template<typename _func>
 			struct BinaryExpansion
+				: private leo::equality_comparable<BinaryExpansion<_func>>
 			{
 				_func Function;
+
+				BinaryExpansion(_func f)
+					: Function(f)
+				{}
 
 				/*!
 				\brief 比较处理器相等。
@@ -1005,7 +1018,7 @@ namespace scheme {
 					ImplRet(leo::examiners::equal_examiner::are_equal(x.Function,
 						y.Function))
 
-					template<typename... _tParams>
+				template<typename... _tParams>
 				inline void
 					operator()(_tParams&&... args) const
 				{
@@ -1017,8 +1030,13 @@ namespace scheme {
 			//! \sa Forms::CallBinaryAs
 			template<typename _type, typename _func>
 			struct BinaryAsExpansion
+				: private leo::equality_comparable<BinaryAsExpansion<_type, _func>>
 			{
 				_func Function;
+
+				BinaryAsExpansion(_func f)
+					: Function(f)
+				{}
 
 				/*!
 				\brief 比较处理器相等。
@@ -1046,13 +1064,13 @@ namespace scheme {
 			void
 				RegisterStrictUnary(ContextNode& node, const string& name, _func f)
 			{
-				RegisterStrict(node, name, UnaryExpansion<_func>{f});
+				RegisterStrict(node, name, UnaryExpansion<_func>(f));
 			}
 			template<typename _type, typename _func>
 			void
 				RegisterStrictUnary(ContextNode& node, const string& name, _func f)
 			{
-				RegisterStrict(node, name, UnaryAsExpansion<_type, _func>{f});
+				RegisterStrict(node, name, UnaryAsExpansion<_type, _func>(f));
 			}
 			//@}
 
@@ -1064,13 +1082,13 @@ namespace scheme {
 			void
 				RegisterStrictBinary(ContextNode& node, const string& name, _func f)
 			{
-				RegisterStrict(node, name, BinaryExpansion<_func>{f});
+				RegisterStrict(node, name, BinaryExpansion<_func>(f));
 			}
 			template<typename _type, typename _func>
 			void
 				RegisterStrictBinary(ContextNode& node, const string& name, _func f)
 			{
-				RegisterStrict(node, name, BinaryAsExpansion<_type, _func>{f});
+				RegisterStrict(node, name, BinaryAsExpansion<_type, _func>(f));
 			}
 			//@}
 

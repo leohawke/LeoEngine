@@ -942,44 +942,46 @@ namespace leo
 	template<typename _tRet, typename... _tParams, size_t... _vSeq>
 	struct call_projection<_tRet(_tParams...), index_sequence<_vSeq...>>
 	{
-		template<typename _func>
-		static lconstfn auto
-			call(_func&& f, std::tuple<_tParams...>&& args, limpl(decay_t<
-				decltype(lforward(f)(std::get<_vSeq>(std::move(args))...))>* = {}))
-			-> decltype(lforward(f)(std::get<_vSeq>(std::move(args))...))
-		{
-			return lforward(f)(std::get<_vSeq>(lforward(args))...);
-		}
 		//@{
 		template<typename _func>
 		static lconstfn auto
-			call(_func&& f, _tParams&&... args)
-			-> decltype(call_projection::call(lforward(f),
-				std::forward_as_tuple(lforward(args)...)))
+			apply_call(_func&& f, std::tuple<_tParams...>&& args, limpl(decay_t<
+				decltype(lforward(f)(std::get<_vSeq>(lforward(args))...))>* = {}))
+			->limpl(decltype(lforward(f)(std::get<_vSeq>(lforward(args))...)))
 		{
-			return call_projection::call(lforward(f),
+			return lforward(f)(std::get<_vSeq>(lforward(args))...);
+		}
+
+		template<typename _fCallable>
+		static lconstfn auto
+			apply_invoke(_fCallable&& f, std::tuple<_tParams...>&& args,
+				limpl(decay_t<decltype(ystdex::invoke(lforward(f),
+					std::get<_vSeq>(lforward(args))...))>* = {}))->limpl(decltype(
+						ystdex::invoke(lforward(f), std::get<_vSeq>(lforward(args))...)))
+		{
+			return ystdex::invoke(lforward(f), std::get<_vSeq>(lforward(args))...);
+		}
+		//@}
+
+		template<typename _func>
+		static lconstfn auto
+			call(_func&& f, _tParams&&... args)
+			->limpl(decltype(call_projection::apply_call(lforward(f),
+				std::forward_as_tuple(lforward(args)...))))
+		{
+			return call_projection::apply_call(lforward(f),
 				std::forward_as_tuple(lforward(args)...));
 		}
 
 		template<typename _fCallable>
 		static lconstfn auto
-			invoke(_fCallable&& f, std::tuple<_tParams...>&& args,
-				limpl(decay_t<decltype(leo::invoke(lforward(f),
-					std::get<_vSeq>(std::move(args))...))>* = {})) -> decltype(
-						leo::invoke(lforward(f), std::get<_vSeq>(lforward(args))...))
+			invoke(_fCallable&& f, _tParams&&... args)
+			->limpl(decltype(call_projection::apply_invoke(lforward(f),
+				std::forward_as_tuple(lforward(args)...))))
 		{
-			return leo::invoke(lforward(f), std::get<_vSeq>(lforward(args))...);
-		}
-		template<typename _func>
-		static lconstfn auto
-			invoke(_func&& f, _tParams&&... args)
-			-> decltype(call_projection::invoke(lforward(f),
-				std::forward_as_tuple(lforward(args)...)))
-		{
-			return call_projection::invoke(lforward(f),
+			return call_projection::apply_invoke(lforward(f),
 				std::forward_as_tuple(lforward(args)...));
 		}
-		//@}
 	};
 
 	template<typename _tRet, typename... _tParams, size_t... _vSeq>
@@ -987,9 +989,12 @@ namespace leo
 		index_sequence<_vSeq...>> : private
 		call_projection<_tRet(_tParams...), index_sequence<_vSeq...>>
 	{
+		using call_projection<_tRet(_tParams...),
+			index_sequence<_vSeq...>>::apply_call;
+		using call_projection<_tRet(_tParams...),
+			index_sequence<_vSeq...>>::apply_invoke;
 		using call_projection<_tRet(_tParams...), index_sequence<_vSeq...>>::call;
-		using
-			call_projection<_tRet(_tParams...), index_sequence<_vSeq...>>::invoke;
+		using call_projection<_tRet(_tParams...), index_sequence<_vSeq...>>::invoke;
 	};
 
 	/*!
@@ -1000,40 +1005,39 @@ namespace leo
 	{
 		template<typename _func>
 		static lconstfn auto
-			call(_func&& f, std::tuple<_tParams...>&& args)
-			-> decltype(lforward(f)(std::get<_vSeq>(std::move(args))...))
+			apply_call(_func&& f, std::tuple<_tParams...>&& args)
+			->limpl(decltype(lforward(f)(std::get<_vSeq>(lforward(args))...)))
 		{
 			return lforward(f)(std::get<_vSeq>(lforward(args))...);
 		}
 
-		//@{
+		template<typename _fCallable>
+		static lconstfn auto
+			apply_invoke(_fCallable&& f, std::tuple<_tParams...>&& args)->limpl(
+				decltype(ystdex::invoke(lforward(f), std::get<_vSeq>(args)...)))
+		{
+			return ystdex::invoke(lforward(f), std::get<_vSeq>(args)...);
+		}
+
 		template<typename _func>
 		static lconstfn auto
 			call(_func&& f, _tParams&&... args)
-			-> decltype(call_projection::call(lforward(f),
-				std::forward_as_tuple(lforward(std::move(args))...)))
+			-> decltype(call_projection::apply_call(lforward(f),
+				std::forward_as_tuple(lforward(lforward(args))...)))
 		{
-			return call_projection::call(lforward(f),
+			return call_projection::apply_call(lforward(f),
 				std::forward_as_tuple(lforward(lforward(args))...));
 		}
 
 		template<typename _fCallable>
 		static lconstfn auto
-			invoke(_fCallable&& f, std::tuple<_tParams...>&& args)
-			-> decltype(leo::invoke(lforward(f), std::get<_vSeq>(args)...))
+			invoke(_fCallable&& f, _tParams&&... args)
+			->limpl(decltype(call_projection::apply_invoke(
+				lforward(f), std::forward_as_tuple(lforward(args)...))))
 		{
-			return leo::invoke(lforward(f), std::get<_vSeq>(args)...);
-		}
-		template<typename _func>
-		static lconstfn auto
-			invoke(_func&& f, _tParams&&... args)
-			-> decltype(call_projection::invoke(lforward(f),
-				std::forward_as_tuple(lforward(args)...)))
-		{
-			return call_projection::invoke(lforward(f),
+			return call_projection::apply_invoke(lforward(f),
 				std::forward_as_tuple(lforward(args)...));
 		}
-		//@}
 	};
 	//@}
 
@@ -1056,20 +1060,40 @@ namespace leo
 			decay_t<_tTuple>>::value>>::call(lforward(f), lforward(args));
 	}
 
-
 	//@{
 	template<typename _fCallable, size_t _vLen = paramlist_size<_fCallable>::value>
 	struct expand_proxy : private call_projection<_fCallable,
 		make_index_sequence<_vLen>>, private expand_proxy<_fCallable, _vLen - 1>
 	{
 		/*!
+		\note 为避免歧义，不直接使用 using 声明。
 		\see CWG 1393 。
 		\see EWG 102 。
 		*/
+		//@{
+		//@{
+		using call_projection<_fCallable, make_index_sequence<_vLen>>::apply_call;
+		template<typename... _tParams>
+		static auto
+			apply_call(_tParams&&... args) -> decltype(
+				expand_proxy<_fCallable, _vLen - 1>::apply_call(lforward(args)...))
+		{
+			return expand_proxy<_fCallable, _vLen - 1>::apply_call(
+				lforward(args)...);
+		}
+
+		using call_projection<_fCallable, make_index_sequence<_vLen>>::apply_invoke;
+		template<typename... _tParams>
+		static auto
+			apply_invoke(_tParams&&... args) -> decltype(
+				expand_proxy<_fCallable, _vLen - 1>::apply_invoke(lforward(args)...))
+		{
+			return expand_proxy<_fCallable, _vLen - 1>::apply_invoke(
+				lforward(args)...);
+		}
+		//@}
+
 		using call_projection<_fCallable, make_index_sequence<_vLen>>::call;
-		/*!
-		\note 为避免歧义，不直接使用 using 声明。
-		*/
 		template<typename... _tParams>
 		static auto
 			call(_tParams&&... args) -> decltype(
@@ -1077,6 +1101,18 @@ namespace leo
 		{
 			return expand_proxy<_fCallable, _vLen - 1>::call(lforward(args)...);
 		}
+
+		//@{
+		using call_projection<_fCallable, make_index_sequence<_vLen>>::invoke;
+		template<typename... _tParams>
+		static auto
+			invoke(_tParams&&... args) -> decltype(
+				expand_proxy<_fCallable, _vLen - 1>::invoke(lforward(args)...))
+		{
+			return expand_proxy<_fCallable, _vLen - 1>::invoke(lforward(args)...);
+		}
+		//@}
+		//@}
 	};
 
 	template<typename _fCallable>

@@ -98,7 +98,7 @@ LogTree(const ValueNode& node, Logger::Level lv)
 					return sfmt("[double] %lf", *p);
 
 				const auto& v(node.Value);
-				const auto& t(v.GetType());
+				const auto& t(v.type());
 
 				if (t != leo::type_id<void>())
 					return leo::quote(string(t.name()), '[', ']');
