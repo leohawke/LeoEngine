@@ -141,6 +141,7 @@
     <None Include="Render\Effect\material.lsl" />
     <None Include="Render\Effect\PostProcess.lsl" />
     <None Include="Render\Effect\Util.lsl" />
+    <None Include="Render\Material\FPDS.mat.lsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6946CA48-2E7E-4770-9D61-0F59C02D0271}</ProjectGuid>

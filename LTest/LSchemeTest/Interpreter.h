@@ -2,7 +2,7 @@
 \ingroup LTest
 \brief LScheme 解释器。
 \par 修改时间:
-	2016-11-13 17:49 +0800
+	2018-5-26 13:03 +0800
 */
 
 
@@ -41,6 +41,7 @@ enum class SSignal
 void
 LogTree(const ValueNode&, Logger::Level = leo::Debug);
 
+void LogTermValue(const TermNode&, Logger::Level = leo::Debug);
 
 /*!
 \build 控制台默认颜色。
