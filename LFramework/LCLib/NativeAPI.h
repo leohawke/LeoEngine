@@ -272,6 +272,7 @@ static_assert(std::is_signed<platform::ssize_t>(),
 #	undef GetMessage
 #	undef GetObject
 #	undef PostMessage
+#	undef SetEnvironmentVariable
 //@}
 
 extern "C"

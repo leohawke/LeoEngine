@@ -55,6 +55,15 @@ namespace platform_ex
 	};
 
 
+	/*!
+	\brief 设置环境变量。
+	\pre 断言：参数非空。
+	\warning 不保证线程安全。
+	\throw std::system_error 设置失败。
+	*/
+	LF_API LB_NONNULL(1, 2) void
+		SetEnvironmentVariable(const char*, const char*);
+
 #	if LFL_Win32
 	/*!
 	\brief 句柄删除器。

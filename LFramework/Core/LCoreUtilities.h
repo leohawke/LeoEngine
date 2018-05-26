@@ -136,5 +136,39 @@ namespace leo {
 			throw LoggedEvent("Failed getting positive " + name + " value.", lv);
 		return CheckUpperBound<_tDst>(val, name, lv);
 	}
+
+	/*!
+	\brief 参数字符串向量。
+
+	用于存储命令行参数等字符串向量。
+	*/
+	class LF_API ArgumentsVector final
+	{
+	public:
+		vector<string> Arguments{};
+
+		/*!
+		\brief 设置值。
+		\pre 间接断言： 第二参数的元素都是非空指针。
+		\exception LoggedEvent 输入的参数数小于 0 。
+		\sa CheckNonnegative
+		\since build 797
+
+		设置参数向量的值。
+		参数分别指定参数向量和表示 NTMBS 的指针数组。
+		*/
+		void
+			Reset(int, char*[]);
+	};
+
+
+	/*!
+	\brief 查询第二参数指定名称的环境变量写入第一参数。
+	\pre 断言：参数非空。
+	\note 若不存在则不修改第一参数。
+	\return 是否修改第一参数。
+	*/
+	LF_API LB_NONNULL(2) bool
+		FetchEnvironmentVariable(string&, const char*);
 }
 #endif
