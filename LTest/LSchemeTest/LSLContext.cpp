@@ -2,7 +2,7 @@
 \ingroup Adaptor
 \brief LSL 上下文。
 \par 修改时间:
-	2016-11-13 17:52 +0800
+	2018-05-26 14:14 +0800
 */
 
 #include "LSLContext.h"
@@ -20,18 +20,10 @@ namespace scheme
 	namespace v1
 	{
 
-		void
-			LoadSequenceSeparators(ContextNode& ctx, EvaluationPasses& passes)
+		LiteralPasses::HandlerType
+			FetchExtendedLiteralPass()
 		{
-			RegisterSequenceContextTransformer(passes, ctx, "$;", string(";")),
-				RegisterSequenceContextTransformer(passes, ctx, "$,", string(","));
-		}
-
-		void
-			LoadDeafultLiteralPasses(ContextNode& ctx)
-		{
-			AccessLiteralPassesRef(ctx)
-				= [](TermNode& term, ContextNode&, string_view id) -> ReductionStatus {
+			return [](TermNode& term, ContextNode&, string_view id) -> ReductionStatus {
 				LAssertNonnull(id.data());
 				if (!id.empty())
 				{
@@ -41,7 +33,6 @@ namespace scheme
 					if ((f == '#' || f == '+' || f == '-') && id.size() > 1)
 					{
 						// TODO: Support numeric literal evaluation passes.
-
 						if (id == "#t" || id == "#true")
 							term.Value = true;
 						else if (id == "#f" || id == "#false")
@@ -74,7 +65,6 @@ namespace scheme
 							term.Value = -std::numeric_limits<long double>::quiet_NaN();
 						else if (f != '#')
 							return ReductionStatus::Retrying;
-
 					}
 					else if (std::isdigit(f))
 					{
@@ -82,10 +72,18 @@ namespace scheme
 
 						const auto ptr(id.data());
 						char* eptr;
+#if 0
+						const auto ans(std::strtod(ptr, &eptr));
+						const auto idx{ size_t(eptr - ptr) };
+
+						if (idx == id.size() && errno != ERANGE)
+							term.Value = ans;
+#else
 						const long ans(std::strtol(ptr, &eptr, 10));
 
 						if (size_t(eptr - ptr) == id.size() && errno != ERANGE)
 							term.Value = int(ans);
+#endif
 					}
 					else
 						return ReductionStatus::Retrying;

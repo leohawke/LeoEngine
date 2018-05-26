@@ -2,7 +2,7 @@
 \ingroup LTest
 \brief LSL 上下文。
 \par 修改时间:
-	2016-11-13 17:53 +0800
+	2018-05-26 14:14 +0800
 */
 
 
@@ -19,13 +19,8 @@ namespace scheme
 namespace v1
 {
 
-/// 731
-void
-LoadSequenceSeparators(ContextNode&, EvaluationPasses&);
-
-/// 740
-void
-LoadDeafultLiteralPasses(ContextNode&);
+LiteralPasses::HandlerType
+	FetchExtendedLiteralPass();
 
 } // namespace v1;
 
