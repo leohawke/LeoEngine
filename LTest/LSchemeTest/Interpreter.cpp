@@ -33,7 +33,7 @@ LB_NONNULL(3) void
 PrintError(WConsole& wc, const LoggedEvent& e, const char* name = "Error")
 {
 	wc.UpdateForeColor(ErrorColor);
-	LFL_TraceRaw(e.GetLevel(), "%s[%s]<%u>: %s", name, typeid(e).name(),
+	LF_TraceRaw(e.GetLevel(), "%s[%s]<%u>: %s", name, typeid(e).name(),
 		unsigned(e.GetLevel()), e.what());
 //	ExtractAndTrace(e, e.GetLevel());
 }

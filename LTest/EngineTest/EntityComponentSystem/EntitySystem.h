@@ -25,7 +25,7 @@ namespace ecs {
 		EntityId AddEntity(_tParams&&... args) {
 			auto ret = GenerateEntityId();
 			if (ret == InvalidEntityId) {
-				Trace(Critical, "AddEntity Failed.ID range is full!");
+				LF_Trace(Critical, "AddEntity Failed.ID range is full!");
 				return ret;
 			}
 			TryRet((Add(leo::type_id<_type>(), ret,std::make_unique<_type>(ret,lforward(args)...))->GetId()))

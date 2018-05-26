@@ -373,12 +373,6 @@ namespace scheme
 			|| std::isdigit(f);
 	}
 
-	observer_ptr<const string>
-		TermToNamePtr(const TermNode& term)
-	{
-		return AccessPtr<TokenValue>(term);
-	}
-
 
 	void
 		TokenizeTerm(TermNode& term)
@@ -403,36 +397,6 @@ namespace scheme
 		else
 			leo::throw_invalid_construction();
 	}
-
-	void
-		DefineValue(ContextNode& ctx, string_view id, ValueObject&& vo, bool forced)
-	{
-		LAssertNonnull(id.data());
-		if (forced)
-			// XXX: Self overwriting is possible.
-			ctx[id].Value = std::move(vo);
-		else if (!ctx.AddValue(id, std::move(vo)))
-			throw BadIdentifier(id, 2);
-	}
-
-	void
-		RedefineValue(ContextNode& ctx, string_view id, ValueObject&& vo, bool forced)
-	{
-		LAssertNonnull(id.data());
-		if (const auto p = AccessNodePtr(ctx, id))
-			p->Value = std::move(vo);
-		else if (!forced)
-			throw BadIdentifier(id, 0);
-	}
-
-	void
-		RemoveIdentifier(ContextNode& ctx, string_view id, bool forced)
-	{
-		LAssertNonnull(id.data());
-		if (!ctx.Remove(id) && !forced)
-			throw BadIdentifier(id, 0);
-	}
-
 
 	bool
 		CheckReducible(ReductionStatus status)

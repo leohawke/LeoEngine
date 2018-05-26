@@ -181,6 +181,76 @@ namespace scheme {
 	LS_API void
 		PrintIndent(std::ostream&, IndentGenerator = DefaultGenerateIndent, size_t = 1);
 
+	//@{
+	/*!
+	\brief 遍历子节点。
+	\note 使用 ADL AccessPtr 。
+
+	遍历节点容器中的子节点。
+	首先调用 AccessPtr 尝试访问 NodeSequence ，否则直接作为节点容器访问。
+	*/
+	template<typename _fCallable, class _type>
+	void
+		TraverseSubnodes(_fCallable f, const _type& node)
+	{
+		using leo::AccessPtr;
+
+		// TODO: Null coalescing or variant value?
+		if (const auto p = AccessPtr<NodeSequence>(node))
+			for (const auto& nd : *p)
+				leo::invoke(f, nd);
+		else
+			for (const auto& nd : node)
+				leo::invoke(f, nd);
+	}
+
+	//! \brief 打印容器边界和其中的 NPLA 节点，且在打印边界前调用前置操作。
+	template<typename _fCallable>
+	void
+		PrintContainedNodes(std::ostream& os, std::function<void()> pre, _fCallable f)
+	{
+		pre();
+		os << '(' << '\n';
+		TryExpr(leo::invoke(f))
+			CatchIgnore(std::out_of_range&)
+			pre();
+		os << ')' << '\n';
+	}
+
+	/*!
+	\brief 打印有索引前缀的节点或遍历子节点并打印。
+	\note 使用 ADL IsPrefixedIndex 。
+	\sa IsPrefixedIndex
+	\sa TraverseSubnodes
+
+	以第三参数作为边界前置操作，调用 PrintContainedNodes 逐个打印子节点内容。
+	调用第四参数输出最后一个参数决定的缩进作为前缀，然后打印子节点内容。
+	对满足 IsPrefixedIndex 的节点调用第四参数作为节点字符串打印；
+	否则，调用第五参数递归打印子节点，忽略此过程中的 std::out_of_range 异常。
+	其中，遍历子节点通过调用 TraverseSubnodes 实现。
+	*/
+	template<typename _fCallable, typename _fCallable2>
+	void
+		TraverseNodeChildAndPrint(std::ostream& os, const ValueNode& node,
+			std::function<void()> pre, _fCallable print_node_str,
+			_fCallable2 print_term_node)
+	{
+		using leo::IsPrefixedIndex;
+
+		TraverseSubnodes([&](const ValueNode& nd) {
+			if (IsPrefixedIndex(nd.GetName()))
+			{
+				pre();
+				leo::invoke(print_node_str, nd);
+			}
+			else
+				PrintContainedNodes(os, pre, [&] {
+				leo::invoke(print_term_node, nd);
+			});
+		}, node);
+	}
+	//@}
+
 	/*!
 	\brief 打印 LSLA 节点。
 	\sa PrintIdent
@@ -1414,7 +1484,7 @@ namespace scheme {
 	*/
 	inline PDefH(void, MoveAction, ContextNode& ctx, Reducer&& act)
 		ImplExpr(!ctx.Current ? ctx.SetupTail(std::move(act))
-			: ctx.Push(std::move(act)
+			: ctx.Push(std::move(act)))
 
 	//@{
 	//! \brief 上下文处理器类型。
@@ -1423,14 +1493,14 @@ namespace scheme {
 	using LiteralHandler = leo::GHEvent<ReductionStatus(const ContextNode&)>;
 
 	//! \brief 注册上下文处理器。
-	inline PDefH(void, RegisterContextHandler, ContextNode& node,
+	inline PDefH(void, RegisterContextHandler, ContextNode& ctx,
 		const string& name, ContextHandler f)
-		ImplExpr(node[name].Value = std::move(f))
+		ImplExpr(ctx.GetBindingsRef()[name].Value = std::move(f))
 
 		//! \brief 注册字面量处理器。
-		inline PDefH(void, RegisterLiteralHandler, ContextNode& node,
+		inline PDefH(void, RegisterLiteralHandler, ContextNode& ctx,
 			const string& name, LiteralHandler f)
-		ImplExpr(node[name].Value = std::move(f))
+		ImplExpr(ctx.GetBindingsRef()[name].Value = std::move(f))
 		//@}
 
 	//@{
