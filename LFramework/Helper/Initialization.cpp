@@ -139,7 +139,7 @@ namespace Test {
 	}
 
 	void
-		WriteNPLA1Stream(std::ostream& os, scheme::Configuration&& conf)
+		WriteLSLA1Stream(std::ostream& os, scheme::Configuration&& conf)
 	{
 		leo::write_literal(os, Text::BOM_UTF_8) << std::move(conf);
 	}
@@ -171,7 +171,7 @@ namespace Test {
 				// XXX: Failed on race condition detected.
 				if (UniqueLockedOutputFileStream uofs{ std::ios_base::out
 					| std::ios_base::trunc | platform::ios_noreplace, path })
-					WriteNPLA1Stream(uofs, Nonnull(creator)());
+					WriteLSLA1Stream(uofs, Nonnull(creator)());
 				else
 				{
 					TraceDe(Warning, "Cannot create file, possible error"

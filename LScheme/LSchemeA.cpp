@@ -222,7 +222,7 @@ namespace scheme
 								return head + " />";
 							for (; i != con.cend(); ++i)
 							{
-								nl = Deref(i).Value.GetType()
+								nl = Deref(i).Value.type()
 									!= leo::type_id<string>();
 								if (nl)
 									res += '\n' + igen(depth + size_t(is_content));

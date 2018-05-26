@@ -1572,32 +1572,32 @@ namespace scheme {
 		//@}
 
 	//@{
-	//! \brief 从指定上下文查找名称对应的节点。
+	//! \brief 从指定环境查找名称对应的节点。
 	template<typename _tKey>
 	inline observer_ptr<ValueNode>
-		LookupName(ContextNode& ctx, const _tKey& id) lnothrow
+		LookupName(Environment& ctx, const _tKey& id) lnothrow
 	{
-		return leo::AccessNodePtr(ctx, id);
+		return leo::AccessNodePtr(ctx.GetMapRef(), id);
 	}
 
 	template<typename _tKey>
 	inline observer_ptr<const ValueNode>
-		LookupName(const ContextNode& ctx, const _tKey& id) lnothrow
+		LookupName(const Environment& ctx, const _tKey& id) lnothrow
 	{
-		return leo::AccessNodePtr(ctx, id);
+		return leo::AccessNodePtr(ctx.GetMapRef(), id);
 	}
 
-	//! \brief 从指定上下文取指定名称指称的值。
+	//! \brief 从指定环境取指定名称指称的值。
 	template<typename _tKey>
 	ValueObject
-		FetchValue(const ContextNode& ctx, const _tKey& name)
+		FetchValue(const Environment& ctx, const _tKey& name)
 	{
 		return GetValueOf(scheme::LookupName(ctx, name));
 	}
 
 	template<typename _tKey>
 	static observer_ptr<const ValueObject>
-		FetchValuePtr(const ContextNode& ctx, const _tKey& name)
+		FetchValuePtr(const Environment& ctx, const _tKey& name)
 	{
 		return GetValuePtrOf(scheme::LookupName(ctx, name));
 	}

@@ -13,6 +13,8 @@ using namespace leo;
 
 namespace scheme
 {
+#define LS_Impl_LSLV1_Enable_Thunked true
+
 	namespace v1
 	{
 		string
@@ -286,7 +288,7 @@ namespace scheme
 
 						// NOTE: Bind dynamic context.
 						if (!eformal.empty())
-							comp_ctx.AddValue(eformal, ValueObject(ctx, OwnershipTag<>()));
+							comp_ctx.GetBindingsRef().AddValue(eformal, ValueObject(ctx, OwnershipTag<>()));
 						// NOTE: Since first term is expected to be saved (e.g. by
 						//	%ReduceCombined), it is safe to reduce directly.
 						RemoveHead(term);
@@ -302,7 +304,7 @@ namespace scheme
 						//	context has to live longer if there exists the child to capture
 						//	the context and then return. And there cannot be cyclic
 						//	reference.
-						comp_ctx.AddValue(ParentContextName, p_context);
+						comp_ctx.GetBindingsRef().AddValue(ParentContextName, p_context);
 						// NOTE: Beta reduction.
 						// TODO: Implement accurate lifetime analysis rather than
 						//	'p_closure.unique()'.
@@ -317,121 +319,17 @@ namespace scheme
 
 		} // unnamed namespace;
 
-		GuardPasses&
-			AccessGuardPassesRef(ContextNode& ctx)
-		{
-			return ctx.Place<GuardPasses>(GuardName);
-		}
-
-		EvaluationPasses&
-			AccessLeafPassesRef(ContextNode& ctx)
-		{
-			return ctx.Place<EvaluationPasses>(LeafTermName);
-		}
-
-		EvaluationPasses&
-			AccessListPassesRef(ContextNode& ctx)
-		{
-			return ctx.Place<EvaluationPasses>(ListTermName);
-		}
-
-		LiteralPasses&
-			AccessLiteralPassesRef(ContextNode& ctx)
-		{
-			return ctx.Place<LiteralPasses>(LiteralTermName);
-		}
-
-		Guard
-			InvokeGuard(TermNode& term, ContextNode& ctx)
-		{
-			return InvokePasses<GuardPasses>(ResolveName(ctx, GuardName), term, ctx);
-		}
-
-		ReductionStatus
-			InvokeLeaf(TermNode& term, ContextNode& ctx)
-		{
-			return InvokePasses<EvaluationPasses>(ResolveName(ctx, LeafTermName), term,
-				ctx);
-		}
-
-		ReductionStatus
-			InvokeList(TermNode& term, ContextNode& ctx)
-		{
-			return InvokePasses<EvaluationPasses>(ResolveName(ctx, ListTermName), term,
-				ctx);
-		}
-
-		ReductionStatus
-			InvokeLiteral(TermNode& term, ContextNode& ctx, string_view id)
-		{
-			LAssertNonnull(id.data());
-			return InvokePasses<LiteralPasses>(ResolveName(ctx, LiteralTermName), term,
-				ctx, id);
-		}
-
-
 		ReductionStatus
 			Reduce(TermNode& term, ContextNode& ctx)
 		{
-			const auto gd(InvokeGuard(term, ctx));
+#if LS_Impl_LSLV1_Enable_Thunked
+			// TODO: Support other states?
+			leo::swap_guard<Reducer> gd(true, ctx.Current);
+			leo::swap_guard<bool> gd_skip(true, ctx.SkipToNextEvaluation);
 
-#ifndef LB_IMPL_MSCPP
-			// NOTE: Rewriting loop until the normal form is got.
-			return leo::retry_on_cond(CheckReducible,[&]() -> ReductionStatus {
-				if (IsBranch(term))
-				{
-					LAssert(term.size() != 0, "Invalid node found.");
-					if (term.size() != 1)
-						// NOTE: List evaluation.
-						return InvokeList(term, ctx);
-					else
-					{
-						// NOTE: List with single element shall be reduced as the
-						//	element.
-						LiftFirst(term);
-						return Reduce(term, ctx);
-					}
-				}
-
-				const auto& tp(term.Value.GetType());
-
-				// NOTE: Empty list or special value token has no-op to do with.
-				// TODO: Handle special value token?
-				return tp != leo::type_id<void>() && tp != leo::type_id<
-					ValueToken>() ? InvokeLeaf(term, ctx) : ReductionStatus::Clean;
-		});
-#else
-			auto cond =CheckReducible;
-			auto f = [&]() -> ReductionStatus {
-				if (IsBranch(term))
-				{
-					LAssert(term.size() != 0, "Invalid node found.");
-					if (term.size() != 1)
-						// NOTE: List evaluation.
-						return InvokeList(term, ctx);
-					else
-					{
-						// NOTE: List with single element shall be reduced as the
-						//	element.
-						LiftFirst(term);
-						return Reduce(term, ctx);
-					}
-				}
-				const auto& tp(term.Value.GetType());
-
-				// NOTE: Empty list or special value token has no-op to do with.
-				// TODO: Handle special value token?
-				return tp != leo::type_id<void>() && tp != leo::type_id<
-					ValueToken>() ? InvokeLeaf(term, ctx) : ReductionStatus::Clean;
-			};
-
-			ReductionStatus res;
-
-			do
-				res = f();
-			while (cond(res));
-			return res;
 #endif
+			return ctx.RewriteGuarded(term,
+				std::bind(ReduceOnce, std::ref(term), std::ref(ctx)));
 		}
 
 		void
@@ -521,10 +419,10 @@ namespace scheme
 			SetupTraceDepth(ContextNode& root, const string& name)
 		{
 			lunseq(
-				root.Place<size_t>(name),
+				root.GetBindingsRef().Place<size_t>(name),
 				AccessGuardPassesRef(root) = [name](TermNode& term, ContextNode& ctx) {
 				using leo::pvoid;
-				auto& depth(AccessChild<size_t>(ctx, name));
+				auto& depth(AccessChild<size_t>(ctx.GetBindingsRef(), name));
 
 				TraceDe(Informative, "Depth = %zu, context = %p, semantics = %p.",
 					depth, pvoid(&ctx), pvoid(&term));
@@ -668,7 +566,7 @@ namespace scheme
 					return (*p_handler)(ctx);
 				// NOTE: Unevaluated term shall be detected and evaluated. See also
 				//	$2017-02 @ %Documentation::Workflow::Annual2017.
-				return IsLeaf(term) ? (term.Value.GetType()
+				return IsLeaf(term) ? (term.Value.type()
 					!= leo::type_id<TokenValue>() ? EvaluateDelayed(term)
 					: ReductionStatus::Retrying) : ReductionStatus::Retained;
 			}
@@ -735,7 +633,7 @@ namespace scheme
 					sfmt("No matching combiner '%s' for operand with %zu argument(s)"
 						" found.", [&](observer_ptr<const string> p) {
 					return
-						p ? *p : sfmt("#<unknown:%s>", fm.Value.GetType().name());
+						p ? *p : sfmt("#<unknown:%s>", fm.Value.type().name());
 				}(TermToNamePtr(fm)).c_str(), FetchArgumentN(term)));
 			}
 			return ReductionStatus::Clean;
@@ -748,39 +646,6 @@ namespace scheme
 				return EvaluateLeafToken(term, ctx, id);
 				// FIXME: Success on node conversion failure?
 			}, TermToNamePtr(term), ReductionStatus::Clean);
-		}
-
-		observer_ptr<const ValueNode>
-			ResolveName(const ContextNode& ctx, string_view id)
-		{
-			LAssertNonnull(id.data());
-
-			observer_ptr<const ValueNode> p;
-			auto ctx_ref(leo::ref(ctx));
-
-			leo::retry_on_cond(
-				[&](observer_ptr<const ContextNode> p_ctx) lnothrow -> bool{
-				if (p_ctx)
-				{
-					ctx_ref = leo::ref(Deref(p_ctx));
-					return true;
-				}
-			return {};
-			}, [&, id]() -> observer_ptr<const ContextNode> {
-				if ((p = LookupName(ctx_ref, id)))
-					return {};
-				if (const auto p_parent = FetchValuePtr(ctx_ref, ParentContextName))
-				{
-					if (const auto p_ctx
-						= p_parent->AccessPtr<observer_ptr<const ContextNode>>())
-						return *p_ctx;
-					if (const auto p_shared
-						= p_parent->AccessPtr<shared_ptr<ContextNode>>())
-						return make_observer(p_shared->get());
-				}
-				return {};
-			});
-			return p;
 		}
 
 		void
@@ -804,59 +669,6 @@ namespace scheme
 				SetupTraceDepth(Root);
 		}
 
-		void
-			REPLContext::LoadFrom(std::istream& is)
-		{
-			if (is)
-			{
-				if (const auto p = is.rdbuf())
-					LoadFrom(*p);
-				else
-					throw std::invalid_argument("Invalid stream buffer found.");
-			}
-			else
-				throw std::invalid_argument("Invalid stream found.");
-		}
-		void
-			REPLContext::LoadFrom(std::streambuf& buf)
-		{
-			using s_it_t = std::istreambuf_iterator<char>;
-
-			Process(Session(s_it_t(&buf), s_it_t()));
-		}
-
-		TermNode
-			REPLContext::Perform(string_view unit)
-		{
-			LAssertNonnull(unit.data());
-			if (!unit.empty())
-				return Process(Session(unit));
-			throw LoggedEvent("Empty token list found.", Alert);
-		}
-
-		void
-			REPLContext::Process(TermNode& term)
-		{
-			TokenizeTerm(term);
-			Preprocess(term);
-			Reduce(term, Root);
-		}
-		TermNode
-			REPLContext::Process(const TokenList& token_list)
-		{
-			auto term(SContext::Analyze(token_list));
-
-			Process(term);
-			return term;
-		}
-		TermNode
-			REPLContext::Process(const Session& session)
-		{
-			auto term(SContext::Analyze(session));
-
-			Process(term);
-			return term;
-		}
 
 		namespace Forms
 		{
@@ -869,98 +681,6 @@ namespace scheme
 					throw ArityMismatch(m, n);
 				return n;
 			}
-
-
-			void
-				BindParameter(ContextNode& e, const TermNode& t, TermNode& o)
-			{
-				if (IsBranch(t))
-				{
-					if (IsBranch(o))
-					{
-						const auto n_p(t.size());
-						const auto n_o(o.size());
-						auto last(t.end());
-
-						if (n_p > 0)
-						{
-							const auto& back(Deref(std::prev(last)));
-
-							if (IsLeaf(back))
-							{
-								if (const auto p = AccessPtr<TokenValue>(back))
-									if (*p == "...")
-										--last;
-							}
-						}
-						if (n_p == n_o || (last != t.end() && n_o >= n_p - 1))
-						{
-							auto j(o.begin());
-
-							for (auto i(t.begin()); i != last; lunseq(++i, ++j))
-							{
-								LAssert(j != o.end(), "Invalid state of operand found.");
-								BindParameter(e, Deref(i), Deref(j));
-							}
-							if (last != t.end())
-							{
-								TermNode::Container con;
-
-								for (; j != o.end(); ++j)
-								{
-									auto& b(Deref(j));
-
-									// TODO: Merge with static binding implementation?
-									// TODO: How to reduce unnecessary copy of retained
-									//	list?
-									con.emplace(b.CreateWith(IValueHolder::Move),
-										MakeIndex(con), b.Value.MakeIndirect());
-								}
-								e.emplace(std::move(con), "...");
-								LAssert(++last == t.end(), "Invalid state found.");
-							}
-						}
-						else if (last == t.end())
-							throw ArityMismatch(n_p, n_o);
-						else
-							throw ParameterMismatch(
-								"Insufficient term found for list parameter.");
-					}
-					else
-						throw ParameterMismatch(
-							"Invalid leaf term found for non-empty list parameter.");
-				}
-				else if (!t.Value)
-				{
-					if (o)
-						throw ParameterMismatch(
-							"Invalid branch term found for empty list parameter.");
-				}
-				else if (const auto p = AccessPtr<TokenValue>(t))
-					BindParameterLeaf(e, *p, std::move(o));
-				else
-					throw ParameterMismatch("Invalid parameter value found.");
-			}
-
-			void
-				BindParameterLeaf(ContextNode& e, const TokenValue& n,
-					TermNode::Container&& con, ValueObject&& vo)
-			{
-				if (n != "#ignore")
-				{
-					if (!n.empty() && IsLSLASymbol(n))
-						// NOTE: The symbol can be rebound.
-						// NOTE: The operands should have been evaluated if this is
-						//	in a lambda. Children nodes in arguments retained are
-						//	also transferred.
-						// XXX: Moved. This is copy elision in object language.
-						e[n].SetContent(std::move(con), std::move(vo));
-					else
-						throw ParameterMismatch(
-							"Invalid token found for symbol parameter.");
-				}
-			}
-
 
 			bool
 				ExtractModifier(TermNode::Container& con, const ValueObject& mod)
@@ -979,68 +699,6 @@ namespace scheme
 						}
 				}
 				return{};
-			}
-
-
-			void
-				DefineOrSet(TermNode& aterm, ContextNode& actx, bool define)
-			{
-				ReduceWithModifier(aterm, actx,
-					[=](TermNode& term, ContextNode& ctx, bool mod) {
-					auto& con(term.GetContainerRef());
-
-					auto i(con.begin());
-
-					++i;
-					if (!i->empty())
-					{
-						const auto i_beg(i->begin());
-
-						if (const auto p_id = TermToNamePtr(Deref(i_beg)))
-						{
-							const auto id(*p_id);
-
-							i->GetContainerRef().erase(i_beg);
-							Lambda(term, ctx);
-							DefineOrSetFor(id, term, ctx, define, mod);
-						}
-						else
-							throw LSLException("Invalid node category found.");
-					}
-					else if (const auto p_id = TermToNamePtr(Deref(i)))
-					{
-						const auto id(*p_id);
-
-						TraceDe(Debug, "Found identifier '%s'.", id.c_str());
-						if (++i != con.end())
-						{
-							CheckedReduceWith(ReduceTail, term, ctx, i);
-							DefineOrSetFor(id, term, ctx, define, mod);
-						}
-						else if (define)
-							RemoveIdentifier(ctx, id, mod);
-						else
-							throw InvalidSyntax("Source operand not found.");
-					}
-					else
-						throw LSLException("Invalid node category found.");
-					term.Value = ValueToken::Unspecified;
-				});
-			}
-
-			void
-				DefineOrSetFor(const string& id, TermNode& term, ContextNode& ctx, bool define,
-					bool mod)
-			{
-				LAssertNonnull(id.data());
-				if (!id.empty() && IsLSLASymbol(id))
-					// XXX: Moved.
-					// NOTE: Unevaluated term is directly saved.
-					(define ? DefineValue : RedefineValue)
-					(ctx, id, std::move(term.Value), mod);
-				else
-					throw InvalidSyntax(sfmt("Invalid token '%s' cannot be %s.", id.data(),
-						define ? "defined" : "set"));
 			}
 
 			ReductionStatus

@@ -95,9 +95,9 @@ namespace leo
 		*/
 		DeclIEntry(bool Equals(const void*) const)
 		/*!
-		\brief 判断是否是持有的对象的唯一所有者。
+		\brief 取被持有对象的共享所有者总数。
 		*/
-		DeclIEntry(bool OwnsUnique() const lnothrow)
+		DeclIEntry(size_t OwnsCount() const lnothrow)
 		/*!
 		\sa Creation
 		*/
@@ -204,35 +204,84 @@ namespace leo
 		//@}
 		DefDeCopyMoveCtorAssignment(ValueHolder)
 
-			PDefH(leo::any, Create, Creation c) const ImplI(IValueHolder)
-			ImplRet(CreateHolder(c, this->value))
+		PDefH(leo::any, Create, Creation c) const ImplI(IValueHolder)
+		ImplRet(CreateHolder(c, this->value))
 
-			PDefH(bool, Equals, const void* p) const ImplI(IValueHolder)
-			ImplRet(bool(p) && AreEqualHeld(this->value,
-				Deref(static_cast<const value_type*>(p))))
+		PDefH(bool, Equals, const void* p) const ImplI(IValueHolder)
+		ImplRet(bool(p) && AreEqualHeld(this->value,
+			Deref(static_cast<const value_type*>(p))))
 
-			PDefH(bool, OwnsUnique, ) const lnothrow ImplI(IValueHolder)
-			ImplRet(true)
+		PDefH(size_t, OwnsCount, ) const lnothrow ImplI(IValueHolder)
+		ImplRet(1)
 
-			PDefH(ValueHolder*, clone, ) const ImplI(IValueHolder)
-			ImplRet(try_new<ValueHolder>(*this))
+		PDefH(ValueHolder*, clone, ) const ImplI(IValueHolder)
+		ImplRet(try_new<ValueHolder>(*this))
 
-			PDefH(void*, get, ) const ImplI(IValueHolder)
-			ImplRet(leo::addressof(this->value))
+		PDefH(void*, get, ) const ImplI(IValueHolder)
+		ImplRet(leo::addressof(this->value))
 
-			PDefH(const type_info&, type, ) const lnothrow ImplI(IValueHolder)
-			ImplRet(type_id<_type>())
+		PDefH(const type_info&, type, ) const lnothrow ImplI(IValueHolder)
+		ImplRet(type_id<_type>())
 	};
 
-	template<typename _type, class _tPointer = std::unique_ptr<_type>>
+	/*!
+	\ingroup type_traits_operations
+	\brief 指针持有者特征。
+	*/
+	template<typename _tPointer>
+	struct PointerHolderTraits : std::pointer_traits<_tPointer>
+	{
+		using holder_pointer = _tPointer;
+		using shared = leo::is_sharing<holder_pointer>;
+
+		//@{
+		static PDefH(size_t, count_owner, const holder_pointer& p_held) lnothrow
+			ImplRet(count_owner(shared(), p_held))
+
+	private:
+		static PDefH(size_t, count_owner, leo::false_,
+			const holder_pointer& p_held) lnothrow
+			ImplRet(is_owner(p_held) ? 1 : 0)
+			static PDefH(size_t, count_owner, leo::true_,
+				const holder_pointer& p_held) lnothrow
+			ImplRet(size_t(p_held.use_count()))
+			//@}
+
+	public:
+		//! \note 使用 ADL get_raw 。
+		static PDefH(auto, get, const holder_pointer& p_held)
+			lnoexcept_spec(get_raw(p_held)) -> decltype(get_raw(p_held))
+			ImplRet(get_raw(p_held))
+
+			//! \note 使用 ADL owns_unique 。
+			static PDefH(bool, is_unique_owner, const holder_pointer& p_held) lnothrow
+			ImplRet(owns_unique(p_held))
+
+			//! \note 对非内建指针使用 ADL owns_nonnull 。
+			static PDefH(bool, is_owner, const holder_pointer& p_held) lnothrow
+			ImplRet(is_owner(std::is_pointer<holder_pointer>(), p_held))
+
+	private:
+		static PDefH(bool, is_owner, leo::false_, const holder_pointer& p_held)
+			lnothrow
+			ImplRet(owns_nonnull(p_held))
+			static PDefH(bool, is_owner, leo::true_, const holder_pointer& p_held)
+			lnothrow
+			ImplRet(bool(p_held))
+	};
+
+	template<typename _type, class _tTraits = PointerHolderTraits<unique_ptr<_type>>>
 	class PointerHolder : implements IValueHolder
 	{
-		static_assert(std::is_object<_type>(), "Invalid type found.");
+		static_assert(leo::is_decayed<_type>(), "Invalid type found.");
 
 	public:
 		using value_type = _type;
-		using holder_pointer = _tPointer;
-		using pointer = typename holder_pointer::pointer;
+		using traits = _tTraits;
+		using holder_pointer = typename traits::holder_pointer;
+		using pointer
+			= decltype(traits::get(std::declval<const holder_pointer&>()));
+		using shared = typename traits::shared;
 
 	protected:
 		holder_pointer p_held;
@@ -243,6 +292,13 @@ namespace leo
 			: p_held(value)
 		{}
 		//@{
+		PointerHolder(const holder_pointer& p)
+			: p_held(p)
+		{}
+		PointerHolder(holder_pointer&& p)
+			: p_held(std::move(p))
+		{}
+
 		PointerHolder(const PointerHolder& h)
 			: PointerHolder(leo::clone_monomorphic_ptr(h.p_held))
 		{}
@@ -251,30 +307,43 @@ namespace leo
 
 			DefDeCopyAssignment(PointerHolder)
 			DefDeMoveAssignment(PointerHolder)
+			
+			DefGetter(lnothrow, const holder_pointer&, Held, p_held)
 
 			leo::any
 			Create(Creation c) const ImplI(IValueHolder)
 		{
-			if (const auto& p = p_held.get())
+			if (shared() && c == IValueHolder::Copy)
+				return CreateHolderInPlace<PointerHolder>(shared(), p_held);
+			if (const auto& p = traits::get(p_held))
 				return CreateHolder(c, *p);
 			leo::throw_invalid_construction();
 		}
 
 		PDefH(bool, Equals, const void* p) const ImplI(IValueHolder)
-			ImplRet(p ? AreEqualHeld(*p_held,
-				Deref(static_cast<const value_type*>(p))) : !get())
+			ImplRet(traits::is_owner(p_held) && p
+				? AreEqualHeld(Deref(traits::get(p_held)),
+					Deref(static_cast<const value_type*>(p))) : !get())
 
-			PDefH(bool, OwnsUnique, ) const lnothrow ImplI(IValueHolder)
-			ImplRet(owns_unique(p_held))
+			PDefH(size_t, OwnsCount, ) const lnothrow ImplI(IValueHolder)
+			ImplRet(traits::count_owner(p_held))
 
-			DefClone(const ImplI(IValueHolder), PointerHolder)
 
 			PDefH(void*, get, ) const ImplI(IValueHolder)
 			ImplRet(p_held.get())
 
 			PDefH(const type_info&, type, ) const lnothrow ImplI(IValueHolder)
-			ImplRet(p_held ? type_id<_type>() : type_id<void>())
+			ImplRet(traits::is_owner(p_held)
+				? leo::type_id<_type>() : leo::type_id<void>())
 	};
+
+	/*!
+	\ingroup metafunctions
+	\relates PointerHolder
+	*/
+	template<typename _tPointer>
+	using HolderFromPointer = PointerHolder<typename PointerHolderTraits<
+		_tPointer>::element_type, PointerHolderTraits<_tPointer>>;
 
 	/*!
 	\brief 带等于接口的引用动态泛型持有者。
@@ -301,15 +370,15 @@ namespace leo
 		{}
 		DefDeCopyMoveCtorAssignment(RefHolder)
 
-			PDefH(leo::any, Create, Creation c) const ImplI(IValueHolder)
-			ImplRet(CreateHolder(c, Ref()))
+		PDefH(leo::any, Create, Creation c) const ImplI(IValueHolder)
+		ImplRet(CreateHolder(c, Ref()))
 
-			PDefH(bool, Equals, const void* p) const ImplI(IValueHolder)
-			ImplRet(bool(p) && AreEqualHeld(Deref(static_cast<const value_type*>(
-				get())), Deref(static_cast<const value_type*>(p))))
+		PDefH(bool, Equals, const void* p) const ImplI(IValueHolder)
+		ImplRet(bool(p) && AreEqualHeld(Deref(static_cast<const value_type*>(
+			get())), Deref(static_cast<const value_type*>(p))))
 
-			PDefH(bool, OwnsUnique, ) const lnothrow ImplI(IValueHolder)
-			ImplRet({})
+		PDefH(size_t, OwnsCount, ) const lnothrow ImplI(IValueHolder)
+		ImplRet(0)
 
 	private:
 		PDefH(value_type&, Ref, ) const

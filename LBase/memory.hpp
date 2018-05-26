@@ -306,6 +306,25 @@ namespace leo
 			lforward(args)...);
 	}
 
+	/*!
+	\ingroup unary_type_traits
+	\brief 判断指定类型是否为已知的持有共享所有权的对象类型。
+	\tparam _type 需要判断特征的类型参数。
+	\note 用户可继承此特征再特化派生的特征扩展新的类型。
+	*/
+	//@{
+	template<typename _type>
+	struct is_sharing : false_
+	{};
+
+	template<typename _type>
+	struct is_sharing<std::shared_ptr<_type>> : true_
+	{};
+
+	template<typename _type>
+	struct is_sharing<std::weak_ptr<_type>> : true_
+	{};
+	//@}
 
 	/*!
 	\brief 使用显式析构函数调用和 std::free 的删除器。

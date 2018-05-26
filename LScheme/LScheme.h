@@ -308,6 +308,33 @@ namespace scheme {
 			ReduceFirst(TermNode&, ContextNode&);
 
 		/*!
+		\brief LSLA1 表达式节点规约：调用求值例程规约子表达式。
+		\return 规约状态。
+		\note 异常安全为调用遍的最低异常安全保证。
+		\note 可能使参数中容器的迭代器失效。
+		\note 默认不需要重规约。这可被求值遍改变。
+		\note 可被求值遍调用以实现递归求值。
+		\sa ContextNode::EvaluateLeaf
+		\sa ContextNode::EvaluateList
+		\sa ValueToken
+		\sa ReduceAgain
+		\todo 实现 ValueToken 保留处理。
+
+		对应不同的节点次级结构分类，一次迭代按以下顺序选择以下分支之一，按需规约子项：
+		对枝节点调用 ContextNode::EvaluateList 求值；
+		对空节点或值为 ValueToken 的叶节点不进行操作；
+		对其它叶节点调用 ContextNode::EvaluateList 求值。
+		迭代结束调用 CheckReducible ，根据结果判断是否进行重规约。
+		此处约定的迭代中对节点的具体结构分类默认也适用于其它 LSLA1 实现 API ；
+		例外情况应单独指定明确的顺序。
+		例外情况包括输入节点不是表达式语义结构（而是 AST ）的 API ，如 TransformNode 。
+		当前实现返回的规约状态总是 ReductionStatus::Clean ，否则会循环迭代。
+		若需要保证无异常时仅在规约成功后终止，使用 ReduceChecked 代替。
+		*/
+		LS_API ReductionStatus
+			ReduceOnce(TermNode&, ContextNode&);
+
+		/*!
 		\brief 规约有序序列：顺序规约子项，结果为最后一个子项的规约结果。
 		\return 当存在子项时为最后一个子项的规约状态，否则为 ReductionStatus::Clean 。
 		\sa ReduceChildrenOrdered

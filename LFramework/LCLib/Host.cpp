@@ -98,28 +98,6 @@ namespace platform_ex
 	}
 
 
-	string
-		FetchCommandOutput(const char* cmd, size_t buf_size)
-	{
-		if (LB_UNLIKELY(buf_size == 0))
-			throw std::invalid_argument("Zero buffer size found.");
-		// TODO: Improve Win32 implementation?
-		if (const auto fp = leo::unique_raw(upopen(cmd, "r"),
-			upclose))
-		{
-			leo::setnbuf(fp.get());
-
-			// TODO: Improve performance?
-			const auto p_buf(make_unique_default_init<char[]>(buf_size));
-			string res;
-
-			for (size_t n; (n = std::fread(&p_buf[0], 1, buf_size, fp.get())) != 0; )
-				res.append(&p_buf[0], n);
-			return res;
-		}
-		LCL_Raise_SysE(, "::popen", lfsig);
-	}
-
 	leo::locked_ptr<CommandCache>
 		LockCommandCache()
 	{
@@ -130,28 +108,6 @@ namespace platform_ex
 		return{ &leo::parameterize_static_object<CommandCache, cmd_cache_tag>(),
 			mtx };
 	}
-
-	const string&
-		FetchCachedCommandResult(const string& cmd, size_t buf_size)
-	{
-		auto p_locked(LockCommandCache());
-		auto& cache(Deref(p_locked));
-
-		try
-		{
-			// TODO: Blocked. Use %string_view as argument using C++14 heterogeneous
-			//	%find template.
-			const auto i_entry(cache.find(cmd));
-
-			return (i_entry != cache.cend() ? i_entry : (cache.emplace(cmd,
-				LB_UNLIKELY(cmd.empty()) ? string()
-				: FetchCommandOutput(cmd.c_str(), buf_size))).first)->second;
-		}
-		CatchExpr(std::system_error& e,
-			TraceDe(Err, "Command execution failed: %s", e.what()))
-			return cache[string()];
-	}
-
 
 	pair<UniqueHandle, UniqueHandle>
 		MakePipe()

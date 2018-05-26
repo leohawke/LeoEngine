@@ -64,9 +64,4 @@ namespace leo {
 		return HolderEquals(GetHolderRef(), p);
 	}
 
-	bool
-		ValueObject::OwnsUnique() const lnothrow
-	{
-		return leo::invoke_value_or(&IValueHolder::OwnsUnique, GetHolderPtr());
-	}
 }
