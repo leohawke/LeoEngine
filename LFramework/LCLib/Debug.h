@@ -31,12 +31,12 @@
 
 /*!
 \ingroup tracing
-\def LFL_Use_TraceSrc
+\def LF_Use_TraceSrc
 \brief 在跟踪日志中使用跟踪源码位置。
 */
 #ifndef NDEBUG
-#	ifndef LFL_Use_TraceSrc
-#		define LFL_Use_TraceSrc 1
+#	ifndef LF_Use_TraceSrc
+#		define LF_Use_TraceSrc 1
 #	endif
 #endif
 
@@ -94,14 +94,33 @@ namespace platform
 		Concurrency::recursive_mutex record_mutex;
 
 	public:
+		//@{
+		/*!
+		\brief 无参数构造：使用过滤器和发送器。
+		\note 异常中立：同 FetchDefaultSender 。
+		\note 由 std::function 的构造模板提供的保证确保无其它异常抛出。
+		*/
+		DefDeCtor(Logger)
+			//! \brief 复制构造：复制过滤等级、过滤器和发送器，使用新创建的互斥量。
+		Logger(const Logger&);
+		/*!
+		\brief 转移构造：转移过滤等级、转移过滤器和发送器，使用新创建的互斥量。
+		\post 被转移的日志对象具有默认的过滤器和发送器。
+		\see LWG 2062 。
+		*/
+		Logger(Logger&&) lnothrow;
+
+		DefDeCopyMoveAssignment(Logger)
+		//@}
+
 		DefGetter(const lnothrow, const Sender&, Sender, sender)
 
-			/*!
-			\brief 设置过滤器。
-			\note 忽略空过滤器。
-			*/
-			void
-			SetFilter(Filter);
+		/*!
+		\brief 设置过滤器。
+		\note 忽略空过滤器。
+		*/
+		void
+		SetFilter(Filter);
 		/*!
 		\brief 设置发送器。
 		\note 忽略空发送器。
@@ -203,6 +222,12 @@ namespace platform
 		static LB_NONNULL(1, 4) void
 			SendLogToFile(std::FILE*, Level, Logger&, const char*) lnothrowv;
 		//@}
+
+		/*!
+		\brief 交换：交换所有互斥量以外的数据成员。
+		*/
+		LF_API friend void
+			swap(Logger&, Logger&) lnothrow;
 	};
 
 
@@ -236,7 +261,7 @@ namespace platform
 	\brief 直接调试跟踪。
 	\note 不带源代码信息。
 	*/
-#define LFL_TraceRaw(_lv, ...) \
+#define LF_TraceRaw(_lv, ...) \
 	LFL_Log(_lv, [&]() -> platform::string { \
 		using platform::sfmt; \
 	\
@@ -245,17 +270,17 @@ namespace platform
 	})
 
 	/*!
-	\def Trace
+	\def LF_Trace
 	\brief 默认调试跟踪。
 	\note 无异常抛出。
 	*/
-#if LFL_Use_TraceSrc
-#	define Trace(_lv, ...) \
+#if LF_Use_TraceSrc
+#	define LF_Trace(_lv, ...) \
 	LFL_Log(_lv, [&]{ \
 		return platform::LogWithSource(__FILE__, __LINE__, __VA_ARGS__); \
 	})
 #else
-#	define Trace(_lv, ...) LFL_TraceRaw(_lv, __VA_ARGS__)
+#	define LF_Trace(_lv, ...) LF_TraceRaw(_lv, __VA_ARGS__)
 #endif
 
 
@@ -266,7 +291,7 @@ namespace platform
 	\sa LFL_Trace
 	*/
 #if LB_Use_LTrace
-#	define TraceDe(_lv, ...) Trace(_lv, __VA_ARGS__)
+#	define TraceDe(_lv, ...) LF_Trace(_lv, __VA_ARGS__)
 #else
 #	define TraceDe(...)
 #endif

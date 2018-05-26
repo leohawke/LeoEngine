@@ -20,6 +20,7 @@
 #include <LFramework/LCLib/MemoryMapping.h>
 
 namespace leo {
+	using platform::deque;
 	using platform::list;
 	using platform::vector;
 

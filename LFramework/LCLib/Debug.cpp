@@ -67,6 +67,16 @@ namespace platform
 #endif
 	}
 
+	Logger::Logger(const Logger& logger)
+		: FilterLevel(logger.FilterLevel), filter(logger.filter),
+		sender(logger.sender)
+	{}
+	Logger::Logger(Logger&& logger) lnothrow
+		: Logger()
+	{
+		swap(logger, *this);
+	}
+
 	void
 		Logger::SetFilter(Filter f)
 	{
@@ -202,6 +212,23 @@ namespace platform
 		std::fflush(stream);
 	}
 
+	void
+		swap(Logger& x, Logger& y) lnothrow
+	{
+		// TODO: Wait for C++17.
+		// XXX: See discussion in LWG 2062.
+#if !__GLIBCXX__
+		lnoexcept_assert("Unsupported luanguage implementation found.",
+			x.filter.swap(y.filter));
+		lnoexcept_assert("Unsupported luanguage implementation found.",
+			x.sender.swap(y.sender));
+#endif
+
+		std::swap(x.FilterLevel, y.FilterLevel);
+		x.filter.swap(y.filter);
+		x.sender.swap(y.sender);
+	}
+
 
 	Logger&
 		FetchCommonLogger()
@@ -277,7 +304,7 @@ namespace platform_ex
 		}
 		catch (...)
 		{
-			LFL_TraceRaw(Descriptions::Emergent, "Unknown exception found.");
+			LF_TraceRaw(Descriptions::Emergent, "Unknown exception found.");
 			leo::lassert(expr_str, file, line, msg);
 		}
 #		endif

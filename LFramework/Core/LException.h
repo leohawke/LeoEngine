@@ -146,7 +146,7 @@ namespace leo
 	{
 		TryRet(leo::invoke_nonvoid(lforward(f), lforward(args)...))
 			CatchExpr(std::exception& e, TraceExceptionType(e, Emergent))
-			CatchExpr(..., LFL_TraceRaw(Emergent, "Unknown exception found."))
+			CatchExpr(..., LF_TraceRaw(Emergent, "Unknown exception found."))
 			return{};
 	}
 

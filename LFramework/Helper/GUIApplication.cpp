@@ -110,11 +110,11 @@ namespace leo {
 #if LFL_Win32
 		//Desktop PseudoRenderer ::GetDesktopWindow();
 #endif
-		Trace(Debug, "GUI host lifetime began.");
+		LF_Trace(Debug, "GUI host lifetime began.");
 	}
 	GUIHost::~GUIHost()
 	{
-		Trace(Debug, "GUI host lifetime ended.");
+		LF_Trace(Debug, "GUI host lifetime ended.");
 
 #	if LF_Hosted && !LFL_Android
 		using leo::get_value;

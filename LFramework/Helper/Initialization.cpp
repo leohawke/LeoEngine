@@ -134,7 +134,7 @@ namespace Test {
 		static ValueNode Root = LoadConfiguration(true);
 		if (Root.GetName() == "LFramework")
 			Root = PackNodes(string(), std::move(Root));
-		Trace(Debug, "Root lifetime began.");
+		LF_Trace(Debug, "Root lifetime began.");
 		return Root;
 	}
 

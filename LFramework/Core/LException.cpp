@@ -44,14 +44,14 @@ namespace leo {
 		TraceException(const char* str, RecordLevel lv, size_t level) lnothrow
 	{
 		TryExpr(
-			LFL_TraceRaw(lv, "%s%s", std::string(level, ' ').c_str(), Nonnull(str)))
-			CatchExpr(..., LFL_TraceRaw(Critical, "Failure @ TraceException."))
+			LF_TraceRaw(lv, "%s%s", std::string(level, ' ').c_str(), Nonnull(str)))
+			CatchExpr(..., LF_TraceRaw(Critical, "Failure @ TraceException."))
 	}
 
 	void
 		TraceExceptionType(const std::exception& e, RecordLevel lv) lnothrow
 	{
-		LFL_TraceRaw(lv, "Caught std::exception[%s].", typeid(e).name());
+		LF_TraceRaw(lv, "Caught std::exception[%s].", typeid(e).name());
 	}
 
 	void
@@ -87,7 +87,7 @@ namespace leo {
 				catch (...)
 			{
 				if (desc)
-					LFL_TraceRaw(Notice, "Exception filtered: %s.", desc);
+					LF_TraceRaw(Notice, "Exception filtered: %s.", desc);
 				throw;
 			}
 			return{};
