@@ -543,7 +543,19 @@ namespace scheme {
 	//@}
 	//@}
 
+	/*!
+	\brief 无效引用错误。
+	*/
+	class LS_API InvalidReference : public LSLException
+	{
+	public:
+		using LSLException::LSLException;
+		DefDeCtor(InvalidReference)
 
+			//! \brief 虚析构：类定义外默认实现。
+			~InvalidReference() override;
+	};
+	//@}
 
 
 
@@ -785,9 +797,52 @@ namespace scheme {
 		ImplExpr(LiftTerm(term.Value, vo))
 	//@}
 
+	/*!
+	\brief 提升项间接引用：复制或转移间接引用项使项不含间接值。
+	*/
+	inline PDefH(void, LiftTermIndirection, TermNode& term, const TermNode& tm)
+		// NOTE: See $2018-02 @ %Documentation::Workflow::Annual2018.
+		ImplExpr(leo::SetContentWith(term, tm, &ValueObject::MakeMoveCopy))
+
+	/*!
+	\warning 引入的间接值无所有权，应注意在生存期内使用以保证内存安全。
+	\todo 支持消亡值和复制。
+	*/
 	//@{
-	inline PDefH(void, LiftTermRef, TermNode& term, TermNode& tm)
-		ImplExpr(term.SetContentIndirect(tm))
+	/*!
+	\note 用于支持实现对象语言中的左值到右值转换。
+	\sa LiftTerm
+	\sa LiftTermRef
+	\sa TermReference
+	*/
+	//@{
+	/*!
+	\brief 提升项或创建引用项。
+
+	项的 Value 数据成员为 TermReference 类型的值时调用 LiftTermRef ；
+	否则，同 LiftTerm 。
+	*/
+	LS_API void
+	LiftTermOrRef(TermNode&, TermNode&);
+
+	/*!
+	\brief 提升自身引用项。
+	\sa LiftTermOrRef
+
+	作用同以相同参数调用 LiftTermOrRef 。
+	仅可能调用 LiftTermRef ，不调用 LiftTerm 以节约不必要的开销。
+	*/
+	LS_API void
+		LiftTermRefToSelf(TermNode&);
+	//@}
+
+	/*!
+	\brief 提升项引用：使用第二个参数指定的项的内容引用替换第一个项的内容。
+	\sa ValueObject::MakeIndirect
+	*/
+	//@{
+	inline PDefH(void, LiftTermRef, TermNode& term, const TermNode& tm)
+		ImplExpr(leo::SetContentWith(term, tm, &ValueObject::MakeIndirect))
 	inline PDefH(void, LiftTermRef, ValueObject& term_v, const ValueObject& vo)
 		ImplExpr(term_v = vo.MakeIndirect())
 	inline PDefH(void, LiftTermRef, TermNode& term, const ValueObject& vo)
@@ -861,6 +916,24 @@ namespace scheme {
 		ImplExpr(IsBranch(term), LiftTerm(term, Deref(term.rbegin())))
 	//@}
 
+
+	/*!
+	\pre 间接断言：参数为枝节点。
+	\return ReductionStatus::Retained 。
+	*/
+	//@{
+	//! \brief 规约为列表：对枝节点移除第一个子项，保留余下的子项作为列表。
+	LS_API ReductionStatus
+		ReduceBranchToList(TermNode&) lnothrowv;
+
+	/*!
+	\brief 规约为列表值：对枝节点移除第一个子项，保留余下的子项提升后作为列表的值。
+	\sa LiftSubtermsToSelfSafe
+	*/
+	LS_API ReductionStatus
+		ReduceBranchToListValue(TermNode&) lnothrowv;
+	//@}
+
 	/*!
 	\sa RemoveHead
 	\note 使用 ADL RemoveHead 。
@@ -876,14 +949,50 @@ namespace scheme {
 	LS_API ReductionStatus
 		ReduceHeadEmptyList(TermNode&) lnothrow;
 
+	//! \return 移除项时 ReductionStatus::Retained ，否则 ReductionStatus::Clean。
+	//@{
 	/*!
 	\brief 规约为列表：对枝节点移除第一个子项，保留余下的子项作为列表。
-	\return 若成功移除项 ReductionStatus::Retained ，否则为 ReductionStatus::Clean。
+	\sa ReduceBranchToList
 	*/
 	LS_API ReductionStatus
 		ReduceToList(TermNode&) lnothrow;
+
+	/*!
+	\brief 规约为列表值：对枝节点移除第一个子项，保留余下的子项提升后作为列表的值。
+	\sa ReduceBranchToListValue
+	*/
+	LS_API ReductionStatus
+		ReduceToListValue(TermNode&) lnothrow;
+	//@}
 	//@}
 
+
+	/*!
+	\note 一般第一参数用于指定被合并的之前的规约结果，第二参数指定用于合并的结果。
+	\return 合并后的规约结果。
+	*/
+	/*!
+	\brief 合并规约结果。
+
+	若第二参数指定保留项，则合并后的规约结果为第二参数；否则为第一参数。
+	*/
+	lconstfn PDefH(ReductionStatus, CombineReductionResult, ReductionStatus res,
+		ReductionStatus r) lnothrow
+		ImplRet(r == ReductionStatus::Retained ? r : res)
+
+	/*!
+	\brief 合并序列规约结果。
+	\sa CheckReducible
+
+	若第二参数指定可继续规约的项，则合并后的规约结果为第二参数；
+	否则同 CombineReductionResult 。
+	若可继续规约，则指定当前规约的项的规约已终止，不合并第一参数指定的结果。
+	下一轮序列的规约可能使用或忽略合并后的结果。
+	*/
+	inline PDefH(ReductionStatus, CombineSequenceReductionResult,
+			ReductionStatus res, ReductionStatus r) lnothrow
+		ImplRet(CheckReducible(r) ? r : CombineReductionResult(res, r))
 
 	//@{
 	/*!
@@ -962,7 +1071,6 @@ namespace scheme {
 	{
 	public:
 		using BindingMap = ValueNode;
-		//! \since build 821
 		using NameResolution
 			= pair<observer_ptr<ValueNode>, leo::lref<const Environment>>;
 
@@ -1095,7 +1203,6 @@ namespace scheme {
 		PDefH(shared_ptr<const void>, Anchor, ) const
 		ImplRet(anchor.Ptr)
 
-		//! \since build 798
 		//@{
 		/*!
 		\brief 检查可作为父环境的宿主对象。
