@@ -727,7 +727,7 @@ namespace scheme {
 	{
 		template<typename _type>
 		auto
-			operator()(_type&& term) const -> decltype(ReferenceTerm(yforward(term)))
+			operator()(_type&& term) const -> decltype(ReferenceTerm(lforward(term)))
 		{
 			return ReferenceTerm(lforward(term));
 		}

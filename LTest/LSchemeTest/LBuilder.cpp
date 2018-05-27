@@ -231,7 +231,7 @@ namespace
 		//	%LFramework.LSL.Dependency.
 		RegisterStrictUnary<const string>(root, "symbol-string?", IsSymbol);
 		// NOTE: Definitions of $if is in %LFramework.LSL.Dependency.
-		RegisterStrictUnary(root, "list?", ComposeReferencedTermOp(IsList));
+		//RegisterStrictUnary(root, "list?", ComposeReferencedTermOp(IsList));
 		RegisterStrictUnary(root, "listpr?", IsList);
 		// TODO: Add nonnull list predicate to improve performance?
 		// NOTE: Definitions of null?, cons, cons&, eval, copy-environment,
@@ -294,10 +294,10 @@ namespace
 			else if (cmd == "off")
 				use_debug = {};
 			else if (cmd == "crash")
-				terminate();
+				leo::terminate();
 		});
 		RegisterForm(root, "$crash", [] {
-			terminate();
+			leo::terminate();
 		});
 		// NOTE: Derived functions with probable privmitive implementation.
 		// NOTE: Definitions of list, list&, $quote are in

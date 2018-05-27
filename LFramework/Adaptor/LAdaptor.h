@@ -168,6 +168,9 @@ namespace leo {
 	using platform::FetchCurrentWorkingDirectory;
 	using platform::MappedFile;
 
+	//系统处理函数。
+	using platform::terminate;
+
 	namespace IO
 	{
 		/*!
