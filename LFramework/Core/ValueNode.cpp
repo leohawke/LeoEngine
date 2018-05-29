@@ -182,4 +182,11 @@ namespace leo {
 			throw std::invalid_argument("Argument is too large.");
 		return str;
 	}
+
+	size_t
+		GetLastIndexOf(const ValueNode::Container& con)
+	{
+		return con.empty() ? size_t(-1)
+			: size_t(std::stoul(con.rbegin()->GetName()));
+	}
 }

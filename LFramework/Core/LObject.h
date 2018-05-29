@@ -298,7 +298,7 @@ namespace leo
 		{}
 
 		PointerHolder(const PointerHolder& h)
-			: PointerHolder(leo::clone_monomorphic_ptr(h.p_held))
+			: PointerHolder(h,shared())
 		{}
 	private:
 		PointerHolder(const PointerHolder& h, leo::false_)

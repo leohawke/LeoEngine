@@ -64,4 +64,10 @@ namespace leo {
 		return HolderEquals(GetHolderRef(), p);
 	}
 
+	size_t
+		ValueObject::OwnsCount() const lnothrow
+	{
+		return leo::invoke_value_or(&IValueHolder::OwnsCount, GetHolderPtr());
+	}
+
 }

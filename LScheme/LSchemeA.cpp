@@ -517,8 +517,7 @@ namespace scheme
 
 	namespace
 	{
-
-		lconstfn_relaxed bool
+		bool
 			IsReserved(string_view id) lnothrowv
 		{
 			LAssertNonnull(id.data());

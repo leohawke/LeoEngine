@@ -1399,28 +1399,28 @@ namespace scheme
 
 		TermNode
 			TransformForSeparator(const TermNode& term, const ValueObject& pfx,
-				const ValueObject& delim, const string& name)
+				const ValueObject& delim, const TokenValue& name)
 		{
 			return TransformForSeparatorTmpl(term, pfx, delim, name);
 		}
 
 		TermNode
 			TransformForSeparator(TermNode& term, const ValueObject& pfx,
-				const ValueObject& delim, const string& name)
+				const ValueObject& delim, const TokenValue& name)
 		{
 			return TransformForSeparatorTmpl(std::move(term), pfx, delim, name);
 		}
 
 		TermNode
 			TransformForSeparatorRecursive(const TermNode& term, const ValueObject& pfx,
-				const ValueObject& delim, const string& name)
+				const ValueObject& delim, const TokenValue& name)
 		{
 			return TransformForSeparatorRecursiveTmpl(term, pfx, delim, name);
 		}
 
 		TermNode
 			TransformForSeparatorRecursive(TermNode& term, const ValueObject& pfx,
-				const ValueObject& delim, const string& name)
+				const ValueObject& delim, const TokenValue& name)
 		{
 			return TransformForSeparatorRecursiveTmpl(std::move(term), pfx, delim, name);
 		}
@@ -1590,7 +1590,7 @@ namespace scheme
 		{
 			if (IsBranch(term))
 			{
-				const auto& fm(Deref(term.begin()));
+				auto& fm(Deref(term.begin()));
 
 				if (const auto p_handler = AccessPtr<ContextHandler>(fm))
 #if LS_Impl_LSLA1_Enable_Thunked
