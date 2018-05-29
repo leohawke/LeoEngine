@@ -58,6 +58,14 @@ namespace scheme
 
 
 		/*!
+		\brief 断言枝节点。
+		\pre 断言：参数指定的项是枝节点。
+		*/
+		inline PDefH(void, AssertBranch, const TermNode& term,
+			const char* msg = "Invalid term found.") lnothrowv
+		ImplExpr(lunused(msg), LAssert(IsBranch(term), msg))
+
+		/*!
 		\brief 检查项节点是否具有指定的值。
 		*/
 		template<typename _type>
