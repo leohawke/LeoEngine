@@ -214,9 +214,6 @@ namespace leo
 		PDefH(size_t, OwnsCount, ) const lnothrow ImplI(IValueHolder)
 		ImplRet(1)
 
-		PDefH(ValueHolder*, clone, ) const ImplI(IValueHolder)
-		ImplRet(try_new<ValueHolder>(*this))
-
 		PDefH(void*, get, ) const ImplI(IValueHolder)
 		ImplRet(leo::addressof(this->value))
 
@@ -288,6 +285,7 @@ namespace leo
 
 	public:
 		//! \brief 取得所有权。
+		explicit
 		PointerHolder(pointer value)
 			: p_held(value)
 		{}
@@ -302,6 +300,14 @@ namespace leo
 		PointerHolder(const PointerHolder& h)
 			: PointerHolder(leo::clone_monomorphic_ptr(h.p_held))
 		{}
+	private:
+		PointerHolder(const PointerHolder& h, leo::false_)
+			: PointerHolder(leo::clone_monomorphic_ptr(h.p_held))
+		{}
+		PointerHolder(const PointerHolder& h, leo::true_)
+			: p_held(h.p_held)
+		{}
+	public:
 		DefDeMoveCtor(PointerHolder)
 			//@}
 
@@ -330,7 +336,7 @@ namespace leo
 
 
 			PDefH(void*, get, ) const ImplI(IValueHolder)
-			ImplRet(p_held.get())
+			ImplRet(traits::get(p_held))
 
 			PDefH(const type_info&, type, ) const lnothrow ImplI(IValueHolder)
 			ImplRet(traits::is_owner(p_held)
@@ -384,11 +390,8 @@ namespace leo
 		PDefH(value_type&, Ref, ) const
 			ImplRet(Deref(static_cast<lref<value_type>*>(base.get())).get())
 	public:
-		DefClone(const ImplI(IValueHolder), RefHolder)
-
 			PDefH(void*, get, ) const ImplI(IValueHolder)
-			ImplRet(leo::pvoid(std::addressof(
-				Deref(static_cast<lref<value_type>*>(base.get())).get())))
+			ImplRet(leo::pvoid(std::addressof(Ref())))
 
 			PDefH(const type_info&, type, ) const lnothrow ImplI(IValueHolder)
 			ImplRet(leo::type_id<value_type>())

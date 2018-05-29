@@ -42,7 +42,7 @@ namespace leo
 		\brief 抽象动态泛型持有者接口。
 		\since build 1.4
 		*/
-		class LB_API holder : public cloneable
+		class LB_API holder 
 		{
 		public:
 			//! \since build 1.4
@@ -50,14 +50,11 @@ namespace leo
 			holder() = default;
 			holder(const holder&) = default;
 			//! \brief 虚析构：类定义外默认实现。
-			~holder() override;
+			virtual ~holder();
 			//@}
 
 			virtual void*
 				get() const = 0;
-
-			virtual holder*
-				clone() const override = 0;
 
 			//! \since build 1.4
 			virtual const type_info&
