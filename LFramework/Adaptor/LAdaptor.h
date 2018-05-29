@@ -77,6 +77,11 @@ namespace leo {
 	using platform::observer_ptr;
 	using platform::owner_less;
 	using platform::reset;
+
+	using platform::share_copy;
+	using platform::share_forward;
+	using platform::share_move;
+
 	using platform::share_raw;
 	using platform::shared_ptr;
 	using platform::static_pointer_cast;

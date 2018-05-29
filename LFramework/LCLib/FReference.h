@@ -31,6 +31,11 @@ namespace platform
 		using limpl(std)::owner_less;
 		using limpl(leo)::observer_ptr;
 		using leo::reset;
+
+		using leo::share_copy;
+		using leo::share_forward;
+		using leo::share_move;
+
 		using leo::share_raw;
 		using limpl(std)::shared_ptr;
 		using limpl(std)::static_pointer_cast;

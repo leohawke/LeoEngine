@@ -209,17 +209,6 @@ namespace leo {
 		//@}
 	};
 
-	//! \brief 引用相等关系仿函数。
-	template<typename _type>
-	struct ref_eq
-	{
-		lconstfn bool
-			operator()(const _type& _x, const _type& _y) const
-		{
-			return &_x == &_y;
-		}
-	};
-
 	// NOTE: There is 'constexpr' in WG21 N3936; but it is in ISO/IEC 14882:2014.
 #define LB_Impl_Functor_Ops_Primary(_n, _tRet, _using_stmt, _expr, ...) \
 	template<typename _type = void> \
@@ -277,8 +266,8 @@ namespace leo {
 		LB_Impl_Functor_Ops_using(_tRet), x _op y, const _type& x, \
 		const _type& y) \
 	\
-	LB_Impl_Functor_Ops_Spec(_n, typename _type1 YPP_Comma typename \
-		_type2, _type1&& x YPP_Comma _type2&& y, lforward(x) _op lforward(y))
+	LB_Impl_Functor_Ops_Spec(_n, typename _type1 LPP_Comma typename \
+		_type2, _type1&& x LPP_Comma _type2&& y, lforward(x) _op lforward(y))
 
 #define LB_Impl_Functor_Binary(_n, _op) \
 	LB_Impl_Functor_Ops2(_n, _op, _type)
@@ -406,9 +395,22 @@ namespace leo {
 	  //! \brief 一元 & 操作。
 	LB_Impl_Functor_Ops1(addrof, &, addrof_t<const _type&>)
 
-		//! \brief 一元 * 操作。
-		LB_Impl_Functor_Ops1(indirect, *, indirect_t<const _type&>)
-		//@}
+	//! \brief 一元 * 操作。
+	LB_Impl_Functor_Ops1(indirect, *, indirect_t<const _type&>)
+
+
+	//! \brief 引用等价关系仿函数。
+	//@{
+	LB_Impl_Functor_Ops_Primary(ref_eq, bool, LB_Impl_Functor_Ops_using(_type), \
+		leo::constfn_addressof(x) == leo::constfn_addressof(y), \
+		const _type& x, const _type& y)
+
+	LB_Impl_Functor_Ops_Spec(ref_eq, typename _type1 LPP_Comma typename \
+		_type2, _type1&& x LPP_Comma _type2&& y, \
+		leo::constfn_addressof(lforward(x)) \
+		== leo::constfn_addressof(lforward(y)))
+	//@}
+	//@}
 
 #undef LB_Impl_Functor_bool_Ordered
 #undef LB_Impl_Functor_bool

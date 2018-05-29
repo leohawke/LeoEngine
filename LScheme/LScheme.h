@@ -136,134 +136,79 @@ namespace scheme {
 		//@}
 
 
-		//@{
-		//! \brief 访问守护遍。
-		LS_API GuardPasses&
-			AccessGuardPassesRef(ContextNode&);
-
-		//! \brief 访问叶遍。
-		LS_API EvaluationPasses&
-			AccessLeafPassesRef(ContextNode&);
-
-		//! \brief 访问列表遍。
-		LS_API EvaluationPasses&
-			AccessListPassesRef(ContextNode&);
-		//@}
 
 		/*!
-		\brief 访问字面量遍。
-		*/
-		LS_API LiteralPasses&
-			AccessLiteralPassesRef(ContextNode&);
-
-		//! \sa InvokePasses
-		//@{
-		/*!
-		\brief 调用守护遍。
-		\sa GuardPasses
-		*/
-		LS_API Guard
-			InvokeGuard(TermNode& term, ContextNode&);
-
-		/*!
-		\sa EvaluationPasses
-		*/
-		//@{
-		//! \brief 调用叶遍。
-		LS_API ReductionStatus
-			InvokeLeaf(TermNode& term, ContextNode&);
-
-		//! \brief 调用列表遍。
-		LS_API ReductionStatus
-			InvokeList(TermNode& term, ContextNode&);
-		//@}
-
-		/*!
-		\brief 调用字面量遍。
-		\pre 断言：字符串参数的数据指针非空。
-		\sa LiteralPasses
-		*/
-		LS_API ReductionStatus
-			InvokeLiteral(TermNode&, ContextNode&, string_view);
-		//@}
-
-
-		/*!
-		\brief LSLV1 表达式节点规约：调用至少一次求值例程规约子表达式。
+		\brief LSLA1 表达式节点规约：调用至少一次求值例程规约子表达式。
 		\return 规约状态。
-		\note 可能使参数中容器的迭代器失效。
-		\note 默认不需要重规约。这可被求值遍改变。
-		\note 可被求值遍调用以实现递归求值。
-		\note 异常安全取决于调用遍的最低异常安全保证。
-		\sa DetectReducible
-		\sa InvokeGuard
-		\sa InvokeLeaf
-		\sa InvokeList
-		\sa ValueToken
-		\todo 实现 ValueToken 保留处理。
+		\sa ContextNode::RewriteGuarded
+		\sa ReduceOnce
 
-		规约顺序如下：
-		调用 InvokeGuard 进行必要的上下文重置；
-		迭代规约，直至不需要进行重规约。
-		对应不同的节点次级结构分类，一次迭代按以下顺序判断选择以下分支之一，按需规约子项：
-		对枝节点调用 InvokeList 求值；
-		对空节点替换为 ValueToken::Null ；
-		对已替换为 ValueToken 的叶节点保留处理；
-		对其它叶节点调用 InvokeLeaf 求值。
-		单一求值的结果作为 DetectReducible 的第二参数，根据结果判断是否进行重规约。
-		此处约定的迭代中对节点的具体结构分类默认也适用于其它 LSLV1 实现 API ；
-		例外情况应单独指定明确的顺序。
-		例外情况包括输入节点不是表达式语义结构（而是抽象语法树）的 API ，如 TransformNode 。
+		以第一参数为项，以 ReduceOnce 为规约函数调用 ContextNode::RewriteGuarded 。
 		*/
-		LS_API ReductionStatus
+		LF_API ReductionStatus
 			Reduce(TermNode&, ContextNode&);
 
 		/*!
-		\note 按语言规范，子项规约顺序未指定。
+		\brief 再次规约。
+		\sa ContextNode::SetupTail
+		\sa ReduceOnce
+		\sa RelayNext
+		\return ReductionStatus::Retrying
+
+		确保再次 Reduce 调用并返回要求重规约的结果。
+		*/
+		LS_API ReductionStatus
+			ReduceAgain(TermNode&, ContextNode&);
+
+		/*!
 		\note 可能使参数中容器的迭代器失效。
 		\sa Reduce
 		*/
 		//@{
-		//! \note 忽略子项重规约要求。
+		/*!
+		\note 按语言规范，子项规约顺序未指定。
+		\note 忽略子项重规约要求。
+		*/
 		//@{
 		/*!
-		\brief 对容器中的第二项开始逐项规约。
-		\throw InvalidSyntax 容器为空 。
+		\brief 对范围内的第二项开始逐项规约。
+		\throw InvalidSyntax 容器为空。
 		\sa ReduceChildren
 		*/
 		//@{
 		LS_API void
 			ReduceArguments(TNIter, TNIter, ContextNode&);
-
 		inline PDefH(void, ReduceArguments, TermNode::Container& con, ContextNode& ctx)
 			ImplRet(ReduceArguments(con.begin(), con.end(), ctx))
-			inline PDefH(void, ReduceArguments, TermNode& term, ContextNode& ctx)
+		inline PDefH(void, ReduceArguments, TermNode& term, ContextNode& ctx)
 			ImplRet(ReduceArguments(term.GetContainerRef(), ctx))
-			//@}
+		//@}
 
-		/*!
-		\todo 使用更确切的异常类型。
-		*/
+		//! \note 失败视为重规约。
 		//@{
 		/*!
-		\brief 规约并检查成功：调用 Reduce 并检查结果，失败时抛出异常。
-		\throw LSLException Reduce 结果不是 ReductionStatus::Success。
+		\brief 规约并检查成功：等效调用 Reduce 并检查结果直至不需重规约。
+		\note 支持尾调用优化，不直接使用 CheckedReduceWith 和 Reduce 。
+		\return ReductionStatus::Retrying 。
 		\sa CheckedReduceWith
 		\sa Reduce
 		*/
-		LS_API void
+		LS_API ReductionStatus
 			ReduceChecked(TermNode&, ContextNode&);
 
 		/*!
-		\brief 规约闭包：使用第四参数指定的闭包项规约后替换到指定项上。
+		\brief 规约闭包。
+		\return 根据规约后剩余项确定的规约结果。
+		\sa CheckNorm
 		\sa ReduceChecked
 
 		构造规约项，规约后替换到第一参数指定项。
 		规约项的内容由第四参数的闭包指定。第三参数指定是否通过转移构造而不保留原项。
 		规约后转移闭包规约的结果：子项以及引用的值的目标被转移到第一参数指定的项。
 		结果中子项和值之间被转移的相对顺序未指定。
+		规约闭包可作为 β 规约或动态环境中求值的尾调用。
 		*/
-		LS_API void
+		LS_API ReductionStatus
 			ReduceCheckedClosure(TermNode&, ContextNode&, bool, TermNode&);
 		//@}
 
@@ -275,16 +220,18 @@ namespace scheme {
 			ReduceChildren(TNIter, TNIter, ContextNode&);
 		inline PDefH(void, ReduceChildren, TermNode::Container& con, ContextNode& ctx)
 			ImplExpr(ReduceChildren(con.begin(), con.end(), ctx))
-			inline PDefH(void, ReduceChildren, TermNode& term, ContextNode& ctx)
+		inline PDefH(void, ReduceChildren, TermNode& term, ContextNode& ctx)
 			ImplExpr(ReduceChildren(term.GetContainerRef(), ctx))
-			//@}
-			//@}
+		//@}
+		//@}
 
-			/*!
-			\brief 有序规约子项。
-			\return 当存在子项时为最后一个子项的规约状态，否则为 ReductionStatus::Clean 。
-			*/
-			//@{
+
+
+		/*!
+		\brief 有序规约子项。
+		\return 当存在子项时为最后一个子项的规约状态，否则为 ReductionStatus::Clean 。
+		*/
+		//@{
 			LS_API ReductionStatus
 			ReduceChildrenOrdered(TNIter, TNIter, ContextNode&);
 		inline PDefH(ReductionStatus, ReduceChildrenOrdered, TermNode::Container& con,
@@ -295,17 +242,17 @@ namespace scheme {
 			ImplRet(ReduceChildrenOrdered(term.GetContainerRef(), ctx))
 			//@}
 
-			/*!
-			\brief 规约第一个子项。
-			\return 规约状态。
-			\sa Reduce
-			\see https://en.wikipedia.org/wiki/Fexpr 。
+		/*!
+		\brief 规约第一个子项。
+		\return 规约状态。
+		\sa Reduce
+		\see https://en.wikipedia.org/wiki/Fexpr 。
 
-			快速严格性分析：
-			无条件求值枝节点第一项以避免非确定性推断子表达式求值的附加复杂度。
-			*/
-			LS_API ReductionStatus
-			ReduceFirst(TermNode&, ContextNode&);
+		快速严格性分析：
+		无条件求值枝节点第一项以避免非确定性推断子表达式求值的附加复杂度。
+		*/
+		LS_API ReductionStatus
+		ReduceFirst(TermNode&, ContextNode&);
 
 		/*!
 		\brief LSLA1 表达式节点规约：调用求值例程规约子表达式。
@@ -342,42 +289,55 @@ namespace scheme {
 		LS_API ReductionStatus
 			ReduceOrdered(TermNode&, ContextNode&);
 
-			/*!
-			\brief 移除容器首项到指定迭代器的项后规约。
-			*/
-			LS_API ReductionStatus
-			ReduceTail(TermNode&, ContextNode&, TNIter);
+		/*!
+		\brief 移除容器首项到指定迭代器的项后规约。
+		*/
+		LS_API ReductionStatus
+		ReduceTail(TermNode&, ContextNode&, TNIter);
 		//@}
 
-
-			/*!
-			\brief 设置跟踪深度节点：调用规约时显示深度和上下文等信息。
-			\note 主要用于调试。
-			\sa InvokeGuard
-			*/
-			LS_API void
-			SetupTraceDepth(ContextNode& ctx, const string& name = limpl("$__depth"));
-
+		/*!
+		\brief 设置跟踪深度节点：调用规约时显示深度和上下文等信息。
+		\note 主要用于调试。
+		\sa InvokeGuard
+		*/
+		LS_API void
+		SetupTraceDepth(ContextNode& ctx, const string& name = limpl("$__depth"));
 
 		/*!
 		\note ValueObject 参数分别指定替换添加的前缀和被替换的分隔符的值。
 		*/
 		//@{
 		/*!
-		\note 移除子项中值和指定分隔符指定的项，并以 AsIndexNode 添加指定前缀值作为子项。
-		\note 最后一个参数指定返回值的名称。
+		\brief 变换分隔符中缀表达式为前缀表达式。
 		\sa AsIndexNode
+
+		移除子项中值和指定分隔符指定的项，并以 AsIndexNode 添加指定前缀值作为子项。
+		被添加的子项若是只有一个子项的列表项，该项被提升直接加入转换后的项作为子项。
+		最后一个参数指定返回值的名称。
 		*/
 		//@{
-		//! \brief 变换分隔符中缀表达式为前缀表达式。
+
+		//! \note 非递归变换。
+		//@{
 		LS_API TermNode
 			TransformForSeparator(const TermNode&, const ValueObject&, const ValueObject&,
-				const string& = {});
+				const TokenValue& = {});
+		LS_API TermNode
+			TransformForSeparator(TermNode&, const ValueObject&, const ValueObject&,
+				const TokenValue& = {});
+		//@}
 
-		//! \brief 递归变换分隔符中缀表达式为前缀表达式。
+		//! \note 递归变换。
+		//@{
 		LS_API TermNode
 			TransformForSeparatorRecursive(const TermNode&, const ValueObject&,
-				const ValueObject&, const string& = {});
+				const ValueObject&, const TokenValue& = {});
+
+		LS_API TermNode
+			TransformForSeparatorRecursive(TermNode&, const ValueObject&,
+				const ValueObject&, const TokenValue& = {});
+		//@}
 		//@}
 
 		/*!
@@ -587,22 +547,12 @@ namespace scheme {
 		\sa ReplaceSeparatedChildren
 
 		变换带有中缀形式的分隔符记号的表达式为指定名称的前缀表达式并去除分隔符，
-		然后注册前缀语法形式。
 		最后一个参数指定是否有序，选择语法形式为 ReduceOrdered 或 ReduceChildren 之一。
 		前缀名称不需要是记号支持的标识符。
 		*/
 		LS_API void
-			RegisterSequenceContextTransformer(EvaluationPasses&, ContextNode&,
-				const string&, const ValueObject&, bool = {});
-
-
-		/*!
-		\brief 断言枝节点。
-		\pre 断言：参数指定的项是枝节点。
-		*/
-		inline PDefH(void, AssertBranch, const TermNode& term,
-			const char* msg = "Invalid term found.") lnothrowv
-			ImplExpr(lunused(msg), LAssert(IsBranch(term), msg))
+			RegisterSequenceContextTransformer(EvaluationPasses&,const ValueObject&,
+				bool = {});
 
 		/*!
 		\brief 取项的参数个数：子项数减 1 。
@@ -610,7 +560,7 @@ namespace scheme {
 		\return 项的参数个数。
 		*/
 		inline PDefH(size_t, FetchArgumentN, const TermNode& term) lnothrowv
-		ImplRet(AssertBranch(term), term.size() - 1)
+			ImplRet(AssertBranch(term), term.size() - 1)
 
 		//! \note 第一参数指定输入的项，其 Value 指定输出的值。
 		//@{
@@ -708,9 +658,24 @@ namespace scheme {
 		/*!
 		\brief 解析名称：处理保留名称并查找名称。
 		\pre 断言：第二参数的数据指针非空。
+		\exception NPLException 访问共享重定向上下文失败。
+		\sa Environment::ResolveName
 		*/
-		LS_API observer_ptr<const ValueNode>
+		LS_API  Environment::NameResolution
 			ResolveName(const ContextNode&, string_view);
+
+		/*!
+		\brief 解析环境。
+		\return 取得所有权的环境指针及是否具有所有权。
+		\note 只支持宿主值类型 \c shared_ptr<Environment> 或 \c weak_ptr<Environment> 。
+		*/
+		//@{
+		LS_API pair<shared_ptr<Environment>, bool>
+			ResolveEnvironment(ValueObject&);
+		inline PDefH(pair<shared_ptr<Environment> LPP_Comma bool>, ResolveEnvironment,
+			TermNode& term)
+			ImplRet(ResolveEnvironment(ReferenceTerm(term).Value))
+			//@}
 
 		/*!
 		\brief 设置默认解释：解释使用的公共处理遍。
@@ -767,95 +732,99 @@ namespace scheme {
 				ImplRet(AssertBranch(term), ReductionStatus::Retained)
 
 
-				/*!
-				\brief 保留经检查确保具有指定个数参数的项：保留求值。
-				\return 项的参数个数。
-				\throw ArityMismatch 项的参数个数不等于第二参数。
-				\sa FetchArgumentN
-				*/
-				LS_API size_t
-				RetainN(const TermNode&, size_t = 1);
+			/*!
+			\brief 保留经检查确保具有指定个数参数的项：保留求值。
+			\return 项的参数个数。
+			\throw ArityMismatch 项的参数个数不等于第二参数。
+			\sa FetchArgumentN
+			*/
+			LS_API size_t
+			RetainN(const TermNode&, size_t = 1);
+			//@}
+
+			//! \throw ParameterMismatch 匹配失败。
+			//@{
+			/*!
+			\pre 断言：字符串参数的数据指针非空。
+			*/
+			//@{
+			//! \brief 检查记号值是符合匹配条件的符号。
+			template<typename _func>
+			auto
+				CheckSymbol(string_view n, _func f) -> decltype(f())
+			{
+				if (IsLSLASymbol(n))
+					return f();
+				throw ParameterMismatch(leo::sfmt(
+					"Invalid token '%s' found for symbol parameter.", n.data()));
+			}
+
+			//! \brief 检查记号值是符合匹配条件的参数符号。
+			template<typename _func>
+			auto
+				CheckParameterLeafToken(string_view n, _func f) -> decltype(f())
+			{
+				if (n != "#ignore")
+					CheckSymbol(n, f);
+			}
 			//@}
 
 			/*!
-			\throw ParameterMismatch 匹配失败。
 			\note 不具有强异常安全保证。匹配失败时，其它的绑定状态未指定。
+			\sa LiftToSelf
 
-			绑定前需要进行结构化匹配检查。
-			若匹配失败，则抛出异常；否则，在第一参数指定的环境内绑定未被忽略的匹配的项：
-			非空列表项的绑定为对应子项的绑定；
-			空列表项的绑定为空操作；
-			非列表项操作数直接绑定到名称为符号值的参数对应项。
-			绑定按深度优先的词法顺序进行。若已存在绑定则重新绑定。
+			递归遍历参数和操作数树进行结构化匹配。
+			若匹配失败，则抛出异常。
 			*/
 			//@{
 			/*!
 			\brief 使用操作数结构化匹配并绑定参数。
 			\throw ArityMismatch 子项数匹配失败。
-			\sa BindParameterLeaf
+			\note 第一参数指定的上下文决定绑定的环境。
+			\sa MatchParameter
+			\sa TermReference
 
 			形式参数和操作数为项指定的表达式树。
 			第二参数指定形式参数，第三参数指定操作数。
-			进行匹配的算法递归搜索形式参数及其子项，匹配要求如下：
-			若项是非空列表，则操作数的对应的项应为满足确定子项数的列表：
-			若最后的子项为符号 ... ，则匹配操作数中结尾的任意个数的项；
-			其它子项一一匹配操作数的子项；
-			若项是空列表，则操作数的对应的项应为空列表；
-			否则，调用 BindParameterLeaf 匹配非列表项。
-			*/
-			LS_API void
-				BindParameter(ContextNode&, const TermNode&, TermNode&);
-
-			/*!
-			\brief 使用操作数结构化匹配并绑定参数到非列表项。
-			\sa BindParameter
-
-			形式参数和操作数为项指定的表达式树。
-			第二参数指定名称，之后的参数指定值。
+			进行其它操作前，对操作数调用 LiftToSelf 处理，但不处理形式参数。
+			进行匹配的算法递归搜索形式参数及其子项，要求参见 MatchParameter 。
+			若匹配成功，在第一参数指定的环境内绑定未被忽略的匹配的项。
+			对结尾序列总是匹配前缀为 . 的符号为目标按以下规则忽略或绑定：
+			子项为 . 时，对应操作数的结尾序列被忽略；
+			否则，绑定项的目标为移除前缀 . 和后续可选前缀 & 后的符号。
+			非列表项的绑定使用以下规则：
+			若匹配成功，在第一参数指定的环境内绑定未被忽略的匹配的非列表项。
 			匹配要求如下：
 			若项是 #ignore ，则忽略操作数对应的项；
 			若项的值是符号，则操作数的对应的项应为非列表项。
+			若被绑定的目标有 & ，则以按引用传递的方式绑定；否则以按值传递的方式绑定。
+			按引用传递绑定直接转移该项的内容。
 			*/
-			//@{
 			LS_API void
-				BindParameterLeaf(ContextNode&, const TokenValue&, TermNode::Container&&,
-					ValueObject&&);
-			inline PDefH(void, BindParameterLeaf, ContextNode& e, const TokenValue& n,
-				TermNode&& o)
-				ImplExpr(BindParameterLeaf(e, n, std::move(o.GetContainerRef()),
-					std::move(o.Value)))
-				//@}
-				//@}
+				BindParameter(ContextNode&, const TermNode&, TermNode&);
+			
+			/*!
+			\brief 匹配参数。
+			\exception std::bad_function 异常中立：参数指定的处理器为空。
 
-				/*!
-				\brief 检查项中是否存在为修饰符的第二个子项，若存在则移除。
-				\return 是否存在并移除了修饰符。
-
-				检查第一参数指定的容器或项是否存在第二参数指定的修饰符为项的第一参数。
-				若检查发现存在修饰符则移除。
-				*/
-				//@{
-				LS_API bool
-				ExtractModifier(TermNode::Container&, const ValueObject& = string("!"));
-			inline PDefH(bool, ExtractModifier, TermNode& term,
-				const ValueObject& mod = string("!"))
-				ImplRet(ExtractModifier(term.GetContainerRef(), mod))
-				//@}
-
-				//! \brief 规约可能带有修饰符的项。
-				template<typename _func>
-			void
-				ReduceWithModifier(TermNode& term, ContextNode& ctx, _func f)
-			{
-				const bool mod(ExtractModifier(term));
-
-				if (IsBranch(term))
-					f(term, ctx, mod);
-				else
-					throw InvalidSyntax("Argument not found.");
-			}
+			进行匹配的算法递归搜索形式参数及其子项。
+			若匹配成功，调用参数指定的匹配处理器。
+			处理器为参数列表结尾的结尾序列处理器和值处理器，分别匹配以 . 起始的项和非列表项。
+			结尾序列处理器传入的字符串参数表示需绑定的表示结尾序列的列表标识符。
+			匹配要求如下：
+			若项是非空列表，则操作数的对应的项应为满足确定子项数的列表：
+			若最后的子项为 . 起始的符号，则匹配操作数中结尾的任意个数的项作为结尾序列：
+			其它子项一一匹配操作数的子项；
+			若项是空列表，则操作数的对应的项应为空列表；
+			否则，匹配非列表项。
+			*/
+			LS_API void
+				MatchParameter(const TermNode&, TermNode&,
+					std::function<void(TNIter, TNIter, const TokenValue&)>,
+					std::function<void(const TokenValue&, TermNode&&)>);
 			//@}
-
+			//@}
+			//@}
 
 			/*!
 			\brief 访问节点并调用一元函数。
@@ -1092,6 +1061,60 @@ namespace scheme {
 			}
 			//@}
 
+
+			//! \pre 间接断言：第一参数指定的项是枝节点。
+			//@{
+			/*
+			\note 实现特殊形式。
+			\throw InvalidSyntax 语法错误。
+			*/
+			//@{
+			/*!
+			\brief 定义。
+			\exception ParameterMismatch 绑定匹配失败。
+			\throw InvalidSyntax 绑定的源为空。
+			\sa BindParameter
+			\sa Vau
+
+			实现修改环境的特殊形式。
+			使用 <definiend> 指定绑定目标，和 Vau 的 <formals> 格式相同。
+			剩余表达式 <expressions> 指定绑定的源。
+			返回未指定值。
+			限定第三参数后可使用 RegisterForm 注册上下文处理器。
+			*/
+			//@{
+			/*!
+			\note 不对剩余表达式进一步求值。
+
+			剩余表达式视为求值结果，直接绑定到 <definiend> 。
+			参考调用文法：
+			$deflazy! <definiend> <expressions>
+			*/
+			LS_API void
+				DefineLazy(TermNode&, ContextNode&);
+
+			/*!
+			\note 不支持递归绑定。
+
+			剩余表达式视为一个表达式进行求值后绑定到 <definiend> 。
+			参考调用文法：
+			$def! <definiend> <expressions>
+			*/
+			LS_API void
+				DefineWithNoRecursion(TermNode&, ContextNode&);
+
+			/*!
+			\note 支持直接递归和互相递归绑定。
+			\sa InvalidReference
+
+			解析可能递归绑定的名称，剩余表达式视为一个表达式进行求值后绑定到 <definiend> 。
+			循环引用以此引入的名称可能抛出 InvalidReference 异常。
+			$defrec! <definiend> <expressions>
+			*/
+			LS_API void
+				DefineWithRecursion(TermNode&, ContextNode&);
+			//@}
+
 			/*!
 			\brief 移除名称绑定。
 			\exception BadIdentifier 非强制时移除不存在的名称。
@@ -1129,41 +1152,123 @@ namespace scheme {
 
 
 			/*!
-			\exception InvalidSyntax 异常中立：由 ExtractParameters 抛出。
+			\exception ParameterMismatch 异常中立：由 BindParameter 抛出。
 			\sa EvaluateIdentifier
 			\sa ExtractParameters
+			\sa MatchParameter
 			\warning 返回闭包调用引用变量超出绑定目标的生存期引起未定义行为。
 			\todo 优化捕获开销。
-
+			
 			使用 ExtractParameters 检查参数列表并捕获和绑定变量，
 			然后设置节点的值为表示 λ 抽象的上下文处理器。
-			可使用 RegisterFormContextHandler 注册上下文处理器。
-			和 Scheme 等不同参数以项而不是位置的形式被转移，在函数应用时可能进一步求值。
+			可使用 RegisterForm 注册上下文处理器。
+			和 Scheme 等不同，参数以项而不是位置的形式被转移，函数应用时可能有副作用。
 			按引用捕获上下文中的绑定。被捕获的上下文中的绑定依赖宿主语言的生存期规则。
+			*/
 			//@{
-			\brief λ 抽象：产生一个捕获当前上下文的过程。
-			\note 实现特殊形式。参数以项的形式被转移，在函数应用时可能进一步求值。
-
-			特殊形式参考文法：
+			/*!
+			\brief λ 抽象：求值为一个捕获当前上下文的严格求值的函数。
+			
+			捕获的静态环境由当前动态环境隐式确定。
+			不保留环境的所有权。
+			*/
+			//@{
+			/*!
+			
+			按值传递返回值：提升项以避免返回引用造成内存安全问题。
+			参考调用文法：
 			$lambda <formals> <body>
 			*/
 			LS_API void
 				Lambda(TermNode&, ContextNode&);
 
 			/*!
-			\brief vau 抽象：求值为一个捕获当前上下文的非严格求值的函数。
-			\note 动态环境的上下文参数被捕获为一个 leo::ref<ContextNode> 对象。
-			\throw InvalidSynta <eformal> 不符合要求。
 
-			初始化的 <eformal> 表示动态环境的上下文参数，应为一个符号或 #ignore 。
-			特殊形式参考文法：
+			在返回时不提升项，允许返回引用。
+			参考调用文法：
+			$lambda& <formals> <body>
+			*/
+			LS_API void
+				LambdaRef(TermNode&, ContextNode&);
+			//@}
+
+
+			/*!
+			\note 动态环境的上下文参数被捕获为一个 ystdex::ref<ContextNode> 对象。
+			\note 初始化的 <eformal> 表示动态环境的上下文参数，应为一个符号或 #ignore 。
+			\note 引入的处理器的 operator() 支持保存当前动作。
+			\throw InvalidSyntax <eformal> 不符合要求。
+			\sa ReduceCheckedClosure
+			上下文中环境以外的数据成员总是被复制而不被转移，
+			以避免求值过程中继续访问这些成员引起未定义行为。
+			*/
+			//@{
+			/*!
+			\brief vau 抽象：求值为一个捕获当前上下文的非严格求值的函数。
+
+			捕获的静态环境由当前动态环境隐式确定。
+			不保留环境的所有权。
+			*/
+			//@{
+			/*!
+			按值传递返回值：提升项以避免返回引用造成内存安全问题。
+			参考调用文法：
 			$vau <formals> <eformal> <body>
 			*/
 			LS_API void
 				Vau(TermNode&, ContextNode&);
+
+			/*!
+
+			在返回时不提升项，允许返回引用。
+			参考调用文法：
+			$vau& <formals> <eformal> <body>
+			*/
+			LS_API void
+				VauRef(TermNode&, ContextNode&);
+			//@}
+
+			/*!
+			\brief 带环境的 vau 抽象：求值为一个捕获当前上下文的非严格求值的函数。
+			\sa ResolveEnvironment
+
+			捕获的静态环境由环境参数 <env> 求值后指定。
+			根据环境参数的类型为 \c shared_ptr<Environment> 或 \c weak_ptr<Environment>
+			决定是否保留所有权。
+			*/
+			//@{
+			/*!
+			按值传递返回值：提升项以避免返回引用造成内存安全问题。
+			参考调用文法：
+			$vaue <env> <formals> <eformal> <body>
+			*/
+			LS_API void
+				VauWithEnvironment(TermNode&, ContextNode&);
+
+			/*!
+
+			在返回时不提升项，允许返回引用。
+			参考调用文法：
+			$vaue& <env> <formals> <eformal> <body>
+			*/
+			LS_API void
+				VauWithEnvironmentRef(TermNode&, ContextNode&);
+			//@}
 			//@}
 			//@}
 
+			/*!
+			\brief 序列有序参数规约：移除第一项后顺序规约子项，结果为最后一个子项的规约结果。
+			\return 子项被规约时为最后一个子项的规约状态，否则为 ReductionStatus::Clean 。
+			\note 可直接实现顺序求值。在对象语言中，若参数为空，返回未指定值。
+			\sa ReduceOrdered
+			\sa RemoveHead
+
+			参考调用文法：
+			$sequence <object>...
+			*/
+			LS_API ReductionStatus
+				Sequence(TermNode&, ContextNode&);
 
 			/*!
 			\sa ReduceChecked
@@ -1202,61 +1307,148 @@ namespace scheme {
 				CallSystem(TermNode&);
 
 
+			/*!
+			\brief 接受两个参数，返回以第一个参数作为首项插入第二个参数创建的新的列表。
+			\return ReductionStatus::Retained 。
+			\throw InvalidSyntax 第二个参数不是列表。
+			\note NPLA 无 cons 对，所以要求创建的总是列表。
+			*/
 			//@{
 			/*!
-			\brief 比较两个子项的值相等。
+			\sa LiftSubtermsToSelfSafe
+			按值传递返回值：提升项以避免返回引用造成内存安全问题。
+			参考调用文法：
+			cons <object> <list>
+			*/
+			LS_API ReductionStatus
+				Cons(TermNode&);
+
+			/*!
+			在返回时不提升项，允许返回引用。
+			参考调用文法：
+			cons& <object> <list>
+			*/
+			LS_API ReductionStatus
+				ConsRef(TermNode&);
+
+			/*!
+			\brief 比较两个子项表示的值引用相同的对象。
 			\sa leo::HoldSame
+			参考调用文法：
+			eq? <object1> <object2>
+			*/
+			LS_API void
+				Equal(TermNode&);
+
+			/*!
+			\brief 比较两个子项的值相等。
+			\sa leo::ValueObject
+
+			参考调用文法：
+			eql? <object1> <object2>
+			*/
+			LS_API void
+				EqualLeaf(TermNode&);
+
+			//@{
+			/*!
+			\brief 比较两个子项的值引用相同的对象。
+			\sa leo::HoldSame
+			参考调用文法：
+			eqr? <object1> <object2>
 			*/
 			LS_API void
 				EqualReference(TermNode&);
 
 			/*!
-			\brief 比较两个子项的值相等。
+			\brief 比较两个子项表示的值相等。
 			\sa leo::ValueObject
+			参考调用文法：
+			eqv? <object1> <object2>
 			*/
 			LS_API void
 				EqualValue(TermNode&);
 			//@}
 
-			//@{
 			/*!
 			\brief 对指定项按指定的环境求值。
+			\note 支持保存当前动作。
+			\sa ReduceCheckedClosure
+			\sa ResolveEnvironment
 
 			以表达式 <expression> 和环境 <environment> 为指定的参数进行求值。
 			环境以 ContextNode 的引用表示。
-			参考文法：
+			*/
+			//@{
+			/*!
+			按值传递返回值：提升项以避免返回引用造成内存安全问题。
+
+			参考调用文法：
 			eval <expression> <environment>
 			*/
 			LS_API ReductionStatus
-				Eval(TermNode&);
+				Eval(TermNode&, ContextNode&);
+
+			/*!
+
+			在返回时不提升项，允许返回引用。
+			参考调用文法：
+			eval& <expression> <environment>
+			*/
+			LS_API ReductionStatus
+				EvalRef(TermNode&, ContextNode&);
 			//@}
+			//@}
+
+			/*!
+			\brief 创建以参数指定的环境列表作为父环境的新环境。
+			\exception NPLException 异常中立：由 Environment 的构造函数抛出。
+			\sa Environment::CheckParent
+			\sa EnvironmentList
+			\todo 使用专用的异常类型。
+
+			取以指定的参数初始化新创建的父环境。
+			参考调用文法：
+			make-environment <environment>...
+			*/
+			LS_API void
+				MakeEnvironment(TermNode&);
+
+			/*!
+			\brief 取当前环境的引用。
+			取得的宿主值类型为 weak_ptr<Environment> 。
+			参考调用文法：
+			() get-current-environment
+			*/
+			LS_API void
+				GetCurrentEnvironment(TermNode&, ContextNode&);
 
 			/*!
 			\brief 求值标识符得到指称的实体。
 			\sa EvaluateIdentifier
-
 			在对象语言中实现函数接受一个 string 类型的参数项，返回值为指定的实体。
 			当名称查找失败时，返回的值为 ValueToken::Null 。
+			参考调用文法：
+			value-of <object>
 			*/
 			LS_API ReductionStatus
 				ValueOf(TermNode&, const ContextNode&);
+			//@}
 
 
 			//@{
 			/*!
 			\brief 包装合并子为应用子。
-
 			参考调用文法：
 			wrap <combiner>
 			*/
 			LS_API ContextHandler
 				Wrap(const ContextHandler&);
 
-			//! \exception LSLException 类型不符合要求。
+			//! \exception NPLException 类型不符合要求。
 			//@{
 			/*!
 			\brief 包装操作子为应用子。
-
 			参考调用文法：
 			wrap1 <operative>
 			*/
@@ -1265,7 +1457,6 @@ namespace scheme {
 
 			/*!
 			\brief 解包装应用子为合并子。
-
 			参考调用文法：
 			unwrap <applicative>
 			*/

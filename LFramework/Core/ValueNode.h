@@ -1016,6 +1016,19 @@ namespace leo {
 		ImplRet(MakeIndex(node.GetContainer()))
 	//@}
 
+	/*!
+	\brief 取最后一个子节点名称的前缀索引。
+	\return 若不存在子节点则为 \c size_t(-1) ，否则为最后一个子节点的名称对应的索引。
+	\throw std::invalid_argument 存在子节点但名称不是前缀索引。
+	\sa IsPrefixedIndex
+	*/
+	//@{
+	LF_API size_t
+	GetLastIndexOf(const ValueNode::Container&);
+	inline PDefH(size_t, GetLastIndexOf, const ValueNode& term)
+		ImplRet(GetLastIndexOf(term.GetContainer()))
+	//@}
+
 		template<typename _tParam, typename... _tParams>
 	inline ValueNode
 		AsIndexNode(_tParam&& arg, _tParams&&... args)

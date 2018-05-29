@@ -533,6 +533,68 @@ namespace leo
 		return p.lock().get();
 	}
 
+
+	/*!	\defgroup owns_any Owns Any Check
+	\brief 检查是否是所有者。
+	*/
+	//@{
+	template<typename _type>
+	lconstfn bool
+		owns_any(_type* const&) lnothrow
+	{
+		return {};
+	}
+	template<typename _type, typename _fDeleter>
+	lconstfn bool
+		owns_any(const std::unique_ptr<_type, _fDeleter>& p) lnothrow
+	{
+		return bool(p);
+	}
+	template<typename _type>
+	lconstfn bool
+		owns_any(const std::shared_ptr<_type>& p) lnothrow
+	{
+		return p.use_count() > 0;
+	}
+	template<typename _type>
+	lconstfn bool
+		owns_any(const std::weak_ptr<_type>& p) lnothrow
+	{
+		return !p.expired();
+	}
+	//@}
+
+	/*!	\defgroup owns_nonnull Owns Nonnull Check
+	\brief 检查是否是非空对象的所有者。
+	*/
+	//@{
+	template<typename _type>
+	lconstfn bool
+		owns_nonnull(_type* const&) lnothrow
+	{
+		return {};
+	}
+	//! \since build 550
+	template<typename _type, typename _fDeleter>
+	lconstfn bool
+		owns_nonnull(const std::unique_ptr<_type, _fDeleter>& p) lnothrow
+	{
+		return bool(p);
+	}
+	template<typename _type>
+	lconstfn bool
+		owns_nonnull(const std::shared_ptr<_type>& p) lnothrow
+	{
+		return bool(p);
+	}
+	template<typename _type>
+	lconstfn bool
+		owns_nonnull(const std::weak_ptr<_type>& p) lnothrow
+	{
+		return bool(p.lock());
+	}
+	//@}
+
 	/*!	\defgroup owns_unique Owns Uniquely Check
 	\brief 检查是否是唯一所有者。
 	*/
@@ -798,6 +860,41 @@ namespace leo
 		make_weak(const std::shared_ptr<_type>& p) lnothrow
 	{
 		return p;
+	}
+	//@}
+
+	/*!
+	\note 使用 ADL make_shared 。
+	*/
+	//@{
+	//! \brief 复制值创建对应的 std::shared_ptr 实例的对象。
+	template<typename _tValue, typename _type = _tValue>
+	lconstfn std::shared_ptr<decay_t<_type>>
+		share_copy(const _tValue& v)
+	{
+		using std::make_shared;
+
+		return make_shared<decay_t<_type>>(lforward(v));
+	}
+
+	//! \brief 传递值创建对应的 std::shared_ptr 实例的对象。
+	template<typename _tValue, typename _type = _tValue>
+	lconstfn std::shared_ptr<decay_t<_type>>
+		share_forward(_tValue&& v)
+	{
+		using std::make_shared;
+
+		return make_shared<decay_t<_type>>(lforward(v));
+	}
+
+	//! \brief 转移值创建对应的 std::shared_ptr 实例的对象。
+	template<typename _tValue, typename _type = _tValue>
+	lconstfn std::shared_ptr<decay_t<_type>>
+		share_move(_tValue&& v)
+	{
+		using std::make_shared;
+
+		return make_shared<decay_t<_type>>(std::move(v));
 	}
 	//@}
 
