@@ -187,6 +187,6 @@ namespace leo {
 		GetLastIndexOf(const ValueNode::Container& con)
 	{
 		return con.empty() ? size_t(-1)
-			: size_t(std::stoul(con.rbegin()->GetName()));
+			: size_t(std::stoul(con.crbegin()->GetName()));
 	}
 }

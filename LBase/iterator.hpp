@@ -16,10 +16,11 @@
 
 namespace leo
 {
-	template<typename _type, typename _tIter = _type*,
+	template<typename _type, typename _tIter =const _type*,
 		typename _tTraits = std::iterator_traits<_tIter >>
 		//伪迭代器,总返回单一值
-		class pseudo_iterator
+		class pseudo_iterator : public iterator_operators_t<
+		pseudo_iterator<_type, _tIter, _tTraits>, _tTraits>
 	{
 	public:
 		using iterator_type = _tIter;
@@ -52,13 +53,13 @@ namespace leo
 			operator=(pseudo_iterator&&) = default;
 
 		pseudo_iterator&
-			operator+=(difference_type)
+			operator+=(difference_type) lnothrow
 		{
 			return *this;
 		}
 
 		pseudo_iterator&
-			operator-=(difference_type)
+			operator-=(difference_type) lnothrow
 		{
 			return *this;
 		}
@@ -70,55 +71,42 @@ namespace leo
 		}
 
 		lconstfn reference
-			operator*() const
+			operator*() const lnothrow
 		{
 			return value;
 		}
 
-		lconstfn pointer
-			operator->() const
-		{
-			return this;
-		}
 
-		pseudo_iterator&
-			operator++()
-		{
-			return *this;
-		}
-		pseudo_iterator
-			operator++(int)
+		lconstfn_relaxed pseudo_iterator& 
+			operator++() lnothrow
 		{
 			return *this;
 		}
 
-		lconstfn pseudo_iterator&
-			operator--() const
+		lconstfn_relaxed pseudo_iterator&
+			operator--() lnothrow
 		{
 			return *this;
 		}
-		lconstfn pseudo_iterator
-			operator--(int) const
+		
+		friend lconstfn bool
+			operator==(const pseudo_iterator& x, const pseudo_iterator& y)
+			lnoexcept_spec(bool(x.value == y.value))
 		{
-			return *this;
-		}
-
-		lconstfn reference
-			operator[](difference_type n) const
-		{
-			return this[n];
+			return x.value == y.value;
 		}
 
-		lconstfn pseudo_iterator
-			operator+(difference_type) const
+		friend lconstfn bool
+			operator<(const pseudo_iterator& x, const pseudo_iterator& y)
+			lnoexcept_spec(bool(x.value < y.value))
 		{
-			return *this;
+			return x.value < y.value;
 		}
 
-		lconstfn pseudo_iterator
-			operator-(difference_type) const
+		friend lconstfn difference_type
+			operator-(const pseudo_iterator&, const pseudo_iterator&) lnothrow
 		{
-			return *this;
+			return 0;
 		}
 	};
 
@@ -138,7 +126,7 @@ namespace leo
 			/*!
 			\todo 测试 operator-> 并支持代理指针。
 			*/
-			using pointer = decay_t<reference>*;
+			using pointer = remove_reference_t<reference>*;
 		};
 	}
 

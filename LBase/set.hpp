@@ -142,9 +142,9 @@ namespace leo {
 
 	private:
 		using mapped_key_compare = details::tcompare<mapped_key_type, _fComp>;
+		using umap_pair = std::pair<const mapped_key_type, value_type>;
 		using umap_type
 			= std::map<mapped_key_type, value_type, mapped_key_compare, allocator_type>;
-		using umap_pair = typename umap_type::value_type;
 		// NOTE: Here %get_second cannot be used directory due to possible
 		//	incomplete value type and requirement on conversion between
 		//	'const_iterator' and 'iterator'.
