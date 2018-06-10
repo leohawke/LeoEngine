@@ -134,6 +134,9 @@
     <ClCompile Include="Core\ResourcesHolder.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Asset\MaterialX.cpp">
+      <Filter>Asset</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -293,6 +296,9 @@
     </ClInclude>
     <ClInclude Include="Core\ResourcesHolder.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\MaterialX.h">
+      <Filter>Asset</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

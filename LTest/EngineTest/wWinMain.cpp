@@ -4,6 +4,7 @@
 #include "../../Engine/Core/Mesh.h"
 #include "../../Engine/Render/IFrameBuffer.h"
 #include "../../Engine/Asset/EffectX.h"
+#include "../../Engine/Asset/MaterialX.h"
 #include "TestFramework.h"
 #include "EntityComponentSystem/EntitySystem.h"
 #include "LSchemEngineUnitTest.h"
@@ -31,6 +32,7 @@ private:
 
 		auto pMesh = platform::X::LoadMesh("Broadleaf_Desktop_LOD0.asset","Broadleaf_Desktop_LOD0");
 		auto pEffect = platform::X::LoadEffect("ForwardPointLightDiffuseShading");
+		auto pMaterialAsset = platform::X::LoadMaterialAsset("FPDS.mat.lsl");
 
 		lm::float4x4 worldmatrix = {
 			{1,0,0,0},

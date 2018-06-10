@@ -17,6 +17,9 @@ namespace asset {
 			std::pair<leo::uint8,leo::uint8> pass_used_range;
 		};
 
+		DefGetter(const lnothrow, const std::string&, EffectName, effect_name)
+			DefGetter(lnothrow, std::string&, EffectName, effect_name)
+
 	private:
 		std::string effect_name;
 		std::vector<std::pair<size_t, leo::any>> bind_values;
