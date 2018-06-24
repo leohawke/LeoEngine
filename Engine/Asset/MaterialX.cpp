@@ -62,10 +62,19 @@ namespace details {
 			}
 
 			CatchExpr(..., leo::rethrow_badstate(fin, std::ios_base::failbit))
+
+			auto& material_node = material_desc.material_node;
+			LAssert(leo::Access<std::string>(*material_node.begin()) == "material", R"(Invalid Format:Not Begin With "material")");
+
+			//must have and only one effect node
 		}
 
 		std::shared_ptr<AssetType> ParseNode()
 		{
+			auto& material_node = material_desc.material_node;
+
+
+
 			return nullptr;
 		}
 

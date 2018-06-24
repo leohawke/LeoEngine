@@ -300,6 +300,9 @@
     <ClInclude Include="Asset\MaterialX.h">
       <Filter>Asset</Filter>
     </ClInclude>
+    <ClInclude Include="Asset\LSLAssetX.h">
+      <Filter>Asset</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

@@ -10,6 +10,7 @@
 #include "../Core/AssetResourceScheduler.h"
 
 #include "EffectX.h"
+#include "LSLAssetX.h"
 
 #include <memory>
 #include <fstream>
@@ -140,7 +141,7 @@ namespace platform {
 
 			ParseMacro(effect_desc.effect_asset->GetMacrosRef(), effect_node);
 			{
-				auto cbuffer_nodes = SelectNodes("cbuffer", effect_node);
+				auto cbuffer_nodes = X::SelectNodes("cbuffer", effect_node);
 				for (auto & cbuffer_node : cbuffer_nodes) {
 					asset::EffectConstantBufferAsset cbuffer;
 					cbuffer.SetName(AccessLastNoChild<std::string>(cbuffer_node));
@@ -179,7 +180,7 @@ namespace platform {
 					ParseParam(param_node);
 			}
 			{
-				auto fragments = SelectNodes("shader", effect_node);
+				auto fragments = X::SelectNodes("shader", effect_node);
 				for (auto& fragment : fragments) {
 					effect_desc.effect_asset->GetFragmentsRef().emplace_back();
 					effect_desc.effect_asset->GetFragmentsRef().back().
@@ -238,15 +239,6 @@ namespace platform {
 			}
 		}
 
-		typename scheme::TermNode::Container SelectNodes(const char* name, const scheme::TermNode& node) {
-			return node.SelectChildren([&](const scheme::TermNode& child) {
-				if (child.size()) {
-					return leo::Access<std::string>(*child.begin()) == name;
-				}
-				return false;
-			});
-		}
-
 		template<typename _type,typename _func>
 		const _type& ReverseAccess(_func f, const scheme::TermNode& node) {
 			auto it = std::find_if(node.rbegin(), node.rend(),f);
@@ -283,7 +275,7 @@ namespace platform {
 		void ParseMacro(std::vector<asset::EffectMacro>& macros, const scheme::TermNode& node)
 		{
 			//macro (macro (name foo) (value bar))
-			auto macro_nodes = SelectNodes("macro", node);
+			auto macro_nodes = X::SelectNodes("macro", node);
 			for (auto & macro_node : macro_nodes) {
 				macros.emplace_back(
 					Access("name", macro_node),
@@ -294,7 +286,7 @@ namespace platform {
 
 		void ParseTechnique(const scheme::TermNode& effect_node)
 		{
-			auto techniques = SelectNodes("technique", effect_node);
+			auto techniques = X::SelectNodes("technique", effect_node);
 			for (auto & technique_node : techniques) {
 				asset::EffectTechniqueAsset technique;
 				technique.SetName(Access("name", technique_node));
@@ -312,7 +304,7 @@ namespace platform {
 				}
 				ParseMacro(technique.GetMacrosRef(), technique_node);
 
-				auto passes = SelectNodes("pass", technique_node);
+				auto passes = X::SelectNodes("pass", technique_node);
 				for (auto & pass_node : passes) {
 					asset::TechniquePassAsset pass;
 					pass.SetName(Access("name", pass_node));
