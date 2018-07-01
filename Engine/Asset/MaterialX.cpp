@@ -3,6 +3,7 @@
 #include "MaterialX.h"
 #include "LSLAssetX.h"
 #include "EffectAsset.h"
+#include "../Core/Materail.h"
 #include "../Core/AssetResourceScheduler.h"
 
 using namespace platform;
@@ -14,7 +15,7 @@ namespace details {
 		struct MaterailDesc {
 			X::path material_path;
 			TermNode material_node;
-			//std::shared_ptr<Enviroment> material_env;
+			std::unique_ptr<MaterialEvaluator> material_eval;
 			std::shared_ptr<AssetType> material_asset;
 			std::shared_ptr<asset::EffectAsset> effect_asset;
 
@@ -23,6 +24,7 @@ namespace details {
 	public:
 		explicit MaterailLoadingDesc(X::path const & materialpath) {
 			material_desc.material_path = materialpath;
+			material_desc.material_eval = std::make_unique<MaterialEvaluator>();
 		}
 
 		std::size_t Type() const override {
@@ -88,9 +90,23 @@ namespace details {
 		{
 			auto& material_node = material_desc.material_node;
 
-			//构造求值环境
+			//env语句
+			for (auto && env_node : X::SelectNodes("env", material_node)) {
+				auto path = leo::Access<std::string>(*env_node.rbegin());
+				try {
+					std::ifstream fin(path);
+					material_desc.material_eval->LoadFrom(fin);
+				}
+				catch (std::invalid_argument& e) {
+					LF_TraceRaw(Descriptions::Err, "载入 (env %s) 出现异常:%s",path.c_str(),e.what());
+				}
+			}
+
+			//env-global
 
 
+			//丢弃求值器
+			material_desc.material_eval.reset();
 			return nullptr;
 		}
 
