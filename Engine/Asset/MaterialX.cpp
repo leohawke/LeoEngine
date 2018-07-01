@@ -88,6 +88,7 @@ namespace details {
 		{
 			auto& material_node = material_desc.material_node;
 
+			//构造求值环境
 
 
 			return nullptr;
