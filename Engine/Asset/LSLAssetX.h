@@ -10,7 +10,7 @@
 namespace platform {
 	namespace X {
 
-		typename scheme::TermNode::Container SelectNodes(const char* name, const scheme::TermNode& node) {
+		inline typename scheme::TermNode::Container SelectNodes(const char* name, const scheme::TermNode& node) {
 			return node.SelectChildren([&](const scheme::TermNode& child) {
 				if (child.size()) {
 					return leo::Access<std::string>(*child.begin()) == name;

@@ -1,6 +1,8 @@
 #include <LScheme/LScheme.h>
 
 #include "MaterialX.h"
+#include "LSLAssetX.h"
+#include "EffectAsset.h"
 #include "../Core/AssetResourceScheduler.h"
 
 using namespace platform;
@@ -14,6 +16,9 @@ namespace details {
 			TermNode material_node;
 			//std::shared_ptr<Enviroment> material_env;
 			std::shared_ptr<AssetType> material_asset;
+			std::shared_ptr<asset::EffectAsset> effect_asset;
+
+			std::string effect_name;
 		} material_desc;
 	public:
 		explicit MaterailLoadingDesc(X::path const & materialpath) {
@@ -31,6 +36,7 @@ namespace details {
 		std::experimental::generator<std::shared_ptr<AssetType>> Coroutine() override {
 			co_yield PreCreate();
 			co_yield LoadNode();
+			co_yield LoadEffect();
 			co_yield ParseNode();
 			co_yield CreateAsset();
 		}
@@ -45,6 +51,14 @@ namespace details {
 		std::shared_ptr<AssetType> LoadNode()
 		{
 			material_desc.material_node = *LoadNode(material_desc.material_path).begin();
+
+			auto& material_node = material_desc.material_node;
+			LAssert(leo::Access<std::string>(*material_node.begin()) == "material", R"(Invalid Format:Not Begin With "material")");
+
+			auto effect_nodes = X::SelectNodes("effect", material_node);
+			LAssert(effect_nodes.size() == 1, R"(Invalid Effect Node(begin with "effect") Number)");
+
+			material_desc.effect_name = leo::Access<std::string>(*(effect_nodes.begin()->rbegin()));
 
 			return  nullptr;
 		}
@@ -61,12 +75,13 @@ namespace details {
 				return SContext::Analyze(std::move(session));
 			}
 
-			CatchExpr(..., leo::rethrow_badstate(fin, std::ios_base::failbit))
+			CatchExpr(..., leo::rethrow_badstate(fin, std::ios_base::failbit));
+		}
 
-			auto& material_node = material_desc.material_node;
-			LAssert(leo::Access<std::string>(*material_node.begin()) == "material", R"(Invalid Format:Not Begin With "material")");
 
-			//must have and only one effect node
+		std::shared_ptr<AssetType> LoadEffect() {
+			material_desc.effect_asset =  X::LoadEffectAsset(material_desc.effect_name + ".lsl");
+			return nullptr;
 		}
 
 		std::shared_ptr<AssetType> ParseNode()
@@ -83,7 +98,7 @@ namespace details {
 		}
 	};
 
-	
+
 }
 
 std::shared_ptr<asset::MaterailAsset> X::LoadMaterialAsset(path const & materialpath)
