@@ -17,7 +17,7 @@ namespace platform {
 	\brief 主要目的是扩展Debug输出,并且可以继承扩展包含多个上下文
 	*/
 	class LSLEvaluator {
-	private:
+	protected:
 		//Terminal
 		REPLContext context;
 

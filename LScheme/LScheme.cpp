@@ -1176,19 +1176,6 @@ namespace scheme
 		} // unnamed namespace;
 
 		ReductionStatus
-			Reduce(TermNode& term, ContextNode& ctx)
-		{
-#if LS_Impl_LSLA1_Enable_Thunked
-			// TODO: Support other states?
-			leo::swap_guard<Reducer> gd(true, ctx.Current);
-			leo::swap_guard<bool> gd_skip(true, ctx.SkipToNextEvaluation);
-
-#endif
-			return ctx.RewriteGuarded(term,
-				std::bind(ReduceOnce, std::ref(term), std::ref(ctx)));
-		}
-
-		ReductionStatus
 			ReduceAgain(TermNode& term, ContextNode& ctx)
 		{
 #if LS_Impl_LSLA1_Enable_Thunked
@@ -1219,6 +1206,19 @@ namespace scheme
 #else
 			return Reduce(term, ctx);
 #endif
+		}
+
+		ReductionStatus
+			Reduce(TermNode& term, ContextNode& ctx)
+		{
+#if LS_Impl_LSLA1_Enable_Thunked
+			// TODO: Support other states?
+			leo::swap_guard<Reducer> gd(true, ctx.Current);
+			leo::swap_guard<bool> gd_skip(true, ctx.SkipToNextEvaluation);
+
+#endif
+			return ctx.RewriteGuarded(term,
+				std::bind(ReduceOnce, std::ref(term), std::ref(ctx)));
 		}
 
 		void
@@ -2179,3 +2179,4 @@ namespace scheme
 	} // namesapce v1;
 
 } // namespace scheme;
+

@@ -83,6 +83,9 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <Lib>
+      <AdditionalDependencies>Imm32.lib</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -174,6 +177,7 @@
     <ClCompile Include="CHRLib\CharacterProcessing.cpp" />
     <ClCompile Include="CHRLib\chrmap.cpp" />
     <ClCompile Include="CHRLib\MappingEx.cpp" />
+    <ClCompile Include="Core\LCoreUtilities.cpp" />
     <ClCompile Include="Core\LException.cpp" />
     <ClCompile Include="Core\LMessage.cpp" />
     <ClCompile Include="Core\LObject.cpp" />

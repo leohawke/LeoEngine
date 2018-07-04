@@ -272,5 +272,8 @@
     <ClCompile Include="LCLib\Timer.cpp">
       <Filter>LCLib</Filter>
     </ClCompile>
+    <ClCompile Include="Core\LCoreUtilities.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

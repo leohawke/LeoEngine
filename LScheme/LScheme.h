@@ -145,7 +145,7 @@ namespace scheme {
 
 		以第一参数为项，以 ReduceOnce 为规约函数调用 ContextNode::RewriteGuarded 。
 		*/
-		LF_API ReductionStatus
+		LS_API ReductionStatus
 			Reduce(TermNode&, ContextNode&);
 
 		/*!

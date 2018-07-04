@@ -152,7 +152,6 @@ namespace leo {
 		\pre 间接断言： 第二参数的元素都是非空指针。
 		\exception LoggedEvent 输入的参数数小于 0 。
 		\sa CheckNonnegative
-		\since build 797
 
 		设置参数向量的值。
 		参数分别指定参数向量和表示 NTMBS 的指针数组。

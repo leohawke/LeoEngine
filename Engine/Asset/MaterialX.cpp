@@ -57,11 +57,14 @@ namespace details {
 			auto& material_node = material_desc.material_node;
 			LAssert(leo::Access<std::string>(*material_node.begin()) == "material", R"(Invalid Format:Not Begin With "material")");
 
+
+			//TODO Split
 			auto effect_nodes = X::SelectNodes("effect", material_node);
 			LAssert(effect_nodes.size() == 1, R"(Invalid Effect Node(begin with "effect") Number)");
 
 			material_desc.effect_name = leo::Access<std::string>(*(effect_nodes.begin()->rbegin()));
 
+			material_node.Remove(effect_nodes.begin()->GetName());
 			return  nullptr;
 		}
 
@@ -91,6 +94,7 @@ namespace details {
 			auto& material_node = material_desc.material_node;
 
 			//env语句
+			//TODO Split
 			for (auto && env_node : X::SelectNodes("env", material_node)) {
 				auto path = leo::Access<std::string>(*env_node.rbegin());
 				try {
@@ -100,14 +104,46 @@ namespace details {
 				catch (std::invalid_argument& e) {
 					LF_TraceRaw(Descriptions::Err, "载入 (env %s) 出现异常:%s",path.c_str(),e.what());
 				}
+				material_node.Remove(env_node.GetName());
 			}
 
 			//env-global
+			for (auto && env_node : X::SelectNodes("env-global", material_node)) {
+				material_node.Remove(env_node.GetName());
+			}
 
+			//非rem语句
+			for (auto && node : material_node.SelectChildren([](const scheme::TermNode& child) {
+				if (!child.empty())
+					return leo::Access<std::string>(*child.begin()) != "rem";
+				return false;
+			})) {
+				NodeEval(node);
+			}
 
 			//丢弃求值器
 			material_desc.material_eval.reset();
 			return nullptr;
+		}
+
+		void NodeEval(const scheme::TermNode& node) {
+			//if(StateEval(node))
+				//return;
+
+			//variable name
+			auto name = leo::Access<std::string>(*node.begin());
+
+			//先查找对应的变量存不存在
+			auto param_index = material_desc.effect_asset->GetParams().size();
+
+			bool qualifier_exist = name.find('.') != std::string::npos;
+
+
+			//expression
+			auto exp = std::move(*node.rbegin());
+
+			//Reduce(exp)
+
 		}
 
 		std::shared_ptr<AssetType> CreateAsset() {

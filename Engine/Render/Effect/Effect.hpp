@@ -187,6 +187,7 @@ namespace platform::Render::Effect {
 		const size_t Hash;
 	};
 
+	//TODO 持有一下自己的Parameter
 	class ConstantBuffer :public NameKey {
 	public:
 		using NameKey::NameKey;

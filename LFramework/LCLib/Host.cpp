@@ -97,6 +97,47 @@ namespace platform_ex
 #endif
 	}
 
+	void
+		SetEnvironmentVariable(const char* envname, const char* envval)
+	{
+#if LFL_Win32
+		// TODO: Use %::_wputenv_s when available.
+		// NOTE: Only narrow enviornment is used.
+		// XXX: Though not documented, %::putenv actually copies the argument.
+		//	Confirmed in ucrt source. See also https://patchwork.ozlabs.org/patch/127453/.
+		LCL_CallF_CAPI(, ::_putenv,
+			(string(Nonnull(envname)) + '=' + Nonnull(envval)).c_str());
+#else
+		LCL_CallF_CAPI(, ::setenv, Nonnull(envname), Nonnull(envval), 1);
+#endif
+	}
+
+	pair<string, int>
+		FetchCommandOutput(const char* cmd, size_t buf_size)
+	{
+		if (LB_UNLIKELY(buf_size == 0))
+			throw std::invalid_argument("Zero buffer size found.");
+
+		string str;
+		int exit_code(0);
+
+		// TODO: Improve Win32 implementation?
+		if (const auto fp = leo::unique_raw(upopen(cmd, "r"), [&](std::FILE* p) {
+			exit_code = upclose(p);
+		}))
+		{
+			leo::setnbuf(fp.get());
+
+			// TODO: Improve performance?
+			const auto p_buf(make_unique_default_init<char[]>(buf_size));
+
+			for (size_t n; (n = std::fread(&p_buf[0], 1, buf_size, fp.get())) != 0; )
+				str.append(&p_buf[0], n);
+		}
+		else
+			LCL_Raise_SysE(, "::popen", lfsig);
+		return { std::move(str), exit_code };
+	}
 
 	leo::locked_ptr<CommandCache>
 		LockCommandCache()
