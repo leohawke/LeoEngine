@@ -8,5 +8,8 @@ MaterialEvaluator::MaterialEvaluator()
 }
 
 void MaterialEvaluator::MaterialEvalFunctions(REPLContext& context) {
+	using namespace scheme::v1::Forms;
+	auto & root(context.Root);
 
+	//先处理字面量
 }

@@ -133,16 +133,44 @@ namespace details {
 			//variable name
 			auto name = leo::Access<std::string>(*node.begin());
 
+			auto& effect_asset = material_desc.effect_asset;
+			auto npos = effect_asset->GetParams().size();
 			//先查找对应的变量存不存在
-			auto param_index = material_desc.effect_asset->GetParams().size();
+			auto param_index =npos;
 
-			bool qualifier_exist = name.find('.') != std::string::npos;
+			auto qualifier_index = name.find('.');
 
+			if (qualifier_index != std::string::npos) {
+				string_view cbuffername{ name.data(),qualifier_index };
+				string_view paramname(name.data()+ qualifier_index+1,name.length()-1- qualifier_index);
+
+				for (auto & bufferasset : effect_asset->GetCBuffers()) {
+					if (bufferasset.GetName() == cbuffername) {
+						for (auto & cp_index : bufferasset.GetParamIndices()) {
+							if (effect_asset->GetParams()[cp_index].GetName() == paramname) {
+								param_index = cp_index;
+								break;
+							}
+						}
+						if (param_index != npos)
+							break;
+					}
+				}
+			}
+			else {
+				param_index = std::find_if(effect_asset->GetParams().begin(), effect_asset->GetParams().end(), [&](const asset::EffectParameterAsset& param) {
+					return param.GetName() == name;
+				}) - effect_asset->GetParams().begin();
+			}
+
+			if (param_index == npos) {
+				LF_TraceRaw(Descriptions::Warning, "(effect %s) 不存在对应的变量名 (%s ...)", material_desc.effect_name.c_str(), name.c_str());
+			}
 
 			//expression
 			auto exp = std::move(*node.rbegin());
 
-			//Reduce(exp)
+			auto ret = material_desc.material_eval->Reduce(exp);
 
 		}
 

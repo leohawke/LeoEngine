@@ -19,6 +19,14 @@ namespace platform {
 	class MaterialEvaluator :public LSLEvaluator {
 	public:
 		MaterialEvaluator();
+
+		std::pair<scheme::TermNode, scheme::ReductionStatus> Reduce(const scheme::TermNode& input) {
+			auto term(input);
+			context.Prepare(term);
+			auto status(scheme::v1::Reduce(term, context.Root));
+
+			return std::make_pair(term, status);
+		}
 	private:
 		static void MaterialEvalFunctions(REPLContext& context);
 	};
