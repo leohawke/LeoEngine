@@ -143,6 +143,9 @@
     <ClCompile Include="Core\Materail.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\LSLBuilder.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -310,6 +313,9 @@
       <Filter>Asset</Filter>
     </ClInclude>
     <ClInclude Include="Core\LSLEvaluator.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LSLBuilder.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

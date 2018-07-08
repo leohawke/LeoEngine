@@ -38,6 +38,7 @@
     <ClCompile Include="Asset\TextureX.cpp" />
     <ClCompile Include="Core\AssetResourceScheduler.cpp" />
     <ClCompile Include="Core\Camera.cpp" />
+    <ClCompile Include="Core\LSLBuilder.cpp" />
     <ClCompile Include="Core\LSLEvaluator.cpp" />
     <ClCompile Include="Core\Materail.cpp" />
     <ClCompile Include="Core\Mesh.cpp" />
@@ -94,6 +95,7 @@
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core\LFile.h" />
     <ClInclude Include="Core\LSLEvaluator.h" />
+    <ClInclude Include="Core\LSLBuilder.h" />
     <ClInclude Include="Core\Materail.h" />
     <ClInclude Include="Core\Mesh.h" />
     <ClInclude Include="Core\Resource.h" />

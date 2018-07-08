@@ -101,7 +101,9 @@ namespace leo {
 		// TODO: Add and use safe %common_arithmetic_type interface instead?
 		using common_t = typename leo::common_int_type<_tDst, _type>::type;
 
-		if (!(common_t(std::numeric_limits<_tDst>::max()) < common_t(val)))
+		if ((std::is_signed<common_t>() && std::is_unsigned<_tDst>()
+			&& leo::integer_width<common_t>() <= leo::integer_width<_tDst>())
+			|| !(common_t(std::numeric_limits<_tDst>::max()) < common_t(val)))
 			return _tDst(val);
 		throw LoggedEvent("Value of '" + name + "' is greater than upper boundary.",
 			lv);
