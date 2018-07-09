@@ -181,6 +181,191 @@ namespace
 
 	ArgumentsVector CommandArguments;
 
+	void
+		LoadSequenceSeparators(EvaluationPasses& passes)
+	{
+		RegisterSequenceContextTransformer(passes, TokenValue(";"), true),
+		RegisterSequenceContextTransformer(passes, TokenValue(","));
+	}
+
+	void LoadLSLContext(REPLContext & context) {
+		using namespace std::placeholders;
+		using namespace Forms;
+		auto& root(context.Root);
+		auto& root_env(root.GetRecordRef());
+
+		LoadSequenceSeparators(context.ListTermPreprocess),
+
+		// NOTE: This is named after '#inert' in Kernel, but essentially
+		//	unspecified in NPLA.
+		root_env.Define("inert", ValueToken::Unspecified, {});
+		// NOTE: This is like '#ignore' in Kernel, but with the symbol type. An
+		//	alternative definition is by evaluating '$def! ignore $quote #ignore'
+		//	(see below for '$def' and '$quote').
+		root_env.Define("ignore", TokenValue("#ignore"), {});
+		// NOTE: Primitive features, listed as RnRK, except mentioned above.
+
+		/*
+		The primitives are provided here to maintain acyclic dependencies on derived
+		forms, also for simplicity of semantics.
+		The primitives are listed in order as Chapter 4 of Revised^-1 Report on the
+		Kernel Programming Language. Derived forms are not ordered likewise.
+		There are some difference of listed primitives.
+		See $2017-02 @ %Documentation::Workflow::Annual2017.
+		*/
+		RegisterStrict(root, "eq?", Equal);
+		RegisterStrict(root, "eql?", EqualLeaf);
+		RegisterStrict(root, "eqr?", EqualReference);
+		RegisterStrict(root, "eqv?", EqualValue);
+		// NOTE: Like Scheme but not Kernel, '$if' treats non-boolean value as
+		//	'#f', for zero overhead principle.
+		RegisterForm(root, "$if", If);
+		RegisterStrictUnary(root, "null?", ComposeReferencedTermOp(IsEmpty));
+		RegisterStrictUnary(root, "nullpr?", IsEmpty);
+		// NOTE: Though NPLA does not use cons pairs, corresponding primitives are
+		//	still necessary.
+		// NOTE: Since NPL has no con pairs, it only added head to existed list.
+		RegisterStrict(root, "cons", Cons);
+		RegisterStrict(root, "cons&", ConsRef);
+		// NOTE: The applicative 'copy-es-immutable' is unsupported currently due to
+		//	different implementation of control primitives.
+		RegisterStrict(root, "eval", Eval);
+		RegisterStrict(root, "eval&", EvalRef);
+
+		// NOTE: Lazy form '$deflazy!' is the basic operation, which may bind
+		//	parameter as unevaluated operands. For zero overhead principle, the form
+		//	without recursion (named '$def!') is preferred. The recursion variant
+		//	(named '$defrec!') is exact '$define!' in Kernel, and is used only when
+		//	necessary.
+		RegisterForm(root, "$deflazy!", DefineLazy);
+		RegisterForm(root, "$def!", DefineWithNoRecursion);
+		RegisterForm(root, "$defrec!", DefineWithRecursion);
+		// NOTE: 'eqv? (() get-current-environment) (() ($vau () e e))' shall
+		//	be evaluated to '#t'.
+		RegisterForm(root, "$vau", Vau);
+		RegisterForm(root, "$vau&", VauRef);
+		RegisterForm(root, "$vaue", VauWithEnvironment);
+		RegisterForm(root, "$vaue&", VauWithEnvironmentRef);
+		RegisterStrictUnary<ContextHandler>(root, "wrap", Wrap);
+		RegisterStrictUnary<ContextHandler>(root, "unwrap", Unwrap);
+
+		RegisterStrict(root, "list", ReduceBranchToListValue);
+		RegisterStrict(root, "list&", ReduceBranchToList);
+		context.Perform(u8R"NPL(
+		$def! $quote $vau (&x) #ignore x;
+		$def! $set! $vau (&expr1 &formals .&expr2) env eval
+			(list $def! formals (unwrap eval) expr2 env) (eval expr1 env);
+		$def! $defv! $vau (&$f &formals &senv .&body) env eval
+			(list $set! env $f $vau formals senv body) env;
+		$def! $defv&! $vau (&$f &formals &senv .&body) env eval
+			(list $set! env $f $vau& formals senv body) env;
+	)NPL");
+
+		RegisterForm(root, "$lambda", Lambda);
+		RegisterForm(root, "$lambda&", LambdaRef);
+
+		context.Perform(u8R"NPL(
+		$defv! $setrec! (&expr1 &formals .&expr2) env eval
+			(list $defrec! formals (unwrap eval) expr2 env) (eval expr1 env);
+		$defv! $defl! (&f &formals .&body) env eval
+			(list $set! env f $lambda formals body) env;
+		$defv! $defl&! (&f &formals .&body) env eval
+			(list $set! env f $lambda& formals body) env;
+		$defl! first ((&x .)) x;
+		$defl! rest ((#ignore .&x)) x;
+		$defl! apply (&appv &arg .&opt) eval (cons () (cons (unwrap appv) arg))
+			($if (null? opt) (() make-environment) (first opt));
+		$defl! list* (&head .&tail)
+			$if (null? tail) head (cons head (apply list* tail));
+		$defv! $defw! (&f &formals &senv .&body) env eval
+			(list $set! env f wrap (list* $vau formals senv body)) env;
+		$defv! $defw&! (&f &formals &senv .&body) env eval
+			(list $set! env f wrap (list* $vau& formals senv body)) env;
+		$defv! $lambdae (&e &formals .&body) env
+			wrap (eval (list* $vaue e formals ignore body) env);
+		$defv! $lambdae& (&e &formals .&body) env
+			wrap (eval (list* $vaue& e formals ignore body) env);
+	)NPL");
+
+		// NOTE: Some combiners are provided here as host primitives for
+		//	more efficiency and less dependencies.
+		// NOTE: The sequence operator is also available as infix ';' syntax sugar.
+		RegisterForm(root, "$sequence", Sequence);
+
+		context.Perform(u8R"NPL(
+		$defv! $cond &clauses env
+			$if (null? clauses) inert (apply ($lambda ((&test .&body) .clauses)
+				$if (eval test env) (eval body env)
+					(apply (wrap $cond) clauses env)) clauses);
+	)NPL");
+
+		// NOTE: Use of 'eql?' is more efficient than '$if'.
+		context.Perform(u8R"NPL(
+		$defl! not? (&x) eql? x #f;
+		$defv! $when (&test .&vexpr) env $if (eval test env)
+			(eval (list* $sequence vexpr) env);
+		$defv! $unless (&test .&vexpr) env $if (not? (eval test env))
+			(eval (list* $sequence vexpr) env);
+	)NPL");
+		RegisterForm(root, "$and?", And);
+		RegisterForm(root, "$or?", Or);
+		context.Perform(u8R"NPL(
+		$defl! first-null? (&l) null? (first l);
+		$defl! list-rest (&x) list (rest x);
+		$defl! accl (&l &pred? &base &head &tail &sum) $sequence
+			($defl! aux (&l &base)
+				$if (pred? l) base (aux (tail l) (sum (head l) base)))
+			(aux l base);
+		$defl! accr (&l &pred? &base &head &tail &sum) $sequence
+			($defl! aux (&l) $if (pred? l) base (sum (head l) (aux (tail l))))
+			(aux l);
+		$defl! foldr1 (&kons &knil &l) accr l null? knil first rest kons;
+		$defw! map1 (&appv &l) env foldr1
+			($lambda (&x &xs) cons (apply appv (list x) env) xs) () l;
+		$defl! list-concat (&x &y) foldr1 cons y x;
+		$defl! append (.&ls) foldr1 list-concat () ls;
+		$defv! $let (&bindings .&body) env
+			eval (list* () (list* $lambda (map1 first bindings) body)
+				(map1 list-rest bindings)) env;
+		$defv! $let* (&bindings .&body) env
+			eval ($if (null? bindings) (list* $let bindings body)
+				(list $let (list (first bindings))
+				(list* $let* (rest bindings) body))) env;
+	)NPL");
+		context.Perform(u8R"NPL(
+		$defl! unfoldable? (&l) accr l null? (first-null? l) first-null? rest
+			$or?;
+		$def! map-reverse $let ((&cenv () make-standard-environment)) wrap
+			($sequence
+				($set! cenv cxrs $lambdae (weaken-environment cenv) (&ls &cxr)
+					accl ls null? () ($lambda (&l) cxr (first l)) rest cons)
+				($vaue cenv (&appv .&ls) env accl ls unfoldable? ()
+					($lambda (&ls) cxrs ls first) ($lambda (&ls) cxrs ls rest)
+						($lambda (&x &xs) cons (apply appv x env) xs)));
+		$defw! for-each-ltr &ls env $sequence (apply map-reverse ls env) inert;
+	)NPL");
+		// NOTE: Object interoperation.
+		RegisterStrict(root, "ref", [](TermNode& term) {
+			CallUnary([&](TermNode& tm) {
+				LiftToReference(term, tm);
+			}, term);
+			return CheckNorm(term);
+		});
+		// NOTE: Environments.
+		RegisterStrictUnary(root, "bound?",
+			[](TermNode& term, const ContextNode& ctx) {
+			return leo::call_value_or([&](string_view id) {
+				return CheckSymbol(id, [&]() {
+					return bool(ResolveName(ctx, id).first);
+				});
+			}, AccessTermPtr<string>(term));
+		});
+		context.Perform(u8R"NPL(
+		$defv! $binds1? (&expr &s) env
+			eval (list (unwrap bound?) (symbol->string s)) (eval expr env);
+	)NPL");
+		RegisterStrict(root, "value-of", ValueOf);
+	}
 
 	/// 740
 	void
@@ -192,23 +377,13 @@ namespace
 		auto& root_env(root.GetRecordRef());
 
 		p_context = make_observer(&context);
-		//LoadLSLContextForSHBuild(context);
+		LoadLSLContext(context);
 		// TODO: Extract literal configuration API.
 		{
 			// TODO: Blocked. Use C++14 lambda initializers to simplify
 			//	implementation.
-			auto lit_base(std::move(root.EvaluateLiteral.begin()->second));
-			auto lit_ext(FetchExtendedLiteralPass());
 
-			root.EvaluateLiteral = [lit_base, lit_ext](TermNode& term,
-				ContextNode& ctx, string_view id) -> ReductionStatus {
-				const auto res(lit_ext(term, ctx, id));
-
-				if (res == ReductionStatus::Clean
-					&& term.Value.type() == leo::type_id<TokenValue>())
-					return lit_base(term, ctx, id);
-				return res;
-			};
+			root.EvaluateLiteral += FetchExtendedLiteralPass(); 
 		}
 		// NOTE: Literal builtins.
 		RegisterLiteralSignal(root, "exit", SSignal::Exit);

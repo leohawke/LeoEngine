@@ -7,11 +7,18 @@
 
 #include "LSLEvaluator.h"
 
-namespace platform::lsl::context {
+namespace platform::lsl {
 	using namespace scheme;
 	using namespace v1;
 
-	LiteralPasses::HandlerType FetchNumberLiteral();
+	namespace context {
+
+		LiteralPasses::HandlerType FetchNumberLiteral();
+	}
+
+	namespace math {
+		void RegisterTypeLiteralAction(REPLContext& context);
+	}
 }
 
 #endif

@@ -1305,7 +1305,7 @@ namespace scheme
 				if (term.size() != 1)
 				{
 					// NOTE: List evaluation.
-#if YF_Impl_NPLA1_Enable_Thunked
+#if LS_Impl_LSLA1_Enable_Thunked
 					return DelimitActions(ctx.EvaluateList, term, ctx);
 #else
 					return ctx.EvaluateList(term, ctx);
@@ -1486,8 +1486,8 @@ namespace scheme
 		}
 
 		void
-			RegisterSequenceContextTransformer(EvaluationPasses& passes, ContextNode& node,
-				const string& name, const ValueObject& delim, bool ordered)
+			RegisterSequenceContextTransformer(EvaluationPasses& passes,
+			 const ValueObject& delim, bool ordered)
 		{
 			passes += leo::bind1(ReplaceSeparatedChildren,
 				ordered ? ContextHandler(Forms::Sequence)

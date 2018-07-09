@@ -127,6 +127,13 @@ Interpreter::Interpreter(Application& app,
 {
 	using namespace std;
 	using namespace platform_ex;
+	using namespace platform;
+
+	leo::FetchCommonLogger().SetSender([sender= Logger::FetchDefaultSender()](Descriptions::RecordLevel lv, Logger& logger, const char* str) {
+		platform_ex::SendDebugString(lv, logger, str);
+		sender(lv, logger, str);
+	});
+
 
 	wc.UpdateForeColor(TitleColor);
 	cout << title << endl << "Initializing...";

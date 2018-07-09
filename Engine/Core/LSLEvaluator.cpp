@@ -15,7 +15,9 @@ namespace platform {
 	{
 		auto& root(context.Root);
 
-		root.EvaluateLiteral += lsl::context::FetchNumberLiteral();
+		//root.EvaluateLiteral += lsl::context::FetchNumberLiteral();
+
+		lsl::math::RegisterTypeLiteralAction(context);
 
 		loader(context);
 	}
