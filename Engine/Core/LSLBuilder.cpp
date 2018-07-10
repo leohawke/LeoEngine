@@ -166,7 +166,6 @@ namespace platform::lsl::math {
 	template<typename _type>
 	ReductionStatus TypeLiteralAction(TermNode & term)
 	{
-		Retain(term);
 
 		const auto size(term.size());
 

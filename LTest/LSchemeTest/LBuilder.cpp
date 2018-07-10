@@ -188,14 +188,73 @@ namespace
 		RegisterSequenceContextTransformer(passes, TokenValue(","));
 	}
 
+	template<typename _type>
+	ReductionStatus TypeLiteralAction(TermNode & term)
+	{
+
+		const auto size(term.size());
+
+		return ReductionStatus::Clean;
+	}
+
+	void RegisterTypeLiteralAction(REPLContext & context)
+	{
+		auto& root(context.Root);
+
+		RegisterStrict(root, "float3", TypeLiteralAction<int>);
+	}
+
 	void LoadLSLContext(REPLContext & context) {
 		using namespace std::placeholders;
 		using namespace Forms;
 		auto& root(context.Root);
 		auto& root_env(root.GetRecordRef());
 
-		LoadSequenceSeparators(context.ListTermPreprocess),
+		LoadSequenceSeparators(context.ListTermPreprocess);
+			root.EvaluateLiteral
+			= [](TermNode& term, ContextNode&, string_view id) -> ReductionStatus {
+			LAssertNonnull(id.data());
+			if (!id.empty())
+			{
+				const char f(id.front());
 
+				// NOTE: Handling extended literals.
+				if (IsLSLAExtendedLiteralNonDigitPrefix(f) && id.size() > 1)
+				{
+					// TODO: Support numeric literal evaluation passes.
+					if (id == "#t" || id == "#true")
+						term.Value = true;
+					else if (id == "#f" || id == "#false")
+						term.Value = false;
+					else if (id == "#n" || id == "#null")
+						term.Value = nullptr;
+					// XXX: Redundant test?
+					else if (IsLSLAExtendedLiteral(id))
+						throw InvalidSyntax(f == '#' ? "Invalid literal found."
+							: "Unsupported literal prefix found.");
+					else
+						return ReductionStatus::Retrying;
+				}
+				else if (std::isdigit(f))
+				{
+					errno = 0;
+
+					const auto ptr(id.data());
+					char* eptr;
+					const long ans(std::strtol(ptr, &eptr, 10));
+
+					if (size_t(eptr - ptr) == id.size() && errno != ERANGE)
+						// XXX: Conversion to 'int' might be implementation-defined.
+						term.Value = int(ans);
+					// TODO: Supported literal postfix?
+					else
+						throw InvalidSyntax("Literal postfix is unsupported.");
+				}
+				else
+					return ReductionStatus::Retrying;
+			}
+			return ReductionStatus::Clean;
+		};
 		// NOTE: This is named after '#inert' in Kernel, but essentially
 		//	unspecified in NPLA.
 		root_env.Define("inert", ValueToken::Unspecified, {});
@@ -204,6 +263,9 @@ namespace
 		//	(see below for '$def' and '$quote').
 		root_env.Define("ignore", TokenValue("#ignore"), {});
 		// NOTE: Primitive features, listed as RnRK, except mentioned above.
+
+		RegisterTypeLiteralAction(context);
+		context.Perform("float3 1 2 3");
 
 		/*
 		The primitives are provided here to maintain acyclic dependencies on derived
@@ -383,7 +445,15 @@ namespace
 			// TODO: Blocked. Use C++14 lambda initializers to simplify
 			//	implementation.
 
-			root.EvaluateLiteral += FetchExtendedLiteralPass(); 
+			root.EvaluateLiteral = [lit_base =std::move(root.EvaluateLiteral.begin()->second),lit_ext= FetchExtendedLiteralPass()](TermNode& term,
+				ContextNode& ctx, string_view id)->ReductionStatus{
+				const auto res(lit_ext(term, ctx, id));
+
+				if (res == ReductionStatus::Clean
+					&& term.Value.type() == leo::type_id<TokenValue>())
+					return lit_base(term, ctx, id);
+				return res;
+			}; 
 		}
 		// NOTE: Literal builtins.
 		RegisterLiteralSignal(root, "exit", SSignal::Exit);
