@@ -58,6 +58,7 @@ namespace platform::lsl::context {
 			auto ret = std::from_chars(id.data(), id.data() + id.size(), int32_ans);
 			if (ret.ec == none) {
 				term.Value = int32_ans;
+				return ReductionStatus::Clean;
 			}
 			else if (ret.ec == std::errc::result_out_of_range) {
 				leo::int64 int64_ans{};
@@ -162,6 +163,12 @@ namespace platform::lsl::context {
 namespace platform::lsl::math {
 
 	using namespace Forms;
+
+	float AccessToFloat(TermNode& term) {
+		if (term.Value.type() == leo::type_id<float>())
+			return leo::Access<float>(term);
+		return {};
+	}
 
 	template<typename _type>
 	ReductionStatus TypeLiteralAction(TermNode & term)
