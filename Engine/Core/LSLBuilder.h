@@ -25,7 +25,7 @@ namespace platform::lsl {
 		namespace details {
 			template<typename _target,typename _head, typename... tails>
 			_target static_value_cast(TermNode & term) {
-				if (pHead = leo::AccessPtr<_head>(term))
+				if (auto pHead = leo::AccessPtr<_head>(term))
 					return static_cast<_target>(*pHead);
 				else
 					return static_value_cast<_target, tails...>(term);
@@ -40,7 +40,7 @@ namespace platform::lsl {
 
 		template<typename _target,typename... _types>
 		_target static_value_cast(TermNode & term) {
-			return detatils::static_value_cast<_target, _types...>(term);
+			return details::static_value_cast<_target, _types...>(term);
 		}
 
 		template<typename _target>

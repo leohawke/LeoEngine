@@ -170,8 +170,14 @@ namespace details {
 			//expression
 			auto exp = std::move(*node.rbegin());
 
-			auto ret = material_desc.material_eval->Reduce(exp);
-
+			try {
+				auto ret = material_desc.material_eval->Reduce(exp);
+			}
+			catch (std::exception& e) {
+				std::stringstream ss;
+				scheme::PrintNode(ss, exp,scheme::LiteralizeEscapeNodeLiteral);
+				LF_TraceRaw(Descriptions::Warning, "变量名:%s 求值(%s)失败 what:%s", name.c_str(),ss.str().c_str(),e.what());
+			}
 		}
 
 		std::shared_ptr<AssetType> CreateAsset() {

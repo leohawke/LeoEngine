@@ -170,26 +170,32 @@ namespace platform::lsl::math {
 		return {};
 	}
 
+	namespace details {
+		template<typename _scalar, size_t multi>
+		ReductionStatus TypeLiteralAction(TermNode& term,leo::math::data_storage<_scalar, multi>& ans) {
+			const auto size(term.size());
+
+			if (size > 1 && size < multi + 2) {
+				auto i = std::next(term.begin());
+				for (auto j = ans.begin(); i != term.end() && j != ans.end(); ++i, ++j)
+					*j = platform::lsl::access::static_value_cast<_scalar,float,leo::int32,leo::uint32,leo::int64,leo::uint64>(*i);
+			}
+			else {
+				throw  std::invalid_argument(leo::sfmt(
+					"Invalid parameter count(>1 && < %u):%u.", multi + 2, size).c_str());
+			}
+
+			return ReductionStatus::Clean;
+		}
+	}
+
 	template<typename _type>
 	ReductionStatus TypeLiteralAction(TermNode & term)
 	{
-		const auto term_size(term.size());
 		_type ans = {};
-
-		if (term_size > 1 && term_size < ans.size()+1) {
-			auto i(std::next(term.begin()));
-
-			term.Value = _type();
-
-		}
-		else {
-			const char* type_name = leo::type_id<_type>().name();
-			throw  std::invalid_argument(leo::sfmt(
-				"Invalid parameter count(>1 && < %u):%u for %s.", ans.size() + 1, term_size, type_name).c_str()
-			);
-		}
-
-		return ReductionStatus::Clean;
+		auto res = details::TypeLiteralAction(term, ans);
+		term.Value = ans;
+		return res;
 	}
 
 	void RegisterTypeLiteralAction(REPLContext & context)
