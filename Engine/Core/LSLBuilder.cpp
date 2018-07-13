@@ -173,8 +173,21 @@ namespace platform::lsl::math {
 	template<typename _type>
 	ReductionStatus TypeLiteralAction(TermNode & term)
 	{
+		const auto term_size(term.size());
+		_type ans = {};
 
-		const auto size(term.size());
+		if (term_size > 1 && term_size < ans.size()+1) {
+			auto i(std::next(term.begin()));
+
+			term.Value = _type();
+
+		}
+		else {
+			const char* type_name = leo::type_id<_type>().name();
+			throw  std::invalid_argument(leo::sfmt(
+				"Invalid parameter count(>1 && < %u):%u for %s.", ans.size() + 1, term_size, type_name).c_str()
+			);
+		}
 
 		return ReductionStatus::Clean;
 	}
