@@ -175,8 +175,25 @@ namespace details {
 			}
 			catch (std::exception& e) {
 				std::stringstream ss;
-				scheme::PrintNode(ss, exp,scheme::LiteralizeEscapeNodeLiteral);
-				LF_TraceRaw(Descriptions::Warning, "变量名:%s 求值(%s)失败 what:%s", name.c_str(),ss.str().c_str(),e.what());
+				scheme::PrintNode(ss, scheme::v1::LoadNode(exp), scheme::LiteralizeEscapeNodeLiteral, [](std::size_t)->std::string {return {}; });
+				auto& nodestr = ss.str();
+				X::ReduceLFToTab(nodestr, 178);
+				//移除连续的\t
+				for (auto itr = nodestr.begin(); itr != nodestr.end();) {
+					if (*itr == '\t') {
+						auto j = std::next(itr);
+						if (j != nodestr.end() && *j == ')') {
+							itr = nodestr.erase(itr);
+							j = std::next(itr);
+						}
+						while (j != nodestr.end() && *j == '\t')
+							j = nodestr.erase(j);
+						itr = j;
+					}
+					else
+						++itr;
+				}
+				LF_TraceRaw(Descriptions::Warning, "变量名:%s 求值(%s)失败 what:%s", name.c_str(), nodestr.c_str(),e.what());
 			}
 		}
 

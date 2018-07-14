@@ -18,6 +18,20 @@ namespace platform {
 				return false;
 			});
 		}
+
+		inline void ReduceLFToTab(std::string& str, size_t length) {
+			auto index = str.find('\n');
+			while (index != std::string::npos) {
+				auto next_index = str.find('\n', index+1);
+				if (next_index != std::string::npos)
+					if(next_index -index >length || ((next_index - index) < length && (next_index % length) < (index % length))) {
+						index = next_index;
+						continue;
+					}
+				str[index] = '\t';
+				index = next_index;
+			}
+		}
 	}
 }
 
