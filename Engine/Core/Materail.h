@@ -27,6 +27,15 @@ namespace platform {
 
 			return std::make_pair(term, status);
 		}
+
+		struct InstanceTag :scheme::LSLATag
+		{};
+
+		struct RenderTag : scheme::LSLATag
+		{};
+
+		using InstanceDelayedTerm = leo::derived_entity<scheme::TermNode, InstanceTag>;
+		using RenderDelayedTerm = leo::derived_entity<scheme::TermNode, RenderTag>;
 	private:
 		static void MaterialEvalFunctions(REPLContext& context);
 	};
