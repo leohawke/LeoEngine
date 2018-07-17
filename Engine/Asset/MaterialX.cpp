@@ -172,6 +172,11 @@ namespace details {
 
 			try {
 				auto ret = material_desc.material_eval->Reduce(exp);
+
+				if (ret.second != ReductionStatus::Clean)
+					throw leo::GeneralEvent(leo::sfmt("Bad Reduct State: %s", ret.second == ReductionStatus::Retained ? "Retained" : "Retrying"));
+
+				material_desc.material_asset->GetBindValues().emplace_back(param_index, std::move(ret.first.Value));
 			}
 			catch (std::exception& e) {
 				std::stringstream ss;
