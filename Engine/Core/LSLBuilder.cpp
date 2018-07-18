@@ -204,6 +204,140 @@ namespace platform::lsl::math {
 
 		RegisterStrict(root, "float3", TypeLiteralAction<leo::math::float3>);
 	}
+
+	ReductionStatus Mul(TermNode& term, TermNode& argument)
+	{
+		if (term.Value.type() == leo::type_id<leo::int32>()) {
+			if (argument.Value.type() == leo::type_id<leo::int32>()) {
+				term.Value = leo::Access<leo::int32>(term) * leo::Access<leo::int32>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<leo::uint32>()) {
+				term.Value = leo::Access<leo::int32>(term) * leo::Access<leo::uint32>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<leo::int64>()) {
+				term.Value = leo::Access<leo::int32>(term) * leo::Access<leo::int64>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<leo::uint64>()) {
+				term.Value = leo::Access<leo::int32>(term) * leo::Access<leo::uint64>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<float>()) {
+				term.Value = leo::Access<leo::int32>(term) * leo::Access<float>(argument);
+			}
+			else
+				throw std::invalid_argument("type error");
+		}
+		else if (term.Value.type() == leo::type_id<leo::uint32>()) {
+			if (argument.Value.type() == leo::type_id<leo::int32>()) {
+				term.Value = leo::Access<leo::uint32>(term) * leo::Access<leo::int32>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<leo::uint32>()) {
+				term.Value = leo::Access<leo::uint32>(term) * leo::Access<leo::uint32>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<leo::int64>()) {
+				term.Value = leo::Access<leo::uint32>(term) * leo::Access<leo::int64>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<leo::uint64>()) {
+				term.Value = leo::Access<leo::uint32>(term) * leo::Access<leo::uint64>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<float>()) {
+				term.Value = leo::Access<leo::uint32>(term) * leo::Access<float>(argument);
+			}
+			else
+				throw std::invalid_argument("type error");
+		}
+		else if (term.Value.type() == leo::type_id<leo::int64>()) {
+			if (argument.Value.type() == leo::type_id<leo::int32>()) {
+				term.Value = leo::Access<leo::int64>(term) * leo::Access<leo::int32>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<leo::uint32>()) {
+				term.Value = leo::Access<leo::int64>(term) * leo::Access<leo::uint32>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<leo::int64>()) {
+				term.Value = leo::Access<leo::int64>(term) * leo::Access<leo::int64>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<leo::uint64>()) {
+				term.Value = leo::Access<leo::int64>(term) * leo::Access<leo::uint64>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<float>()) {
+				term.Value = leo::Access<leo::int64>(term) * leo::Access<float>(argument);
+			}
+			else
+				throw std::invalid_argument("type error");
+		}
+		else if (term.Value.type() == leo::type_id<leo::uint64>()) {
+			if (argument.Value.type() == leo::type_id<leo::int32>()) {
+				term.Value = leo::Access<leo::uint64>(term) * leo::Access<leo::int32>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<leo::uint32>()) {
+				term.Value = leo::Access<leo::uint64>(term) * leo::Access<leo::uint32>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<leo::int64>()) {
+				term.Value = leo::Access<leo::uint64>(term) * leo::Access<leo::int64>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<leo::uint64>()) {
+				term.Value = leo::Access<leo::uint64>(term) * leo::Access<leo::uint64>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<float>()) {
+				term.Value = leo::Access<leo::uint64>(term) * leo::Access<float>(argument);
+			}
+			else
+				throw std::invalid_argument("type error");
+		}
+		else if (term.Value.type() == leo::type_id<float>()) {
+			if (argument.Value.type() == leo::type_id<leo::int32>()) {
+				term.Value = leo::Access<float>(term) * leo::Access<leo::int32>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<leo::uint32>()) {
+				term.Value = leo::Access<float>(term) * leo::Access<leo::uint32>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<leo::int64>()) {
+				term.Value = leo::Access<float>(term) * leo::Access<leo::int64>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<leo::uint64>()) {
+				term.Value = leo::Access<float>(term) * leo::Access<leo::uint64>(argument);
+			}
+			else if (argument.Value.type() == leo::type_id<float>()) {
+				term.Value = leo::Access<float>(term) * leo::Access<float>(argument);
+			}
+			else
+				throw std::invalid_argument("type error");
+		}
+		else
+			throw std::invalid_argument("type error");
+		return ReductionStatus::Clean;
+	}
+
+	ReductionStatus Add(TermNode& term, TermNode& argument)
+	{
+		return ReductionStatus::Clean;
+	}
+
+	template<typename _func,typename _type>
+	ReductionStatus BinaryFold(_func f,_type val,TermNode & term)
+	{
+		term.Value = val;
+		const auto n(FetchArgumentN(term));
+		auto i(std::next(term.begin()));
+		auto j(std::next(i, typename std::iterator_traits<decltype(i)>::difference_type(n)));
+		for (; i != j; ++j) 
+		{
+			auto res(f(term, *i));
+			if (res != ReductionStatus::Clean)
+				return res;
+		}
+		return ReductionStatus::Clean;
+	}
+
+	void RegisterMathDotLssFile(REPLContext & context)
+	{
+		auto& root(context.Root);
+		RegisterStrict(root, "*", [](TermNode& term) {
+			return BinaryFold(Mul, 1, term);
+		});
+		RegisterStrict(root, "+", [](TermNode& term) {
+			return BinaryFold(Add, 0, term);
+		});
+	}
 }
 
 

@@ -28,6 +28,8 @@ namespace platform {
 			return std::make_pair(term, status);
 		}
 
+		void RegisterMathDotLssFile();
+
 		struct InstanceTag :scheme::LSLATag
 		{};
 

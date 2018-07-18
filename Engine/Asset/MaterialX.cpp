@@ -98,6 +98,9 @@ namespace details {
 			for (auto && env_node : X::SelectNodes("env", material_node)) {
 				auto path = leo::Access<std::string>(*env_node.rbegin());
 				try {
+					if (path == "math.lss") {
+						material_desc.material_eval->RegisterMathDotLssFile();
+					}
 					std::ifstream fin(path);
 					material_desc.material_eval->LoadFrom(fin);
 				}

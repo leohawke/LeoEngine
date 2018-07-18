@@ -1,5 +1,5 @@
 #include "Materail.h"
-
+#include "LSLBuilder.h"
 using namespace platform;
 using namespace scheme;
 using namespace v1;
@@ -37,4 +37,8 @@ void MaterialEvaluator::MaterialEvalFunctions(REPLContext& context) {
 
 	RegisterForm(root, "lazy-oninstance", LazyOnInstance);
 	RegisterForm(root, "lazy-onrender", LazyOnInstance);
+}
+
+void MaterialEvaluator::RegisterMathDotLssFile() {
+	lsl::math::RegisterMathDotLssFile(context);
 }

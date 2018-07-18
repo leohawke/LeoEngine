@@ -5,9 +5,13 @@
 #ifndef LE_Core_LSLBuilder_H
 #define LE_Core_LSLBuilder_H 1
 
-#include "LSLEvaluator.h"
+#include <LScheme/SContext.h>
+#include <LScheme/LScheme.h>
+#include <LScheme/LSchemREPL.h>
 
 namespace platform::lsl {
+	using REPLContext = scheme::v1::REPLContext;
+
 	using namespace scheme;
 	using namespace v1;
 
@@ -18,6 +22,8 @@ namespace platform::lsl {
 
 	namespace math {
 		void RegisterTypeLiteralAction(REPLContext& context);
+
+		void RegisterMathDotLssFile(REPLContext& context);
 	}
 
 
