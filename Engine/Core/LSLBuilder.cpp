@@ -164,10 +164,9 @@ namespace platform::lsl::math {
 
 	using namespace Forms;
 
-	float AccessToFloat(TermNode& term) {
-		if (term.Value.type() == leo::type_id<float>())
-			return leo::Access<float>(term);
-		return {};
+	template<typename _scalar>
+	_scalar AccessToScalar(TermNode& term) {
+		return platform::lsl::access::static_value_cast<_scalar, float, leo::int32, leo::uint32, leo::int64, leo::uint64>(term);
 	}
 
 	namespace details {
@@ -260,6 +259,44 @@ namespace platform::lsl::math {
 		template<typename _1, typename _2>
 		struct AddFunctor :BinaryFunctor<_1, _2, leo::plus<>> {
 		};
+
+		template<typename _1, typename _2>
+		struct SubFunctor :BinaryFunctor<_1, _2, leo::minus<>> {
+		};
+
+		template<typename _1, typename _2>
+		struct DivFunctor{
+			bool operator()(TermNode& term, TermNode& argument) {
+				term.Value = AccessToScalar<float>(term) / AccessToScalar<float>(argument);
+				return true;
+			}
+		};
+
+		template<typename _1, typename _2,typename = std::void_t<>>
+		struct ModFunctor {
+			bool operator()(TermNode& term, TermNode& argument) {
+				auto p_1 = leo::AccessPtr<_1>(term);
+				auto p_2 = leo::AccessPtr<_2>(argument);
+				if (p_1 && p_2) {
+					term.Value = fmodf(AccessToScalar<float>(term), AccessToScalar<float>(argument));
+					return true;
+				}
+				return false;
+			}
+		};
+
+		template<typename _1, typename _2>
+		struct ModFunctor<_1,_2, std::void_t<std::enable_if_t<!leo::is_same<_1, float>::value && !leo::is_same<_2, float>::value>>> {
+			bool operator()(TermNode& term, TermNode& argument) {
+				auto p_1 = leo::AccessPtr<_1>(term);
+				auto p_2 = leo::AccessPtr<_2>(argument);
+				if (p_1 && p_2) {
+					term.Value = AccessToScalar<leo::common_type_t<_1, _2>>(term) % AccessToScalar<leo::common_type_t<_1, _2>>(argument);
+					return true;
+				}
+				return false;
+			}
+		};
 	}
 
 	ReductionStatus Mul(TermNode& term, TermNode& argument)
@@ -270,6 +307,34 @@ namespace platform::lsl::math {
 	ReductionStatus Add(TermNode& term, TermNode& argument)
 	{
 		return details::Binary<details::AddFunctor>(term, argument);
+	}
+
+	template<template<typename, typename> typename _functor>
+	ReductionStatus Binary(TermNode& term) {
+		const auto n(FetchArgumentN(term));
+		if (n == 2) {
+			auto i(std::next(term.begin()));
+			term.Value = i->Value;
+			return details::Binary<_functor>(term, *std::next(i));
+		}
+		else
+			throw  std::invalid_argument(leo::sfmt(
+				"Invalid parameter count  %u != 2.", n).c_str());
+	}
+
+	ReductionStatus Sub(TermNode& term)
+	{
+		return Binary<details::SubFunctor>(term);
+	}
+
+	ReductionStatus Div(TermNode& term)
+	{
+		return Binary<details::DivFunctor>(term);
+	}
+
+	ReductionStatus Mod(TermNode& term)
+	{
+		return Binary<details::ModFunctor>(term);
 	}
 
 	template<typename _func, typename _type>
@@ -297,6 +362,9 @@ namespace platform::lsl::math {
 		RegisterStrict(root, "+", [](TermNode& term) {
 			return BinaryFold(Add, 0, term);
 		});
+		RegisterStrict(root, "-", Sub);
+		RegisterStrict(root, "/", Div);
+		RegisterStrict(root, "%", Mod);
 	}
 }
 
