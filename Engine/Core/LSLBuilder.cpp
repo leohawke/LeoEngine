@@ -172,13 +172,13 @@ namespace platform::lsl::math {
 
 	namespace details {
 		template<typename _scalar, size_t multi>
-		ReductionStatus TypeLiteralAction(TermNode& term,leo::math::data_storage<_scalar, multi>& ans) {
+		ReductionStatus TypeLiteralAction(TermNode& term, leo::math::data_storage<_scalar, multi>& ans) {
 			const auto size(term.size());
 
 			if (size > 1 && size < multi + 2) {
 				auto i = std::next(term.begin());
 				for (auto j = ans.begin(); i != term.end() && j != ans.end(); ++i, ++j)
-					*j = platform::lsl::access::static_value_cast<_scalar,float,leo::int32,leo::uint32,leo::int64,leo::uint64>(*i);
+					*j = platform::lsl::access::static_value_cast<_scalar, float, leo::int32, leo::uint32, leo::int64, leo::uint64>(*i);
 			}
 			else {
 				throw  std::invalid_argument(leo::sfmt(
@@ -205,121 +205,81 @@ namespace platform::lsl::math {
 		RegisterStrict(root, "float3", TypeLiteralAction<leo::math::float3>);
 	}
 
+	namespace details {
+		template<template<typename, typename> typename _functor>
+		ReductionStatus Binary(TermNode& term, TermNode& argument)
+		{
+			if (
+				_functor<float, leo::int32>()(term, argument) ||
+				_functor<float, leo::uint32>()(term, argument) ||
+				_functor<float, leo::int64>()(term, argument) ||
+				_functor<float, leo::uint64>()(term, argument) ||
+				_functor<float, float>()(term, argument) ||
+				_functor<leo::int32, leo::int32>()(term, argument) ||
+				_functor<leo::int32, leo::uint32>()(term, argument) ||
+				_functor<leo::int32, leo::int64>()(term, argument) ||
+				_functor<leo::int32, leo::uint64>()(term, argument) ||
+				_functor<leo::int32, float>()(term, argument) ||
+				_functor<leo::uint32, leo::int32>()(term, argument) ||
+				_functor<leo::uint32, leo::uint32>()(term, argument) ||
+				_functor<leo::uint32, leo::int64>()(term, argument) ||
+				_functor<leo::uint32, leo::uint64>()(term, argument) ||
+				_functor<leo::uint32, float>()(term, argument) ||
+				_functor<leo::int64, leo::int32>()(term, argument) ||
+				_functor<leo::int64, leo::uint32>()(term, argument) ||
+				_functor<leo::int64, leo::int64>()(term, argument) ||
+				_functor<leo::int64, leo::uint64>()(term, argument) ||
+				_functor<leo::int64, float>()(term, argument) ||
+				_functor<leo::uint64, leo::int32>()(term, argument) ||
+				_functor<leo::uint64, leo::uint32>()(term, argument) ||
+				_functor<leo::uint64, leo::int64>()(term, argument) ||
+				_functor<leo::uint64, leo::uint64>()(term, argument) ||
+				_functor<leo::uint64, float>()(term, argument))
+				return ReductionStatus::Clean;
+			else
+				throw std::invalid_argument("type error");
+		}
+
+		template<typename _1, typename _2, typename _functor>
+		struct BinaryFunctor {
+			bool operator()(TermNode& term, TermNode& argument) {
+				auto p_1 = leo::AccessPtr<_1>(term);
+				auto p_2 = leo::AccessPtr<_2>(argument);
+				if (p_1 && p_2) {
+					term.Value =static_cast<leo::common_type_t<_1,_2>>(_functor()(*p_1, *p_2));
+					return true;
+				}
+				return false;
+			}
+		};
+
+		template<typename _1, typename _2>
+		struct MulFunctor :BinaryFunctor<_1, _2, leo::multiplies<>> {
+		};
+
+		template<typename _1, typename _2>
+		struct AddFunctor :BinaryFunctor<_1, _2, leo::plus<>> {
+		};
+	}
+
 	ReductionStatus Mul(TermNode& term, TermNode& argument)
 	{
-		if (term.Value.type() == leo::type_id<leo::int32>()) {
-			if (argument.Value.type() == leo::type_id<leo::int32>()) {
-				term.Value = leo::Access<leo::int32>(term) * leo::Access<leo::int32>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<leo::uint32>()) {
-				term.Value = leo::Access<leo::int32>(term) * leo::Access<leo::uint32>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<leo::int64>()) {
-				term.Value = leo::Access<leo::int32>(term) * leo::Access<leo::int64>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<leo::uint64>()) {
-				term.Value = leo::Access<leo::int32>(term) * leo::Access<leo::uint64>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<float>()) {
-				term.Value = leo::Access<leo::int32>(term) * leo::Access<float>(argument);
-			}
-			else
-				throw std::invalid_argument("type error");
-		}
-		else if (term.Value.type() == leo::type_id<leo::uint32>()) {
-			if (argument.Value.type() == leo::type_id<leo::int32>()) {
-				term.Value = leo::Access<leo::uint32>(term) * leo::Access<leo::int32>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<leo::uint32>()) {
-				term.Value = leo::Access<leo::uint32>(term) * leo::Access<leo::uint32>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<leo::int64>()) {
-				term.Value = leo::Access<leo::uint32>(term) * leo::Access<leo::int64>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<leo::uint64>()) {
-				term.Value = leo::Access<leo::uint32>(term) * leo::Access<leo::uint64>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<float>()) {
-				term.Value = leo::Access<leo::uint32>(term) * leo::Access<float>(argument);
-			}
-			else
-				throw std::invalid_argument("type error");
-		}
-		else if (term.Value.type() == leo::type_id<leo::int64>()) {
-			if (argument.Value.type() == leo::type_id<leo::int32>()) {
-				term.Value = leo::Access<leo::int64>(term) * leo::Access<leo::int32>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<leo::uint32>()) {
-				term.Value = leo::Access<leo::int64>(term) * leo::Access<leo::uint32>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<leo::int64>()) {
-				term.Value = leo::Access<leo::int64>(term) * leo::Access<leo::int64>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<leo::uint64>()) {
-				term.Value = leo::Access<leo::int64>(term) * leo::Access<leo::uint64>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<float>()) {
-				term.Value = leo::Access<leo::int64>(term) * leo::Access<float>(argument);
-			}
-			else
-				throw std::invalid_argument("type error");
-		}
-		else if (term.Value.type() == leo::type_id<leo::uint64>()) {
-			if (argument.Value.type() == leo::type_id<leo::int32>()) {
-				term.Value = leo::Access<leo::uint64>(term) * leo::Access<leo::int32>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<leo::uint32>()) {
-				term.Value = leo::Access<leo::uint64>(term) * leo::Access<leo::uint32>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<leo::int64>()) {
-				term.Value = leo::Access<leo::uint64>(term) * leo::Access<leo::int64>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<leo::uint64>()) {
-				term.Value = leo::Access<leo::uint64>(term) * leo::Access<leo::uint64>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<float>()) {
-				term.Value = leo::Access<leo::uint64>(term) * leo::Access<float>(argument);
-			}
-			else
-				throw std::invalid_argument("type error");
-		}
-		else if (term.Value.type() == leo::type_id<float>()) {
-			if (argument.Value.type() == leo::type_id<leo::int32>()) {
-				term.Value = leo::Access<float>(term) * leo::Access<leo::int32>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<leo::uint32>()) {
-				term.Value = leo::Access<float>(term) * leo::Access<leo::uint32>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<leo::int64>()) {
-				term.Value = leo::Access<float>(term) * leo::Access<leo::int64>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<leo::uint64>()) {
-				term.Value = leo::Access<float>(term) * leo::Access<leo::uint64>(argument);
-			}
-			else if (argument.Value.type() == leo::type_id<float>()) {
-				term.Value = leo::Access<float>(term) * leo::Access<float>(argument);
-			}
-			else
-				throw std::invalid_argument("type error");
-		}
-		else
-			throw std::invalid_argument("type error");
-		return ReductionStatus::Clean;
+		return details::Binary<details::MulFunctor>(term, argument);
 	}
 
 	ReductionStatus Add(TermNode& term, TermNode& argument)
 	{
-		return ReductionStatus::Clean;
+		return details::Binary<details::AddFunctor>(term, argument);
 	}
 
-	template<typename _func,typename _type>
-	ReductionStatus BinaryFold(_func f,_type val,TermNode & term)
+	template<typename _func, typename _type>
+	ReductionStatus BinaryFold(_func f, _type val, TermNode & term)
 	{
 		term.Value = val;
 		const auto n(FetchArgumentN(term));
 		auto i(std::next(term.begin()));
 		auto j(std::next(i, typename std::iterator_traits<decltype(i)>::difference_type(n)));
-		for (; i != j; ++j) 
+		for (; i != j; ++j)
 		{
 			auto res(f(term, *i));
 			if (res != ReductionStatus::Clean)
