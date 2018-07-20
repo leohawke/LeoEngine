@@ -353,6 +353,21 @@ namespace platform::lsl::math {
 		return ReductionStatus::Clean;
 	}
 
+	template<typename _func>
+	decltype(auto) FetchCMathFileUnaryFunction(_func f) {
+		return [f = f](TermNode& term) {
+			auto i(std::next(term.begin()));
+			term.Value =f(AccessToScalar<float>(*i));
+			return ReductionStatus::Clean;
+		};
+	}
+
+	void RegisterCMathFile(REPLContext & context) {
+		auto& root(context.Root);
+
+		RegisterStrict(root, "sqrt", FetchCMathFileUnaryFunction(sqrtf));
+	}
+
 	void RegisterMathDotLssFile(REPLContext & context)
 	{
 		auto& root(context.Root);
