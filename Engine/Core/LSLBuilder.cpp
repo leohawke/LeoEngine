@@ -1,6 +1,7 @@
 #include "LSLBuilder.h"
 #include <LBase/lmathtype.hpp>
 #include <charconv>
+#include <cmath>
 
 using namespace scheme;
 using namespace v1;
@@ -365,7 +366,20 @@ namespace platform::lsl::math {
 	void RegisterCMathFile(REPLContext & context) {
 		auto& root(context.Root);
 
-		RegisterStrict(root, "sqrt", FetchCMathFileUnaryFunction(sqrtf));
+		RegisterStrict(root, "sqrt", FetchCMathFileUnaryFunction(std::sqrtf));
+
+#define AMBIGUOUS_SPECIAL(f) [](float v){return f(v);}
+		//!\brief Exponential functions 
+		//@{
+		RegisterStrict(root, "exp", FetchCMathFileUnaryFunction(std::expf));
+		RegisterStrict(root, "exp2", FetchCMathFileUnaryFunction(AMBIGUOUS_SPECIAL(std::exp2)));
+		RegisterStrict(root, "expm1", FetchCMathFileUnaryFunction(AMBIGUOUS_SPECIAL(std::expm1)));
+		RegisterStrict(root, "log", FetchCMathFileUnaryFunction(AMBIGUOUS_SPECIAL(std::log)));
+		RegisterStrict(root, "log10", FetchCMathFileUnaryFunction(AMBIGUOUS_SPECIAL(std::log10)));
+		RegisterStrict(root, "log2", FetchCMathFileUnaryFunction(AMBIGUOUS_SPECIAL(std::log2)));
+		RegisterStrict(root, "loglp", FetchCMathFileUnaryFunction(AMBIGUOUS_SPECIAL(std::log1p)));
+		//@}
+#undef AMBIGUOUS_SPECIAL
 	}
 
 	void RegisterMathDotLssFile(REPLContext & context)
