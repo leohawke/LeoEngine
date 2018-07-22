@@ -364,21 +364,50 @@ namespace platform::lsl::math {
 	}
 
 	void RegisterCMathFile(REPLContext & context) {
+		using namespace std;
 		auto& root(context.Root);
 
 		RegisterStrict(root, "sqrt", FetchCMathFileUnaryFunction(std::sqrtf));
 
-#define AMBIGUOUS_SPECIAL(f) [](float v){return f(v);}
+#define UNARY_SPECIAL(f) [](float v){return f(v);}
+#define REGISTER_UNARY(f) RegisterStrict(root,#f, FetchCMathFileUnaryFunction(UNARY_SPECIAL(f)));
 		//!\brief Exponential functions 
 		//@{
-		RegisterStrict(root, "exp", FetchCMathFileUnaryFunction(std::expf));
-		RegisterStrict(root, "exp2", FetchCMathFileUnaryFunction(AMBIGUOUS_SPECIAL(std::exp2)));
-		RegisterStrict(root, "expm1", FetchCMathFileUnaryFunction(AMBIGUOUS_SPECIAL(std::expm1)));
-		RegisterStrict(root, "log", FetchCMathFileUnaryFunction(AMBIGUOUS_SPECIAL(std::log)));
-		RegisterStrict(root, "log10", FetchCMathFileUnaryFunction(AMBIGUOUS_SPECIAL(std::log10)));
-		RegisterStrict(root, "log2", FetchCMathFileUnaryFunction(AMBIGUOUS_SPECIAL(std::log2)));
-		RegisterStrict(root, "loglp", FetchCMathFileUnaryFunction(AMBIGUOUS_SPECIAL(std::log1p)));
+		REGISTER_UNARY(exp);
+		REGISTER_UNARY(exp2);
+		REGISTER_UNARY(expm1);
+		REGISTER_UNARY(log);
+		REGISTER_UNARY(log10);
+		REGISTER_UNARY(log2);
+		REGISTER_UNARY(log1p);
 		//@}
+
+		//!\brief Power functions 
+		//@{
+		REGISTER_UNARY(sqrt);
+		REGISTER_UNARY(cbrt);
+		//@}
+
+		//!\brief Trigonometric functions 
+		//@{
+		REGISTER_UNARY(sin);
+		REGISTER_UNARY(cos);
+		REGISTER_UNARY(tan);
+		REGISTER_UNARY(asin);
+		REGISTER_UNARY(acos);
+		REGISTER_UNARY(atan);
+		//@}
+
+		//!\brief Hyperbolic functions 
+		//@{
+		REGISTER_UNARY(sinh);
+		REGISTER_UNARY(cosh);
+		REGISTER_UNARY(tanh);
+		REGISTER_UNARY(asinh);
+		REGISTER_UNARY(acosh);
+		REGISTER_UNARY(atanh);
+		//@}
+
 #undef AMBIGUOUS_SPECIAL
 	}
 
