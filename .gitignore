@@ -229,3 +229,4 @@ Engine.Net/SWIG/*.cpp
 Engine.Net/Engine.Net/*.cs
 /LTest/EngineTest/Debug_TOOL/EngineTest.tlog
 *.idb
+/build_msvc
