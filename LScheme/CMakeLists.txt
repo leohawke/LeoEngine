@@ -1,7 +1,7 @@
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLSCHEME_EXPORTS")
 
 file(GLOB_RECURSE SOURCE_FILES
-	*.cpp)
+    *.cpp)
 file(GLOB_RECURSE HEADER_FILES
     *.h
     *.hpp)
