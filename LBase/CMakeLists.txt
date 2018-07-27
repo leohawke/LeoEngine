@@ -1,7 +1,7 @@
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DLB_Use_LightweightTypeID")
 
 file(GLOB_RECURSE SOURCE_FILES
-	*.cpp)
+    *.cpp)
 file(GLOB_RECURSE HEADER_FILES
     *.h
     *.hpp)
