@@ -318,6 +318,12 @@
     <ClInclude Include="Core\LSLBuilder.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="System\TimeValue.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\NinthTimer.h">
+      <Filter>System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
@@ -340,6 +346,9 @@
     </Filter>
     <Filter Include="Render\Material">
       <UniqueIdentifier>{661cd8e8-d189-4430-94d4-c68076f60cd9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="System">
+      <UniqueIdentifier>{0005d704-97d9-4add-85d4-7c2e2e625828}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
