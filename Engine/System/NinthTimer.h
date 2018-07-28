@@ -22,7 +22,7 @@ namespace platform::chrono {
 
 		NinthTimer();
 
-		DefDeCtor(NinthTimer)
+		DefDeDtor(NinthTimer)
 
 	public:
 		void Reset();
@@ -44,11 +44,13 @@ namespace platform::chrono {
 		//! \brief determine if the TimerType::Normal timer is paused returns true if paused, false otherwise
 		bool IsPaused();
 	public:
-		const TimeValue& GetFrameStateTime(TimerType type = TimerType::Normal) const;
+		const TimeValue& GetFrameStartTime(TimerType type = TimerType::Normal) const;
 
 	private:
-		const unsigned int TimerTypeCount = 2;
+		static const unsigned int TimerTypeCount = 2;
 		using AdapterDuration = std::chrono::duration<double, std::chrono::seconds::period>;
+
+		void OffsetToGameTime(Duration pasue_duration);
 	private:
 		TimeValue timespans[TimerTypeCount];
 
