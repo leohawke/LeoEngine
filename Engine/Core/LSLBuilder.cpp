@@ -345,7 +345,7 @@ namespace platform::lsl::math {
 		const auto n(FetchArgumentN(term));
 		auto i(std::next(term.begin()));
 		auto j(std::next(i, typename std::iterator_traits<decltype(i)>::difference_type(n)));
-		for (; i != j; ++j)
+		for (; i != j; ++i)
 		{
 			auto res(f(term, *i));
 			if (res != ReductionStatus::Clean)
