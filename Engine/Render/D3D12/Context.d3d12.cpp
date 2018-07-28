@@ -472,7 +472,7 @@ namespace platform_ex {
 	namespace Windows {
 		namespace D3D12 {
 			bool Support() {
-				return true;
+				return false;
 			}
 			platform::Render::Context& GetContext() {
 				return Context::Instance();

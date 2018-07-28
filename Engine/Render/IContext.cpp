@@ -12,13 +12,20 @@ namespace platform_ex {
 			bool Support();
 			platform::Render::Context& GetContext();
 		}
+
+		namespace D3D11 {
+			platform::Render::Context& GetContext();
+		}
 	}
 }
 
 namespace platform {
 	namespace Render {
 		Context& Context::Instance() {
-			return platform_ex::Windows::D3D12::GetContext();
+			if(!platform_ex::Windows::D3D12::Support())
+				return platform_ex::Windows::D3D12::GetContext();
+			else
+				return platform_ex::Windows::D3D11::GetContext();
 		}
 
 		void Context::SetFrame(const std::shared_ptr<FrameBuffer>& framebuffer)
