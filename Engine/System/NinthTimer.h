@@ -7,6 +7,8 @@
 #define LE_System_NinthTimer_H 1
 
 #include "TimeValue.h"
+#include <LBase/linttype.hpp>
+#include <LBase/lmacro.h>
 
 namespace platform::chrono {
 	class NinthTimer {
@@ -19,7 +21,8 @@ namespace platform::chrono {
 		};
 
 		NinthTimer();
-		~NinthTimer();
+
+		DefDeCtor(NinthTimer)
 
 	public:
 		void Reset();
@@ -46,6 +49,34 @@ namespace platform::chrono {
 	private:
 		const unsigned int TimerTypeCount = 2;
 		using AdapterDuration = std::chrono::duration<double, std::chrono::seconds::period>;
+	private:
+		TimeValue timespans[TimerTypeCount];
+
+		bool enable = true;
+		leo::uint64 frame_counter = 0;
+
+		//编辑器中,渲染可以被停止
+		//注意,引擎中时间停止了也不会停止渲染
+#if ENGINE_TOOL
+		leo::uint64 render_frame_counter = 0;
+#endif
+
+		//TimePoint when since system boot, all other tick-unit variables are relative to this.
+		TimePoint start_point;
+		//This is the base for Monotonic time. it always moves forward at a constant rate until the timer is Reset()).
+		Duration last_duration;
+		// Additional ticks for Normal time (relative to Monotonic time). Game time can be affected by loading, pausing, time smoothing and time clamping.
+		Duration offset_duration;
+
+		//In seconds since the last Update(), clamped/smoothed etc.
+		float frame_time;
+		// In real seconds since the last Update(), non-clamped/un-smoothed etc.
+		float real_frametime;
+
+		//if normal time is paused.GetFrameTime will return 0;
+		bool paused_normal_timer;
+		//when the normal time is paused,On un-pause,offset will be adjuseted to match.
+		Duration normal_pasued_duration;
 	};
 
 }
