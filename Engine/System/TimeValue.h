@@ -13,12 +13,16 @@ namespace platform::chrono {
 	using ::leo::Timers::HighResolutionClock;
 
 	//引擎所使用的最大时间精度为10微秒
-	using Tick = std::chrono::ratio<1, 100000>;
+	using EngineTick = std::ratio<1, 100000>;
+	using EngineTickType = leo::make_signed_t<std::chrono::nanoseconds::rep>;
+
+	using Duration = leo::Timers::Duration;
+	using Tick = Duration::period;
+	using TickType = Duration::rep;
 
 	class TimeValue : public std::chrono::duration<
-		leo::make_signed_t<std::chrono::nanoseconds::rep>, Tick> 
+		EngineTickType, EngineTick>
 	{
-
 	};
 }
 

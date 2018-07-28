@@ -146,6 +146,9 @@
     <ClCompile Include="Core\LSLBuilder.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="System\NinthTimer.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">

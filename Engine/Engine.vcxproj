@@ -73,6 +73,7 @@
     <ClCompile Include="Render\ITexture.cpp" />
     <ClCompile Include="Render\PipleState.cpp" />
     <ClCompile Include="Render\RenderView.cpp" />
+    <ClCompile Include="System\NinthTimer.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="Win32\File.cpp" />
     <ClCompile Include="Win32\NTHandle.cpp" />
