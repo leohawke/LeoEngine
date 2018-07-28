@@ -17,6 +17,7 @@ namespace platform::chrono {
 	using EngineTickType = leo::make_signed_t<std::chrono::nanoseconds::rep>;
 
 	using Duration = leo::Timers::Duration;
+	using TimePoint = leo::Timers::TimePoint;
 	using Tick = Duration::period;
 	using TickType = Duration::rep;
 
