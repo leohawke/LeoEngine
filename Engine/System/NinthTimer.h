@@ -51,6 +51,12 @@ namespace platform::chrono {
 		using AdapterDuration = std::chrono::duration<double, std::chrono::seconds::period>;
 
 		void OffsetToGameTime(Duration pasue_duration);
+
+		//return the give type count in seconds
+		template<typename _target,typename _duration>
+		_target GetAdapterDurationCount(const _duration& duration) {
+			return static_cast<_target>(std::chrono::duration_cast<AdapterDuration>(duration).count());
+		}
 	private:
 		TimeValue timespans[TimerTypeCount];
 
