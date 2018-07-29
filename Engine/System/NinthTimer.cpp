@@ -1,6 +1,7 @@
 #include "NinthTimer.h"
 
 using  namespace platform::chrono;
+using namespace std::chrono;
 
 NinthTimer::NinthTimer()
 {
@@ -9,21 +10,52 @@ NinthTimer::NinthTimer()
 
 void NinthTimer::Reset()
 {
+	start_point = HighResolutionClock::now();
 
+	last_duration = 0ms;
+	offset_duration = 0ms;
+
+	frame_time = 0;
+	real_frametime = 0;
+
+	paused_normal_timer = false;
+	normal_pasued_duration = 0ms;
 }
 
 void NinthTimer::UpdateOnFrameStart()
 {
+	if (!enable)
+		return;
+
+	++frame_counter;
+
+	const auto now = HighResolutionClock::now();
+
+	real_frametime = GetAdapterDurationCount<float>(now - start_point - last_duration);
+
+	frame_time = std::min(real_frametime,0.25f);
+
+	LAssert(frame_time >= 0, "Time can only go forward.");
+
+
+	auto current_duration = now - start_point;
+
+	last_duration = current_duration;
+	
 }
 
 float NinthTimer::GetFrameTime(TimerType type)
 {
-	return 0.0f;
+	if (!enable)
+		return 0;
+	if (type == TimerType::Normal)
+		return !paused_normal_timer ? frame_time : 0;
+	return frame_time;
 }
 
 float NinthTimer::GetRealFrameTime() const
 {
-	return 0.0f;
+	return !paused_normal_timer ? real_frametime : 0;
 }
 
 
@@ -65,7 +97,7 @@ bool NinthTimer::Continue()
 	paused_normal_timer = false;
 	OffsetToGameTime(normal_pasued_duration);
 
-	normal_pasued_duration = Duration::zero();
+	normal_pasued_duration = 0ms;
 	return true;
 }
 
