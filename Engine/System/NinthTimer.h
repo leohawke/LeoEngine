@@ -13,7 +13,7 @@
 namespace platform::chrono {
 	class NinthTimer {
 	public:
-		enum class TimerType {
+		enum class TimerType : leo::uint8 {
 			//! \brief Pausable, serialized, frametime is smoothed/scaled/clamped.
 			Normal =0, 
 			//! \brief Non-pausable, non-serialized, frametime unprocessed.
@@ -57,6 +57,9 @@ namespace platform::chrono {
 		_target GetAdapterDurationCount(const _duration& duration) {
 			return static_cast<_target>(std::chrono::duration_cast<AdapterDuration>(duration).count());
 		}
+
+		void RefreshNormalTime(Duration duration);
+		void RefreshMonotonicTime(Duration duration);
 	private:
 		TimeValue timespans[TimerTypeCount];
 
