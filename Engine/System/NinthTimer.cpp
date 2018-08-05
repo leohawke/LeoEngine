@@ -134,7 +134,7 @@ void NinthTimer::RefreshMonotonicTime(Duration durration) {
 	timespans[(unsigned int)TimerType::Monotonic].SetSecondDuration(duration_cast<AdapterDuration>(durration));
 }
 
-NinthTimer& FetchGlobalTimer() {
+NinthTimer& platform::chrono::FetchGlobalTimer() {
 	if (TimerPtr)
 		return *TimerPtr;
 	throw leo::GeneralEvent("Timer instance is not ready.");
