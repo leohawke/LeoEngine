@@ -40,6 +40,10 @@ void NinthTimer::UpdateOnFrameStart()
 
 	auto current_duration = now - start_point;
 
+	RefreshMonotonicTime(current_duration);
+	if (!paused_normal_timer)
+		RefreshNormalTime(current_duration);
+
 	last_duration = current_duration;
 	
 }
@@ -105,9 +109,18 @@ void NinthTimer::OffsetToGameTime(Duration pasue_duration)
 
 	offset_duration = pasue_duration - last_duration;
 
-	//RefreshNormalTime
+	RefreshNormalTime(last_duration);
 
 	if (paused_normal_timer) {
 		normal_pasued_duration = pasue_duration;
 	}
+}
+
+//这里发生了数值类型的转变和精度误差
+void NinthTimer::RefreshNormalTime(Duration durration) {
+	timespans[(unsigned int)TimerType::Normal].SetSecondDuration(duration_cast<AdapterDuration>(durration + offset_duration));
+}
+
+void NinthTimer::RefreshMonotonicTime(Duration durration) {
+	timespans[(unsigned int)TimerType::Monotonic].SetSecondDuration(duration_cast<AdapterDuration>(durration));
 }

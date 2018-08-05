@@ -24,6 +24,15 @@ namespace platform::chrono {
 	class TimeValue : public std::chrono::duration<
 		EngineTickType, EngineTick>
 	{
+	public:
+		using base = std::chrono::duration<
+			EngineTickType, EngineTick>;
+		using base::base;
+
+		template<typename _rep>
+		void SetSecondDuration(const std::chrono::duration<_rep, std::chrono::seconds::period>& duration) {
+			(*this) =std::chrono::duration_cast<base>(duration);
+		}
 	};
 }
 
