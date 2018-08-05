@@ -5,6 +5,7 @@
 #include "../../Engine/Render/IFrameBuffer.h"
 #include "../../Engine/Asset/EffectX.h"
 #include "../../Engine/Asset/MaterialX.h"
+#include "../../Engine/System/NinthTimer.h"
 #include "TestFramework.h"
 #include "EntityComponentSystem/EntitySystem.h"
 #include "LSchemEngineUnitTest.h"
@@ -21,6 +22,8 @@ public:
 	using base::base;
 private:
 	leo::uint32 DoUpdate(leo::uint32 pass) override {
+		auto& timer = platform::chrono::FetchGlobalTimer();
+		timer.UpdateOnFrameStart();
 		auto entityId = ecs::EntitySystem::Instance().AddEntity<ecs::Entity>();
 
 		Context::Instance().BeginFrame();
@@ -53,7 +56,7 @@ private:
 		pEffect->GetParameter("worldviewproj"sv) = lm::transpose(worldviewproj);
 		pEffect->GetParameter("worldviewinvt"sv) = lm::transpose(worldviewinvt);
 		//mat
-		pEffect->GetParameter("albedo"sv) = lm::float3(0.8f, 0.6f, 0.4f);
+		pEffect->GetParameter("albedo"sv) = lm::float3(std::fmod(timer.GetFrameTime(),1.0f), std::fmod(timer.GetFrameStartTime().count()/ 6000000.f, 1.0f), 0.4f);
 		pEffect->GetParameter("metalness"sv) = 0.6f;
 		pEffect->GetParameter("specular"sv) = lm::float3(1.0f, 0.2f, 0.1f);
 		pEffect->GetParameter("alpha"sv) = 1.0f;
@@ -77,6 +80,8 @@ private:
 	void OnCreate() override {
 		auto swap_chain = ::Create(GetNativeHandle());
 		Context::Instance().CreateDeviceAndDisplay();
+
+		static platform::chrono::NinthTimer timer = {};
 	}
 };
 
