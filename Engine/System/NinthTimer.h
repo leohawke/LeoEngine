@@ -90,6 +90,7 @@ namespace platform::chrono {
 		Duration normal_pasued_duration;
 	};
 
+	NinthTimer& FetchGlobalTimer();
 }
 
 #endif

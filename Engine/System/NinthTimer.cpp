@@ -1,10 +1,19 @@
 #include "NinthTimer.h"
+#include <LFramework/Core/LException.h>
 
 using  namespace platform::chrono;
 using namespace std::chrono;
 
+
+namespace {
+	NinthTimer* TimerPtr;
+}
+
 NinthTimer::NinthTimer()
 {
+	LAssert(!TimerPtr, "Duplicate instance found.");
+	TimerPtr = this;
+
 	Reset();
 }
 
@@ -124,3 +133,10 @@ void NinthTimer::RefreshNormalTime(Duration durration) {
 void NinthTimer::RefreshMonotonicTime(Duration durration) {
 	timespans[(unsigned int)TimerType::Monotonic].SetSecondDuration(duration_cast<AdapterDuration>(durration));
 }
+
+NinthTimer& FetchGlobalTimer() {
+	if (TimerPtr)
+		return *TimerPtr;
+	throw leo::GeneralEvent("Timer instance is not ready.");
+}
+
