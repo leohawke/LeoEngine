@@ -83,8 +83,7 @@ bool NinthTimer::Pasue()
 
 	paused_normal_timer = true;
 
-	normal_pasued_duration =
-		+offset_duration;
+	normal_pasued_duration = last_duration +offset_duration;
 
 	return true;
 }
