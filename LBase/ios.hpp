@@ -38,6 +38,7 @@ namespace leo
 	\see http://wg21.cmeerw.net/lwg/issue91 ¡£
 	*/
 	template<typename _tChar, class _tTraits>
+	LB_NORETURN
 	void
 		rethrow_badstate(std::basic_ios<_tChar, _tTraits>& ios,
 			std::ios_base::iostate state = std::ios_base::badbit)
