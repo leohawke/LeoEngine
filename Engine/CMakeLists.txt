@@ -12,13 +12,16 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DINITGUID -D_CRT_SECURE_NO_
 set(CMAKE_CXX_FLAGS_DEBUG_TOOL "${CMAKE_CXX_FLAGS_DEBUG_TOOL} -DINITGUID -DENGINE_TOOL -D_CRT_SECURE_NO_WARNINGS")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DLB_Use_LightweightTypeID")
 
-file(GLOB_RECURSE SOURCE_FILES
-    *.cpp)
-file(GLOB_RECURSE HEADER_FILES
-    *.h
-    *.hpp)
+file(GLOB_RECURSE source_list
+	RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+	*.h
+	*.hpp
+    *.cpp
+	)
 
-add_library(Engine STATIC ${SOURCE_FILES} ${HEADER_FILES})
+add_library(Engine STATIC ${source_list})
+
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${source_list})
 
 target_include_directories(Engine PUBLIC ${SDK_PATH})
 target_include_directories(Engine PUBLIC ${CMAKE_SOURCE_DIR})
