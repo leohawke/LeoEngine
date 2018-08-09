@@ -6,7 +6,7 @@ file(GLOB_RECURSE source_list
 
 link_directories(${SDK_PATH})
 
-add_executable(EngineTest ${source_list})
+add_executable(EngineTest WIN32 ${source_list})
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${source_list})
 
