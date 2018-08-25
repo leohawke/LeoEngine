@@ -852,6 +852,10 @@ namespace dds {
 			return leo::hash_combine_seq(Type(), dds_desc.dds_path.wstring());
 		}
 
+		const path& Path() const override {
+			return dds_desc.dds_path;
+		}
+
 		std::experimental::generator<std::shared_ptr<AssetType>> Coroutine() override {
 			co_yield ReadDDS();
 			co_yield ConvertFormat();

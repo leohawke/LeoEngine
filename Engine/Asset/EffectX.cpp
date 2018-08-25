@@ -91,6 +91,10 @@ namespace platform {
 			return leo::hash_combine_seq(Type(), effect_desc.effect_path.wstring());
 		}
 
+		const asset::path& Path() const override {
+			return effect_desc.effect_path;
+		}
+
 		std::experimental::generator<std::shared_ptr<AssetType>> Coroutine() override {
 			co_yield PreCreate();
 			co_yield LoadNode();

@@ -12,7 +12,11 @@
 #include <experimental/resumable>
 #include <experimental/generator>
 #include <experimental/coroutine>
+#include <experimental/filesystem>
+
 namespace asset {
+	using path = std::experimental::filesystem::path;
+
 	template<unsigned char c0, unsigned char c1, unsigned char c2, unsigned char c3>
 	struct four_cc {
 		enum { value = (c0 << 0) + (c1 << 8) + (c2 << 16) + (c3 << 24) };
@@ -28,6 +32,8 @@ namespace asset {
 		virtual std::size_t Type() const = 0;
 
 		virtual std::size_t Hash() const = 0;
+
+		virtual const path& Path() const = 0;
 	};
 
 
