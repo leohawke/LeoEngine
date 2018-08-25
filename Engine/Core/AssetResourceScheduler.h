@@ -43,6 +43,10 @@ namespace platform {
 		std::shared_ptr<_type> SyncSpawnResource(_tParams&&... args);
 
 		static AssetResourceScheduler& Instance();
+
+		//！\brief 获取某个资源的路径,无法取得时抛出异常
+		const asset::path& FindAssetPath(void* pAsset);
+
 	private:
 		AssetResourceScheduler();
 		~AssetResourceScheduler();

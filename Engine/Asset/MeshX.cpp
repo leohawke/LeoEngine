@@ -217,6 +217,9 @@ namespace platform {
 			return leo::hash_combine_seq(Type(), mesh_desc.mesh_path.wstring());
 		}
 
+		const asset::path& Path() const override {
+			return mesh_desc.mesh_path;
+		}
 
 		std::experimental::generator<std::shared_ptr<AssetType>> Coroutine() override {
 			platform_ex::Windows::File interna_file{ mesh_desc.mesh_path.wstring(),platform::File::kToRead };

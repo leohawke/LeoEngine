@@ -19,13 +19,15 @@ namespace asset {
 		};
 
 		DefGetter(const lnothrow, const std::string&, EffectName, effect_name)
-			DefGetter(lnothrow, std::string&, EffectName, effect_name)
+			DefGetter(lnothrow, std::string&, EffectNameRef, effect_name)
 
 		DefGetter(const lnothrow, const std::vector<std::pair<size_t LPP_Comma leo::ValueObject>>&, BindValues, bind_values)
-			DefGetter(lnothrow, std::vector<std::pair<size_t LPP_Comma leo::ValueObject>>&, BindValues, bind_values)
+			DefGetter(lnothrow, std::vector<std::pair<size_t LPP_Comma leo::ValueObject>>&, BindValuesRef, bind_values)
 	private:
 		std::string effect_name;
 		std::vector<std::pair<size_t, leo::ValueObject>> bind_values;
+
+		std::string asset_path;
 	};
 }
 

@@ -714,7 +714,7 @@ namespace platform
 		}
 #	else
 		LB_NONNULL(1) basic_filebuf<_tChar, _tTraits>*
-			open_file_ptr(::_Filet* p_file)
+			open_file_ptr(::FILE* p_file)
 		{
 			if (p_file)
 			{

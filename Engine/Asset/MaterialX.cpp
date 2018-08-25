@@ -35,6 +35,10 @@ namespace details {
 			return leo::hash_combine_seq(Type(), material_desc.material_path.wstring());
 		}
 
+		const asset::path& Path() const override {
+			return material_desc.material_path;
+		}
+
 		std::experimental::generator<std::shared_ptr<AssetType>> Coroutine() override {
 			co_yield PreCreate();
 			co_yield LoadNode();
@@ -65,6 +69,8 @@ namespace details {
 			material_desc.effect_name = leo::Access<std::string>(*(effect_nodes.begin()->rbegin()));
 
 			material_node.Remove(effect_nodes.begin()->GetName());
+
+			material_desc.material_asset->GetEffectNameRef() = material_desc.effect_name;
 			return  nullptr;
 		}
 
@@ -179,7 +185,7 @@ namespace details {
 				if (ret.second != ReductionStatus::Clean)
 					throw leo::GeneralEvent(leo::sfmt("Bad Reduct State: %s", ret.second == ReductionStatus::Retained ? "Retained" : "Retrying"));
 
-				material_desc.material_asset->GetBindValues().emplace_back(param_index, std::move(ret.first.Value));
+				material_desc.material_asset->GetBindValuesRef().emplace_back(param_index, std::move(ret.first.Value));
 			}
 			catch (std::exception& e) {
 				std::stringstream ss;
