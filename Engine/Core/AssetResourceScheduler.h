@@ -45,7 +45,7 @@ namespace platform {
 		static AssetResourceScheduler& Instance();
 
 		//！\brief 获取某个资源的路径,无法取得时抛出异常
-		const asset::path& FindAssetPath(void* pAsset);
+		const asset::path& FindAssetPath(const void* pAsset);
 
 	private:
 		AssetResourceScheduler();

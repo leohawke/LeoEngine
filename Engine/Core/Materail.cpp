@@ -1,10 +1,13 @@
 #include "Materail.h"
 #include "LSLBuilder.h"
+#include "AssetResourceScheduler.h"
+#include "../Asset/MaterialX.h"
 using namespace platform;
 using namespace scheme;
 using namespace v1;
 
 platform::Material::Material(const asset::MaterailAsset & asset, const std::string & name)
+	:identity_name(asset::path(AssetResourceScheduler::Instance().FindAssetPath(&asset)).replace_extension().u8string() + "-" + name)
 {
 	for (auto& bind_value : asset.GetBindValues()) {
 		if (LB_UNLIKELY(bind_value.second.GetContent().type() == leo::type_id<MaterialEvaluator::InstanceDelayedTerm>())){
@@ -17,11 +20,20 @@ platform::Material::Material(const asset::MaterailAsset & asset, const std::stri
 				ret.first.Value.GetContent()
 			);
 		}
-		else {
+		else if (LB_UNLIKELY(bind_value.second.GetContent().type() == leo::type_id<MaterialEvaluator::RenderDelayedTerm>())) {
+			delay_values.emplace_back(bind_value.first,
+				scheme::TermNode(bind_value.second.Access<MaterialEvaluator::RenderDelayedTerm>()));
+		}
+		else{
 			bind_values.emplace_back(bind_value);
 		}
 	}
 }
+
+void platform::Material::UpdateParams(Renderable* pRenderable) {
+
+}
+
 
 MaterialEvaluator & platform::Material::GetInstanceEvaluator()
 {
@@ -41,6 +53,19 @@ MaterialEvaluator & platform::Material::GetInstanceEvaluator()
 
 	return instance;
 }
+
+template<>
+std::shared_ptr<Material> AssetResourceScheduler::SyncSpawnResource<Material, const X::path&, const std::string&>(const X::path& path, const std::string & name) {
+	auto pAsset = X::LoadMaterialAsset(path);
+	if (!pAsset)
+		return {};
+	auto pMaterial = std::make_shared<Material>(*pAsset, name);
+	return pMaterial;
+}
+
+template std::shared_ptr<Material> AssetResourceScheduler::SyncSpawnResource<Material, const X::path&, const std::string&>(const X::path& path, const std::string & name);
+
+
 
 
 MaterialEvaluator::MaterialEvaluator()

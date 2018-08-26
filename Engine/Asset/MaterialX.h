@@ -7,11 +7,14 @@
 
 #include "EffectX.h"
 #include "MaterialAsset.h"
+#include "../Core/Materail.h"
 namespace platform {
 	namespace X {
 		using path = std::experimental::filesystem::path;
 
 		std::shared_ptr<asset::MaterailAsset> LoadMaterialAsset(path const& materialpath);
+
+		std::shared_ptr<Material> LoadMaterial(path const& materialpath, const std::string& name);
 	}
 }
 
