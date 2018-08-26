@@ -15,14 +15,32 @@
 namespace platform {
 	class MaterialEvaluator;
 
+	class Renderable;
+
 	class Material :Resource {
 	public:
 		Material(const asset::MaterailAsset& asset, const std::string& name);
 
+		struct RenderDelayedContext {
+			Renderable* pRenderable;
+		};
 	public:
-		const std::string& GetName() const lnothrow;
+		const std::string& GetName() const lnothrow override {
+			return identity_name;
+		}
+
+		std::shared_ptr<Render::Effect::Effect> GetEffect() const lnothrow {
+			return bind_effects;
+		}
+
+	public:
+		friend class Renderable;
+
+		//after effect set/before render
+		void UpdateParams(Renderable* pRenderable);
 	private:
 		std::vector<std::pair<size_t, leo::any>> bind_values;
+		std::vector<std::pair<size_t, scheme::TermNode>> delay_values;
 		std::shared_ptr<Render::Effect::Effect> bind_effects;
 		std::string identity_name;
 	public:

@@ -223,3 +223,8 @@ std::shared_ptr<asset::MaterailAsset> X::LoadMaterialAsset(path const & material
 {
 	return  AssetResourceScheduler::Instance().SyncLoad<details::MaterailLoadingDesc>(materialpath);
 }
+
+std::shared_ptr<Material> LoadMaterial(path const& materialpath, const std::string& name) {
+	return  AssetResourceScheduler::Instance().SyncSpawnResource(materialpath, name);
+}
+

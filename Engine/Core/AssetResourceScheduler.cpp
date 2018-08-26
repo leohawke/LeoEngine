@@ -16,7 +16,7 @@ namespace platform {
 		static AssetResourceScheduler instance;
 		return instance;
 	}
-	const asset::path& AssetResourceScheduler::FindAssetPath(void * pAsset)
+	const asset::path& AssetResourceScheduler::FindAssetPath(const void * pAsset)
 	{
 		for (auto &pair : asset_loaded_caches) {
 			if (pair.second.loaded_asset.get() == pAsset)
