@@ -74,6 +74,10 @@ namespace asset {
 	};
 }
 
+namespace platform {
+	class Material;
+}
+
 namespace platform::Render {
 	class Texture;
 
@@ -320,6 +324,9 @@ namespace platform::Render::Effect {
 		}
 
 		friend class Effect;
+		friend class Material;
+	private:
+		Parameter& operator=(const leo::any& val);
 	private:
 		Variable var;
 
