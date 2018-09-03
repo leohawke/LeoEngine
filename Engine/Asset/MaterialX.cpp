@@ -185,7 +185,7 @@ namespace details {
 				if (ret.second != ReductionStatus::Clean)
 					throw leo::GeneralEvent(leo::sfmt("Bad Reduct State: %s", ret.second == ReductionStatus::Retained ? "Retained" : "Retrying"));
 
-				material_desc.material_asset->GetBindValuesRef().emplace_back(param_index, std::move(ret.first.Value));
+				material_desc.material_asset->GetBindValuesRef().emplace_back(effect_asset->GetParams()[param_index].GetNameHash(), std::move(ret.first.Value));
 			}
 			catch (std::exception& e) {
 				std::stringstream ss;
@@ -224,7 +224,7 @@ std::shared_ptr<asset::MaterailAsset> X::LoadMaterialAsset(path const & material
 	return  AssetResourceScheduler::Instance().SyncLoad<details::MaterailLoadingDesc>(materialpath);
 }
 
-std::shared_ptr<Material> LoadMaterial(path const& materialpath, const std::string& name) {
-	return  AssetResourceScheduler::Instance().SyncSpawnResource(materialpath, name);
+std::shared_ptr<Material> LoadMaterial(asset::path const& materialpath, const std::string& name) {
+	return  AssetResourceScheduler::Instance().SyncSpawnResource<Material>(materialpath, name);
 }
 

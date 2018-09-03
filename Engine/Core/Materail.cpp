@@ -31,7 +31,9 @@ platform::Material::Material(const asset::MaterailAsset & asset, const std::stri
 }
 
 void platform::Material::UpdateParams(Renderable* pRenderable) {
-
+	for (auto& bind_value : bind_values) {
+		bind_effects->GetParameter(bind_value.first) = bind_value.second;
+	}
 }
 
 
@@ -55,7 +57,7 @@ MaterialEvaluator & platform::Material::GetInstanceEvaluator()
 }
 
 template<>
-std::shared_ptr<Material> AssetResourceScheduler::SyncSpawnResource<Material, const X::path&, const std::string&>(const X::path& path, const std::string & name) {
+std::shared_ptr<Material> platform::AssetResourceScheduler::SyncSpawnResource<Material, const X::path&, const std::string&>(const X::path& path, const std::string & name) {
 	auto pAsset = X::LoadMaterialAsset(path);
 	if (!pAsset)
 		return {};
@@ -63,7 +65,7 @@ std::shared_ptr<Material> AssetResourceScheduler::SyncSpawnResource<Material, co
 	return pMaterial;
 }
 
-template std::shared_ptr<Material> AssetResourceScheduler::SyncSpawnResource<Material, const X::path&, const std::string&>(const X::path& path, const std::string & name);
+template std::shared_ptr<Material> platform::AssetResourceScheduler::SyncSpawnResource<Material, const X::path&, const std::string&>(const X::path& path, const std::string & name);
 
 
 
