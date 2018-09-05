@@ -71,6 +71,8 @@ namespace platform {
 		using RenderDelayedTerm = leo::derived_entity<scheme::TermNode, RenderTag>;
 
 		friend class Material;
+
+		static void CheckReductionStatus(scheme::ReductionStatus status);
 	private:
 		static void MaterialEvalFunctions(REPLContext& context);
 	};

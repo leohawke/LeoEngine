@@ -13,9 +13,7 @@ platform::Material::Material(const asset::MaterailAsset & asset, const std::stri
 		if (LB_UNLIKELY(bind_value.second.GetContent().type() == leo::type_id<MaterialEvaluator::InstanceDelayedTerm>())){
 			auto ret = GetInstanceEvaluator().Reduce(bind_value.second.Access<MaterialEvaluator::InstanceDelayedTerm>());
 
-			if (ret.second != ReductionStatus::Clean)
-				throw leo::GeneralEvent(leo::sfmt("Bad Reduct State: %s", ret.second == ReductionStatus::Retained ? "Retained" : "Retrying"));
-
+			MaterialEvaluator::CheckReductionStatus(ret.second);
 			bind_values.emplace_back(bind_value.first,
 				ret.first.Value.GetContent()
 			);
@@ -33,6 +31,13 @@ platform::Material::Material(const asset::MaterailAsset & asset, const std::stri
 void platform::Material::UpdateParams(Renderable* pRenderable) {
 	for (auto& bind_value : bind_values) {
 		bind_effects->GetParameter(bind_value.first) = bind_value.second;
+	}
+	for (auto & delay_value : delay_values) {
+		auto ret = GetInstanceEvaluator().Reduce(delay_value.second);
+		if (ret.second == ReductionStatus::Clean)
+			bind_effects->GetParameter(delay_value.first) = ret.first.Value.GetContent();
+		else
+			LF_TraceRaw(Descriptions::Warning, "Material::UpdateParams(pRenderable=%p) 求值%s 规约失败,放弃设置该值", pRenderable, bind_effects->GetParameter(delay_value.first).Name.c_str());
 	}
 }
 
@@ -102,6 +107,12 @@ void MaterialEvaluator::MaterialEvalFunctions(REPLContext& context) {
 
 	RegisterForm(root, "lazy-oninstance", LazyOnInstance);
 	RegisterForm(root, "lazy-onrender", LazyOnInstance);
+}
+
+void MaterialEvaluator::CheckReductionStatus(ReductionStatus status)
+{
+	if (status != ReductionStatus::Clean)
+		throw leo::GeneralEvent(leo::sfmt("Bad Reduct State: %s", status == ReductionStatus::Retained ? "Retained" : "Retrying"));
 }
 
 void MaterialEvaluator::RegisterMathDotLssFile() {
