@@ -182,9 +182,7 @@ namespace details {
 			try {
 				auto ret = material_desc.material_eval->Reduce(exp);
 
-				if (ret.second != ReductionStatus::Clean)
-					throw leo::GeneralEvent(leo::sfmt("Bad Reduct State: %s", ret.second == ReductionStatus::Retained ? "Retained" : "Retrying"));
-
+				MaterialEvaluator::CheckReductionStatus(ret.second);
 				material_desc.material_asset->GetBindValuesRef().emplace_back(effect_asset->GetParams()[param_index].GetNameHash(), std::move(ret.first.Value));
 			}
 			catch (std::exception& e) {
