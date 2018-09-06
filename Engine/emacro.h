@@ -8,6 +8,7 @@
 
 #include <LBase/ldef.h>
 #include <LFramework/LCLib/Debug.h>
+#include <LFramework/Adaptor/LAdaptor.h>
 
 /*!
 \def LE_DLL

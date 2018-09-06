@@ -8,6 +8,7 @@
 #include <LBase/linttype.hpp>
 #include <LBase/lmathtype.hpp>
 #include <LBase/any.h>
+#include <LBase/examiner.hpp>
 #include <LFramework/LCLib/Debug.h>
 
 #include "../PipleState.h"

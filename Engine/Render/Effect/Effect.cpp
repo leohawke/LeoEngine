@@ -1,5 +1,10 @@
-#include <LFramework/LCLib/Debug.h>
 #include <LBase/memory.hpp>
+#include <LBase/linttype.hpp>
+#include <LBase/lmathtype.hpp>
+#include <LBase/any.h>
+#include <LBase/utility.hpp>
+
+#include <LFramework/LCLib/Debug.h>
 
 #include "../../asset/EffectX.h"
 #include "../IContext.h"
@@ -17,7 +22,101 @@ namespace platform::Render {
 }
 
 namespace platform::Render::Effect {
+	Parameter & Parameter::operator=(const leo::any & val)
+	{
+		static std::unordered_map<EffectParamType, std::function<void(Parameter &, const leo::any &)>> map_fuctors;
+		struct InitBlock final
+		{
+			InitBlock() {
+#define REGISTER_MAP_FUNCTOR(enum_type,value_type) map_fuctors[enum_type] = [](Parameter & paramenter, const leo::any & val) { \
+				paramenter = leo::any_cast<value_type>(val); \
+			}
+				REGISTER_MAP_FUNCTOR(asset::EPT_bool, bool);
+				REGISTER_MAP_FUNCTOR(asset::EPT_string, std::string);
+				REGISTER_MAP_FUNCTOR(asset::EPT_uint, leo::uint32);
+				//REGISTER_MAP_FUNCTOR(asset::EPT_uint2, leo::math::uint2);
+				//REGISTER_MAP_FUNCTOR(asset::EPT_uint3,
+				//REGISTER_MAP_FUNCTOR(asset::EPT_uint4,
+				REGISTER_MAP_FUNCTOR(asset::EPT_int, leo::int32);
+				//REGISTER_MAP_FUNCTOR(asset::EPT_int2,
+				//REGISTER_MAP_FUNCTOR(asset::EPT_int3,
+				//REGISTER_MAP_FUNCTOR(asset::EPT_int4,
+				REGISTER_MAP_FUNCTOR(asset::EPT_float, float);
+				REGISTER_MAP_FUNCTOR(asset::EPT_float2, leo::math::float2);
+				//REGISTER_MAP_FUNCTOR(asset::EPT_float2x2
+				//REGISTER_MAP_FUNCTOR(asset::EPT_float2x3
+				//REGISTER_MAP_FUNCTOR(asset::EPT_float2x4
+				REGISTER_MAP_FUNCTOR(asset::EPT_float3, leo::math::float3);
+				//REGISTER_MAP_FUNCTOR(asset::EPT_float3x2
+				REGISTER_MAP_FUNCTOR(asset::EPT_float3x3, leo::math::float3x3);
+				//REGISTER_MAP_FUNCTOR(asset::EPT_float3x4
+				REGISTER_MAP_FUNCTOR(asset::EPT_float4, leo::math::float4);
+				//REGISTER_MAP_FUNCTOR(asset::EPT_float4x2
+				//REGISTER_MAP_FUNCTOR(asset::EPT_float4x3
+				REGISTER_MAP_FUNCTOR(asset::EPT_float4x4, leo::math::float4x4);
+#undef  REGISTER_MAP_FUNCTOR
+			}
+		};
 
+		static leo::call_once_init<InitBlock, leo::once_flag> init {};
+
+
+		if (!var.bind.target)
+			var = val;
+		else {
+			switch (type) {
+			case asset::EPT_bool:
+				break;
+			case asset::EPT_string:
+				break;
+			case asset::EPT_uint:
+				break;
+			case asset::EPT_uint2:
+				break;
+			case asset::EPT_uint3:
+				break;
+			case asset::EPT_uint4:
+				break;
+			case asset::EPT_int:
+				break;
+			case asset::EPT_int2:
+				break;
+			case asset::EPT_int3:
+				break;
+			case asset::EPT_int4:
+				break;
+			case asset::EPT_float:
+				break;
+			case asset::EPT_float2:
+				break;
+			case asset::EPT_float2x2:
+				break;
+			case asset::EPT_float2x3:
+				break;
+			case asset::EPT_float2x4:
+				break;
+			case asset::EPT_float3:
+				break;
+			case asset::EPT_float3x2:
+				break;
+			case asset::EPT_float3x3:
+				break;
+			case asset::EPT_float3x4:
+				break;
+			case asset::EPT_float4:
+				break;
+			case asset::EPT_float4x2:
+				break;
+			case asset::EPT_float4x3:
+				break;
+			case asset::EPT_float4x4:
+				break;
+			default:
+				throw leo::unsupported("the type is not a value class");
+			}
+		}
+		return *this;
+	}
 
 	const Pass & platform::Render::Effect::Technique::GetPass(leo::uint8 index) const
 	{
@@ -55,6 +154,7 @@ namespace platform::Render::Effect {
 
 	GraphicsBuffer* ConstantBuffer::GetGraphicsBuffer() const lnothrow {
 		return gpu_buffer.get();
+		
 	}
 }
 
