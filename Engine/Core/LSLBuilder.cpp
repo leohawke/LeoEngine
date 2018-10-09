@@ -367,8 +367,6 @@ namespace platform::lsl::math {
 		using namespace std;
 		auto& root(context.Root);
 
-		RegisterStrict(root, "sqrt", FetchCMathFileUnaryFunction(std::sqrtf));
-
 #define UNARY_SPECIAL(f) [](float v){return f(v);}
 #define REGISTER_UNARY(f) RegisterStrict(root,#f, FetchCMathFileUnaryFunction(UNARY_SPECIAL(f)));
 		//!\brief Exponential functions 
@@ -423,6 +421,8 @@ namespace platform::lsl::math {
 		RegisterStrict(root, "-", Sub);
 		RegisterStrict(root, "/", Div);
 		RegisterStrict(root, "%", Mod);
+
+		RegisterCMathFile(context);
 	}
 }
 
