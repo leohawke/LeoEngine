@@ -2,8 +2,8 @@
 \ingroup Engine
 \brief 提供渲染所需的Effect,Pass使用。
 */
-#ifndef LE_Core_Mesh_H
-#define LE_Core_Mesh_H 1
+#ifndef LE_Core_Material_H
+#define LE_Core_Material_H 1
 
 #include <LBase/any.h>
 
@@ -60,6 +60,8 @@ namespace platform {
 		}
 
 		void RegisterMathDotLssFile();
+
+		void Define(string_view id, scheme::ValueObject&& vo,bool forced);
 
 		struct InstanceTag :scheme::LSLATag
 		{};

@@ -119,3 +119,10 @@ void MaterialEvaluator::RegisterMathDotLssFile() {
 	lsl::math::RegisterMathDotLssFile(context);
 }
 
+void MaterialEvaluator::Define(string_view id,ValueObject && vo, bool forced)
+{
+	auto & root(context.Root);
+	auto& root_env(root.GetRecordRef());
+	root_env.Define(id,std::move(vo), forced);
+}
+

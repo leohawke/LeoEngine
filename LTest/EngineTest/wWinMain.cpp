@@ -24,6 +24,8 @@ private:
 	leo::uint32 DoUpdate(leo::uint32 pass) override {
 		auto& timer = platform::chrono::FetchGlobalTimer();
 		timer.UpdateOnFrameStart();
+		platform::Material::GetInstanceEvaluator().Define("time", timer.GetFrameTime(), {});
+
 		auto entityId = ecs::EntitySystem::Instance().AddEntity<ecs::Entity>();
 
 		Context::Instance().BeginFrame();
@@ -36,6 +38,7 @@ private:
 		auto pMesh = platform::X::LoadMesh("Broadleaf_Desktop_LOD0.asset","Broadleaf_Desktop_LOD0");
 		auto pEffect = platform::X::LoadEffect("ForwardPointLightDiffuseShading");
 		auto pMaterialAsset = platform::X::LoadMaterialAsset("FPDS.mat.lsl");
+		auto pMaterial = platform::X::LoadMaterial("FPDS.mat.lsl", "lyp");
 
 		lm::float4x4 worldmatrix = {
 			{1,0,0,0},

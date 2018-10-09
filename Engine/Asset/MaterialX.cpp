@@ -107,8 +107,10 @@ namespace details {
 					if (path == "math.lss") {
 						material_desc.material_eval->RegisterMathDotLssFile();
 					}
-					std::ifstream fin(path);
-					material_desc.material_eval->LoadFrom(fin);
+					else {
+						std::ifstream fin(path);
+						material_desc.material_eval->LoadFrom(fin);
+					}
 				}
 				catch (std::invalid_argument& e) {
 					LF_TraceRaw(Descriptions::Err, "载入 (env %s) 出现异常:%s",path.c_str(),e.what());
@@ -222,7 +224,7 @@ std::shared_ptr<asset::MaterailAsset> X::LoadMaterialAsset(path const & material
 	return  AssetResourceScheduler::Instance().SyncLoad<details::MaterailLoadingDesc>(materialpath);
 }
 
-std::shared_ptr<Material> LoadMaterial(asset::path const& materialpath, const std::string& name) {
+std::shared_ptr<Material> X::LoadMaterial(asset::path const& materialpath, const std::string& name) {
 	return  AssetResourceScheduler::Instance().SyncSpawnResource<Material>(materialpath, name);
 }
 
