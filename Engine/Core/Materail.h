@@ -12,6 +12,8 @@
 #include "../Asset/MaterialAsset.h"
 #include "../Render/Effect/Effect.hpp"
 
+#include <unordered_set>
+
 namespace platform {
 	class MaterialEvaluator;
 
@@ -59,7 +61,8 @@ namespace platform {
 			return std::make_pair(term, status);
 		}
 
-		void RegisterMathDotLssFile();
+		using path = std::experimental::filesystem::path;
+		void LoadFile(const path& filepath);
 
 		void Define(string_view id, scheme::ValueObject&& vo,bool forced);
 
@@ -77,6 +80,10 @@ namespace platform {
 		static void CheckReductionStatus(scheme::ReductionStatus status);
 	private:
 		static void MaterialEvalFunctions(REPLContext& context);
+
+		void RegisterMathDotLssFile();
+
+		std::unordered_set<std::size_t> loaded_fileshash_set;
 	};
 }
 
