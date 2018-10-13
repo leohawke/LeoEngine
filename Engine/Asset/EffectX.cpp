@@ -721,7 +721,7 @@ namespace platform {
 				try {
 					auto first = leo::Access<std::string>(*child_node.begin());
 					auto second = leo::Access<std::string>(*child_node.rbegin());
-					auto first_hash = leo::constfn_hash(first.c_str());
+					auto first_hash = leo::constfn_hash(first);
 
 					asset::ShaderBlobAsset::Type compile_type;
 					string_view compile_entry_point = second;
