@@ -243,8 +243,8 @@ namespace platform::lsl::math {
 		template<typename _1, typename _2, typename _functor>
 		struct BinaryFunctor {
 			bool operator()(TermNode& term, TermNode& argument) {
-				auto p_1 = leo::AccessPtr<_1>(term);
-				auto p_2 = leo::AccessPtr<_2>(argument);
+				auto p_1 = AccessTermPtr<_1>(term);
+				auto p_2 = AccessTermPtr<_2>(argument);
 				if (p_1 && p_2) {
 					term.Value =static_cast<leo::common_type_t<_1,_2>>(_functor()(*p_1, *p_2));
 					return true;
@@ -276,8 +276,8 @@ namespace platform::lsl::math {
 		template<typename _1, typename _2,typename = std::void_t<>>
 		struct ModFunctor {
 			bool operator()(TermNode& term, TermNode& argument) {
-				auto p_1 = leo::AccessPtr<_1>(term);
-				auto p_2 = leo::AccessPtr<_2>(argument);
+				auto p_1 = AccessTermPtr<_1>(term);
+				auto p_2 = AccessTermPtr<_2>(argument);
 				if (p_1 && p_2) {
 					term.Value = fmodf(AccessToScalar<float>(term), AccessToScalar<float>(argument));
 					return true;
@@ -289,8 +289,8 @@ namespace platform::lsl::math {
 		template<typename _1, typename _2>
 		struct ModFunctor<_1,_2, std::void_t<std::enable_if_t<!leo::is_same<_1, float>::value && !leo::is_same<_2, float>::value>>> {
 			bool operator()(TermNode& term, TermNode& argument) {
-				auto p_1 = leo::AccessPtr<_1>(term);
-				auto p_2 = leo::AccessPtr<_2>(argument);
+				auto p_1 = AccessTermPtr<_1>(term);
+				auto p_2 = AccessTermPtr<_2>(argument);
 				if (p_1 && p_2) {
 					term.Value = AccessToScalar<leo::common_type_t<_1, _2>>(term) % AccessToScalar<leo::common_type_t<_1, _2>>(argument);
 					return true;

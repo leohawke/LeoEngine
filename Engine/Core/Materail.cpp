@@ -6,6 +6,8 @@ using namespace platform;
 using namespace scheme;
 using namespace v1;
 
+namespace fs = std::experimental::filesystem;
+
 platform::Material::Material(const asset::MaterailAsset & asset, const std::string & name)
 	:identity_name(asset::path(AssetResourceScheduler::Instance().FindAssetPath(&asset)).replace_extension().u8string() + "-" + name)
 {
@@ -106,7 +108,7 @@ void MaterialEvaluator::MaterialEvalFunctions(REPLContext& context) {
 	auto & root(context.Root);
 
 	RegisterForm(root, "lazy-oninstance", LazyOnInstance);
-	RegisterForm(root, "lazy-onrender", LazyOnInstance);
+	RegisterForm(root, "lazy-onrender", LazyOnRender);
 }
 
 void MaterialEvaluator::CheckReductionStatus(ReductionStatus status)
@@ -117,6 +119,26 @@ void MaterialEvaluator::CheckReductionStatus(ReductionStatus status)
 
 void MaterialEvaluator::RegisterMathDotLssFile() {
 	lsl::math::RegisterMathDotLssFile(context);
+}
+
+void MaterialEvaluator::LoadFile(const path & filepath)
+{
+	auto hash_value = fs::hash_value(filepath);
+	if (loaded_fileshash_set.find(hash_value) != loaded_fileshash_set.end())
+		return;
+	try {
+		if (filepath == "math.lss") {
+			RegisterMathDotLssFile();
+		}
+		else {
+			std::ifstream fin(filepath);
+			LoadFrom(fin);
+		}
+		loaded_fileshash_set.emplace(hash_value);
+	}
+	catch (std::invalid_argument& e) {
+		LF_TraceRaw(Descriptions::Err, "载入 (env %s) 出现异常:%s", filepath.c_str(), e.what());
+	}
 }
 
 void MaterialEvaluator::Define(string_view id,ValueObject && vo, bool forced)

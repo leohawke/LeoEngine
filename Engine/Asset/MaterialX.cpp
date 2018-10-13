@@ -103,23 +103,14 @@ namespace details {
 			//TODO Split
 			for (auto && env_node : X::SelectNodes("env", material_node)) {
 				auto path = leo::Access<std::string>(*env_node.rbegin());
-				try {
-					if (path == "math.lss") {
-						material_desc.material_eval->RegisterMathDotLssFile();
-					}
-					else {
-						std::ifstream fin(path);
-						material_desc.material_eval->LoadFrom(fin);
-					}
-				}
-				catch (std::invalid_argument& e) {
-					LF_TraceRaw(Descriptions::Err, "载入 (env %s) 出现异常:%s",path.c_str(),e.what());
-				}
+				material_desc.material_eval->LoadFile(path);
 				material_node.Remove(env_node.GetName());
 			}
 
 			//env-global
 			for (auto && env_node : X::SelectNodes("env-global", material_node)) {
+				auto path = leo::Access<std::string>(*env_node.rbegin());
+				Material::GetInstanceEvaluator().LoadFile(path);
 				material_node.Remove(env_node.GetName());
 			}
 
