@@ -138,12 +138,12 @@ namespace leo {
 #endif
 	lconstexpr size_t constfn_hash(const char * str, size_t seed = 0)
 	{
-		return 0 == *str ? seed : constfn_hash(str + 1, seed ^ (*str + 0x9e3779b9 + (seed << 6) + (seed >> 2)));
+		return 0 == *str ? seed : constfn_hash(str + 1, seed ^ (*str + 0x9e3779b9ull + (seed << 6) + (seed >> 2)));
 	}
 
 	lconstexpr size_t constfn_hash(size_t n,const char * str, size_t seed = 0)
 	{
-		return 0 == n ? seed : constfn_hash(n-1,str + 1, seed ^ (*str + 0x9e3779b9 + (seed << 6) + (seed >> 2)));
+		return 0 == n ? seed : constfn_hash(n-1,str + 1, seed ^ (*str + 0x9e3779b9ull + (seed << 6) + (seed >> 2)));
 	}
 
 	inline size_t constfn_hash(const std::string& str, size_t seed = 0)
