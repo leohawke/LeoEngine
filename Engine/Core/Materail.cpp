@@ -25,9 +25,11 @@ platform::Material::Material(const asset::MaterailAsset & asset, const std::stri
 				scheme::TermNode(bind_value.second.Access<MaterialEvaluator::RenderDelayedTerm>()));
 		}
 		else{
-			bind_values.emplace_back(bind_value);
+			bind_values.emplace_back(bind_value.first,bind_value.second.GetContent());
 		}
 	}
+
+	bind_effects = platform::X::LoadEffect(asset.GetEffectName());
 }
 
 void platform::Material::UpdateParams(const Renderable* pRenderable) const{

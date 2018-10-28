@@ -64,56 +64,11 @@ namespace platform::Render::Effect {
 		if (!var.bind.target)
 			var = val;
 		else {
-			switch (type) {
-			case asset::EPT_bool:
-				break;
-			case asset::EPT_string:
-				break;
-			case asset::EPT_uint:
-				break;
-			case asset::EPT_uint2:
-				break;
-			case asset::EPT_uint3:
-				break;
-			case asset::EPT_uint4:
-				break;
-			case asset::EPT_int:
-				break;
-			case asset::EPT_int2:
-				break;
-			case asset::EPT_int3:
-				break;
-			case asset::EPT_int4:
-				break;
-			case asset::EPT_float:
-				break;
-			case asset::EPT_float2:
-				break;
-			case asset::EPT_float2x2:
-				break;
-			case asset::EPT_float2x3:
-				break;
-			case asset::EPT_float2x4:
-				break;
-			case asset::EPT_float3:
-				break;
-			case asset::EPT_float3x2:
-				break;
-			case asset::EPT_float3x3:
-				break;
-			case asset::EPT_float3x4:
-				break;
-			case asset::EPT_float4:
-				break;
-			case asset::EPT_float4x2:
-				break;
-			case asset::EPT_float4x3:
-				break;
-			case asset::EPT_float4x4:
-				break;
-			default:
+			auto search = map_fuctors.find(type);
+			if (search != map_fuctors.end())
+				std::invoke(search->second,*this, val);
+			else
 				throw leo::unsupported("the type is not a value class");
-			}
 		}
 		return *this;
 	}

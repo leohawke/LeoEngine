@@ -57,11 +57,11 @@ namespace platform::lsl::context {
 		else if (std::isdigit(f)) {
 			leo::int32 int32_ans{};
 			auto ret = std::from_chars(id.data(), id.data() + id.size(), int32_ans);
-			if (ret.ec == none) {
+			if (ret.ptr == id.data() + id.size() && ret.ec == none) {
 				term.Value = int32_ans;
 				return ReductionStatus::Clean;
 			}
-			else if (ret.ec == std::errc::result_out_of_range) {
+			else if (ret.ptr == id.data() + id.size() && ret.ec == std::errc::result_out_of_range) {
 				leo::int64 int64_ans{};
 				auto ret = std::from_chars(id.data(), id.data() + id.size() - 1, int64_ans);
 				if (ret.ec == std::errc::result_out_of_range)
@@ -178,7 +178,7 @@ namespace platform::lsl::math {
 			if (size > 1 && size < multi + 2) {
 				auto i = std::next(term.begin());
 				for (auto j = ans.begin(); i != term.end() && j != ans.end(); ++i, ++j)
-					*j = platform::lsl::access::static_value_cast<_scalar, float, leo::int32, leo::uint32, leo::int64, leo::uint64>(*i);
+					*j = AccessToScalar<_scalar>(*i);
 			}
 			else {
 				throw  std::invalid_argument(leo::sfmt(
