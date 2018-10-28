@@ -102,7 +102,6 @@ private:
 		Context::Instance().BeginFrame();
 		Context::Instance().GetScreenFrame()->Clear(FrameBuffer::Color | FrameBuffer::Depth | FrameBuffer::Stencil, { 0,0,0,1 }, 1,0);
 		auto& Device = Context::Instance().GetDevice();
-		//auto pTex = leo::unique_raw(Device.CreateTexture(512, 0, 1, EFormat::EF_ABGR8, EAccessHint::EA_GenMips | EAccessHint::EA_GPUWrite | EAccessHint::EA_GPURead, {}));
 
 		ecs::EntitySystem::Instance().RemoveEntity(entityId);
 

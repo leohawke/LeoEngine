@@ -292,7 +292,7 @@ namespace dds {
 	};
 #endif
 
-	EFormat FromDXGIFormat(uint32_t format)
+	inline EFormat FromDXGIFormat(uint32_t format)
 	{
 		switch (format)
 		{
@@ -534,7 +534,7 @@ namespace dds {
 		}
 	}
 
-	EFormat Convert(const SURFACEDESC2& desc, const HEADER_DXT10& desc10) {
+	inline EFormat Convert(const SURFACEDESC2& desc, const HEADER_DXT10& desc10) {
 		EFormat format = EF_ARGB8;
 		if (desc.pixel_format.flags & DDSPF_FOURCC) {
 			// From "Programming Guide for DDS", http://msdn.microsoft.com/en-us/library/bb943991.aspx
@@ -1054,41 +1054,6 @@ namespace dds {
 
 			return pAsset;
 		}
-	};
-
-	EFormat DDSLoadingDesc::convert_fmts[][2] =
-	{
-		{ EF_BC1, EF_ARGB8 },
-		{ EF_BC1_SRGB, EF_ARGB8_SRGB },
-		{ EF_BC2, EF_ARGB8 },
-		{ EF_BC2_SRGB, EF_ARGB8_SRGB },
-		{ EF_BC3, EF_ARGB8 },
-		{ EF_BC3_SRGB, EF_ARGB8_SRGB },
-		//{ EF_BC4, EF_R8 },
-		//{ EF_BC4_SRGB, EF_R8 },
-		{ EF_SIGNED_BC4, EF_SIGNED_R8 },
-		//{ EF_BC5, EF_GR8 },
-		//{ EF_BC5_SRGB, EF_GR8 },
-		{ EF_SIGNED_BC5, EF_SIGNED_GR8 },
-		{ EF_BC6, EF_ABGR16F },
-		{ EF_SIGNED_BC6, EF_ABGR16F },
-		{ EF_BC7, EF_ARGB8 },
-		{ EF_BC7_SRGB, EF_ARGB8 },
-		{ EF_ETC1, EF_ARGB8 },
-		{ EF_ETC2_BGR8, EF_ARGB8 },
-		{ EF_ETC2_BGR8_SRGB, EF_ARGB8_SRGB },
-		{ EF_ETC2_A1BGR8, EF_ARGB8 },
-		{ EF_ETC2_A1BGR8_SRGB, EF_ARGB8_SRGB },
-		{ EF_ETC2_ABGR8, EF_ARGB8 },
-		{ EF_ETC2_ABGR8_SRGB, EF_ARGB8_SRGB },
-		{ EF_R8, EF_ARGB8 },
-		{ EF_SIGNED_R8, EF_SIGNED_ABGR8 },
-		{ EF_GR8, EF_ARGB8 },
-		{ EF_SIGNED_GR8, EF_SIGNED_ABGR8 },
-		{ EF_ARGB8_SRGB, EF_ARGB8 },
-		{ EF_ARGB8, EF_ABGR8 },
-		{ EF_R16, EF_R16F },
-		{ EF_R16F, EF_R8 },
 	};
 }
 
