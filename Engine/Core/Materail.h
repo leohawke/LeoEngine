@@ -39,7 +39,7 @@ namespace platform {
 		friend class Renderable;
 
 		//after effect set/before render
-		void UpdateParams(Renderable* pRenderable);
+		void UpdateParams(const Renderable* pRenderable) const;
 	private:
 		std::vector<std::pair<size_t, leo::any>> bind_values;
 		std::vector<std::pair<size_t, scheme::TermNode>> delay_values;

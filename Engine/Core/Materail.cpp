@@ -30,7 +30,7 @@ platform::Material::Material(const asset::MaterailAsset & asset, const std::stri
 	}
 }
 
-void platform::Material::UpdateParams(Renderable* pRenderable) {
+void platform::Material::UpdateParams(const Renderable* pRenderable) const{
 	for (auto& bind_value : bind_values) {
 		bind_effects->GetParameter(bind_value.first) = bind_value.second;
 	}
