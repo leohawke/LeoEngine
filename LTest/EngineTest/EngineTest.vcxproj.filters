@@ -2,7 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="TestFramework.cpp" />
-    <ClCompile Include="wWinMain.cpp" />
     <ClCompile Include="EntityComponentSystem\EntitySystem.cpp">
       <Filter>EntityComponentSystem</Filter>
     </ClCompile>
@@ -21,6 +20,7 @@
     <ClCompile Include="Scene\SceneSystem.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="wWinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TestFramework.h" />

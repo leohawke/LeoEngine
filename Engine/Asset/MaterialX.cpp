@@ -167,6 +167,7 @@ namespace details {
 
 			if (param_index == npos) {
 				LF_TraceRaw(Descriptions::Warning, "(effect %s) 不存在对应的变量名 (%s ...)", material_desc.effect_name.c_str(), name.c_str());
+				return;
 			}
 
 			//expression
