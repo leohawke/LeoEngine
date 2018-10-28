@@ -76,7 +76,7 @@ namespace platform {
 		};
 
 		//todo thread safe
-		leo::used_list_cache<std::shared_ptr<asset::IAssetLoading>, AssetLoadedDesc, IAssetLoadingEqual,IAssetLoadingHash> asset_loaded_caches;
+		leo::used_list_cache<std::shared_ptr<asset::IAssetLoading>, AssetLoadedDesc, IAssetLoadingEqual, IAssetLoadingHash> asset_loaded_caches{ 8192 };
 	};
 }
 

@@ -1,5 +1,5 @@
 #include <LScheme/LScheme.h>
-
+#include "DDSX.h"
 #include "MaterialX.h"
 #include "LSLAssetX.h"
 #include "EffectAsset.h"
@@ -44,6 +44,20 @@ namespace details {
 			co_yield LoadNode();
 			co_yield LoadEffect();
 			co_yield ParseNode();
+			//load textures
+			for (auto& pair : material_desc.material_asset->GetBindValues()) {
+				auto& effect_asset = material_desc.effect_asset;
+				auto param_index = std::find_if(effect_asset->GetParams().begin(), effect_asset->GetParams().end(), [&](const asset::EffectParameterAsset& param) {
+					return param.GetNameHash() == pair.first;
+				}) - effect_asset->GetParams().begin();
+
+				auto& param = effect_asset->GetParams()[param_index];
+				if (param.GetType() <= asset::EPT_textureCUBEArray) {
+					auto path = leo::any_cast<std::string>(pair.second.GetContent());
+					platform::AssetResourceScheduler::Instance().SyncLoad<dds::DDSLoadingDesc>(path);
+					co_yield nullptr;
+				}
+			}
 			co_yield CreateAsset();
 		}
 

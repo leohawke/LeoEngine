@@ -149,6 +149,9 @@
     <ClCompile Include="System\NinthTimer.cpp">
       <Filter>System</Filter>
     </ClCompile>
+    <ClCompile Include="Asset\DDSX.cpp">
+      <Filter>Asset</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
