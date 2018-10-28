@@ -9,7 +9,7 @@
 
 				float3 specular;
 				float alpha;
-				float smoothness;
+				float roughness;
 			};
 
 			float SmoothnessToRoughness(float smoothness){

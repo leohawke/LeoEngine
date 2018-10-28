@@ -106,10 +106,7 @@ private:
 
 		ecs::EntitySystem::Instance().RemoveEntity(entityId);
 
-		auto pMesh = platform::X::LoadMesh("Broadleaf_Desktop_LOD0.asset","Broadleaf_Desktop_LOD0");
 		auto pEffect = platform::X::LoadEffect("ForwardPointLightDiffuseShading");
-		auto pMaterialAsset = platform::X::LoadMaterialAsset("FPDS.mat.lsl");
-		auto pMaterial = platform::X::LoadMaterial("FPDS.mat.lsl", "lyp");
 
 		lm::float4x4 worldmatrix = {
 			{1,0,0,0},
@@ -117,8 +114,8 @@ private:
 			{0,0,1,0},
 			{0,0,0,1}
 		};
-		auto projmatrix = platform::X::perspective_fov_lh(3.14f / 6, 384 / 256.f, 1, 1000);
-		auto viewmatrix = platform::X::look_at_lh({ 0,0,-10 }, { 0,0,0 }, { 0,1,0 });
+		auto projmatrix = platform::X::perspective_fov_lh(3.14f / 6, 600.0f / 800, 1, 1000);
+		auto viewmatrix = platform::X::look_at_lh({ 0,10,0 }, { 0,0,10 }, { 0,1,0 });
 
 		auto worldview = worldmatrix * viewmatrix;
 		auto worldviewproj = worldview * projmatrix;
@@ -137,13 +134,8 @@ private:
 		pEffect->GetParameter("light_blubsize"sv) = 10.f;
 
 		//mat
-		pEffect->GetParameter("albedo"sv) = lm::float3(std::fmod(timer.GetFrameTime(), 1.0f), std::fmod(timer.GetFrameStartTime().count() / 6000000.f, 1.0f), 0.4f);
-		pEffect->GetParameter("metalness"sv) = 0.6f;
 		pEffect->GetParameter("specular"sv) = lm::float3(1.0f, 0.2f, 0.1f);
 		pEffect->GetParameter("alpha"sv) = 1.0f;
-		pEffect->GetParameter("smoothness"sv) = 0.8f;
-
-		Context::Instance().Render(*pEffect, pEffect->GetTechniqueByIndex(0), pMesh->GetInputLayout());
 
 		for(auto& entity : pEntities->GetRenderables())
 		{

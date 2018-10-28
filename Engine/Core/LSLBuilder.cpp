@@ -37,7 +37,7 @@ namespace platform::lsl::context {
 
 			const float f_ans(std::strtof(ptr, &eptr));
 
-			if (size_t(eptr - ptr) == id.size() && errno != ERANGE) {
+			if (size_t(eptr - ptr)+1 == id.size() && errno != ERANGE) {
 				term.Value = f_ans;
 				return ReductionStatus::Clean;
 			}
@@ -203,6 +203,8 @@ namespace platform::lsl::math {
 		auto& root(context.Root);
 
 		RegisterStrict(root, "float3", TypeLiteralAction<leo::math::float3>);
+		RegisterStrict(root, "float2", TypeLiteralAction<leo::math::float2>);
+		RegisterStrict(root, "float4", TypeLiteralAction<leo::math::float4>);
 	}
 
 	namespace details {

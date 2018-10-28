@@ -25,7 +25,7 @@
 				float nv = abs(dot(normal,view_dir)) + 1e-5h;
 				float lv = saturate(dot(light_source,view_dir));
 
-				float roughness = max(SmoothnessToRoughness(material.smoothness),0.001f);
+				float roughness = material.roughness;
 				float occlusion = 1.f;
 
 				float3 diffuse = BurleyBRDF(nl,nv,vh,roughness)*nl*occlusion;
