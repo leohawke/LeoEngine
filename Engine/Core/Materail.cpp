@@ -2,6 +2,7 @@
 #include "LSLBuilder.h"
 #include "AssetResourceScheduler.h"
 #include "../Asset/MaterialX.h"
+#include "../Asset/TextureX.h"
 using namespace platform;
 using namespace scheme;
 using namespace v1;
@@ -30,6 +31,16 @@ platform::Material::Material(const asset::MaterailAsset & asset, const std::stri
 	}
 
 	bind_effects = platform::X::LoadEffect(asset.GetEffectName());
+
+	for (auto& bind_value : bind_values) {
+		if (bind_effects->GetParameter(bind_value.first).GetType() < asset::EPT_textureCUBEArray) {
+			if (LB_LIKELY(bind_value.second.type() == leo::type_id<std::string>())) {
+				auto pTexture = X::LoadTexture(leo::any_cast<std::string>(bind_value.second), Render::EA_GPURead | Render::EA_Immutable);
+
+				bind_value.second =Render::TextureSubresource(pTexture, 0, pTexture->GetArraySize(),0, pTexture->GetNumMipMaps());
+			}
+		}
+	}
 }
 
 void platform::Material::UpdateParams(const Renderable* pRenderable) const{

@@ -91,8 +91,11 @@ namespace platform_ex {
 				lconstexpr static UINT const NUM_MAX_CBV_SRV_UAVS = 4 * 1024;
 
 				//@}
-				D3D12_CPU_DESCRIPTOR_HANDLE null_srv_handle,null_uav_handle;
 
+				//@{
+				//\brief null bind object
+				D3D12_CPU_DESCRIPTOR_HANDLE null_srv_handle, null_uav_handle;
+				//@}
 			private:
 				void FillCaps();
 
