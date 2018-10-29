@@ -139,17 +139,12 @@ namespace platform_ex::Windows::D3D12 {
 
 		ID3D12DescriptorHeap* heaps[2];
 		uint32 num_heaps = 0;
-		COMPtr<ID3D12DescriptorHeap> cbv_srv_uav_heap;
+		leo::observer_ptr<ID3D12DescriptorHeap> cbv_srv_uav_heap;
 		auto sampler_heap = shader_compose.SamplerHeap();
 		if (num_handle > 0) {
 			//hash cache
-			D3D12_DESCRIPTOR_HEAP_DESC cbv_srv_heap_desc;
-			cbv_srv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-			cbv_srv_heap_desc.NumDescriptors = static_cast<UINT>(num_handle);
-			cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-			cbv_srv_heap_desc.NodeMask = 0;
-			CheckHResult((*device)->CreateDescriptorHeap(&cbv_srv_heap_desc, COMPtr_RefParam(cbv_srv_uav_heap, IID_ID3D12DescriptorHeap)));
-			heaps[num_heaps++] = cbv_srv_uav_heap.Get();
+			cbv_srv_uav_heap = device->CreateDynamicCBVSRVUAVDescriptorHeap(static_cast<UINT>(num_handle));
+			heaps[num_heaps++] = cbv_srv_uav_heap.get();
 		}
 		if (sampler_heap)
 			heaps[num_heaps++] = sampler_heap;
@@ -179,9 +174,8 @@ namespace platform_ex::Windows::D3D12 {
 				if (!shader_compose.Srvs[i].empty()) {
 					render_cmd_list->SetGraphicsRootDescriptorTable(root_param_index, gpu_handle);
 					for (auto& srv : shader_compose.Srvs[i]) {
-						//TODO null_srv_handle
-						(*device)->CopyDescriptorsSimple(1, cpu_handle, srv->GetHandle(),
-							D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+						 (*device)->CopyDescriptorsSimple(1, cpu_handle,srv!=nullptr? srv->GetHandle(): device->null_srv_handle,
+								D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 						cpu_handle.ptr += cbv_srv_uav_desc_size;
 						gpu_handle.ptr += cbv_srv_uav_desc_size;
 					}
@@ -193,8 +187,7 @@ namespace platform_ex::Windows::D3D12 {
 				if (!shader_compose.Uavs[i].empty()) {
 					render_cmd_list->SetGraphicsRootDescriptorTable(root_param_index, gpu_handle);
 					for (auto& uav : shader_compose.Uavs[i]) {
-						//TODO null_srv_handle
-						(*device)->CopyDescriptorsSimple(1, cpu_handle, uav->GetHandle(),
+						(*device)->CopyDescriptorsSimple(1, cpu_handle,uav!=nullptr? uav->GetHandle():device->null_uav_handle,
 							D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 						cpu_handle.ptr += cbv_srv_uav_desc_size;
 						gpu_handle.ptr += cbv_srv_uav_desc_size;
