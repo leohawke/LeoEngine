@@ -171,18 +171,18 @@ namespace platform::lsl::math {
 	}
 
 	namespace details {
-		template<typename _scalar, size_t multi>
-		ReductionStatus TypeLiteralAction(TermNode& term, leo::math::data_storage<_scalar, multi>& ans) {
+		template<typename _type>
+		ReductionStatus TypeLiteralAction(TermNode& term, _type& ans) {
 			const auto size(term.size());
 
-			if (size > 1 && size < multi + 2) {
+			if (size > 1 && size < ans.size() + 2) {
 				auto i = std::next(term.begin());
 				for (auto j = ans.begin(); i != term.end() && j != ans.end(); ++i, ++j)
-					*j = AccessToScalar<_scalar>(*i);
+					*j = AccessToScalar<_type::scalar_type>(*i);
 			}
 			else {
 				throw  std::invalid_argument(leo::sfmt(
-					"Invalid parameter count(>1 && < %u):%u.", multi + 2, size).c_str());
+					"Invalid parameter count(>1 && < %u):%u.", ans.size() + 2, size).c_str());
 			}
 
 			return ReductionStatus::Clean;

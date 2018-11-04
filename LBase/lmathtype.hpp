@@ -42,7 +42,6 @@ namespace leo {
 		template<typename scalar, size_t multi>
 		struct data_storage;
 
-		//behavior change: constructor is no longer implicitly called
 #ifdef LB_IMPL_MSCPP
 #pragma warning(push)
 #pragma warning(disable :4587)
@@ -62,42 +61,6 @@ namespace leo {
 				};
 				scalar data[2];
 			};
-
-			data_storage(scalar X, scalar Y)
-				:x(X), y(Y)
-			{}
-
-			data_storage() = default;
-
-			constexpr size_t size() const {
-				return 2;
-			}
-
-			const scalar_type& operator[](std::size_t index) const noexcept {
-				lassume(index < size());
-				return data[index];
-			}
-
-			scalar_type& operator[](std::size_t index) noexcept {
-				lassume(index < size());
-				return data[index];
-			}
-
-			const scalar_type* begin() const {
-				return data + 0;
-			}
-
-			const scalar_type* end() const {
-				return data + size();
-			}
-
-			scalar_type* begin() {
-				return data + 0;
-			}
-
-			scalar_type* end() {
-				return data + size();
-			}
 		};
 
 		template<typename scalar>
@@ -170,9 +133,9 @@ namespace leo {
 				scalar data[4];
 			};
 
-			data_storage() = default;
+			constexpr data_storage() noexcept = default;
 
-			data_storage(scalar X, scalar Y, scalar Z, scalar W)
+			constexpr data_storage(scalar X, scalar Y, scalar Z, scalar W) noexcept
 				:x(X), y(Y), z(Z), w(W)
 			{}
 
@@ -180,12 +143,12 @@ namespace leo {
 				return 4;
 			}
 
-			const scalar_type& operator[](std::size_t index) const noexcept {
+			constexpr const scalar_type& operator[](std::size_t index) const noexcept {
 				lassume(index < size());
 				return data[index];
 			}
 
-			scalar_type& operator[](std::size_t index) noexcept {
+			constexpr scalar_type& operator[](std::size_t index) noexcept {
 				lassume(index < size());
 				return data[index];
 			}
@@ -210,51 +173,181 @@ namespace leo {
 #ifdef LB_IMPL_MSCPP
 #pragma warning(pop)
 #endif
+		namespace type_details {
+			//type structurces
+			/*\brief holds type info about component and subparts
+			*/
+			template<typename scalar>
+			struct type_vector2d {
+				using component_type = scalar;
+				using vector2d_type = data_storage<scalar, 2>;
+			};
+
+			template<typename scalar>
+			struct type_vector3d {
+				using component_type = scalar;
+				using vector2d_type = data_storage<scalar, 2>;
+				using vector3d_type = data_storage<scalar, 3>;
+			};
+
+			template<typename scalar>
+			struct type_vector4d {
+				using component_type = scalar;
+				using vector2d_type = data_storage<scalar, 2>;
+				using vector3d_type = data_storage<scalar, 3>;
+				using vector4d_type = data_storage<scalar, 3>;
+			};
+
+			template<typename type_struct, int index>
+			struct component {
+				using component_type = typename type_struct::component_type;
+
+				component_type data[1];
+				operator component_type&(void) { return (data[index]); }
+				operator const component_type&(void) const { return (data[index]); }
+
+				component& operator=(const component_type&value) {
+					data[index] = value;
+				}
+			};
+
+			template<typename type_struct, int index_x, int index_y>
+			struct converter_vector2d {
+				using component_type = typename type_struct::component_type;
+				using vector2d_type = typename type_struct::vector2d_type;
+
+				static vector2d_type convert(component_type* data) {
+					return vector2d_type(data[index_x], data[index_y]);
+				}
+			};
+
+			template<typename type_struct>
+			struct converter_vector2d<type_struct, 0, 1> {
+				using component_type = typename type_struct::component_type;
+				using vector2d_type = typename type_struct::vector2d_type;
+
+				static vector2d_type convert(component_type* data) {
+					return reinterpret_cast<vector2d_type>(data[0]);
+				}
+			};
+
+			template<typename type_struct>
+			struct converter_vector2d<type_struct, 1, 2> {
+				using component_type = typename type_struct::component_type;
+				using vector2d_type = typename type_struct::vector2d_type;
+
+				static vector2d_type convert(component_type* data) {
+					return reinterpret_cast<vector2d_type>(data[1]);
+				}
+			};
+
+			template<typename type_struct>
+			struct converter_vector2d<type_struct, 2, 3> {
+				using component_type = typename type_struct::component_type;
+				using vector2d_type = typename type_struct::vector2d_type;
+
+				static vector2d_type convert(component_type* data) {
+					return reinterpret_cast<vector2d_type>(data[2]);
+				}
+			};
+
+			template<typename type_struct, bool anti, int index_x, int index_y>
+			struct sub_vector2d {
+				using component_type = typename type_struct::component_type;
+				using vector2d_type = typename type_struct::vector2d_type;
+
+				component_type data[2];
+
+				operator typename converter_vector2d<type_struct, index_x, index_y>::vector2d_type(void)
+				{
+					return converter_vector2d<type_struct, index_x, index_y>::convert(data);
+				}
+
+				template<typename type, int ind_x, int ind_y>
+				sub_vector2d& operator=(const sub_vector2d<type, anti, ind_x, ind_y>& value) {
+					data[index_x] = value.data[ind_x];
+					data[index_y] = value.data[ind_y];
+					return *this;
+				}
+
+				sub_vector2d& operator=(const vector2d_type& value) {
+					data[index_x] = value.x;
+					data[index_y] = value.y;
+					return *this;
+				}
+			};
+
+			template<typename type_struct, bool anti = false>
+			struct vector_2d_impl {
+				using component_type = typename type_struct::component_type;
+				using scalar_type = component_type;
+				using vec_type = vector_2d_impl;
+
+				union {
+					type_details::component<type_struct, 0> x;
+					type_details::component<type_struct, 1> y;
+					type_details::sub_vector2d<type_struct, anti, 0, 1> xy;
+					type_details::sub_vector2d<type_struct, anti, 1, 0> yx;
+
+					scalar_type data[2];
+				};
+
+				constexpr vector_2d_impl(scalar_type x, scalar_type y) noexcept
+					:data{x,y}
+				{
+				}
+
+				constexpr vector_2d_impl() noexcept = default;
+
+				constexpr size_t size() const {
+					return 2;
+				}
+
+				const scalar_type& operator[](std::size_t index) const noexcept {
+					lassume(index < size());
+					return data[index];
+				}
+
+				scalar_type& operator[](std::size_t index) noexcept {
+					lassume(index < size());
+					return data[index];
+				}
+
+				const scalar_type* begin() const noexcept {
+					return data + 0;
+				}
+
+				const scalar_type* end() const noexcept {
+					return data + size();
+				}
+
+				scalar_type* begin() noexcept {
+					return data + 0;
+				}
+
+				scalar_type* end() noexcept {
+					return data + size();
+				}
+			};
+		}
+
+		template<typename scalar>
+		using vector_2d = type_details::vector_2d_impl<type_details::type_vector2d<scalar>>;
+
 		template<typename _type>
-		struct is_lmathtype:false_
+		struct is_lmathtype :false_
 		{};
-	
+
 		template<typename _type>
 		constexpr auto is_lmathtype_v = is_lmathtype<_type>::value;
 
 		//The float2 data type
-		struct lalignas(16) float2 :data_storage<float, 2>
+		struct lalignas(16) float2 :vector_2d<float>
 		{
-
-			float2() noexcept = default;
-
-			float2(float X, float Y) noexcept
-				:vec_type(X, Y)
-			{}
-
-			explicit float2(const float* src) noexcept
-				: vec_type(src[0], src[1])
-			{}
-
-			template<typename T>
-			explicit float2(const T& src) noexcept
-			{
-				static_assert(sizeof(T) >= sizeof(float) * 2, "Need More Data");
-				std::memcpy(this, &src, sizeof(float) * 2);
-			}
-
-			template<typename T>
-			float2& operator=(const T& src) noexcept
-			{
-				static_assert(sizeof(T) >= sizeof(float) * 2, "Need More Data");
-				std::memcpy(this, &src, sizeof(float) * 2);
-				return *this;
-			}
-
-			float* operator&() noexcept
-			{
-				return data;
-			}
-
-			float2 operator-() const noexcept {
-				return float2(-x, -y);
-			}
+			using vec_type::vec_type;
 		};
+
+		
 
 		//The float3 data type
 		struct lalignas(16) float3 :data_storage<float, 3>
@@ -505,7 +598,7 @@ namespace leo {
 			}
 		};
 
-		struct lalignas(4) half2 :data_storage<half, 2>
+		struct lalignas(4) half2 :vector_2d<half>
 		{
 			half2(half X, half Y) noexcept
 				:vec_type(X, Y)
@@ -529,7 +622,7 @@ namespace leo {
 
 			explicit operator float2() const noexcept
 			{
-				return float2(x.operator float(), y.operator float());
+				return float2(((half)x).operator float(), ((half)y).operator float());
 			}
 		};
 
