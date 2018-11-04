@@ -44,6 +44,10 @@ TestFrameWork::TestFrameWork(const std::wstring_view & name)
 #endif
 }
 
+platform_ex::MessageMap& TestFrameWork::GetMessageMap() {
+	return p_wnd_thrd->GetWindowPtr()->MessageMap;
+}
+
 TestFrameWork::~TestFrameWork()
 {
 	OnDestroy();

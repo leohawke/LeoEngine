@@ -40,6 +40,7 @@ namespace Test {
 		void Run();
 
 		platform_ex::NativeWindowHandle GetNativeHandle();
+		platform_ex::MessageMap& GetMessageMap();
 	protected:
 		leo::uint32 Update(leo::uint32 pass);
 
