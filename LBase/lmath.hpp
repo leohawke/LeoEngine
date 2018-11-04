@@ -232,6 +232,12 @@ namespace leo {
 			return{ dot(l,tm[0]),dot(l,tm[1]) ,dot(l,tm[2]) ,dot(l,tm[3]) };
 		}
 
+		inline float3 transformpoint(const float3&l, const float4x4&m) {
+			auto v = float4(l, 1);
+			auto tm= transpose(m);
+			return { dot(v,tm[0]),dot(v,tm[1]) ,dot(v,tm[2]) };
+		}
+
 		using std::max;
 		using std::min;
 

@@ -5,7 +5,7 @@
 #ifndef LE_RENDER_EFFECT_COPY_h
 #define LE_RENDER_EFFECT_COPY_h 1
 
-#include "EffectProperty.h"
+#include "Effect.hpp"
 
 namespace platform::Render::Effect {
 
