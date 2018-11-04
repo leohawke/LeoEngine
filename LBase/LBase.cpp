@@ -13,6 +13,9 @@ using std::invoke_result;
 #include "LBase/set.hpp"
 
 static decltype(auto) foo() {
+
+	static_assert(sizeof(leo::math::float2) == sizeof(leo::math::float4));
+
 	return 0;
 }
 
