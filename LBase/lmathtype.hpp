@@ -177,25 +177,25 @@ namespace leo {
 			//type structurces
 			/*\brief holds type info about component and subparts
 			*/
-			template<typename scalar>
+			template<typename scalar, typename vector2d_impl>
 			struct type_vector2d {
 				using component_type = scalar;
-				using vector2d_type = data_storage<scalar, 2>;
+				using vector2d_type = vector2d_impl;
 			};
 
-			template<typename scalar>
+			template<typename scalar, typename vector2d_impl, typename vector3d_impl>
 			struct type_vector3d {
 				using component_type = scalar;
-				using vector2d_type = data_storage<scalar, 2>;
-				using vector3d_type = data_storage<scalar, 3>;
+				using vector2d_type = vector2d_impl;
+				using vector3d_type = vector3d_impl;
 			};
 
-			template<typename scalar>
+			template<typename scalar, typename vector2d_impl, typename vector3d_impl,typename vector4d_impl>
 			struct type_vector4d {
 				using component_type = scalar;
-				using vector2d_type = data_storage<scalar, 2>;
-				using vector3d_type = data_storage<scalar, 3>;
-				using vector4d_type = data_storage<scalar, 3>;
+				using vector2d_type = vector2d_impl;
+				using vector3d_type = vector3d_impl;
+				using vector4d_type = vector4d_impl;
 			};
 
 			template<typename type_struct, int index>
@@ -293,7 +293,7 @@ namespace leo {
 				};
 
 				constexpr vector_2d_impl(scalar_type x, scalar_type y) noexcept
-					:data{x,y}
+					:data{ x,y }
 				{
 				}
 
@@ -329,10 +329,311 @@ namespace leo {
 					return data + size();
 				}
 			};
+
+			template<typename type_struct, int index_x, int index_y, int index_z>
+			struct converter_vector3d {
+				using component_type = typename type_struct::component_type;
+				using vector3d_type = typename type_struct::vector3d_type;
+
+				static vector3d_type convert(component_type* data) {
+					return vector3d_type(data[index_x], data[index_y], data[index_z]);
+				}
+			};
+
+			template<typename type_struct>
+			struct converter_vector3d<type_struct, 0, 1, 2> {
+				using component_type = typename type_struct::component_type;
+				using vector3d_type = typename type_struct::vector3d_type;
+
+				static vector3d_type convert(component_type* data) {
+					return reinterpret_cast<vector3d_type>(data[0]);
+				}
+			};
+
+			template<typename type_struct>
+			struct converter_vector3d<type_struct, 1, 2, 3> {
+				using component_type = typename type_struct::component_type;
+				using vector3d_type = typename type_struct::vector3d_type;
+
+				static vector3d_type convert(component_type* data) {
+					return reinterpret_cast<vector3d_type>(data[0]);
+				}
+			};
+
+			template<typename type_struct, bool anti, int index_x, int index_y, int index_z>
+			struct sub_vector3d {
+				using component_type = typename type_struct::component_type;
+				using vector3d_type = typename type_struct::vector3d_type;
+
+				component_type data[3];
+
+				operator typename converter_vector3d<type_struct, index_x, index_y, index_z>::vector3d_type(void)
+				{
+					return converter_vector3d<type_struct, index_x, index_y, index_z>::convert(data);
+				}
+
+				template<typename type, int ind_x, int ind_y, int ind_z>
+				sub_vector3d& operator=(const sub_vector3d<type, anti, ind_x, ind_y, ind_z>& value) {
+					data[index_x] = value.data[ind_x];
+					data[index_y] = value.data[ind_y];
+					data[index_z] = value.data[ind_z];
+					return *this;
+				}
+
+				sub_vector3d& operator=(const vector3d_type& value) {
+					data[index_x] = value.x;
+					data[index_y] = value.y;
+					data[index_z] = value.z;
+					return *this;
+				}
+			};
+
+			template<typename type_struct, bool anti = false>
+			struct vector_3d_impl {
+				using component_type = typename type_struct::component_type;
+				using scalar_type = component_type;
+				using vec_type = vector_3d_impl;
+
+				union {
+					type_details::component<type_struct, 0> x;
+					type_details::component<type_struct, 1> y;
+					type_details::component<type_struct, 2> z;
+					type_details::sub_vector2d<type_struct, anti, 0, 1> xy;
+					type_details::sub_vector2d<type_struct, anti, 0, 2> xz;
+					type_details::sub_vector2d<type_struct, anti, 1, 0> yx;
+					type_details::sub_vector2d<type_struct, anti, 1, 2> yz;
+					type_details::sub_vector2d<type_struct, anti, 2, 0> zx;
+					type_details::sub_vector2d<type_struct, anti, 2, 1> zy;
+
+					type_details::sub_vector3d<type_struct, anti, 0, 1, 2> xyz;
+					type_details::sub_vector3d<type_struct, anti, 0, 2, 1> xzy;
+					type_details::sub_vector3d<type_struct, anti, 1, 0, 2> yxz;
+					type_details::sub_vector3d<type_struct, anti, 1, 2, 0> yzx;
+					type_details::sub_vector3d<type_struct, anti, 2, 0, 1> zxy;
+					type_details::sub_vector3d<type_struct, anti, 2, 1, 0> zyx;
+
+					scalar_type data[3];
+				};
+
+				constexpr vector_3d_impl(scalar_type x, scalar_type y, scalar_type z) noexcept
+					:data{ x,y ,z }
+				{
+				}
+
+				constexpr vector_3d_impl() noexcept = default;
+
+				constexpr size_t size() const {
+					return 3;
+				}
+
+				const scalar_type& operator[](std::size_t index) const noexcept {
+					lassume(index < size());
+					return data[index];
+				}
+
+				scalar_type& operator[](std::size_t index) noexcept {
+					lassume(index < size());
+					return data[index];
+				}
+
+				const scalar_type* begin() const noexcept {
+					return data + 0;
+				}
+
+				const scalar_type* end() const noexcept {
+					return data + size();
+				}
+
+				scalar_type* begin() noexcept {
+					return data + 0;
+				}
+
+				scalar_type* end() noexcept {
+					return data + size();
+				}
+			};
+
+			template<typename type_struct, int index_x, int index_y, int index_z,int index_w>
+			struct converter_vector4d {
+				using component_type = typename type_struct::component_type;
+				using vector4d_type = typename type_struct::vector4d_type;
+
+				static vector4d_type convert(component_type* data) {
+					return vector4d_type(data[index_x], data[index_y], data[index_z],data[index_w]);
+				}
+			};
+
+			template<typename type_struct>
+			struct converter_vector4d<type_struct, 0, 1, 2,3> {
+				using component_type = typename type_struct::component_type;
+				using vector4d_type = typename type_struct::vector4d_type;
+
+				static vector4d_type convert(component_type* data) {
+					return reinterpret_cast<vector4d_type>(data[0]);
+				}
+			};
+
+			template<typename type_struct, bool anti, int index_x, int index_y, int index_z,int index_w>
+			struct sub_vector4d {
+				using component_type = typename type_struct::component_type;
+				using vector4d_type = typename type_struct::vector4d_type;
+
+				component_type data[4];
+
+				operator typename converter_vector4d<type_struct, index_x, index_y, index_z,index_w>::vector4d_type(void)
+				{
+					return converter_vector4d<type_struct, index_x, index_y, index_z,index_w>::convert(data);
+				}
+
+				template<typename type, int ind_x, int ind_y, int ind_z,int ind_w>
+				sub_vector4d& operator=(const sub_vector4d<type, anti, ind_x, ind_y, ind_z,ind_w>& value) {
+					data[index_x] = value.data[ind_x];
+					data[index_y] = value.data[ind_y];
+					data[index_z] = value.data[ind_z];
+					data[index_w] = value.data[ind_w];
+					return *this;
+				}
+
+				sub_vector4d& operator=(const vector4d_type& value) {
+					data[index_x] = value.x;
+					data[index_y] = value.y;
+					data[index_z] = value.z;
+					data[index_w] = value.w;
+					return *this;
+				}
+			};
+
+			template<typename type_struct, bool anti = false>
+			struct vector_4d_impl {
+				using component_type = typename type_struct::component_type;
+				using vector3d_type = typename type_struct::vector3d_type;
+				using scalar_type = component_type;
+				using vec_type = vector_4d_impl;
+
+				union {
+					type_details::component<type_struct, 0> x;
+					type_details::component<type_struct, 1> y;
+					type_details::component<type_struct, 2> z;
+					type_details::component<type_struct, 3> w;
+
+					type_details::sub_vector2d<type_struct, anti, 0, 1> xy;
+					type_details::sub_vector2d<type_struct, anti, 0, 2> xz;
+					type_details::sub_vector2d<type_struct, anti, 0, 3> xw;
+					type_details::sub_vector2d<type_struct, anti, 1, 0> yx;
+					type_details::sub_vector2d<type_struct, anti, 1, 2> yz;
+					type_details::sub_vector2d<type_struct, anti, 1, 3> yw;
+					type_details::sub_vector2d<type_struct, anti, 2, 0> zx;
+					type_details::sub_vector2d<type_struct, anti, 2, 1> zy;
+					type_details::sub_vector2d<type_struct, anti, 2, 3> zw;
+					type_details::sub_vector2d<type_struct, anti, 3, 0> wx;
+					type_details::sub_vector2d<type_struct, anti, 3, 1> wy;
+					type_details::sub_vector2d<type_struct, anti, 3, 2> wz;
+
+					type_details::sub_vector3d<type_struct, anti, 0, 1, 2> xyz;
+					type_details::sub_vector3d<type_struct, anti, 0, 2, 1> xzy;
+					type_details::sub_vector3d<type_struct, anti, 0, 1, 3> xyw;
+					type_details::sub_vector3d<type_struct, anti, 0, 3, 1> xwy;
+					type_details::sub_vector3d<type_struct, anti, 0, 2, 3> xzw;
+					type_details::sub_vector3d<type_struct, anti, 0, 3, 2> xwz;
+					type_details::sub_vector3d<type_struct, anti, 1, 0, 2> yxz;
+					type_details::sub_vector3d<type_struct, anti, 1, 2, 0> yzx;
+					type_details::sub_vector3d<type_struct, anti, 1, 0, 3> yxw;
+					type_details::sub_vector3d<type_struct, anti, 1, 3, 0> ywx;
+					type_details::sub_vector3d<type_struct, anti, 1, 2, 3> yzw;
+					type_details::sub_vector3d<type_struct, anti, 1, 3, 2> ywz;
+					type_details::sub_vector3d<type_struct, anti, 2, 0, 1> zxy;
+					type_details::sub_vector3d<type_struct, anti, 2, 1, 0> zyx;
+					type_details::sub_vector3d<type_struct, anti, 2, 0, 3> zxw;
+					type_details::sub_vector3d<type_struct, anti, 2, 3, 0> zwx;
+					type_details::sub_vector3d<type_struct, anti, 2, 1, 3> zyw;
+					type_details::sub_vector3d<type_struct, anti, 2, 3, 1> zwy;
+					type_details::sub_vector3d<type_struct, anti, 3, 0, 1> wxy;
+					type_details::sub_vector3d<type_struct, anti, 3, 1, 0> wyx;
+					type_details::sub_vector3d<type_struct, anti, 3, 0, 2> wxz;
+					type_details::sub_vector3d<type_struct, anti, 3, 2, 0> wzx;
+					type_details::sub_vector3d<type_struct, anti, 3, 1, 2> wyz;
+					type_details::sub_vector3d<type_struct, anti, 3, 2, 1> wzy;
+
+					type_details::sub_vector4d<type_struct, anti, 0, 1, 2, 3>  xyzw;
+					type_details::sub_vector4d<type_struct, anti, 0, 1, 3, 2>  xywz; 
+					type_details::sub_vector4d<type_struct, anti, 0, 2, 1, 3>  xzyw;
+					type_details::sub_vector4d<type_struct, anti, 0, 2, 3, 1>  xzwy;
+					type_details::sub_vector4d<type_struct, anti, 0, 3, 1, 2>  xwyz; 
+					type_details::sub_vector4d<type_struct, anti, 0, 3, 2, 1>  xwzy;
+					type_details::sub_vector4d<type_struct, anti, 1, 0, 2, 3>  yxzw; 
+					type_details::sub_vector4d<type_struct, anti, 1, 0, 3, 2>  yxwz;
+					type_details::sub_vector4d<type_struct, anti, 1, 2, 0, 3>  yzxw;
+					type_details::sub_vector4d<type_struct, anti, 1, 2, 3, 0>  yzwx;
+					type_details::sub_vector4d<type_struct, anti, 1, 3, 0, 2>  ywxz; 
+					type_details::sub_vector4d<type_struct, anti, 1, 3, 2, 0>  ywzx; 
+					type_details::sub_vector4d<type_struct, anti, 2, 0, 1, 3>  zxyw; 
+					type_details::sub_vector4d<type_struct, anti, 2, 0, 3, 1>  zxwy;
+					type_details::sub_vector4d<type_struct, anti, 2, 1, 0, 3>  zyxw; 
+					type_details::sub_vector4d<type_struct, anti, 2, 1, 3, 0>  zywx;
+					type_details::sub_vector4d<type_struct, anti, 2, 3, 0, 1>  zwxy;
+					type_details::sub_vector4d<type_struct, anti, 2, 3, 1, 0>  zwyx; 
+					type_details::sub_vector4d<type_struct, anti, 3, 0, 1, 2>  wxyz;
+					type_details::sub_vector4d<type_struct, anti, 3, 0, 2, 1>  wxzy; 
+					type_details::sub_vector4d<type_struct, anti, 3, 1, 0, 2>  wyxz; 
+					type_details::sub_vector4d<type_struct, anti, 3, 1, 2, 0>  wyzx; 
+					type_details::sub_vector4d<type_struct, anti, 3, 2, 0, 1>  wzxy; 
+					type_details::sub_vector4d<type_struct, anti, 3, 2, 1, 0>  wzyx;
+
+					scalar_type data[4];
+				};
+
+				constexpr vector_4d_impl(scalar_type x, scalar_type y, scalar_type z,scalar_type w) noexcept
+					:data{ x,y ,z ,w}
+				{
+				}
+
+				constexpr vector_4d_impl(vector3d_type xyz, scalar_type w) noexcept
+					:data{ xyz.x,xyz.y,xyz.z,w }
+				{
+				}
+
+				constexpr vector_4d_impl() noexcept = default;
+
+				constexpr size_t size() const {
+					return 4;
+				}
+
+				const scalar_type& operator[](std::size_t index) const noexcept {
+					lassume(index < size());
+					return data[index];
+				}
+
+				scalar_type& operator[](std::size_t index) noexcept {
+					lassume(index < size());
+					return data[index];
+				}
+
+				const scalar_type* begin() const noexcept {
+					return data + 0;
+				}
+
+				const scalar_type* end() const noexcept {
+					return data + size();
+				}
+
+				scalar_type* begin() noexcept {
+					return data + 0;
+				}
+
+				scalar_type* end() noexcept {
+					return data + size();
+				}
+			};
 		}
 
-		template<typename scalar>
-		using vector_2d = type_details::vector_2d_impl<type_details::type_vector2d<scalar>>;
+		template<typename scalar, typename type>
+		using vector_2d = type_details::vector_2d_impl<type_details::type_vector2d<scalar, type>>;
+
+		template<typename scalar,typename type1, typename type2>
+		using vector_3d = type_details::vector_3d_impl<type_details::type_vector3d<scalar, type1,type2>>;
+
+		template<typename scalar, typename vector2d_impl, typename vector3d_impl, typename vector4d_impl>
+		using vector_4d = type_details::vector_4d_impl<type_details::type_vector4d<scalar, vector2d_impl, vector3d_impl, vector4d_impl>>;
 
 		template<typename _type>
 		struct is_lmathtype :false_
@@ -342,130 +643,21 @@ namespace leo {
 		constexpr auto is_lmathtype_v = is_lmathtype<_type>::value;
 
 		//The float2 data type
-		struct lalignas(16) float2 :vector_2d<float>
+		struct lalignas(16) float2 :vector_2d<float, float2>
 		{
 			using vec_type::vec_type;
 		};
 
-		
-
 		//The float3 data type
-		struct lalignas(16) float3 :data_storage<float, 3>
+		struct lalignas(16) float3 :vector_3d<float,float2,float3>
 		{
-
-			float3() noexcept = default;
-
-			float3(float X, float Y, float Z) noexcept
-				:vec_type(X, Y, Z)
-			{}
-
-			float3(const float2& XY, float Z) noexcept
-				: vec_type(XY.x, XY.y, Z)
-			{}
-
-			float3(float X, const float2& YZ) noexcept
-				: vec_type(X, YZ.x, YZ.y)
-			{}
-
-			explicit float3(const float* src) noexcept
-				: vec_type(src[0], src[1], src[2])
-			{}
-
-			template<typename T>
-			explicit float3(const T& src) noexcept
-			{
-				static_assert(sizeof(T) >= sizeof(float) * 3, "Need More Data");
-				std::memcpy(this, &src, sizeof(float) * 3);
-			}
-
-			template<typename T>
-			float3& operator=(const T& src) noexcept
-			{
-				static_assert(sizeof(T) >= sizeof(float) * 3, "Need More Data");
-				std::memcpy(this, &src, sizeof(float) * 3);
-				return *this;
-			}
-
-			float* operator &() noexcept
-			{
-				return data;
-			}
-
-			float3 operator-() const noexcept {
-				return float3(-x, -y, -z);
-			}
-
+			using vec_type::vec_type;
 		};
 
 		//The float4 data type
-		struct lalignas(16) float4 :data_storage<float, 4>
+		struct lalignas(16) float4 :vector_4d<float,float2,float3,float4>
 		{
-
-			float4() noexcept = default;
-
-			float4(float X, float Y, float Z, float W) noexcept
-				:vec_type(X, Y, Z, W)
-			{}
-
-			float4(const float2& XY, const float2& ZW) noexcept
-				: vec_type(XY.x, XY.y, ZW.x, ZW.y)
-			{
-			}
-
-			float4(const float2& XY, float Z, float W) noexcept
-				: vec_type(XY.x, XY.y, Z, W)
-			{
-			}
-
-			float4(float X, const float2& YZ, float W) noexcept
-				: vec_type(X, YZ.x, YZ.y, W)
-			{
-			}
-
-			float4(float X, float Y, const float2& ZW) noexcept
-				: vec_type(X, Y, ZW.x, ZW.y)
-			{
-			}
-
-			float4(const float3& XYZ, float W) noexcept
-				: vec_type(XYZ.x, XYZ.y, XYZ.z, W)
-			{
-			}
-
-			float4(float X, const float3& YZW) noexcept
-				: vec_type(X, YZW.x, YZW.y, YZW.z)
-			{
-			}
-
-
-			explicit float4(const float* src) noexcept
-				: vec_type(src[0], src[1], src[2], src[3]) {
-			}
-
-			template<typename T>
-			explicit float4(const T& src) noexcept
-			{
-				static_assert(sizeof(T) >= sizeof(float4), "Need More Data");
-				std::memcpy(this, &src, sizeof(float4));
-			}
-
-			template<typename T>
-			float4& operator=(const T& src) noexcept
-			{
-				static_assert(sizeof(T) >= sizeof(float4), "Need More Data");
-				std::memcpy(this, &src, sizeof(float4));
-				return *this;
-			}
-
-			float* operator &() noexcept
-			{
-				return data;
-			}
-
-			float4 operator-() const noexcept {
-				return float4(-x, -y, -z, -w);
-			}
-
+			using vec_type::vec_type;
 		};
 
 		template<>
@@ -598,7 +790,7 @@ namespace leo {
 			}
 		};
 
-		struct lalignas(4) half2 :vector_2d<half>
+		struct lalignas(4) half2 :vector_2d<half, half2>
 		{
 			half2(half X, half Y) noexcept
 				:vec_type(X, Y)
