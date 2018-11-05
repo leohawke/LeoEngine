@@ -12,7 +12,14 @@ using std::invoke_result;
 #include "LBase/cast.hpp"
 #include "LBase/set.hpp"
 
+namespace lm = leo::math;
+
 static decltype(auto) foo() {
+
+	lm::float2 smq{ 1,0 };
+	lm::float3 gugugu{ 1,2,3 };
+
+	gugugu.zx = smq.yx;
 
 	static_assert(sizeof(leo::math::float2) == sizeof(leo::math::float4));
 
