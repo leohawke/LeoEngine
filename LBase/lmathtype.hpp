@@ -642,16 +642,32 @@ namespace leo {
 		template<typename _type>
 		constexpr auto is_lmathtype_v = is_lmathtype<_type>::value;
 
-		//The float2 data type
-		struct lalignas(16) float2 :vector_2d<float, float2>
+		template<typename scalar>
+		struct vector2 : vector_2d<scalar, vector2<scalar>>
 		{
-			using vec_type::vec_type;
+			using base = vector_2d<scalar, vector2<scalar>>;
+			using base::base;
+		};
+
+		//The float2 data type
+		struct lalignas(16) float2 :vector2<float>
+		{
+			using base = vector2<float>;
+			using base::base;
+		};
+
+		template<typename scalar>
+		struct vector3 : vector_3d<scalar, vector2<scalar>,vector3<scalar>>
+		{
+			using base = vector_3d<scalar, vector2<scalar>, vector3<scalar>>;
+			using base::base;
 		};
 
 		//The float3 data type
-		struct lalignas(16) float3 :vector_3d<float,float2,float3>
+		struct lalignas(16) float3 :vector3<float>
 		{
-			using vec_type::vec_type;
+			using base = vector3<float>;
+			using base::base;
 		};
 
 		//The float4 data type

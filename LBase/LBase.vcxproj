@@ -55,6 +55,7 @@
     <ClInclude Include="linttype.hpp" />
     <ClInclude Include="lmacro.h" />
     <ClInclude Include="lmemory.hpp" />
+    <ClInclude Include="lmathquaternion.hpp" />
     <ClInclude Include="mixin.hpp" />
     <ClInclude Include="path.hpp" />
     <ClInclude Include="MCF\Abstract.hpp" />
