@@ -27,7 +27,7 @@ namespace leo::math {
 			:x(x),y(y),z(z),w(w)
 		{}
 
-		inline static basic_quaternion identity{ 0,0,0,1 };
+		const static basic_quaternion identity;
 
 		union {
 			struct {
@@ -44,6 +44,9 @@ namespace leo::math {
 	basic_quaternion< scalar> make_qtangent(const vector3<scalar>& normal, scalar signw) {
 		return  basic_quaternion<scalar>{ normal.x,normal.y,normal.z,signw };
 	}
+
+	template<typename scalar>
+	const basic_quaternion<scalar> basic_quaternion<scalar>::identity {0,0,0,1}
 
 	using quaternion = basic_quaternion<float>;
 }
