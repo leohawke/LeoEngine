@@ -67,6 +67,7 @@
     <ClInclude Include="mixin.hpp" />
     <ClInclude Include="typeindex.h" />
     <ClInclude Include="lmath.hpp" />
+    <ClInclude Include="lmathquaternion.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="any.cpp" />
