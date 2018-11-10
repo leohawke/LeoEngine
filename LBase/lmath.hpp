@@ -4,6 +4,7 @@
 */
 
 #include "LBase/lmathtype.hpp"
+#include "LBase/lmathquaternion.hpp"
 
 #ifndef LBase_lmath_hpp
 #define LBase_lmath_hpp 1
@@ -181,8 +182,8 @@ namespace leo {
 		}
 
 		inline bool operator==(const float4x4& l, const float4x4& r) noexcept {
-			return (l[0]==r[0]) && (l[1]==r[1])
-				&& (l[2]==r[2]) && (l[3]==r[3]);
+			return (l[0] == r[0]) && (l[1] == r[1])
+				&& (l[2] == r[2]) && (l[3] == r[3]);
 		}
 
 		inline bool operator!=(const float4x4& l, const float4x4& r) noexcept {
@@ -216,7 +217,7 @@ namespace leo {
 			};
 		}
 
-		inline float4x4 operator*(const float4x4& lhs, const float4x4& rhs) {
+		inline float4x4 mul(const float4x4& lhs, const float4x4& rhs) {
 			auto tmp(transpose(rhs));
 
 			return {
@@ -227,6 +228,10 @@ namespace leo {
 			};
 		}
 
+		inline float4x4 operator*(const float4x4& lhs, const float4x4& rhs) {
+			return mul(lhs, rhs);
+		}
+
 		inline float4 transform(const float4& l, const float4x4& m) {
 			auto tm = transpose(m);
 			return{ dot(l,tm[0]),dot(l,tm[1]) ,dot(l,tm[2]) ,dot(l,tm[3]) };
@@ -234,7 +239,7 @@ namespace leo {
 
 		inline float3 transformpoint(const float3&l, const float4x4&m) {
 			auto v = float4(l, 1);
-			auto tm= transpose(m);
+			auto tm = transpose(m);
 			return { dot(v,tm[0]),dot(v,tm[1]) ,dot(v,tm[2]) };
 		}
 
@@ -258,11 +263,11 @@ namespace leo {
 		}
 
 		inline float4 max(const float4& l, const float4& r) noexcept {
-			return float4(max(l.x, r.x), max(l.y, r.y), max(l.b, r.b), max(l.a, r.a));
+			return float4(max(l.x, r.x), max(l.y, r.y), max(l.z, r.z), max(l.w, r.w));
 		}
 
 		inline float4 min(const float4& l, const float4& r) noexcept {
-			return float4(min(l.x, r.x), min(l.y, r.y), min(l.b, r.b), min(l.a, r.a));
+			return float4(min(l.x, r.x), min(l.y, r.y), min(l.z, r.z), min(l.w, r.w));
 		}
 
 		using std::fabs;
@@ -279,6 +284,65 @@ namespace leo {
 			return float4(fabs(f4.x), fabs(f4.y), fabs(f4.z), fabs(f4.w));
 		}
 	}
+}
+
+//quaternion
+namespace leo::math {
+	template<typename scalar>
+	inline constexpr basic_quaternion<scalar> mul(basic_quaternion<scalar> lhs, basic_quaternion<scalar> rhs) noexcept
+	{
+		return{
+			lhs.x * rhs.w - lhs.y * rhs.z + lhs.z * rhs.y + lhs.w * rhs.x,
+			lhs.x * rhs.z + lhs.y * rhs.w - lhs.z * rhs.x + lhs.w * rhs.y,
+			lhs.y * rhs.x - lhs.x * rhs.y + lhs.z * rhs.w + lhs.w * rhs.z,
+			lhs.w * rhs.w - lhs.x * rhs.x - lhs.y * rhs.y - lhs.z * rhs.z
+		};
+	}
+
+	/* !\brief make a Quaternion of which the sign of the scalar element encodes the Reflection
+	*/
+	template<typename scalar>
+	inline constexpr basic_quaternion< scalar> make_qtangent(const vector3<scalar>& normal, scalar signw) {
+		return  basic_quaternion<scalar>{ normal.x, normal.y, normal.z, signw };
+	}
+
+	template<typename scalar>
+	inline constexpr basic_quaternion<scalar> operator+(basic_quaternion<scalar> lhs, basic_quaternion<scalar> rhs) noexcept {
+		return { lhs.x + rhs.x,lhs.y + rhs.y,lhs.z + rhs.z,lhs.w + rhs.w };
+	}
+	template<typename scalar>
+	inline constexpr basic_quaternion<scalar> operator-(basic_quaternion<scalar> lhs, basic_quaternion<scalar> rhs) noexcept {
+		return { lhs.x - rhs.x,lhs.y - rhs.y,lhs.z - rhs.z,lhs.w - rhs.w };
+	}
+
+	template<typename scalar>
+	inline constexpr basic_quaternion<scalar> operator*(basic_quaternion<scalar> lhs, basic_quaternion<scalar> rhs) noexcept {
+		return mul(lhs, rhs);
+	}
+
+	template<typename scalar>
+	inline constexpr basic_quaternion<scalar> operator*(basic_quaternion<scalar> lhs, scalar rhs) noexcept {
+		return { lhs.x * rhs,lhs.y * rhs,lhs.z * rhs,lhs * rhs.w };
+	}
+	template<typename scalar>
+	inline constexpr basic_quaternion<scalar> operator/(basic_quaternion<scalar> lhs, scalar rhs) noexcept {
+		return { lhs.x / rhs,lhs.y / rhs,lhs.z / rhs,lhs / rhs.w };
+	}
+
+	template<typename scalar>
+	inline constexpr basic_quaternion<scalar> basic_quaternion<scalar>::operator+() const noexcept {
+		return *this;
+	}
+	template<typename scalar>
+	inline constexpr basic_quaternion<scalar> basic_quaternion<scalar>::operator-() const noexcept {
+		return { -x,-y,-z,-w };
+	}
+
+	template<typename scalar>
+	constexpr bool basic_quaternion<scalar>::operator==(const basic_quaternion<scalar>& rhs) const noexcept {
+		return x == rhs.x && y == rhs.y && z == rhs.z &&w == rhs.w;
+	}
+
 }
 
 //data depend-base function

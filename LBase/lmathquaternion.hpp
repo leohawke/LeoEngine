@@ -32,43 +32,42 @@ namespace leo::math {
 
 		const static basic_quaternion identity;
 
-		constexpr const scalar_type* begin() const noexcept {
+		constexpr const scalar* begin() const noexcept {
 			return data + 0;
 		}
 
-		constexpr const scalar_type* end() const noexcept {
+		constexpr const scalar* end() const noexcept {
 			return data + size();
 		}
 
-		scalar_type* begin() noexcept {
+		scalar* begin() noexcept {
 			return data + 0;
 		}
 
-		scalar_type* end() noexcept {
+		scalar* end() noexcept {
 			return data + size();
 		}
 
-		constexpr const scalar_type& operator[](std::size_t index) const noexcept {
+		constexpr const scalar& operator[](std::size_t index) const noexcept {
 			lassume(index < size());
 			return data[index];
 		}
 
-		scalar_type& operator[](std::size_t index) noexcept {
+		scalar& operator[](std::size_t index) noexcept {
 			lassume(index < size());
 			return data[index];
 		}
 
-		basic_quaternion& operator+=(basic_quaternion rhs) noexcept;
-		basic_quaternion& operator-=(basic_quaternion rhs) noexcept;
+		friend constexpr basic_quaternion<scalar> operator+(basic_quaternion<scalar> lhs, basic_quaternion<scalar> rhs) noexcept;
+		friend constexpr basic_quaternion<scalar> operator-(basic_quaternion<scalar> lhs, basic_quaternion<scalar> rhs) noexcept;
+		friend constexpr basic_quaternion<scalar> operator*(basic_quaternion<scalar> lhs, basic_quaternion<scalar> rhs) noexcept;
+		friend constexpr basic_quaternion<scalar> operator*(basic_quaternion<scalar> lhs, scalar rhs) noexcept;
+		friend constexpr basic_quaternion<scalar> operator/(basic_quaternion<scalar> lhs, scalar rhs) noexcept;
 
-		basic_quaternion& operator*=(basic_quaternion rhs) noexcept;
-		basic_quaternion& operator*=(scalar_type rhs) noexcept;
-		basic_quaternion& operator/=(scalar_type rhs) noexcept;
+		constexpr basic_quaternion operator+() const noexcept;
+		constexpr basic_quaternion operator-() const noexcept;
 
-		basic_quaternion operator+() const noexcept;
-		basic_quaternion operator-() const noexcept;
-
-		bool operator==(const basic_quaternion& rhs) const noexcept;
+		constexpr bool operator==(const basic_quaternion& rhs) const noexcept;
 
 		union {
 			struct {
@@ -77,14 +76,6 @@ namespace leo::math {
 			scalar data[4];
 		};
 	};
-
-
-	/* !\brief make a Quaternion of which the sign of the scalar element encodes the Reflection
-	*/
-	template<typename scalar>
-	basic_quaternion< scalar> make_qtangent(const vector3<scalar>& normal, scalar signw) {
-		return  basic_quaternion<scalar>{ normal.x, normal.y, normal.z, signw };
-	}
 
 	template<typename scalar>
 	const basic_quaternion<scalar> basic_quaternion<scalar>::identity{ 0,0,0,1 }

@@ -7,11 +7,10 @@ using std::invoke_result;
 #include "LBase/scope_gurad.hpp"
 #include "LBase/cache.hpp"
 #include "LBase/concurrency.h"
-#include "LBase/lmathtype.hpp"
 #include "LBase/examiner.hpp"
 #include "LBase/cast.hpp"
 #include "LBase/set.hpp"
-#include "LBase/lmathquaternion.hpp"
+#include "LBase/lmath.hpp"
 
 namespace lm = leo::math;
 
