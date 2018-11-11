@@ -78,7 +78,7 @@
 			out float4 color :SV_Target
 		)
 		{
-			float3 view_dir = normalize(view_postion);
+			float3 view_dir = -normalize(view_postion);
 			float shadow = 1;
 
 			Material material;
@@ -92,7 +92,7 @@
 			float3 diffuse,specular = 0;
 			ShadingMaterial(material,view_postion,view_dir,shadow,diffuse,specular);
 
-			color.xyz = diffuse + specular;
+			color.xyz = diffuse*material.albedo + specular;
 			color.w = 1.0f;
 		}
 		"
