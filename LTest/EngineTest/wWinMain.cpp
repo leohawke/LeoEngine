@@ -7,12 +7,14 @@
 #include "../../Engine/Asset/MaterialX.h"
 #include "../../Engine/Asset/LSLAssetX.h"
 #include "../../Engine/System/NinthTimer.h"
+#include "../../Engine/Core/CameraController.h"
 #include "TestFramework.h"
 #include "EntityComponentSystem/EntitySystem.h"
 #include "LSchemEngineUnitTest.h"
 #include "../../Engine/Core/Camera.h"
 
 #include <LScheme/LScheme.h>
+#include <windowsx.h>
 
 #define TEST_CODE 1
 
@@ -91,11 +93,9 @@ public:
 	using base::base;
 
 	std::unique_ptr<Entities> pEntities;
+	engine::Core::CameraElement camera;
+	std::unique_ptr<engine::Core::TrackballCameraManipulator> pCameraMainpulator;
 
-	leo::math::float3 eye{ 0,10,0 };
-	leo::math::float3 view_vec{ 0,-0.7f,0.7f };
-	leo::math::float3 up_vec{ 0,1,0 };
-	leo::math::float2 alpha_beta {-45,90};
 private:
 	leo::uint32 DoUpdate(leo::uint32 pass) override {
 		auto& timer = platform::chrono::FetchGlobalTimer();
@@ -119,23 +119,23 @@ private:
 			{0,0,0,1}
 		};
 		auto projmatrix = engine::X::perspective_fov_lh(3.14f / 6, 600.0f / 800, 1, 1000);
-		auto viewmatrix = engine::X::look_at_lh(eye, eye+ view_vec*10, up_vec);
+		auto viewmatrix = camera.GetViewMatrix();
 
 		auto worldview = worldmatrix * viewmatrix;
 		auto worldviewproj = worldview * projmatrix;
-		auto worldviewinvt = worldview;
+		auto worldviewinvt =leo::math::inverse(worldview);
 
 		using namespace std::literals;
 		//obj
 		pEffect->GetParameter("worldview"sv) = lm::transpose(worldview);
 		pEffect->GetParameter("worldviewproj"sv) = lm::transpose(worldviewproj);
-		pEffect->GetParameter("worldviewinvt"sv) = lm::transpose(worldviewinvt);
+		pEffect->GetParameter("worldviewinvt"sv) =lm::transpose(worldviewinvt);
 		
 		//light
 		pEffect->GetParameter("view_light_pos"sv) = transformpoint(lm::float3(0, 0,0), viewmatrix);
-		pEffect->GetParameter("light_radius"sv) =40.f;
+		pEffect->GetParameter("light_radius"sv) =80.f;
 		pEffect->GetParameter("light_color"sv) = lm::float3(1.8f, 1.8f, 1.6f);
-		pEffect->GetParameter("light_blubsize"sv) = 20.f;
+		pEffect->GetParameter("light_blubsize"sv) = 60.f;
 
 		//mat
 		pEffect->GetParameter("specular"sv) = lm::float3(1.0f, 0.2f, 0.1f);
@@ -163,53 +163,32 @@ private:
 
 		pEntities = std::make_unique<Entities>("sponza_crytek.entities.lsl");
 
-		GetMessageMap()[WM_KEYDOWN] += [&, sphere_dir = [&] {
-			alpha_beta.x = leo::clamp<float>(alpha_beta.x, -180, 180);
-			alpha_beta.y = leo::clamp<float>(alpha_beta.y, -180, 180);
+		leo::math::float3 eye{ 0,10,0 };
+		leo::math::float3 view_vec{ 0,-0.7f,0.7f };
+		leo::math::float3 up_vec{ 0,1,0 };
 
-			view_vec.y = std::sin(alpha_beta.x / 180 * 3.14f);
-			auto cos = std::cos(alpha_beta.x / 180 * 3.14f);
-			view_vec.x = cos * std::cos(alpha_beta.y / 180 * 3.14f);
-			view_vec.z = cos * std::sin(alpha_beta.y / 180 * 3.14f);
-		}](::WPARAM wParam, ::LPARAM lParams) {
-			switch (wParam)
-			{
-			case 'A':
-				eye.x += 0.2f;
-				break;
-			case 'D':
-				eye.x -= 0.2f;
-				break;
-			case 'W':
-				eye.z += 0.2f;
-				break;
-			case 'S':
-				eye.z -= 0.2f;
-				break;
-			case 'Q':
-				eye.y += 0.2f;
-				break;
-			case 'E':
-				eye.y -= 0.2f;
-				break;
-			case 'I':
-				alpha_beta.x += 1;
-				sphere_dir();
-				break;
-			case 'K':
-				alpha_beta.x -= 1;
-				sphere_dir();
-				break;
-			case 'J':
-				alpha_beta.y += 1;
-				sphere_dir();
-				break;
-			case 'L':
-				alpha_beta.y -= 1;
-				sphere_dir();
-				break;
-			default:
-				break;
+		camera.SetViewMatrix(engine::X::look_at_lh({0,10,0}, eye + view_vec * 10, up_vec));
+
+		pCameraMainpulator = std::make_unique<engine::Core::TrackballCameraManipulator>(10.0f);
+		pCameraMainpulator->Attach(camera);
+		pCameraMainpulator->SetSpeed(0.005f, 0.1f);
+
+		GetMessageMap()[WM_MOUSEMOVE] += [&](::WPARAM wParam, ::LPARAM lParam) {
+			static auto lastxPos = GET_X_LPARAM(lParam);
+			static auto lastyPos = GET_Y_LPARAM(lParam);
+			auto xPos = GET_X_LPARAM(lParam);
+			auto yPos = GET_Y_LPARAM(lParam);
+			leo::math::float2 offset(static_cast<float>(xPos - lastxPos),static_cast<float>(yPos - lastyPos));
+			lastxPos = xPos;
+			lastyPos = yPos;
+			if (wParam & MK_LBUTTON) {
+				pCameraMainpulator->Rotate(offset);
+			}
+			if (wParam & MK_MBUTTON) {
+				pCameraMainpulator->Move(offset);
+			}
+			if (wParam & MK_RBUTTON) {
+				pCameraMainpulator->Zoom(offset);
 			}
 		};
 	}

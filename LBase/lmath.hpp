@@ -121,7 +121,7 @@ namespace leo {
 			return !(l == r);
 		}
 
-		inline float3& operator+=(float3& l, const float3& r) {
+		inline float3& operator+=(float3& l, const float3& r) noexcept {
 			l.x += r.x;
 			l.y += r.y;
 			l.z += r.z;
@@ -136,7 +136,7 @@ namespace leo {
 		}
 
 		template<typename _type>
-		inline float3& operator*=(float3& l, _type r) {
+		inline float3& operator*=(float3& l, _type r) noexcept {
 			l.x *= r;
 			l.y *= r;
 			l.z *= r;
@@ -144,18 +144,18 @@ namespace leo {
 		}
 
 		template<typename T>
-		inline float3& operator/=(float3&l, T r) {
+		inline float3& operator/=(float3&l, T r) noexcept {
 			l.x /= r;
 			l.y /= r;
 			l.z /= r;
 			return l;
 		}
 
-		inline float dot(const vector3<float> &l, const vector3<float>& r) {
+		inline float dot(const vector3<float> &l, const vector3<float>& r) noexcept {
 			return l.x*r.x + l.y*r.y + l.z*r.z;
 		}
 
-		inline float3 cross(const float3&l, const float3& r) {
+		inline float3 cross(const float3&l, const float3& r) noexcept {
 			return {
 				l.y*r.z - l.z*r.y,
 				l.z*r.x - l.x*r.z,
@@ -163,14 +163,14 @@ namespace leo {
 		}
 
 		template<typename _type, limpl(typename = enable_if_t<is_lmathtype_v<_type>>)>
-		inline _type operator+(const _type& l, const _type& r) noexcept {
+		inline constexpr _type operator+(const _type& l, const _type& r) noexcept {
 			auto ret = l;
 			ret += r;
 			return ret;
 		}
 
 		template<typename _type, limpl(typename = enable_if_t<is_lmathtype_v<_type>>)>
-		inline _type operator-(const _type& l, const _type& r) noexcept {
+		inline constexpr _type operator-(const _type& l, const _type& r) noexcept {
 			auto ret = l;
 			ret -= r;
 			return ret;
@@ -328,12 +328,15 @@ namespace leo::math {
 	}
 
 	template<typename scalar>
-	constexpr bool basic_quaternion<scalar>::operator==(const basic_quaternion<scalar>& rhs) const noexcept {
+	inline constexpr bool basic_quaternion<scalar>::operator==(const basic_quaternion<scalar>& rhs) const noexcept {
 		return x == rhs.x && y == rhs.y && z == rhs.z &&w == rhs.w;
 	}
 
 
-	constexpr float3 transformquat(float3 vector, quaternion q) noexcept;
+	inline constexpr float3 transformquat(float3 v, quaternion q) noexcept {
+		float3 quat_v{ q.x,q.y,q.z };
+		return v + cross(quat_v, cross(quat_v, v) + q.w*v) * 2;
+	}
 }
 
 //matrix
