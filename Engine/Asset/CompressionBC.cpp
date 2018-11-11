@@ -809,20 +809,20 @@ namespace bc
 	}
 
 	template <typename T>
-	void Rotation(data_storage<T, 4>& v, int mode)
+	void Rotation(vector4<T>& v, int mode)
 	{
 		switch (mode)
 		{
 		case 0:
 			break;
 		case 1:
-			std::swap(v.x, v.w);
+			swap(v.x, v.w);
 			break;
 		case 2:
-			std::swap(v.y, v.w);
+			swap(v.y, v.w);
 			break;
 		case 3:
-			std::swap(v.z, v.w);
+			swap(v.z, v.w);
 			break;
 
 		default:

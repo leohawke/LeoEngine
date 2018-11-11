@@ -23,7 +23,7 @@ namespace platform::M{
 
 		template <typename T>
 		Color_T<T>::Color_T(T const * rhs) lnoexcept
-			: col_(rhs)
+			: col_(rhs[0],rhs[1],rhs[2],rhs[3])
 		{
 		}
 

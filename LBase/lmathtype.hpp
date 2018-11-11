@@ -21,6 +21,7 @@
 #include "ldef.h"
 #include "lmathhalf.h"
 #include "type_traits.hpp"
+#include "ref.hpp"
 
 #include <cmath>
 #include <algorithm> //std::max,std::min
@@ -208,8 +209,18 @@ namespace leo {
 
 				component& operator=(const component_type&value) {
 					data[index] = value;
+					return *this;
 				}
 			};
+
+			template<typename type_struct, int index_l,int index_r>
+			void swap(component<type_struct, index_l>& lhs, component<type_struct, index_r>& rhs) {
+				using component_type = typename type_struct::component_type;
+
+				component_type T = rhs;
+				rhs = lhs;
+				lhs = T;
+			}
 
 			template<typename type_struct, int index_x, int index_y>
 			struct converter_vector2d {
@@ -670,10 +681,18 @@ namespace leo {
 			using base::base;
 		};
 
-		//The float4 data type
-		struct lalignas(16) float4 :vector_4d<float,float2,float3,float4>
+		template<typename scalar>
+		struct vector4 : vector_4d<scalar, vector2<scalar>, vector3<scalar>,vector4<scalar>>
 		{
-			using vec_type::vec_type;
+			using base = vector_4d<scalar, vector2<scalar>, vector3<scalar>,vector4<scalar>>;
+			using base::base;
+		};
+
+		//The float4 data type
+		struct lalignas(16) float4 :vector4<float>
+		{
+			using base = vector4<float>;
+			using base::base;
 		};
 
 		template<>
@@ -759,6 +778,27 @@ namespace leo {
 				:r({ r0,r1,r2,r3 })
 			{
 			}
+		};
+
+		struct int3 : vector3<int>
+		{
+			using base = vector3<int>;
+			using base::base;
+
+			int3 operator+(const int3& rhs) const {
+				return int3(x + rhs.x, y + rhs.y, z + rhs.z);
+			}
+
+			int3& operator+=(const int3& rhs) {
+				*this = *this + rhs;
+				return *this;
+			}
+		};
+
+		struct uint4 :vector4<uint32>
+		{
+			using base = vector4<uint32>;
+			using base::base;
 		};
 
 
