@@ -38,7 +38,7 @@ namespace engine::Core {
 
 	class TrackballCameraManipulator :public CameraManipulator {
 	public:
-		TrackballCameraManipulator(float dist):
+		explicit TrackballCameraManipulator(float dist):
 			look_at_dist(dist)
 		{}
 
