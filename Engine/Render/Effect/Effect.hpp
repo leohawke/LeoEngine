@@ -6,7 +6,6 @@
 #define LE_RENDER_EFFECT_h 1
 
 #include <LBase/linttype.hpp>
-#include <LBase/lmathtype.hpp>
 #include <LBase/any.h>
 #include <LBase/examiner.hpp>
 #include <LFramework/LCLib/Debug.h>

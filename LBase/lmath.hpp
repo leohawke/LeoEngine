@@ -474,9 +474,43 @@ namespace leo::math {
 		}
 	}
 
-	inline float4x4 make_matrix(quaternion q, float3 t);
+	inline float4x4 to_matrix(quaternion quat) {
+		float const x2(quat.x + quat.x);
+		float const y2(quat.y + quat.y);
+		float const z2(quat.z + quat.z);
 
-	inline float4x4 make_matrix(float3 rotation_center, quaternion rotation, float3 t);
+		float const xx2(quat.x * x2), xy2(quat.x * y2), xz2(quat.x * z2);
+		float const yy2(quat.y * y2), yz2(quat.y * z2), zz2(quat.z * z2);
+		float const wx2(quat.w * x2), wy2(quat.w * y2), wz2(quat.w * z2);
+
+		return {
+			{1 - yy2 - zz2,	xy2 + wz2,		xz2 - wy2,		0},
+			{xy2 - wz2,		1 - xx2 - zz2,	yz2 + wx2,		0},
+			{xz2 + wy2,		yz2 - wx2,		1 - xx2 - yy2,	0},
+			{0,				0,				0,				1}
+		};
+	}
+
+	inline float4x4 translation(float x, float y, float z) {
+		return {
+			{1,0,0,0},
+			{0,1,0,0},
+			{0,0,1,0},
+			{x,y,z,1}
+		};
+	}
+
+	inline float4x4 translation(float3 trans) {
+		return translation(trans.x, trans.y, trans.z);
+	}
+
+	inline float4x4 make_matrix(quaternion rotation, float3 trans) {
+		return to_matrix(rotation)*translation(trans);
+	}
+
+	inline float4x4 make_matrix(float3 rotation_center, quaternion rotation, float3 trans) {
+		return  translation(-rotation_center) * to_matrix(rotation)*translation(trans + rotation_center);
+	}
 }
 
 //template function
