@@ -9,7 +9,7 @@
 #ifndef LBase_lmath_hpp
 #define LBase_lmath_hpp 1
 
-//data base function
+//vector
 namespace leo {
 	namespace math {
 		inline bool zero_float(float l) {
@@ -181,67 +181,7 @@ namespace leo {
 			return l * (1.f - t) + r * t;
 		}
 
-		inline bool operator==(const float4x4& l, const float4x4& r) noexcept {
-			return (l[0] == r[0]) && (l[1] == r[1])
-				&& (l[2] == r[2]) && (l[3] == r[3]);
-		}
 
-		inline bool operator!=(const float4x4& l, const float4x4& r) noexcept {
-			return !(l == r);
-		}
-
-		inline float4x4 transpose(const float4x4& m) {
-			return{
-				{ m[0][0],m[1][0] ,m[2][0] ,m[3][0] },
-			{ m[0][1],m[1][1] ,m[2][1] ,m[3][1] },
-			{ m[0][2],m[1][2] ,m[2][2] ,m[3][2] },
-			{ m[0][3],m[1][3] ,m[2][3] ,m[3][3] }
-			};
-		}
-
-		inline float4x4 operator*(float l, const float4x4& m) {
-			return{
-				m[0] * l,
-				m[1] * l,
-				m[2] * l,
-				m[3] * l,
-			};
-		}
-
-		inline float4x4 operator-(const float4x4&  l, const float4x4& r) {
-			return{
-				l[0] - r[0],
-				l[1] - r[1],
-				l[2] - r[2],
-				l[3] - r[3],
-			};
-		}
-
-		inline float4x4 mul(const float4x4& lhs, const float4x4& rhs) {
-			auto tmp(transpose(rhs));
-
-			return {
-				{dot(lhs[0],tmp[0]),dot(lhs[0],tmp[1]),dot(lhs[0],tmp[2]),dot(lhs[0],tmp[3])},
-				{ dot(lhs[1],tmp[0]),dot(lhs[1],tmp[1]),dot(lhs[1],tmp[2]),dot(lhs[1],tmp[3]) },
-				{ dot(lhs[2],tmp[0]),dot(lhs[2],tmp[1]),dot(lhs[2],tmp[2]),dot(lhs[2],tmp[3]) },
-				{ dot(lhs[3],tmp[0]),dot(lhs[3],tmp[1]),dot(lhs[3],tmp[2]),dot(lhs[3],tmp[3]) },
-			};
-		}
-
-		inline float4x4 operator*(const float4x4& lhs, const float4x4& rhs) {
-			return mul(lhs, rhs);
-		}
-
-		inline float4 transform(const float4& l, const float4x4& m) {
-			auto tm = transpose(m);
-			return{ dot(l,tm[0]),dot(l,tm[1]) ,dot(l,tm[2]) ,dot(l,tm[3]) };
-		}
-
-		inline float3 transformpoint(const float3&l, const float4x4&m) {
-			auto v = float4(l, 1);
-			auto tm = transpose(m);
-			return { dot(v,tm[0]),dot(v,tm[1]) ,dot(v,tm[2]) };
-		}
 
 		using std::max;
 		using std::min;
@@ -283,7 +223,6 @@ namespace leo {
 		inline float4 abs(const float4& f4) noexcept {
 			return float4(fabs(f4.x), fabs(f4.y), fabs(f4.z), fabs(f4.w));
 		}
-
 
 		inline uint32 dot(const uint4& l, const uint4& r)
 		{
@@ -351,7 +290,146 @@ namespace leo::math {
 
 }
 
-//data depend-base function
+//matrix
+namespace leo::math {
+	inline bool operator==(const float4x4& l, const float4x4& r) noexcept {
+		return (l[0] == r[0]) && (l[1] == r[1])
+			&& (l[2] == r[2]) && (l[3] == r[3]);
+	}
+
+	inline bool operator!=(const float4x4& l, const float4x4& r) noexcept {
+		return !(l == r);
+	}
+
+	inline float4x4 transpose(const float4x4& m) {
+		return{
+			{ m[0][0],m[1][0] ,m[2][0] ,m[3][0] },
+		{ m[0][1],m[1][1] ,m[2][1] ,m[3][1] },
+		{ m[0][2],m[1][2] ,m[2][2] ,m[3][2] },
+		{ m[0][3],m[1][3] ,m[2][3] ,m[3][3] }
+		};
+	}
+
+	inline float4x4 operator*(float l, const float4x4& m) {
+		return{
+			m[0] * l,
+			m[1] * l,
+			m[2] * l,
+			m[3] * l,
+		};
+	}
+
+	inline float4x4 operator-(const float4x4&  l, const float4x4& r) {
+		return{
+			l[0] - r[0],
+			l[1] - r[1],
+			l[2] - r[2],
+			l[3] - r[3],
+		};
+	}
+
+	inline float4x4 mul(const float4x4& lhs, const float4x4& rhs) noexcept {
+		auto tmp(transpose(rhs));
+
+		return {
+			{dot(lhs[0],tmp[0]),dot(lhs[0],tmp[1]),dot(lhs[0],tmp[2]),dot(lhs[0],tmp[3])},
+			{ dot(lhs[1],tmp[0]),dot(lhs[1],tmp[1]),dot(lhs[1],tmp[2]),dot(lhs[1],tmp[3]) },
+			{ dot(lhs[2],tmp[0]),dot(lhs[2],tmp[1]),dot(lhs[2],tmp[2]),dot(lhs[2],tmp[3]) },
+			{ dot(lhs[3],tmp[0]),dot(lhs[3],tmp[1]),dot(lhs[3],tmp[2]),dot(lhs[3],tmp[3]) },
+		};
+	}
+
+	inline float4x4 operator*(const float4x4& lhs, const float4x4& rhs) noexcept {
+		return mul(lhs, rhs);
+	}
+
+	inline float4 transform(const float4& l, const float4x4& m) noexcept {
+		auto tm = transpose(m);
+		return{ dot(l,tm[0]),dot(l,tm[1]) ,dot(l,tm[2]) ,dot(l,tm[3]) };
+	}
+
+	inline float3 transformpoint(const float3&l, const float4x4&m) noexcept {
+		auto v = float4(l, 1);
+		auto tm = transpose(m);
+		return { dot(v,tm[0]),dot(v,tm[1]) ,dot(v,tm[2]) };
+	}
+
+	inline float determinant(const float4x4& rhs) noexcept {
+		float const _3142_3241(rhs(2, 0) * rhs(3, 1) - rhs(2, 1) * rhs(3, 0));
+		float const _3143_3341(rhs(2, 0) * rhs(3, 2) - rhs(2, 2) * rhs(3, 0));
+		float const _3144_3441(rhs(2, 0) * rhs(3, 3) - rhs(2, 3) * rhs(3, 0));
+		float const _3243_3342(rhs(2, 1) * rhs(3, 2) - rhs(2, 2) * rhs(3, 1));
+		float const _3244_3442(rhs(2, 1) * rhs(3, 3) - rhs(2, 3) * rhs(3, 1));
+		float const _3344_3443(rhs(2, 2) * rhs(3, 3) - rhs(2, 3) * rhs(3, 2));
+
+		return rhs(0, 0) * (rhs(1, 1) * _3344_3443 - rhs(1, 2) * _3244_3442 + rhs(1, 3) * _3243_3342)
+			- rhs(0, 1) * (rhs(1, 0) * _3344_3443 - rhs(1, 2) * _3144_3441 + rhs(1, 3) * _3143_3341)
+			+ rhs(0, 2) * (rhs(1, 0) * _3244_3442 - rhs(1, 1) * _3144_3441 + rhs(1, 3) * _3142_3241)
+			- rhs(0, 3) * (rhs(1, 0) * _3243_3342 - rhs(1, 1) * _3143_3341 + rhs(1, 2) * _3142_3241);
+	}
+
+	float4x4 inverse(const float4x4& rhs) noexcept {
+		float const _2132_2231(rhs(1, 0) * rhs(2, 1) - rhs(1, 1) * rhs(2, 0));
+		float const _2133_2331(rhs(1, 0) * rhs(2, 2) - rhs(1, 2) * rhs(2, 0));
+		float const _2134_2431(rhs(1, 0) * rhs(2, 3) - rhs(1, 3) * rhs(2, 0));
+		float const _2142_2241(rhs(1, 0) * rhs(3, 1) - rhs(1, 1) * rhs(3, 0));
+		float const _2143_2341(rhs(1, 0) * rhs(3, 2) - rhs(1, 2) * rhs(3, 0));
+		float const _2144_2441(rhs(1, 0) * rhs(3, 3) - rhs(1, 3) * rhs(3, 0));
+		float const _2233_2332(rhs(1, 1) * rhs(2, 2) - rhs(1, 2) * rhs(2, 1));
+		float const _2234_2432(rhs(1, 1) * rhs(2, 3) - rhs(1, 3) * rhs(2, 1));
+		float const _2243_2342(rhs(1, 1) * rhs(3, 2) - rhs(1, 2) * rhs(3, 1));
+		float const _2244_2442(rhs(1, 1) * rhs(3, 3) - rhs(1, 3) * rhs(3, 1));
+		float const _2334_2433(rhs(1, 2) * rhs(2, 3) - rhs(1, 3) * rhs(2, 2));
+		float const _2344_2443(rhs(1, 2) * rhs(3, 3) - rhs(1, 3) * rhs(3, 2));
+		float const _3142_3241(rhs(2, 0) * rhs(3, 1) - rhs(2, 1) * rhs(3, 0));
+		float const _3143_3341(rhs(2, 0) * rhs(3, 2) - rhs(2, 2) * rhs(3, 0));
+		float const _3144_3441(rhs(2, 0) * rhs(3, 3) - rhs(2, 3) * rhs(3, 0));
+		float const _3243_3342(rhs(2, 1) * rhs(3, 2) - rhs(2, 2) * rhs(3, 1));
+		float const _3244_3442(rhs(2, 1) * rhs(3, 3) - rhs(2, 3) * rhs(3, 1));
+		float const _3344_3443(rhs(2, 2) * rhs(3, 3) - rhs(2, 3) * rhs(3, 2));
+
+		float const det(determinant(rhs));
+		if (zero_float(det))
+		{
+			return rhs;
+		}
+		else
+		{
+			float invDet(1 / det);
+
+			return {
+				{
+					+invDet * (rhs(1, 1) * _3344_3443 - rhs(1, 2) * _3244_3442 + rhs(1, 3) * _3243_3342),
+					-invDet * (rhs(0, 1) * _3344_3443 - rhs(0, 2) * _3244_3442 + rhs(0, 3) * _3243_3342),
+					+invDet * (rhs(0, 1) * _2344_2443 - rhs(0, 2) * _2244_2442 + rhs(0, 3) * _2243_2342),
+					-invDet * (rhs(0, 1) * _2334_2433 - rhs(0, 2) * _2234_2432 + rhs(0, 3) * _2233_2332)
+				},
+
+				{	
+					-invDet * (rhs(1, 0) * _3344_3443 - rhs(1, 2) * _3144_3441 + rhs(1, 3) * _3143_3341),
+					+invDet * (rhs(0, 0) * _3344_3443 - rhs(0, 2) * _3144_3441 + rhs(0, 3) * _3143_3341),
+					-invDet * (rhs(0, 0) * _2344_2443 - rhs(0, 2) * _2144_2441 + rhs(0, 3) * _2143_2341),
+					+invDet * (rhs(0, 0) * _2334_2433 - rhs(0, 2) * _2134_2431 + rhs(0, 3) * _2133_2331) },
+
+				{	
+					+invDet * (rhs(1, 0) * _3244_3442 - rhs(1, 1) * _3144_3441 + rhs(1, 3) * _3142_3241),
+					-invDet * (rhs(0, 0) * _3244_3442 - rhs(0, 1) * _3144_3441 + rhs(0, 3) * _3142_3241),
+					+invDet * (rhs(0, 0) * _2244_2442 - rhs(0, 1) * _2144_2441 + rhs(0, 3) * _2142_2241),
+					-invDet * (rhs(0, 0) * _2234_2432 - rhs(0, 1) * _2134_2431 + rhs(0, 3) * _2132_2231)
+				},
+
+				{
+					-invDet * (rhs(1, 0) * _3243_3342 - rhs(1, 1) * _3143_3341 + rhs(1, 2) * _3142_3241),
+					+invDet * (rhs(0, 0) * _3243_3342 - rhs(0, 1) * _3143_3341 + rhs(0, 2) * _3142_3241),
+					-invDet * (rhs(0, 0) * _2243_2342 - rhs(0, 1) * _2143_2341 + rhs(0, 2) * _2142_2241),
+					+invDet * (rhs(0, 0) * _2233_2332 - rhs(0, 1) * _2133_2331 + rhs(0, 2) * _2132_2231)
+				}
+			};
+		}
+	}
+}
+
+//template function
 namespace leo {
 	namespace math {
 

@@ -378,7 +378,7 @@ namespace leo {
 
 				component_type data[3];
 
-				operator typename converter_vector3d<type_struct, index_x, index_y, index_z>::vector3d_type(void)
+				operator typename converter_vector3d<type_struct, index_x, index_y, index_z>::vector3d_type() const
 				{
 					return converter_vector3d<type_struct, index_x, index_y, index_z>::convert(data);
 				}
@@ -778,6 +778,15 @@ namespace leo {
 				:r({ r0,r1,r2,r3 })
 			{
 			}
+
+			static float4x4 identity;
+		};
+
+		inline float4x4 float4x4::identity{
+			{1,0,0,0},
+			{0,1,0,0},
+			{0,0,1,0},
+			{0,0,0,1},
 		};
 
 		struct int3 : vector3<int>
