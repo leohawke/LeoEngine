@@ -687,6 +687,10 @@ namespace leo {
 		{
 			using base = vector3<float>;
 			using base::base;
+
+			constexpr float3 operator-() const noexcept {
+				return { -x,-y,-z };
+			}
 		};
 
 		template<typename scalar>
