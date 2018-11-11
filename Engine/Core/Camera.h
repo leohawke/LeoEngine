@@ -37,6 +37,47 @@ namespace platform {
 				{ -lm::dot(x,eye),-lm::dot(y,eye),-lm::dot(z,eye),1 }
 			};
 		}
+
+		class CameraElement {
+		public:
+			CameraElement()
+			:matrix(lm::float4x4::identity)
+			{
+			}
+
+			lm::float3 GetEyePos() const noexcept {
+				return  reinterpret_cast<const lm::float3&>(matrix[3].xyz);
+			}
+			void SetEyePos(lm::float3 pos) noexcept {
+				matrix[3].xyz = pos;
+			}
+
+			lm::float3 GetRightVector() const noexcept {
+				return  reinterpret_cast<const lm::float3&>(matrix[0].xyz);
+			}
+			void SetRightVector(lm::float3 right) noexcept {
+				matrix[0].xyz = right;
+			}
+			lm::float3 GetUpVector() const noexcept {
+				return  reinterpret_cast<const lm::float3&>(matrix[1].xyz);
+			}
+			void SetUpVector(lm::float3 up) noexcept {
+				matrix[1].xyz = up;
+			}
+
+			lm::float3 GetForwardVector() const noexcept {
+				return  reinterpret_cast<const lm::float3&>(matrix[2].xyz);
+			}
+			void SetForwardVector(lm::float3 forward) noexcept {
+				matrix[2].xyz = forward;
+			}
+
+			lm::float4x4 GetViewMatrix() const noexcept {
+				return lm::inverse(matrix);
+			}
+		private:
+			lm::float4x4  matrix; // world-space matrix:translation view postiion to world
+		};
 	}
 }
 
