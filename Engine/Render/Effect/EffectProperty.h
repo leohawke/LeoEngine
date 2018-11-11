@@ -54,9 +54,9 @@ namespace platform::Render::Effect {
 
 		float3property(leo::lref<float3> v)
 			:ref(v), getter([] {}), setter([] {}),
-			x(v.get().x), y(v.get().y), z(v.get().z),
-			r(v.get().x), g(v.get().y), b(v.get().z),
-			u(v.get().x), v(v.get().y), w(v.get().z)
+			x(v.get().x.operator float &()), y(v.get().y.operator float &()), z(v.get().z.operator float &()),
+			r(v.get().x.operator float &()), g(v.get().y.operator float &()), b(v.get().z.operator float &()),
+			u(v.get().x.operator float &()), v(v.get().y.operator float &()), w(v.get().z.operator float &())
 		{}
 
 		float3property& operator=(float3 v) {
@@ -98,8 +98,8 @@ namespace platform::Render::Effect {
 
 		float4property(leo::lref<float4> v)
 			:ref(v), getter([] {}), setter([] {}),
-			x(v.get().x), y(v.get().y), z(v.get().z), w(v.get().w),
-			r(v.get().x), g(v.get().y), b(v.get().z), a(v.get().w)
+			x(v.get().x.operator float &()), y(v.get().y.operator float &()), z(v.get().z.operator float &()), w(v.get().w.operator float &()),
+			r(v.get().x.operator float &()), g(v.get().y.operator float &()), b(v.get().z.operator float &()), a(v.get().w.operator float &())
 		{}
 
 		float4property& operator=(float4 v) {

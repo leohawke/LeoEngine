@@ -311,30 +311,6 @@ namespace tc {
 	{
 		return ExtendNTo8Bits<7>(input);
 	}
-
-	struct int3 : leo::math::data_storage<int, 3>
-	{
-		using leo::math::data_storage<int, 3>::data_storage;
-
-		int3 operator+(const int3& rhs) const{
-			return int3(x + rhs.x, y + rhs.y, z + rhs.z);
-		}
-
-		int3& operator+=(const int3& rhs) {
-			*this = *this + rhs;
-			return *this;
-		}
-	};
-
-	struct uint4 :leo::math::data_storage<uint32, 4>
-	{
-		using leo::math::data_storage<uint32,4>::data_storage;
-	};
-
-	inline uint32 dot(const uint4& l, const uint4& r)
-	{
-		return l.x*r.x + l.y*r.y + l.z*r.z + l.w*r.w;
-	}
 }
 
 #endif

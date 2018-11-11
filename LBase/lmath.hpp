@@ -283,6 +283,12 @@ namespace leo {
 		inline float4 abs(const float4& f4) noexcept {
 			return float4(fabs(f4.x), fabs(f4.y), fabs(f4.z), fabs(f4.w));
 		}
+
+
+		inline uint32 dot(const uint4& l, const uint4& r)
+		{
+			return l.x*r.x + l.y*r.y + l.z*r.z + l.w*r.w;
+		}
 	}
 }
 
