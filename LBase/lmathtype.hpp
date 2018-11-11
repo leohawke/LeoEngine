@@ -715,6 +715,18 @@ namespace leo {
 		struct is_lmathtype<float4> :true_
 		{};
 
+		template<>
+		struct is_lmathtype<vector2<float>> :true_
+		{};
+
+		template<>
+		struct is_lmathtype<vector3<float>> :true_
+		{};
+
+		template<>
+		struct is_lmathtype<vector4<float>> :true_
+		{};
+
 		//The float3x3 data type
 		struct lalignas(16) float3x3 {
 			std::array<float3, 3> r;
