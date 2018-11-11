@@ -207,6 +207,9 @@ namespace leo {
 				operator component_type&(void) { return (data[index]); }
 				operator const component_type&(void) const { return (data[index]); }
 
+				const component_type* operator&() const { return data+index; }
+				component_type* operator&() { return data+index; }
+
 				component& operator=(const component_type&value) {
 					data[index] = value;
 					return *this;
@@ -527,6 +530,11 @@ namespace leo {
 					type_details::component<type_struct, 2> z;
 					type_details::component<type_struct, 3> w;
 
+					type_details::component<type_struct, 0> r;
+					type_details::component<type_struct, 1> g;
+					type_details::component<type_struct, 2> b;
+					type_details::component<type_struct, 3> a;
+
 					type_details::sub_vector2d<type_struct, anti, 0, 1> xy;
 					type_details::sub_vector2d<type_struct, anti, 0, 2> xz;
 					type_details::sub_vector2d<type_struct, anti, 0, 3> xw;
@@ -779,15 +787,16 @@ namespace leo {
 			{
 			}
 
-			static float4x4 identity;
+			const static float4x4 identity;
 		};
 
-		inline float4x4 float4x4::identity{
+
+		lselectany const float4x4 float4x4::identity = {
 			{1,0,0,0},
 			{0,1,0,0},
 			{0,0,1,0},
 			{0,0,0,1},
-		};
+			};
 
 		struct int3 : vector3<int>
 		{

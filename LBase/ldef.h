@@ -645,6 +645,12 @@
 #endif
 //@}
 
+#ifdef LB_IMPL_MSCPP
+#define lselectany __declspec(selectany)
+#else
+#define lselectany __attribute__((weak))
+#endif
+
 namespace stdex
 {
 

@@ -368,7 +368,7 @@ namespace leo::math {
 			- rhs(0, 3) * (rhs(1, 0) * _3243_3342 - rhs(1, 1) * _3143_3341 + rhs(1, 2) * _3142_3241);
 	}
 
-	float4x4 inverse(const float4x4& rhs) noexcept {
+	inline float4x4 inverse(const float4x4& rhs) noexcept {
 		float const _2132_2231(rhs(1, 0) * rhs(2, 1) - rhs(1, 1) * rhs(2, 0));
 		float const _2133_2331(rhs(1, 0) * rhs(2, 2) - rhs(1, 2) * rhs(2, 0));
 		float const _2134_2431(rhs(1, 0) * rhs(2, 3) - rhs(1, 3) * rhs(2, 0));
