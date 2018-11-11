@@ -2,10 +2,10 @@
 	(refer brdf_common.lsl)
 	(cbuffer mat
 		(float3 albedo)
-		(float2 metalness)
-		(float3 specular)
 		(float alpha)
+		(float2 metalness)
 		(float2 glossiness)
+		(float3 specular)
 	)
 	(cbuffer light
 		(float3 view_light_pos)
@@ -92,7 +92,7 @@
 			float3 diffuse,specular = 0;
 			ShadingMaterial(material,view_postion,view_dir,shadow,diffuse,specular);
 
-			color.xyz = diffuse*material.albedo + specular;
+			color.xyz = diffuse + specular;
 			color.w = 1.0f;
 		}
 		"
