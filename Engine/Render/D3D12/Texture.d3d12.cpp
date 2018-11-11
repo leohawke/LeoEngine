@@ -2,6 +2,7 @@
 #include "Context.h"
 #include "Convert.h"
 #include "RenderView.h"
+#include "../Effect/CopyEffect.h"
 #include <LBase/id.hpp>
 
 

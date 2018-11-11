@@ -5,7 +5,6 @@
 #ifndef LE_RENDER_D3D12_Context_h
 #define LE_RENDER_D3D12_Context_h 1
 
-#include "../Effect/CopyEffect.h"
 #include "../IContext.h"
 #include "InputLayout.hpp"
 #include "Adapter.h"
@@ -21,6 +20,11 @@
 #include <LBase/concurrency.h>
 
 #include <unordered_map>
+
+namespace platform::Render::Effect {
+	class Effect;
+	class CopyEffect;
+}
 
 namespace platform_ex {
 	namespace Windows {

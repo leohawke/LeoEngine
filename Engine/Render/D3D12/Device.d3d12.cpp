@@ -2,6 +2,7 @@
 #include "Context.h"
 #include "Convert.h"
 #include "Texture.h"
+#include "../Effect/CopyEffect.h"
 
 namespace Vertex = platform::Render::Vertex;
 namespace Buffer = platform::Render::Buffer;

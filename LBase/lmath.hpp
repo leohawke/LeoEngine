@@ -10,6 +10,34 @@
 #define LBase_lmath_hpp 1
 
 //vector
+namespace leo::math {
+	template<typename T>
+	inline vector3<T>& operator/=(vector3<T>&l, T r) {
+		l.x /= r;
+		l.y /= r;
+		l.z /= r;
+		return l;
+	}
+
+	template<typename T>
+	inline vector3<T>& operator*=(vector3<T>& l, T r) {
+		l.x *= r;
+		l.y *= r;
+		l.z *= r;
+		return l;
+	}
+
+	template<typename _type>
+	inline vector4<_type>& operator/=(vector4<_type>& l, _type r) {
+		l.x /= r;
+		l.y /= r;
+		l.z /= r;
+		l.w /= r;
+		return l;
+	}
+}
+
+//vector<float>
 namespace leo {
 	namespace math {
 		inline bool zero_float(float l) {
@@ -123,7 +151,7 @@ namespace leo {
 			return l;
 		}
 
-		inline float dot(const float3&l, const float3& r) {
+		inline float dot(const vector3<float> &l, const vector3<float>& r) {
 			return l.x*r.x + l.y*r.y + l.z*r.z;
 		}
 
@@ -257,7 +285,15 @@ namespace leo::math {
 	}
 
 	template<typename scalar>
-	inline constexpr basic_quaternion< scalar> rotation_axis(const vector3<scalar>& axis, scalar angle) noexcept;
+	inline constexpr basic_quaternion< scalar> rotation_axis(const vector3<scalar>& axis, scalar angle) noexcept {
+		float sa = sinf(angle*0.5f);
+		float ca = cosf(angle*0.5f);
+
+		if (zero_float(length_sq(axis)))
+			return { sa,sa,sa,ca };
+		else
+			return { sa*normalize(axis),ca };
+	}
 
 	template<typename scalar>
 	inline constexpr basic_quaternion<scalar> operator+(basic_quaternion<scalar> lhs, basic_quaternion<scalar> rhs) noexcept {

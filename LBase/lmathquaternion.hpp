@@ -26,8 +26,12 @@ namespace leo::math {
 		constexpr basic_quaternion(const basic_quaternion&)  noexcept = default;
 		constexpr basic_quaternion(basic_quaternion&&)  noexcept = default;
 
-		constexpr basic_quaternion(scalar x, scalar y, scalar z, scalar w)
+		constexpr basic_quaternion(scalar x, scalar y, scalar z, scalar w) noexcept
 			:x(x),y(y),z(z),w(w)
+		{}
+
+		constexpr basic_quaternion(const vector3<scalar>& xyz,scalar w) noexcept
+			:x(xyz.x),y(xyz.y),z(xyz.z),w(w)
 		{}
 
 		basic_quaternion& operator=(const basic_quaternion&) noexcept = default;
