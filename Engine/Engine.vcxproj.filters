@@ -152,6 +152,9 @@
     <ClCompile Include="Asset\DDSX.cpp">
       <Filter>Asset</Filter>
     </ClCompile>
+    <ClCompile Include="Core\CameraController.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -330,7 +333,7 @@
     <ClInclude Include="System\NinthTimer.h">
       <Filter>System</Filter>
     </ClInclude>
-    <ClInclude Include="CameraController.h">
+    <ClInclude Include="Core\CameraController.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

@@ -23,6 +23,9 @@ namespace leo::math {
 
 		constexpr basic_quaternion() noexcept = default;
 
+		constexpr basic_quaternion(const basic_quaternion&)  noexcept = default;
+		constexpr basic_quaternion(basic_quaternion&&)  noexcept = default;
+
 		constexpr basic_quaternion(scalar x, scalar y, scalar z, scalar w)
 			:x(x),y(y),z(z),w(w)
 		{}
@@ -78,7 +81,7 @@ namespace leo::math {
 	};
 
 	template<typename scalar>
-	const basic_quaternion<scalar> basic_quaternion<scalar>::identity{ 0,0,0,1 }
+	const basic_quaternion<scalar> basic_quaternion<scalar>::identity{ 0,0,0,1 };
 
 	using quaternion = basic_quaternion<float>;
 }

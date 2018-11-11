@@ -81,6 +81,10 @@ namespace engine::Core {
 		lm::float4x4 GetViewMatrix() const noexcept {
 			return lm::inverse(matrix);
 		}
+
+		void SetViewMatrix(const lm::float4x4& view) noexcept {
+			matrix = lm::inverse(view);
+		}
 	private:
 		lm::float4x4  matrix; // world-space matrix:translation view postiion to world
 	};
