@@ -118,8 +118,8 @@ private:
 			{0,0,1,0},
 			{0,0,0,1}
 		};
-		auto projmatrix = platform::X::perspective_fov_lh(3.14f / 6, 600.0f / 800, 1, 1000);
-		auto viewmatrix = platform::X::look_at_lh(eye, eye+ view_vec*10, up_vec);
+		auto projmatrix = engine::X::perspective_fov_lh(3.14f / 6, 600.0f / 800, 1, 1000);
+		auto viewmatrix = engine::X::look_at_lh(eye, eye+ view_vec*10, up_vec);
 
 		auto worldview = worldmatrix * viewmatrix;
 		auto worldviewproj = worldview * projmatrix;
