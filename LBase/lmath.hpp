@@ -20,6 +20,11 @@ namespace leo {
 			return zero_float(l - r);
 		}
 
+		inline constexpr float
+			sgn(float value) noexcept {
+			return value < 0.f ? -1.f : (value > 0.f ? 1.f : +0.f);
+		}
+
 		/* \!brief float4‘ÀÀ„∑˚÷ÿ‘ÿ
 		*/
 		//@{
@@ -252,6 +257,9 @@ namespace leo::math {
 	}
 
 	template<typename scalar>
+	inline constexpr basic_quaternion< scalar> rotation_axis(const vector3<scalar>& axis, scalar angle) noexcept;
+
+	template<typename scalar>
 	inline constexpr basic_quaternion<scalar> operator+(basic_quaternion<scalar> lhs, basic_quaternion<scalar> rhs) noexcept {
 		return { lhs.x + rhs.x,lhs.y + rhs.y,lhs.z + rhs.z,lhs.w + rhs.w };
 	}
@@ -288,6 +296,8 @@ namespace leo::math {
 		return x == rhs.x && y == rhs.y && z == rhs.z &&w == rhs.w;
 	}
 
+
+	constexpr float3 transformquat(float3 vector, quaternion q) noexcept;
 }
 
 //matrix
@@ -405,13 +415,13 @@ namespace leo::math {
 					-invDet * (rhs(0, 1) * _2334_2433 - rhs(0, 2) * _2234_2432 + rhs(0, 3) * _2233_2332)
 				},
 
-				{	
+				{
 					-invDet * (rhs(1, 0) * _3344_3443 - rhs(1, 2) * _3144_3441 + rhs(1, 3) * _3143_3341),
 					+invDet * (rhs(0, 0) * _3344_3443 - rhs(0, 2) * _3144_3441 + rhs(0, 3) * _3143_3341),
 					-invDet * (rhs(0, 0) * _2344_2443 - rhs(0, 2) * _2144_2441 + rhs(0, 3) * _2143_2341),
 					+invDet * (rhs(0, 0) * _2334_2433 - rhs(0, 2) * _2134_2431 + rhs(0, 3) * _2133_2331) },
 
-				{	
+				{
 					+invDet * (rhs(1, 0) * _3244_3442 - rhs(1, 1) * _3144_3441 + rhs(1, 3) * _3142_3241),
 					-invDet * (rhs(0, 0) * _3244_3442 - rhs(0, 1) * _3144_3441 + rhs(0, 3) * _3142_3241),
 					+invDet * (rhs(0, 0) * _2244_2442 - rhs(0, 1) * _2144_2441 + rhs(0, 3) * _2142_2241),
@@ -427,6 +437,10 @@ namespace leo::math {
 			};
 		}
 	}
+
+	inline float4x4 make_matrix(quaternion q, float3 t);
+
+	inline float4x4 make_matrix(float3 rotation_center, quaternion rotation, float3 t);
 }
 
 //template function
