@@ -247,10 +247,6 @@ namespace platform::Render::Effect {
 				auto cbuff_size = std::accumulate(param_indices.begin(), param_indices.end(), 0, [&](leo::uint32 init, leo::uint32 param_index) {
 					auto& asset_param = asset_params[param_index];
 
-					ShaderInfo::ConstantBufferInfo::VariableInfo VariableInfo;
-					VariableInfo.name = asset_param.GetName();
-					VariableInfo.start_offset = init;
-					pseudo_varinfos.emplace_back(VariableInfo);
 					auto value = 0;
 					switch (asset_param.GetType()) {
 					case asset::EPT_bool:
@@ -302,7 +298,31 @@ namespace platform::Render::Effect {
 					}
 					if(asset_param.GetArraySize() != 0)
 						value *= asset_param.GetArraySize();
-					pseudo_strides.emplace_back(value);
+					uint32 stride;
+					if (asset_param.GetArraySize() != 0) {
+						if (asset_param.GetType() == asset::EPT_float4x4)
+							stride = 64;
+						else
+							stride = 16;
+					}
+					else {
+						if (asset_param.GetType() == asset::EPT_float4x4)
+							stride = 16;
+						else
+							stride = 4;
+					}
+
+					pseudo_strides.emplace_back(stride);
+					
+					auto init_ceil16 = (init + 15)&(~15);
+					if(init + value > init_ceil16)
+						init = init_ceil16;
+
+					ShaderInfo::ConstantBufferInfo::VariableInfo VariableInfo;
+					VariableInfo.name = asset_param.GetName();
+					VariableInfo.start_offset = init;
+					pseudo_varinfos.emplace_back(VariableInfo);
+
 					return init + value;
 				});
 				GraphicsBuffer* pGPUBuffer = Context::Instance().GetDevice().CreateConstanBuffer(platform::Render::Buffer::Usage::Dynamic, 0, cbuff_size, EFormat::EF_Unknown);

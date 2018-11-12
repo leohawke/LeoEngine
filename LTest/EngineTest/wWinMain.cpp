@@ -123,16 +123,16 @@ private:
 
 		auto worldview = worldmatrix * viewmatrix;
 		auto worldviewproj = worldview * projmatrix;
-		auto worldviewinvt =leo::math::inverse(worldview);
+		auto worldviewinv =lm::inverse(worldview);
 
 		using namespace std::literals;
 		//obj
 		pEffect->GetParameter("worldview"sv) = lm::transpose(worldview);
 		pEffect->GetParameter("worldviewproj"sv) = lm::transpose(worldviewproj);
-		pEffect->GetParameter("worldviewinvt"sv) =lm::transpose(worldviewinvt);
+		pEffect->GetParameter("worldviewinvt"sv) = worldviewinv;
 		
 		//light
-		pEffect->GetParameter("view_light_pos"sv) = transformpoint(lm::float3(0, 0,0), viewmatrix);
+		pEffect->GetParameter("view_light_pos"sv) = transformpoint(lm::float3(0, 40,0), viewmatrix);
 		pEffect->GetParameter("light_radius"sv) =80.f;
 		pEffect->GetParameter("light_color"sv) = lm::float3(1.8f, 1.8f, 1.6f);
 		pEffect->GetParameter("light_blubsize"sv) = 60.f;
