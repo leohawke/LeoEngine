@@ -7,7 +7,6 @@
 				float3 albedo;
 				float metalness;
 
-				float3 specular;
 				float alpha;
 				float roughness;
 			};
