@@ -84,7 +84,6 @@
 			material.normal = normalize(view_normal);
 			material.albedo = albedo*albedo_tex.Sample(bilinear_sampler,tex).rgb;
 			material.metalness = metalness.x;
-			material.specular = specular;
 			material.alpha = alpha;
 			material.roughness = glossiness.y > 0.5?glossiness.x*glossiness_tex.Sample(bilinear_sampler,tex).r:glossiness.x;
 
