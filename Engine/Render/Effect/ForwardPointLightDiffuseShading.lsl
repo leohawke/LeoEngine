@@ -92,7 +92,7 @@
 			float3 diffuse,specular = 0;
 			ShadingMaterial(material,view_postion,view_dir,shadow,diffuse,specular);
 
-			color.xyz = diffuse*material.albedo + specular;
+			color.xyz = diffuse*material.albedo*(1-material.metalness) + specular;
 			color.w = 1.0f;
 		}
 		"
