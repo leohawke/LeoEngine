@@ -5,7 +5,6 @@
 		(float alpha)
 		(float2 metalness)
 		(float2 glossiness)
-		(float3 specular)
 	)
 	(cbuffer light
 		(float3 view_light_pos)

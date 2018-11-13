@@ -138,7 +138,6 @@ private:
 		pEffect->GetParameter("light_blubsize"sv) = 60.f;
 
 		//mat
-		pEffect->GetParameter("specular"sv) = lm::float3(1.0f, 0.2f, 0.1f);
 		pEffect->GetParameter("alpha"sv) = 1.0f;
 
 		for(auto& entity : pEntities->GetRenderables())
