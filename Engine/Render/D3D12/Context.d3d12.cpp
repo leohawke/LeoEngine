@@ -392,7 +392,7 @@ namespace platform_ex::Windows::D3D12 {
 			--prim_count;
 			break;
 		case platform::Render::InputLayout::TriangleList:
-			prim_count /= 2;
+			prim_count /= 3;
 			break;
 		case platform::Render::InputLayout::TriangleStrip:
 			prim_count -= 2;
