@@ -141,6 +141,11 @@ namespace platform_ex {
 				array<bool, NUM_MAX_CBV_SRV_UAVS> cbv_srv_uav_heap_flag;
 				//@}
 
+				//@{
+				//\brief cache Device Object for performance
+				std::unordered_map<size_t, COMPtr<ID3D12DescriptorHeap>> cbv_srv_uav_heaps;
+				//@}
+
 				//@}
 
 				platform::Render::Caps d3d_caps;
