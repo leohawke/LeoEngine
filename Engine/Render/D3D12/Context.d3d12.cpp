@@ -143,8 +143,23 @@ namespace platform_ex::Windows::D3D12 {
 		leo::observer_ptr<ID3D12DescriptorHeap> cbv_srv_uav_heap;
 		auto sampler_heap = shader_compose.SamplerHeap();
 		if (num_handle > 0) {
-			//hash cache
-			cbv_srv_uav_heap = device->CreateDynamicCBVSRVUAVDescriptorHeap(static_cast<UINT>(num_handle));
+			size_t hash_val = 0;
+			for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
+				hash_val = hash_combine_seq(hash_val, i, shader_compose.Srvs[i].size());
+				hash_val = hash(hash_val, shader_compose.Srvs[i].begin(), shader_compose.Srvs[i].end());
+			}
+			for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
+				hash_val = hash_combine_seq(hash_val, i, shader_compose.Uavs[i].size());
+				hash_val = hash(hash_val, shader_compose.Uavs[i].begin(), shader_compose.Uavs[i].end());
+			}
+			auto iter = device->cbv_srv_uav_heaps.find(hash_val);
+			if (iter == device->cbv_srv_uav_heaps.end()) {
+				cbv_srv_uav_heap = device->CreateDynamicCBVSRVUAVDescriptorHeap(static_cast<UINT>(num_handle));
+				device->cbv_srv_uav_heaps.emplace(hash_val, *cbv_srv_uav_heap.get());
+			}
+			else {
+				cbv_srv_uav_heap = leo::make_observer(iter->second.Get());
+			}
 			heaps[num_heaps++] = cbv_srv_uav_heap.get();
 		}
 		if (sampler_heap)
