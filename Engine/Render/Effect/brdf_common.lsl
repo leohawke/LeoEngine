@@ -43,7 +43,7 @@
 				float d = D_GGX(nh,roughness);
 				float v = V_SmithGGXCorrelated(nv,nl,roughness);
 
-				float3 f0 = lerp(0.4,albedo,metallic);
+				float3 f0 = lerp(0.04,albedo,metallic);
 				float f90 = SpecularMicroOcclusion(f0);
 
 				float f = F_Schlick(vh,f0,f90);

@@ -162,11 +162,11 @@ private:
 
 		pEntities = std::make_unique<Entities>("sponza_crytek.entities.lsl");
 
-		leo::math::float3 eye{ 0,10,0 };
-		leo::math::float3 view_vec{ 0,-0.7f,0.7f };
-		leo::math::float3 up_vec{ 0,1,0 };
+		leo::math::float3 eye{ -38.47f,3.53f,2.19f };
+		leo::math::float3 up_vec{ 0.12f,0.98f,-0.08f };
+		leo::math::float3 view_vec{ 0.94f,-0.1f,0.2f };
 
-		camera.SetViewMatrix(engine::X::look_at_lh({ 0,10,0 }, eye + view_vec * 10, up_vec));
+		camera.SetViewMatrix(engine::X::look_at_lh(eye, eye + view_vec * 10, up_vec));
 
 		pCameraMainpulator = std::make_unique<engine::Core::TrackballCameraManipulator>(10.0f);
 		pCameraMainpulator->Attach(camera);
