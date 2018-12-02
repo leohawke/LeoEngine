@@ -32,7 +32,7 @@ public:
 		auto material_name = Access("material", node);
 
 		pMesh = platform::X::LoadMesh(mesh_name + ".asset", mesh_name);
-		pMaterial = platform::X::LoadMaterial(material_name+".mat.lsl", material_name);
+		pMaterial = platform::X::LoadMaterial(material_name + ".mat.lsl", material_name);
 	}
 
 	const platform::Material& GetMaterial() const {
@@ -105,7 +105,7 @@ private:
 		auto entityId = ecs::EntitySystem::Instance().AddEntity<ecs::Entity>();
 
 		Context::Instance().BeginFrame();
-		Context::Instance().GetScreenFrame()->Clear(FrameBuffer::Color | FrameBuffer::Depth | FrameBuffer::Stencil, { 0,0,0,1 }, 1,0);
+		Context::Instance().GetScreenFrame()->Clear(FrameBuffer::Color | FrameBuffer::Depth | FrameBuffer::Stencil, { 0,0,0,1 }, 1, 0);
 		auto& Device = Context::Instance().GetDevice();
 
 		ecs::EntitySystem::Instance().RemoveEntity(entityId);
@@ -123,24 +123,24 @@ private:
 
 		auto worldview = worldmatrix * viewmatrix;
 		auto worldviewproj = worldview * projmatrix;
-		auto worldviewinv =lm::inverse(worldview);
+		auto worldviewinv = lm::inverse(worldview);
 
 		using namespace std::literals;
 		//obj
 		pEffect->GetParameter("worldview"sv) = lm::transpose(worldview);
 		pEffect->GetParameter("worldviewproj"sv) = lm::transpose(worldviewproj);
 		pEffect->GetParameter("worldviewinvt"sv) = worldviewinv;
-		
+
 		//light
-		pEffect->GetParameter("view_light_pos"sv) = transformpoint(lm::float3(0, 40,0), viewmatrix);
-		pEffect->GetParameter("light_radius"sv) =80.f;
+		pEffect->GetParameter("view_light_pos"sv) = transformpoint(lm::float3(0, 40, 0), viewmatrix);
+		pEffect->GetParameter("light_radius"sv) = 80.f;
 		pEffect->GetParameter("light_color"sv) = lm::float3(1.8f, 1.8f, 1.6f);
 		pEffect->GetParameter("light_blubsize"sv) = 60.f;
 
 		//mat
 		pEffect->GetParameter("alpha"sv) = 1.0f;
 
-		for(auto& entity : pEntities->GetRenderables())
+		for (auto& entity : pEntities->GetRenderables())
 		{
 			entity.GetMaterial().UpdateParams(reinterpret_cast<const platform::Renderable*>(&entity));
 			Context::Instance().Render(*pEffect, pEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
@@ -166,7 +166,7 @@ private:
 		leo::math::float3 view_vec{ 0,-0.7f,0.7f };
 		leo::math::float3 up_vec{ 0,1,0 };
 
-		camera.SetViewMatrix(engine::X::look_at_lh({0,10,0}, eye + view_vec * 10, up_vec));
+		camera.SetViewMatrix(engine::X::look_at_lh({ 0,10,0 }, eye + view_vec * 10, up_vec));
 
 		pCameraMainpulator = std::make_unique<engine::Core::TrackballCameraManipulator>(10.0f);
 		pCameraMainpulator->Attach(camera);
@@ -177,7 +177,7 @@ private:
 			static auto lastyPos = GET_Y_LPARAM(lParam);
 			auto xPos = GET_X_LPARAM(lParam);
 			auto yPos = GET_Y_LPARAM(lParam);
-			leo::math::float2 offset(static_cast<float>(xPos - lastxPos),static_cast<float>(yPos - lastyPos));
+			leo::math::float2 offset(static_cast<float>(xPos - lastxPos), static_cast<float>(yPos - lastyPos));
 			lastxPos = xPos;
 			lastyPos = yPos;
 			if (wParam & MK_LBUTTON) {

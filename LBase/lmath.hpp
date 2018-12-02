@@ -112,6 +112,9 @@ namespace leo {
 		}
 		//@}
 
+		/* \!brief float3运算符重载
+		*/
+		//@{
 		inline bool operator==(const float3& l, const float3& r) noexcept {
 			return float_equal(l.x, r.x) && float_equal(l.y, r.y)
 				&& float_equal(l.z, r.z);
@@ -161,6 +164,15 @@ namespace leo {
 				l.z*r.x - l.x*r.z,
 				l.x*r.y - l.y*r.x };
 		}
+		//@}
+
+		/* \!brief float2运算符重载
+		*/
+		//@{
+		inline bool operator==(const float2& l, const float2& r) noexcept {
+			return float_equal(l.x, r.x) && float_equal(l.y, r.y);
+		}
+		//@}
 
 		template<typename _type, limpl(typename = enable_if_t<is_lmathtype_v<_type>>)>
 		inline constexpr _type operator+(const _type& l, const _type& r) noexcept {

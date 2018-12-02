@@ -669,7 +669,7 @@ namespace leo {
 		};
 
 		//The float2 data type
-		struct lalignas(16) float2 :vector2<float>
+		struct float2 :vector2<float>
 		{
 			using base = vector2<float>;
 			using base::base;
@@ -683,7 +683,7 @@ namespace leo {
 		};
 
 		//The float3 data type
-		struct lalignas(16) float3 :vector3<float>
+		struct float3 :vector3<float>
 		{
 			using base = vector3<float>;
 			using base::base;
@@ -701,7 +701,7 @@ namespace leo {
 		};
 
 		//The float4 data type
-		struct lalignas(16) float4 :vector4<float>
+		struct float4 :vector4<float>
 		{
 			using base = vector4<float>;
 			using base::base;
@@ -732,7 +732,7 @@ namespace leo {
 		{};
 
 		//The float3x3 data type
-		struct lalignas(16) float3x3 {
+		struct float3x3 {
 			std::array<float3, 3> r;
 
 			float& operator()(uint8 row, uint8 col) noexcept {
@@ -765,7 +765,7 @@ namespace leo {
 		};
 
 		//The float4x4 
-		struct lalignas(16) float4x4 {
+		struct float4x4 {
 			std::array<float4, 4> r;
 
 			float& operator()(uint8 row, uint8 col) noexcept {
