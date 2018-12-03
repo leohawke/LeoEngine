@@ -46,7 +46,7 @@
 				float3 f0 = lerp(0.04,albedo,metallic);
 				float f90 = SpecularMicroOcclusion(f0);
 
-				float f = F_Schlick(vh,f0,f90);
+				float3 f = F_Schlick(vh,f0,f90);
 
 				return d*v*f;
 			}

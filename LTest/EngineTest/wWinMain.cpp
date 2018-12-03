@@ -134,8 +134,8 @@ private:
 		//light
 		pEffect->GetParameter("view_light_pos"sv) = transformpoint(lm::float3(0, 40, 0), viewmatrix);
 		pEffect->GetParameter("light_radius"sv) = 80.f;
-		pEffect->GetParameter("light_color"sv) = lm::float3(1.8f, 1.8f, 1.6f);
-		pEffect->GetParameter("light_blubsize"sv) = 60.f;
+		pEffect->GetParameter("light_color"sv) = lm::float3(1.0f, 1.0f, 1.0f);
+		pEffect->GetParameter("light_blubsize"sv) = 40.f;
 
 		//mat
 		pEffect->GetParameter("alpha"sv) = 1.0f;
