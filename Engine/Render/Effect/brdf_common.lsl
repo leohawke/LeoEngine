@@ -54,7 +54,7 @@
 
 			float2x3 SurfaceEnergy(Material material,float3 normal,float3 light_source,float3 view_dir,float shadow)
 			{
-				float halfway_vec = normalize(view_dir+light_source);
+				float3 halfway_vec = normalize(view_dir+light_source);
 
 				float nh = saturate(dot(normal,halfway_vec));
 				float nl = saturate(dot(normal,light_source));

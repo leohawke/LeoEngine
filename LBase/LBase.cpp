@@ -21,8 +21,6 @@ static decltype(auto) foo() {
 
 	gugugu.zx = smq.yx;
 
-	static_assert(sizeof(leo::math::float2) == sizeof(leo::math::float4));
-	
 	auto mjs = lm::make_qtangent<float>(gugugu, -1);
 
 	return 0;
