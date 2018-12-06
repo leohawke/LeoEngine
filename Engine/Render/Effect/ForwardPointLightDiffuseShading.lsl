@@ -60,12 +60,12 @@
 						in float2 TexCoord:TEXCOORD,
 					out float4 ClipPos:SV_POSITION,
 					out float2 Tex:TEXCOORD0,
-					out float4 ViewPos:TEXCOORD1,
+					out float3 ViewPos:TEXCOORD1,
 					out float3 ViewNormal:TEXCOORD2
 		)
 		{
 			ClipPos = mul(float4(Postion,1.0f),worldviewproj);
-			ViewPos = mul(float4(Postion,1.0f),worldview);
+			ViewPos = mul(float4(Postion,1.0f),worldview).xyz;
 			ViewNormal = mul(float4(Normal,0.0f),worldviewinvt).xyz;
 			Tex = TexCoord;
 		}
