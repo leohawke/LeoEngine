@@ -145,8 +145,17 @@ namespace platform::Render::Effect {
 	}
 
 
+	//effect will be discard
 	Parameter & Effect::GetParameter(const std::string_view & name)
 	{
+#ifndef NDEBUG
+		auto hash = leo::constfn_hash(name);
+		auto itr = parameters.find(hash);
+		if (itr != parameters.end())
+			return itr->second;
+		LF_Trace(platform::Descriptions::Warning, "The Effect(%s) ctor pseudo paramter(%s),It's waste memory!", GetName().c_str(), name.data());
+		return parameters.emplace(hash,Parameter(name,EffectParamType::EPT_ElemEmpty)).first->second;
+#endif
 		return GetParameter(leo::constfn_hash(name));
 	}
 

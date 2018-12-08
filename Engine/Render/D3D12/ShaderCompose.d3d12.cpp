@@ -21,7 +21,7 @@ namespace {
 				param->Value(tex_subres);
 			}
 			catch (leo::bad_any_cast&) {
-				LF_Trace(platform::Descriptions::RecordLevel::Warning, "SetTextureSRV Value Null!");
+				LF_Trace(platform::Descriptions::RecordLevel::Warning, "SetTextureSRV(%s) Value Null!",param->Name.c_str());
 			}
 			if (tex_subres.tex) {
 				auto pTexture = dynamic_cast<D3D12::Texture*>(tex_subres.tex.get());
@@ -52,7 +52,12 @@ namespace {
 		{}
 		void operator()() {
 			std::shared_ptr<platform::Render::GraphicsBuffer> buffer;
-			param->Value(buffer);
+			try {
+				param->Value(buffer);
+			}
+			catch (leo::bad_any_cast&) {
+				LF_Trace(platform::Descriptions::RecordLevel::Warning, "SetBufferSRV(%s) Value Null!",param->Name.c_str());
+			}
 			if (buffer) {
 				auto pBuffer = static_cast<D3D12::GraphicsBuffer*>(buffer.get());
 				*psrvsrc = std::make_tuple(pBuffer->Resource(), 0, 1);

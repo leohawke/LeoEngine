@@ -181,6 +181,10 @@ namespace platform::Render::Effect {
 			:NameKey(name,std::hash<std::string>()(name))
 		{}
 
+		NameKey(const std::string_view& name)
+		:Name(name),Hash(std::hash<std::string_view>()(name)){
+		}
+
 		NameKey(const std::string& name,size_t hash)
 			:Name(name),Hash(hash)
 		{}
@@ -302,8 +306,8 @@ namespace platform::Render::Effect {
 
 	class Parameter :public NameKey {
 	public:
-		Parameter(const std::string& name, EffectParamType type_)
-			:NameKey(name, std::hash<std::string>()(name)),type(type_)
+		Parameter(const std::string_view& name, EffectParamType type_)
+			:NameKey(name),type(type_)
 		{}
 
 		Parameter(const std::string& name, size_t hash, EffectParamType type_)
