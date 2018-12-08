@@ -143,7 +143,7 @@ namespace platform {
 				return std::hash<decltype(param)>()(param);
 			};
 
-			ParseMacro(effect_desc.effect_asset->GetMacrosRef(), effect_node);
+			ParseMacro(effect_desc.effect_asset->GetMacrosRef(), effect_node, false);
 			{
 				auto cbuffer_nodes = X::SelectNodes("cbuffer", effect_node);
 				for (auto & cbuffer_node : cbuffer_nodes) {
@@ -161,7 +161,7 @@ namespace platform {
 					});
 					std::vector<leo::uint32> ParamIndices;
 					for (auto & param_node : param_nodes) {
-						auto param_index = ParseParam(param_node);
+						auto param_index = ParseParam(param_node,true);
 						ParamIndices.emplace_back(static_cast<leo::uint32>(param_index));
 					}
 					cbuffer.GetParamIndicesRef() = std::move(ParamIndices);
@@ -182,7 +182,7 @@ namespace platform {
 					}
 				});
 				for (auto & param_node : param_nodes)
-					ParseParam(param_node);
+					ParseParam(param_node,false);
 			}
 			{
 				auto fragments = X::SelectNodes("shader", effect_node);
@@ -281,7 +281,7 @@ namespace platform {
 				return nullptr;
 		};
 
-		void ParseMacro(std::vector<asset::EffectMacro>& macros, const scheme::TermNode& node,bool topmacro = false)
+		void ParseMacro(std::vector<asset::EffectMacro>& macros, const scheme::TermNode& node,bool topmacro)
 		{
 			//macro (macro (name foo) (value bar))
 			auto macro_nodes = X::SelectNodes("macro", node);
@@ -792,7 +792,7 @@ namespace platform {
 			}
 		}
 
-		size_t ParseParam(const scheme::TermNode& param_node) {
+		size_t ParseParam(const scheme::TermNode& param_node,bool cbuffer_param) {
 			asset::EffectParameterAsset param;
 			param.SetName(AccessLastNoChild<std::string>(param_node));
 			//don't need check type again
@@ -815,7 +815,8 @@ namespace platform {
 			auto optional_value = ReadParamValue(param_node,param.GetType());
 			if (optional_value.has_value())
 				effect_desc.effect_asset->BindValue(index, optional_value.value());
-			effect_desc.effect_asset->EmplaceShaderGenInfo(AssetType::PARAM, index, std::stoul(param_node.GetName()));
+			if(!cbuffer_param)
+				effect_desc.effect_asset->EmplaceShaderGenInfo(AssetType::PARAM, index, std::stoul(param_node.GetName()));
 			effect_desc.effect_asset->GetParamsRef().emplace_back(std::move(param));
 			return index;
 		}

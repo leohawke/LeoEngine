@@ -58,7 +58,7 @@
 	)
 	(shader
 		"
-		void ForawdVS(in float3 Postion:POSITION,
+		void ForwardVS(in float3 Postion:POSITION,
 						in float3 Normal:NORMAL,
 						in float2 TexCoord:TEXCOORD,
 					out float4 ClipPos:SV_POSITION,
@@ -73,7 +73,7 @@
 			Tex = TexCoord;
 		}
 
-		void PointLightPS(in float4 ClipPos:SV_POSITION,
+		void ForwardLightPS(in float4 ClipPos:SV_POSITION,
 			in float2 tex:TEXCOORD0,
 			in float3 view_postion:TEXCOORD1,
 			in float3 view_normal:TEXCOORD2,
@@ -103,8 +103,8 @@
 	)
 	(technique (name PointLight)
 		(pass (name p0)
-			(vertex_shader ForawdVS)
-			(pixel_shader PointLightPS)
+			(vertex_shader ForwardVS)
+			(pixel_shader ForwardLightPS)
 		)
 	)
 )
