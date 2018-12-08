@@ -193,6 +193,9 @@ namespace platform {
 						);
 				}
 			}
+			//TODO:collect material info recrate shader info in material module
+			//Note:the code gen order is immutable
+			effect_desc.effect_asset->PrepareShaderGen();
 			effect_desc.effect_code = effect_desc.effect_asset->GenHLSLShader();
 			ParseTechnique(effect_node);
 

@@ -193,6 +193,26 @@ namespace asset {
 #ifdef ENGINE_TOOL
 	public:
 		std::string GenHLSLShader() const;
+
+		enum GenSlot {
+			MACRO,
+			PARAM,
+			CBUFFER,
+			FRAGMENT
+		};
+
+		void EmplaceShaderGenInfo(GenSlot genslot, leo::uint32 localindex, leo::uint32 genindex) {
+			gen_indices.emplace_back(genslot, localindex, genindex);
+		}
+
+		void PrepareShaderGen() {
+			std::sort(gen_indices.begin(), gen_indices.end(), [](const std::tuple<GenSlot, leo::uint32, leo::uint32>& lhs,const std::tuple<GenSlot, leo::uint32, leo::uint32>& rhs) {
+				return std::get<2>(lhs) < std::get<2>(rhs);
+			});
+		}
+
+	private:
+		std::vector<std::tuple<GenSlot, leo::uint32, leo::uint32>> gen_indices;
 #endif
 	};
 }

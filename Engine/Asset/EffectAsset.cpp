@@ -156,65 +156,78 @@ std::string asset::EffectAsset::GenHLSLShader() const
 {
 	using std::endl;
 
+	auto& macros = GetMacros();
+	auto& cbuffers = GetCBuffers();
+	auto& params = GetParams();
+	auto & fragments = GetFragments();
+
 	std::stringstream ss;
-	for (auto & name_value : GetMacros())
-	{
-		ss << leo::sfmt("#define %s %s", name_value.first.c_str(), name_value.second.c_str()) << endl;
-	}
-	ss << endl;
-	std::set<std::size_t> except_set;
-	for (auto & cbuffer : GetCBuffers())
-	{
-		ss << leo::sfmt("cbuffer %s", cbuffer.GetName().c_str()) << endl;
-		ss << '{' << endl;
 
-		for (auto paramindex : cbuffer.GetParamIndices())
+	for (auto& gen_index : gen_indices) {
+		auto local_index = std::get<1>(gen_index);
+		switch (std::get<0>(gen_index)) {
+		case	MACRO:
 		{
-			const auto & param = GetParams()[paramindex];
-			if (param.GetType() >= EPT_bool) {
-				ss << leo::sfmt("%s %s", GetTypeName(param.GetType()).c_str(), param.GetName().c_str());
-				if (param.GetArraySize())
-					ss << leo::sfmt("[%s]", std::to_string(param.GetArraySize()).c_str());
-				ss << ';' << endl;
-			}
-			except_set.insert(param.GetNameHash());
+			auto& name_value = macros[local_index];
+			ss << leo::sfmt("#define %s %s", name_value.first.c_str(), name_value.second.c_str()) << endl;
+			break;
 		}
+		case	CBUFFER:
+		{
+			auto & cbuffer = cbuffers[local_index];
+			ss << leo::sfmt("cbuffer %s", cbuffer.GetName().c_str()) << endl;
+			ss << '{' << endl;
 
-		ss << "};" << endl;
-	}
+			for (auto paramindex : cbuffer.GetParamIndices())
+			{
+				const auto & param = GetParams()[paramindex];
+				if (param.GetType() >= EPT_bool) {
+					ss << leo::sfmt("%s %s", GetTypeName(param.GetType()).c_str(), param.GetName().c_str());
+					if (param.GetArraySize())
+						ss << leo::sfmt("[%s]", std::to_string(param.GetArraySize()).c_str());
+					ss << ';' << endl;
+				}
+			}
 
-	for (auto & param : GetParams())
-	{
-		if (except_set.count(param.GetNameHash()) > 0)
-			continue;
-		std::string elem_type = [&] {
-			if (auto pElemType = std::get_if<EffectParamType>(&param.GetElemInfo())) {
-				if (*pElemType != EPT_ElemEmpty)
-					return GetTypeName(param.GetElemType());
-				else
-					return std::string();
+			ss << "};" << endl;
+			break;
+		}
+		case	PARAM:
+		{
+			auto & param = params[local_index];
+			std::string elem_type = [&] {
+				if (auto pElemType = std::get_if<EffectParamType>(&param.GetElemInfo())) {
+					if (*pElemType != EPT_ElemEmpty)
+						return GetTypeName(param.GetElemType());
+					else
+						return std::string();
+				}
+				else {
+					return param.GetElemUserType();
+				}
+			}();
+			if (param.GetType() <= EPT_ConsumeStructuredBuffer && !elem_type.empty()) {
+				ss << leo::sfmt("%s<%s> %s", GetTypeName(param.GetType()).c_str(),
+					elem_type.c_str(), param.GetName().c_str())
+					<< ';'
+					<< endl;
 			}
 			else {
-				return param.GetElemUserType();
+				ss << leo::sfmt("%s %s", GetTypeName(param.GetType()).c_str(),
+					param.GetName().c_str())
+					<< ';'
+					<< endl;
 			}
-		}();
-		if (param.GetType() <= EPT_ConsumeStructuredBuffer && !elem_type.empty()) {
-			ss << leo::sfmt("%s<%s> %s", GetTypeName(param.GetType()).c_str(),
-				elem_type.c_str(), param.GetName().c_str())
-				<< ';'
-				<< endl;
+			break;
 		}
-		else {
-			ss << leo::sfmt("%s %s", GetTypeName(param.GetType()).c_str(),
-				param.GetName().c_str())
-				<< ';'
-				<< endl;
+		case	FRAGMENT:
+		{
+			auto & fragment = fragments[local_index];
+			ss << fragment.GetFragment() << endl;
+			break;
+		}
 		}
 	}
-	ss << endl;
-
-	for (auto & fragment : GetFragments())
-		ss << fragment.GetFragment() << endl;
 
 	return ss.str();
 }
