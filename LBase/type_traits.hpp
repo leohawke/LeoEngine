@@ -534,13 +534,9 @@ namespace leo {
 	\see http://wg21.cmeerw.net/cwg/issue1558 ¡£
 	\since build 1.4
 	*/
-#if LB_IMPL_GNUCPP >= 50000
-	template<typename _type, typename...>
-	using well_formed_t = _type;
-#else
+
 	template<typename _type, typename... _types>
-	using well_formed_t = typename always<_type>::template apply<_types...>::type;
-#endif
+	using well_formed_t = _type;
 
 	/*!
 	\see WG21 N3911 ¡£
