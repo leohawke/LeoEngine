@@ -4,11 +4,16 @@
 			"
 			struct Material{
 				float3 normal;
+				float alpha;
+
 				float3 albedo;
 				float metalness;
 
-				float alpha;
+				float3 diffuse;
+
 				float roughness;
+
+				float3 position;
 			};
 
 			float SmoothnessToRoughness(float smoothness){

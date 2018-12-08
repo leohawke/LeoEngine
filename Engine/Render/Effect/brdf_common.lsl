@@ -52,8 +52,9 @@
 			}
 
 
-			float2x3 SurfaceEnergy(Material material,float3 normal,float3 light_source,float3 view_dir,float shadow)
+			float2x3 SurfaceEnergy(Material material,float3 light_source,float3 view_dir)
 			{
+				float3 normal = material.normal;
 				float3 halfway_vec = normalize(view_dir+light_source);
 
 				float nh = saturate(dot(normal,halfway_vec));
@@ -63,13 +64,12 @@
 				float lv = saturate(dot(light_source,view_dir));
 
 				float roughness = material.roughness;
-				float occlusion = 1.f;
 
-				float3 diffuse = BurleyBRDF(nl,nv,vh,roughness)*nl*occlusion;
+				float3 diffuse = BurleyBRDF(nl,nv,vh,roughness);
 
 				float3 specular = SpecularBRDF_GGX(nh,nl,vh,nv,roughness,material.albedo,material.metalness);
 
-				return float2x3(diffuse,specular*nl*occlusion);
+				return float2x3(diffuse*material.diffuse,specular);
 			}
 			"
 	)

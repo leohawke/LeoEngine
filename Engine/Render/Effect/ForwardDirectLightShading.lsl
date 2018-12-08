@@ -1,17 +1,16 @@
 (effect
 	(refer brdf_common.lsl)
+	(refer DirectLight.lsl)
 	(cbuffer mat
 		(float3 albedo)
 		(float alpha)
 		(float2 metalness)
 		(float2 glossiness)
 	)
-	(cbuffer light
-		(float3 view_light_pos)
-		(float light_radius)
-		(float3 light_color)
-		(float light_blubsize)
+	(cbuffer global
+		(uint light_count)
 	)
+	(StructuredBuffer (elem DirectLighting) lights)
 	(cbuffer obj
 		(float4x4 worldviewproj)
 		(float4x4 worldview)
@@ -26,30 +25,34 @@
 	)
 	(shader 
 		"
-		float AttenuationTerm(float3 light_source,float radius,float blubsize){
-				float invRadius = 1/radius;
-				float d = length(light_source);
-				float fadeoutFactor = saturate((radius-d)*(invRadius/0.2h));
-				d = max(d-blubsize,0);
-				float dnom = 1+ d/blubsize;
-				float attenuation = fadeoutFactor * fadeoutFactor/(dnom*dnom);
-				return attenuation;
+		void SurfaceShading(in Light light,in Material material,float3 view_dir,inout float3 diffuse,inout float3 specular){
+			float2x3 energy = SurfaceEnergy(material,light.direction,view_dir);
+
+			diffuse = energy[0]*light.attenuation*light.nol*light.color;
+			specular = energy[1]*light.attenuation*light.nol*light.color;
 		}
 
-		void ShadingMaterial(Material material,float3 view_position,float3 view_dir,float shadow,inout float3 diffuse,inout float3 specular)
+		struct LightingResult
 		{
-			float3 light_source = view_light_pos - view_position;
-			float3 light_source_normal = normalize(light_source);
+			float3 diffuse;
+			float3 specular;
+		};
 
-			float3 atten = AttenuationTerm(light_source,light_radius,light_blubsize);
-			atten *= light_color;
+		void ShadingMaterial(Material material,float3 view_dir,float shadow,float occlusion,inout float3 diffuse,inout float3 specular)
+		{
+			LightingResult total = (LightingResult)0;
+			for(int i = 0; i!=light_count;++i ){
+				DirectLight direct_light = lights[i];
+				Light light = GetPointLight(direct_light,material);
 
-			float2x3 energy = SurfaceEnergy(material,material.normal,light_source_normal,view_dir,shadow);
-			diffuse = energy[0] /*+ Subsurface*/;
-			diffuse *= atten;
+				LightingResult result = (LightingResult)0;
+				SurfaceShading(light,material,view_dir,result.diffuse,result.specular);
 
-			specular = energy[1];
-			specular *= atten;
+				total.diffuse += result.diffuse;
+				total.specular += result.specular;
+			}
+			diffuse = total.diffuse;
+			specular = toatal.specular;
 		}
 		"
 	)
@@ -79,18 +82,21 @@
 		{
 			float3 view_dir = -normalize(view_postion);
 			float shadow = 1;
+			float occlusion = 1;
 
 			Material material;
 			material.normal = normalize(view_normal);
+			material.diffuse = material.albedo*(1-material.metalness);
 			material.albedo = albedo*albedo_tex.Sample(bilinear_sampler,tex).rgb;
 			material.metalness = metalness.x;
 			material.alpha = alpha;
 			material.roughness = glossiness.y > 0.5?glossiness.x*glossiness_tex.Sample(bilinear_sampler,tex).r:glossiness.x;
+			material.position = view_position;
 
 			float3 diffuse,specular = 0;
-			ShadingMaterial(material,view_postion,view_dir,shadow,diffuse,specular);
+			ShadingMaterial(material,view_dir,shadow,occlusion,diffuse,specular);
 
-			color.xyz = diffuse*material.albedo*(1-material.metalness) + specular;
+			color.xyz = diffuse + specular;
 			color.w = 1.0f;
 		}
 		"

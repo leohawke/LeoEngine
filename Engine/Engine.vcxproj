@@ -145,7 +145,8 @@
     </CustomBuild>
     <None Include="Render\Effect\brdf_common.lsl" />
     <None Include="Render\Effect\Copy.lsl" />
-    <None Include="Render\Effect\ForwardPointLightDiffuseShading.lsl" />
+    <None Include="Render\Effect\DirectLight.lsl" />
+    <None Include="Render\Effect\ForwardDirectLightShading.lsl" />
     <None Include="Render\Effect\material.lsl" />
     <None Include="Render\Effect\PostProcess.lsl" />
     <None Include="Render\Effect\Util.lsl" />

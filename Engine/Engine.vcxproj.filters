@@ -382,11 +382,14 @@
     <None Include="Render\Effect\material.lsl">
       <Filter>Render\Effect</Filter>
     </None>
-    <None Include="Render\Effect\ForwardPointLightDiffuseShading.lsl">
-      <Filter>Render\Effect</Filter>
-    </None>
     <None Include="Render\Material\FPDS.mat.lsl">
       <Filter>Render\Material</Filter>
+    </None>
+    <None Include="Render\Effect\ForwardDirectLightShading.lsl">
+      <Filter>Render\Effect</Filter>
+    </None>
+    <None Include="Render\Effect\DirectLight.lsl">
+      <Filter>Render\Effect</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
