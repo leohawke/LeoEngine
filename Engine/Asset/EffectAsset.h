@@ -201,12 +201,14 @@ namespace asset {
 			FRAGMENT
 		};
 
-		void EmplaceShaderGenInfo(GenSlot genslot, leo::uint32 localindex, leo::uint32 genindex) {
-			gen_indices.emplace_back(genslot, localindex, genindex);
+		void EmplaceShaderGenInfo(GenSlot genslot,std::size_t localindex,std::size_t genindex) {
+			gen_indices.emplace_back(genslot,static_cast<leo::uint32>(localindex),static_cast<leo::uint32>(genindex));
 		}
 
 		void PrepareShaderGen() {
 			std::sort(gen_indices.begin(), gen_indices.end(), [](const std::tuple<GenSlot, leo::uint32, leo::uint32>& lhs,const std::tuple<GenSlot, leo::uint32, leo::uint32>& rhs) {
+				if (std::get<2>(lhs) == std::get<2>(rhs))
+					return std::get<1>(lhs) < std::get<1>(rhs);
 				return std::get<2>(lhs) < std::get<2>(rhs);
 			});
 		}

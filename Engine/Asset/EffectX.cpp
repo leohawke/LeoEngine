@@ -165,6 +165,7 @@ namespace platform {
 						ParamIndices.emplace_back(static_cast<leo::uint32>(param_index));
 					}
 					cbuffer.GetParamIndicesRef() = std::move(ParamIndices);
+					effect_desc.effect_asset->EmplaceShaderGenInfo(AssetType::CBUFFER, effect_desc.effect_asset->GetCBuffersRef().size(), std::stoul(cbuffer_node.GetName()));
 					effect_desc.effect_asset->GetCBuffersRef().emplace_back(std::move(cbuffer));
 				}
 			}
@@ -186,6 +187,7 @@ namespace platform {
 			{
 				auto fragments = X::SelectNodes("shader", effect_node);
 				for (auto& fragment : fragments) {
+					effect_desc.effect_asset->EmplaceShaderGenInfo(AssetType::FRAGMENT, effect_desc.effect_asset->GetFragmentsRef().size(), std::stoul(fragment.GetName()));
 					effect_desc.effect_asset->GetFragmentsRef().emplace_back();
 					effect_desc.effect_asset->GetFragmentsRef().back().
 						GetFragmentRef() = scheme::Deliteralize(
@@ -279,11 +281,18 @@ namespace platform {
 				return nullptr;
 		};
 
-		void ParseMacro(std::vector<asset::EffectMacro>& macros, const scheme::TermNode& node)
+		void ParseMacro(std::vector<asset::EffectMacro>& macros, const scheme::TermNode& node,bool topmacro = false)
 		{
 			//macro (macro (name foo) (value bar))
 			auto macro_nodes = X::SelectNodes("macro", node);
 			for (auto & macro_node : macro_nodes) {
+				if (!topmacro) {
+					effect_desc.effect_asset->EmplaceShaderGenInfo(AssetType::MACRO, macros.size(), std::stoul(macro_node.GetName()));
+				}
+				else {
+					//当有其他类型使用index 0时，宏会排在前面
+					effect_desc.effect_asset->EmplaceShaderGenInfo(AssetType::MACRO, macros.size(), 0);
+				}
 				macros.emplace_back(
 					Access("name", macro_node),
 					Access("value", macro_node));
@@ -309,7 +318,8 @@ namespace platform {
 					//继承technique意味继承所有的pass
 					technique.GetPassesRef() = inherit_technique->GetPasses();
 				}
-				ParseMacro(technique.GetMacrosRef(), technique_node);
+				//techinque中的宏要求push到顶端
+				ParseMacro(technique.GetMacrosRef(), technique_node,true);
 
 				auto passes = X::SelectNodes("pass", technique_node);
 				for (auto & pass_node : passes) {
@@ -350,7 +360,7 @@ namespace platform {
 					}
 
 					//pass也有宏节点
-					ParseMacro(pass.GetMacrosRef(), pass_node);
+					ParseMacro(pass.GetMacrosRef(), pass_node,true);
 					ParsePassState(*pass_ptr, pass_node);
 					ComposePassShader(technique, *pass_ptr, pass_node);
 				}
@@ -766,6 +776,7 @@ namespace platform {
 
 		void UniqueMacro(std::vector<asset::EffectMacro>& macros)
 		{
+			//TODO! remap shader gen info
 			//宏的覆盖原则 删除前面已定义的宏
 			auto iter = macros.begin();
 			while (iter != macros.end()) {
@@ -804,6 +815,7 @@ namespace platform {
 			auto optional_value = ReadParamValue(param_node,param.GetType());
 			if (optional_value.has_value())
 				effect_desc.effect_asset->BindValue(index, optional_value.value());
+			effect_desc.effect_asset->EmplaceShaderGenInfo(AssetType::PARAM, index, std::stoul(param_node.GetName()));
 			effect_desc.effect_asset->GetParamsRef().emplace_back(std::move(param));
 			return index;
 		}
