@@ -110,7 +110,7 @@ private:
 
 		ecs::EntitySystem::Instance().RemoveEntity(entityId);
 
-		auto pEffect = platform::X::LoadEffect("ForwardPointLightDiffuseShading");
+		auto pEffect = platform::X::LoadEffect("ForwardDirectLightShading");
 
 		lm::float4x4 worldmatrix = {
 			{1,0,0,0},

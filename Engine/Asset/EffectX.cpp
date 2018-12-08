@@ -753,6 +753,17 @@ namespace platform {
 					}
 					string_view profile = CompileProfile(compile_type);
 					using namespace leo;
+
+					auto path = effect_desc.effect_path.string();
+#ifndef NDEBUG
+					path += ".hlsl";
+					{
+						std::ofstream fout(path);
+						fout << effect_desc.effect_code;
+					}
+#endif
+
+
 					LFL_DEBUG_DECL_TIMER(ComposePassShader,sfmt("CompilerReflectStrip Type:%s ", first.c_str()))
 					auto blob = X::Shader::CompileToDXBC(compile_type, effect_desc.effect_code, compile_entry_point, AppendCompileMacros(macros, compile_type), profile,
 						D3DFlags::D3DCOMPILE_ENABLE_STRICTNESS |
@@ -761,7 +772,7 @@ namespace platform {
 #else
 						D3DFlags::D3DCOMPILE_OPTIMIZATION_LEVEL3
 #endif
-						, effect_desc.effect_path.string()
+						, path
 					);
 					auto pInfo = leo::unique_raw(X::Shader::ReflectDXBC(blob, compile_type));
 					blob.swap(X::Shader::StripDXBC(blob, D3DFlags::D3DCOMPILER_STRIP_DEBUG_INFO

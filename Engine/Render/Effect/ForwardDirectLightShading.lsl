@@ -41,7 +41,7 @@
 		void ShadingMaterial(Material material,float3 view_dir,float shadow,float occlusion,inout float3 diffuse,inout float3 specular)
 		{
 			LightingResult total = (LightingResult)0;
-			for(int i = 0; i!=light_count;++i ){
+			for(uint i = 0; i!=light_count;++i ){
 				DirectLight direct_light = lights[i];
 				Light light = GetPointLight(direct_light,material);
 
@@ -52,7 +52,7 @@
 				total.specular += result.specular;
 			}
 			diffuse = total.diffuse;
-			specular = toatal.specular;
+			specular = total.specular;
 		}
 		"
 	)
@@ -75,23 +75,23 @@
 
 		void ForwardLightPS(in float4 ClipPos:SV_POSITION,
 			in float2 tex:TEXCOORD0,
-			in float3 view_postion:TEXCOORD1,
+			in float3 view_position:TEXCOORD1,
 			in float3 view_normal:TEXCOORD2,
 			out float4 color :SV_Target
 		)
 		{
-			float3 view_dir = -normalize(view_postion);
+			float3 view_dir = -normalize(view_position);
 			float shadow = 1;
 			float occlusion = 1;
 
 			Material material;
 			material.normal = normalize(view_normal);
-			material.diffuse = material.albedo*(1-material.metalness);
 			material.albedo = albedo*albedo_tex.Sample(bilinear_sampler,tex).rgb;
 			material.metalness = metalness.x;
 			material.alpha = alpha;
 			material.roughness = glossiness.y > 0.5?glossiness.x*glossiness_tex.Sample(bilinear_sampler,tex).r:glossiness.x;
 			material.position = view_position;
+			material.diffuse = material.albedo*(1-material.metalness);
 
 			float3 diffuse,specular = 0;
 			ShadingMaterial(material,view_dir,shadow,occlusion,diffuse,specular);

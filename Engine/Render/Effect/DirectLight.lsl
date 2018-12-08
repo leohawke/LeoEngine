@@ -24,11 +24,11 @@
 			};
 
 			struct Light{
-				float3 color
+				float3 color;
 				float3 direction;
 				float attenuation;
 				float nol;
-			}
+			};
 
 			float DistanceAttenuationTerm(float3 light_source,float radius,float blubsize){
 				float invRadius = 1/radius;
@@ -53,6 +53,8 @@
 				light.nol = saturate(dot(material.normal,light_source_normal));
 
 				light.color = light_params.color;
+
+				return light;
 			}
 			"
 	)
