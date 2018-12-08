@@ -788,8 +788,14 @@ namespace platform {
 					param.GetArraySizeRef() = std::stoul(*p);
 			}
 			else if (param.GetType() <= asset::EPT_ConsumeStructuredBuffer) {
-				if (auto elemtype = AccessPtr("elemtype", param_node))
-					param.GetElemTypeRef() = AssetType::GetType(*elemtype);
+				if (auto elemtype = AccessPtr("elemtype", param_node)) {
+					try {
+						param.GetElemInfoRef() = AssetType::GetType(*elemtype);
+					}
+					catch (leo::unsupported&) {
+						param.GetElemInfoRef() = *elemtype;
+					}
+				}
 			}
 			auto index = effect_desc.effect_asset->GetParams().size();
 			auto optional_value = ReadParamValue(param_node,param.GetType());

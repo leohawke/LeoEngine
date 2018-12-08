@@ -13,6 +13,7 @@
 #include <vector>
 #include <utility>
 #include <optional>
+#include <variant>
 
 #include "../Render/PipleState.h"
 #include "../Render/Effect/Effect.hpp"
@@ -45,13 +46,19 @@ namespace asset {
 			DefGetter(const lnothrow, leo::uint32, ArraySize, array_size)
 			DefGetter(lnothrow, leo::uint32&, ArraySizeRef, array_size)
 
-			DefGetter(const lnothrow, const EffectParamType&, ElemType, elem_type)
-			DefGetter(lnothrow, EffectParamType&, ElemTypeRef, elem_type)
+			DefGetter(const lnothrow, const EffectParamType&, ElemType,std::get<EffectParamType>(elem_info))
+			DefGetter(lnothrow, EffectParamType&, ElemTypeRef,std::get<EffectParamType>(elem_info))
+
+			DefGetter(const lnothrow, const std::string&, ElemUserType, std::get<std::string>(elem_info))
+			DefGetter(lnothrow, std::string&, ElemUserTypeRef, std::get<std::string>(elem_info))
+
+			DefGetter(const lnothrow, const std::variant<EffectParamType LPP_Comma std::string>&, ElemInfo, elem_info)
+			DefGetter(lnothrow, std::variant<EffectParamType LPP_Comma std::string>&, ElemInfoRef, elem_info)
 	private:
 		EffectParamType type;
 		leo::uint32 array_size = 0;
 
-		EffectParamType elem_type = EPT_ElemEmpty;
+		std::variant<EffectParamType,std::string>  elem_info = EPT_ElemEmpty;
 	};
 
 	class ShaderFragmentAsset {

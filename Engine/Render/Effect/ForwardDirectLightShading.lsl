@@ -10,7 +10,7 @@
 	(cbuffer global
 		(uint light_count)
 	)
-	(StructuredBuffer (elem DirectLighting) lights)
+	(StructuredBuffer (elemtype DirectLight) lights)
 	(cbuffer obj
 		(float4x4 worldviewproj)
 		(float4x4 worldview)

@@ -187,9 +187,18 @@ std::string asset::EffectAsset::GenHLSLShader() const
 	{
 		if (except_set.count(param.GetNameHash()) > 0)
 			continue;
-		std::string elem_type;
-		if (param.GetType() <= EPT_ConsumeStructuredBuffer && param.GetElemType() != EPT_ElemEmpty) {
-			elem_type = GetTypeName(param.GetElemType());
+		std::string elem_type = [&] {
+			if (auto pElemType = std::get_if<EffectParamType>(&param.GetElemInfo())) {
+				if (*pElemType != EPT_ElemEmpty)
+					return GetTypeName(param.GetElemType());
+				else
+					return std::string();
+			}
+			else {
+				return param.GetElemUserType();
+			}
+		}();
+		if (param.GetType() <= EPT_ConsumeStructuredBuffer && !elem_type.empty()) {
 			ss << leo::sfmt("%s<%s> %s", GetTypeName(param.GetType()).c_str(),
 				elem_type.c_str(), param.GetName().c_str())
 				<< ';'
