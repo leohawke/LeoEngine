@@ -96,6 +96,31 @@ public:
 	engine::Core::CameraElement camera;
 	std::unique_ptr<engine::Core::TrackballCameraManipulator> pCameraMainpulator;
 
+#define POINT_LIGHT 0
+#define SPOT_LIGHT 1
+#define DIRECTIONAL_LIGHT 2
+	struct DirectLight {
+		//direction for spot and directional lights (View space).
+		lm::float3 direction;
+		//range for point and spot lights(Maximum distance of influence)
+		float range;
+		//position for spot and direction lights(View Space)
+		lm::float3 position;
+		//outer angle for spot light(radian)
+		float outerangle;
+		//blub size for point light or inneragnle for spot light
+		float blub_innerangle;
+
+		//The color of emitted light(linear RGB color)
+		lm::float3 color;
+		//
+		leo::uint32 type;
+
+	};
+
+	static_assert(sizeof(DirectLight) == sizeof(lm::float4) + sizeof(lm::float4) + sizeof(lm::float4) + 4);
+
+	std::vector<DirectLight> lights;
 private:
 	leo::uint32 DoUpdate(leo::uint32 pass) override {
 		auto& timer = platform::chrono::FetchGlobalTimer();
@@ -108,9 +133,10 @@ private:
 		Context::Instance().GetScreenFrame()->Clear(FrameBuffer::Color | FrameBuffer::Depth | FrameBuffer::Stencil, { 0,0,0,1 }, 1, 0);
 		auto& Device = Context::Instance().GetDevice();
 
-		ecs::EntitySystem::Instance().RemoveEntity(entityId);
 
-		auto pEffect = platform::X::LoadEffect("ForwardDirectLightShading");
+
+		
+		ecs::EntitySystem::Instance().RemoveEntity(entityId);
 
 		lm::float4x4 worldmatrix = {
 			{1,0,0,0},
@@ -125,6 +151,21 @@ private:
 		auto worldviewproj = worldview * projmatrix;
 		auto worldviewinv = lm::inverse(worldview);
 
+		DirectLight point_light;
+		point_light.type = POINT_LIGHT;
+		point_light.position = transformpoint(lm::float3(0, 40, 0), viewmatrix);
+		point_light.range = 80;
+		point_light.blub_innerangle = 40;
+		point_light.color = lm::float3(1.0f, 1.0f, 1.0f);
+
+		if (lights.empty())
+			lights.push_back(point_light);
+
+		auto pBuffer = leo::share_raw(Device.CreateConstanBuffer(Buffer::Usage::Static, EAccessHint::EA_GPURead| EAccessHint::EA_GPUStructured, sizeof(DirectLight)*lights.size(),static_cast<EFormat>(sizeof(DirectLight)), &lights[0]));
+
+
+		auto pEffect = platform::X::LoadEffect("ForwardDirectLightShading");
+
 		using namespace std::literals;
 		//obj
 		pEffect->GetParameter("worldview"sv) = lm::transpose(worldview);
@@ -132,10 +173,8 @@ private:
 		pEffect->GetParameter("worldviewinvt"sv) = worldviewinv;
 
 		//light
-		pEffect->GetParameter("view_light_pos"sv) = transformpoint(lm::float3(0, 40, 0), viewmatrix);
-		pEffect->GetParameter("light_radius"sv) = 80.f;
-		pEffect->GetParameter("light_color"sv) = lm::float3(1.0f, 1.0f, 1.0f);
-		pEffect->GetParameter("light_blubsize"sv) = 40.f;
+		pEffect->GetParameter("light_count"sv) = static_cast<leo::uint32>(lights.size());
+		pEffect->GetParameter("lights") = pBuffer;
 
 		//mat
 		pEffect->GetParameter("alpha"sv) = 1.0f;

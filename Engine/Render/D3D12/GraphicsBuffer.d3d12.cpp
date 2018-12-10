@@ -111,7 +111,7 @@ namespace platform_ex::Windows::D3D12 {
 		uint32_t total_size = size_in_byte;
 		if ((access &EAccessHint::EA_GPUWrite)
 			&& !(
-				/*(access & EAccessHint::EA_GPUStructured) || */
+				(access & EAccessHint::EA_GPUStructured) ||
 			(access & EAccessHint::EA_GPUUnordered)))
 		{
 			total_size = ((size_in_byte + 4 - 1) & ~(4 - 1)) + sizeof(uint64_t);
@@ -184,24 +184,26 @@ namespace platform_ex::Windows::D3D12 {
 			Context::Instance().CommitCommandList(Device::Command_Resource);
 		}
 
-		auto const structure_byte_stride = NumFormatBytes(format);
+		auto structure_byte_stride = NumFormatBytes(format);
+		if (structure_byte_stride == 0)
+			structure_byte_stride = format;
 
 		if ((access & EAccessHint::EA_GPURead) && (format != EF_Unknown))
 		{
 			D3D12_SHADER_RESOURCE_VIEW_DESC desc;
-			desc.Format = /*(access & EAccessHint::EA_GPUStructured) ? DXGI_FORMAT_UNKNOWN :*/ Convert(format);
+			desc.Format = (access & EAccessHint::EA_GPUStructured) ? DXGI_FORMAT_UNKNOWN : Convert(format);
 			desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 			desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 			desc.Buffer.FirstElement = 0;
 			desc.Buffer.NumElements = size_in_byte / structure_byte_stride;
-			desc.Buffer.StructureByteStride = /*(access & EAccessHint::EA_GPUStructured) ? structure_byte_stride :*/ 0;
+			desc.Buffer.StructureByteStride = (access & EAccessHint::EA_GPUStructured) ? structure_byte_stride : 0;
 			desc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
 			srv = std::make_unique<ViewSimulation>(resource, desc);
 		}
 
 		if ((access & EAccessHint::EA_GPUWrite)
-			&& !(/*(access & EAH_GPU_Structured) ||*/ (access & EAccessHint::EA_GPUUnordered)))
+			&& !((access & EAccessHint::EA_GPUStructured) || (access & EAccessHint::EA_GPUUnordered)))
 		{
 			counter_offset = (size_in_byte + 4 - 1) & ~(4 - 1);
 		}

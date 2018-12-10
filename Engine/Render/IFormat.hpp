@@ -467,6 +467,7 @@ namespace platform::Render {
 			EA_GPURead = 1U << 2,
 			EA_GPUWrite = 1U << 3,
 			EA_GPUUnordered = 1U << 4,
+			EA_GPUStructured = 1UL << 5,
 			EA_GenMips = 1U << 6,//Generate_Mips
 			EA_Immutable = 1U << 7,
 		};
