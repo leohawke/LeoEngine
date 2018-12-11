@@ -48,7 +48,7 @@ private:
 			if (!child.empty())
 				return leo::Access<std::string>(*child.begin()) == name;
 			return false;
-		});
+			});
 		return leo::Access<std::string>(*(it->rbegin()));
 	}
 
@@ -121,6 +121,7 @@ public:
 	static_assert(sizeof(DirectLight) == sizeof(lm::float4) + sizeof(lm::float4) + sizeof(lm::float4) + 4);
 
 	std::vector<DirectLight> lights;
+	std::shared_ptr<GraphicsBuffer> pLightConstatnBuffer;
 private:
 	leo::uint32 DoUpdate(leo::uint32 pass) override {
 		auto& timer = platform::chrono::FetchGlobalTimer();
@@ -135,7 +136,7 @@ private:
 
 
 
-		
+
 		ecs::EntitySystem::Instance().RemoveEntity(entityId);
 
 		lm::float4x4 worldmatrix = {
@@ -151,18 +152,9 @@ private:
 		auto worldviewproj = worldview * projmatrix;
 		auto worldviewinv = lm::inverse(worldview);
 
-		DirectLight point_light;
-		point_light.type = POINT_LIGHT;
+		DirectLight& point_light = lights[0];
 		point_light.position = transformpoint(lm::float3(0, 40, 0), viewmatrix);
-		point_light.range = 80;
-		point_light.blub_innerangle = 40;
-		point_light.color = lm::float3(1.0f, 1.0f, 1.0f);
-
-		if (lights.empty())
-			lights.push_back(point_light);
-
-		auto pBuffer = leo::share_raw(Device.CreateConstanBuffer(Buffer::Usage::Static, EAccessHint::EA_GPURead| EAccessHint::EA_GPUStructured, sizeof(DirectLight)*lights.size(),static_cast<EFormat>(sizeof(DirectLight)), &lights[0]));
-
+		pLightConstatnBuffer->UpdateSubresource(0, static_cast<leo::uint32>(sizeof(DirectLight)*lights.size()),&lights[0]);
 
 		auto pEffect = platform::X::LoadEffect("ForwardDirectLightShading");
 
@@ -174,7 +166,7 @@ private:
 
 		//light
 		pEffect->GetParameter("light_count"sv) = static_cast<leo::uint32>(lights.size());
-		pEffect->GetParameter("lights") = pBuffer;
+		pEffect->GetParameter("lights") = pLightConstatnBuffer;
 
 		//mat
 		pEffect->GetParameter("alpha"sv) = 1.0f;
@@ -210,6 +202,18 @@ private:
 		pCameraMainpulator = std::make_unique<engine::Core::TrackballCameraManipulator>(10.0f);
 		pCameraMainpulator->Attach(camera);
 		pCameraMainpulator->SetSpeed(0.005f, 0.1f);
+
+		DirectLight point_light;
+		point_light.type = POINT_LIGHT;
+		point_light.position = lm::float3(0, 40, 0);
+		point_light.range = 80;
+		point_light.blub_innerangle = 40;
+		point_light.color = lm::float3(1.0f, 1.0f, 1.0f);
+
+		lights.push_back(point_light);
+
+		auto& Device = Context::Instance().GetDevice();
+		pLightConstatnBuffer = leo::share_raw(Device.CreateConstanBuffer(Buffer::Usage::Dynamic, EAccessHint::EA_GPURead | EAccessHint::EA_GPUStructured, sizeof(DirectLight)*lights.size(), static_cast<EFormat>(sizeof(DirectLight)),nullptr));
 
 		GetMessageMap()[WM_MOUSEMOVE] += [&](::WPARAM wParam, ::LPARAM lParam) {
 			static auto lastxPos = GET_X_LPARAM(lParam);

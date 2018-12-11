@@ -85,7 +85,6 @@ namespace platform_ex::Windows::D3D12 {
 	private:
 		void CreateRootSignature();
 		void CreateBarriers();
-		void SwapAndPresent();
 
 	private:
 
@@ -117,7 +116,7 @@ namespace platform_ex::Windows::D3D12 {
 		using UnorderedAccessViewSimulation = ViewSimulation;
 		std::array<std::vector<UnorderedAccessViewSimulation*>, NumTypes> Uavs;
 		std::array<std::vector<platform::Render::GraphicsBuffer*>, NumTypes> CBuffs;
-		std::array<std::vector<std::tuple<ID3D12Resource*, uint32_t, uint32_t>>, NumTypes> SrvSrcs;
+		std::array<std::vector<std::tuple<ResourceHolder*, uint32_t, uint32_t>>, NumTypes> SrvSrcs;
 		std::array<std::vector<D3D12_SAMPLER_DESC>, NumTypes> Samplers;
 
 	private:
@@ -126,7 +125,7 @@ namespace platform_ex::Windows::D3D12 {
 		std::vector<D3D12_RESOURCE_BARRIER> barriers;
 
 		std::array<std::vector<parameter_bind_t>, NumTypes> ParamBinds;
-		std::array<std::vector<std::pair<ID3D12Resource*, ID3D12Resource*>>, NumTypes> UavSrcs;
+		std::array<std::vector<std::pair<ResourceHolder*, ID3D12Resource*>>, NumTypes> UavSrcs;
 
 		std::vector<leo::observer_ptr<platform::Render::Effect::ConstantBuffer>> AllCBuffs;
 

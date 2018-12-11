@@ -11,7 +11,7 @@ using namespace platform_ex::Windows;
 namespace {
 	class SetTextureSRV {
 	public:
-		SetTextureSRV(std::tuple<ID3D12Resource*, leo::uint32, leo::uint32>&srvsrc_, D3D12::ViewSimulation*& srv_, platform::Render::Effect::Parameter * param_)
+		SetTextureSRV(std::tuple<D3D12::ResourceHolder*, leo::uint32, leo::uint32>&srvsrc_, D3D12::ViewSimulation*& srv_, platform::Render::Effect::Parameter * param_)
 			:psrvsrc(&srvsrc_), ppsrv(&srv_), param(param_)
 		{}
 
@@ -24,7 +24,7 @@ namespace {
 				LF_Trace(platform::Descriptions::RecordLevel::Warning, "SetTextureSRV(%s) Value Null!",param->Name.c_str());
 			}
 			if (tex_subres.tex) {
-				auto pTexture = dynamic_cast<D3D12::Texture*>(tex_subres.tex.get());
+				D3D12::ResourceHolder* pTexture = dynamic_cast<D3D12::Texture*>(tex_subres.tex.get());
 				*psrvsrc = std::make_tuple(pTexture->Resource(),
 					tex_subres.first_array_index * tex_subres.tex->GetNumMipMaps() + tex_subres.first_level,
 
@@ -40,7 +40,7 @@ namespace {
 			}
 		}
 	private:
-		std::tuple<ID3D12Resource*, leo::uint32, leo::uint32>* psrvsrc;
+		std::tuple<D3D12::ResourceHolder*, leo::uint32, leo::uint32>* psrvsrc;
 		D3D12::ViewSimulation** ppsrv;
 		platform::Render::Effect::Parameter * param;
 	};
@@ -237,7 +237,6 @@ void platform_ex::Windows::D3D12::ShaderCompose::Bind()
 
 void platform_ex::Windows::D3D12::ShaderCompose::UnBind()
 {
-	SwapAndPresent();
 }
 
 const std::optional<platform_ex::Windows::D3D12::ShaderCompose::Template::ShaderBlobEx>& platform_ex::Windows::D3D12::ShaderCompose::GetShaderBlob(Type shader_type) const
@@ -339,18 +338,6 @@ void platform_ex::Windows::D3D12::ShaderCompose::CreateBarriers()
 				}
 			}
 		}
-	}
-}
-
-void platform_ex::Windows::D3D12::ShaderCompose::SwapAndPresent()
-{
-	for (auto & barrier : barriers) {
-		std::swap(barrier.Transition.StateBefore, barrier.Transition.StateAfter);
-	}
-
-	if (!barriers.empty()) {
-		D3D12::Context::Instance().GetCommandList(D3D12::Device::Command_Render)
-			->ResourceBarrier(static_cast<UINT>(barriers.size()), barriers.data());
 	}
 }
 
