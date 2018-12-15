@@ -19,8 +19,6 @@
 #include <cassert>
 
 #include "LBase/lmacro.h"
-//≤¢≤ª÷ÿ‘ÿoperator new
-#include "LBase/DebugOutput.hpp"
 
 #if defined LEO_MEMORY_TRACKER
 namespace leo

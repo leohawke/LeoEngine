@@ -155,6 +155,9 @@
     <ClCompile Include="Core\CameraController.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="GraphicsPipeline\IGraphicsPipelineStage.cpp">
+      <Filter>GraphicsPipeline</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -336,6 +339,9 @@
     <ClInclude Include="Core\CameraController.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="GraphicsPipeline\IGraphicsPipelineStage.h">
+      <Filter>GraphicsPipeline</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
@@ -361,6 +367,9 @@
     </Filter>
     <Filter Include="System">
       <UniqueIdentifier>{0005d704-97d9-4add-85d4-7c2e2e625828}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GraphicsPipeline">
+      <UniqueIdentifier>{13d84a08-8875-4539-a5d5-698bdb39898d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
