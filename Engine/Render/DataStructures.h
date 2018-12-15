@@ -32,21 +32,6 @@ namespace LeoEngine::Render {
 		//
 		leo::uint32 type;
 	};
-
-	struct ShadingChunk {
-		leo::uint32 first_index;
-		leo::uint32 indices_count;
-
-		leo::uint32 first_vertexid;
-		leo::uint32 vertices_count;
-
-		//高层次的渲染状态决议[TODO:线框、双边、叠加、光照、不接受阴影、多层子材质、透明]
-		//只能用于通用性需求扩展、不能超过16个
-		leo::uint16 material_flags;
-		//[Multilayer-sub Material]
-		leo::uint16 material_id;
-
-	};
 }
 
 #endif

@@ -13,7 +13,8 @@ namespace LeoEngine::Render {
 	};
 
 	class IShadingElement {
-
+	public:
+		IShadingElement() = default;
 	};
 }
 
