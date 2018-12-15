@@ -1,4 +1,4 @@
-#include "IRenderView.h"
+#include "IGPUResourceView.h"
 
 namespace platform::Render {
 

@@ -12,7 +12,7 @@
 #include "Camera.h"
 
 
-namespace engine::Core {
+namespace LeoEngine::Core {
 	namespace lm = leo::math;
 
 	class CameraManipulator : leo::noncopyable {
@@ -28,10 +28,10 @@ namespace engine::Core {
 
 		virtual ~CameraManipulator();
 
-		virtual void Attach(CameraElement& camera);
+		virtual void Attach(Camera& camera);
 		virtual void Detach();
 	protected:
-		leo::observer_ptr<CameraElement> pCamera;
+		leo::observer_ptr<Camera> pCamera;
 
 		float rotationScaler, moveScaler;
 	};
@@ -42,7 +42,7 @@ namespace engine::Core {
 			look_at_dist(dist)
 		{}
 
-		void Attach(CameraElement& camera) override;
+		void Attach(Camera& camera) override;
 
 		void Move(lm::float2 offset);
 		void Rotate(lm::float2 offset);

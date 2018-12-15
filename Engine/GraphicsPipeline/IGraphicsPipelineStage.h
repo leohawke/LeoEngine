@@ -6,7 +6,7 @@
 #include <LBase/linttype.hpp>
 #include <LBase/memory.hpp>
 
-namespace platform::GraphicsPipeline {
+namespace LeoEngine::GraphicsPipeline {
 	class GraphicsView;
 	class GraphicsPipeline;
 

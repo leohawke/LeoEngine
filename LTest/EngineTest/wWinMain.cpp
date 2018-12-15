@@ -93,8 +93,8 @@ public:
 	using base::base;
 
 	std::unique_ptr<Entities> pEntities;
-	engine::Core::CameraElement camera;
-	std::unique_ptr<engine::Core::TrackballCameraManipulator> pCameraMainpulator;
+	LeoEngine::Core::Camera camera;
+	std::unique_ptr<LeoEngine::Core::TrackballCameraManipulator> pCameraMainpulator;
 
 #define POINT_LIGHT 0
 #define SPOT_LIGHT 1
@@ -199,7 +199,7 @@ private:
 
 		camera.SetViewMatrix(engine::X::look_at_lh(eye, eye + view_vec * 10, up_vec));
 
-		pCameraMainpulator = std::make_unique<engine::Core::TrackballCameraManipulator>(10.0f);
+		pCameraMainpulator = std::make_unique<LeoEngine::Core::TrackballCameraManipulator>(10.0f);
 		pCameraMainpulator->Attach(camera);
 		pCameraMainpulator->SetSpeed(0.005f, 0.1f);
 

@@ -51,8 +51,8 @@ namespace platform_ex::Windows::D3D12 {
 			rt_handles.empty() ? nullptr : &rt_handles[0], false, ds_handle_ptr);
 
 
-		d3d12_viewport.TopLeftX = static_cast<float>(viewport.left);
-		d3d12_viewport.TopLeftY = static_cast<float>(viewport.top);
+		d3d12_viewport.TopLeftX = static_cast<float>(viewport.x);
+		d3d12_viewport.TopLeftY = static_cast<float>(viewport.y);
 		d3d12_viewport.Width = static_cast<float>(viewport.width);
 		d3d12_viewport.Height = static_cast<float>(viewport.height);
 

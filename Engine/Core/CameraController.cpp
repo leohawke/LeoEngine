@@ -1,11 +1,11 @@
 #include <LBase/lmacro.h>
 #include "CameraController.h"
 
-using namespace engine::Core;
+using namespace LeoEngine::Core;
 
 ImplDeDtor(CameraManipulator)
 
-void CameraManipulator::Attach(CameraElement& camera)
+void CameraManipulator::Attach(Camera& camera)
 {
 	pCamera.reset(&camera);
 }
@@ -14,7 +14,7 @@ void CameraManipulator::Detach() {
 	pCamera.reset();
 }
 
-void TrackballCameraManipulator::Attach(CameraElement & camera)
+void TrackballCameraManipulator::Attach(Camera & camera)
 {
 	CameraManipulator::Attach(camera);
 

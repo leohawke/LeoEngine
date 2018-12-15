@@ -107,9 +107,6 @@
     <ClCompile Include="Render\FrameBuffer.cpp">
       <Filter>Render</Filter>
     </ClCompile>
-    <ClCompile Include="Render\RenderView.cpp">
-      <Filter>Render</Filter>
-    </ClCompile>
     <ClCompile Include="Render\Effect\CopyEffect.cpp">
       <Filter>Render\Effect</Filter>
     </ClCompile>
@@ -157,6 +154,9 @@
     </ClCompile>
     <ClCompile Include="Render\D3D12\ResourceView.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ResourceView.cpp">
+      <Filter>Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -272,9 +272,6 @@
     <ClInclude Include="Render\D3D12\FrameBuffer.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="Core\ViewPort.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="Render\D3D12\test.h" />
     <ClInclude Include="Render\Effect\CopyEffect.h">
       <Filter>Render\Effect</Filter>
@@ -347,6 +344,9 @@
     </ClInclude>
     <ClInclude Include="Render\D3D12\ResourceView.h">
       <Filter>Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ViewPort.h">
+      <Filter>Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

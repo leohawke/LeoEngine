@@ -1,7 +1,7 @@
 #include <LBase/lmacro.h>
 #include "IGraphicsPipelineStage.h"
 
-using namespace platform::GraphicsPipeline;
+using namespace LeoEngine::GraphicsPipeline;
 
 ImplDeDtor(GraphicsPipelineStage);
 

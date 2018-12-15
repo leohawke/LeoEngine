@@ -50,8 +50,8 @@ namespace platform::Render {
 					min_clr_index = i;
 			if (min_clr_index == clr_index)
 			{
-				viewport.left = 0;
-				viewport.top = 0;
+				viewport.x = 0;
+				viewport.y = 0;
 				viewport.width = view->Width();
 				viewport.height = view->Height();
 			}
