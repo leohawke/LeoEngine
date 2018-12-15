@@ -7,7 +7,7 @@
 #define LE_RENDER_D3D12_RenderView_h 1
 
 #include "d3d12_dxgi.h"
-#include "..\IRenderView.h"
+#include "..\IGPUResourceView.h"
 #include "..\ITexture.hpp"
 #include "ResourceHolder.h"
 #include <LBase/lmathtype.hpp>

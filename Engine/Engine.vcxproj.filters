@@ -59,9 +59,6 @@
     <ClCompile Include="Render\D3D12\Texture.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="Render\D3D12\RenderView.d3d12.cpp">
-      <Filter>Render\D3D12</Filter>
-    </ClCompile>
     <ClCompile Include="Render\D3D12\Display.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
@@ -158,6 +155,9 @@
     <ClCompile Include="GraphicsPipeline\IGraphicsPipelineStage.cpp">
       <Filter>GraphicsPipeline</Filter>
     </ClCompile>
+    <ClCompile Include="Render\D3D12\ResourceView.d3d12.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -175,9 +175,6 @@
     <ClInclude Include="Render\D3D12\Display.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="Render\D3D12\RenderView.h">
-      <Filter>Render\D3D12</Filter>
-    </ClInclude>
     <ClInclude Include="Render\D3D12\Texture.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
@@ -191,9 +188,6 @@
       <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="Render\IFormat.hpp">
-      <Filter>Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\IRenderView.h">
       <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="Render\ITexture.hpp">
@@ -341,6 +335,18 @@
     </ClInclude>
     <ClInclude Include="GraphicsPipeline\IGraphicsPipelineStage.h">
       <Filter>GraphicsPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsPipeline\IGraphicsView.h">
+      <Filter>GraphicsPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\DataStructures.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IGPUResourceView.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\ResourceView.h">
+      <Filter>Render\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

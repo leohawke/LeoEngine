@@ -1,9 +1,9 @@
 /*! \file Engine\Render\IFormat.hpp
 \ingroup Engine
-\brief GPU数据结构View。
+\brief GPU资源View。
 */
-#ifndef LE_RENDER_IRenderView_h
-#define LE_RENDER_IRenderView_h 1
+#ifndef LE_RENDER_IGPUResourceView_h
+#define LE_RENDER_IGPUResourceView_h 1
 
 #include "ITexture.hpp"
 

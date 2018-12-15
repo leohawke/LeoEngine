@@ -50,7 +50,7 @@
     <ClCompile Include="Render\D3D12\GraphicsBuffer.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\InputLayout.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\PipleState.d3d12.cpp" />
-    <ClCompile Include="Render\D3D12\RenderView.d3d12.cpp" />
+    <ClCompile Include="Render\D3D12\ResourceView.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\ResourceHolder.cpp" />
     <ClCompile Include="Render\D3D12\ShaderCompose.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Texture.d3d12.cpp">
@@ -101,6 +101,7 @@
     <ClInclude Include="Core\ResourcesHolder.h" />
     <ClInclude Include="Core\ViewPort.h" />
     <ClInclude Include="emacro.h" />
+    <ClInclude Include="GraphicsPipeline\IGraphicsView.h" />
     <ClInclude Include="GraphicsPipeline\IGraphicsPipelineStage.h" />
     <ClInclude Include="Render\Color_T.hpp" />
     <ClInclude Include="Render\D3D12\Adapter.h" />
@@ -115,9 +116,10 @@
     <ClInclude Include="Render\D3D12\ShaderCompose.h" />
     <ClInclude Include="Render\D3D12\d3d12_dxgi.h" />
     <ClInclude Include="Render\D3D12\Display.h" />
-    <ClInclude Include="Render\D3D12\RenderView.h" />
+    <ClInclude Include="Render\D3D12\ResourceView.h" />
     <ClInclude Include="Render\D3D12\test.h" />
     <ClInclude Include="Render\D3D12\Texture.h" />
+    <ClInclude Include="Render\DataStructures.h" />
     <ClInclude Include="Render\DeviceCaps.h" />
     <ClInclude Include="Render\Effect\BiltEffect.h" />
     <ClInclude Include="Render\Effect\CopyEffect.h" />
@@ -129,7 +131,7 @@
     <ClInclude Include="Render\IFormat.hpp" />
     <ClInclude Include="Render\IFrameBuffer.h" />
     <ClInclude Include="Render\IGraphicsBuffer.hpp" />
-    <ClInclude Include="Render\IRenderView.h" />
+    <ClInclude Include="Render\IGPUResourceView.h" />
     <ClInclude Include="Render\ITexture.hpp" />
     <ClInclude Include="Render\PipleState.h" />
     <ClInclude Include="Render\InputLayout.hpp" />

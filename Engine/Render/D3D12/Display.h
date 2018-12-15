@@ -11,7 +11,7 @@
 #include "FrameBuffer.h"
 #include "Texture.h"
 #include "../IDisplay.h"
-#include "RenderView.h"
+#include "ResourceView.h"
 
 namespace platform_ex {
 	namespace Windows {

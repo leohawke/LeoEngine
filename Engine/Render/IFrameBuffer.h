@@ -5,7 +5,7 @@
 #ifndef LE_RENDER_IFrameBuffer_h
 #define LE_RENDER_IFrameBuffer_h 1
 
-#include "IRenderView.h"
+#include "IGPUResourceView.h"
 #include "../Core/ViewPort.h"
 
 #include <LBase/lmathtype.hpp>

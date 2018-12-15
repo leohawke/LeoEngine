@@ -7,7 +7,7 @@
 
 #include "../Effect/Effect.hpp"
 #include "d3d12_dxgi.h"
-#include "RenderView.h"
+#include "ResourceView.h"
 #include <optional>
 
 
