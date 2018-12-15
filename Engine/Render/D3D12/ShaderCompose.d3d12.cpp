@@ -21,11 +21,11 @@ namespace {
 				param->Value(tex_subres);
 			}
 			catch (leo::bad_any_cast&) {
-				LF_Trace(platform::Descriptions::RecordLevel::Warning, "SetTextureSRV(%s) Value Null!",param->Name.c_str());
+				LF_Trace(platform::Descriptions::RecordLevel::Warning, "SetTextureSRV(%s) Value Null!", param->Name.c_str());
 			}
 			if (tex_subres.tex) {
-				D3D12::ResourceHolder* pTexture = dynamic_cast<D3D12::Texture*>(tex_subres.tex.get());
-				*psrvsrc = std::make_tuple(pTexture->Resource(),
+				auto pTexture = dynamic_cast<D3D12::Texture*>(tex_subres.tex.get());
+				*psrvsrc = std::make_tuple(static_cast<D3D12::ResourceHolder*>(pTexture),
 					tex_subres.first_array_index * tex_subres.tex->GetNumMipMaps() + tex_subres.first_level,
 
 					tex_subres.num_items * tex_subres.num_levels);
@@ -47,7 +47,7 @@ namespace {
 
 	class SetBufferSRV {
 	public:
-		SetBufferSRV(std::tuple<ID3D12Resource*, leo::uint32, leo::uint32>&srvsrc_, D3D12::ViewSimulation*& srv_, platform::Render::Effect::Parameter * param_)
+		SetBufferSRV(std::tuple<D3D12::ResourceHolder*, leo::uint32, leo::uint32>&srvsrc_, D3D12::ViewSimulation*& srv_, platform::Render::Effect::Parameter * param_)
 			:psrvsrc(&srvsrc_), ppsrv(&srv_), param(param_)
 		{}
 		void operator()() {
@@ -56,11 +56,11 @@ namespace {
 				param->Value(buffer);
 			}
 			catch (leo::bad_any_cast&) {
-				LF_Trace(platform::Descriptions::RecordLevel::Warning, "SetBufferSRV(%s) Value Null!",param->Name.c_str());
+				LF_Trace(platform::Descriptions::RecordLevel::Warning, "SetBufferSRV(%s) Value Null!", param->Name.c_str());
 			}
 			if (buffer) {
 				auto pBuffer = static_cast<D3D12::GraphicsBuffer*>(buffer.get());
-				*psrvsrc = std::make_tuple(pBuffer->Resource(), 0, 1);
+				*psrvsrc = std::make_tuple(pBuffer, 0, 1);
 				*ppsrv = pBuffer->RetriveShaderResourceView();
 			}
 			else {
@@ -68,14 +68,14 @@ namespace {
 			}
 		}
 	private:
-		std::tuple<ID3D12Resource*, leo::uint32, leo::uint32>* psrvsrc;
+		std::tuple<D3D12::ResourceHolder*, leo::uint32, leo::uint32>* psrvsrc;
 		D3D12::ViewSimulation** ppsrv;
 		platform::Render::Effect::Parameter * param;
 	};
 
 	class SetTextureUAV {
 	public:
-		SetTextureUAV(std::pair<ID3D12Resource*, ID3D12Resource*> uavsrc_, D3D12::ViewSimulation*& uav_, platform::Render::Effect::Parameter * param_)
+		SetTextureUAV(std::pair<D3D12::ResourceHolder*, ID3D12Resource*> uavsrc_, D3D12::ViewSimulation*& uav_, platform::Render::Effect::Parameter * param_)
 			:puavsrc(&uavsrc_), ppuav(&uav_), param(param_)
 		{}
 
@@ -84,7 +84,7 @@ namespace {
 			param->Value(tex_subres);
 			if (tex_subres.tex) {
 				auto pTexture = dynamic_cast<D3D12::Texture*>(tex_subres.tex.get());
-				puavsrc->first = pTexture->Resource();
+				puavsrc->first = pTexture;
 				puavsrc->second = nullptr;
 
 				*ppuav = pTexture->RetriveUnorderedAccessView(
@@ -98,14 +98,14 @@ namespace {
 			}
 		}
 	private:
-		std::pair<ID3D12Resource*, ID3D12Resource*>* puavsrc;
+		std::pair<D3D12::ResourceHolder*, ID3D12Resource*>* puavsrc;
 		D3D12::ViewSimulation** ppuav;
 		platform::Render::Effect::Parameter * param;
 	};
 
 	class SetBufferUAV {
 	public:
-		SetBufferUAV(std::pair<ID3D12Resource*, ID3D12Resource*> uavsrc_, D3D12::ViewSimulation*& uav_, platform::Render::Effect::Parameter * param_)
+		SetBufferUAV(std::pair<D3D12::ResourceHolder*, ID3D12Resource*> uavsrc_, D3D12::ViewSimulation*& uav_, platform::Render::Effect::Parameter * param_)
 			:puavsrc(&uavsrc_), ppuav(&uav_), param(param_)
 		{}
 
@@ -114,7 +114,7 @@ namespace {
 			param->Value(buffer);
 			if (buffer) {
 				auto pBuffer = static_cast<D3D12::GraphicsBuffer*>(buffer.get());
-				puavsrc->first = pBuffer->Resource();
+				puavsrc->first = pBuffer;
 				puavsrc->second = pBuffer->UploadResource();
 
 				*ppuav = pBuffer->RetriveUnorderedAccessView();
@@ -125,7 +125,7 @@ namespace {
 			}
 		}
 	private:
-		std::pair<ID3D12Resource*, ID3D12Resource*>* puavsrc;
+		std::pair<D3D12::ResourceHolder*, ID3D12Resource*>* puavsrc;
 		D3D12::ViewSimulation** ppuav;
 		platform::Render::Effect::Parameter * param;
 	};
@@ -134,22 +134,22 @@ namespace {
 platform_ex::Windows::D3D12::ShaderCompose::Template::~Template() = default;
 
 platform_ex::Windows::D3D12::ShaderCompose::Template::Template()
-:VertexShader(std::nullopt),PixelShader(std::nullopt),VertexInfo(std::nullopt),
-PixelInfo(std::nullopt),VertexIndices(std::nullopt),PixelIndices(std::nullopt){
+	:VertexShader(std::nullopt), PixelShader(std::nullopt), VertexInfo(std::nullopt),
+	PixelInfo(std::nullopt), VertexIndices(std::nullopt), PixelIndices(std::nullopt) {
 	//uname union uname struct init
 }
 
-platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect):
-sc_template(std::make_unique<Template>())
+platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect) :
+	sc_template(std::make_unique<Template>())
 {
-	auto CopyShader = [&](auto& shader,auto type) {
+	auto CopyShader = [&](auto& shader, auto type) {
 		if (pShaderBlob.count(type)) {
 			auto pBlobAsset = pShaderBlob[type];
 			shader = std::make_pair(std::make_unique<byte[]>(pBlobAsset->GetBlob().second), pBlobAsset->GetBlob().second);
 			std::memcpy(shader.value().first.get(), pBlobAsset->GetBlob().first.get(), pBlobAsset->GetBlob().second);
 		}
 	};
-	
+
 	CopyShader(sc_template->VertexShader, ShaderCompose::Type::VertexShader);
 	CopyShader(sc_template->PixelShader, ShaderCompose::Type::PixelShader);
 
@@ -172,9 +172,9 @@ sc_template(std::make_unique<Template>())
 		}
 
 		Samplers[index].resize(BlobInfo.NumSamplers);
-		SrvSrcs[index].resize(BlobInfo.NumSrvs, std::make_tuple(static_cast<ID3D12Resource*>(nullptr), 0, 0));
+		SrvSrcs[index].resize(BlobInfo.NumSrvs, std::make_tuple(static_cast<ResourceHolder*>(nullptr), 0, 0));
 		Srvs[index].resize(BlobInfo.NumSrvs);
-		UavSrcs[index].resize(BlobInfo.NumUavs, std::make_pair<ID3D12Resource*, ID3D12Resource*>(nullptr, nullptr));
+		UavSrcs[index].resize(BlobInfo.NumUavs, std::make_pair<ResourceHolder*, ID3D12Resource*>(nullptr, nullptr));
 		Uavs[index].resize(BlobInfo.NumUavs);
 
 		for (auto& BoundResourceInfo : BlobInfo.BoundResourceInfos) {
@@ -297,43 +297,27 @@ void platform_ex::Windows::D3D12::ShaderCompose::CreateBarriers()
 		D3D12_RESOURCE_BARRIER barrier_before;
 		barrier_before.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier_before.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
-		barrier_before.Transition.StateBefore
-			= (Type::PixelShader == (Type)st) ? D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-			: D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+		barrier_before.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
 		//srv barrier
 		for (auto j = 0; j != SrvSrcs[st].size(); ++j) {
 			for (auto subres = 0; subres != std::get<2>(SrvSrcs[st][j]); ++subres) {
-				barrier_before.Transition.pResource = std::get<0>(SrvSrcs[st][j]);
-				if (barrier_before.Transition.pResource != nullptr) {
-					barrier_before.Transition.Subresource = std::get<1>(SrvSrcs[st][j]);
-
-					if (std::find_if(barriers.begin(), barriers.end(),
-						[&](const D3D12_RESOURCE_BARRIER exist_barrier) {
-						return exist_barrier.Transition.pResource == barrier_before.Transition.pResource &&   exist_barrier.Transition.Subresource == barrier_before.Transition.Subresource;
-					}
-					) == barriers.end()) {
+				auto pResourceHolder = std::get<0>(SrvSrcs[st][j]);
+				if (pResourceHolder != nullptr) {
+					if (pResourceHolder->UpdateResourceBarrier(barrier_before, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE)) {
 						barriers.emplace_back(barrier_before);
 					}
 				}
 			}
 		}
 
-		barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-		barrier_before.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-
 		//uav barrier
 		for (auto j = 0; j != UavSrcs[st].size(); ++j) {
-			barrier_before.Transition.pResource = UavSrcs[st][j].first;
-			if (barrier_before.Transition.pResource != nullptr) {
-				LAssert(std::find_if(SrvSrcs[st].begin(), SrvSrcs[st].end(), [&](auto& tuple) {return std::get<0>(tuple) == barrier_before.Transition.pResource; }) == SrvSrcs[st].end(), "Resource Input&Ouput !!!");
+			auto pResourceHolder = UavSrcs[st][j].first;
+			if (pResourceHolder != nullptr) {
+				LAssert(std::find_if(SrvSrcs[st].begin(), SrvSrcs[st].end(), [&](auto& tuple) {return std::get<0>(tuple) == pResourceHolder; }) == SrvSrcs[st].end(), "Resource Input&Ouput !!!");
 
-				if (std::find_if(barriers.begin(), barriers.end(),
-					[&](const D3D12_RESOURCE_BARRIER exist_barrier) {
-					return exist_barrier.Transition.pResource == barrier_before.Transition.pResource &&   exist_barrier.Transition.Subresource == barrier_before.Transition.Subresource;
-				}
-				) == barriers.end()) {
+				if (pResourceHolder->UpdateResourceBarrier(barrier_before, D3D12_RESOURCE_STATE_UNORDERED_ACCESS)) {
 					barriers.emplace_back(barrier_before);
 				}
 			}
