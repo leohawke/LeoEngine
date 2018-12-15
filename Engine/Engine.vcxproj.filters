@@ -348,6 +348,9 @@
     <ClInclude Include="Render\ViewPort.h">
       <Filter>Render</Filter>
     </ClInclude>
+    <ClInclude Include="Render\ShadingElement.h">
+      <Filter>Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

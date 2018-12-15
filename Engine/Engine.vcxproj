@@ -124,6 +124,7 @@
     <ClInclude Include="Render\Effect\CopyEffect.h" />
     <ClInclude Include="Render\Effect\Effect.hpp" />
     <ClInclude Include="Render\Effect\EffectProperty.h" />
+    <ClInclude Include="Render\ShadingElement.h" />
     <ClInclude Include="Render\IContext.h" />
     <ClInclude Include="Render\IDevice.h" />
     <ClInclude Include="Render\IDisplay.h" />
