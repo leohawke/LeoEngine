@@ -8,6 +8,9 @@
 #include "../Core/Camera.h"
 #include "../Render/ViewPort.h"
 #include "../Render/DataStructures.h"
+#include "../Render/ShadingElement.h"
+#include "../Render/ShadingObject.h"
+#include "../Render/Effect/Effect.hpp"
 
 namespace LeoEngine::GraphicsPipeline {
 	inline namespace Interface {
@@ -16,6 +19,11 @@ namespace LeoEngine::GraphicsPipeline {
 		using DirectLight = LeoEngine::Render::DirectLight;
 		using Camera = LeoEngine::Core::Camera;
 		using TimeValue = ::platform::chrono::TimeValue;
+
+		using ShadingElement = LeoEngine::Render::ShadingElement;
+		using ShadingObject = LeoEngine::Render::ShadingObject;
+
+		using EffectItem = LeoEngine::RenderEffect::EffectItem;
 
 
 		class IGarphicsView {
@@ -56,7 +64,7 @@ namespace LeoEngine::GraphicsPipeline {
 			virtual LightIndex  AddLight(const  DirectLight& light) = 0;
 			virtual DirectLight& GetLight(LightIndex light_id) = 0;
 
-			virtual void 
+			virtual void AddShadingObject(leo::observer_ptr<ShadingElement> pShadingElement, leo::observer_ptr<ShadingObject> pShadingObject, EffectItem& effect_item) = 0;
 		};
 	}
 }

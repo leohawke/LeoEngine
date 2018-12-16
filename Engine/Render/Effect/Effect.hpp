@@ -429,4 +429,12 @@ namespace platform::Render::Effect {
 	};
 }
 
+namespace LeoEngine::RenderEffect {
+	using namespace platform::Render::Effect;
+	struct EffectItem {
+		std::shared_ptr<Effect> effect = nullptr;
+		Technique* technique = nullptr;
+	};
+}
+
 #endif

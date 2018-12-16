@@ -7,12 +7,6 @@
     <ClCompile Include="Render\Color_T.cpp">
       <Filter>Render</Filter>
     </ClCompile>
-    <ClCompile Include="Render\IContext.cpp">
-      <Filter>Render</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\ITexture.cpp">
-      <Filter>Render</Filter>
-    </ClCompile>
     <ClCompile Include="Win32\File.cpp">
       <Filter>Win32</Filter>
     </ClCompile>
@@ -74,20 +68,11 @@
     <ClCompile Include="Render\D3D12\Adapter.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="Render\PipleState.cpp">
-      <Filter>Render</Filter>
-    </ClCompile>
     <ClCompile Include="Render\D3D12\GraphicsBuffer.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsBuffer.cpp">
-      <Filter>Render</Filter>
-    </ClCompile>
     <ClCompile Include="Render\Effect\BiltEffect.cpp">
       <Filter>Render\Effect</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\InputLayout.cpp">
-      <Filter>Render</Filter>
     </ClCompile>
     <ClCompile Include="Render\D3D12\InputLayout.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
@@ -103,9 +88,6 @@
     </ClCompile>
     <ClCompile Include="Render\D3D12\Device.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\FrameBuffer.cpp">
-      <Filter>Render</Filter>
     </ClCompile>
     <ClCompile Include="Render\Effect\CopyEffect.cpp">
       <Filter>Render\Effect</Filter>
@@ -155,11 +137,29 @@
     <ClCompile Include="Render\D3D12\ResourceView.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="Render\ResourceView.cpp">
-      <Filter>Render</Filter>
-    </ClCompile>
     <ClCompile Include="Render\ShadingElement.cpp">
       <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\IContext.cpp">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\InputLayout.cpp">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ITexture.cpp">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\FrameBuffer.cpp">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ResourceView.cpp">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\PipleState.cpp">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\GraphicsBuffer.cpp">
+      <Filter>Render\DeviceInterface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -184,16 +184,7 @@
     <ClInclude Include="Render\Color_T.hpp">
       <Filter>Render</Filter>
     </ClInclude>
-    <ClInclude Include="Render\DeviceCaps.h">
-      <Filter>Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\IContext.h">
-      <Filter>Render</Filter>
-    </ClInclude>
     <ClInclude Include="Render\IFormat.hpp">
-      <Filter>Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\ITexture.hpp">
       <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="Win32\File.h">
@@ -242,15 +233,6 @@
     <ClInclude Include="Render\D3D12\PipleState.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="Render\PipleState.h">
-      <Filter>Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\IDevice.h">
-      <Filter>Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\IGraphicsBuffer.hpp">
-      <Filter>Render</Filter>
-    </ClInclude>
     <ClInclude Include="Render\D3D12\GraphicsBuffer.hpp">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
@@ -260,17 +242,11 @@
     <ClInclude Include="Render\Effect\BiltEffect.h">
       <Filter>Render\Effect</Filter>
     </ClInclude>
-    <ClInclude Include="Render\InputLayout.hpp">
-      <Filter>Render</Filter>
-    </ClInclude>
     <ClInclude Include="Render\D3D12\InputLayout.hpp">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="Render\D3D12\Fence.h">
       <Filter>Render\D3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\IFrameBuffer.h">
-      <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="Render\D3D12\FrameBuffer.h">
       <Filter>Render\D3D12</Filter>
@@ -290,9 +266,6 @@
     </ClInclude>
     <ClInclude Include="Core\Resource.h">
       <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\IDisplay.h">
-      <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="Core\Camera.h">
       <Filter>Core</Filter>
@@ -342,9 +315,6 @@
     <ClInclude Include="Render\DataStructures.h">
       <Filter>Render</Filter>
     </ClInclude>
-    <ClInclude Include="Render\IGPUResourceView.h">
-      <Filter>Render</Filter>
-    </ClInclude>
     <ClInclude Include="Render\D3D12\ResourceView.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
@@ -352,6 +322,39 @@
       <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="Render\ShadingElement.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\DeviceCaps.h">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IDevice.h">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IContext.h">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IGPUResourceView.h">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\InputLayout.hpp">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IFrameBuffer.h">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ITexture.hpp">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IGraphicsBuffer.hpp">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IDisplay.h">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\PipleState.h">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShadingObject.h">
       <Filter>Render</Filter>
     </ClInclude>
   </ItemGroup>
@@ -383,11 +386,11 @@
     <Filter Include="GraphicsPipeline">
       <UniqueIdentifier>{13d84a08-8875-4539-a5d5-698bdb39898d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Render\DeviceInterface">
+      <UniqueIdentifier>{f5398575-73b2-48e9-a4a5-539b3edd2f2c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Render\CommonTextureImpl.hcc">
-      <Filter>Render</Filter>
-    </None>
     <None Include="Render\Effect\PostProcess.lsl">
       <Filter>Render\Effect</Filter>
     </None>
@@ -411,6 +414,9 @@
     </None>
     <None Include="Render\Effect\DirectLight.lsl">
       <Filter>Render\Effect</Filter>
+    </None>
+    <None Include="Render\CommonTextureImpl.hcc">
+      <Filter>Render\DeviceInterface</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
