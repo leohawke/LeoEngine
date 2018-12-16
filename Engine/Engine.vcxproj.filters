@@ -161,6 +161,10 @@
     <ClCompile Include="Render\GraphicsBuffer.cpp">
       <Filter>Render\DeviceInterface</Filter>
     </ClCompile>
+    <ClCompile Include="GraphicsPipeline\GraphicsView.cpp">
+      <Filter>GraphicsPipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsPipeline\GarphicsView.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -356,6 +360,12 @@
     </ClInclude>
     <ClInclude Include="Render\ShadingObject.h">
       <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsPipeline\GraphicsView.h">
+      <Filter>GraphicsPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsPipeline\ShadingPipeline.h">
+      <Filter>GraphicsPipeline</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

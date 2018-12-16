@@ -1,5 +1,5 @@
-#ifndef LE_GRAPHICSVIEW_H
-#define LE_GRAPHICSVIEW_H 1
+#ifndef LE_IGRAPHICSVIEW_H
+#define LE_IGRAPHICSVIEW_H 1
 
 #pragma once
 
@@ -26,7 +26,8 @@ namespace LeoEngine::GraphicsPipeline {
 		using EffectItem = LeoEngine::RenderEffect::EffectItem;
 
 
-		class IGarphicsView {
+		class IGraphicsView {
+		public:
 			enum ViewType {
 				Default_View,
 				Recursive_View,

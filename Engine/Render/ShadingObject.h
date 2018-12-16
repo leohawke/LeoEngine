@@ -7,6 +7,18 @@
 #include <LBase/lmath.hpp>
 
 namespace LeoEngine::Render {
+	enum ShadingListID {
+		ESLIST_INTERNAL, //! internally used.
+		EFLIST_PREPROCESS, //!Pre-process items.
+		EFLIST_GENERAL, //!Opaque/shadow passes.
+		EFLIST_ZPREPASS, //!Items that are rendered into the z-prepass.
+
+		EFLIST_CUSTOM, //!Custom scene pass.
+	};
+
+	const int EFLIST_COUNT = EFLIST_CUSTOM+1;
+
+
 	namespace lm = leo::math;
 	class lalignas(16) ShadingObject {
 	public:
