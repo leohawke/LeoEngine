@@ -3,6 +3,7 @@
 #include "../../Engine/Render/IContext.h"
 #include "../../Engine/Core/Mesh.h"
 #include "../../Engine/Render/IFrameBuffer.h"
+#include "../../Engine/Render/DataStructures.h"
 #include "../../Engine/Asset/EffectX.h"
 #include "../../Engine/Asset/MaterialX.h"
 #include "../../Engine/Asset/LSLAssetX.h"
@@ -21,6 +22,7 @@
 #include <filesystem>
 
 using namespace platform::Render;
+using namespace LeoEngine::Render;
 namespace fs = std::filesystem;
 
 namespace lm = leo::math;
@@ -125,7 +127,7 @@ private:
 			{0,0,1,0},
 			{0,0,0,1}
 		};
-		auto projmatrix = engine::X::perspective_fov_lh(3.14f / 6, 600.0f / 800, 1, 1000);
+		auto projmatrix = LeoEngine::X::perspective_fov_lh(3.14f / 6, 600.0f / 800, 1, 1000);
 		auto viewmatrix = camera.GetViewMatrix();
 
 		auto worldview = worldmatrix * viewmatrix;
@@ -177,7 +179,7 @@ private:
 		leo::math::float3 up_vec{ 0.12f,0.98f,-0.08f };
 		leo::math::float3 view_vec{ 0.94f,-0.1f,0.2f };
 
-		camera.SetViewMatrix(engine::X::look_at_lh(eye, eye + view_vec * 10, up_vec));
+		camera.SetViewMatrix(LeoEngine::X::look_at_lh(eye, eye + view_vec * 10, up_vec));
 
 		pCameraMainpulator = std::make_unique<LeoEngine::Core::TrackballCameraManipulator>(10.0f);
 		pCameraMainpulator->Attach(camera);

@@ -7,7 +7,10 @@
 #include <LBase/lmath.hpp>
 
 namespace LeoEngine::Render {
-	using LightIndex = leo::uint16;
+	using namespace leo::inttype;
+	namespace lm = leo::math;
+
+	using LightIndex = uint16;
 
 	enum DirectLightType {
 		POINT_LIGHT = 0,
@@ -30,7 +33,7 @@ namespace LeoEngine::Render {
 		//The color of emitted light(linear RGB color)
 		lm::float3 color;
 		//
-		leo::uint32 type;
+		uint32 type;
 	};
 }
 

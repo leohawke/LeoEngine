@@ -29,6 +29,7 @@ namespace platform::Render {
 			BlendIndex,
 
 			TextureCoord,
+
 		};
 
 		struct Element {
@@ -63,16 +64,23 @@ namespace platform::Render {
 
 			leo::uint32 instance_freq;
 		};
+
+		enum InputLayoutFormat :uint8 {
+			Empty,
+
+			P3F_N3F_T2F	= 1, //!1.4 
+			P3F_N4B_T2F,	//!TODO
+		};
 	}
 
 	class InputLayout :public leo::noncopyable {
 	public:
 		enum TopologyType {
-			PointList,
-			LineList,
-			LineStrip,
 			TriangleList,
 			TriangleStrip,
+			LineList,
+			LineStrip,
+			PointList,
 
 			//TODO
 		};

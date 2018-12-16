@@ -158,6 +158,9 @@
     <ClCompile Include="Render\ResourceView.cpp">
       <Filter>Render</Filter>
     </ClCompile>
+    <ClCompile Include="Render\ShadingElement.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
