@@ -32,6 +32,7 @@
     <ClCompile Include="Core\AssetResourceScheduler.cpp" />
     <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Core\CameraController.cpp" />
+    <ClCompile Include="Core\GraphicsEngine.cpp" />
     <ClCompile Include="Core\LSLBuilder.cpp" />
     <ClCompile Include="Core\LSLEvaluator.cpp" />
     <ClCompile Include="Core\Materail.cpp" />
@@ -95,6 +96,7 @@
     <ClInclude Include="Core\AssetResourceScheduler.h" />
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core\CameraController.h" />
+    <ClInclude Include="Core\GraphicsEngine.h" />
     <ClInclude Include="Core\LFile.h" />
     <ClInclude Include="Core\LSLEvaluator.h" />
     <ClInclude Include="Core\LSLBuilder.h" />

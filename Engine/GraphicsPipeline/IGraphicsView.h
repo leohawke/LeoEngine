@@ -30,7 +30,6 @@ namespace LeoEngine::GraphicsPipeline {
 		public:
 			enum ViewType {
 				Default_View,
-				Recursive_View,
 				Shadow_View,
 			};
 

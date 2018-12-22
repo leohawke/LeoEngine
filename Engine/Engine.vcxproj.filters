@@ -165,6 +165,9 @@
       <Filter>GraphicsPipeline</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsPipeline\GarphicsView.cpp" />
+    <ClCompile Include="Core\GraphicsEngine.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -366,6 +369,9 @@
     </ClInclude>
     <ClInclude Include="GraphicsPipeline\ShadingPipeline.h">
       <Filter>GraphicsPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\GraphicsEngine.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
