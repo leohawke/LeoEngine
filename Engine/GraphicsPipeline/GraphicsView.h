@@ -29,7 +29,7 @@ namespace LeoEngine::GraphicsPipeline {
 		LightIndex  AddLight(const  DirectLight& light) final;
 		DirectLight& GetLight(LightIndex light_id) final;
 
-		void AddShadingObject(leo::observer_ptr<ShadingElement> pShadingElement, leo::observer_ptr<ShadingObject> pShadingObject, EffectItem& effect_item) final;
+		void AddShadingObject(leo::observer_ptr<ShadingElement> pShadingElement, leo::observer_ptr<ShadingObject> pShadingObject,const EffectItem& effect_item) final;
 	public:
 		//TODO! lockfree_add_vector
 		using ShadingItems = leo::vector<LeoEngine::Render::ShadingItem>;
@@ -48,6 +48,9 @@ namespace LeoEngine::GraphicsPipeline {
 		DirectgLightList lights;
 
 		ViewPort view_port;
+
+		Camera camera;
+		Camera previous_camera;
 	};
 }
 

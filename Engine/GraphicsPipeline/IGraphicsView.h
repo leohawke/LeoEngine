@@ -65,7 +65,7 @@ namespace LeoEngine::GraphicsPipeline {
 			virtual LightIndex  AddLight(const  DirectLight& light) = 0;
 			virtual DirectLight& GetLight(LightIndex light_id) = 0;
 
-			virtual void AddShadingObject(leo::observer_ptr<ShadingElement> pShadingElement, leo::observer_ptr<ShadingObject> pShadingObject, EffectItem& effect_item) = 0;
+			virtual void AddShadingObject(leo::observer_ptr<ShadingElement> pShadingElement, leo::observer_ptr<ShadingObject> pShadingObject,const EffectItem& effect_item) = 0;
 		};
 	}
 }
