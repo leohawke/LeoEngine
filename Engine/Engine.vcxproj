@@ -145,6 +145,7 @@
     <ClInclude Include="Render\ShadingObject.h" />
     <ClInclude Include="Render\ViewPort.h" />
     <ClInclude Include="System\NinthTimer.h" />
+    <ClInclude Include="System\SystemEnvironment.h" />
     <ClInclude Include="System\TimeValue.h" />
     <ClInclude Include="Win32\File.h" />
     <ClInclude Include="Win32\Handle.h" />

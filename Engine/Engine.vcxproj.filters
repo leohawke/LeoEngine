@@ -95,32 +95,11 @@
     <ClCompile Include="Asset\MeshX.cpp">
       <Filter>Asset</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Mesh.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Camera.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="Render\D3D12\ResourceHolder.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="Core\AssetResourceScheduler.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\ResourcesHolder.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="Asset\MaterialX.cpp">
       <Filter>Asset</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\LSLEvaluator.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Materail.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\LSLBuilder.cpp">
-      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="System\NinthTimer.cpp">
       <Filter>System</Filter>
@@ -165,7 +144,28 @@
       <Filter>GraphicsPipeline</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsPipeline\GarphicsView.cpp" />
+    <ClCompile Include="Core\ResourcesHolder.cpp">
+      <Filter>Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\AssetResourceScheduler.cpp">
+      <Filter>Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Materail.cpp">
+      <Filter>Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Mesh.cpp">
+      <Filter>Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\LSLEvaluator.cpp">
+      <Filter>Core\LSL</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\LSLBuilder.cpp">
+      <Filter>Core\LSL</Filter>
+    </ClCompile>
     <ClCompile Include="Core\GraphicsEngine.cpp">
+      <Filter>Core\LeoEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Camera.cpp">
       <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
@@ -202,9 +202,6 @@
     </ClInclude>
     <ClInclude Include="Win32\NTHandle.h">
       <Filter>Win32</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\LFile.h">
-      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Asset\CompressionBC.hpp">
       <Filter>Asset</Filter>
@@ -268,41 +265,17 @@
     <ClInclude Include="Asset\MeshX.h">
       <Filter>Asset</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Mesh.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Resource.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Camera.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="Render\D3D12\ResourceHolder.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="Asset\MaterialAsset.h">
       <Filter>Asset</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Materail.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\AssetResourceScheduler.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\ResourcesHolder.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="Asset\MaterialX.h">
       <Filter>Asset</Filter>
     </ClInclude>
     <ClInclude Include="Asset\LSLAssetX.h">
       <Filter>Asset</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\LSLEvaluator.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\LSLBuilder.h">
-      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="System\TimeValue.h">
       <Filter>System</Filter>
@@ -370,8 +343,38 @@
     <ClInclude Include="GraphicsPipeline\ShadingPipeline.h">
       <Filter>GraphicsPipeline</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Resource.h">
+      <Filter>Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ResourcesHolder.h">
+      <Filter>Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\AssetResourceScheduler.h">
+      <Filter>Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Materail.h">
+      <Filter>Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Mesh.h">
+      <Filter>Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LSLEvaluator.h">
+      <Filter>Core\LSL</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LSLBuilder.h">
+      <Filter>Core\LSL</Filter>
+    </ClInclude>
     <ClInclude Include="Core\GraphicsEngine.h">
+      <Filter>Core\LeoEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Camera.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LFile.h">
+      <Filter>Core\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="System\SystemEnvironment.h">
+      <Filter>System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -404,6 +407,18 @@
     </Filter>
     <Filter Include="Render\DeviceInterface">
       <UniqueIdentifier>{f5398575-73b2-48e9-a4a5-539b3edd2f2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Resource">
+      <UniqueIdentifier>{b3934063-cb99-43f5-98ce-26b87c7342d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\LSL">
+      <UniqueIdentifier>{fc679982-849c-482b-ae24-474cb3afe0af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\LeoEngine">
+      <UniqueIdentifier>{2f19aeeb-134b-431b-be54-8b80a98a7b20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Base">
+      <UniqueIdentifier>{53562c64-6239-4065-b2b0-0ed9aab29db3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -45,6 +45,22 @@ namespace LeoEngine {
 namespace LeoEngine::Core {
 	namespace lm = leo::math;
 
+	//TODO!
+	//我们应该使用艺术工作者所使用工具的坐标系[3D-MAX]
+	//! "right-handed" coordinate systems, where the positive X-Axis points
+	//! to the right, the positive Y-Axis points away from the viewer and the positive
+	//! Z-Axis points up. The following illustration shows our coordinate system.
+	//! <PRE>
+	//! z-axis
+	//!  ^
+	//!  |
+	//!  |   y-axis
+	//!  |  /
+	//!  | /
+	//!  |/
+	//!  +---------------->   x-axis
+	//! </PRE>
+
 	class Camera {
 	public:
 		class TransformElement {
@@ -95,10 +111,10 @@ namespace LeoEngine::Core {
 		//Frustum Top Point in coordinate origin
 		class FrustumElement {
 		private:
-			float fov;
-			float aspect;
-			float nearPlane;
-			float farPlane;
+			float fov = 75.f/180*3.14f;
+			float aspect = 1;
+			float nearPlane = 0.25f;
+			float farPlane = 1024.f;
 		};
 	public:
 		lm::float3 GetEyePos() const noexcept {
@@ -135,9 +151,17 @@ namespace LeoEngine::Core {
 		void SetViewMatrix(const lm::float4x4& view) noexcept {
 			transform_element.SetViewMatrix(view);
 		}
+
+		void SetFrustum(leo::uint16 width, leo::uint16 height, const FrustumElement& frustum = {});
+
+		leo::uint16 GetFrustumViewWidth() const { return width; }
+		leo::uint16 GetFrustumViewHeight() const { return height; }
 	protected:
 		TransformElement transform_element;
 		FrustumElement frustum_elemnt;
+
+		leo::uint16 width;
+		leo::uint16 height;
 	};
 }
 
