@@ -47,6 +47,10 @@ namespace LeoEngine::GraphicsEngine {
 			virtual GraphicsView* GetOrCreateRenderView(IGraphicsView::ViewType type) = 0;
 		};
 	}
+
+	class  LeoEngine final : public ILeoEngine {
+		GraphicsView* GetOrCreateRenderView(IGraphicsView::ViewType type) ;
+	};
 }
 
 #endif
