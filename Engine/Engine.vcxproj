@@ -38,7 +38,6 @@
     <ClCompile Include="Core\Materail.cpp" />
     <ClCompile Include="Core\Mesh.cpp" />
     <ClCompile Include="Core\ResourcesHolder.cpp" />
-    <ClCompile Include="GraphicsPipeline\GarphicsView.cpp" />
     <ClCompile Include="GraphicsPipeline\GraphicsView.cpp" />
     <ClCompile Include="GraphicsPipeline\IGraphicsPipelineStage.cpp" />
     <ClCompile Include="Render\Color_T.cpp" />
@@ -56,9 +55,7 @@
     <ClCompile Include="Render\D3D12\ResourceView.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\ResourceHolder.cpp" />
     <ClCompile Include="Render\D3D12\ShaderCompose.d3d12.cpp" />
-    <ClCompile Include="Render\D3D12\Texture.d3d12.cpp">
-      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
-    </ClCompile>
+    <ClCompile Include="Render\D3D12\Texture.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Texture1D.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Texture2D.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Texture3D.d3d12.cpp" />
