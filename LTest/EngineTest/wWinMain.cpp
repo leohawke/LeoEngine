@@ -9,6 +9,7 @@
 #include "../../Engine/Asset/LSLAssetX.h"
 #include "../../Engine/System/NinthTimer.h"
 #include "../../Engine/Core/CameraController.h"
+#include "../../Engine/System/SystemEnvironment.h"
 #include "TestFramework.h"
 #include "EntityComponentSystem/EntitySystem.h"
 #include "LSchemEngineUnitTest.h"
@@ -171,7 +172,7 @@ private:
 		auto swap_chain = ::Create(GetNativeHandle());
 		Context::Instance().CreateDeviceAndDisplay();
 
-		static platform::chrono::NinthTimer timer = {};
+		static auto pInitGuard = LeoEngine::System::InitGlobalEnvironment();
 
 		pEntities = std::make_unique<Entities>("sponza_crytek.entities.lsl");
 

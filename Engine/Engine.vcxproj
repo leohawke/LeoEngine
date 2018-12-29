@@ -33,6 +33,7 @@
     <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Core\CameraController.cpp" />
     <ClCompile Include="Core\GraphicsEngine.cpp" />
+    <ClCompile Include="Core\LeoEngine.cpp" />
     <ClCompile Include="Core\LSLBuilder.cpp" />
     <ClCompile Include="Core\LSLEvaluator.cpp" />
     <ClCompile Include="Core\Materail.cpp" />

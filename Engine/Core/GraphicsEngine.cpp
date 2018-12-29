@@ -26,6 +26,5 @@ GraphicsPassInfo GraphicsPassInfo::CreateGeneralPassGraphicsInfo(const Camera& c
 }
 
 void GraphicsPassInfo::SetCamera(const Camera& camera) {
-	//TODO
-	//pCamera = Environment->LeoEngine->GetGraphicsPassCamera(camera);
+	pCamera = Environment->LeoEngine->GetGraphicsPassCamera(camera);
 }
