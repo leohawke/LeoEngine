@@ -38,7 +38,6 @@
     <ClCompile Include="Core\Materail.cpp" />
     <ClCompile Include="Core\Mesh.cpp" />
     <ClCompile Include="Core\ResourcesHolder.cpp" />
-    <ClCompile Include="GraphicsPipeline\GarphicsView.cpp" />
     <ClCompile Include="GraphicsPipeline\GraphicsView.cpp" />
     <ClCompile Include="GraphicsPipeline\IGraphicsPipelineStage.cpp" />
     <ClCompile Include="Render\Color_T.cpp" />

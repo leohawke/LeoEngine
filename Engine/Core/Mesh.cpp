@@ -53,7 +53,7 @@ namespace platform {
 
 
 	MeshesHolder::MeshesHolder()
-		:loaded_meshes(pool_resource)
+		:loaded_meshes(&pool_resource)
 	{
 	}
 	platform::MeshesHolder::~MeshesHolder()

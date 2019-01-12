@@ -143,7 +143,6 @@
     <ClCompile Include="GraphicsPipeline\GraphicsView.cpp">
       <Filter>GraphicsPipeline</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsPipeline\GarphicsView.cpp" />
     <ClCompile Include="Core\ResourcesHolder.cpp">
       <Filter>Core\Resource</Filter>
     </ClCompile>
