@@ -405,7 +405,7 @@ namespace platform::Render::Effect {
 	}
 
 	EffectsHolder::EffectsHolder()
-		:loaded_effects(pool_resource.upstream_resource())
+		:loaded_effects(pool_resource)
 	{
 	}
 
