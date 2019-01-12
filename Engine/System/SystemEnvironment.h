@@ -8,6 +8,7 @@
 
 #include "../Core/GraphicsEngine.h"
 #include "NinthTimer.h"
+#include <LBase/lmemory.hpp>
 
 namespace LeoEngine::System {
 	struct GlobalEnvironment {
@@ -16,6 +17,9 @@ namespace LeoEngine::System {
 	};
 
 	GlobalEnvironment& FetchGlobalEnvironment();
+
+	[[nodiscard]]
+	std::shared_ptr<void> InitGlobalEnvironment();
 }
 
 extern LeoEngine::System::GlobalEnvironment* Environment;
