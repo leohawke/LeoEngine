@@ -45,14 +45,14 @@ namespace LeoEngine::GraphicsEngine {
 		class ILeoEngine {
 		public:
 			virtual GraphicsView* GetOrCreateRenderView(IGraphicsView::ViewType type) = 0;
-			virtual Camera* GetGraphicsPassCamera(const Camera& camera) = 0;
 		};
 	}
+}
 
-	class  LeoEngine final : public ILeoEngine {
-		GraphicsView* GetOrCreateRenderView(IGraphicsView::ViewType type) override;
-
-		Camera* GetGraphicsPassCamera(const Camera& camera) override;
+namespace LeoEngine::Core {
+	class IWhiteEngine {
+	public:
+		virtual Camera* GetGraphicsPassCamera(const Camera& camera) = 0;
 	};
 }
 

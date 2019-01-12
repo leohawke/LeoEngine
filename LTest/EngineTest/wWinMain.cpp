@@ -24,6 +24,7 @@
 
 using namespace platform::Render;
 using namespace LeoEngine::Render;
+using namespace LeoEngine::GraphicsEngine;
 namespace fs = std::filesystem;
 
 namespace lm = leo::math;
@@ -110,6 +111,8 @@ private:
 		auto& timer = platform::chrono::FetchGlobalTimer();
 		timer.UpdateOnFrameStart();
 		platform::Material::GetInstanceEvaluator().Define("time", timer.GetFrameTime(), true);
+
+		auto passInfo = GraphicsPassInfo::CreateGeneralPassGraphicsInfo(camera);
 
 		auto entityId = ecs::EntitySystem::Instance().AddEntity<ecs::Entity>();
 

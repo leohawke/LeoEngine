@@ -3,6 +3,10 @@
 using namespace LeoEngine::GraphicsPipeline;
 using namespace LeoEngine::Render;
 
+GraphicsView::GraphicsView(ViewType _view_type)
+	:view_type(_view_type)
+{}
+
 void GraphicsView::SetFrameID(leo::uint32 frameId)
 {
 	frame_id = frameId;

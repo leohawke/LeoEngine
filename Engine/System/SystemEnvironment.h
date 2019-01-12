@@ -13,6 +13,7 @@
 namespace LeoEngine::System {
 	struct GlobalEnvironment {
 		LeoEngine::GraphicsEngine::ILeoEngine* LeoEngine;
+		LeoEngine::Core::IWhiteEngine* WhiteEngine;
 		platform::chrono::NinthTimer* Timer;
 	};
 

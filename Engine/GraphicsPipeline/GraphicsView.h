@@ -10,6 +10,8 @@ namespace LeoEngine::GraphicsPipeline {
 	using ShadingItem = LeoEngine::Render::ShadingItem;
 	class GraphicsView : public IGraphicsView {
 	public:
+		GraphicsView(ViewType view_type);
+
 		void SetFrameID(leo::uint32 frameId) final;
 		leo::uint32 GetFrameID() const final;
 

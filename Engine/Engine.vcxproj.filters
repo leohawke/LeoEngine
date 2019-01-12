@@ -162,7 +162,7 @@
       <Filter>Core\LSL</Filter>
     </ClCompile>
     <ClCompile Include="Core\GraphicsEngine.cpp">
-      <Filter>Core\LeoEngine</Filter>
+      <Filter>Core\Engine</Filter>
     </ClCompile>
     <ClCompile Include="Core\Camera.cpp">
       <Filter>Core</Filter>
@@ -171,7 +171,10 @@
       <Filter>System</Filter>
     </ClCompile>
     <ClCompile Include="Core\LeoEngine.cpp">
-      <Filter>Core\LeoEngine</Filter>
+      <Filter>Core\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\WhiteEngine.cpp">
+      <Filter>Core\Engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -370,7 +373,7 @@
       <Filter>Core\LSL</Filter>
     </ClInclude>
     <ClInclude Include="Core\GraphicsEngine.h">
-      <Filter>Core\LeoEngine</Filter>
+      <Filter>Core\Engine</Filter>
     </ClInclude>
     <ClInclude Include="Core\Camera.h">
       <Filter>Core</Filter>
@@ -380,6 +383,12 @@
     </ClInclude>
     <ClInclude Include="System\SystemEnvironment.h">
       <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LeoEngine.h">
+      <Filter>Core\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\WhiteEngine.h">
+      <Filter>Core\Engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -419,11 +428,11 @@
     <Filter Include="Core\LSL">
       <UniqueIdentifier>{fc679982-849c-482b-ae24-474cb3afe0af}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Core\LeoEngine">
-      <UniqueIdentifier>{2f19aeeb-134b-431b-be54-8b80a98a7b20}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Core\Base">
       <UniqueIdentifier>{53562c64-6239-4065-b2b0-0ed9aab29db3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Engine">
+      <UniqueIdentifier>{2f19aeeb-134b-431b-be54-8b80a98a7b20}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -39,6 +39,7 @@
     <ClCompile Include="Core\Materail.cpp" />
     <ClCompile Include="Core\Mesh.cpp" />
     <ClCompile Include="Core\ResourcesHolder.cpp" />
+    <ClCompile Include="Core\WhiteEngine.cpp" />
     <ClCompile Include="GraphicsPipeline\GraphicsView.cpp" />
     <ClCompile Include="GraphicsPipeline\IGraphicsPipelineStage.cpp" />
     <ClCompile Include="Render\Color_T.cpp" />
@@ -96,6 +97,7 @@
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core\CameraController.h" />
     <ClInclude Include="Core\GraphicsEngine.h" />
+    <ClInclude Include="Core\LeoEngine.h" />
     <ClInclude Include="Core\LFile.h" />
     <ClInclude Include="Core\LSLEvaluator.h" />
     <ClInclude Include="Core\LSLBuilder.h" />
@@ -103,6 +105,7 @@
     <ClInclude Include="Core\Mesh.h" />
     <ClInclude Include="Core\Resource.h" />
     <ClInclude Include="Core\ResourcesHolder.h" />
+    <ClInclude Include="Core\WhiteEngine.h" />
     <ClInclude Include="emacro.h" />
     <ClInclude Include="GraphicsPipeline\GraphicsView.h" />
     <ClInclude Include="GraphicsPipeline\IGraphicsView.h" />

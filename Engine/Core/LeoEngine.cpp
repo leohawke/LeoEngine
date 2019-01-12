@@ -1,12 +1,10 @@
-#include "GraphicsEngine.h"
+#include "LeoEngine.h"
+#include "../GraphicsPipeline/GraphicsView.h"
 
 using namespace LeoEngine;
 using namespace LeoEngine::GraphicsPipeline;
 
 GraphicsView* GraphicsEngine::LeoEngine::GetOrCreateRenderView(IGraphicsView::ViewType type) {
-	return nullptr;
-}
-
-Camera* GraphicsEngine::LeoEngine::GetGraphicsPassCamera(const Camera& camera) {
-	return nullptr;
+	//todo pool
+	return new GraphicsView(type);
 }
