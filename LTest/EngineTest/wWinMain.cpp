@@ -4,6 +4,7 @@
 #include "../../Engine/Core/Mesh.h"
 #include "../../Engine/Render/IFrameBuffer.h"
 #include "../../Engine/Render/DataStructures.h"
+#include "../../Engine/GraphicsPipeline/GraphicsView.h"
 #include "../../Engine/Asset/EffectX.h"
 #include "../../Engine/Asset/MaterialX.h"
 #include "../../Engine/Asset/LSLAssetX.h"
@@ -58,6 +59,8 @@ private:
 
 	std::shared_ptr<platform::Material> pMaterial;
 	std::shared_ptr<platform::Mesh> pMesh;
+
+	std::unique_ptr<ShadingObject> pShadingObject;
 };
 
 class Entities {
@@ -156,11 +159,16 @@ private:
 
 		//mat
 		pEffect->GetParameter("alpha"sv) = 1.0f;
+		
+		auto pView = passInfo.GetRenderView();
+		 
 
 		for (auto& entity : pEntities->GetRenderables())
 		{
 			entity.GetMaterial().UpdateParams(reinterpret_cast<const platform::Renderable*>(&entity));
 			Context::Instance().Render(*pEffect, pEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
+
+			pView->AddShadingObject()
 		}
 
 		Context::Instance().GetDisplay().SwapBuffers();

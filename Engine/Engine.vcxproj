@@ -34,6 +34,7 @@
     <ClCompile Include="Core\CameraController.cpp" />
     <ClCompile Include="Core\GraphicsEngine.cpp" />
     <ClCompile Include="Core\LeoEngine.cpp" />
+    <ClCompile Include="Core\LeoEngine\ShadingElements\SEMesh.cpp" />
     <ClCompile Include="Core\LSLBuilder.cpp" />
     <ClCompile Include="Core\LSLEvaluator.cpp" />
     <ClCompile Include="Core\Materail.cpp" />
@@ -98,6 +99,7 @@
     <ClInclude Include="Core\CameraController.h" />
     <ClInclude Include="Core\GraphicsEngine.h" />
     <ClInclude Include="Core\LeoEngine.h" />
+    <ClInclude Include="Core\LeoEngine\ShadingElements\SEMesh.h" />
     <ClInclude Include="Core\LFile.h" />
     <ClInclude Include="Core\LSLEvaluator.h" />
     <ClInclude Include="Core\LSLBuilder.h" />

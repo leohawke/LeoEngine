@@ -170,11 +170,14 @@
     <ClCompile Include="System\SystemEnvironment.cpp">
       <Filter>System</Filter>
     </ClCompile>
-    <ClCompile Include="Core\LeoEngine.cpp">
-      <Filter>Core\Engine</Filter>
-    </ClCompile>
     <ClCompile Include="Core\WhiteEngine.cpp">
-      <Filter>Core\Engine</Filter>
+      <Filter>Core\Engine\WhiteEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\LeoEngine.cpp">
+      <Filter>Core\Engine\LeoEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\LeoEngine\ShadingElements\SEMesh.cpp">
+      <Filter>Core\Engine\LeoEngine\ShadingElements</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -384,11 +387,14 @@
     <ClInclude Include="System\SystemEnvironment.h">
       <Filter>System</Filter>
     </ClInclude>
-    <ClInclude Include="Core\LeoEngine.h">
-      <Filter>Core\Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Core\WhiteEngine.h">
-      <Filter>Core\Engine</Filter>
+      <Filter>Core\Engine\WhiteEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LeoEngine.h">
+      <Filter>Core\Engine\LeoEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LeoEngine\ShadingElements\SEMesh.h">
+      <Filter>Core\Engine\LeoEngine\ShadingElements</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -433,6 +439,15 @@
     </Filter>
     <Filter Include="Core\Engine">
       <UniqueIdentifier>{2f19aeeb-134b-431b-be54-8b80a98a7b20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Engine\WhiteEngine">
+      <UniqueIdentifier>{a6ef2baf-91cf-4e9a-9993-ecf28ebd4c86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Engine\LeoEngine">
+      <UniqueIdentifier>{8ecf8778-317a-4554-a213-d94ef458eca9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Engine\LeoEngine\ShadingElements">
+      <UniqueIdentifier>{6937e48e-9eb5-49ab-8e57-1a4b77f48cc6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

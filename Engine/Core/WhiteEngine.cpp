@@ -4,5 +4,5 @@ using namespace LeoEngine::Core;
 
 Camera * WhiteEngine::GetGraphicsPassCamera(const Camera & camera)
 {
-	return nullptr;
+	return new Camera(camera);
 }

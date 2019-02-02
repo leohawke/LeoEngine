@@ -25,6 +25,11 @@ GraphicsPassInfo GraphicsPassInfo::CreateGeneralPassGraphicsInfo(const Camera& c
 	return passInfo;
 }
 
+GraphicsView* GraphicsPassInfo::GetRenderView() const
+{
+	return static_cast<GraphicsView*>(graphics_view.get());
+}
+
 void GraphicsPassInfo::SetCamera(const Camera& camera) {
 	pCamera = Environment->WhiteEngine->GetGraphicsPassCamera(camera);
 }

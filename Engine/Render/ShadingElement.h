@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef LE_RENDER_ShadingElement_h
 #define LE_RENDER_ShadingElement_h 1
 
@@ -57,7 +55,7 @@ namespace LeoEngine::Render {
 		//Multi-Type ShadingElement
 		virtual ~ShadingElement();
 
-		ShadingElement();
+		ShadingElement(ShadingElementDataType type);
 	public:
 		//ShadingElement LinkList
 	};

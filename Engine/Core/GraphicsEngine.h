@@ -23,6 +23,8 @@ namespace LeoEngine::GraphicsEngine {
 
 
 		leo::uint32 GetFrameID() { return frame_id; }
+
+		GraphicsView* GetRenderView() const;
 	private:
 		GraphicsPassInfo() {
 			//TODO!

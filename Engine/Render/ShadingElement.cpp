@@ -5,7 +5,10 @@ using namespace LeoEngine::Render;
 
 ImplDeDtor(IShadingElement)
 
-ShadingElement::ShadingElement() {
+
+ShadingElement::ShadingElement(ShadingElementDataType _type)
+	:type(_type)
+{
 	id = ShadingElement::ElementId++;
 }
 
