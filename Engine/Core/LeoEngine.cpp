@@ -8,3 +8,8 @@ GraphicsView* GraphicsEngine::LeoEngine::GetOrCreateRenderView(IGraphicsView::Vi
 	//todo pool
 	return new GraphicsView(type);
 }
+
+void GraphicsEngine::LeoEngine::ReturnRenderView(GraphicsView* pRenderView)
+{
+	delete this;
+}

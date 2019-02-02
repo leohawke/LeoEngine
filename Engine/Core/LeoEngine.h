@@ -11,6 +11,8 @@
 namespace LeoEngine::GraphicsEngine {
 	class  LeoEngine final : public ILeoEngine {
 		GraphicsView* GetOrCreateRenderView(IGraphicsView::ViewType type) override;
+
+		void ReturnRenderView(GraphicsView* pRenderView) override;
 	};
 }
 
