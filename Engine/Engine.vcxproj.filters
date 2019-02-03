@@ -396,6 +396,9 @@
     <ClInclude Include="Core\LeoEngine\ShadingElements\SEMesh.h">
       <Filter>Core\Engine\LeoEngine\ShadingElements</Filter>
     </ClInclude>
+    <ClInclude Include="Core\LeoEngine\ShadingElements\SEMeshImpl.h">
+      <Filter>Core\Engine\LeoEngine\ShadingElements</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

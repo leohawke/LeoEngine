@@ -48,6 +48,8 @@ namespace LeoEngine::GraphicsEngine {
 		public:
 			virtual GraphicsView* GetOrCreateRenderView(IGraphicsView::ViewType type) = 0;
 			virtual void ReturnRenderView(GraphicsView* pRenderView) = 0;
+
+			virtual ShadingElement* CreateShadingElement(Render::ShadingElementDataType) = 0;
 		};
 	}
 }

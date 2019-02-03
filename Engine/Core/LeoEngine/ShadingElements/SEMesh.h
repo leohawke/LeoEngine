@@ -17,9 +17,9 @@ namespace LeoEngine::GraphicsEngine {
 
 
 
-	class SEMesh : public LeoEngine::Render::ShadingElement
+	class SEMesh : public Render::ShadingElement
 	{
-		using base =  LeoEngine::Render::ShadingElement;
+		using base =  Render::ShadingElement;
 	public:
 		platform::Mesh* pRenderMesh = nullptr;
 

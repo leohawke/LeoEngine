@@ -13,6 +13,8 @@ namespace LeoEngine::GraphicsEngine {
 		GraphicsView* GetOrCreateRenderView(IGraphicsView::ViewType type) override;
 
 		void ReturnRenderView(GraphicsView* pRenderView) override;
+
+		ShadingElement* CreateShadingElement(Render::ShadingElementDataType) override;
 	};
 }
 

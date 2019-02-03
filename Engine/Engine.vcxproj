@@ -100,6 +100,7 @@
     <ClInclude Include="Core\GraphicsEngine.h" />
     <ClInclude Include="Core\LeoEngine.h" />
     <ClInclude Include="Core\LeoEngine\ShadingElements\SEMesh.h" />
+    <ClInclude Include="Core\LeoEngine\ShadingElements\SEMeshImpl.h" />
     <ClInclude Include="Core\LFile.h" />
     <ClInclude Include="Core\LSLEvaluator.h" />
     <ClInclude Include="Core\LSLBuilder.h" />

@@ -5,6 +5,7 @@
 #include "../../Engine/Render/IFrameBuffer.h"
 #include "../../Engine/Render/DataStructures.h"
 #include "../../Engine/GraphicsPipeline/GraphicsView.h"
+#include "../../Engine/Core/LeoEngine/ShadingElements/SEMesh.h"
 #include "../../Engine/Asset/EffectX.h"
 #include "../../Engine/Asset/MaterialX.h"
 #include "../../Engine/Asset/LSLAssetX.h"
@@ -38,6 +39,8 @@ public:
 
 		pMesh = platform::X::LoadMesh(mesh_name + ".asset", mesh_name);
 		pMaterial = platform::X::LoadMaterial(material_name + ".mat.lsl", material_name);
+
+		pShadingElement = leo::unique_raw(Environment->LeoEngine->CreateShadingElement(SED_Mesh));
 	}
 
 	const platform::Material& GetMaterial() const {
@@ -61,6 +64,7 @@ private:
 	std::shared_ptr<platform::Mesh> pMesh;
 
 	std::unique_ptr<ShadingObject> pShadingObject;
+	std::unique_ptr<ShadingElement> pShadingElement;
 };
 
 class Entities {
@@ -168,7 +172,6 @@ private:
 			entity.GetMaterial().UpdateParams(reinterpret_cast<const platform::Renderable*>(&entity));
 			Context::Instance().Render(*pEffect, pEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
 
-			pView->AddShadingObject()
 		}
 
 		Context::Instance().GetDisplay().SwapBuffers();
