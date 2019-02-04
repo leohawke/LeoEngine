@@ -5,6 +5,7 @@
 
 #include "IGraphicsView.h"
 #include "ShadingPipeline.h"
+#include "../Core/Threading/ThreadSafeWorkerContainer.hpp"
 
 namespace LeoEngine::GraphicsPipeline {
 	using ShadingItem = LeoEngine::Render::ShadingItem;
@@ -34,7 +35,7 @@ namespace LeoEngine::GraphicsPipeline {
 		void AddShadingObject(leo::observer_ptr<ShadingElement> pShadingElement, leo::observer_ptr<ShadingObject> pShadingObject,const EffectItem& effect_item) final;
 	public:
 		//TODO! lockfree_add_vector
-		using ShadingItems = leo::vector<LeoEngine::Render::ShadingItem>;
+		using ShadingItems = leo::vector<Render::ShadingItem>;
 		using DirectgLightList = leo::list<DirectLight>;
 
 	private:
@@ -46,13 +47,18 @@ namespace LeoEngine::GraphicsPipeline {
 
 		leo::observer_ptr<GraphicsView> parent_view;
 
-		ShadingItems shading_items[LeoEngine::Render::EFLIST_COUNT];
+		ShadingItems shading_items[Render::EFLIST_COUNT];
 		DirectgLightList lights;
 
 		ViewPort view_port;
 
 		Camera camera;
 		Camera previous_camera;
+
+		//Temporary shading objects storage
+		struct {
+			Worker::ThreadSafeWorkerContainer<ShadingObject*> objects;
+		};
 	};
 }
 

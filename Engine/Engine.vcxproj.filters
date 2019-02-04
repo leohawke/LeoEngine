@@ -399,6 +399,9 @@
     <ClInclude Include="Core\LeoEngine\ShadingElements\SEMeshImpl.h">
       <Filter>Core\Engine\LeoEngine\ShadingElements</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Threading\ThreadSafeWorkerContainer.hpp">
+      <Filter>Core\Threading</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
@@ -451,6 +454,9 @@
     </Filter>
     <Filter Include="Core\Engine\LeoEngine\ShadingElements">
       <UniqueIdentifier>{6937e48e-9eb5-49ab-8e57-1a4b77f48cc6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Threading">
+      <UniqueIdentifier>{551030a7-f19e-45ed-87c8-0cd0d623401e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

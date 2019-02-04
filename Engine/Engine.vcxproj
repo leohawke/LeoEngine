@@ -108,6 +108,7 @@
     <ClInclude Include="Core\Mesh.h" />
     <ClInclude Include="Core\Resource.h" />
     <ClInclude Include="Core\ResourcesHolder.h" />
+    <ClInclude Include="Core\Threading\ThreadSafeWorkerContainer.hpp" />
     <ClInclude Include="Core\WhiteEngine.h" />
     <ClInclude Include="emacro.h" />
     <ClInclude Include="GraphicsPipeline\GraphicsView.h" />

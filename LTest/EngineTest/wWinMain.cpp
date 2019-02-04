@@ -63,7 +63,6 @@ private:
 	std::shared_ptr<platform::Material> pMaterial;
 	std::shared_ptr<platform::Mesh> pMesh;
 
-	std::unique_ptr<ShadingObject> pShadingObject;
 	std::unique_ptr<ShadingElement> pShadingElement;
 };
 
