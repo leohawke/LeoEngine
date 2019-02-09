@@ -179,6 +179,9 @@
     <ClCompile Include="Core\LeoEngine\ShadingElements\SEMesh.cpp">
       <Filter>Core\Engine\LeoEngine\ShadingElements</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Threading\JobDispacther.cpp">
+      <Filter>Core\Threading</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -400,6 +403,9 @@
       <Filter>Core\Engine\LeoEngine\ShadingElements</Filter>
     </ClInclude>
     <ClInclude Include="Core\Threading\ThreadSafeWorkerContainer.hpp">
+      <Filter>Core\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Threading\JobDispatcher.h">
       <Filter>Core\Threading</Filter>
     </ClInclude>
   </ItemGroup>

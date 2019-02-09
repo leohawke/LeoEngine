@@ -1,24 +1,40 @@
 /*! \file Core\Threading\ThreadSafeWorkerContainer.h
 \ingroup LeoEngine
-\brief 特别设计的用词用于 渲染数据，具备以下特征:
-	-在LeoEngine 更新时被创建，在渲染时被使用
+\brief 特别设计 用于 渲染数据，具备以下特征:
+	-在更新时多个Worker送入数据，在渲染时被使用
 
-	注意，依赖JobManager被构建
+	注意，依赖JobDispatcher被构建
 */
 #ifndef LECT_THREADSAFEWORKERCONTAINER_HPP_
 #define LECT_THREADSAFEWORKERCONTAINER_HPP_ 1
 
 #include <LBase/container.hpp>
-#include <LBase/linttype.hpp>
+#include "JobDispatcher.h"
 
 namespace LeoEngine::Worker {
-	using namespace leo::inttype;
 
 	template<typename T>
 	class ThreadSafeWorkerContainer {
 	public:
-		ThreadSafeWorkerContainer();
-		~ThreadSafeWorkerContainer();
+		ThreadSafeWorkerContainer()
+			:
+			numWorkers(0),
+			workers(nullptr),
+			coalescedArrCapacity(0),
+			coalescedArr(nullptr),
+			isCoalesced(false)
+		{}
+
+		~ThreadSafeWorkerContainer() {
+			clear();
+			delete[] workers;
+			workers = nullptr;
+		}
+
+		ThreadSafeWorkerContainer(const ThreadSafeWorkerContainer&) = delete;
+		ThreadSafeWorkerContainer(ThreadSafeWorkerContainer&&) = delete;
+
+		ThreadSafeWorkerContainer& operator=(const ThreadSafeWorkerContainer&) = delete;
 
 		//! Safe access of elements for calling thread via operator[].
 		uint32 ConvertToEncodedWorkerId_threadlocal(uint32 nIndex) const;
@@ -69,7 +85,7 @@ namespace LeoEngine::Worker {
 		T* push_back_impl(size_t& nIndex);
 		void ReserverCoalescedMemory(size_t n);
 
-		uint64  foreignWorkerId; //!< Id of the non-job-manager-worker thread that's also allowed to use this container.
+		workerid  foreignWorkerId; //!< Id of the non-job-manager-worker thread that's also allowed to use this container.
 
 		SWorker* workers;
 		uint32   numWorkers;
