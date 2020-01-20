@@ -7,10 +7,10 @@ using namespace platform;
 using namespace scheme;
 using namespace v1;
 
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 platform::Material::Material(const asset::MaterailAsset & asset, const std::string & name)
-	:identity_name(asset::path(AssetResourceScheduler::Instance().FindAssetPath(&asset)).replace_extension().u8string() + "-" + name)
+	:identity_name(asset::path(AssetResourceScheduler::Instance().FindAssetPath(&asset)).replace_extension().string() + "-" + name)
 {
 	for (auto& bind_value : asset.GetBindValues()) {
 		if (LB_UNLIKELY(bind_value.second.GetContent().type() == leo::type_id<MaterialEvaluator::InstanceDelayedTerm>())){

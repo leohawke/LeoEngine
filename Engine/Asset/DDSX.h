@@ -15,7 +15,7 @@
 #include "CompressionBC.hpp"
 #include "../Render/IContext.h"
 
-#include <experimental/filesystem>
+#include <filesystem>
 
 namespace dds {
 	using namespace leo::inttype;
@@ -829,7 +829,7 @@ namespace dds {
 
 	class DDSLoadingDesc : public asset::AssetLoading<DDSAsset> {
 	private:
-		using path = std::experimental::filesystem::path;
+		using path = std::filesystem::path;
 		struct DDSDesc {
 			platform::File file;
 			path dds_path;

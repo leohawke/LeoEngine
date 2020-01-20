@@ -292,6 +292,7 @@ namespace platform_ex
 		//	However as a optimization, it is somewhat more efficient for some
 		//	cases. See $2015-01 @ %Documentation::Workflow::Annual2015.
 		if (::_isatty(fd))
+		{
 			TryRet(new TerminalData(fd))
 #	else
 		// XXX: Performance?
@@ -302,8 +303,9 @@ namespace platform_ex
 		if (::isatty(fd))
 			TryRet(new TerminalData(fp))
 #	endif
-			CatchExpr(Exception& e,
-				TraceDe(Informative, "Creating console failed: %s.", e.what()))
+			CatchExpr(Exception & e,
+				TraceDe(Informative, "Creating console failed."))
+		}
 			return{};
 	}())
 	{}

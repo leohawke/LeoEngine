@@ -8,11 +8,11 @@
 #include "../Render/ITexture.hpp"
 #include "../Core/LFile.h"
 
-#include <experimental/filesystem>
+#include <filesystem>
 
 namespace platform {
 	namespace X {
-		using path = std::experimental::filesystem::path;
+		using path = std::filesystem::path;
 
 
 		uint64 GetImageInfo(File const & file, Render::TextureType& type,
