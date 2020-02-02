@@ -61,6 +61,7 @@ namespace leo {
 	using platform::basic_string_view;
 	using platform::string_view;
 	using platform::u16string_view;
+	using platform::u8string_view;
 	using platform::wstring_view;
 
 	using platform::bad_weak_ptr;

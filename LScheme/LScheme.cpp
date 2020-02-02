@@ -1686,6 +1686,12 @@ namespace scheme
 			throw LoggedEvent("Empty token list found.", Alert);
 		}
 
+		TermNode
+			REPLContext::Perform(u8string_view unit, ContextNode& ctx)
+		{
+			return Perform(string_view(reinterpret_cast<const char*>(unit.data()),unit.length()), ctx);
+		}
+
 		void
 			REPLContext::Prepare(TermNode& term) const
 		{

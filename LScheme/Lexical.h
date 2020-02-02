@@ -13,6 +13,7 @@ namespace scheme {
 	using leo::list;
 	using leo::string;
 	using leo::string_view;
+	using leo::u8string_view;
 	using leo::vector;
 	using leo::begin;
 	using leo::end;
