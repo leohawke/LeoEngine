@@ -67,6 +67,8 @@ namespace scheme {
 				ImplRet(Perform(unit, Root))
 			TermNode
 			Perform(string_view, ContextNode&);
+			PDefH(TermNode, Perform, u8string_view unit)
+				ImplRet(Perform(unit, Root))
 			TermNode
 			Perform(u8string_view, ContextNode&);
 			//@}
