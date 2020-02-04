@@ -56,6 +56,29 @@
 
 				return light;
 			}
+
+			Light GetDirectionalLight(in DirectLight light_params,in Material material)
+			{
+				Light light;
+
+				light.attenuation = 1;
+
+				light.direction = light_params.position;
+
+				light.nol = saturate(dot(material.normal,light.direction));
+
+				light.color = light_params.color;
+
+				return light;
+			}
+
+			Light GetLight(in DirectLight light_params,in Material material)
+			{
+				if(light_params.type == DIRECTIONAL_LIGHT)
+					return GetDirectionalLight(light_params,material);
+				else
+					return GetPointLight(light_params,material);
+			}
 			"
 	)
 )

@@ -43,7 +43,8 @@
 			LightingResult total = (LightingResult)0;
 			for(uint i = 0; i!=light_count;++i ){
 				DirectLight direct_light = lights[i];
-				Light light = GetPointLight(direct_light,material);
+
+				Light light = GetLight(direct_light,material);
 
 				LightingResult result = (LightingResult)0;
 				SurfaceShading(light,material,view_dir,result.diffuse,result.specular);
