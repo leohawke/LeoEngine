@@ -205,8 +205,13 @@ private:
 		point_light.range = 80;
 		point_light.blub_innerangle = 40;
 		point_light.color = lm::float3(1.0f, 1.0f, 1.0f);
-
 		lights.push_back(point_light);
+
+		DirectLight directioal_light;
+		directioal_light.type = DIRECTIONAL_LIGHT;
+		directioal_light.position = lm::float3(0, 1, 0);
+		directioal_light.color = lm::float3(1.0f, 1.0f, 1.0f);
+		lights.push_back(directioal_light);
 
 		auto& Device = Context::Instance().GetDevice();
 		pLightConstatnBuffer = leo::share_raw(Device.CreateConstanBuffer(Buffer::Usage::Dynamic, EAccessHint::EA_GPURead | EAccessHint::EA_GPUStructured, sizeof(DirectLight)*lights.size(), static_cast<EFormat>(sizeof(DirectLight)),nullptr));
