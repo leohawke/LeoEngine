@@ -1861,11 +1861,11 @@ enum DWRITE_TRIMMING_GRANULARITY
     /// Trimming occurs at character cluster boundary.
     /// </summary>
     DWRITE_TRIMMING_GRANULARITY_CHARACTER,
-    
+
     /// <summary>
     /// Trimming occurs at word boundary.
     /// </summary>
-    DWRITE_TRIMMING_GRANULARITY_WORD    
+    DWRITE_TRIMMING_GRANULARITY_WORD
 };
 
 /// <summary>
@@ -2476,12 +2476,24 @@ struct DWRITE_SHAPING_TEXT_PROPERTIES
     /// This character can be shaped independently from the others
     /// (usually set for the space character).
     /// </summary>
-    UINT16  isShapedAlone       : 1;
+    UINT16 isShapedAlone        : 1;
 
     /// <summary>
     /// Reserved for use by shaping engine.
     /// </summary>
-    UINT16  reserved            : 15;
+    UINT16 reserved1            : 1;
+
+    /// <summary>
+    /// Glyph shaping can be cut after this point without affecting shaping
+    /// before or after it. Otherwise, splitting a call to GetGlyphs would
+    /// cause a reflow of glyph advances and shapes.
+    /// </summary>
+    UINT16 canBreakShapingAfter : 1;
+
+    /// <summary>
+    /// Reserved for use by shaping engine.
+    /// </summary>
+    UINT16 reserved             : 13;
 };
 
 /// <summary>
@@ -2494,27 +2506,28 @@ struct DWRITE_SHAPING_GLYPH_PROPERTIES
     /// another method. This exists for backwards compatibility
     /// with Uniscribe's SCRIPT_JUSTIFY enum.
     /// </summary>
-    UINT16  justification       : 4;
+    UINT16 justification        : 4;
 
     /// <summary>
     /// Indicates glyph is the first of a cluster.
     /// </summary>
-    UINT16  isClusterStart      : 1;
+    UINT16 isClusterStart       : 1;
 
     /// <summary>
     /// Glyph is a diacritic.
     /// </summary>
-    UINT16  isDiacritic         : 1;
+    UINT16 isDiacritic          : 1;
 
     /// <summary>
-    /// Glyph has no width, blank, ZWJ, ZWNJ etc.
+    /// Glyph has no width, mark, ZWJ, ZWNJ, ZWSP, LRM etc.
+    /// This flag is not limited to just U+200B.
     /// </summary>
-    UINT16  isZeroWidthSpace    : 1;
+    UINT16 isZeroWidthSpace     : 1;
 
     /// <summary>
     /// Reserved for use by shaping engine.
     /// </summary>
-    UINT16  reserved            : 9;
+    UINT16 reserved             : 9;
 };
 
 /// <summary>
@@ -2930,7 +2943,7 @@ interface DWRITE_DECLARE_INTERFACE("b7e6163e-7f46-43b4-84b3-e4e6249c365d") IDWri
     STDMETHOD(GetGlyphPlacements)(
         _In_reads_(textLength) WCHAR const* textString,
         _In_reads_(textLength) UINT16 const* clusterMap,
-        _In_reads_(textLength) DWRITE_SHAPING_TEXT_PROPERTIES* textProps,
+        _Inout_updates_(textLength) DWRITE_SHAPING_TEXT_PROPERTIES* textProps,
         UINT32 textLength,
         _In_reads_(glyphCount) UINT16 const* glyphIndices,
         _In_reads_(glyphCount) DWRITE_SHAPING_GLYPH_PROPERTIES const* glyphProps,

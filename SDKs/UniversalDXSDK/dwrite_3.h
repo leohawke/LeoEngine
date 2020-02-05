@@ -499,7 +499,7 @@ interface DWRITE_DECLARE_INTERFACE("9A1B41C3-D3BB-466A-87FC-FE67556A3B65") IDWri
     /// <summary>
     /// Retrieves a weight-stretch-style based collection of font families.
     /// </summary>
-    /// <param name="includeDownloadableFonts">Include cloud fonts or only locally installed ones.</param>
+    /// <param name="includeDownloadableFonts">Include downloadable fonts or only locally installed ones.</param>
     /// <param name="fontCollection">Receives a pointer to the newly created font collection object, or nullptr in
     ///     case of failure.</param>
     /// <param name="checkForUpdates">If this parameter is nonzero, the function performs an immediate check for changes 
@@ -2274,7 +2274,7 @@ interface DWRITE_DECLARE_INTERFACE("DC102F47-A12D-4B1C-822D-9E117E33043F") IDWri
     /// <summary>
     /// The CreateInMemoryFontFileReference method creates a font file reference
     /// (IDWriteFontFile object) from an array of bytes. The font file reference
-    /// is bound to the IDWRiteInMemoryFontFileLoader instance with which it was
+    /// is bound to the IDWriteInMemoryFontFileLoader instance with which it was
     /// created and remains valid for as long as that loader is registered with
     /// the factory.
     /// </summary>
@@ -2597,7 +2597,7 @@ interface DWRITE_DECLARE_INTERFACE("F3744D80-21F7-42EB-B35D-995BC72FC223") IDWri
     /// <summary>
     /// Retrieves the set of system fonts.
     /// </summary>
-    /// <param name="includeDownloadableFonts">Include cloud fonts or only locally installed ones.</param>
+    /// <param name="includeDownloadableFonts">Include downloadable fonts or only locally installed ones.</param>
     /// <param name="fontSet">Receives a pointer to the font set object, or nullptr in case of failure.</param>
     /// <returns>
     /// Standard HRESULT error code.
@@ -2612,7 +2612,7 @@ interface DWRITE_DECLARE_INTERFACE("F3744D80-21F7-42EB-B35D-995BC72FC223") IDWri
     /// <summary>
     /// Retrieves a collection of fonts grouped into families.
     /// </summary>
-    /// <param name="includeDownloadableFonts">Include cloud fonts or only locally installed ones.</param>
+    /// <param name="includeDownloadableFonts">Include downloadable fonts or only locally installed ones.</param>
     /// <param name="fontFamilyModel">How to group families in the collection.</param>
     /// <param name="fontCollection">Receives a pointer to the font collection object, or nullptr in case of failure.</param>
     /// <returns>
@@ -2624,7 +2624,6 @@ interface DWRITE_DECLARE_INTERFACE("F3744D80-21F7-42EB-B35D-995BC72FC223") IDWri
         _COM_Outptr_ IDWriteFontCollection2** fontCollection
         ) PURE;
 
-    using IDWriteFactory::GetSystemFontCollection;
     using IDWriteFactory3::GetSystemFontCollection;
 
     /// <summary>
@@ -3292,9 +3291,6 @@ interface DWRITE_DECLARE_INTERFACE("514039C6-4617-4064-BF8B-92EA83E506E0") IDWri
         _COM_Outptr_ IDWriteFontFamily2** fontFamily
         ) PURE;
 
-    using IDWriteFontCollection::GetFontFamily;
-    using IDWriteFontCollection1::GetFontFamily;
-
     /// <summary>
     /// Gets a list of fonts in the specified font family ranked in order of how well they match the specified axis values.
     /// </summary>
@@ -3334,6 +3330,10 @@ interface DWRITE_DECLARE_INTERFACE("514039C6-4617-4064-BF8B-92EA83E506E0") IDWri
     STDMETHOD(GetFontSet)(
         _COM_Outptr_ IDWriteFontSet1** fontSet
         ) PURE;
+
+    using IDWriteFontCollection::GetFontFamily;
+    using IDWriteFontCollection1::GetFontFamily;
+    using IDWriteFontCollection1::GetFontSet;
 };
 
 
@@ -3485,5 +3485,148 @@ interface DWRITE_DECLARE_INTERFACE("2397599D-DD0D-4681-BD6A-F4F31EAADE77") IDWri
 };
 
 #endif // NTDDI_VERSION >= NTDDI_WIN10_RS3
+
+#if NTDDI_VERSION >= NTDDI_WIN10_RS4
+
+interface DWRITE_DECLARE_INTERFACE("DC7EAD19-E54C-43AF-B2DA-4E2B79BA3F7F") IDWriteFontSet2 : public IDWriteFontSet1
+{
+    /// <summary>
+    /// Gets the expiration event for the font set, if any. The expiration event is set on a system font set object if
+    /// it is out of date due to fonts being installed, uninstalled, or updated. The client should handle the event by
+    /// getting a new system font set.
+    /// </summary>
+    /// <returns>
+    /// Returns an event handle if called on the system font set, or nullptr if called on a custom font set.
+    /// </returns>
+    /// <remarks>
+    /// The client must not call CloseHandle on the returned event handle. The handle is owned by the font set 
+    /// object, and remains valid as long as the client holds a reference to the font set. The client can wait
+    /// on the returned event or use RegisterWaitForSingleObject to request a callback when the event is set.
+    /// </remarks>
+    STDMETHOD_(HANDLE, GetExpirationEvent)() PURE;
+};
+
+interface DWRITE_DECLARE_INTERFACE("A4D055A6-F9E3-4E25-93B7-9E309F3AF8E9") IDWriteFontCollection3 : public IDWriteFontCollection2
+{
+    /// <summary>
+    /// Gets the expiration event for the font collection, if any. The expiration event is set on a system font 
+    /// collection object if it is out of date due to fonts being installed, uninstalled, or updated. The client 
+    /// should handle the event by getting a new system font collection.
+    /// </summary>
+    /// <returns>
+    /// Returns an event handle if called on the system font collection, or nullptr if called on a custom font 
+    /// collection.
+    /// </returns>
+    /// <remarks>
+    /// The client must not call CloseHandle on the returned event handle. The handle is owned by the font collection 
+    /// object, and remains valid as long as the client holds a reference to the font collection. The client can wait
+    /// on the returned event or use RegisterWaitForSingleObject to request a callback when the event is set.
+    /// </remarks>
+    STDMETHOD_(HANDLE, GetExpirationEvent)() PURE;
+};
+
+interface DWRITE_DECLARE_INTERFACE("35D0E0B3-9076-4D2E-A016-A91B568A06B4") IDWriteFactory7 : public IDWriteFactory6
+{
+    /// <summary>
+    /// Retrieves the set of system fonts.
+    /// </summary>
+    /// <param name="includeDownloadableFonts">Include downloadable fonts or only locally installed ones.</param>
+    /// <param name="fontSet">Receives a pointer to the font set object, or nullptr in case of failure.</param>
+    /// <returns>
+    /// Standard HRESULT error code.
+    /// </returns>
+    STDMETHOD(GetSystemFontSet)(
+        BOOL includeDownloadableFonts,
+        _COM_Outptr_ IDWriteFontSet2** fontSet
+        ) PURE;
+
+    using IDWriteFactory6::GetSystemFontSet;
+
+    /// <summary>
+    /// Retrieves a collection of fonts grouped into families.
+    /// </summary>
+    /// <param name="includeDownloadableFonts">Include downloadable fonts or only locally installed ones.</param>
+    /// <param name="fontFamilyModel">How to group families in the collection.</param>
+    /// <param name="fontCollection">Receives a pointer to the font collection object, or nullptr in case of failure.</param>
+    /// <returns>
+    /// Standard HRESULT error code.
+    /// </returns>
+    STDMETHOD(GetSystemFontCollection)(
+        BOOL includeDownloadableFonts,
+        DWRITE_FONT_FAMILY_MODEL fontFamilyModel,
+        _COM_Outptr_ IDWriteFontCollection3** fontCollection
+        ) PURE;
+
+    using IDWriteFactory6::GetSystemFontCollection;
+};
+
+#endif // NTDDI_VERSION >= NTDDI_WIN10_RS4
+
+#if NTDDI_VERSION >= NTDDI_WIN10_RS5
+
+/// <summary>
+/// The font source type identifies the mechanism by which a font came to be included in a font set.
+/// </summary>
+enum DWRITE_FONT_SOURCE_TYPE
+{
+    /// <summary>
+    /// The font source is unknown or is not any of the other defined font source types.
+    /// </summary>
+    DWRITE_FONT_SOURCE_TYPE_UNKNOWN,
+
+    /// <summary>
+    /// The font source is a font file, which is installed for all users on the device.
+    /// </summary>
+    DWRITE_FONT_SOURCE_TYPE_PER_MACHINE,
+
+    /// <summary>
+    /// The font source is a font file, which is installed for the current user.
+    /// </summary>
+    DWRITE_FONT_SOURCE_TYPE_PER_USER,
+
+    /// <summary>
+    /// The font source is an APPX package, which includes one or more font files.
+    /// The font source name is the full name of the package.
+    /// </summary>
+    DWRITE_FONT_SOURCE_TYPE_APPX_PACKAGE,
+
+    /// <summary>
+    /// The font source is a font provider for downloadable fonts.
+    /// </summary>
+    DWRITE_FONT_SOURCE_TYPE_REMOTE_FONT_PROVIDER
+};
+
+interface DWRITE_DECLARE_INTERFACE("7C073EF2-A7F4-4045-8C32-8AB8AE640F90") IDWriteFontSet3 : public IDWriteFontSet2
+{
+    /// <summary>
+    /// Gets the font source type of the specified font.
+    /// </summary>
+    /// <param name="listIndex">Zero-based index of the font.</param>
+    STDMETHOD_(DWRITE_FONT_SOURCE_TYPE, GetFontSourceType)(UINT32 fontIndex) PURE;
+
+    /// <summary>
+    /// Gets the length of the font source name for the specified font.
+    /// </summary>
+    /// <param name="listIndex">Zero-based index of the font.</param>
+    STDMETHOD_(UINT32, GetFontSourceNameLength)(UINT32 listIndex) PURE;
+
+    /// <summary>
+    /// Copies the font source name for the specified font to an output array.
+    /// </summary>
+    /// <param name="listIndex">Zero-based index of the font.</param>
+    /// <param name="stringBuffer">Character array that receives the string.</param>
+    /// <param name="stringBufferSize">Size of the array in characters. The size must include space for the terminating
+    /// null character.</param>
+    /// <returns>
+    /// Standard HRESULT error code.
+    /// </returns>
+    STDMETHOD(GetFontSourceName)(
+        UINT32 listIndex, 
+        _Out_writes_z_(stringBufferSize) WCHAR* stringBuffer, 
+        UINT32 stringBufferSize
+        ) PURE;
+};
+
+#endif // NTDDI_VERSION >= NTDDI_WIN10_RS5
 
 #endif // DWRITE_3_H_INCLUDED

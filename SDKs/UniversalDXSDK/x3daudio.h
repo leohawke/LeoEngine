@@ -4,7 +4,7 @@
  |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
  |PROJECT: X3DAudio                     MODEL:   Unmanaged User-mode        |
  |VERSION: 1.7                          EXCEPT:  No Exceptions              |
- |CLASS:   N / A                        MINREQ:  WinXP, Xbox360             |
+ |CLASS:   N / A                        MINREQ:  Win8, Xbox One             |
  |BASE:    N / A                        DIALECT: MSC++ 14.00                |
  |>------------------------------------------------------------------------<|
  | DUTY: Cross-platform stand-alone 3D audio math library                   |
@@ -52,10 +52,10 @@
 #error "This version of XAudio2 is available only in Windows 8 or later. Use the XAudio2 headers and libraries from the DirectX SDK with applications that target Windows 7 and earlier versions."
 #endif // (_WIN32_WINNT < _WIN32_WINNT_WIN8)
 
-#include <winapifamily.h>
+/*#include <winapifamily.h>*/
 
-#pragma region Application Family
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_TV_APP | WINAPI_PARTITION_TV_TITLE)
+/*#pragma region Application Family*/
+/*#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_TV_APP | WINAPI_PARTITION_TV_TITLE | WINAPI_PARTITION_GAMES)*/
 
 //--------------<D-E-F-I-N-I-T-I-O-N-S>-------------------------------------//
 #include <windef.h>    // general windows types
@@ -288,17 +288,11 @@ typedef struct X3DAUDIO_DSP_SETTINGS
 
 //--------------<M-A-C-R-O-S>-----------------------------------------------//
 // function storage-class attribute and calltype
-#if defined(X3DAUDIOSTATIC)
-    #define X3DAUDIO_API_(type) EXTERN_C type STDAPIVCALLTYPE
+#if defined(X3DEXPORT)
+#define X3DAUDIO_API_(type) EXTERN_C __declspec(dllexport) type STDAPIVCALLTYPE
 #else
-    #if defined(X3DEXPORT)
-        #define X3DAUDIO_API_(type) EXTERN_C __declspec(dllexport) type STDAPIVCALLTYPE
-    #else
-        #define X3DAUDIO_API_(type) EXTERN_C __declspec(dllimport) type STDAPIVCALLTYPE
-    #endif
+#define X3DAUDIO_API_(type) EXTERN_C __declspec(dllimport) type STDAPIVCALLTYPE
 #endif
-#define X3DAUDIO_IMP_(type) type STDMETHODVCALLTYPE
-
 
 //--------------<F-U-N-C-T-I-O-N-S>-----------------------------------------//
 // initializes instance handle
@@ -310,7 +304,7 @@ X3DAUDIO_API_(void) X3DAudioCalculate (_In_reads_bytes_(X3DAUDIO_HANDLE_BYTESIZE
 
 #pragma pack(pop) // revert packing alignment
 
-#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_TV_APP | WINAPI_PARTITION_TV_TITLE) */
-#pragma endregion
+/*#endif*/ /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_TV_APP | WINAPI_PARTITION_TV_TITLE | WINAPI_PARTITION_GAMES) */
+/*#pragma endregion*/
 //---------------------------------<-EOF->----------------------------------//
 

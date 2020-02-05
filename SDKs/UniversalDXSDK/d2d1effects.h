@@ -112,6 +112,8 @@ typedef enum D2D1_BITMAPSOURCE_ORIENTATION
 
 /// <summary>
 /// The enumeration of the Gaussian Blur effect's top level properties.
+/// Effect description: Applies a gaussian blur to a bitmap with the specified blur
+/// radius and angle.
 /// </summary>
 typedef enum D2D1_GAUSSIANBLUR_PROP
 {
@@ -149,6 +151,8 @@ typedef enum D2D1_GAUSSIANBLUR_OPTIMIZATION
 
 /// <summary>
 /// The enumeration of the Directional Blur effect's top level properties.
+/// Effect description: Applies a directional blur to a bitmap with the specified
+/// blur radius and angle.
 /// </summary>
 typedef enum D2D1_DIRECTIONALBLUR_PROP
 {
@@ -192,6 +196,7 @@ typedef enum D2D1_DIRECTIONALBLUR_OPTIMIZATION
 
 /// <summary>
 /// The enumeration of the Shadow effect's top level properties.
+/// Effect description: Applies a shadow to a bitmap based on its alpha channel.
 /// </summary>
 typedef enum D2D1_SHADOW_PROP
 {
@@ -229,6 +234,8 @@ typedef enum D2D1_SHADOW_OPTIMIZATION
 
 /// <summary>
 /// The enumeration of the Blend effect's top level properties.
+/// Effect description: Blends a foreground and background using a pre-defined blend
+/// mode.
 /// </summary>
 typedef enum D2D1_BLEND_PROP
 {
@@ -277,6 +284,8 @@ typedef enum D2D1_BLEND_MODE
 
 /// <summary>
 /// The enumeration of the Saturation effect's top level properties.
+/// Effect description: Alters the saturation of the bitmap based on the user
+/// specified saturation value.
 /// </summary>
 typedef enum D2D1_SATURATION_PROP
 {
@@ -293,6 +302,8 @@ typedef enum D2D1_SATURATION_PROP
 
 /// <summary>
 /// The enumeration of the Hue Rotation effect's top level properties.
+/// Effect description: Changes the Hue of a bitmap based on a user specified Hue
+/// Rotation angle.
 /// </summary>
 typedef enum D2D1_HUEROTATION_PROP
 {
@@ -309,6 +320,8 @@ typedef enum D2D1_HUEROTATION_PROP
 
 /// <summary>
 /// The enumeration of the Color Matrix effect's top level properties.
+/// Effect description: Applies a user specified color matrix to each channel of the
+/// input bitmap.
 /// </summary>
 typedef enum D2D1_COLORMATRIX_PROP
 {
@@ -345,6 +358,7 @@ typedef enum D2D1_COLORMATRIX_ALPHA_MODE
 
 /// <summary>
 /// The enumeration of the Bitmap Source effect's top level properties.
+/// Effect description: Provides an image source.
 /// </summary>
 typedef enum D2D1_BITMAPSOURCE_PROP
 {
@@ -410,6 +424,8 @@ typedef enum D2D1_BITMAPSOURCE_ALPHA_MODE
 
 /// <summary>
 /// The enumeration of the Composite effect's top level properties.
+/// Effect description: Composites foreground and background images using the
+/// selected composition mode.
 /// </summary>
 typedef enum D2D1_COMPOSITE_PROP
 {
@@ -426,6 +442,7 @@ typedef enum D2D1_COMPOSITE_PROP
 
 /// <summary>
 /// The enumeration of the 3D Transform effect's top level properties.
+/// Effect description: Applies a 3D transform to a bitmap.
 /// </summary>
 typedef enum D2D1_3DTRANSFORM_PROP
 {
@@ -465,6 +482,7 @@ typedef enum D2D1_3DTRANSFORM_INTERPOLATION_MODE
 
 /// <summary>
 /// The enumeration of the 3D Perspective Transform effect's top level properties.
+/// Effect description: Applies a 3D perspective transform to a bitmap.
 /// </summary>
 typedef enum D2D1_3DPERSPECTIVETRANSFORM_PROP
 {
@@ -534,6 +552,7 @@ typedef enum D2D1_3DPERSPECTIVETRANSFORM_INTERPOLATION_MODE
 
 /// <summary>
 /// The enumeration of the 2D Affine Transform effect's top level properties.
+/// Effect description: Applies a 2D affine transform to a bitmap.
 /// </summary>
 typedef enum D2D1_2DAFFINETRANSFORM_PROP
 {
@@ -580,6 +599,8 @@ typedef enum D2D1_2DAFFINETRANSFORM_INTERPOLATION_MODE
 
 /// <summary>
 /// The enumeration of the DPI Compensation effect's top level properties.
+/// Effect description: Scales according to the input DPI and the current context
+/// DPI
 /// </summary>
 typedef enum D2D1_DPICOMPENSATION_PROP
 {
@@ -620,6 +641,7 @@ typedef enum D2D1_DPICOMPENSATION_INTERPOLATION_MODE
 
 /// <summary>
 /// The enumeration of the Scale effect's top level properties.
+/// Effect description: Applies scaling operation to the bitmap.
 /// </summary>
 typedef enum D2D1_SCALE_PROP
 {
@@ -672,6 +694,8 @@ typedef enum D2D1_SCALE_INTERPOLATION_MODE
 
 /// <summary>
 /// The enumeration of the Turbulence effect's top level properties.
+/// Effect description: Generates a bitmap based on the Perlin noise turbulence
+/// function.
 /// </summary>
 typedef enum D2D1_TURBULENCE_PROP
 {
@@ -732,6 +756,8 @@ typedef enum D2D1_TURBULENCE_NOISE
 
 /// <summary>
 /// The enumeration of the Displacement Map effect's top level properties.
+/// Effect description: Displaces a bitmap based on user specified setting and
+/// another bitmap.
 /// </summary>
 typedef enum D2D1_DISPLACEMENTMAP_PROP
 {
@@ -760,6 +786,7 @@ typedef enum D2D1_DISPLACEMENTMAP_PROP
 
 /// <summary>
 /// The enumeration of the Color Management effect's top level properties.
+/// Effect description: Changes colors based on user provided color contexts.
 /// </summary>
 typedef enum D2D1_COLORMANAGEMENT_PROP
 {
@@ -837,6 +864,7 @@ typedef enum D2D1_COLORMANAGEMENT_RENDERING_INTENT
 
 /// <summary>
 /// The enumeration of the Histogram effect's top level properties.
+/// Effect description: Computes the histogram of an image.
 /// </summary>
 typedef enum D2D1_HISTOGRAM_PROP
 {
@@ -865,6 +893,8 @@ typedef enum D2D1_HISTOGRAM_PROP
 
 /// <summary>
 /// The enumeration of the Point-Specular effect's top level properties.
+/// Effect description: Creates a specular lighting effect with a point light
+/// source.
 /// </summary>
 typedef enum D2D1_POINTSPECULAR_PROP
 {
@@ -929,6 +959,7 @@ typedef enum D2D1_POINTSPECULAR_SCALE_MODE
 
 /// <summary>
 /// The enumeration of the Spot-Specular effect's top level properties.
+/// Effect description: Creates a specular lighting effect with a spot light source.
 /// </summary>
 typedef enum D2D1_SPOTSPECULAR_PROP
 {
@@ -1011,6 +1042,8 @@ typedef enum D2D1_SPOTSPECULAR_SCALE_MODE
 
 /// <summary>
 /// The enumeration of the Distant-Specular effect's top level properties.
+/// Effect description: Creates a specular lighting effect with a distant light
+/// source.
 /// </summary>
 typedef enum D2D1_DISTANTSPECULAR_PROP
 {
@@ -1081,6 +1114,7 @@ typedef enum D2D1_DISTANTSPECULAR_SCALE_MODE
 
 /// <summary>
 /// The enumeration of the Point-Diffuse effect's top level properties.
+/// Effect description: Creates a diffuse lighting effect with a point light source.
 /// </summary>
 typedef enum D2D1_POINTDIFFUSE_PROP
 {
@@ -1139,6 +1173,7 @@ typedef enum D2D1_POINTDIFFUSE_SCALE_MODE
 
 /// <summary>
 /// The enumeration of the Spot-Diffuse effect's top level properties.
+/// Effect description: Creates a diffuse lighting effect with a spot light source.
 /// </summary>
 typedef enum D2D1_SPOTDIFFUSE_PROP
 {
@@ -1215,6 +1250,8 @@ typedef enum D2D1_SPOTDIFFUSE_SCALE_MODE
 
 /// <summary>
 /// The enumeration of the Distant-Diffuse effect's top level properties.
+/// Effect description: Creates a diffuse lighting effect with a distant light
+/// source.
 /// </summary>
 typedef enum D2D1_DISTANTDIFFUSE_PROP
 {
@@ -1279,6 +1316,7 @@ typedef enum D2D1_DISTANTDIFFUSE_SCALE_MODE
 
 /// <summary>
 /// The enumeration of the Flood effect's top level properties.
+/// Effect description: Renders an infinite sized floodfill of the given color.
 /// </summary>
 typedef enum D2D1_FLOOD_PROP
 {
@@ -1295,6 +1333,8 @@ typedef enum D2D1_FLOOD_PROP
 
 /// <summary>
 /// The enumeration of the Linear Transfer effect's top level properties.
+/// Effect description: Remaps the color intensities of the input bitmap based on a
+/// user specified linear transfer function for each RGBA channel.
 /// </summary>
 typedef enum D2D1_LINEARTRANSFER_PROP
 {
@@ -1383,6 +1423,8 @@ typedef enum D2D1_LINEARTRANSFER_PROP
 
 /// <summary>
 /// The enumeration of the Gamma Transfer effect's top level properties.
+/// Effect description: Remaps the color intensities of the input bitmap based on a
+/// user specified gamma transfer function for each RGBA channel.
 /// </summary>
 typedef enum D2D1_GAMMATRANSFER_PROP
 {
@@ -1495,6 +1537,9 @@ typedef enum D2D1_GAMMATRANSFER_PROP
 
 /// <summary>
 /// The enumeration of the Table Transfer effect's top level properties.
+/// Effect description: Remaps the color intensities of the input bitmap based on a
+/// transfer function generated by a user specified list of values for each RGBA
+/// channel.
 /// </summary>
 typedef enum D2D1_TABLETRANSFER_PROP
 {
@@ -1559,6 +1604,9 @@ typedef enum D2D1_TABLETRANSFER_PROP
 
 /// <summary>
 /// The enumeration of the Discrete Transfer effect's top level properties.
+/// Effect description: Remaps the color intensities of the input bitmap based on a
+/// discrete function generated by a user specified list of values for each RGBA
+/// channel.
 /// </summary>
 typedef enum D2D1_DISCRETETRANSFER_PROP
 {
@@ -1623,6 +1671,7 @@ typedef enum D2D1_DISCRETETRANSFER_PROP
 
 /// <summary>
 /// The enumeration of the Convolve Matrix effect's top level properties.
+/// Effect description: Applies a user specified convolution kernel to a bitmap.
 /// </summary>
 typedef enum D2D1_CONVOLVEMATRIX_PROP
 {
@@ -1711,6 +1760,8 @@ typedef enum D2D1_CONVOLVEMATRIX_SCALE_MODE
 
 /// <summary>
 /// The enumeration of the Brightness effect's top level properties.
+/// Effect description: Adjusts the brightness of the image based on the specified
+/// white and black point.
 /// </summary>
 typedef enum D2D1_BRIGHTNESS_PROP
 {
@@ -1733,6 +1784,9 @@ typedef enum D2D1_BRIGHTNESS_PROP
 
 /// <summary>
 /// The enumeration of the Arithmetic Composite effect's top level properties.
+/// Effect description: Composites two bitmaps based on the following algorithm:
+/// Output = Coefficients_1 * Source * Destination + Coefficients_2 * Source+
+/// Coefficients_3 * Destination + Coefficients_4.
 /// </summary>
 typedef enum D2D1_ARITHMETICCOMPOSITE_PROP
 {
@@ -1755,6 +1809,8 @@ typedef enum D2D1_ARITHMETICCOMPOSITE_PROP
 
 /// <summary>
 /// The enumeration of the Crop effect's top level properties.
+/// Effect description: Crops the input bitmap according to the specified
+/// parameters.
 /// </summary>
 typedef enum D2D1_CROP_PROP
 {
@@ -1777,6 +1833,8 @@ typedef enum D2D1_CROP_PROP
 
 /// <summary>
 /// The enumeration of the Border effect's top level properties.
+/// Effect description: Extends the region of the bitmap based on the selected
+/// border mode.
 /// </summary>
 typedef enum D2D1_BORDER_PROP
 {
@@ -1812,6 +1870,7 @@ typedef enum D2D1_BORDER_EDGE_MODE
 
 /// <summary>
 /// The enumeration of the Morphology effect's top level properties.
+/// Effect description: Erodes or dilates a bitmap by the given radius.
 /// </summary>
 typedef enum D2D1_MORPHOLOGY_PROP
 {
@@ -1848,6 +1907,7 @@ typedef enum D2D1_MORPHOLOGY_MODE
 
 /// <summary>
 /// The enumeration of the Tile effect's top level properties.
+/// Effect description: Tiles the specified region of the input bitmap.
 /// </summary>
 typedef enum D2D1_TILE_PROP
 {
@@ -1864,6 +1924,9 @@ typedef enum D2D1_TILE_PROP
 
 /// <summary>
 /// The enumeration of the Atlas effect's top level properties.
+/// Effect description: Changes the available area of the input to the specified
+/// rectangle. Provides an optimization for scenarios where a bitmap is used as an
+/// atlas.
 /// </summary>
 typedef enum D2D1_ATLAS_PROP
 {
@@ -1886,6 +1949,8 @@ typedef enum D2D1_ATLAS_PROP
 
 /// <summary>
 /// The enumeration of the Opacity Metadata effect's top level properties.
+/// Effect description: Changes the rectangle which is assumed to be opaque.
+/// Provides optimizations in certain scenarios.
 /// </summary>
 typedef enum D2D1_OPACITYMETADATA_PROP
 {

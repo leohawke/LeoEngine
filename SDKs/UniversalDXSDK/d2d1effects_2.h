@@ -50,8 +50,23 @@ DEFINE_GUID(CLSID_D2D1Tint,                     0x36312b17, 0xf7dd, 0x4014, 0x91
 
 #endif // #if NTDDI_VERSION >= NTDDI_WIN10_RS1
 
+// The number of nits that sRGB or scRGB color space uses for SDR white, or
+// floating point values of 1.0f. Note that this value is only constant when the
+// color space uses scene-referred luminance, which is true for HDR content. If
+// the color space uses display-referred luminance instead, then the SDR white
+// level should be queried from the display.
+#define D2D1_SCENE_REFERRED_SDR_WHITE_LEVEL 80.0f
+
+#if NTDDI_VERSION >= NTDDI_WIN10_RS5
+
+DEFINE_GUID(CLSID_D2D1WhiteLevelAdjustment,     0x44a1cadb, 0x6cdd, 0x4818, 0x8f, 0xf4, 0x26, 0xc1, 0xcf, 0xe9, 0x5b, 0xdb);
+DEFINE_GUID(CLSID_D2D1HdrToneMap,               0x7b0b748d, 0x4610, 0x4486, 0xa9, 0x0c, 0x99, 0x9d, 0x9a, 0x2e, 0x2b, 0x11);
+
+#endif // #if NTDDI_VERSION >= NTDDI_WIN10_RS5
+
 /// <summary>
 /// The enumeration of the Contrast effect's top level properties.
+/// Effect description: Adjusts the contrast of an image.
 /// </summary>
 typedef enum D2D1_CONTRAST_PROP
 {
@@ -74,6 +89,7 @@ typedef enum D2D1_CONTRAST_PROP
 
 /// <summary>
 /// The enumeration of the RgbToHue effect's top level properties.
+/// Effect description: Converts an RGB bitmap to HSV or HSL.
 /// </summary>
 typedef enum D2D1_RGBTOHUE_PROP
 {
@@ -98,6 +114,7 @@ typedef enum D2D1_RGBTOHUE_OUTPUT_COLOR_SPACE
 
 /// <summary>
 /// The enumeration of the HueToRgb effect's top level properties.
+/// Effect description: Converts an HSV or HSL bitmap into an RGB bitmap.
 /// </summary>
 typedef enum D2D1_HUETORGB_PROP
 {
@@ -122,6 +139,7 @@ typedef enum D2D1_HUETORGB_INPUT_COLOR_SPACE
 
 /// <summary>
 /// The enumeration of the Chroma Key effect's top level properties.
+/// Effect description: Converts a specified color to transparent.
 /// </summary>
 typedef enum D2D1_CHROMAKEY_PROP
 {
@@ -156,6 +174,7 @@ typedef enum D2D1_CHROMAKEY_PROP
 
 /// <summary>
 /// The enumeration of the Emboss effect's top level properties.
+/// Effect description: Applies an embossing effect to an image.
 /// </summary>
 typedef enum D2D1_EMBOSS_PROP
 {
@@ -178,6 +197,7 @@ typedef enum D2D1_EMBOSS_PROP
 
 /// <summary>
 /// The enumeration of the Exposure effect's top level properties.
+/// Effect description: Simulates camera exposure adjustment.
 /// </summary>
 typedef enum D2D1_EXPOSURE_PROP
 {
@@ -194,6 +214,7 @@ typedef enum D2D1_EXPOSURE_PROP
 
 /// <summary>
 /// The enumeration of the Posterize effect's top level properties.
+/// Effect description: Reduces the number of colors in an image.
 /// </summary>
 typedef enum D2D1_POSTERIZE_PROP
 {
@@ -222,6 +243,7 @@ typedef enum D2D1_POSTERIZE_PROP
 
 /// <summary>
 /// The enumeration of the Sepia effect's top level properties.
+/// Effect description: Applies a Sepia tone to an image.
 /// </summary>
 typedef enum D2D1_SEPIA_PROP
 {
@@ -244,6 +266,7 @@ typedef enum D2D1_SEPIA_PROP
 
 /// <summary>
 /// The enumeration of the Sharpen effect's top level properties.
+/// Effect description: Performs sharpening adjustment
 /// </summary>
 typedef enum D2D1_SHARPEN_PROP
 {
@@ -266,6 +289,7 @@ typedef enum D2D1_SHARPEN_PROP
 
 /// <summary>
 /// The enumeration of the Straighten effect's top level properties.
+/// Effect description: Straightens an image.
 /// </summary>
 typedef enum D2D1_STRAIGHTEN_PROP
 {
@@ -305,6 +329,7 @@ typedef enum D2D1_STRAIGHTEN_SCALE_MODE
 
 /// <summary>
 /// The enumeration of the Temperature And Tint effect's top level properties.
+/// Effect description: Adjusts the temperature and tint of an image.
 /// </summary>
 typedef enum D2D1_TEMPERATUREANDTINT_PROP
 {
@@ -327,6 +352,7 @@ typedef enum D2D1_TEMPERATUREANDTINT_PROP
 
 /// <summary>
 /// The enumeration of the Vignette effect's top level properties.
+/// Effect description: Fades the edges of an image to the specified color.
 /// </summary>
 typedef enum D2D1_VIGNETTE_PROP
 {
@@ -355,6 +381,7 @@ typedef enum D2D1_VIGNETTE_PROP
 
 /// <summary>
 /// The enumeration of the Edge Detection effect's top level properties.
+/// Effect description: Detects edges of an image.
 /// </summary>
 typedef enum D2D1_EDGEDETECTION_PROP
 {
@@ -403,6 +430,7 @@ typedef enum D2D1_EDGEDETECTION_MODE
 
 /// <summary>
 /// The enumeration of the Highlights and Shadows effect's top level properties.
+/// Effect description: Adjusts the highlight and shadow strength of an image.
 /// </summary>
 typedef enum D2D1_HIGHLIGHTSANDSHADOWS_PROP
 {
@@ -451,6 +479,7 @@ typedef enum D2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA
 
 /// <summary>
 /// The enumeration of the Lookup Table 3D effect's top level properties.
+/// Effect description: Remaps colors in an image via a 3D lookup table.
 /// </summary>
 typedef enum D2D1_LOOKUPTABLE3D_PROP
 {
@@ -475,6 +504,8 @@ typedef enum D2D1_LOOKUPTABLE3D_PROP
 
 /// <summary>
 /// The enumeration of the Opacity effect's top level properties.
+/// Effect description: Adjusts the opacity of an image by multiplying the alpha
+/// channel by the specified opacity.
 /// </summary>
 typedef enum D2D1_OPACITY_PROP
 {
@@ -491,6 +522,9 @@ typedef enum D2D1_OPACITY_PROP
 
 /// <summary>
 /// The enumeration of the Cross Fade effect's top level properties.
+/// Effect description: This effect combines two images by adding weighted pixels
+/// from input images. The formula can be expressed as output = weight * Destination
+/// + (1 - weight) * Source
 /// </summary>
 typedef enum D2D1_CROSSFADE_PROP
 {
@@ -507,6 +541,8 @@ typedef enum D2D1_CROSSFADE_PROP
 
 /// <summary>
 /// The enumeration of the Tint effect's top level properties.
+/// Effect description: This effect tints the source image by multiplying the
+/// specified color by the source image.
 /// </summary>
 typedef enum D2D1_TINT_PROP
 {
@@ -525,6 +561,75 @@ typedef enum D2D1_TINT_PROP
     D2D1_TINT_PROP_FORCE_DWORD = 0xffffffff
 
 } D2D1_TINT_PROP;
+
+
+#endif // #if NTDDI_VERSION >= NTDDI_WIN10_RS1
+
+#if NTDDI_VERSION >= NTDDI_WIN10_RS5
+
+/// <summary>
+/// The enumeration of the White Level Adjustment effect's top level properties.
+/// Effect description: This effect adjusts the white level of the source image by
+/// multiplying the source image color by the ratio of the input and output white
+/// levels. Input and output white levels are specified in nits.
+/// </summary>
+typedef enum D2D1_WHITELEVELADJUSTMENT_PROP
+{
+    
+    /// <summary>
+    /// Property Name: "InputWhiteLevel"
+    /// Property Type: FLOAT
+    /// </summary>
+    D2D1_WHITELEVELADJUSTMENT_PROP_INPUT_WHITE_LEVEL = 0,
+    
+    /// <summary>
+    /// Property Name: "OutputWhiteLevel"
+    /// Property Type: FLOAT
+    /// </summary>
+    D2D1_WHITELEVELADJUSTMENT_PROP_OUTPUT_WHITE_LEVEL = 1,
+    D2D1_WHITELEVELADJUSTMENT_PROP_FORCE_DWORD = 0xffffffff
+
+} D2D1_WHITELEVELADJUSTMENT_PROP;
+
+
+/// <summary>
+/// The enumeration of the HDR Tone Map effect's top level properties.
+/// Effect description: Adjusts the maximum luminance of the source image to fit
+/// within the maximum output luminance supported. Input and output luminance values
+/// are specified in nits. Note that the color space of the image is assumed to be
+/// scRGB.
+/// </summary>
+typedef enum D2D1_HDRTONEMAP_PROP
+{
+    
+    /// <summary>
+    /// Property Name: "InputMaxLuminance"
+    /// Property Type: FLOAT
+    /// </summary>
+    D2D1_HDRTONEMAP_PROP_INPUT_MAX_LUMINANCE = 0,
+    
+    /// <summary>
+    /// Property Name: "OutputMaxLuminance"
+    /// Property Type: FLOAT
+    /// </summary>
+    D2D1_HDRTONEMAP_PROP_OUTPUT_MAX_LUMINANCE = 1,
+    
+    /// <summary>
+    /// Property Name: "DisplayMode"
+    /// Property Type: D2D1_HDRTONEMAP_DISPLAY_MODE
+    /// </summary>
+    D2D1_HDRTONEMAP_PROP_DISPLAY_MODE = 2,
+    D2D1_HDRTONEMAP_PROP_FORCE_DWORD = 0xffffffff
+
+} D2D1_HDRTONEMAP_PROP;
+
+typedef enum D2D1_HDRTONEMAP_DISPLAY_MODE
+{
+    D2D1_HDRTONEMAP_DISPLAY_MODE_SDR = 0,
+    D2D1_HDRTONEMAP_DISPLAY_MODE_HDR = 1,
+    D2D1_HDRTONEMAP_DISPLAY_MODE_FORCE_DWORD = 0xffffffff
+
+} D2D1_HDRTONEMAP_DISPLAY_MODE;
 
 
 #endif // #if NTDDI_VERSION >= NTDDI_WIN10_RS1

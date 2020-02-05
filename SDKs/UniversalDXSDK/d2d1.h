@@ -3351,6 +3351,7 @@ interface DX_DECLARE_INTERFACE("06152247-6f50-465a-9245-118bfd3b6007") ID2D1Fact
     /// <summary>
     /// Retrieves the current desktop DPI. To refresh this, call ReloadSystemMetrics.
     /// </summary>
+    [[deprecated("Deprecated. Use DisplayInformation::LogicalDpi for Windows Store Apps or GetDpiForWindow for desktop apps.")]]
     STDMETHOD_(void, GetDesktopDpi)(
         _Out_ FLOAT *dpiX,
         _Out_ FLOAT *dpiY 
@@ -3625,11 +3626,11 @@ typedef interface ID2D1BitmapRenderTarget ID2D1BitmapRenderTarget;
 
 typedef interface ID2D1HwndRenderTarget ID2D1HwndRenderTarget;
 
-/*#endif*/ /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) */
+/*#endif*/ /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) */
 /*#pragma endregion*/
 
-/*#pragma region Application Family*/
-/*#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)*/
+/*#pragma region Desktop Family*/
+/*#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)*/
 
 typedef interface ID2D1GdiInteropRenderTarget ID2D1GdiInteropRenderTarget;
 

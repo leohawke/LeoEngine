@@ -4,7 +4,7 @@
  |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
  |PROJECT: XAPOFX                       MODEL:   Unmanaged User-mode        |
  |VERSION: 1.3                          EXCEPT:  No Exceptions              |
- |CLASS:   N / A                        MINREQ:  WinXP, Xbox360             |
+ |CLASS:   N / A                        MINREQ:  Win8, Xbox One             |
  |BASE:    N / A                        DIALECT: MSC++ 14.00                |
  |>------------------------------------------------------------------------<|
  | DUTY: Cross-platform Audio Processing Objects                            |
@@ -24,16 +24,29 @@
 /*#include <winapifamily.h>*/
 
 /*#pragma region Application Family*/
-/*#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_TV_APP | WINAPI_PARTITION_TV_TITLE)*/
+/*#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_TV_APP | WINAPI_PARTITION_TV_TITLE | WINAPI_PARTITION_GAMES)*/
 
 //--------------<D-E-F-I-N-I-T-I-O-N-S>-------------------------------------//
 
 // FX class IDs
+#ifdef __cplusplus
 class __declspec(uuid("F5E01117-D6C4-485A-A3F5-695196F3DBFA")) FXEQ;
-class __declspec(uuid("C4137916-2BE1-46FD-8599-441536F49856")) FXMasteringLimiter;
-class __declspec(uuid("7D9ACA56-CB68-4807-B632-B137352E8596")) FXReverb;
-class __declspec(uuid("5039D740-F736-449A-84D3-A56202557B87")) FXEcho;
+EXTERN_C const GUID DECLSPEC_SELECTANY CLSID_FXEQ = __uuidof(FXEQ);
 
+class __declspec(uuid("C4137916-2BE1-46FD-8599-441536F49856")) FXMasteringLimiter;
+EXTERN_C const GUID DECLSPEC_SELECTANY CLSID_FXMasteringLimiter = __uuidof(FXMasteringLimiter);
+
+class __declspec(uuid("7D9ACA56-CB68-4807-B632-B137352E8596")) FXReverb;
+EXTERN_C const GUID DECLSPEC_SELECTANY CLSID_FXReverb = __uuidof(FXReverb);
+
+class __declspec(uuid("5039D740-F736-449A-84D3-A56202557B87")) FXEcho;
+EXTERN_C const GUID DECLSPEC_SELECTANY CLSID_FXEcho = __uuidof(FXEcho);
+#else // __cplusplus
+DEFINE_GUID(CLSID_FXEQ,                 0xF5E01117, 0xD6C4, 0x485A, 0xA3, 0xF5, 0x69, 0x51, 0x96, 0xF3, 0xDB, 0xFA);
+DEFINE_GUID(CLSID_FXMasteringLimiter,   0xC4137916, 0x2BE1, 0x46FD, 0x85, 0x99, 0x44, 0x15, 0x36, 0xF4, 0x98, 0x56);
+DEFINE_GUID(CLSID_FXReverb,             0x7D9ACA56, 0xCB68, 0x4807, 0xB6, 0x32, 0xB1, 0x37, 0x35, 0x2E, 0x85, 0x96);
+DEFINE_GUID(CLSID_FXEcho,               0x5039D740, 0xF736, 0x449A, 0x84, 0xD3, 0xA5, 0x62, 0x02, 0x55, 0x7B, 0x87);
+#endif // __cplusplus
 
 #if !defined(GUID_DEFS_ONLY) // ignore rest if only GUID definitions requested
     #include <windows.h>
@@ -80,6 +93,9 @@ class __declspec(uuid("5039D740-F736-449A-84D3-A56202557B87")) FXEcho;
     #define FXREVERB_MAX_ROOMSIZE     1.0f
     #define FXREVERB_DEFAULT_ROOMSIZE 0.6f
 
+    // Loudness defaults used with FXLoudness:
+    #define FXLOUDNESS_DEFAULT_MOMENTARY_MS     400
+    #define FXLOUDNESS_DEFAULT_SHORTTERM_MS     3000
 
     // Echo initialization data/parameter bounds (inclusive), used with FXEcho:
     #define FXECHO_MIN_WETDRYMIX     0.0f
@@ -151,34 +167,29 @@ class __declspec(uuid("5039D740-F736-449A-84D3-A56202557B87")) FXEcho;
         float Delay;     // delay (all channels) in milliseconds, must be within [FXECHO_MIN_DELAY, FXECHO_PARAMETERS.MaxDelay]
     } FXECHO_PARAMETERS;
 
-
 //--------------<M-A-C-R-O-S>-----------------------------------------------//
-    // function storage-class attribute and calltype
-
-    #if !defined(FXDLL)
-        #define FX_API_(type) EXTERN_C type STDAPIVCALLTYPE
+// Use default values for some parameters if building C++ code
+    #ifdef __cplusplus
+        #define DEFAULT(x) =x
     #else
-        #if defined(FXEXPORT)
-            #define FX_API_(type) EXTERN_C __declspec(dllexport) type STDAPIVCALLTYPE
-        #else
-            #define FX_API_(type) EXTERN_C __declspec(dllimport) type STDAPIVCALLTYPE
-        #endif
+        #define DEFAULT(x)
     #endif
+// function storage-class attribute and calltype
 
-    #define FX_IMP_(type) type STDMETHODVCALLTYPE
+    #define FX_API_(type) STDAPIV_(type)
 
 
 //--------------<F-U-N-C-T-I-O-N-S>-----------------------------------------//
     // creates instance of requested XAPO, use Release to free instance
     //  pInitData        - [in] effect-specific initialization parameters, may be NULL if InitDataByteSize == 0
     //  InitDataByteSize - [in] size of pInitData in bytes, may be 0 if pInitData is NULL
-    FX_API_(HRESULT) CreateFX (REFCLSID clsid, _Outptr_ IUnknown** pEffect, _In_reads_bytes_opt_(InitDataByteSize) const void* pInitData=NULL, UINT32 InitDataByteSize=0);
+    FX_API_(HRESULT) CreateFX (REFCLSID clsid, _Outptr_ IUnknown** pEffect, _In_reads_bytes_opt_(InitDataByteSize) const void* pInitDat DEFAULT(NULL), UINT32 InitDataByteSize DEFAULT(0));
 
 
     #pragma pack(pop) // revert packing alignment
 #endif // !defined(GUID_DEFS_ONLY)
 
-/*#endif*/ /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_TV_APP | WINAPI_PARTITION_TV_TITLE) */
+/*#endif*/ /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_TV_APP | WINAPI_PARTITION_TV_TITLE | WINAPI_PARTITION_GAMES) */
 /*#pragma endregion*/
 //---------------------------------<-EOF->----------------------------------//
 

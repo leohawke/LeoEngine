@@ -23,11 +23,19 @@
 /*#include <winapifamily.h>*/
 
 /*#pragma region Application Family*/
-/*#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_TV_APP | WINAPI_PARTITION_TV_TITLE)*/
+/*#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_TV_APP | WINAPI_PARTITION_TV_TITLE | WINAPI_PARTITION_GAMES)*/
 
+#ifdef __cplusplus
 // XAudio 2.8
 class __declspec(uuid("4FC3B166-972A-40CF-BC37-7DB03DB2FBA3")) AudioVolumeMeter;
+EXTERN_C const GUID DECLSPEC_SELECTANY CLSID_AudioVolumeMeter = __uuidof(AudioVolumeMeter);
+
 class __declspec(uuid("C2633B16-471B-4498-B8C5-4F0959E2EC09")) AudioReverb;
+EXTERN_C const GUID DECLSPEC_SELECTANY CLSID_AudioReverb = __uuidof(AudioReverb);
+#else // __cplusplus
+DEFINE_GUID(CLSID_AudioVolumeMeter,     0x4FC3B166, 0x972A, 0x40CF, 0xBC, 0x37, 0x7D, 0xB0, 0x3D, 0xB2, 0xFB, 0xA3);
+DEFINE_GUID(CLSID_AudioReverb,          0xC2633B16, 0x471B, 0x4498, 0xB8, 0xC5, 0x4F, 0x09, 0x59, 0xE2, 0xEC, 0x09);
+#endif
 
 // Ignore the rest of this header if only the GUID definitions were requested
 #ifndef GUID_DEFS_ONLY
@@ -55,22 +63,20 @@ class __declspec(uuid("C2633B16-471B-4498-B8C5-4F0959E2EC09")) AudioReverb;
 #else
     #define DEFAULT(x)
 #endif
-#if (defined XAUDIO2_EXPORT)
-    #define XAUDIO2FX_STDAPI extern "C" __declspec(dllexport) HRESULT __stdcall
-#else
-    #define XAUDIO2FX_STDAPI extern "C" __declspec(dllimport) HRESULT __stdcall
-#endif
+#define XAUDIO2FX_STDAPI STDAPI
 
 XAUDIO2FX_STDAPI CreateAudioVolumeMeter(_Outptr_ IUnknown** ppApo);
 XAUDIO2FX_STDAPI CreateAudioReverb(_Outptr_ IUnknown** ppApo);
 
-__inline HRESULT XAudio2CreateVolumeMeter(_Outptr_ IUnknown** ppApo, UINT32 /*Flags*/ DEFAULT(0))
+__inline HRESULT XAudio2CreateVolumeMeter(_Outptr_ IUnknown** ppApo, UINT32 Flags DEFAULT(0))
 {
+    UNREFERENCED_PARAMETER(Flags);
     return CreateAudioVolumeMeter(ppApo);
 }
 
-__inline HRESULT XAudio2CreateReverb(_Outptr_ IUnknown** ppApo, UINT32 /*Flags*/ DEFAULT(0))
+__inline HRESULT XAudio2CreateReverb(_Outptr_ IUnknown** ppApo, UINT32 Flags DEFAULT(0))
 {
+    UNREFERENCED_PARAMETER(Flags);
     return CreateAudioReverb(ppApo);
 }
 
@@ -262,9 +268,8 @@ __inline void ReverbConvertI3DL2ToNative
     _In_ const XAUDIO2FX_REVERB_I3DL2_PARAMETERS* pI3DL2,
     _Out_ XAUDIO2FX_REVERB_PARAMETERS* pNative
 #if(_WIN32_WINNT >= _WIN32_WINNT_WIN10)
-    ,  bool sevenDotOneReverb = true
+    ,  BOOL sevenDotOneReverb DEFAULT(TRUE)
 #endif
-
 )
 {
     float reflectionsDelay;
@@ -388,7 +393,7 @@ __inline void ReverbConvertI3DL2ToNative
 
 #endif // #ifndef GUID_DEFS_ONLY
 
-/*#endif*/ /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_TV_APP | WINAPI_PARTITION_TV_TITLE) */
+/*#endif*/ /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_TV_APP | WINAPI_PARTITION_TV_TITLE | WINAPI_PARTITION_GAMES) */
 /*#pragma endregion*/
 
 #endif // #ifndef __XAUDIO2FX_INCLUDED__

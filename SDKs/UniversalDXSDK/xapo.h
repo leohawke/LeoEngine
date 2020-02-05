@@ -4,7 +4,7 @@
  |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
  |PROJECT: XAPO                         MODEL:   Unmanaged User-mode        |
  |VERSION: 1.0                          EXCEPT:  No Exceptions              |
- |CLASS:   N / A                        MINREQ:  WinXP, Xbox360             |
+ |CLASS:   N / A                        MINREQ:  Win8, Xbox One             |
  |BASE:    N / A                        DIALECT: MSC++ 14.00                |
  |>------------------------------------------------------------------------<|
  | DUTY: Cross-platform Audio Processing Object interfaces                  |
@@ -93,16 +93,23 @@
 /*#include <winapifamily.h>*/
 
 /*#pragma region Application Family*/
-/*#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_TV_APP | WINAPI_PARTITION_TV_TITLE)*/
+/*#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_TV_APP | WINAPI_PARTITION_TV_TITLE | WINAPI_PARTITION_GAMES)*/
 
 //--------------<D-E-F-I-N-I-T-I-O-N-S>-------------------------------------//
 
 #include <basetyps.h>
 
 // XAPO interface IDs
+#ifdef __cplusplus
 interface __declspec(uuid("A410B984-9839-4819-A0BE-2856AE6B3ADB")) IXAPO;
-interface __declspec(uuid("26D95C66-80F2-499A-AD54-5AE7F01C6D98")) IXAPOParameters;
+EXTERN_C const GUID DECLSPEC_SELECTANY IID_IXAPO = __uuidof(IXAPO);
 
+interface __declspec(uuid("26D95C66-80F2-499A-AD54-5AE7F01C6D98")) IXAPOParameters;
+EXTERN_C const GUID DECLSPEC_SELECTANY IID_IXAPOParameters = __uuidof(IXAPOParameters);
+#else
+DEFINE_GUID(IID_IXAPO, 0xA410B984, 0x9839, 0x4819, 0xA0, 0xBE, 0x28, 0x56, 0xAE, 0x6B, 0x3A, 0xDB);
+DEFINE_GUID(IID_IXAPOParameters, 0x26D95C66, 0x80F2, 0x499A, 0xAD, 0x54, 0x5A, 0xE7, 0xF0, 0x1C, 0x6D, 0x98);
+#endif // #ifdef __cplusplus
 
 #if !defined(GUID_DEFS_ONLY) // ignore rest if only GUID definitions requested
     #include <windows.h>
@@ -418,7 +425,7 @@ interface __declspec(uuid("26D95C66-80F2-499A-AD54-5AE7F01C6D98")) IXAPOParamete
           // RETURN VALUE:
           //  COM error code
           ////
-        STDMETHOD(LockForProcess) (THIS_ UINT32 InputLockedParameterCount, _In_reads_opt_(InputLockedParameterCount) const XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS* pInputLockedParameters, UINT32 OutputLockedParameterCount, _In_reads_opt_(OutputLockedParameterCount) const XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS* pOutputLockedParameters) PURE;
+        STDMETHOD(LockForProcess) (THIS_ UINT32 InputLockedParameterCount, _In_reads_opt_(InputLockedParameterCount) const XAPO_LOCKFORPROCESS_PARAMETERS* pInputLockedParameters, UINT32 OutputLockedParameterCount, _In_reads_opt_(OutputLockedParameterCount) const XAPO_LOCKFORPROCESS_PARAMETERS* pOutputLockedParameters) PURE;
 
           ////
           // DESCRIPTION:
@@ -638,6 +645,6 @@ interface __declspec(uuid("26D95C66-80F2-499A-AD54-5AE7F01C6D98")) IXAPOParamete
     #pragma pack(pop) // revert packing alignment
 #endif // !defined(GUID_DEFS_ONLY)
 
-/*#endif*/ /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_TV_APP | WINAPI_PARTITION_TV_TITLE) */
+/*#endif*/ /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_TV_APP | WINAPI_PARTITION_TV_TITLE | WINAPI_PARTITION_GAMES) */
 /*#pragma endregion*/
 //---------------------------------<-EOF->----------------------------------//

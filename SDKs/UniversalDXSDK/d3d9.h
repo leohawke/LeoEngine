@@ -308,7 +308,6 @@ extern "C" {
 
 IDirect3D9 * WINAPI Direct3DCreate9(UINT SDKVersion);
 
-
 /*
  * Stubs for graphics profiling.
  */

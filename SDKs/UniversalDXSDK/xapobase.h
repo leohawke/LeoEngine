@@ -4,7 +4,7 @@
  |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
  |PROJECT: XAPO                         MODEL:   Unmanaged User-mode        |
  |VERSION: 1.0                          EXCEPT:  No Exceptions              |
- |CLASS:   N / A                        MINREQ:  WinXP, Xbox360             |
+ |CLASS:   N / A                        MINREQ:  Win8, Xbox One             |
  |BASE:    N / A                        DIALECT: MSC++ 14.00                |
  |>------------------------------------------------------------------------<|
  | DUTY: XAPO base classes                                                  |
@@ -65,7 +65,7 @@ typedef float FLOAT32; // 32-bit IEEE float
   //  Default implementation of the IXAPO and IUnknown interfaces.
   //  Provides overridable implementations for all methods save IXAPO::Process.
   ////
-class __declspec(novtable) CXAPOBase: public IXAPO {
+class DECLSPEC_NOVTABLE CXAPOBase: public IXAPO {
 private:
     const XAPO_REGISTRATION_PROPERTIES* m_pRegistrationProperties; // pointer to registration properties of the XAPO, set via constructor
 
@@ -264,7 +264,7 @@ public:
   //  For smaller parameter blocks, use atomic operations directly
   //  on the parameters for synchronization.
   ////
-class __declspec(novtable) CXAPOParametersBase: public CXAPOBase, public IXAPOParameters {
+class DECLSPEC_NOVTABLE CXAPOParametersBase: public CXAPOBase, public IXAPOParameters {
 private:
     BYTE*  m_pParameterBlocks;           // three contiguous process parameter blocks used for synchronization, user responsible for initialization of parameter blocks before IXAPO::Process/SetParameters/GetParameters called
     BYTE*  m_pCurrentParameters;         // pointer to current process parameters, must be aligned for atomic operations
