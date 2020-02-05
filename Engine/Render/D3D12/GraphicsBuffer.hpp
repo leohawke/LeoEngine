@@ -32,6 +32,8 @@ namespace platform_ex::Windows::D3D12 {
 		ViewSimulation* RetriveRenderTargetView(uint16 width, uint16 height, platform::Render::EFormat pf);
 		ViewSimulation* RetriveShaderResourceView();
 		ViewSimulation* RetriveUnorderedAccessView();
+
+		EFormat GetFormat() const { return format; }
 	private:
 		void* Map(platform::Render::Buffer::Access ba) override;
 		void Unmap() override;

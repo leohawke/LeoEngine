@@ -62,6 +62,8 @@ namespace platform::Render {
 	{
 	public:
 		virtual RayTracingGeometry* CreateRayTracingGeometry(const RayTracingGeometryInitializer& initializer) = 0;
+
+		virtual void BuildAccelerationStructure(platform::Render::RayTracingGeometry* pGeometry) =0;
 	};
 }
 

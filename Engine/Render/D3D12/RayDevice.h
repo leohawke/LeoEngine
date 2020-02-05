@@ -14,7 +14,10 @@ namespace platform_ex::Windows::D3D12 {
 	public:
 		RayDevice(Device* pDevice, Context* pContext);
 
-		RayTracingGeometry* CreateRayTracingGeometry(const platform::Render::RayTracingGeometryInitializer& initializer) override;
+		RayTracingGeometry* CreateRayTracingGeometry(const platform::Render::RayTracingGeometryInitializer& initializer) final override;
+
+		//TODO:state abstract cause performance(GPU sync point)
+		void BuildAccelerationStructure(platform::Render::RayTracingGeometry* pGeometry) final override;
 	private:
 		Device* device;
 		Context* context;
