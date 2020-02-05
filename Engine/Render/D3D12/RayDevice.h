@@ -2,6 +2,8 @@
 #define LE_RENDER_D3D12_RayDevice_h 1
 
 #include "../IRayDevice.h"
+#include "d3d12_dxgi.h"
+
 
 namespace platform_ex::Windows::D3D12 {
 	class Device;
@@ -16,6 +18,8 @@ namespace platform_ex::Windows::D3D12 {
 		Device* device;
 		Context* context;
 	};
+
+	bool IsDirectXRaytracingSupported(ID3D12Device* device);
 }
 
 #endif

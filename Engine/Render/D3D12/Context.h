@@ -16,7 +16,6 @@
 #include "Fence.h"
 #include "RayContext.h"
 
-#include <UniversalDXSDK/d3d12.h>
 
 #include <LBase/concurrency.h>
 

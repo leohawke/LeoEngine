@@ -266,7 +266,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		FilterExceptions([&, this] {
 			ray_context = make_shared<RayContext>(device.get(), this);
-			});
+			},"ERROR: DirectX Raytracing is not supported by your OS, GPU and/or driver.");
 	}
 
 	COMPtr<ID3D12Resource> Context::InnerResourceAlloc(InnerReourceType type, leo::uint32 size_in_byte)
