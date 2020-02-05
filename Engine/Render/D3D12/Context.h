@@ -14,6 +14,7 @@
 #include "PipleState.h"
 #include "GraphicsBuffer.hpp"
 #include "Fence.h"
+#include "RayContext.h"
 
 #include <UniversalDXSDK/d3d12.h>
 
@@ -31,6 +32,7 @@ namespace platform_ex {
 		namespace D3D12 {
 			namespace  Effect = platform::Render::Effect;
 			using namespace platform::Render::IFormat;
+
 
 			class Device final : platform::Render::Device  {
 			public:
@@ -79,6 +81,7 @@ namespace platform_ex {
 				leo::observer_ptr<ID3D12PipelineState> CreateRenderPSO(const D3D12_GRAPHICS_PIPELINE_STATE_DESC&);
 			public:
 				friend class Context;
+				friend class RayContext;
 			
 				enum CommandType {
 					Command_Render = 0,
@@ -175,6 +178,8 @@ namespace platform_ex {
 				void EndFrame() override;
 
 				Display& GetDisplay() override;
+
+				RayContext& GetRayContext() override;
 			public:
 				void CreateDeviceAndDisplay() override;
 			private:
@@ -234,6 +239,8 @@ namespace platform_ex {
 
 				shared_ptr<Device> device;
 				shared_ptr<Display> display;
+
+				shared_ptr<RayContext> ray_context;
 
 				array<COMPtr<ID3D12GraphicsCommandList>,Device::CommandTypeCount> d3d_cmd_lists;
 				array<std::mutex, Device::CommandTypeCount> cmd_list_mutexs;

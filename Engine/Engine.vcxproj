@@ -56,6 +56,7 @@
     <ClCompile Include="Render\D3D12\GraphicsBuffer.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\InputLayout.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\PipleState.d3d12.cpp" />
+    <ClCompile Include="Render\D3D12\RayContext.cpp" />
     <ClCompile Include="Render\D3D12\ResourceView.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\ResourceHolder.cpp" />
     <ClCompile Include="Render\D3D12\ShaderCompose.d3d12.cpp" />
@@ -126,6 +127,8 @@
     <ClInclude Include="Render\D3D12\GraphicsBuffer.hpp" />
     <ClInclude Include="Render\D3D12\InputLayout.hpp" />
     <ClInclude Include="Render\D3D12\PipleState.h" />
+    <ClInclude Include="Render\D3D12\RayContext.h" />
+    <ClInclude Include="Render\D3D12\RayDevice.h" />
     <ClInclude Include="Render\D3D12\ResourceHolder.h" />
     <ClInclude Include="Render\D3D12\ShaderCompose.h" />
     <ClInclude Include="Render\D3D12\d3d12_dxgi.h" />
@@ -139,6 +142,8 @@
     <ClInclude Include="Render\Effect\CopyEffect.h" />
     <ClInclude Include="Render\Effect\Effect.hpp" />
     <ClInclude Include="Render\Effect\EffectProperty.h" />
+    <ClInclude Include="Render\IRayContext.h" />
+    <ClInclude Include="Render\IRayDevice.h" />
     <ClInclude Include="Render\ShadingElement.h" />
     <ClInclude Include="Render\IContext.h" />
     <ClInclude Include="Render\IDevice.h" />

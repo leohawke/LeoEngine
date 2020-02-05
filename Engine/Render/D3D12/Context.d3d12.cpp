@@ -263,6 +263,10 @@ namespace platform_ex::Windows::D3D12 {
 
 		for (auto& fence :device->fences)
 			fence.swap(std::make_unique<Fence>());
+
+		FilterExceptions([&, this] {
+			ray_context = make_shared<RayContext>(device.get(), this);
+			});
 	}
 
 	COMPtr<ID3D12Resource> Context::InnerResourceAlloc(InnerReourceType type, leo::uint32 size_in_byte)
@@ -470,6 +474,15 @@ namespace platform_ex::Windows::D3D12 {
 	{
 		return *display;
 	}
+
+	RayContext& D3D12::Context::GetRayContext()
+	{
+		if (ray_context)
+			return *ray_context;
+		else
+			throw leo::unsupported();
+	}
+
 	Context & Context::Instance()
 	{
 		static Context context;

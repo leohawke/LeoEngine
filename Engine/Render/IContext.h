@@ -1,6 +1,6 @@
 /*! \file Engine\Render\IContext.h
 \ingroup Engine
-\brief 绘制创建接口类。
+\brief 绘制执行接口类。
 */
 #ifndef LE_RENDER_IContext_h
 #define LE_RENDER_IContext_h 1
@@ -12,10 +12,14 @@ namespace platform::Render {
 
 	class FrameBuffer;
 
+	class RayContext;
+
 	class Context {
 	public:
 		virtual Device& GetDevice() = 0;
 		virtual Display& GetDisplay() = 0;
+
+		virtual RayContext& GetRayContext() = 0;
 
 		virtual void Push(const PipleState&) = 0;
 		virtual void Render(const Effect::Effect&, const Effect::Technique&, const InputLayout&) = 0;

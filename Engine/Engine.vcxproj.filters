@@ -182,6 +182,9 @@
     <ClCompile Include="Core\Threading\JobDispacther.cpp">
       <Filter>Core\Threading</Filter>
     </ClCompile>
+    <ClCompile Include="Render\D3D12\RayContext.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -407,6 +410,18 @@
     </ClInclude>
     <ClInclude Include="Core\Threading\JobDispatcher.h">
       <Filter>Core\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IRayContext.h">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IRayDevice.h">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\RayContext.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\RayDevice.h">
+      <Filter>Render\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
