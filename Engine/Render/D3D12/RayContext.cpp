@@ -5,6 +5,7 @@
 namespace D12 = platform_ex::Windows::D3D12;
 namespace R = platform::Render;
 
+using namespace D12;
 
 bool D12::IsDirectXRaytracingSupported(ID3D12Device* device)
 {
@@ -22,6 +23,11 @@ D12::RayDevice& D12::RayContext::GetDevice()
 D12::RayDevice::RayDevice(Device* pDevice, Context* pContext)
 	:device(pDevice), context(pContext)
 {
+}
+
+D12::RayTracingGeometry* D12::RayDevice::CreateRayTracingGeometry(const R::RayTracingGeometryInitializer& initializer)
+{
+	return nullptr;
 }
 
 D12::RayContext::RayContext(Device* pDevice, Context* pContext)

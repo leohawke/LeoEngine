@@ -423,6 +423,12 @@
     <ClInclude Include="Render\D3D12\RayDevice.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="Render\IRayTracingGeometry.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\RayTracingGeometry.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

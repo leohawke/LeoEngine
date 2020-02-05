@@ -129,6 +129,7 @@
     <ClInclude Include="Render\D3D12\PipleState.h" />
     <ClInclude Include="Render\D3D12\RayContext.h" />
     <ClInclude Include="Render\D3D12\RayDevice.h" />
+    <ClInclude Include="Render\D3D12\RayTracingGeometry.h" />
     <ClInclude Include="Render\D3D12\ResourceHolder.h" />
     <ClInclude Include="Render\D3D12\ShaderCompose.h" />
     <ClInclude Include="Render\D3D12\d3d12_dxgi.h" />
@@ -144,6 +145,7 @@
     <ClInclude Include="Render\Effect\EffectProperty.h" />
     <ClInclude Include="Render\IRayContext.h" />
     <ClInclude Include="Render\IRayDevice.h" />
+    <ClInclude Include="Render\IRayTracingGeometry.h" />
     <ClInclude Include="Render\ShadingElement.h" />
     <ClInclude Include="Render\IContext.h" />
     <ClInclude Include="Render\IDevice.h" />

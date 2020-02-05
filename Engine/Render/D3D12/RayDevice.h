@@ -3,7 +3,7 @@
 
 #include "../IRayDevice.h"
 #include "d3d12_dxgi.h"
-
+#include "RayTracingGeometry.h"
 
 namespace platform_ex::Windows::D3D12 {
 	class Device;
@@ -14,6 +14,7 @@ namespace platform_ex::Windows::D3D12 {
 	public:
 		RayDevice(Device* pDevice, Context* pContext);
 
+		RayTracingGeometry* CreateRayTracingGeometry(const platform::Render::RayTracingGeometryInitializer& initializer) override;
 	private:
 		Device* device;
 		Context* context;
