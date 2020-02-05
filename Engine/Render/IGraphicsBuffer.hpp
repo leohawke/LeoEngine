@@ -12,8 +12,10 @@ namespace platform::Render {
 	namespace Buffer {
 		enum  Usage
 		{
-			Static,
-			Dynamic
+			Static = 0x0001,
+			Dynamic = 0x0002,
+
+			AccelerationStructure = 0x8000,
 		};
 
 		enum Access {
