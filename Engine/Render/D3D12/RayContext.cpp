@@ -24,6 +24,8 @@ D12::RayDevice& D12::RayContext::GetDevice()
 D12::RayDevice::RayDevice(Device* pDevice, Context* pContext)
 	:device(pDevice), context(pContext)
 {
+	if (!SUCCEEDED(device->d3d_device->QueryInterface(COMPtr_RefParam(d3d_ray_device, IID_ID3D12Device5))))
+		throw leo::unsupported();
 }
 
 D12::RayTracingGeometry* D12::RayDevice::CreateRayTracingGeometry(const R::RayTracingGeometryInitializer& initializer)

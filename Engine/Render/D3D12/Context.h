@@ -81,6 +81,7 @@ namespace platform_ex {
 			public:
 				friend class Context;
 				friend class RayContext;
+				friend class RayDevice;
 			
 				enum CommandType {
 					Command_Render = 0,

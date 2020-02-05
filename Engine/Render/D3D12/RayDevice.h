@@ -18,9 +18,16 @@ namespace platform_ex::Windows::D3D12 {
 
 		//TODO:state abstract cause performance(GPU sync point)
 		void BuildAccelerationStructure(platform::Render::RayTracingGeometry* pGeometry) final override;
+
+		ID3D12Device5* GetRayTracingDevice() const
+		{
+			return d3d_ray_device.Get();
+		}
 	private:
 		Device* device;
 		Context* context;
+
+		COMPtr<ID3D12Device5> d3d_ray_device;
 	};
 
 	bool IsDirectXRaytracingSupported(ID3D12Device* device);

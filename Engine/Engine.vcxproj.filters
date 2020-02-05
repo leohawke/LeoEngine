@@ -185,6 +185,9 @@
     <ClCompile Include="Render\D3D12\RayContext.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
+    <ClCompile Include="Render\D3D12\RayTracingGeometry.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">

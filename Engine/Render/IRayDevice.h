@@ -15,7 +15,7 @@ namespace platform::Render {
 	enum class ERayTracingGeometryType
 	{
 		// Indexed or non-indexed triangle list with fixed function ray intersection.
-		// Vertex buffer must contain vertex positions as VET_Float3.
+		// Vertex buffer must contain vertex positions as float3.
 		// Vertex stride must be at least 12 bytes, but may be larger to support custom per-vertex data.
 		// Index buffer may be provided for indexed triangle lists. Implicit triangle list is assumed otherwise.
 		Triangles,
