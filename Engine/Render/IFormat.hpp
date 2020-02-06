@@ -470,6 +470,9 @@ namespace platform::Render {
 			EA_GPUStructured = 1UL << 5,
 			EA_GenMips = 1U << 6,//Generate_Mips
 			EA_Immutable = 1U << 7,
+
+			//ByteAddressBuffer
+			EA_Raw = 1U <<8,
 		};
 
 		struct ElementInitData

@@ -90,9 +90,15 @@ void D12::RayTracingGeometry::BuildAccelerationStructure()
 
 	CreateAccelerationStructureBuffers(AccelerationStructureBuffer,ScratchBuffer, Context::Instance().GetDevice(), PrebuildInfo);
 
-	//ScratchBuffer->UpdateResourceBarrier()
+	//scratch buffers should be created in UAV state from the start
+	D3D12_RESOURCE_BARRIER barrier;
+	ScratchBuffer->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+	Context::Instance().GetCommandList(Device::Command_Resource)->ResourceBarrier(1, &barrier);
 
 	Context::Instance().CommitCommandList(Device::Command_Resource);
+
+
 
 	// We don't need to keep a scratch buffer after initial build if acceleration structure is static.
 	if (!(BuildFlags & D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE))
@@ -119,7 +125,7 @@ static void CreateAccelerationStructureBuffers(shared_ptr<GraphicsBuffer>& Accel
 
 	ScratchBuffer = leo::share_raw(Creator.CreateVertexBuffer(
 		Usage::Static,
-		EAccessHint::EA_GPUUnordered,
+		EAccessHint::EA_GPUUnordered | EAccessHint::EA_Raw,
 		ScratchBufferWidth,
 		EF_Unknown
 	));

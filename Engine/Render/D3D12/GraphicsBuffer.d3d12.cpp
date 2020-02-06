@@ -97,6 +97,11 @@ namespace platform_ex::Windows::D3D12 {
 			init_state = D3D12_RESOURCE_STATE_GENERIC_READ;
 			heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
 		}
+		else if (usage & Usage::AccelerationStructure)
+		{
+			init_state = D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE;
+			heap_prop.Type = D3D12_HEAP_TYPE_DEFAULT;
+		}
 		else
 		{
 			init_state = D3D12_RESOURCE_STATE_COMMON;
@@ -227,7 +232,7 @@ namespace platform_ex::Windows::D3D12 {
 			}
 
 			D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
-			if (/*access & EAccessHint::EA_Raw*/ false)
+			if (access & EAccessHint::EA_Raw)
 			{
 				desc.Format = DXGI_FORMAT_R32_TYPELESS;
 				desc.Buffer.StructureByteStride = 0;
@@ -244,9 +249,16 @@ namespace platform_ex::Windows::D3D12 {
 			}
 			desc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
 			desc.Buffer.FirstElement = 0;
-			desc.Buffer.NumElements = size_in_byte / structure_byte_stride;
+			if (access & EAccessHint::EA_Raw)
+			{
+				desc.Buffer.NumElements = size_in_byte / 4;
+			}
+			else
+			{
+				desc.Buffer.NumElements = size_in_byte / structure_byte_stride;
+			}
 			desc.Buffer.CounterOffsetInBytes = counter_offset;
-			if (/*access & EAccessHint::EA_Raw*/false)
+			if (access & EAccessHint::EA_Raw)
 			{
 				desc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_RAW;
 			}
