@@ -87,6 +87,6 @@ D12::RayContext::RayContext(Device* pDevice, Context* pContext)
 {
 	ray_device = std::make_shared<RayDevice>(pDevice,pContext);
 
-	if(IsDirectXRaytracingSupported(pDevice->d3d_device.Get()))
+	if(!IsDirectXRaytracingSupported(pDevice->d3d_device.Get()))
 		throw leo::unsupported();
 }
