@@ -9,6 +9,7 @@
 #include "Resource.h"
 #include "../Render/InputLayout.hpp"
 #include "ResourcesHolder.h"
+#include "../Render/IRayTracingGeometry.h"
 
 namespace platform {
 
@@ -31,6 +32,7 @@ namespace platform {
 	private:
 		std::unique_ptr<Render::InputLayout> input_layout;
 		std::vector<asset::MeshAsset::SubMeshDescrption> sub_meshes;
+		std::unique_ptr<Render::RayTracingGeometry> tracing_geometry;
 		leo::uint8 mesh_lod = 0;
 		std::string name;
 	};

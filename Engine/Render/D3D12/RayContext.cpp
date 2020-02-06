@@ -67,7 +67,7 @@ D12::RayTracingGeometry* D12::RayDevice::CreateRayTracingGeometry(const R::RayTr
 		Geometry->BuildFlags |= D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE;
 	}
 
-	Geometry->Segment = initializer.Segement;
+	Geometry->Segement = initializer.Segement;
 
 	return Geometry;
 }

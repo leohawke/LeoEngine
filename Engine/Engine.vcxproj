@@ -57,7 +57,7 @@
     <ClCompile Include="Render\D3D12\InputLayout.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\PipleState.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\RayContext.cpp" />
-    <ClCompile Include="Render\D3D12\RayTracingGeometry.cpp" />
+    <ClCompile Include="Render\D3D12\RayTracingGeometry.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\ResourceView.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\ResourceHolder.cpp" />
     <ClCompile Include="Render\D3D12\ShaderCompose.d3d12.cpp" />
@@ -73,6 +73,7 @@
     <ClCompile Include="Render\IContext.cpp" />
     <ClCompile Include="Render\FrameBuffer.cpp" />
     <ClCompile Include="Render\InputLayout.cpp" />
+    <ClCompile Include="Render\IRayTracingGeometry.cpp" />
     <ClCompile Include="Render\ITexture.cpp" />
     <ClCompile Include="Render\PipleState.cpp" />
     <ClCompile Include="Render\ResourceView.cpp" />

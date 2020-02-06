@@ -9,6 +9,8 @@ namespace platform::Render {
 	/** Bottom level ray tracing acceleration structure (contains triangles). */
 	class RayTracingGeometry
 	{
+	public:
+		virtual ~RayTracingGeometry();
 	};
 }
 

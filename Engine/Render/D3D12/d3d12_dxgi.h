@@ -86,6 +86,13 @@ namespace platform_ex {
 				com->SetPrivateData(::WKPDID_D3DDebugObjectName,static_cast<UINT>(std::strlen(objectname)), objectname);
 #endif
 			}
+			template<typename DXCOM>
+			void Debug(DXCOM* com, const char* objectname)
+			{
+#if defined(_DEBUG)
+				com->SetPrivateData(::WKPDID_D3DDebugObjectName, static_cast<UINT>(std::strlen(objectname)), objectname);
+#endif
+			}
 		}
 
 		/*

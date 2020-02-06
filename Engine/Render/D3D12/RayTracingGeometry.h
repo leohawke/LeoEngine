@@ -16,7 +16,7 @@ namespace platform_ex::Windows::D3D12 {
 		GraphicsBuffer* VertexBuffer = nullptr;
 
 		//todo:define direct type
-		platform::Render::EFormat VertexFormat = EF_BGR32F;
+		platform::Render::EFormat VertexFormat =platform::Render::EF_BGR32F;
 
 		// Offset in bytes from the base address of the vertex buffer.
 		leo::uint32 VertexBufferOffset = 0;
@@ -49,11 +49,14 @@ namespace platform_ex::Windows::D3D12 {
 
 		D3D12_RAYTRACING_GEOMETRY_TYPE GeometryType = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
 
-		RayTracingGeometrySegement Segment;
+		RayTracingGeometrySegement Segement;
 		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS BuildFlags;
 
 
 		GraphicsBuffer* IndexBuffer;
+
+		shared_ptr<GraphicsBuffer> AccelerationStructureBuffer;
+		shared_ptr<GraphicsBuffer> ScratchBuffer;
 
 		void BuildAccelerationStructure();
 	};

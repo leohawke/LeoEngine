@@ -2,6 +2,8 @@
 #include "../Render/IContext.h"
 #include "AssetResourceScheduler.h"
 #include "../Asset/MeshX.h"
+#include "../Render/IRayDevice.h"
+#include "../Render/IRayContext.h"
 
 namespace platform {
 	using namespace Render;
@@ -11,6 +13,12 @@ namespace platform {
 	{
 		auto& device = Context::Instance().GetDevice();
 		input_layout = unique_raw(device.CreateInputLayout());
+
+		auto index_stream = leo::share_raw(
+			device.CreateIndexBuffer(
+				Buffer::Usage::Static, EAccessHint::EA_GPURead | EAccessHint::EA_Immutable,
+				NumFormatBytes(asset.GetIndexFormat()) * asset.GetIndexCount(),
+				asset.GetIndexFormat(), asset.GetIndexStreams().get()));
 
 		for (std::size_t i = 0; i != asset.GetVertexElements().size(); ++i) {
 			auto& element = asset.GetVertexElements()[i];
@@ -22,13 +30,25 @@ namespace platform {
 					element.GetElementSize()*asset.GetVertexCount(),
 					element.format, stream.get()));
 			input_layout->BindVertexStream(vertex_stream, { element });
+
+			if (element.usage == Vertex::Position)
+			{
+				auto& ray_device = Context::Instance().GetRayContext().GetDevice();
+
+				RayTracingGeometryInitializer initializer;
+
+				initializer.Segement.VertexBuffer = vertex_stream.get();
+				initializer.Segement.VertexFormat = element.format;
+				initializer.Segement.VertexBufferStride = NumFormatBytes(element.format);
+				initializer.Segement.NumPrimitives = asset.GetIndexCount() / 3;
+
+				initializer.IndexBuffer = index_stream.get();
+
+				tracing_geometry =leo::unique_raw(ray_device.CreateRayTracingGeometry(initializer));
+				ray_device.BuildAccelerationStructure(tracing_geometry.get());
+			}
 		}
 
-		auto index_stream = leo::share_raw(
-			device.CreateIndexBuffer(
-				Buffer::Usage::Static, EAccessHint::EA_GPURead | EAccessHint::EA_Immutable,
-				NumFormatBytes(asset.GetIndexFormat())*asset.GetIndexCount(),
-				asset.GetIndexFormat(), asset.GetIndexStreams().get()));
 		input_layout->BindIndexStream(index_stream, asset.GetIndexFormat());
 
 		//Topo

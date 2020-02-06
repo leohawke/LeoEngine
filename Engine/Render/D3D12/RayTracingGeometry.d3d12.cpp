@@ -7,6 +7,8 @@ namespace R = platform::Render;
 
 using namespace D12;
 
+static void CreateAccelerationStructureBuffers(shared_ptr<GraphicsBuffer>& AccelerationStructureBuffer, shared_ptr<GraphicsBuffer>& ScratchBuffer, Device& Deivce, const D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO& PrebuildInfo);
+
 void D12::RayTracingGeometry::BuildAccelerationStructure()
 {
 	auto& raydevice = Context::Instance().GetRayContext().GetDevice();
@@ -33,19 +35,19 @@ void D12::RayTracingGeometry::BuildAccelerationStructure()
 
 	if (GeometryType == D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES)
 	{
-		Desc.Triangles.VertexFormat = Convert(Segment.VertexFormat);
+		Desc.Triangles.VertexFormat = Convert(Segement.VertexFormat);
 
 		Desc.Triangles.Transform3x4 = D3D12_GPU_VIRTUAL_ADDRESS(0);
 
 		if (IndexBuffer)
 		{
 			Desc.Triangles.IndexFormat = IndexStride == 4 ? DXGI_FORMAT_R32_UINT : DXGI_FORMAT_R16_UINT;
-			Desc.Triangles.IndexCount = Segment.NumPrimitives * IndicesPerPrimitive;
+			Desc.Triangles.IndexCount = Segement.NumPrimitives * IndicesPerPrimitive;
 			Desc.Triangles.IndexBuffer = IndexBuffer->Resource()->GetGPUVirtualAddress() +
 				IndexOffsetInBytes +
-				IndexStride * Segment.FirstPrimitive * IndicesPerPrimitive;
+				IndexStride * Segement.FirstPrimitive * IndicesPerPrimitive;
 
-			Desc.Triangles.VertexCount = Segment.VertexBuffer->GetSize() / Segment.VertexBufferStride;
+			Desc.Triangles.VertexCount = Segement.VertexBuffer->GetSize() / Segement.VertexBufferStride;
 		}
 		else // Non-indexed geometry
 		{
@@ -53,11 +55,11 @@ void D12::RayTracingGeometry::BuildAccelerationStructure()
 			Desc.Triangles.IndexCount = 0;
 			Desc.Triangles.IndexBuffer = D3D12_GPU_VIRTUAL_ADDRESS(0);
 
-			Desc.Triangles.VertexCount = Segment.VertexBuffer->GetSize() / Segment.VertexBufferStride;
+			Desc.Triangles.VertexCount = Segement.VertexBuffer->GetSize() / Segement.VertexBufferStride;
 		}
 
-		Desc.Triangles.VertexBuffer.StartAddress = Segment.VertexBuffer->Resource()->GetGPUVirtualAddress() + Segment.VertexBufferOffset;
-		Desc.Triangles.VertexBuffer.StrideInBytes = Segment.VertexBufferStride;
+		Desc.Triangles.VertexBuffer.StartAddress = Segement.VertexBuffer->Resource()->GetGPUVirtualAddress() + Segement.VertexBufferOffset;
+		Desc.Triangles.VertexBuffer.StrideInBytes = Segement.VertexBufferStride;
 	}
 	else if (GeometryType == D3D12_RAYTRACING_GEOMETRY_TYPE_PROCEDURAL_PRIMITIVE_AABBS)
 	{
@@ -86,7 +88,41 @@ void D12::RayTracingGeometry::BuildAccelerationStructure()
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO PrebuildInfo = {};
 	RayTracingDevice->GetRaytracingAccelerationStructurePrebuildInfo(&PrebuildDescInputs, &PrebuildInfo);
 
-	//CreateAccelerationStructureBuffers
+	CreateAccelerationStructureBuffers(AccelerationStructureBuffer,ScratchBuffer, Context::Instance().GetDevice(), PrebuildInfo);
+
+	//ScratchBuffer->UpdateResourceBarrier()
 
 	Context::Instance().CommitCommandList(Device::Command_Resource);
+
+	// We don't need to keep a scratch buffer after initial build if acceleration structure is static.
+	if (!(BuildFlags & D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE))
+	{
+		ScratchBuffer.reset();
+	}
+}
+
+using namespace R::Buffer;
+namespace D3D = platform_ex::Windows::D3D;
+
+static void CreateAccelerationStructureBuffers(shared_ptr<GraphicsBuffer>& AccelerationStructureBuffer, shared_ptr<GraphicsBuffer>& ScratchBuffer, Device& Creator, const D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO& PrebuildInfo)
+{
+	AccelerationStructureBuffer =leo::share_raw(Creator.CreateVertexBuffer(
+		Usage::AccelerationStructure,
+		EAccessHint::EA_GPUUnordered,
+		PrebuildInfo.ResultDataMaxSizeInBytes,
+		EF_Unknown
+	));
+
+	D3D::Debug(AccelerationStructureBuffer->Resource(), "Acceleration structure");
+
+	auto ScratchBufferWidth = std::max(PrebuildInfo.UpdateScratchDataSizeInBytes, PrebuildInfo.ScratchDataSizeInBytes);
+
+	ScratchBuffer = leo::share_raw(Creator.CreateVertexBuffer(
+		Usage::Static,
+		EAccessHint::EA_GPUUnordered,
+		ScratchBufferWidth,
+		EF_Unknown
+	));
+
+	D3D::Debug(AccelerationStructureBuffer->Resource(), "Acceleration structure scratch");
 }
