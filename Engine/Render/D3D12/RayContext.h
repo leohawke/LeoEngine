@@ -15,11 +15,15 @@ namespace platform_ex::Windows::D3D12 {
 		RayContext(Device* pDevice, Context* pContext);
 
 		RayDevice& GetDevice() override;
+
+		ID3D12GraphicsCommandList4* RayTracingCommandList() const;
 	private:
 		std::shared_ptr<RayDevice> ray_device;
 
 		Device* device;
 		Context* context;
+
+		COMPtr<ID3D12GraphicsCommandList4> raytracing_command_list;
 	};
 }
 

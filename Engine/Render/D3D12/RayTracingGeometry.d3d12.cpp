@@ -92,13 +92,23 @@ void D12::RayTracingGeometry::BuildAccelerationStructure()
 
 	//scratch buffers should be created in UAV state from the start
 	D3D12_RESOURCE_BARRIER barrier;
+	barrier.Transition.Subresource = 0;
 	ScratchBuffer->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	Context::Instance().GetCommandList(Device::Command_Resource)->ResourceBarrier(1, &barrier);
 
 	Context::Instance().CommitCommandList(Device::Command_Resource);
 
+	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC BuildDesc = {};
+	BuildDesc.Inputs = PrebuildDescInputs;
+	BuildDesc.DestAccelerationStructureData = AccelerationStructureBuffer->Resource()->GetGPUVirtualAddress();
+	BuildDesc.ScratchAccelerationStructureData = ScratchBuffer->Resource()->GetGPUVirtualAddress();
+	BuildDesc.SourceAccelerationStructureData = isUpdate
+		? AccelerationStructureBuffer->Resource()->GetGPUVirtualAddress()
+		: D3D12_GPU_VIRTUAL_ADDRESS(0);
 
+	ID3D12GraphicsCommandList4* RayTracingCommandList = Context::Instance().GetRayContext().RayTracingCommandList();
+	RayTracingCommandList->BuildRaytracingAccelerationStructure(&BuildDesc, 0, nullptr);
 
 	// We don't need to keep a scratch buffer after initial build if acceleration structure is static.
 	if (!(BuildFlags & D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE))

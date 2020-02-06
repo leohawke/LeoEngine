@@ -67,8 +67,6 @@ namespace platform_ex::Windows::D3D12 {
 		for (auto i = 0; i != clr_views.size(); ++i) {
 			if (clr_views[i]) {
 				D3D12_RESOURCE_BARRIER barrier;
-				barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-				barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 				barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 				auto p = static_cast<RenderTargetView*>(clr_views[i].get());
 				if (p->GetResourceHolder()->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_RENDER_TARGET))
@@ -79,8 +77,6 @@ namespace platform_ex::Windows::D3D12 {
 		if (ds_view) {
 			auto p = static_cast<DepthStencilView*>(ds_view.get());
 			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 			barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 			if (p->GetResourceHolder()->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_DEPTH_WRITE))
 				barriers.push_back(barrier);

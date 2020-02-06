@@ -363,8 +363,6 @@ namespace platform_ex::Windows::D3D12 {
 			auto& vb = static_cast<GraphicsBuffer&>(*stream.stream);
 			if (!(vb.GetAccess() & (EAccessHint::EA_CPURead | EAccessHint::EA_CPUWrite))) {
 				D3D12_RESOURCE_BARRIER barrier;
-				barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-				barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 				barrier.Transition.Subresource = 0;
 				if (vb.UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER)) {
 					barriers.emplace_back(barrier);
@@ -378,8 +376,6 @@ namespace platform_ex::Windows::D3D12 {
 		if (layout.GetIndexStream()) {
 			auto& ib = static_cast<GraphicsBuffer&>(*layout.GetIndexStream());
 			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 			barrier.Transition.Subresource = 0;
 			if (ib.UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_INDEX_BUFFER)) {
 				barriers.push_back(barrier);

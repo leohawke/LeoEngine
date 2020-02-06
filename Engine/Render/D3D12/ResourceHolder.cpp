@@ -9,7 +9,11 @@ namespace platform_ex::Windows {
 			if (curr_state == target_state)
 				return false;
 			else {
+				barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+				barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+
 				barrier.Transition.pResource = resource.Get();
+
 				barrier.Transition.StateBefore = curr_state;
 				barrier.Transition.StateAfter = target_state;
 				curr_state = target_state;

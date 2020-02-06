@@ -98,8 +98,6 @@ void platform_ex::Windows::D3D12::Display::SwapBuffers()
 {
 	if (swap_chain) {
 		D3D12_RESOURCE_BARRIER barrier;
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 		barrier.Transition.Subresource = 0;
 		auto rt_tex = render_targets_texs[back_buffer_index].get();
 		if (rt_tex->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_PRESENT))

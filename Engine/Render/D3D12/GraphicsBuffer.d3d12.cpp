@@ -175,8 +175,6 @@ namespace platform_ex::Windows::D3D12 {
 			buffer_upload->Unmap(0, nullptr);
 
 			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 			barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 			if (UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_COPY_DEST)) {
 				cmd_list->ResourceBarrier(1, &barrier);
@@ -303,8 +301,6 @@ namespace platform_ex::Windows::D3D12 {
 			upload_buff->Unmap(0, nullptr);
 
 			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 			barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 			if (UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_COPY_DEST)) {
 				cmd_list->ResourceBarrier(1, &barrier);

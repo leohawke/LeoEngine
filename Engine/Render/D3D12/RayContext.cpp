@@ -21,6 +21,11 @@ D12::RayDevice& D12::RayContext::GetDevice()
 	return *ray_device;
 }
 
+ID3D12GraphicsCommandList4* D12::RayContext::RayTracingCommandList() const
+{
+	return raytracing_command_list.Get();
+}
+
 D12::RayDevice::RayDevice(Device* pDevice, Context* pContext)
 	:device(pDevice), context(pContext)
 {
@@ -86,6 +91,8 @@ D12::RayContext::RayContext(Device* pDevice, Context* pContext)
 	:device(pDevice),context(pContext)
 {
 	ray_device = std::make_shared<RayDevice>(pDevice,pContext);
+
+	context->GetCommandList(Device::Command_Render)->QueryInterface(COMPtr_RefParam(raytracing_command_list, IID_ID3D12GraphicsCommandList4));
 
 	if(!IsDirectXRaytracingSupported(pDevice->d3d_device.Get()))
 		throw leo::unsupported();
