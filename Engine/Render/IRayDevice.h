@@ -97,7 +97,8 @@ namespace platform::Render {
 
 		virtual RayTracingScene* CreateRayTracingScene(const RayTracingSceneInitializer& initializer) = 0;
 
-		virtual void BuildAccelerationStructure(platform::Render::RayTracingGeometry* pGeometry) =0;
+		virtual void BuildAccelerationStructure(RayTracingGeometry* pGeometry) = 0;
+		virtual void BuildAccelerationStructure(RayTracingScene* pGeometry) =0;
 	};
 }
 

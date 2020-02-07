@@ -11,6 +11,8 @@
 #include "GraphicsBuffer.hpp"
 
 namespace platform_ex::Windows::D3D12 {
+	class Device;
+
 	struct RayTracingGeometrySegement
 	{
 		GraphicsBuffer* VertexBuffer = nullptr;
@@ -62,6 +64,8 @@ namespace platform_ex::Windows::D3D12 {
 
 		void BuildAccelerationStructure();
 	};
+
+	void CreateAccelerationStructureBuffers(shared_ptr<GraphicsBuffer>& AccelerationStructureBuffer, shared_ptr<GraphicsBuffer>& ScratchBuffer, Device& Deivce, const D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO& PrebuildInfo);
 }
 
 #endif

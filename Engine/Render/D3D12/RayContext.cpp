@@ -51,10 +51,15 @@ void D12::RayDevice::BuildAccelerationStructure(R::RayTracingGeometry* geometry)
 {
 	RayTracingGeometry* pGeometry = static_cast<RayTracingGeometry*>(geometry);
 
-
-	//TODO:transition all vbs and ibs to readable state
-
 	pGeometry->BuildAccelerationStructure();
+}
+
+void D12::RayDevice::BuildAccelerationStructure(R::RayTracingScene* scene)
+{
+	RayTracingScene* pScene = static_cast<RayTracingScene*>(scene);
+
+
+	pScene->BuildAccelerationStructure();
 }
 
 D12::RayContext::RayContext(Device* pDevice, Context* pContext)

@@ -21,6 +21,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		//TODO:state abstract cause performance(GPU sync point)
 		void BuildAccelerationStructure(platform::Render::RayTracingGeometry* pGeometry) final override;
+		void BuildAccelerationStructure(platform::Render::RayTracingScene* pGeometry) final override;
 
 		ID3D12Device5* GetRayTracingDevice() const
 		{

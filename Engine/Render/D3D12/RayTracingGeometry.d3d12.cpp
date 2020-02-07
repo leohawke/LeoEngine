@@ -7,8 +7,6 @@ namespace R = platform::Render;
 
 using namespace D12;
 
-static void CreateAccelerationStructureBuffers(shared_ptr<GraphicsBuffer>& AccelerationStructureBuffer, shared_ptr<GraphicsBuffer>& ScratchBuffer, Device& Deivce, const D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO& PrebuildInfo);
-
 D12::RayTracingGeometry::RayTracingGeometry(const platform::Render::RayTracingGeometryInitializer& initializer)
 {
 	this->IndexBuffer = static_cast<GraphicsBuffer*>(initializer.IndexBuffer);
@@ -160,7 +158,7 @@ void D12::RayTracingGeometry::BuildAccelerationStructure()
 using namespace R::Buffer;
 namespace D3D = platform_ex::Windows::D3D;
 
-static void CreateAccelerationStructureBuffers(shared_ptr<GraphicsBuffer>& AccelerationStructureBuffer, shared_ptr<GraphicsBuffer>& ScratchBuffer, Device& Creator, const D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO& PrebuildInfo)
+void D12::CreateAccelerationStructureBuffers(shared_ptr<GraphicsBuffer>& AccelerationStructureBuffer, shared_ptr<GraphicsBuffer>& ScratchBuffer, Device& Creator, const D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO& PrebuildInfo)
 {
 	AccelerationStructureBuffer =leo::share_raw(Creator.CreateVertexBuffer(
 		Usage::AccelerationStructure,
