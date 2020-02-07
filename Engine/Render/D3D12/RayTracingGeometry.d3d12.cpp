@@ -9,6 +9,46 @@ using namespace D12;
 
 static void CreateAccelerationStructureBuffers(shared_ptr<GraphicsBuffer>& AccelerationStructureBuffer, shared_ptr<GraphicsBuffer>& ScratchBuffer, Device& Deivce, const D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO& PrebuildInfo);
 
+D12::RayTracingGeometry::RayTracingGeometry(const platform::Render::RayTracingGeometryInitializer& initializer)
+{
+	this->IndexBuffer = static_cast<GraphicsBuffer*>(initializer.IndexBuffer);
+
+	leo::uint32 IndexStride = this->IndexBuffer ? NumFormatBytes(this->IndexBuffer->GetFormat()) : 0;
+	this->IndexStride = IndexStride;
+	this->IndexOffsetInBytes = initializer.IndexBufferOffset;
+
+	switch (initializer.GeometryType)
+	{
+	case R::ERayTracingGeometryType::Triangles:
+		this->GeometryType = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
+		break;
+	case R::ERayTracingGeometryType::Procedural:
+		this->GeometryType = D3D12_RAYTRACING_GEOMETRY_TYPE_PROCEDURAL_PRIMITIVE_AABBS;
+		break;
+	default:
+		break;
+	}
+
+	bool fastBuild = false;
+	bool allowUpdate = false;
+
+	if (fastBuild)
+	{
+		this->BuildFlags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_BUILD;
+	}
+	else
+	{
+		this->BuildFlags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE;
+	}
+
+	if (allowUpdate)
+	{
+		this->BuildFlags |= D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE;
+	}
+
+	this->Segement = initializer.Segement;
+}
+
 void D12::RayTracingGeometry::BuildAccelerationStructure()
 {
 	auto& raydevice = Context::Instance().GetRayContext().GetDevice();

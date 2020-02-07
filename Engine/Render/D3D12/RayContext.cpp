@@ -35,51 +35,16 @@ D12::RayDevice::RayDevice(Device* pDevice, Context* pContext)
 
 D12::RayTracingGeometry* D12::RayDevice::CreateRayTracingGeometry(const R::RayTracingGeometryInitializer& initializer)
 {
-	D12::RayTracingGeometry* Geometry = new D12::RayTracingGeometry();
-
-	Geometry->IndexBuffer = static_cast<GraphicsBuffer*>(initializer.IndexBuffer);
-
-	leo::uint32 IndexStride = Geometry->IndexBuffer ? NumFormatBytes(Geometry->IndexBuffer->GetFormat()) : 0;
-	Geometry->IndexStride = IndexStride;
-	Geometry->IndexOffsetInBytes = initializer.IndexBufferOffset;
-
-	switch (initializer.GeometryType)
-	{
-	case R::ERayTracingGeometryType::Triangles:
-		Geometry->GeometryType = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
-		break;
-	case R::ERayTracingGeometryType::Procedural:
-		Geometry->GeometryType = D3D12_RAYTRACING_GEOMETRY_TYPE_PROCEDURAL_PRIMITIVE_AABBS;
-		break;
-	default:
-		break;
-	}
-
-	bool fastBuild = false;
-	bool allowUpdate = false;
-
-	if (fastBuild)
-	{
-		Geometry->BuildFlags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_BUILD;
-	}
-	else
-	{
-		Geometry->BuildFlags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE;
-	}
-
-	if (allowUpdate)
-	{
-		Geometry->BuildFlags |= D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE;
-	}
-
-	Geometry->Segement = initializer.Segement;
+	D12::RayTracingGeometry* Geometry = new D12::RayTracingGeometry(initializer);
 
 	return Geometry;
 }
 
 RayTracingScene* D12::RayDevice::CreateRayTracingScene(const R::RayTracingSceneInitializer& initializer)
 {
-	return nullptr;
+	auto Scene = new RayTracingScene(initializer);
+
+	return Scene;
 }
 
 void D12::RayDevice::BuildAccelerationStructure(R::RayTracingGeometry* geometry)

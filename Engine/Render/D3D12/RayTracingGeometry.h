@@ -44,6 +44,8 @@ namespace platform_ex::Windows::D3D12 {
 	class RayTracingGeometry:public platform::Render::RayTracingGeometry
 	{
 	public:
+		RayTracingGeometry(const platform::Render::RayTracingGeometryInitializer& initializer);
+
 		leo::uint32 IndexStride = 0; // 0 for non-indexed / implicit triangle list, 2 for uint16, 4 for uint32
 		leo::uint32 IndexOffsetInBytes = 0;
 

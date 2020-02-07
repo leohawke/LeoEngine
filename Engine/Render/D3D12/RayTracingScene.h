@@ -9,11 +9,13 @@
 
 #include "../IRayTracingScene.h"
 #include "d3d12_dxgi.h"
+#include "../IRayDevice.h"
 
 namespace platform_ex::Windows::D3D12 {
 	class RayTracingScene :public platform::Render::RayTracingScene
 	{
 	public:
+		RayTracingScene(const platform::Render::RayTracingSceneInitializer& initializer);
 	private:
 
 	};
