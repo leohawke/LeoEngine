@@ -68,6 +68,7 @@
     <ClInclude Include="typeindex.h" />
     <ClInclude Include="lmath.hpp" />
     <ClInclude Include="lmathquaternion.hpp" />
+    <ClInclude Include="span.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="any.cpp" />

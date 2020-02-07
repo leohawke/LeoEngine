@@ -161,6 +161,9 @@ namespace leo
 	LB_NORETURN LB_API void
 		throw_invalid_construction();
 
+	LB_NORETURN LB_API void
+		throw_out_of_range(const char* msg);
+
 	/*!
 	\brief 抛出错误： std::system_error 或允许相同构造函数参数的异常。
 	\throw _type 使用参数构造的异常。

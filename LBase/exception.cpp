@@ -19,4 +19,9 @@ namespace leo {
 	{
 		throw invalid_construction();
 	}
+
+	LB_NORETURN LB_API void leo::throw_out_of_range(const char* msg)
+	{
+		throw std::out_of_range(msg);
+	}
 }
