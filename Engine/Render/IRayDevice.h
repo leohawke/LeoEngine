@@ -1,16 +1,19 @@
 /*! \file Engine\Render\IRayDevice.h
 \ingroup Engine
-\brief 射线创建接口类。
+\brief 射线追踪资源创建类。
 */
 #ifndef LE_RENDER_IRayDevice_h
 #define LE_RENDER_IRayDevice_h 1
 
 #include "IGraphicsBuffer.hpp"
 #include "IFormat.hpp"
+#include <LBase/span.hpp>
+#include <LBase/lmathtype.hpp>
 
 namespace platform::Render {
 
 	class RayTracingGeometry;
+	class RayTracingScene;
 
 	enum class ERayTracingGeometryType
 	{
@@ -58,10 +61,41 @@ namespace platform::Render {
 		RayTracingGeometrySegement Segement;
 	};
 
+	namespace math = leo::math;
+
+	struct RayTracingGeometryInstance
+	{
+		RayTracingGeometry* Geometry;
+
+		math::float4x4 Transform;
+
+		leo::uint8 Mask = 0XFF;
+	};
+
+	// Scene may only be used during the frame when it was created.
+	struct RayTracingSceneInitializer
+	{
+		leo::span< RayTracingGeometryInstance> Instances;
+
+		// This value controls how many elements will be allocated in the shader binding table per geometry segment.
+		// Changing this value allows different hit shaders to be used for different effects.
+		// For example, setting this to 2 allows one hit shader for regular material evaluation and a different one for shadows.
+		// Desired hit shader can be selected by providing appropriate RayContributionToHitGroupIndex to TraceRay() function.
+		// Use ShaderSlot argument in SetRayTracingHitGroup() to assign shaders and resources for specific part of the shder binding table record.
+		leo::uint32 ShaderSlotsPerGeometrySegment = 1;
+
+
+		// Defines how many different callable shaders with unique resource bindings can be bound to this scene.
+		// Shaders and resources are assigned to slots in the scene using SetRayTracingCallableShader().
+		leo::uint32 NumCallableShaderSlots = 0;
+	};
+
 	class RayDevice
 	{
 	public:
 		virtual RayTracingGeometry* CreateRayTracingGeometry(const RayTracingGeometryInitializer& initializer) = 0;
+
+		virtual RayTracingScene* CreateRayTracingScene(const RayTracingSceneInitializer& initializer) = 0;
 
 		virtual void BuildAccelerationStructure(platform::Render::RayTracingGeometry* pGeometry) =0;
 	};

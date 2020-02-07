@@ -191,6 +191,12 @@
     <ClCompile Include="Render\D3D12\RayTracingGeometry.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
+    <ClCompile Include="Render\IRayTracingScene.cpp">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\IRayTracingPipelineState.cpp">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -434,6 +440,15 @@
     </ClInclude>
     <ClInclude Include="Render\IRayTracingGeometry.h">
       <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IRayTracingScene.h">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IRayTracingPipelineState.h">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\RayTracingScene.h">
+      <Filter>Render\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

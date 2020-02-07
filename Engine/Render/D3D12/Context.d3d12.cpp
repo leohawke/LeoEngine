@@ -4,6 +4,7 @@
 #include "Display.h"
 #include "FrameBuffer.h"
 #include "Texture.h"
+#include "RayContext.h"
 #include "../Effect/CopyEffect.h"
 
 #define TEST_CODE 1

@@ -77,6 +77,11 @@ D12::RayTracingGeometry* D12::RayDevice::CreateRayTracingGeometry(const R::RayTr
 	return Geometry;
 }
 
+RayTracingScene* D12::RayDevice::CreateRayTracingScene(const R::RayTracingSceneInitializer& initializer)
+{
+	return nullptr;
+}
+
 void D12::RayDevice::BuildAccelerationStructure(R::RayTracingGeometry* geometry)
 {
 	RayTracingGeometry* pGeometry = static_cast<RayTracingGeometry*>(geometry);

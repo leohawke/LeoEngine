@@ -4,6 +4,7 @@
 #include "../IRayDevice.h"
 #include "d3d12_dxgi.h"
 #include "RayTracingGeometry.h"
+#include "RayTracingScene.h"
 
 namespace platform_ex::Windows::D3D12 {
 	class Device;
@@ -15,6 +16,8 @@ namespace platform_ex::Windows::D3D12 {
 		RayDevice(Device* pDevice, Context* pContext);
 
 		RayTracingGeometry* CreateRayTracingGeometry(const platform::Render::RayTracingGeometryInitializer& initializer) final override;
+
+		RayTracingScene* CreateRayTracingScene(const platform::Render::RayTracingSceneInitializer& initializer)  final override;
 
 		//TODO:state abstract cause performance(GPU sync point)
 		void BuildAccelerationStructure(platform::Render::RayTracingGeometry* pGeometry) final override;
