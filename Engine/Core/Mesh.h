@@ -27,6 +27,7 @@ namespace platform {
 			DefSetter(lnothrow, leo::uint8, GeometryLod, mesh_lod)
 
 			DefGetter(const lnothrow, const Render::InputLayout&, InputLayout, *input_layout);
+		DefGetter(lnothrow, Render::RayTracingGeometry*, RayTracingGeometry, tracing_geometry.get());
 
 		const std::string& GetName() const lnothrow;
 	private:

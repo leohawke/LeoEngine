@@ -16,6 +16,9 @@
 #include "EntityComponentSystem/EntitySystem.h"
 #include "LSchemEngineUnitTest.h"
 #include "../../Engine/Core/Camera.h"
+#include "../../Engine/Render/IRayTracingScene.h"
+#include "../../Engine/Render/IRayDevice.h"
+#include "../../Engine/Render/IRayContext.h"
 
 #include <LScheme/LScheme.h>
 #include <windowsx.h>
@@ -47,7 +50,11 @@ public:
 		return *pMaterial;
 	}
 
-	const platform::Mesh& GetMesh() const {
+	platform::Mesh& GetMesh()  {
+		return *pMesh;
+	}
+
+	const platform::Mesh& GetMesh() const{
 		return *pMesh;
 	}
 private:
@@ -77,6 +84,25 @@ public:
 
 	const std::vector<Entity>& GetRenderables() const {
 		return entities;
+	}
+
+	leo::unique_ptr<platform::Render::RayTracingScene> BuildRayTracingScene()
+	{
+		platform::Render::RayTracingSceneInitializer initializer;
+
+		std::vector<RayTracingGeometryInstance> Instances;
+
+		for (auto& entity : entities)
+		{
+			RayTracingGeometryInstance Instance;
+			Instance.Geometry = entity.GetMesh().GetRayTracingGeometry();
+
+			Instance.Transform = leo::math::float4x4::identity;
+
+			Instances.push_back(Instance);
+		}
+
+		return leo::unique_raw(Context::Instance().GetRayContext().GetDevice().CreateRayTracingScene(initializer));
 	}
 private:
 	template<typename path_type>
@@ -126,7 +152,7 @@ private:
 		Context::Instance().GetScreenFrame()->Clear(FrameBuffer::Color | FrameBuffer::Depth | FrameBuffer::Stencil, { 0,0,0,1 }, 1, 0);
 		auto& Device = Context::Instance().GetDevice();
 
-
+		auto pRayScene = pEntities->BuildRayTracingScene();
 
 
 		ecs::EntitySystem::Instance().RemoveEntity(entityId);
