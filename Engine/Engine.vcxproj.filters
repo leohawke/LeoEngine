@@ -197,7 +197,7 @@
     <ClCompile Include="Render\IRayTracingPipelineState.cpp">
       <Filter>Render\DeviceInterface</Filter>
     </ClCompile>
-    <ClCompile Include="Render\D3D12\RayTracingScene.cpp">
+    <ClCompile Include="Render\D3D12\RayTracingScene.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
   </ItemGroup>

@@ -200,6 +200,8 @@ namespace platform_ex {
 				void SyncCommand(Device::CommandType);
 				void ResetCommand(Device::CommandType);
 
+				void ExecuteUAVBarrier();
+
 				const COMPtr<ID3D12CommandQueue>& GetCommandQueue(Device::CommandType) const;
 
 				void CommitCommandList(Device::CommandType);

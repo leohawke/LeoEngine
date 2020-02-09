@@ -63,6 +63,15 @@ namespace platform_ex::Windows::D3D12 {
 		CheckHResult(d3d_cmd_lists[type]->Reset(GetDevice().d3d_cmd_allocators[type].Get(), nullptr));
 	}
 
+	void Context::ExecuteUAVBarrier()
+	{
+		D3D12_RESOURCE_BARRIER Barrier = {};
+		Barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+		Barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		Barrier.UAV.pResource = nullptr;
+		d3d_cmd_lists[Device::Command_Render]->ResourceBarrier(1, &Barrier);
+	}
+
 	const COMPtr<ID3D12CommandQueue>& D3D12::Context::GetCommandQueue(Device::CommandType type) const
 	{
 		return d3d_cmd_queues[type];

@@ -58,7 +58,7 @@
     <ClCompile Include="Render\D3D12\PipleState.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\RayContext.cpp" />
     <ClCompile Include="Render\D3D12\RayTracingGeometry.d3d12.cpp" />
-    <ClCompile Include="Render\D3D12\RayTracingScene.cpp" />
+    <ClCompile Include="Render\D3D12\RayTracingScene.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\ResourceView.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\ResourceHolder.cpp" />
     <ClCompile Include="Render\D3D12\ShaderCompose.d3d12.cpp" />
