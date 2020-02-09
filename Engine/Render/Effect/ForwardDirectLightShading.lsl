@@ -12,9 +12,11 @@
 	)
 	(StructuredBuffer (elemtype DirectLight) lights)
 	(cbuffer obj
-		(float4x4 worldviewproj)
-		(float4x4 worldview)
-		(float4x4 worldviewinvt)
+		(float4x4 world)
+	)
+	(cbuffer camera
+		(float3 camera_pos)
+		(float4x4 viewproj)
 	)
 	(texture2D albedo_tex)
 	(texture2D glossiness_tex)
@@ -64,34 +66,35 @@
 						in float2 TexCoord:TEXCOORD,
 					out float4 ClipPos:SV_POSITION,
 					out float2 Tex:TEXCOORD0,
-					out float3 ViewPos:TEXCOORD1,
-					out float3 ViewNormal:TEXCOORD2
+					out float3 WorldPos:TEXCOORD1,
+					out float3 WorldNormal:TEXCOORD2
 		)
 		{
-			ClipPos = mul(float4(Postion,1.0f),worldviewproj);
-			ViewPos = mul(float4(Postion,1.0f),worldview).xyz;
-			ViewNormal = mul(float4(Normal,0.0f),worldviewinvt).xyz;
+			WorldPos = mul(float4(Postion,1.0f),world);
+			WorldNormal = mul(float4(Normal,0.0f),world).xyz;
+
+			ClipPos = mul(float4(WorldPos,1.0f),viewproj);
 			Tex = TexCoord;
 		}
 
 		void ForwardLightPS(in float4 ClipPos:SV_POSITION,
 			in float2 tex:TEXCOORD0,
-			in float3 view_position:TEXCOORD1,
-			in float3 view_normal:TEXCOORD2,
+			in float3 world_pos:TEXCOORD1,
+			in float3 world_normal:TEXCOORD2,
 			out float4 color :SV_Target
 		)
 		{
-			float3 view_dir = -normalize(view_position);
+			float3 view_dir = normalize(camera_pos-world_pos);
 			float shadow = 1;
 			float occlusion = 1;
 
 			Material material;
-			material.normal = normalize(view_normal);
+			material.normal = normalize(world_normal);
 			material.albedo = albedo*albedo_tex.Sample(bilinear_sampler,tex).rgb;
 			material.metalness = metalness.x;
 			material.alpha = alpha;
 			material.roughness = glossiness.y > 0.5?glossiness.x*glossiness_tex.Sample(bilinear_sampler,tex).r:glossiness.x;
-			material.position = view_position;
+			material.position = world_pos;
 			material.diffuse = material.albedo*(1-material.metalness);
 
 			float3 diffuse,specular = 0;

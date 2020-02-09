@@ -166,21 +166,20 @@ private:
 		auto projmatrix = LeoEngine::X::perspective_fov_lh(3.14f / 6, 600.0f / 800, 1, 1000);
 		auto viewmatrix = camera.GetViewMatrix();
 
-		auto worldview = worldmatrix * viewmatrix;
-		auto worldviewproj = worldview * projmatrix;
-		auto worldviewinv = lm::inverse(worldview);
+		auto viewporj = viewmatrix * projmatrix;
 
 		DirectLight& point_light = lights[0];
-		point_light.position = transformpoint(lm::float3(0, 40, 0), viewmatrix);
+		point_light.position = lm::float3(0, 40, 0);
 		pLightConstatnBuffer->UpdateSubresource(0, static_cast<leo::uint32>(sizeof(DirectLight)*lights.size()),&lights[0]);
 
 		auto pEffect = platform::X::LoadEffect("ForwardDirectLightShading");
 
 		using namespace std::literals;
 		//obj
-		pEffect->GetParameter("worldview"sv) = lm::transpose(worldview);
-		pEffect->GetParameter("worldviewproj"sv) = lm::transpose(worldviewproj);
-		pEffect->GetParameter("worldviewinvt"sv) = worldviewinv;
+		pEffect->GetParameter("world"sv) = lm::transpose(worldmatrix);
+		//camera
+		pEffect->GetParameter("camera_pos"sv) = camera.GetEyePos();
+		pEffect->GetParameter("viewproj"sv) = lm::transpose(viewporj);
 
 		//light
 		pEffect->GetParameter("light_count"sv) = static_cast<leo::uint32>(lights.size());
@@ -231,12 +230,12 @@ private:
 		point_light.range = 80;
 		point_light.blub_innerangle = 40;
 		point_light.color = lm::float3(1.0f, 1.0f, 1.0f);
-		lights.push_back(point_light);
+		//lights.push_back(point_light);
 
 		DirectLight directioal_light;
 		directioal_light.type = DIRECTIONAL_LIGHT;
-		directioal_light.position = lm::float3(0, 1, 0);
-		directioal_light.color = lm::float3(1.0f, 1.0f, 1.0f);
+		directioal_light.position = lm::float3(0.335837096f,0.923879147f,-0.183468640f);
+		directioal_light.color = lm::float3(4.0f, 4.0f, 4.0f);
 		lights.push_back(directioal_light);
 
 		auto& Device = Context::Instance().GetDevice();
