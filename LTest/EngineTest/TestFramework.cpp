@@ -21,7 +21,7 @@ TestFrameWork::TestFrameWork(const std::wstring_view & name)
 #if LFL_Win32
 	p_wnd_thrd.reset(new WindowThread([this] {
 		return unique_ptr<Window>(new Window(CreateNativeWindow(
-			WindowClassName, { 800, 600 }, L"TestFrame", WS_TILED | WS_CAPTION
+			WindowClassName, { 1280, 720 }, L"TestFrame", WS_TILED | WS_CAPTION
 			| WS_SYSMENU | WS_MINIMIZEBOX),
 			app.GetGUIHostRef()));
 	}));

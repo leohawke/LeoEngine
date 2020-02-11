@@ -80,6 +80,14 @@ public:
 
 		for (auto& entity_node : platform::X::SelectNodes("entity", term_node))
 			entities.emplace_back(entity_node);
+
+		min = leo::math::float3(FLT_MAX, FLT_MAX, FLT_MAX);
+		max = leo::math::float3(FLT_MIN, FLT_MIN, FLT_MIN);
+		for (auto& entity : entities)
+		{
+			min = leo::math::min(min, entity.GetMesh().GetBoundingMin());
+			max = leo::math::max(max, entity.GetMesh().GetBoundingMax());
+		}
 	}
 
 	const std::vector<Entity>& GetRenderables() const {
@@ -104,6 +112,9 @@ public:
 
 		return leo::unique_raw(Context::Instance().GetRayContext().GetDevice().CreateRayTracingScene(initializer));
 	}
+
+	leo::math::float3 min;
+	leo::math::float3 max;
 private:
 	template<typename path_type>
 	scheme::TermNode LoadNode(const path_type& path) {
@@ -152,7 +163,7 @@ private:
 		Context::Instance().GetScreenFrame()->Clear(FrameBuffer::Color | FrameBuffer::Depth | FrameBuffer::Stencil, { 0,0,0,1 }, 1, 0);
 		auto& Device = Context::Instance().GetDevice();
 
-		auto pRayScene = pEntities->BuildRayTracingScene();
+		//auto pRayScene = pEntities->BuildRayTracingScene();
 
 
 		ecs::EntitySystem::Instance().RemoveEntity(entityId);
@@ -163,7 +174,7 @@ private:
 			{0,0,1,0},
 			{0,0,0,1}
 		};
-		auto projmatrix = LeoEngine::X::perspective_fov_lh(3.14f / 6, 600.0f / 800, 1, 1000);
+		auto projmatrix = LeoEngine::X::perspective_fov_lh(3.14f / 4, 720.f / 1280, 1, 1000);
 		auto viewmatrix = camera.GetViewMatrix();
 
 		auto viewporj = viewmatrix * projmatrix;
@@ -187,6 +198,9 @@ private:
 
 		//mat
 		pEffect->GetParameter("alpha"sv) = 1.0f;
+
+		//light_ext
+		pEffect->GetParameter("ambient_color") = leo::math::float3(0.1f, 0.1f, 0.1f);
 		
 		auto pView = passInfo.GetRenderView();
 		 
@@ -214,27 +228,32 @@ private:
 
 		pEntities = std::make_unique<Entities>("sponza_crytek.entities.lsl");
 
-		leo::math::float3 eye{ -38.47f,3.53f,2.19f };
-		leo::math::float3 up_vec{ 0.12f,0.98f,-0.08f };
+		float modelRaidus = leo::math::length(pEntities->max - pEntities->min) * .5f;
+
+		auto  eye = (pEntities->max + pEntities->min) *.5f;
+
+		eye = eye + leo::math::float3(modelRaidus * .51f, 1.2f, 0.f);
+
+		leo::math::float3 up_vec{ 0,1.f,0 };
 		leo::math::float3 view_vec{ 0.94f,-0.1f,0.2f };
 
-		camera.SetViewMatrix(LeoEngine::X::look_at_lh(eye, eye + view_vec * 10, up_vec));
+		camera.SetViewMatrix(LeoEngine::X::look_at_lh(eye,leo::math::float3(0,0,0), up_vec));
 
 		pCameraMainpulator = std::make_unique<LeoEngine::Core::TrackballCameraManipulator>(10.0f);
 		pCameraMainpulator->Attach(camera);
 		pCameraMainpulator->SetSpeed(0.005f, 0.1f);
 
-		DirectLight point_light;
+		/*DirectLight point_light;
 		point_light.type = POINT_LIGHT;
 		point_light.position = lm::float3(0, 40, 0);
 		point_light.range = 80;
 		point_light.blub_innerangle = 40;
-		point_light.color = lm::float3(1.0f, 1.0f, 1.0f);
+		point_light.color = lm::float3(1.0f, 1.0f, 1.0f);*/
 		//lights.push_back(point_light);
 
 		DirectLight directioal_light;
 		directioal_light.type = DIRECTIONAL_LIGHT;
-		directioal_light.position = lm::float3(0.335837096f,0.923879147f,-0.183468640f);
+		directioal_light.direction = lm::float3(0.335837096f,0.923879147f,-0.183468640f);
 		directioal_light.color = lm::float3(4.0f, 4.0f, 4.0f);
 		lights.push_back(directioal_light);
 
