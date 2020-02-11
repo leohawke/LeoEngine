@@ -29,7 +29,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		leo::shared_ptr<GraphicsBuffer> AccelerationStructureBuffer;
 
-		COMPtr<ID3D12Device5> RayTracingDevice;
+		ID3D12Device5* RayTracingDevice;
 
 		leo::unique_ptr<ViewSimulation> AccelerationStructureView;
 	};
