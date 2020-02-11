@@ -67,7 +67,8 @@
 					out float4 ClipPos:SV_POSITION,
 					out float2 Tex:TEXCOORD0,
 					out float3 WorldPos:TEXCOORD1,
-					out float3 WorldNormal:TEXCOORD2
+					out float3 WorldNormal:TEXCOORD2,
+					out float3 ViewDir:TEXCOORD3
 		)
 		{
 			WorldPos = mul(float4(Postion,1.0f),world);
@@ -75,16 +76,18 @@
 
 			ClipPos = mul(float4(WorldPos,1.0f),viewproj);
 			Tex = TexCoord;
+			ViewDir = camera_pos - WorldPos;
 		}
 
 		void ForwardLightPS(in float4 ClipPos:SV_POSITION,
 			in float2 tex:TEXCOORD0,
 			in float3 world_pos:TEXCOORD1,
 			in float3 world_normal:TEXCOORD2,
+			in float3 view_dir :TEXCOORD3,
 			out float4 color :SV_Target
 		)
 		{
-			float3 view_dir = normalize(camera_pos-world_pos);
+			view_dir = normalize(view_dir);
 			float shadow = 1;
 			float occlusion = 1;
 
