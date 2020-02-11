@@ -29,6 +29,9 @@ namespace platform {
 			DefGetter(const lnothrow, const Render::InputLayout&, InputLayout, *input_layout);
 		DefGetter(lnothrow, Render::RayTracingGeometry*, RayTracingGeometry, tracing_geometry.get());
 
+		leo::math::float3 GetBoundingMin() const { return min; }
+		leo::math::float3 GetBoundingMax() const { return max; }
+
 		const std::string& GetName() const lnothrow;
 	private:
 		std::unique_ptr<Render::InputLayout> input_layout;
@@ -36,6 +39,9 @@ namespace platform {
 		std::unique_ptr<Render::RayTracingGeometry> tracing_geometry;
 		leo::uint8 mesh_lod = 0;
 		std::string name;
+
+		leo::math::float3 min;
+		leo::math::float3 max;
 	};
 
 	class MeshesHolder :ResourcesHolder<Mesh> {

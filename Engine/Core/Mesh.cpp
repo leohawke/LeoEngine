@@ -20,6 +20,8 @@ namespace platform {
 				NumFormatBytes(asset.GetIndexFormat()) * asset.GetIndexCount(),
 				asset.GetIndexFormat(), asset.GetIndexStreams().get()));
 
+		min = leo::math::float3();
+		max = leo::math::float3();
 		for (std::size_t i = 0; i != asset.GetVertexElements().size(); ++i) {
 			auto& element = asset.GetVertexElements()[i];
 			auto& stream = asset.GetVertexStreams()[i];
@@ -46,6 +48,15 @@ namespace platform {
 
 				tracing_geometry =leo::unique_raw(ray_device.CreateRayTracingGeometry(initializer));
 				ray_device.BuildAccelerationStructure(tracing_geometry.get());
+
+				min = leo::math::float3(FLT_MAX,FLT_MAX,FLT_MAX);
+				max = leo::math::float3(FLT_MIN,FLT_MIN,FLT_MIN);
+				auto stream =reinterpret_cast<leo::math::float3*>(asset.GetVertexStreams()[i].get());
+				for (uint32 i = 0; i != asset.GetVertexCount(); ++i)
+				{
+					min = leo::math::min(stream[i], min);
+					max = leo::math::max(stream[i], max);
+				}
 			}
 		}
 
