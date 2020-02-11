@@ -212,6 +212,10 @@ namespace platform {
 		template<typename path_type>
 		scheme::TermNode LoadNode(const path_type& path) {
 			std::ifstream fin(path);
+
+			if (!fin.is_open())
+				throw;
+
 			fin >> std::noskipws;
 			using sb_it_t = std::istream_iterator<char>;
 

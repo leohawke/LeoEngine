@@ -9,7 +9,7 @@
 
 			float3 transform_quat(float3 v,float4 quat)
 			{
-				return v + cross(quat.xyz, cross(quat.xyz, v) + q.w*v) * 2;
+				return v + cross(quat.xyz, cross(quat.xyz, v) + quat.w*v) * 2;
 			}
 		"
 	)

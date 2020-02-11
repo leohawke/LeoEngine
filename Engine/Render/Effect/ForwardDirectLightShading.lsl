@@ -109,7 +109,7 @@
 			float3x3 ts_to_world;
 			ts_to_world[0] = normalize(t);
 			ts_to_world[1] = normalize(b);
-			ts_wo_world[2] = world_normal(n);
+			ts_to_world[2] = world_normal;
 
 			float3 normal = normal_tex.Sample(bilinear_sampler,tex).rgb;
 			normal = normal*2-1;
