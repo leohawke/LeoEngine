@@ -349,6 +349,129 @@ namespace leo::math {
 		float3 quat_v{ q.x,q.y,q.z };
 		return v + cross(quat_v, cross(quat_v, v) + q.w*v) * 2;
 	}
+
+	inline float4 to_quaternion(float4x4 mat) noexcept
+	{
+		float4 quat {};
+
+		float s = 0;
+		const float tr = mat(0, 0) + mat(1, 1) + mat(2, 2) + 1;
+
+		// check the diagonal
+		if (tr > 1)
+		{
+			s = sqrt(tr);
+			quat.w = s * 0.5f;
+			s = 0.5f / s;
+			quat.x = (mat(1, 2) - mat(2, 1)) * s;
+			quat.y = (mat(2, 0) - mat(0, 2)) * s;
+			quat.z = (mat(0, 1) - mat(1, 0)) * s;
+		}
+		else
+		{
+			int maxi = 0;
+			float maxdiag = mat(0, 0);
+			for (int i = 1; i < 3; ++i)
+			{
+				if (mat(i, i) > maxdiag)
+				{
+					maxi = i;
+					maxdiag = mat(i, i);
+				}
+			}
+
+			switch (maxi)
+			{
+			case 0:
+				s = sqrt((mat(0, 0) - (mat(1, 1) + mat(2, 2))) + 1);
+
+				quat.x = s * 0.5f;
+
+				if (!float_equal(s, 0))
+				{
+					s = 0.5f / s;
+				}
+
+				quat.w = (mat(1, 2) - mat(2, 1)) * s;
+				quat.y = (mat(1, 0) + mat(0, 1)) * s;
+				quat.z = (mat(2, 0) + mat(0, 2)) * s;
+				break;
+
+			case 1:
+				s = sqrt((mat(1, 1) - (mat(2, 2) + mat(0, 0))) + 1);
+				quat.y = s * 0.5f;
+
+				if (!float_equal(s, 0))
+				{
+					s = 0.5f / s;
+				}
+
+				quat.w = (mat(2, 0) - mat(0, 2)) * s;
+				quat.z = (mat(2, 1) + mat(1, 2)) * s;
+				quat.x = (mat(0, 1) + mat(1, 0)) * s;
+				break;
+
+			case 2:
+			default:
+				s = sqrt((mat(2, 2) - (mat(0, 0) + mat(1, 1))) + 1);
+
+				quat.z = s * 0.5f;
+
+				if (!float_equal(s, 0))
+				{
+					s = 0.5f / s;
+				}
+
+				quat.w = (mat(0, 1) - mat(1, 0)) * s;
+				quat.x = (mat(0, 2) + mat(2, 0)) * s;
+				quat.y = (mat(1, 2) + mat(2, 1)) * s;
+				break;
+			}
+		}
+
+		return normalize(quat);
+	}
+
+	//bits default is 8
+	inline float4 to_quaternion(float3 t, float3 b, float3 n, int bits = 8)
+	{
+		float k = 1;
+		if (dot(b, cross(n, t)) < 0)
+		{
+			k = -1;
+		}
+
+		float4x4 tangent_frame(
+			float4(t, 0),
+			float4(b, 0),
+			float4(n, 0),
+			float4(0,0,0,1)
+		);
+
+		auto tangent_quat = to_quaternion(tangent_frame);
+		if (tangent_quat.w < 0)
+			tangent_quat = float4(0, 0, 0, 0) - tangent_quat;
+
+		if (bits > 0)
+		{
+			auto const bias = 1.f / ((1UL << (bits - 1)) - 1);
+			if (tangent_quat.w < bias)
+			{
+				auto const factor = sqrt(1 - bias * bias);
+				tangent_quat.x *= factor;
+				tangent_quat.y *= factor;
+				tangent_quat.z *= factor;
+				tangent_quat.w = bias;
+			}
+		}
+
+		if (k < 0)
+		{
+			tangent_quat = float4(0, 0, 0, 0) - tangent_quat;
+		}
+
+		return tangent_quat;
+	}
 }
 
 //matrix
