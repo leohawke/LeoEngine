@@ -6,11 +6,11 @@
 			#define SPOT_LIGHT 1
 			#define DIRECTIONAL_LIGHT 2
 			struct DirectLight{
-				//direction for spot and directional lights (View space).
+				//direction for spot and directional lights (world space).
 				float3 direction;
 				//range for point and spot lights(Maximum distance of influence)
 				float range;
-				//position for spot and direction lights(View Space)
+				//position for spot and point lights(world Space)
 				float3 position;
 				//outer angle for spot light(radian)
 				float outerangle;
@@ -63,7 +63,7 @@
 
 				light.attenuation = 1;
 
-				light.direction = light_params.position;
+				light.direction = light_params.direction;
 
 				light.nol = saturate(dot(material.normal,light.direction));
 

@@ -19,11 +19,11 @@ namespace LeoEngine::Render {
 	};
 
 	struct DirectLight {
-		//direction for spot and directional lights (View space).
+		//direction for spot and directional lights (world space).
 		lm::float3 direction;
 		//range for point and spot lights(Maximum distance of influence)
 		float range;
-		//position for spot and direction lights(View Space)
+		//position for spot and point lights(world Space)
 		lm::float3 position;
 		//outer angle for spot light(radian)
 		float outerangle;
