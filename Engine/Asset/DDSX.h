@@ -842,6 +842,9 @@ namespace dds {
 		DDSLoadingDesc(path const& texpath) {
 			dds_desc.dds_path = texpath;
 			dds_desc.file = platform::File{ texpath.wstring(), platform::File::kToRead };
+
+			if (!dds_desc.file.IsOpen())
+				throw;
 		}
 
 		std::size_t Type() const override {
