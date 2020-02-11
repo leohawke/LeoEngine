@@ -20,6 +20,7 @@
 	)
 	(texture2D albedo_tex)
 	(texture2D glossiness_tex)
+	(texture2D normal_tex)
 	(sampler bilinear_sampler
 		(filtering min_mag_linear_mip_point)
 		(address_u clamp)
@@ -62,37 +63,65 @@
 	(shader
 		"
 		void ForwardVS(in float3 Postion:POSITION,
-						in float3 Normal:NORMAL,
+						in float4 Tangent_Quat:TANGENT,
 						in float2 TexCoord:TEXCOORD,
 					out float4 ClipPos:SV_POSITION,
 					out float2 Tex:TEXCOORD0,
 					out float3 WorldPos:TEXCOORD1,
-					out float3 WorldNormal:TEXCOORD2,
-					out float3 ViewDir:TEXCOORD3
+					out float3 ViewDir:TEXCOORD2,
+					out float3 oTsToW0:TEXCOORD3,
+					out float3 oTsToW1:TEXCOORD4,
+					out float3 oTsToW2:TEXCOORD5,
 		)
 		{
 			WorldPos = mul(float4(Postion,1.0f),world);
-			WorldNormal = mul(float4(Normal,0.0f),world).xyz;
 
 			ClipPos = mul(float4(WorldPos,1.0f),viewproj);
 			Tex = TexCoord;
 			ViewDir = camera_pos - WorldPos;
+
+			Tangent_Quat = Tangent_Quat * 2 - 1;
+
+			float3x3 obj_to_ts;
+			obj_to_ts[0] = transform_quat(float3(1, 0, 0), Tangent_Quat);
+			obj_to_ts[1] = transform_quat(float3(0, 1, 0), Tangent_Quat) * sign(Tangent_Quat.w);
+			obj_to_ts[2] = transform_quat(float3(0, 0, 1), Tangent_Quat);
+
+			float3x3 ts_to_world = mul(obj_to_ts,(float3x3)world);
+
+			oTsToW0 = ts_to_world[0];
+			oTsToW1 = ts_to_world[1];
+			oTsToW2 = ts_to_world[2];
 		}
 
 		void ForwardLightPS(in float4 ClipPos:SV_POSITION,
 			in float2 tex:TEXCOORD0,
 			in float3 world_pos:TEXCOORD1,
-			in float3 world_normal:TEXCOORD2,
-			in float3 view_dir :TEXCOORD3,
+			in float3 view_dir :TEXCOORD2,
+			in float3 t:TEXCOORD3,
+			in float3 b:TEXCOORD4,
+			in float3 n:TEXCOORD5,
 			out float4 color :SV_Target
 		)
 		{
+			float3 world_normal = normalize(n);
+
+			float3x3 ts_to_world;
+			ts_to_world[0] = normalize(t);
+			ts_to_world[1] = normalize(b);
+			ts_wo_world[2] = world_normal(n);
+
+			float3 normal = normal_tex.Sample(bilinear_sampler,tex).rgb;
+			normal = normal*2-1;
+
+			world_normal = normalize(mul(normal,ts_to_world));
+
 			view_dir = normalize(view_dir);
 			float shadow = 1;
 			float occlusion = 1;
 
 			Material material;
-			material.normal = normalize(world_normal);
+			material.normal = world_normal;
 			material.albedo = albedo*albedo_tex.Sample(bilinear_sampler,tex).rgb;
 			material.metalness = metalness.x;
 			material.alpha = alpha;
