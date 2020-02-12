@@ -112,7 +112,6 @@
 			ts_to_world[2] = world_normal;
 
 			float3 normal =decompress_normal(normal_tex.Sample(bilinear_sampler,tex));
-			normal = normal*2-1;
 
 			world_normal = normalize(mul(normal,ts_to_world));
 
