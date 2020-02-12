@@ -777,7 +777,7 @@ namespace leo
 				{
 					if (_tTraits::eq_int_type(c, eof))
 					{
-						st |= std::ios_base::eofbit;
+						st =st | std::ios_base::eofbit;
 						break;
 					}
 					if (f(c, *p_buf))
@@ -787,7 +787,7 @@ namespace leo
 					}
 					if (!(str.length() < msize))
 					{
-						st |= std::ios_base::failbit;
+						st =st | std::ios_base::failbit;
 						break;
 					}
 					str.append(1, _tTraits::to_char_type(c));
@@ -801,7 +801,7 @@ namespace leo
 			}
 		}
 		if (n == 0)
-			st |= std::ios_base::failbit;
+			st =st | std::ios_base::failbit;
 		if (st)
 			is.setstate(st);
 		return is;

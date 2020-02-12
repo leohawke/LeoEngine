@@ -71,7 +71,7 @@
 					out float3 ViewDir:TEXCOORD2,
 					out float3 oTsToW0:TEXCOORD3,
 					out float3 oTsToW1:TEXCOORD4,
-					out float3 oTsToW2:TEXCOORD5,
+					out float3 oTsToW2:TEXCOORD5
 		)
 		{
 			WorldPos = mul(float4(Postion,1.0f),world);
@@ -111,7 +111,7 @@
 			ts_to_world[1] = normalize(b);
 			ts_to_world[2] = world_normal;
 
-			float3 normal = normal_tex.Sample(bilinear_sampler,tex).rgb;
+			float3 normal =decompress_normal(normal_tex.Sample(bilinear_sampler,tex));
 			normal = normal*2-1;
 
 			world_normal = normalize(mul(normal,ts_to_world));

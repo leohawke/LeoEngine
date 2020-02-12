@@ -7,6 +7,7 @@
 
 #include "../Render/ITexture.hpp"
 #include "../Core/LFile.h"
+#include <LBase/span.hpp>
 
 #include <filesystem>
 
@@ -32,6 +33,10 @@ namespace platform {
 			void const * src_data, uint32 src_row_pitch, uint32 src_slice_pitch, Render::EFormat src_format,
 			uint16 src_width, uint16 src_height, uint16 src_depth,
 			bool linear);
+
+		void SaveTexture(path const& path, Render::TextureType type,
+			uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size,
+			Render::EFormat format, leo::span<Render::ElementInitData> init_data);
 	}
 
 #ifdef ENGINE_TOOL

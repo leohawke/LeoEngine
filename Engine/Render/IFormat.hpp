@@ -360,6 +360,12 @@ namespace platform::Render {
 		}
 
 		inline bool
+			IsFloatFormat(EFormat format)
+		{
+			return (ECT_Float == ChannelType<0>(format));
+		}
+
+		inline bool
 			IsCompressedFormat(EFormat format)
 		{
 			return (EC_BC == Channel<0>(format)) || (EC_ETC == Channel<0>(format));

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2024
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LBase", "LBase\LBase.vcxproj", "{4F3AE107-3FFD-4D5C-82A8-5034C0041562}"
 EndProject
@@ -22,6 +22,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.Net", "Engine.Net\Engine.Net\Engine.Net.csproj", "{B40C855A-A115-4852-996D-A4CC61B29973}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "leo.Engine", "Engine.Net\leo.Engine\leo.Engine.csproj", "{C612D6F9-A239-4503-84F9-D3FE1A9A21FA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{6C55A3E0-9F3A-4E80-9B4C-BFDAEA2407E4}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalMapCompressor", "Tools\NormalMapCompressor\NormalMapCompressor.vcxproj", "{77D3DA43-3C20-42AD-91B6-8B57069C85AD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -110,6 +114,14 @@ Global
 		{C612D6F9-A239-4503-84F9-D3FE1A9A21FA}.Release|x64.Build.0 = Release|Any CPU
 		{C612D6F9-A239-4503-84F9-D3FE1A9A21FA}.Release|x86.ActiveCfg = Release|Any CPU
 		{C612D6F9-A239-4503-84F9-D3FE1A9A21FA}.Release|x86.Build.0 = Release|Any CPU
+		{77D3DA43-3C20-42AD-91B6-8B57069C85AD}.Debug|x64.ActiveCfg = Debug|x64
+		{77D3DA43-3C20-42AD-91B6-8B57069C85AD}.Debug|x64.Build.0 = Debug|x64
+		{77D3DA43-3C20-42AD-91B6-8B57069C85AD}.Debug|x86.ActiveCfg = Debug|Win32
+		{77D3DA43-3C20-42AD-91B6-8B57069C85AD}.Debug|x86.Build.0 = Debug|Win32
+		{77D3DA43-3C20-42AD-91B6-8B57069C85AD}.Release|x64.ActiveCfg = Release|x64
+		{77D3DA43-3C20-42AD-91B6-8B57069C85AD}.Release|x64.Build.0 = Release|x64
+		{77D3DA43-3C20-42AD-91B6-8B57069C85AD}.Release|x86.ActiveCfg = Release|Win32
+		{77D3DA43-3C20-42AD-91B6-8B57069C85AD}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -119,6 +131,7 @@ Global
 		{2EBBB8C0-9BBC-4EB0-A1D6-597F46B8D565} = {CB2E7065-C2DF-4BAF-B4EC-550568D9F56E}
 		{B40C855A-A115-4852-996D-A4CC61B29973} = {BE52721A-3113-49EF-980B-B0DFDCFF24AB}
 		{C612D6F9-A239-4503-84F9-D3FE1A9A21FA} = {BE52721A-3113-49EF-980B-B0DFDCFF24AB}
+		{77D3DA43-3C20-42AD-91B6-8B57069C85AD} = {6C55A3E0-9F3A-4E80-9B4C-BFDAEA2407E4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1C85FA3C-C95F-4981-96BC-8082DAEDA622}
