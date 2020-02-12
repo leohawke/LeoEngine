@@ -782,21 +782,21 @@ namespace platform {
 				{
 					float fz = static_cast<float>(z) / dst_depth * src_depth;
 					uint32 sz0 = static_cast<uint32>(fz);
-					uint32 sz1 = clamp<uint32>(sz0 + 1, 0, src_depth - 1);
+					uint32 sz1 = clamp<uint32>(0, src_depth - 1, sz0 + 1);
 					float weight_z = fz - sz0;
 
 					for (uint32 y = 0; y < dst_height; ++y)
 					{
 						float fy = static_cast<float>(y) / dst_height * src_height;
 						uint32 sy0 = static_cast<uint32>(fy);
-						uint32 sy1 = clamp<uint32>(sy0 + 1, 0, src_height - 1);
+						uint32 sy1 = clamp<uint32>(0, src_height - 1, sy0 + 1);
 						float weight_y = fy - sy0;
 
 						for (uint32 x = 0; x < dst_width; ++x)
 						{
 							float fx = static_cast<float>(x) / dst_width * src_width;
 							uint32 sx0 = static_cast<uint32>(fx);
-							uint32 sx1 = clamp<uint32>(sx0 + 1, 0, src_width - 1);
+							uint32 sx1 = clamp<uint32>(0, src_width - 1, sx0 + 1);
 							float weight_x = fx - sx0;
 							M::Color clr_x00 = lerp(src_32f[(sz0 * src_height + sy0) * src_width + sx0],
 								src_32f[(sz0 * src_height + sy0) * src_width + sx1], weight_x);

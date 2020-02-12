@@ -22,7 +22,7 @@ namespace
 			float y = com_normals[i * 4 + 1] / 255.0f * 2 - 1;
 			float z = sqrt(1 - x * x - y * y);
 
-			res_normals[i * 4 + 0] = static_cast<uint8_t>(math::clamp(static_cast<int>((z * 0.5f + 0.5f) * 255 + 0.5f), 0, 255));
+			res_normals[i * 4 + 0] = static_cast<uint8_t>(math::clamp(0, 255, static_cast<int>((z * 0.5f + 0.5f) * 255 + 0.5f)));
 			res_normals[i * 4 + 1] = com_normals[i * 4 + 1];
 			res_normals[i * 4 + 2] = com_normals[i * 4 + 2];
 			res_normals[i * 4 + 3] = 0;
@@ -58,10 +58,10 @@ namespace
 				uint8_t uncom_y[16];
 				for (uint32_t dy = 0; dy < 4; ++dy)
 				{
-					uint32_t y = math::clamp(y_base + dy, 0U, height - 1);
+					uint32_t y = math::clamp(0U, height - 1, y_base + dy);
 					for (uint32_t dx = 0; dx < 4; ++dx)
 					{
-						uint32_t x = math::clamp(x_base + dx, 0U, width - 1);
+						uint32_t x = math::clamp(0U, width - 1, x_base + dx);
 
 						float3 n;
 						n.x = in_data[y * width + x].r() * 2 - 1;
@@ -69,8 +69,8 @@ namespace
 						n.z = in_data[y * width + x].b() * 2 - 1;
 						n = math::normalize(n);
 
-						uncom_x[dy * 4 + dx] = static_cast<uint8_t>(math::clamp(static_cast<int>((n.x * 0.5f + 0.5f) * 255.0f + 0.5f), 0, 255));
-						uncom_y[dy * 4 + dx] = static_cast<uint8_t>(math::clamp(static_cast<int>((n.y * 0.5f + 0.5f) * 255.0f + 0.5f), 0, 255));
+						uncom_x[dy * 4 + dx] = static_cast<uint8_t>(math::clamp(0, 255, static_cast<int>((n.x * 0.5f + 0.5f) * 255.0f + 0.5f)));
+						uncom_y[dy * 4 + dx] = static_cast<uint8_t>(math::clamp(0, 255, static_cast<int>((n.y * 0.5f + 0.5f) * 255.0f + 0.5f)));
 					}
 				}
 
@@ -332,29 +332,33 @@ namespace
 
 		platform::X::SaveTexture(out_file, in_type, out_width, out_height, in_depth, in_num_mipmaps, in_array_size, new_format,leo::make_span(new_data));
 
-		float mse = 0;
-		int n = 0;
-		for (size_t sub_res = 0; sub_res < in_array_size; ++sub_res)
+		if (IsCompressedFormat(new_format))
 		{
-			uint32_t the_width = in_width;
-			uint32_t the_height = in_height;
 
-			for (uint32_t mip = 0; mip < in_num_mipmaps; ++mip)
+			float mse = 0;
+			int n = 0;
+			for (size_t sub_res = 0; sub_res < in_array_size; ++sub_res)
 			{
-				mse += MSESubresource(the_width, the_height, in_format, in_data[sub_res * in_num_mipmaps + mip],
-					new_format, new_data[sub_res * in_num_mipmaps + mip]);
-				n += the_width * the_height;
+				uint32_t the_width = in_width;
+				uint32_t the_height = in_height;
 
-				the_width = std::max(the_width / 2, 1U);
-				the_height = std::max(the_height / 2, 1U);
+				for (uint32_t mip = 0; mip < in_num_mipmaps; ++mip)
+				{
+					mse += MSESubresource(the_width, the_height, in_format, in_data[sub_res * in_num_mipmaps + mip],
+						new_format, new_data[sub_res * in_num_mipmaps + mip]);
+					n += the_width * the_height;
+
+					the_width = std::max(the_width / 2, 1U);
+					the_height = std::max(the_height / 2, 1U);
+				}
 			}
+
+			mse /= n;
+			float psnr = 10 * log10(255 * 255 / std::max(mse, 1e-6f));
+
+			cout << "MSE: " << mse << endl;
+			cout << "PSNR: " << psnr << endl;
 		}
-
-		mse /= n;
-		float psnr = 10 * log10(255 * 255 / std::max(mse, 1e-6f));
-
-		cout << "MSE: " << mse << endl;
-		cout << "PSNR: " << psnr << endl;
 	}
 }
 
