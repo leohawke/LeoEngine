@@ -182,23 +182,29 @@
     <ClCompile Include="Core\Threading\JobDispacther.cpp">
       <Filter>Core\Threading</Filter>
     </ClCompile>
-    <ClCompile Include="Render\D3D12\RayContext.cpp">
-      <Filter>Render\D3D12</Filter>
-    </ClCompile>
     <ClCompile Include="Render\IRayTracingGeometry.cpp">
-      <Filter>Render\DeviceInterface</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\D3D12\RayTracingGeometry.d3d12.cpp">
-      <Filter>Render\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\IRayTracingScene.cpp">
-      <Filter>Render\DeviceInterface</Filter>
+      <Filter>Render\DeviceInterface\RayTracing</Filter>
     </ClCompile>
     <ClCompile Include="Render\IRayTracingPipelineState.cpp">
-      <Filter>Render\DeviceInterface</Filter>
+      <Filter>Render\DeviceInterface\RayTracing</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\IRayTracingScene.cpp">
+      <Filter>Render\DeviceInterface\RayTracing</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\IRayTracingShader.cpp">
+      <Filter>Render\DeviceInterface\RayTracing</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\RayTracingGeometry.d3d12.cpp">
+      <Filter>Render\D3D12\RayTracing</Filter>
     </ClCompile>
     <ClCompile Include="Render\D3D12\RayTracingScene.d3d12.cpp">
-      <Filter>Render\D3D12</Filter>
+      <Filter>Render\D3D12\RayTracing</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\RayContext.cpp">
+      <Filter>Render\D3D12\RayTracing</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\RayTracingPipelineState.cpp">
+      <Filter>Render\D3D12\RayTracing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -427,31 +433,43 @@
       <Filter>Core\Threading</Filter>
     </ClInclude>
     <ClInclude Include="Render\IRayContext.h">
-      <Filter>Render\DeviceInterface</Filter>
+      <Filter>Render\DeviceInterface\RayTracing</Filter>
     </ClInclude>
     <ClInclude Include="Render\IRayDevice.h">
-      <Filter>Render\DeviceInterface</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\D3D12\RayContext.h">
-      <Filter>Render\D3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\D3D12\RayDevice.h">
-      <Filter>Render\D3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\D3D12\RayTracingGeometry.h">
-      <Filter>Render\D3D12</Filter>
+      <Filter>Render\DeviceInterface\RayTracing</Filter>
     </ClInclude>
     <ClInclude Include="Render\IRayTracingGeometry.h">
-      <Filter>Render\DeviceInterface</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\IRayTracingScene.h">
-      <Filter>Render\DeviceInterface</Filter>
+      <Filter>Render\DeviceInterface\RayTracing</Filter>
     </ClInclude>
     <ClInclude Include="Render\IRayTracingPipelineState.h">
-      <Filter>Render\DeviceInterface</Filter>
+      <Filter>Render\DeviceInterface\RayTracing</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IRayTracingScene.h">
+      <Filter>Render\DeviceInterface\RayTracing</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IRayTracingShader.h">
+      <Filter>Render\DeviceInterface\RayTracing</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\RayTracingShader.h">
+      <Filter>Render\D3D12\RayTracing</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\RayTracingGeometry.h">
+      <Filter>Render\D3D12\RayTracing</Filter>
     </ClInclude>
     <ClInclude Include="Render\D3D12\RayTracingScene.h">
-      <Filter>Render\D3D12</Filter>
+      <Filter>Render\D3D12\RayTracing</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\RayContext.h">
+      <Filter>Render\D3D12\RayTracing</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\RayDevice.h">
+      <Filter>Render\D3D12\RayTracing</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\RayTracingPipelineState.h">
+      <Filter>Render\D3D12\RayTracing</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\D3D12RayTracing.h">
+      <Filter>Render\D3D12\RayTracing</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -508,6 +526,12 @@
     </Filter>
     <Filter Include="Core\Threading">
       <UniqueIdentifier>{551030a7-f19e-45ed-87c8-0cd0d623401e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render\DeviceInterface\RayTracing">
+      <UniqueIdentifier>{50488218-b202-4e5b-9b96-90240b372a8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render\D3D12\RayTracing">
+      <UniqueIdentifier>{cf26db45-8ae4-489e-9924-9d1945a35667}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -14,6 +14,8 @@ namespace platform::Render {
 
 	class RayTracingGeometry;
 	class RayTracingScene;
+	class RayTracingShader;
+	class RayTracingPipelineState;
 
 	enum class ERayTracingGeometryType
 	{
@@ -90,12 +92,30 @@ namespace platform::Render {
 		leo::uint32 NumCallableShaderSlots = 0;
 	};
 
+	class RayTracingPipelineStateInitializer
+	{
+	public:
+		RayTracingPipelineStateInitializer() {};
+
+		uint32 MaxPayloadSizeInBytes = 24;
+
+		bool bAllowHitGroupIndexing = true;
+
+	public:
+		leo::span<RayTracingShader*> RayGenTable;
+		leo::span<RayTracingShader*> MissTable;
+		leo::span<RayTracingShader*> HitGroupTable;
+		leo::span<RayTracingShader*> CallableTable;
+	};
+
 	class RayDevice
 	{
 	public:
 		virtual RayTracingGeometry* CreateRayTracingGeometry(const RayTracingGeometryInitializer& initializer) = 0;
 
 		virtual RayTracingScene* CreateRayTracingScene(const RayTracingSceneInitializer& initializer) = 0;
+
+		virtual RayTracingPipelineState* CreateRayTracingPipelineState(const RayTracingPipelineState& initializer) = 0;
 
 		virtual void BuildAccelerationStructure(RayTracingGeometry* pGeometry) = 0;
 		virtual void BuildAccelerationStructure(RayTracingScene* pGeometry) =0;
