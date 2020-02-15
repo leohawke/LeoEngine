@@ -4,12 +4,15 @@
 
 #include "../IRayTracingShader.h"
 #include "d3d12_dxgi.h"
+#include "../ShaderCore.h"
 
 namespace platform_ex::Windows::D3D12 {
 	class RayTracingShader : public platform::Render::RayTracingShader
 	{
 	public:
 		ID3D12RootSignature* pRootSigneature = nullptr;
+
+		platform::Render::ShaderCodeResourceCounts ResourceCounts;
 	};
 }
 

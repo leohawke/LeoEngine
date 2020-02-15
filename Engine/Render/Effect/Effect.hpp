@@ -12,6 +12,7 @@
 
 #include "../PipleState.h"
 #include "../../Core/ResourcesHolder.h"
+#include "../ShaderCore.h"
 
 #include <tuple>
 #include <vector>
@@ -164,9 +165,7 @@ namespace platform::Render {
 		};
 		std::vector<BoundResourceInfo> BoundResourceInfos;
 
-		uint16_t NumSamplers = 0;
-		uint16_t NumSrvs = 0;
-		uint16_t NumUavs = 0;
+		ShaderCodeResourceCounts ResourceCounts;
 
 		std::optional<size_t> InputSignature = std::nullopt;
 		std::optional<leo::math::data_storage<uint16,3>> CSBlockSize = std::nullopt;
