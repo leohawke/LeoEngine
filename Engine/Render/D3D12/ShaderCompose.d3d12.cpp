@@ -171,11 +171,11 @@ platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<Sha
 			sc_template->CBuffIndices[index].emplace_back(static_cast<uint8>(index));
 		}
 
-		Samplers[index].resize(BlobInfo.NumSamplers);
-		SrvSrcs[index].resize(BlobInfo.NumSrvs, std::make_tuple(static_cast<ResourceHolder*>(nullptr), 0, 0));
-		Srvs[index].resize(BlobInfo.NumSrvs);
-		UavSrcs[index].resize(BlobInfo.NumUavs, std::make_pair<ResourceHolder*, ID3D12Resource*>(nullptr, nullptr));
-		Uavs[index].resize(BlobInfo.NumUavs);
+		Samplers[index].resize(BlobInfo.ResourceCounts.NumSamplers);
+		SrvSrcs[index].resize(BlobInfo.ResourceCounts.NumSRVs, std::make_tuple(static_cast<ResourceHolder*>(nullptr), 0, 0));
+		Srvs[index].resize(BlobInfo.ResourceCounts.NumSRVs);
+		UavSrcs[index].resize(BlobInfo.ResourceCounts.NumUAVs, std::make_pair<ResourceHolder*, ID3D12Resource*>(nullptr, nullptr));
+		Uavs[index].resize(BlobInfo.ResourceCounts.NumUAVs);
 
 		for (auto& BoundResourceInfo : BlobInfo.BoundResourceInfos) {
 			auto& Parameter = pEffect->GetParameter(BoundResourceInfo.name);
@@ -432,13 +432,13 @@ namespace platform_ex::Windows::D3D12 {
 			switch (input_bind_desc.Type)
 			{
 			case D3D_SIT_SAMPLER:
-				pInfo->NumSamplers = std::max(pInfo->NumSamplers, BindPoint);
+				pInfo->ResourceCounts.NumSamplers = std::max(pInfo->ResourceCounts.NumSamplers, BindPoint);
 				break;
 
 			case D3D_SIT_TEXTURE:
 			case D3D_SIT_STRUCTURED:
 			case D3D_SIT_BYTEADDRESS:
-				pInfo->NumSrvs = std::max(pInfo->NumSrvs, BindPoint);
+				pInfo->ResourceCounts.NumSRVs = std::max(pInfo->ResourceCounts.NumSRVs, BindPoint);
 				break;
 
 			case D3D_SIT_UAV_RWTYPED:
@@ -447,7 +447,7 @@ namespace platform_ex::Windows::D3D12 {
 			case D3D_SIT_UAV_APPEND_STRUCTURED:
 			case D3D_SIT_UAV_CONSUME_STRUCTURED:
 			case D3D_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
-				pInfo->NumUavs = std::max(pInfo->NumUavs, BindPoint);
+				pInfo->ResourceCounts.NumUAVs = std::max(pInfo->ResourceCounts.NumUAVs, BindPoint);
 				break;
 
 			default:

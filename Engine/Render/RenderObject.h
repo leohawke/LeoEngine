@@ -42,7 +42,7 @@ namespace platform::Render {
 	};
 
 	template<typename T,limpl(typename = leo::enable_if_t<std::is_convertible_v<T*,RObject*>>)>
-		leo::shared_ptr<T> shared_raw_robject(T* p)
+		std::shared_ptr<T> shared_raw_robject(T* p)
 	{
 			return leo::share_raw(p, RObjectDeleter());
 	}
