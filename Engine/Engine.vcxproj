@@ -33,6 +33,7 @@
     <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Core\CameraController.cpp" />
     <ClCompile Include="Core\GraphicsEngine.cpp" />
+    <ClCompile Include="Core\Hash\CityHash.cpp" />
     <ClCompile Include="Core\LeoEngine.cpp" />
     <ClCompile Include="Core\LeoEngine\ShadingElements\SEMesh.cpp" />
     <ClCompile Include="Core\LSLBuilder.cpp" />
@@ -62,6 +63,7 @@
     <ClCompile Include="Render\D3D12\RayTracingScene.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\ResourceView.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\ResourceHolder.cpp" />
+    <ClCompile Include="Render\D3D12\RootSignature.cpp" />
     <ClCompile Include="Render\D3D12\ShaderCompose.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Texture.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Texture1D.d3d12.cpp" />
@@ -108,6 +110,7 @@
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core\CameraController.h" />
     <ClInclude Include="Core\GraphicsEngine.h" />
+    <ClInclude Include="Core\Hash\CityHash.h" />
     <ClInclude Include="Core\LeoEngine.h" />
     <ClInclude Include="Core\LeoEngine\ShadingElements\SEMesh.h" />
     <ClInclude Include="Core\LeoEngine\ShadingElements\SEMeshImpl.h" />
@@ -143,6 +146,7 @@
     <ClInclude Include="Render\D3D12\RayTracingScene.h" />
     <ClInclude Include="Render\D3D12\RayTracingShader.h" />
     <ClInclude Include="Render\D3D12\ResourceHolder.h" />
+    <ClInclude Include="Render\D3D12\RootSignature.h" />
     <ClInclude Include="Render\D3D12\ShaderCompose.h" />
     <ClInclude Include="Render\D3D12\d3d12_dxgi.h" />
     <ClInclude Include="Render\D3D12\Display.h" />

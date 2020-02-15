@@ -3,6 +3,7 @@
 #define LE_RENDER_ShaderCore_h 1
 
 #include <LBase/linttype.hpp>
+#include <LBase/lmemory.hpp>
 
 namespace platform::Render {
 	struct ShaderCodeResourceCounts
@@ -12,6 +13,20 @@ namespace platform::Render {
 		leo::uint16 NumUAVs = 0;
 		leo::uint16 NumCBs;
 	};
+
+	enum class ShaderType : leo::uint8
+	{
+		VertexShader,
+		PixelShader,
+		HullShader,
+		DomainShader,
+		GeometryShader,
+		ComputeShader,
+	};
+
+
+	using ShaderBlob = std::pair<std::unique_ptr<stdex::byte[]>, std::size_t>;
+
 }
 
 #endif

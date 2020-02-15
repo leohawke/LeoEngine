@@ -75,7 +75,7 @@ namespace asset {
 
 	class TechniquePassAsset :public EffectNodeAsset {
 	public:
-		using ShaderType = platform::Render::ShaderCompose::Type;
+		using ShaderType = platform::Render::ShaderType;
 		DefGetter(const lnothrow, const std::vector<EffectMacro>&, Macros, macros)
 			DefGetter(lnothrow, std::vector<EffectMacro>&, MacrosRef, macros)
 
@@ -114,8 +114,8 @@ namespace asset {
 
 	class ShaderBlobAsset :leo::noncopyable {
 	public:
-		using Type = platform::Render::ShaderCompose::Type;
-		using ShaderBlob = platform::Render::ShaderCompose::ShaderBlob;
+		using Type = platform::Render::ShaderType;
+		using ShaderBlob = platform::Render::ShaderBlob;
 
 		explicit ShaderBlobAsset(Type _type, ShaderBlob&& _blob, platform::Render::ShaderInfo* pinfo)
 			:type(_type), blob(lforward(_blob)),pInfo(pinfo)

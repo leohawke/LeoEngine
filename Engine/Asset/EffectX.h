@@ -18,11 +18,11 @@ namespace platform {
 		std::shared_ptr<Render::Effect::Effect> LoadEffect(std::string const& name);
 
 		namespace Shader {
-			Render::ShaderCompose::ShaderBlob CompileToDXBC(Render::ShaderCompose::Type type, std::string_view Code,
+			Render::ShaderBlob CompileToDXBC(Render::ShaderType type, std::string_view Code,
 				std::string_view entry_point,const std::vector<asset::EffectMacro>& macros,
 				std::string_view profile, leo::uint32 flags,std::string_view SourceName);
-			Render::ShaderInfo* ReflectDXBC(const Render::ShaderCompose::ShaderBlob& blob, Render::ShaderCompose::Type type);
-			Render::ShaderCompose::ShaderBlob StripDXBC(const Render::ShaderCompose::ShaderBlob& blob, leo::uint32 flags);
+			Render::ShaderInfo* ReflectDXBC(const Render::ShaderBlob& blob, Render::ShaderType type);
+			Render::ShaderBlob StripDXBC(const Render::ShaderBlob& blob, leo::uint32 flags);
 		}
 	}
 }

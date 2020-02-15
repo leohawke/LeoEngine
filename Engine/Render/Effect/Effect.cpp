@@ -14,7 +14,7 @@
 #include "../../Core/AssetResourceScheduler.h"
 
 namespace platform::Render {
-	ShaderInfo::ShaderInfo(ShaderCompose::Type t)
+	ShaderInfo::ShaderInfo(ShaderType t)
 		:Type(t)
 	{}
 
@@ -386,7 +386,7 @@ namespace platform::Render::Effect {
 				Pass pass{};
 
 				auto& asset_blob_hashs = asset_pass.GetBlobs();
-				std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> asset_blobs;
+				std::unordered_map<ShaderType, leo::observer_ptr<const asset::ShaderBlobAsset>> asset_blobs;
 				for (auto&pair : asset_blob_hashs) {
 					asset_blobs.emplace(pair.first, &pEffectAsset->GetBlob(pair.second));
 				}

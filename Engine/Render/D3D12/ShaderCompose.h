@@ -32,7 +32,7 @@ namespace platform_ex::Windows::D3D12 {
 			leo::observer_ptr<ID3D12RootSignature> root_signature;
 			COMPtr<ID3D12DescriptorHeap> sampler_heap;
 
-			using ShaderBlobEx = base::ShaderBlob;
+			using ShaderBlobEx = platform::Render::ShaderBlob;
 
 			union {
 				struct {
@@ -70,12 +70,12 @@ namespace platform_ex::Windows::D3D12 {
 
 	public:
 
-		ShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect);
+		ShaderCompose(std::unordered_map<platform::Render::ShaderType, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect);
 
 		 void Bind() override;
 		 void UnBind() override;
 
-		 const std::optional<Template::ShaderBlobEx>& GetShaderBlob(Type shader_type) const;
+		 const std::optional<Template::ShaderBlobEx>& GetShaderBlob(platform::Render::ShaderType shader_type) const;
 
 	public:
 		ID3D12RootSignature* RootSignature() const;
@@ -149,7 +149,7 @@ namespace platform_ex::Windows::D3D12 {
 		desc.RasterizedStream = 0;
 	}
 
-	inline void operator<<(D3D12_SHADER_BYTECODE& desc, const std::optional<ShaderCompose::ShaderBlob>& blob)
+	inline void operator<<(D3D12_SHADER_BYTECODE& desc, const std::optional<platform::Render::ShaderBlob>& blob)
 	{
 		if (!blob)
 			desc << nullptr;

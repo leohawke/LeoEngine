@@ -32,6 +32,9 @@ namespace platform_ex {
 			namespace  Effect = platform::Render::Effect;
 			using namespace platform::Render::IFormat;
 
+			class RootSignature;
+			class RootSignatureMap;
+
 
 			class Device final : platform::Render::Device  {
 			public:
@@ -56,7 +59,7 @@ namespace platform_ex {
 
 				platform::Render::Caps& GetCaps() override;
 
-				ShaderCompose* CreateShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect) override;
+				ShaderCompose* CreateShaderCompose(std::unordered_map<platform::Render::ShaderType, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect) override;
 
 				//\brief D3D12 Buffer 创建时没有BIND_FLAG
 				GraphicsBuffer* CreateBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const*>  init_data = nullptr);
@@ -65,7 +68,7 @@ namespace platform_ex {
 				GraphicsBuffer* CreateVertexBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const *>  init_data = nullptr) override;
 				GraphicsBuffer* CreateIndexBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const *>  init_data = nullptr) override;
 
-				leo::observer_ptr<ID3D12RootSignature> CreateRootSignature(std::array<size_t, ShaderCompose::NumTypes * 4> num, bool vertex_shader, bool stream_output);
+				leo::observer_ptr<RootSignature> CreateRootSignature(std::array<size_t, ShaderCompose::NumTypes * 4> num, bool vertex_shader, bool stream_output);
 
 				PipleState* CreatePipleState(const platform::Render::PipleState& state) override;
 
@@ -156,7 +159,7 @@ namespace platform_ex {
 				std::unique_ptr<platform::Render::Effect::CopyEffect> bilt_effect;
 				std::unique_ptr<InputLayout> postprocess_layout;
 
-				std::unordered_map<size_t, COMPtr<ID3D12RootSignature>> root_signatures;
+				std::unique_ptr<RootSignatureMap> root_signatures;
 
 				std::unordered_map<size_t,COMPtr<ID3D12PipelineState>> graphics_psos;
 

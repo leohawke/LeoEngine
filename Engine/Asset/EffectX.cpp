@@ -747,10 +747,10 @@ namespace platform {
 
 					switch (first_hash) {
 					case leo::constfn_hash("vertex_shader"):
-						compile_type = platform::Render::ShaderCompose::Type::VertexShader;
+						compile_type = platform::Render::ShaderType::VertexShader;
 						break;
 					case leo::constfn_hash("pixel_shader"):
-						compile_type = platform::Render::ShaderCompose::Type::PixelShader;
+						compile_type = platform::Render::ShaderType::PixelShader;
 						break;
 					default:
 						continue;
@@ -907,10 +907,10 @@ namespace platform {
 			break;
 		}
 		switch (type) {
-		case ShaderCompose::Type::VertexShader:
+		case ShaderType::VertexShader:
 			append_macros.emplace_back("VS", "1");
 			break;
-		case ShaderCompose::Type::PixelShader:
+		case ShaderType::PixelShader:
 			append_macros.emplace_back("PS", "1");
 			break;
 		}
@@ -925,9 +925,9 @@ namespace platform {
 		switch (caps.type) {
 		case Caps::Type::D3D12:
 			switch (type) {
-			case ShaderCompose::Type::VertexShader:
+			case ShaderType::VertexShader:
 				return "vs_5_0";
-			case ShaderCompose::Type::PixelShader:
+			case ShaderType::PixelShader:
 				return "ps_5_0";
 			}
 		}
@@ -941,12 +941,12 @@ namespace platform {
 #ifdef LFL_Win32
 
 namespace platform_ex::Windows::D3D12 {
-	platform::Render::ShaderInfo * ReflectDXBC(const platform::Render::ShaderCompose::ShaderBlob & blob, platform::Render::ShaderCompose::Type type);
+	platform::Render::ShaderInfo * ReflectDXBC(const platform::Render::ShaderBlob & blob, platform::Render::ShaderType type);
 }
 
 #include <UniversalDXSDK/d3dcompiler.h>
 namespace platform::X::Shader {
-	Render::ShaderCompose::ShaderBlob CompileToDXBC(Render::ShaderCompose::Type type, std::string_view code,
+	Render::ShaderBlob CompileToDXBC(Render::ShaderType type, std::string_view code,
 		std::string_view entry_point, const std::vector<asset::EffectMacro>& macros,
 		std::string_view profile, leo::uint32 flags, string_view SourceName) {
 		std::vector<D3D_SHADER_MACRO> defines;
@@ -964,7 +964,7 @@ namespace platform::X::Shader {
 
 		auto hr = D3DCompile(code.data(), code.size(), SourceName.data(), defines.data(), nullptr, entry_point.data(), profile.data(), flags, 0, &code_blob, &error_blob);
 		if (code_blob) {
-			Render::ShaderCompose::ShaderBlob blob;
+			Render::ShaderBlob blob;
 			blob.first = std::make_unique<stdex::byte[]>(code_blob->GetBufferSize());
 			blob.second = code_blob->GetBufferSize();
 			std::memcpy(blob.first.get(), code_blob->GetBufferPointer(), blob.second);
@@ -976,7 +976,7 @@ namespace platform::X::Shader {
 		platform_ex::CheckHResult(hr);
 	}
 
-	Render::ShaderInfo * ReflectDXBC(const Render::ShaderCompose::ShaderBlob & blob, Render::ShaderCompose::Type type)
+	Render::ShaderInfo * ReflectDXBC(const Render::ShaderBlob & blob, Render::ShaderType type)
 	{
 		using namespace Render;
 		auto caps = Context::Instance().GetDevice().GetCaps();
@@ -986,10 +986,10 @@ namespace platform::X::Shader {
 		}
 	}
 	
-	Render::ShaderCompose::ShaderBlob StripDXBC(const Render::ShaderCompose::ShaderBlob& code_blob, leo::uint32 flags) {
+	Render::ShaderBlob StripDXBC(const Render::ShaderBlob& code_blob, leo::uint32 flags) {
 		platform_ex::COMPtr<ID3DBlob> stripped_blob;
 		platform_ex::CheckHResult(D3DStripShader(code_blob.first.get(), code_blob.second, flags, &stripped_blob));
-		Render::ShaderCompose::ShaderBlob blob;
+		Render::ShaderBlob blob;
 		blob.first = std::make_unique<stdex::byte[]>(stripped_blob->GetBufferSize());
 		blob.second = stripped_blob->GetBufferSize();
 		std::memcpy(blob.first.get(), stripped_blob->GetBufferPointer(), blob.second);

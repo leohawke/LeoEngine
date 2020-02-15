@@ -139,7 +139,7 @@ platform_ex::Windows::D3D12::ShaderCompose::Template::Template()
 	//uname union uname struct init
 }
 
-platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect) :
+platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<ShaderType, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect) :
 	sc_template(std::make_unique<Template>())
 {
 	auto CopyShader = [&](auto& shader, auto type) {

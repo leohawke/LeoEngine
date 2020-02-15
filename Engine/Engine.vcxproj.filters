@@ -209,6 +209,12 @@
     <ClCompile Include="Render\RenderObject.cpp">
       <Filter>Render\DeviceInterface</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Hash\CityHash.cpp">
+      <Filter>Core\Hash</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\RootSignature.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -480,6 +486,12 @@
     <ClInclude Include="Render\ShaderCore.h">
       <Filter>Render</Filter>
     </ClInclude>
+    <ClInclude Include="Render\D3D12\RootSignature.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Hash\CityHash.h">
+      <Filter>Core\Hash</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
@@ -541,6 +553,9 @@
     </Filter>
     <Filter Include="Render\D3D12\RayTracing">
       <UniqueIdentifier>{cf26db45-8ae4-489e-9924-9d1945a35667}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Hash">
+      <UniqueIdentifier>{a8d87a4e-523e-4ac2-a78a-ea2f3c546b2d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

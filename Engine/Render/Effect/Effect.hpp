@@ -114,28 +114,17 @@ namespace platform::Render {
 	public:
 		virtual ~ShaderCompose();
 
-		enum class Type : leo::uint8
-		{
-			VertexShader,
-			PixelShader,
-			GeometryShader,
-			ComputeShader,
-			HullShader,
-			DomainShader,
-		};
-
-		static const leo::uint8 NumTypes = (leo::uint8)Type::DomainShader + 1;
+		static const leo::uint8 NumTypes = (leo::uint8)ShaderType::ComputeShader + 1;
 
 		virtual void Bind() = 0;
 		virtual void UnBind() = 0;
 
-		using ShaderBlob = std::pair<std::unique_ptr<stdex::byte[]>, std::size_t>;
 	};
 
 	struct ShaderInfo {
-		ShaderCompose::Type Type;
+		ShaderType Type;
 
-		ShaderInfo(ShaderCompose::Type t);
+		ShaderInfo(ShaderType t);
 
 		struct ConstantBufferInfo
 		{

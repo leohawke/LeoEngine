@@ -2,6 +2,7 @@
 #include "Context.h"
 #include "Convert.h"
 #include "Texture.h"
+#include "RootSignature.h"
 #include "../Effect/CopyEffect.h"
 
 namespace Vertex = platform::Render::Vertex;
@@ -193,191 +194,27 @@ namespace platform_ex::Windows::D3D12 {
 		return texture.release();
 	}
 
-	ShaderCompose * platform_ex::Windows::D3D12::Device::CreateShaderCompose(std::unordered_map<ShaderCompose::Type, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect)
+	ShaderCompose * platform_ex::Windows::D3D12::Device::CreateShaderCompose(std::unordered_map<platform::Render::ShaderType, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect)
 	{
 		return std::make_unique<ShaderCompose>(pShaderBlob, pEffect).release();
 	}
 
-	leo::observer_ptr<ID3D12RootSignature> Device::CreateRootSignature(std::array<size_t, ShaderCompose::NumTypes * 4> num, bool vertex_shader, bool stream_output)
+	leo::observer_ptr<RootSignature> Device::CreateRootSignature(std::array<size_t, ShaderCompose::NumTypes * 4> num, bool vertex_shader, bool stream_output)
 	{
-		auto hash_val = leo::hash(num.begin(), num.end());
-		leo::hash_combine(hash_val, vertex_shader);
-		leo::hash_combine(hash_val, stream_output);
-		auto iter = root_signatures.find(hash_val);
-		if (iter != root_signatures.end())
-			return leo::make_observer(iter->second.Get());
+		QuantizedBoundShaderState QBSS;
 
-		size_t numcbv = 0;
-		for (auto i = 0; i != ShaderCompose::NumTypes; ++i)
-			numcbv += num[i * 4 + 0];
-
-		std::vector<D3D12_ROOT_PARAMETER> root_params;
-		std::vector<D3D12_DESCRIPTOR_RANGE> ranges;
-		//必须reserve 不然取data的指针会因为emplace_back失效
-		ranges.reserve(numcbv + ShaderCompose::NumTypes * 3);
 		for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
-			if (num[i * 4 + 0] != 0) {
-				D3D12_ROOT_PARAMETER root_param;
-				root_param.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-				auto type = (ShaderCompose::Type)i;
-				switch (type) {
-				case ShaderCompose::Type::VertexShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-					break;
-				case ShaderCompose::Type::PixelShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-					break;
-				case ShaderCompose::Type::GeometryShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_GEOMETRY;
-					break;
-				case ShaderCompose::Type::HullShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_HULL;
-					break;
-				case ShaderCompose::Type::DomainShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_DOMAIN;
-					break;
-				default:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-				}
+			QBSS.RegisterCounts[i].NumCBs = num[i * 4 + 0];
+			QBSS.RegisterCounts[i].NumSRVs = num[i * 4 + 1];
+			QBSS.RegisterCounts[i].NumUAVs = num[i * 4 + 2];
+			QBSS.RegisterCounts[i].NumSamplers = num[i * 4 + 3];
 
-				root_param.Descriptor.RegisterSpace = 0;
-				for (auto j = 0; j != num[i * 4 + 0]; ++j)
-				{
-					root_param.Descriptor.ShaderRegister = j;
-					root_params.emplace_back(root_param);
-				}
-			}
-		}
-		for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
-			if (num[i * 4 + 1] != 0) {
-				D3D12_DESCRIPTOR_RANGE range;
-				range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-				range.NumDescriptors = static_cast<UINT>(num[i * 4 + 1]);
-				range.BaseShaderRegister = 0;
-				range.RegisterSpace = 0;
-				range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-				ranges.emplace_back(range);
-
-				D3D12_ROOT_PARAMETER root_param;
-				root_param.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-				auto type = (ShaderCompose::Type)i;
-				switch (type) {
-				case ShaderCompose::Type::VertexShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-					break;
-				case ShaderCompose::Type::PixelShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-					break;
-				case ShaderCompose::Type::GeometryShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_GEOMETRY;
-					break;
-				case ShaderCompose::Type::HullShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_HULL;
-					break;
-				case ShaderCompose::Type::DomainShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_DOMAIN;
-					break;
-				default:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-				}
-				root_param.DescriptorTable.NumDescriptorRanges = 1;
-				root_param.DescriptorTable.pDescriptorRanges = &ranges.back();
-				root_params.emplace_back(root_param);
-			}
-		}
-		for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
-			if (num[i * 4 + 2] != 0) {
-				D3D12_DESCRIPTOR_RANGE range;
-				range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
-				range.NumDescriptors = static_cast<UINT>(num[i * 4 + 2]);
-				range.BaseShaderRegister = 0;
-				range.RegisterSpace = 0;
-				range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-				ranges.emplace_back(range);
-
-				D3D12_ROOT_PARAMETER root_param;
-				root_param.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-				auto type = (ShaderCompose::Type)i;
-				switch (type) {
-				case ShaderCompose::Type::VertexShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-					break;
-				case ShaderCompose::Type::PixelShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-					break;
-				case ShaderCompose::Type::GeometryShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_GEOMETRY;
-					break;
-				case ShaderCompose::Type::HullShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_HULL;
-					break;
-				case ShaderCompose::Type::DomainShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_DOMAIN;
-					break;
-				default:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-				}
-				root_param.DescriptorTable.NumDescriptorRanges = 1;
-				root_param.DescriptorTable.pDescriptorRanges = &ranges.back();
-				root_params.emplace_back(root_param);
-			}
-		}
-		for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
-			if (num[i * 4 + 3] != 0) {
-				D3D12_DESCRIPTOR_RANGE range;
-				range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
-				range.NumDescriptors = static_cast<UINT>(num[i * 4 + 3]);
-				range.BaseShaderRegister = 0;
-				range.RegisterSpace = 0;
-				range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-				ranges.emplace_back(range);
-
-				D3D12_ROOT_PARAMETER root_param;
-				root_param.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-				auto type = (ShaderCompose::Type)i;
-				switch (type) {
-				case ShaderCompose::Type::VertexShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-					break;
-				case ShaderCompose::Type::PixelShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-					break;
-				case ShaderCompose::Type::GeometryShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_GEOMETRY;
-					break;
-				case ShaderCompose::Type::HullShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_HULL;
-					break;
-				case ShaderCompose::Type::DomainShader:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_DOMAIN;
-					break;
-				default:
-					root_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-				}
-				root_param.DescriptorTable.NumDescriptorRanges = 1;
-				root_param.DescriptorTable.pDescriptorRanges = &ranges.back();
-				root_params.emplace_back(root_param);
-			}
 		}
 
-		D3D12_ROOT_SIGNATURE_DESC root_signature_desc;
-		root_signature_desc.NumParameters = static_cast<UINT>(root_params.size());
-		root_signature_desc.pParameters = root_params.empty() ? nullptr : root_params.data();
-		root_signature_desc.NumStaticSamplers = 0;
-		root_signature_desc.pStaticSamplers = nullptr;
-		root_signature_desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_NONE;
-		if (vertex_shader)
-			root_signature_desc.Flags |= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-		if (stream_output)
-			root_signature_desc.Flags |= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_STREAM_OUTPUT;
+		QBSS.AllowIAInputLayout = vertex_shader;
+		QBSS.AllowStreamOuput = stream_output;
 
-		COMPtr<ID3DBlob> signature;
-		COMPtr<ID3DBlob> error;
-		SerializeRootSignature(&root_signature_desc, D3D_ROOT_SIGNATURE_VERSION_1, &signature.ReleaseAndGetRef(), &error.ReleaseAndGetRef());
-		ID3D12RootSignature* root_signature;
-		CheckHResult(d3d_device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_ID3D12RootSignature, leo::replace_cast<void**>(&root_signature)));
-
-		return leo::make_observer(root_signatures.emplace(hash_val, root_signature).first->second.Get());
+		return leo::make_observer(root_signatures->GetRootSignature(QBSS));
 	}
 
 	PipleState * Device::CreatePipleState(const platform::Render::PipleState & state)
@@ -505,6 +342,8 @@ namespace platform_ex::Windows::D3D12 {
 		null_uav_desc.Texture2D.PlaneSlice = 0;
 		null_uav_handle = AllocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		d3d_device->CreateUnorderedAccessView(nullptr, nullptr, &null_uav_desc, null_uav_handle);
+
+		root_signatures = std::make_unique<RootSignatureMap>(d3d_device.Get());
 
 		FillCaps();
 
