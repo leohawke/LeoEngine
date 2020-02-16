@@ -19,6 +19,8 @@ namespace platform_ex::Windows::D3D12 {
 
 	using ShaderInfo = platform::Render::ShaderInfo;
 
+	class RootSignature;
+
 	class ShaderCompose:public platform::Render::ShaderCompose
 	{
 	public:
@@ -29,7 +31,7 @@ namespace platform_ex::Windows::D3D12 {
 			Template();
 			~Template();
 
-			leo::observer_ptr<ID3D12RootSignature> root_signature;
+			leo::observer_ptr<RootSignature> root_signature;
 			COMPtr<ID3D12DescriptorHeap> sampler_heap;
 
 			using ShaderBlobEx = platform::Render::ShaderBlob;

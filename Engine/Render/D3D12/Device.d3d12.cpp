@@ -204,10 +204,10 @@ namespace platform_ex::Windows::D3D12 {
 		QuantizedBoundShaderState QBSS;
 
 		for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
-			QBSS.RegisterCounts[i].NumCBs = num[i * 4 + 0];
-			QBSS.RegisterCounts[i].NumSRVs = num[i * 4 + 1];
-			QBSS.RegisterCounts[i].NumUAVs = num[i * 4 + 2];
-			QBSS.RegisterCounts[i].NumSamplers = num[i * 4 + 3];
+			QBSS.RegisterCounts[i].NumCBs = static_cast<leo::uint16>(num[i * 4 + 0]);
+			QBSS.RegisterCounts[i].NumSRVs = static_cast<leo::uint16>(num[i * 4 + 1]);
+			QBSS.RegisterCounts[i].NumUAVs = static_cast<leo::uint16>(num[i * 4 + 2]);
+			QBSS.RegisterCounts[i].NumSamplers = static_cast<leo::uint16>(num[i * 4 + 3]);
 
 		}
 
@@ -343,7 +343,7 @@ namespace platform_ex::Windows::D3D12 {
 		null_uav_handle = AllocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		d3d_device->CreateUnorderedAccessView(nullptr, nullptr, &null_uav_desc, null_uav_handle);
 
-		root_signatures = std::make_unique<RootSignatureMap>(d3d_device.Get());
+		root_signatures = std::make_unique<RootSignatureMap>(device);
 
 		FillCaps();
 
@@ -658,5 +658,21 @@ namespace platform_ex::Windows::D3D12 {
 			postprocess_layout->BindVertexStream(share_raw(CreateBuffer(Buffer::Usage::Static, EAccessHint::EA_GPURead | EAccessHint::EA_Immutable, sizeof(postprocess_pos), EFormat::EF_Unknown, postprocess_pos)), { Vertex::Element{ Vertex::Position,0,EFormat::EF_GR32F } });
 		}
 		return Deref(postprocess_layout);
+	}
+
+	void D3D12::Device::CheckFeatureSupport(ID3D12Device* device)
+	{
+		D3D12_FEATURE_DATA_D3D12_OPTIONS D3D12Caps {};
+		CheckHResult(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &D3D12Caps, sizeof(D3D12Caps)));
+		ResourceHeapTier = D3D12Caps.ResourceHeapTier;
+		ResourceBindingTier = D3D12Caps.ResourceBindingTier;
+
+		D3D12_FEATURE_DATA_ROOT_SIGNATURE D3D12RootSignatureCaps = {};
+		D3D12RootSignatureCaps.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;	// This is the highest version we currently support. If CheckFeatureSupport succeeds, the HighestVersion returned will not be greater than this.
+		if (FAILED(device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &D3D12RootSignatureCaps, sizeof(D3D12RootSignatureCaps))))
+		{
+			D3D12RootSignatureCaps.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
+		}
+		RootSignatureVersion = D3D12RootSignatureCaps.HighestVersion;
 	}
 }

@@ -47,6 +47,11 @@ RayTracingScene* D12::RayDevice::CreateRayTracingScene(const R::RayTracingSceneI
 	return Scene;
 }
 
+RayTracingPipelineState* platform_ex::Windows::D3D12::RayDevice::CreateRayTracingPipelineState(const platform::Render::RayTracingPipelineStateInitializer& initializer)
+{
+	return nullptr;
+}
+
 void D12::RayDevice::BuildAccelerationStructure(R::RayTracingGeometry* geometry)
 {
 	RayTracingGeometry* pGeometry = static_cast<RayTracingGeometry*>(geometry);

@@ -19,7 +19,7 @@ void RayTracingScene::BuildAccelerationStructure()
 
 	auto BuildFlags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE;
 
-	uint32 NumDxrInstances = Instances.size();
+	uint32 NumDxrInstances =static_cast<uint32>(Instances.size());
 
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS PrebuildDescInputs = {};
 
@@ -52,7 +52,7 @@ void RayTracingScene::BuildAccelerationStructure()
 	}
 
 	// Create and fill instance buffer
-	const uint32 NumSceneInstances = Instances.size();
+	const uint32 NumSceneInstances =static_cast<uint32>(Instances.size());
 
 	unique_ptr<GraphicsBuffer> InstanceBuffer;
 

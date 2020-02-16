@@ -37,6 +37,23 @@ namespace platform_ex::Windows::D3D12 {
 		uint32 GetHashCode() const;
 	};
 
+	class RootSignatureDesc
+	{
+	public:
+		explicit RootSignatureDesc(const QuantizedBoundShaderState& QBSS, const D3D12_RESOURCE_BINDING_TIER ResourceBindingTier);
+
+		inline const D3D12_VERSIONED_ROOT_SIGNATURE_DESC& GetDesc() const { return RootDesc; }
+
+		static constexpr uint32 MaxRootParameters = 32;	// Arbitrary max, increase as needed.
+	private:
+
+		uint32 RootParametersSize;	// The size of all root parameters in the root signature. Size in DWORDs, the limit is 64.
+		CD3DX12_ROOT_PARAMETER1 TableSlots[MaxRootParameters];
+		CD3DX12_DESCRIPTOR_RANGE1 DescriptorRanges[MaxRootParameters];
+		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC RootDesc;
+	};
+
+
 	class RootSignature
 	{
 	public:
@@ -44,13 +61,27 @@ namespace platform_ex::Windows::D3D12 {
 		{
 			Init(blob);
 		}
-		RootSignature(const QuantizedBoundShaderState& QBSS)
+		RootSignature(const QuantizedBoundShaderState& QBSS,ID3D12Device* pDevice)
 		{
-			Init(QBSS);
+			Init(QBSS,pDevice);
 		}
 
 		void Init(const ShaderBlob& blob);
-		void Init(const QuantizedBoundShaderState& QBSS);
+		void Init(const QuantizedBoundShaderState& QBSS,ID3D12Device* pDevice);
+		void Init(const D3D12_VERSIONED_ROOT_SIGNATURE_DESC& InDesc, uint32 BindingSpace, ID3D12Device* pDevice);
+
+		uint32 GetTotalRootSignatureSizeInBytes() const { return 4 * TotalRootSignatureSizeInDWORDs; }
+	private:
+		void AnalyzeSignature(const D3D12_VERSIONED_ROOT_SIGNATURE_DESC& Desc, uint32 BindingSpace);
+		template<typename RootSignatureDescType>
+		void InternalAnalyzeSignature(const RootSignatureDescType& Desc, uint32 BindingSpace);
+
+	private:
+		COMPtr<ID3DBlob> SignatureBlob;
+
+	public:
+		COMPtr<ID3D12RootSignature> Signature;
+		uint8 TotalRootSignatureSizeInDWORDs = 0;
 	};
 
 	

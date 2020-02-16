@@ -6,6 +6,7 @@
 #include "../IRayDevice.h"
 #include "d3d12_dxgi.h"
 #include "D3D12RayTracing.h"
+#include "RootSignature.h"
 
 namespace platform_ex::Windows::D3D12 {
 	class RayTracingPipelineState : public platform::Render::RayTracingPipelineState
@@ -16,13 +17,13 @@ namespace platform_ex::Windows::D3D12 {
 		COMPtr<ID3D12StateObject> StateObject;
 
 		// This is useful for the case where user only provides default RayGen, Miss and HitGroup shaders.
-		RayTracingShaderTable DefaultShaderTable;
+		::RayTracingShaderTable DefaultShaderTable;
 
-		RayTracingShaderLibrary RayGenShaders;
-		RayTracingShaderLibrary MissShaders;
-		RayTracingShaderLibrary HitGroupShaders;
+		::RayTracingShaderLibrary RayGenShaders;
+		::RayTracingShaderLibrary MissShaders;
+		::RayTracingShaderLibrary HitGroupShaders;
 
-		ID3D12RootSignature* GlobalRootSignature = nullptr;
+		leo::observer_ptr<RootSignature> GlobalRootSignature = nullptr;
 
 		bool bAllowHitGroupIndexing = true;
 		leo::uint32 MaxLocalRootSignatureSize = 0;

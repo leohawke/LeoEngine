@@ -21,6 +21,7 @@ namespace platform::Render {
 		HullShader,
 		DomainShader,
 		GeometryShader,
+		VisibilityAll,
 		ComputeShader,
 	};
 

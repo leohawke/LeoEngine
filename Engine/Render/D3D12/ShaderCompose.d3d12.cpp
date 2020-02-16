@@ -5,8 +5,11 @@
 #include "../ITexture.hpp"
 #include "Texture.h"
 #include "Convert.h"
+#include "RootSignature.h"
 
 using namespace platform_ex::Windows;
+using platform::Render::ShaderType;
+using platform::Render::ShaderBlob;
 
 namespace {
 	class SetTextureSRV {
@@ -139,7 +142,7 @@ platform_ex::Windows::D3D12::ShaderCompose::Template::Template()
 	//uname union uname struct init
 }
 
-platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<ShaderType, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect) :
+platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<platform::Render::ShaderType, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect) :
 	sc_template(std::make_unique<Template>())
 {
 	auto CopyShader = [&](auto& shader, auto type) {
@@ -150,11 +153,11 @@ platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<Sha
 		}
 	};
 
-	CopyShader(sc_template->VertexShader, ShaderCompose::Type::VertexShader);
-	CopyShader(sc_template->PixelShader, ShaderCompose::Type::PixelShader);
+	CopyShader(sc_template->VertexShader, ShaderType::VertexShader);
+	CopyShader(sc_template->PixelShader, ShaderType::PixelShader);
 
 	if (sc_template->VertexShader.has_value())
-		sc_template->vs_signature = pShaderBlob[ShaderCompose::Type::VertexShader]->GetInfo().InputSignature.value();
+		sc_template->vs_signature = pShaderBlob[ShaderType::VertexShader]->GetInfo().InputSignature.value();
 
 	for (auto& pair : pShaderBlob) {
 		auto index = static_cast<leo::uint8>(pair.first);
@@ -239,14 +242,14 @@ void platform_ex::Windows::D3D12::ShaderCompose::UnBind()
 {
 }
 
-const std::optional<platform_ex::Windows::D3D12::ShaderCompose::Template::ShaderBlobEx>& platform_ex::Windows::D3D12::ShaderCompose::GetShaderBlob(Type shader_type) const
+const std::optional<platform_ex::Windows::D3D12::ShaderCompose::Template::ShaderBlobEx>& platform_ex::Windows::D3D12::ShaderCompose::GetShaderBlob(ShaderType shader_type) const
 {
 	return sc_template->Shaders[static_cast<uint8>(shader_type)];
 }
 
 ID3D12RootSignature * platform_ex::Windows::D3D12::ShaderCompose::RootSignature() const
 {
-	return sc_template->root_signature.get();
+	return sc_template->root_signature->Signature.Get();
 }
 
 ID3D12DescriptorHeap * platform_ex::Windows::D3D12::ShaderCompose::SamplerHeap() const
@@ -381,8 +384,9 @@ platform_ex::Windows::D3D12::ShaderCompose::parameter_bind_t platform_ex::Window
 #pragma comment(lib,"UniversalDXSDK/Lib/x86/d3dcompiler.lib")
 #endif
 
+
 namespace platform_ex::Windows::D3D12 {
-	platform::Render::ShaderInfo * ReflectDXBC(const ShaderCompose::ShaderBlob & blob, ShaderCompose::Type type)
+	platform::Render::ShaderInfo * ReflectDXBC(const ShaderBlob & blob, ShaderType type)
 	{
 		auto pInfo = std::make_unique<ShaderInfo>(type);
 		platform_ex::COMPtr<ID3D12ShaderReflection> pReflection;
@@ -480,7 +484,7 @@ namespace platform_ex::Windows::D3D12 {
 			}
 		}
 
-		if (type == ShaderCompose::Type::VertexShader) {
+		if (type == ShaderType::VertexShader) {
 			union {
 				D3D12_SIGNATURE_PARAMETER_DESC signature_desc;
 				stdex::byte signature_data[sizeof(D3D12_SIGNATURE_PARAMETER_DESC)];
@@ -496,7 +500,7 @@ namespace platform_ex::Windows::D3D12 {
 			pInfo->InputSignature = signature;
 		}
 
-		if (type == ShaderCompose::Type::ComputeShader) {
+		if (type == ShaderType::ComputeShader) {
 			UINT x, y, z;
 			pReflection->GetThreadGroupSize(&x, &y, &z);
 			pInfo->CSBlockSize = leo::math::data_storage<uint16, 3>(static_cast<uint16>(x),

@@ -160,10 +160,12 @@ namespace D3D = platform_ex::Windows::D3D;
 
 void D12::CreateAccelerationStructureBuffers(shared_ptr<GraphicsBuffer>& AccelerationStructureBuffer, shared_ptr<GraphicsBuffer>& ScratchBuffer, Device& Creator, const D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO& PrebuildInfo)
 {
+	lconstraint(PrebuildInfo.ResultDataMaxSizeInBytes <= std::numeric_limits<uint32>::max());
+
 	AccelerationStructureBuffer =leo::share_raw(Creator.CreateVertexBuffer(
 		Usage::AccelerationStructure,
 		EAccessHint::EA_GPUUnordered,
-		PrebuildInfo.ResultDataMaxSizeInBytes,
+		static_cast<uint32>(PrebuildInfo.ResultDataMaxSizeInBytes),
 		EF_Unknown
 	));
 
@@ -171,10 +173,12 @@ void D12::CreateAccelerationStructureBuffers(shared_ptr<GraphicsBuffer>& Acceler
 
 	auto ScratchBufferWidth = std::max(PrebuildInfo.UpdateScratchDataSizeInBytes, PrebuildInfo.ScratchDataSizeInBytes);
 
+	lconstraint(ScratchBufferWidth <= std::numeric_limits<uint32>::max());
+
 	ScratchBuffer = leo::share_raw(Creator.CreateVertexBuffer(
 		Usage::Static,
 		EAccessHint::EA_GPUUnordered | EAccessHint::EA_Raw,
-		ScratchBufferWidth,
+		static_cast<uint32>(ScratchBufferWidth),
 		EF_Unknown
 	));
 

@@ -111,6 +111,8 @@ namespace platform_ex {
 
 				void DeviceEx(ID3D12Device* device, ID3D12CommandQueue* cmd_queue, D3D_FEATURE_LEVEL feature_level);
 
+				void CheckFeatureSupport(ID3D12Device* device);
+
 				struct CmdAllocatorDependencies
 				{
 					COMPtr<ID3D12CommandAllocator> cmd_allocator;
@@ -167,6 +169,22 @@ namespace platform_ex {
 				std::multimap<uint32_t, COMPtr<ID3D12Resource>> readback_resources;
 
 				array<std::unique_ptr<Fence>, Device::CommandTypeCount> fences;
+
+				//feature support
+				D3D12_RESOURCE_BINDING_TIER ResourceBindingTier;
+				D3D12_RESOURCE_HEAP_TIER ResourceHeapTier;
+
+				D3D_ROOT_SIGNATURE_VERSION RootSignatureVersion;
+			public:
+				D3D12_RESOURCE_BINDING_TIER GetResourceBindingTier() const
+				{
+					return ResourceBindingTier;
+				}
+
+				D3D_ROOT_SIGNATURE_VERSION GetRootSignatureVersion() const
+				{
+					return RootSignatureVersion;
+				}
 			};
 
 			class Context : public platform::Render::Context {

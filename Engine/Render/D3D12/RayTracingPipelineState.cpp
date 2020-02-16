@@ -12,11 +12,11 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 	leo::span<platform::Render::RayTracingShader*> InitializerRayGenShaders = initializer.RayGenTable;
 	leo::span<platform::Render::RayTracingShader*> InitializerCallableShaders = initializer.CallableTable;
 
-	const uint32 MaxTotalShaders = InitializerRayGenShaders.size() + InitializerMissShaders.size() + InitializerHitGroups.size() + InitializerCallableShaders.size();
+	const uint32 MaxTotalShaders =static_cast<uint32>(InitializerRayGenShaders.size() + InitializerMissShaders.size() + InitializerHitGroups.size() + InitializerCallableShaders.size());
 
 	// All raygen and miss shaders must share the same global root signature, so take the first one and validate the rest
 
-	GlobalRootSignature =static_cast<RayTracingShader*>(InitializerRayGenShaders[0])->pRootSigneature;
+	GlobalRootSignature =static_cast<RayTracingShader*>(InitializerRayGenShaders[0])->pRootSignature;
 
 	//TODO:CompieShader GetName
 	auto GetPrimaryExportNameChars = [](RayTracingShader* Shader, RayTracingPipelineCache::CollectionType CollectionType)
@@ -30,7 +30,7 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 
 	leo::vector<LPCWSTR> RayGenShaderNames;
 
-	RayGenShaders.Reserve(InitializerRayGenShaders.size());
+	RayGenShaders.Reserve(static_cast<uint32>(InitializerRayGenShaders.size()));
 	RayGenShaderNames.reserve(InitializerRayGenShaders.size());
 
 	for (auto ShaderInterface : InitializerRayGenShaders)
@@ -39,7 +39,7 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 
 		Shader->AddRef();
 
-		LAssert(Shader->pRootSigneature == GlobalRootSignature, "All raygen and miss shaders must share the same root signature");
+		LAssert(Shader->pRootSignature == GlobalRootSignature, "All raygen and miss shaders must share the same root signature");
 
 		RayGenShaderNames.emplace_back(GetPrimaryExportNameChars(Shader, RayTracingPipelineCache::CollectionType::RayGen));
 		RayGenShaders.Shaders.emplace_back(platform::Render::shared_raw_robject(Shader));
@@ -48,7 +48,7 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 	// Add miss shaders
 	leo::vector<LPCWSTR> MissShaderNames;
 
-	MissShaders.Reserve(InitializerRayGenShaders.size());
+	MissShaders.Reserve(static_cast<uint32>(InitializerRayGenShaders.size()));
 	MissShaderNames.reserve(InitializerRayGenShaders.size());
 
 	for (auto ShaderInterface : InitializerMissShaders)
@@ -57,7 +57,7 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 
 		Shader->AddRef();
 
-		LAssert(Shader->pRootSigneature == GlobalRootSignature, "All raygen and miss shaders must share the same root signature");
+		LAssert(Shader->pRootSignature == GlobalRootSignature, "All raygen and miss shaders must share the same root signature");
 
 		MissShaderNames.emplace_back(GetPrimaryExportNameChars(Shader, RayTracingPipelineCache::CollectionType::Miss));
 		MissShaders.Shaders.emplace_back(platform::Render::shared_raw_robject(Shader));
@@ -69,7 +69,7 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 	MaxLocalRootSignatureSize = 0;
 
 	leo::vector<LPCWSTR> HitGroupNames;
-	HitGroupShaders.Reserve(InitializerHitGroups.size());
+	HitGroupShaders.Reserve(static_cast<uint32>(InitializerHitGroups.size()));
 	HitGroupNames.reserve(InitializerHitGroups.size());
 
 	for (auto ShaderInterface : InitializerHitGroups)
@@ -80,7 +80,7 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 
 		const uint32 ShaderViewDescriptors = Shader->ResourceCounts.NumSRVs + Shader->ResourceCounts.NumUAVs;
 		MaxHitGroupViewDescriptors = std::max(MaxHitGroupViewDescriptors, ShaderViewDescriptors);
-		MaxLocalRootSignatureSize = std::max(MaxLocalRootSignatureSize, Shader->pRootSigneature->GetTotalRootSignatureSizeInBytes());
+		MaxLocalRootSignatureSize = std::max(MaxLocalRootSignatureSize, Shader->pRootSignature->GetTotalRootSignatureSizeInBytes());
 
 		HitGroupNames.emplace_back(GetPrimaryExportNameChars(Shader, RayTracingPipelineCache::CollectionType::HitGroup));
 		HitGroupShaders.Shaders.emplace_back(platform::Render::shared_raw_robject(Shader));
