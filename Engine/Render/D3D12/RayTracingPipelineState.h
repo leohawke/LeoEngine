@@ -15,6 +15,7 @@ namespace platform_ex::Windows::D3D12 {
 		RayTracingPipelineState(const platform::Render::RayTracingPipelineStateInitializer& initializer);
 	public:
 		COMPtr<ID3D12StateObject> StateObject;
+		COMPtr<ID3D12StateObjectProperties> PipelineProperties;
 
 		// This is useful for the case where user only provides default RayGen, Miss and HitGroup shaders.
 		::RayTracingShaderTable DefaultShaderTable;
@@ -22,6 +23,7 @@ namespace platform_ex::Windows::D3D12 {
 		::RayTracingShaderLibrary RayGenShaders;
 		::RayTracingShaderLibrary MissShaders;
 		::RayTracingShaderLibrary HitGroupShaders;
+		::RayTracingShaderLibrary CallableShaders;
 
 		leo::observer_ptr<RootSignature> GlobalRootSignature = nullptr;
 

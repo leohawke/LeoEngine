@@ -1,5 +1,6 @@
 #include "RayTracingPipelineState.h"
 #include "D3D12RayTracing.h"
+#include "Context.h"
 
 using namespace platform_ex::Windows::D3D12;
 
@@ -85,4 +86,103 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 		HitGroupNames.emplace_back(GetPrimaryExportNameChars(Shader, RayTracingPipelineCache::CollectionType::HitGroup));
 		HitGroupShaders.Shaders.emplace_back(platform::Render::shared_raw_robject(Shader));
 	}
+
+	leo::vector<LPCWSTR> CallableShaderNames;
+	CallableShaders.Reserve(static_cast<uint32>(InitializerCallableShaders.size()));
+	CallableShaderNames.reserve(InitializerCallableShaders.size());
+
+	for (auto ShaderInterface : InitializerCallableShaders)
+	{
+		auto Shader = static_cast<RayTracingShader*>(ShaderInterface);
+
+		Shader->AddRef();
+
+		const uint32 ShaderViewDescriptors = Shader->ResourceCounts.NumSRVs + Shader->ResourceCounts.NumUAVs;
+		MaxHitGroupViewDescriptors = std::max(MaxHitGroupViewDescriptors, ShaderViewDescriptors);
+		MaxLocalRootSignatureSize = std::max(MaxLocalRootSignatureSize, Shader->pRootSignature->GetTotalRootSignatureSizeInBytes());
+
+		CallableShaderNames.emplace_back(GetPrimaryExportNameChars(Shader, RayTracingPipelineCache::CollectionType::Callable));
+		CallableShaders.Shaders.emplace_back(platform::Render::shared_raw_robject(Shader));
+	}
+
+	std::vector<D3D12_EXISTING_COLLECTION_DESC> UniqueShaderCollectionDescs;
+
+	auto RayTracingDevice = Context::Instance().GetRayContext().GetDevice().GetRayTracingDevice();
+
+	StateObject = CreateRayTracingStateObject(
+		RayTracingDevice,
+		{},
+		{},
+		initializer.MaxPayloadSizeInBytes,
+		{},
+		GlobalRootSignature->Signature.Get(),
+		{},
+		{},
+		leo::make_span(UniqueShaderCollectionDescs),
+		D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE
+	);
+
+	HRESULT QueryInterfaceResult = StateObject->QueryInterface(COMPtr_RefParam(PipelineProperties,IID_ID3D12StateObjectProperties));
+
+	LAssert(SUCCEEDED(QueryInterfaceResult), "Failed to query pipeline properties from the ray tracing pipeline state object.");
+
+	auto GetShaderIdentifier = [PipelineProperties = this->PipelineProperties.Get()](LPCWSTR ExportName)->ShaderIdentifier
+	{
+		ShaderIdentifier Result;
+
+		const void* Data = PipelineProperties->GetShaderIdentifier(ExportName);
+		LAssert(Data, "Couldn't find requested export in the ray tracing shader pipeline");
+
+		if (Data)
+		{
+			Result.SetData(Data);
+		}
+
+		return Result;
+	};
+
+	// Query shader identifiers from the pipeline state object
+
+	HitGroupShaders.Identifiers.reserve(InitializerHitGroups.size());
+	for (int32 HitGroupIndex = 0; HitGroupIndex < HitGroupNames.size(); ++HitGroupIndex)
+	{
+		LPCWSTR ExportNameChars = HitGroupNames[HitGroupIndex];
+		HitGroupShaders.Identifiers[HitGroupIndex] = GetShaderIdentifier(ExportNameChars);
+	}
+
+	RayGenShaders.Identifiers.reserve(RayGenShaderNames.size());
+	for (int32 ShaderIndex = 0; ShaderIndex < RayGenShaderNames.size(); ++ShaderIndex)
+	{
+		LPCWSTR ExportNameChars = RayGenShaderNames[ShaderIndex];
+		RayGenShaders.Identifiers[ShaderIndex] = GetShaderIdentifier(ExportNameChars);
+	}
+
+	MissShaders.Identifiers.reserve(MissShaderNames.size());
+	for (int32 ShaderIndex = 0; ShaderIndex < MissShaderNames.size(); ++ShaderIndex)
+	{
+		LPCWSTR ExportNameChars = MissShaderNames[ShaderIndex];
+		MissShaders.Identifiers[ShaderIndex] = GetShaderIdentifier(ExportNameChars);
+	}
+
+	CallableShaders.Identifiers.reserve(CallableShaderNames.size());
+	for (int32 ShaderIndex = 0; ShaderIndex < CallableShaderNames.size(); ++ShaderIndex)
+	{
+		LPCWSTR ExportNameChars = CallableShaderNames[ShaderIndex];
+		CallableShaders.Identifiers[ShaderIndex] = GetShaderIdentifier(ExportNameChars);
+	}
+
+	// Setup default shader binding table, which simply includes all provided RGS and MS plus a single default closest hit shader.
+		// Hit record indexing and local resources access is disabled when using using this SBT.
+
+	::RayTracingShaderTable::Initializer SBTInitializer = {};
+	SBTInitializer.NumRayGenShaders = RayGenShaders.Identifiers.size();
+	SBTInitializer.NumMissShaders = MissShaders.Identifiers.size();
+	SBTInitializer.NumCallableRecords = 0; // Default SBT does not support callable shaders
+	SBTInitializer.NumHitRecords = 0; // Default SBT does not support indexable hit shaders
+	SBTInitializer.LocalRootDataSize = 0; // Shaders in default SBT are not allowed to access any local resources
+
+	DefaultShaderTable.Init(SBTInitializer);
+	DefaultShaderTable.SetRayGenIdentifiers(RayGenShaders.Identifiers);
+	DefaultShaderTable.SetMissIdentifiers(MissShaders.Identifiers);
+	DefaultShaderTable.SetDefaultHitGroupIdentifier(HitGroupShaders.Identifiers[0]);
 }

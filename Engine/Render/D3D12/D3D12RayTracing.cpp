@@ -19,7 +19,7 @@ void RayTracingShaderTable::UploadToGPU(Windows::D3D12::Device* Device)
 	bIsDirty = false;
 }
 
-inline COMPtr<ID3D12StateObject> CreateRayTracingStateObject(ID3D12Device5* RayTracingDevice, const leo::span<const DXILLibrary*>& ShaderLibraries, const leo::span<LPCWSTR>& Exports, uint32 MaxPayloadSizeInBytes, const leo::span<const D3D12_HIT_GROUP_DESC>& HitGroups, const ID3D12RootSignature* GlobalRootSignature, const leo::span<ID3D12RootSignature*>& LocalRootSignatures, const leo::span<uint32>& LocalRootSignatureAssociations, const leo::span<D3D12_EXISTING_COLLECTION_DESC>& ExistingCollections, D3D12_STATE_OBJECT_TYPE StateObjectType)
+COMPtr<ID3D12StateObject> CreateRayTracingStateObject(ID3D12Device5* RayTracingDevice, const leo::span<const DXILLibrary*>& ShaderLibraries, const leo::span<LPCWSTR>& Exports, uint32 MaxPayloadSizeInBytes, const leo::span<const D3D12_HIT_GROUP_DESC>& HitGroups, const ID3D12RootSignature* GlobalRootSignature, const leo::span<ID3D12RootSignature*>& LocalRootSignatures, const leo::span<uint32>& LocalRootSignatureAssociations, const leo::span<D3D12_EXISTING_COLLECTION_DESC>& ExistingCollections, D3D12_STATE_OBJECT_TYPE StateObjectType)
 {
 	// There are several pipeline sub-objects that are always required:
 	// 1) D3D12_RAYTRACING_SHADER_CONFIG

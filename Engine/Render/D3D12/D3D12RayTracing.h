@@ -99,7 +99,7 @@ struct DXILLibrary
 	D3D12_DXIL_LIBRARY_DESC Desc = {};
 };
 
-inline COMPtr<ID3D12StateObject> CreateRayTracingStateObject(
+COMPtr<ID3D12StateObject> CreateRayTracingStateObject(
 	ID3D12Device5* RayTracingDevice,
 	const leo::span<const DXILLibrary*>& ShaderLibraries,
 	const leo::span<LPCWSTR>& Exports,
@@ -114,6 +114,25 @@ inline COMPtr<ID3D12StateObject> CreateRayTracingStateObject(
 
 class RayTracingShaderTable
 {
+private:
+	void WriteData(uint32 WriteOffset, const void* InData, uint32 InDataSize)
+	{
+		std::memcpy(reinterpret_cast<std::byte*>(Data.data()) + WriteOffset, InData, InDataSize);
+
+		bIsDirty = true;
+	}
+
+	void WriteLocalShaderRecord(uint32 RecordIndex, uint32 OffsetWithinRecord, const void* InData, uint32 InDataSize)
+	{
+		LAssert(OffsetWithinRecord % 4 == 0, "SBT record parameters must be written on DWORD-aligned boundary");
+		LAssert(InDataSize % 4 == 0, "SBT record parameters must be DWORD-aligned");
+		LAssert(OffsetWithinRecord + InDataSize <= LocalRecordSizeUnaligned, "SBT record write request is out of bounds");
+		LAssert(RecordIndex < NumLocalRecords, "SBT local record write request is out of bounds");
+
+		const uint32 WriteOffset = LocalShaderTableOffset + LocalRecordStride * RecordIndex + OffsetWithinRecord;
+
+		WriteData(WriteOffset, InData, InDataSize);
+	}
 public:
 	struct Initializer
 	{
@@ -170,6 +189,43 @@ public:
 
 		Data.resize(TotalDataSize);
 	}
+
+	void SetRayGenIdentifier(uint32 RecordIndex, const ShaderIdentifier& ShaderIdentifier)
+	{
+		const uint32 WriteOffset = RayGenShaderTableOffset + RecordIndex * RayGenRecordStride;
+		WriteData(WriteOffset, ShaderIdentifier.Data, ShaderIdentifierSize);
+	}
+
+	void SetMissIdentifier(uint32 RecordIndex, const ShaderIdentifier& ShaderIdentifier)
+	{
+		const uint32 WriteOffset = MissShaderTableOffset + RecordIndex * MissRecordStride;
+		WriteData(WriteOffset, ShaderIdentifier.Data, ShaderIdentifierSize);
+	}
+
+	void SetDefaultHitGroupIdentifier(const ShaderIdentifier& ShaderIdentifier)
+	{
+		const uint32 WriteOffset = DefaultHitGroupShaderTableOffset;
+		WriteData(WriteOffset, ShaderIdentifier.Data, ShaderIdentifierSize);
+	}
+
+	void SetRayGenIdentifiers(const leo::span<const ShaderIdentifier>& Identifiers)
+	{
+		lconstraint(Identifiers.size() == NumRayGenShaders);
+		for (int32 Index = 0; Index < Identifiers.size(); ++Index)
+		{
+			SetRayGenIdentifier(Index, Identifiers[Index]);
+		}
+	}
+
+	void SetMissIdentifiers(const leo::span<const ShaderIdentifier>& Identifiers)
+	{
+		lconstraint(Identifiers.size() == NumMissShaders);
+		for (int32 Index = 0; Index < Identifiers.size(); ++Index)
+		{
+			SetMissIdentifier(Index, Identifiers[Index]);
+		}
+	}
+
 
 	void UploadToGPU(Windows::D3D12::Device* Device);
 
@@ -236,7 +292,7 @@ public:
 	static constexpr uint32 RayGenRecordStride = D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
 	static constexpr uint32 MissRecordStride = D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
 
-	uint32 LocalRecordSizeUnaligned = 0; // size of the shader identifier + local root parameters, not aligned to SHADER_RECORD_BYTE_ALIGNMENT (used for out-of-bounds access checks)
+	uint32 LocalRecordSizeUnaligned = 0; // size of the shader identifier + local root parameters, not aligned to SHADER_RECORD_BYTE_ALIGNMENT (used for out-of-bounds access lconstraints)
 	uint32 LocalRecordStride = 0; // size of shader identifier + local root parameters, aligned to SHADER_RECORD_BYTE_ALIGNMENT (same for hit groups and callable shaders)
 
 	static constexpr uint32 RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT = D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
@@ -307,3 +363,4 @@ public:
 		Callable,
 	};
 };
+
