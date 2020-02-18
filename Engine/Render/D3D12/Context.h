@@ -68,7 +68,7 @@ namespace platform_ex {
 				GraphicsBuffer* CreateVertexBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const *>  init_data = nullptr) override;
 				GraphicsBuffer* CreateIndexBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const *>  init_data = nullptr) override;
 
-				leo::observer_ptr<RootSignature> CreateRootSignature(std::array<size_t, ShaderCompose::NumTypes * 4> num, bool vertex_shader, bool stream_output);
+				leo::observer_ptr<RootSignature> CreateRootSignature(const QuantizedBoundShaderState& QBSS);
 
 				PipleState* CreatePipleState(const platform::Render::PipleState& state) override;
 

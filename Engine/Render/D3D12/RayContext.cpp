@@ -47,9 +47,18 @@ RayTracingScene* D12::RayDevice::CreateRayTracingScene(const R::RayTracingSceneI
 	return Scene;
 }
 
-RayTracingPipelineState* platform_ex::Windows::D3D12::RayDevice::CreateRayTracingPipelineState(const platform::Render::RayTracingPipelineStateInitializer& initializer)
+RayTracingPipelineState* D12::RayDevice::CreateRayTracingPipelineState(const platform::Render::RayTracingPipelineStateInitializer& initializer)
 {
-	return nullptr;
+	auto PipelineState = new RayTracingPipelineState(initializer);
+
+	return PipelineState;
+}
+
+RayTracingShader* D12::RayDevice::CreateRayTracingSahder(const platform::Render::RayTracingShaderInitializer& initializer)
+{
+	auto Shader = new RayTracingShader(initializer);
+
+	return Shader;
 }
 
 void D12::RayDevice::BuildAccelerationStructure(R::RayTracingGeometry* geometry)

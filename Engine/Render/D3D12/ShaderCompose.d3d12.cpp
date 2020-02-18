@@ -259,19 +259,23 @@ ID3D12DescriptorHeap * platform_ex::Windows::D3D12::ShaderCompose::SamplerHeap()
 
 void platform_ex::Windows::D3D12::ShaderCompose::CreateRootSignature()
 {
-	std::array<size_t, NumTypes * 4> num;
+	QuantizedBoundShaderState QBSS;
+
+	QBSS.AllowIAInputLayout = sc_template->VertexShader.has_value();
+	QBSS.AllowStreamOuput = false;
+
 	size_t num_sampler = 0;
 	for (auto i = 0; i != NumTypes; ++i) {
-		num[i * 4 + 0] = CBuffs[i].size();
-		num[i * 4 + 1] = Srvs[i].size();
-		num[i * 4 + 2] = Uavs[i].size();
-		num[i * 4 + 3] = Samplers[i].size();
+		QBSS.RegisterCounts[i].NumCBs = CBuffs[i].size();
+		QBSS.RegisterCounts[i].NumSRVs = Srvs[i].size();
+		QBSS.RegisterCounts[i].NumUAVs = Uavs[i].size();
+		QBSS.RegisterCounts[i].NumSamplers = Samplers[i].size();
 
-		num_sampler += num[i * 4 + 3];
+		num_sampler += QBSS.RegisterCounts[i].NumSamplers;
 	}
 
 	auto& Device = Context::Instance().GetDevice();
-	sc_template->root_signature = Device.CreateRootSignature(num, sc_template->VertexShader.has_value(), false);
+	sc_template->root_signature = Device.CreateRootSignature(QBSS);
 
 	if (num_sampler > 0) {
 		D3D12_DESCRIPTOR_HEAP_DESC sampler_heap_desc;

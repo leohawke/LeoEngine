@@ -59,7 +59,41 @@ struct HitGroupSystemRootConstants
 #define RAY_TRACING_SYSTEM_VERTEXBUFFER_REGISTER 1
 #define RAY_TRACING_SYSTEM_ROOTCONSTANT_REGISTER 0
 
+struct ShaderIdentifier
+{
+	uint64 Data[4] = { ~0ull, ~0ull, ~0ull, ~0ull };
 
+	bool operator == (const ShaderIdentifier& Other) const
+	{
+		return Data[0] == Other.Data[0]
+			&& Data[1] == Other.Data[1]
+			&& Data[2] == Other.Data[2]
+			&& Data[3] == Other.Data[3];
+	}
+
+	bool operator != (const ShaderIdentifier& Other) const
+	{
+		return !(*this == Other);
+	}
+
+	bool IsValid() const
+	{
+		return *this != ShaderIdentifier();
+	}
+
+	// No shader is executed if a shader binding table record with null identifier is encountered.
+	void SetNull()
+	{
+		Data[3] = Data[2] = Data[1] = Data[0] = 0ull;
+	}
+
+	void SetData(const void* InData)
+	{
+		std::memcpy(Data, InData, sizeof(Data));
+	}
+};
+
+static_assert(sizeof(ShaderIdentifier) == D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES, "Unexpected shader identifier size");
 
 struct DXILLibrary
 {
@@ -304,41 +338,7 @@ public:
 	bool bIsDirty = true;
 };
 
-struct ShaderIdentifier
-{
-	uint64 Data[4] = { ~0ull, ~0ull, ~0ull, ~0ull };
 
-	bool operator == (const ShaderIdentifier& Other) const
-	{
-		return Data[0] == Other.Data[0]
-			&& Data[1] == Other.Data[1]
-			&& Data[2] == Other.Data[2]
-			&& Data[3] == Other.Data[3];
-	}
-
-	bool operator != (const ShaderIdentifier& Other) const
-	{
-		return !(*this == Other);
-	}
-
-	bool IsValid() const
-	{
-		return *this != ShaderIdentifier();
-	}
-
-	// No shader is executed if a shader binding table record with null identifier is encountered.
-	void SetNull()
-	{
-		Data[3] = Data[2] = Data[1] = Data[0] = 0ull;
-	}
-
-	void SetData(const void* InData)
-	{
-		std::memcpy(Data, InData, sizeof(Data));
-	}
-};
-
-static_assert(sizeof(ShaderIdentifier) == D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES, "Unexpected shader identifier size");
 
 struct RayTracingShaderLibrary
 {

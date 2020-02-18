@@ -199,21 +199,8 @@ namespace platform_ex::Windows::D3D12 {
 		return std::make_unique<ShaderCompose>(pShaderBlob, pEffect).release();
 	}
 
-	leo::observer_ptr<RootSignature> Device::CreateRootSignature(std::array<size_t, ShaderCompose::NumTypes * 4> num, bool vertex_shader, bool stream_output)
+	leo::observer_ptr<RootSignature> Device::CreateRootSignature(const QuantizedBoundShaderState& QBSS)
 	{
-		QuantizedBoundShaderState QBSS;
-
-		for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
-			QBSS.RegisterCounts[i].NumCBs = static_cast<leo::uint16>(num[i * 4 + 0]);
-			QBSS.RegisterCounts[i].NumSRVs = static_cast<leo::uint16>(num[i * 4 + 1]);
-			QBSS.RegisterCounts[i].NumUAVs = static_cast<leo::uint16>(num[i * 4 + 2]);
-			QBSS.RegisterCounts[i].NumSamplers = static_cast<leo::uint16>(num[i * 4 + 3]);
-
-		}
-
-		QBSS.AllowIAInputLayout = vertex_shader;
-		QBSS.AllowStreamOuput = stream_output;
-
 		return leo::make_observer(root_signatures->GetRootSignature(QBSS));
 	}
 

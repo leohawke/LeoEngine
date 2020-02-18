@@ -6,6 +6,7 @@
 #include "RayTracingGeometry.h"
 #include "RayTracingScene.h"
 #include "RayTracingPipelineState.h"
+#include "RayTracingShader.h"
 
 namespace platform_ex::Windows::D3D12 {
 	class Device;
@@ -21,6 +22,9 @@ namespace platform_ex::Windows::D3D12 {
 		RayTracingScene* CreateRayTracingScene(const platform::Render::RayTracingSceneInitializer& initializer)  final override;
 
 		RayTracingPipelineState* CreateRayTracingPipelineState(const platform::Render::RayTracingPipelineStateInitializer& initializer) final override;
+
+		RayTracingShader* CreateRayTracingSahder(const  platform::Render::RayTracingShaderInitializer& initializer) final override;
+
 
 		//TODO:state abstract cause performance(GPU sync point)
 		void BuildAccelerationStructure(platform::Render::RayTracingGeometry* pGeometry) final override;

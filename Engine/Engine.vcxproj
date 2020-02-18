@@ -62,6 +62,7 @@
     <ClCompile Include="Render\D3D12\RayTracingGeometry.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\RayTracingPipelineState.cpp" />
     <ClCompile Include="Render\D3D12\RayTracingScene.d3d12.cpp" />
+    <ClCompile Include="Render\D3D12\RayTracingShader.cpp" />
     <ClCompile Include="Render\D3D12\ResourceView.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\ResourceHolder.cpp" />
     <ClCompile Include="Render\D3D12\RootSignature.cpp" />

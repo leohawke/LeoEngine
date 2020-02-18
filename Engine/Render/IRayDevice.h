@@ -7,8 +7,10 @@
 
 #include "IGraphicsBuffer.hpp"
 #include "IFormat.hpp"
+#include "../Asset/EffectAsset.h"
 #include <LBase/span.hpp>
 #include <LBase/lmathtype.hpp>
+#include <LFramework/Core/LString.h>
 
 namespace platform::Render {
 
@@ -108,6 +110,15 @@ namespace platform::Render {
 		leo::span<RayTracingShader*> CallableTable;
 	};
 
+	class RayTracingShaderInitializer
+	{
+	public:
+		asset::ShaderBlobAsset Blob;
+		leo::Text::String EntryPoint;
+		leo::Text::String AnyHitEntryPoint;
+		leo::Text::String IntersectionEntryPoint;
+	};
+
 	class RayDevice
 	{
 	public:
@@ -116,6 +127,8 @@ namespace platform::Render {
 		virtual RayTracingScene* CreateRayTracingScene(const RayTracingSceneInitializer& initializer) = 0;
 
 		virtual RayTracingPipelineState* CreateRayTracingPipelineState(const RayTracingPipelineStateInitializer& initializer) = 0;
+
+		virtual RayTracingShader* CreateRayTracingSahder(const RayTracingShaderInitializer& initializer) = 0;
 
 		virtual void BuildAccelerationStructure(RayTracingGeometry* pGeometry) = 0;
 		virtual void BuildAccelerationStructure(RayTracingScene* pGeometry) =0;
