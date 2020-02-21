@@ -131,6 +131,56 @@ namespace asset::X::Shader::DXBC {
 	}
 }
 
+bool IsRayTracingShader(ShaderType type)
+{
+	switch (type)
+	{
+	case platform::Render::Shader::RayGen:
+	case platform::Render::Shader::RayMiss:
+	case platform::Render::Shader::RayHitGroup:
+	case platform::Render::Shader::RayCallable:
+		return true;
+	default:
+		return false;
+	}
+}
+
+// Parses ray tracing shader entry point specification string in one of the following formats:
+// 1) Verbatim single entry point name, e.g. "MainRGS"
+// 2) Complex entry point for ray tracing hit group shaders:
+//      a) "closesthit=MainCHS"
+//      b) "closesthit=MainCHS anyhit=MainAHS"
+//      c) "closesthit=MainCHS anyhit=MainAHS intersection=MainIS"
+//      d) "closesthit=MainCHS intersection=MainIS"
+//    NOTE: closesthit attribute must always be provided for complex hit group entry points
+static void ParseRayTracingEntryPoint(const std::string& Input, std::string& OutMain, std::string& OutAnyHit, std::string& OutIntersection)
+{
+	auto ParseEntry = [&Input](const char* Marker)
+	{
+		std::string Result;
+		auto BeginIndex = Input.find(Marker);
+		if (BeginIndex != std::string::npos)
+		{
+			auto EndIndex = Input.find(" ", BeginIndex);
+			if (EndIndex == std::string::npos) EndIndex = Input.size() + 1;
+			auto MarkerLen = std::strlen(Marker);
+			auto Count = EndIndex - BeginIndex;
+			Result = Input.substr(BeginIndex + MarkerLen, Count - MarkerLen);
+		}
+		return Result;
+	};
+
+	OutMain = ParseEntry("closesthit=");
+	OutAnyHit = ParseEntry("anyhit=");
+	OutIntersection = ParseEntry("intersection=");
+
+	// If complex hit group entry is not specified, assume a single verbatim entry point
+	if (OutMain.empty() && OutAnyHit.empty() && OutIntersection.empty())
+	{
+		OutMain = Input;
+	}
+}
+
 namespace asset::X::Shader::DXIL {
 
 	static dxc::DxcDllSupport& GetDxcDllHelper()
@@ -263,6 +313,31 @@ namespace asset::X::Shader::DXIL {
 		std::string_view profile, leo::uint32 flags, string_view SourceName) {
 		using String = leo::Text::String;
 
+		bool bIsRayTracingShader = IsRayTracingShader(type);
+
+		std::string RayEntryPoint;
+		std::string RayAnyHitEntryPoint;
+		std::string RayIntersectionEntryPoint;
+		std::string RayTracingExports;
+		if (bIsRayTracingShader)
+		{
+			ParseRayTracingEntryPoint(std::string(entry_point), RayEntryPoint, RayAnyHitEntryPoint, RayIntersectionEntryPoint);
+
+			RayTracingExports = RayEntryPoint;
+
+			if (!RayAnyHitEntryPoint.empty())
+			{
+				RayTracingExports += ";";
+				RayTracingExports += RayAnyHitEntryPoint;
+			}
+
+			if (!RayIntersectionEntryPoint.empty())
+			{
+				RayTracingExports += ";";
+				RayTracingExports += RayIntersectionEntryPoint;
+			}
+		}
+
 		std::vector<std::pair<String, String>> def_holder;
 		std::vector<DxcDefine> defs;
 		for (auto& macro : macros) {
@@ -273,7 +348,7 @@ namespace asset::X::Shader::DXIL {
 		}
 
 		std::vector<const wchar_t*> args;
-		D3DCreateDXCArguments(args, nullptr, flags, GetAutoBindingSpace(type));
+		D3DCreateDXCArguments(args,(wchar_t*)String(RayTracingExports).data(), flags, GetAutoBindingSpace(type));
 
 		dxc::DxcDllSupport& DxcDllHelper = GetDxcDllHelper();
 
@@ -292,8 +367,8 @@ namespace asset::X::Shader::DXIL {
 		CheckHResult(Compiler->Compile(
 			TextBlob.Get(),
 			(wchar_t*)wSourceName.data(),
-			(wchar_t*)String(entry_point.data(), entry_point.size()).data(),
-			(wchar_t*)String(profile.data(),profile.size()).data(),
+			(wchar_t*)String(entry_point).data(),
+			(wchar_t*)String(profile).data(),
 			args.data(),
 			args.size(),
 			defs.data(),
@@ -345,10 +420,7 @@ namespace asset::X::Shader::DXIL {
 namespace asset::X::Shader
 {
 
-	bool IsRayTracingShader(ShaderType type)
-	{
-		return false;
-	}
+	
 
 	ShaderBlob Compile(ShaderType type, std::string_view Code,
 		std::string_view entry_point, const std::vector<ShaderMacro>& macros,
