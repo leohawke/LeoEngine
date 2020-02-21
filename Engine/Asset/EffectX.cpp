@@ -18,6 +18,7 @@
 
 
 #pragma warning(disable:4715) //return value or throw exception;
+using namespace platform::Render::Shader;
 
 namespace D3DFlags {
 	enum COMPILER_FLAGS
@@ -63,7 +64,7 @@ namespace D3DFlags {
 namespace platform {
 	using namespace scheme;
 
-	std::vector<asset::EffectMacro> AppendCompileMacros(const std::vector<asset::EffectMacro>& macros, asset::ShaderBlobAsset::Type type);
+	std::vector<asset::ShaderMacro> AppendCompileMacros(const std::vector<asset::ShaderMacro>& macros, asset::ShaderBlobAsset::Type type);
 	std::string_view CompileProfile(asset::ShaderBlobAsset::Type type);
 
 	class EffectLoadingDesc : public asset::AssetLoading<asset::EffectAsset> {
@@ -147,13 +148,13 @@ namespace platform {
 			{
 				auto cbuffer_nodes = X::SelectNodes("cbuffer", effect_node);
 				for (auto & cbuffer_node : cbuffer_nodes) {
-					asset::EffectConstantBufferAsset cbuffer;
+					asset::ShaderConstantBufferAsset cbuffer;
 					cbuffer.SetName(AccessLastNoChild<std::string>(cbuffer_node));
 					auto param_nodes = cbuffer_node.SelectChildren([&](const scheme::TermNode& child) {
 						if (child.empty())
 							return false;
 						try {
-							return  AssetType::GetType(leo::Access<std::string>(*child.begin())) != asset::EPT_shader;
+							return  AssetType::GetType(leo::Access<std::string>(*child.begin())) != SPT_shader;
 						}
 						catch (leo::unsupported&) {
 							return false;
@@ -175,7 +176,7 @@ namespace platform {
 					if (child.empty())
 						return false;
 					try {
-						return  AssetType::GetType(leo::Access<std::string>(*child.begin())) != asset::EPT_shader;
+						return  AssetType::GetType(leo::Access<std::string>(*child.begin())) !=SPT_shader;
 					}
 					catch (leo::unsupported&) {
 						return false;
@@ -285,7 +286,7 @@ namespace platform {
 				return nullptr;
 		};
 
-		void ParseMacro(std::vector<asset::EffectMacro>& macros, const scheme::TermNode& node,bool topmacro)
+		void ParseMacro(std::vector<asset::ShaderMacro>& macros, const scheme::TermNode& node,bool topmacro)
 		{
 			//macro (macro (name foo) (value bar))
 			auto macro_nodes = X::SelectNodes("macro", node);
@@ -721,8 +722,8 @@ namespace platform {
 
 		void ComposePassShader(const asset::EffectTechniqueAsset&technique, asset::TechniquePassAsset& pass, scheme::TermNode& pass_node) {
 			size_t seed = 0;
-			auto macro_hash = leo::combined_hash<asset::EffectMacro>();
-			std::vector<asset::EffectMacro> macros{ effect_desc.effect_asset->GetMacros() };
+			auto macro_hash = leo::combined_hash<asset::ShaderMacro>();
+			std::vector<asset::ShaderMacro> macros{ effect_desc.effect_asset->GetMacros() };
 			for (auto & macro_pair : technique.GetMacros()) {
 				leo::hash_combine(seed, macro_hash(macro_pair));
 				macros.emplace_back(macro_pair);
@@ -789,13 +790,13 @@ namespace platform {
 			}
 		}
 
-		void UniqueMacro(std::vector<asset::EffectMacro>& macros)
+		void UniqueMacro(std::vector<asset::ShaderMacro>& macros)
 		{
 			//TODO! remap shader gen info
 			//宏的覆盖原则 删除前面已定义的宏
 			auto iter = macros.begin();
 			while (iter != macros.end()) {
-				auto exist = std::find_if(iter + 1, macros.end(), [&iter](const asset::EffectMacro& tail)
+				auto exist = std::find_if(iter + 1, macros.end(), [&iter](const asset::ShaderMacro& tail)
 				{
 					return iter->first == tail.first;
 				}
@@ -808,15 +809,15 @@ namespace platform {
 		}
 
 		size_t ParseParam(const scheme::TermNode& param_node,bool cbuffer_param) {
-			asset::EffectParameterAsset param;
+			asset::ShaderParameterAsset param;
 			param.SetName(AccessLastNoChild<std::string>(param_node));
 			//don't need check type again
 			param.GetTypeRef() = AssetType::GetType(leo::Access<std::string>(*param_node.begin()));
-			if (param.GetType() >= asset::EPT_bool) {
+			if (param.GetType() >= SPT_bool) {
 				if (auto p = leo::AccessChildPtr<std::string>(param_node, "arraysize"))
 					param.GetArraySizeRef() = std::stoul(*p);
 			}
-			else if (param.GetType() <= asset::EPT_ConsumeStructuredBuffer) {
+			else if (param.GetType() <= SPT_ConsumeStructuredBuffer) {
 				if (auto elemtype = AccessPtr("elemtype", param_node)) {
 					try {
 						param.GetElemInfoRef() = AssetType::GetType(*elemtype);
@@ -854,10 +855,10 @@ namespace platform {
 			return static_cast<leo::uint8>(std::stoul(value));
 		};
 		
-		std::optional<leo::any> ReadParamValue(const scheme::TermNode& param_node,asset::EffectParamType type) {
+		std::optional<leo::any> ReadParamValue(const scheme::TermNode& param_node,asset::ShaderParamType type) {
 #define AccessParam(name,expr) if (auto value = AccessPtr(name, param_node)) expr
 			using namespace Render;
-			if (type == asset::EPT_sampler) {
+			if (type == SPT_sampler) {
 				SamplerDesc sampler;
 				AccessParam("border_clr", sampler.border_clr = M::Color(to_float4(*value).data));
 
@@ -893,7 +894,7 @@ namespace platform {
 }
 
 namespace platform {
-	std::vector<asset::EffectMacro> AppendCompileMacros(const std::vector<asset::EffectMacro>& macros, asset::ShaderBlobAsset::Type type)
+	std::vector<asset::ShaderMacro> AppendCompileMacros(const std::vector<asset::ShaderMacro>& macros, asset::ShaderBlobAsset::Type type)
 	{
 		using namespace  platform::Render;
 
@@ -947,7 +948,7 @@ namespace platform_ex::Windows::D3D12 {
 #include <UniversalDXSDK/d3dcompiler.h>
 namespace platform::X::Shader {
 	Render::ShaderBlob CompileToDXBC(Render::ShaderType type, std::string_view code,
-		std::string_view entry_point, const std::vector<asset::EffectMacro>& macros,
+		std::string_view entry_point, const std::vector<asset::ShaderMacro>& macros,
 		std::string_view profile, leo::uint32 flags, string_view SourceName) {
 		std::vector<D3D_SHADER_MACRO> defines;
 		for (auto& macro : macros) {

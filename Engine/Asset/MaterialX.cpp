@@ -8,6 +8,7 @@
 
 using namespace platform;
 using namespace scheme;
+using namespace platform::Render::Shader;
 
 namespace details {
 	class MaterailLoadingDesc : public asset::AssetLoading<asset::MaterailAsset> {
@@ -47,12 +48,12 @@ namespace details {
 			//load textures
 			for (auto& pair : material_desc.material_asset->GetBindValues()) {
 				auto& effect_asset = material_desc.effect_asset;
-				auto param_index = std::find_if(effect_asset->GetParams().begin(), effect_asset->GetParams().end(), [&](const asset::EffectParameterAsset& param) {
+				auto param_index = std::find_if(effect_asset->GetParams().begin(), effect_asset->GetParams().end(), [&](const asset::ShaderParameterAsset& param) {
 					return param.GetNameHash() == pair.first;
 				}) - effect_asset->GetParams().begin();
 
 				auto& param = effect_asset->GetParams()[param_index];
-				if (param.GetType() <= asset::EPT_textureCUBEArray) {
+				if (param.GetType() <=SPT_textureCUBEArray) {
 					auto path = leo::any_cast<std::string>(pair.second.GetContent());
 					platform::AssetResourceScheduler::Instance().SyncLoad<dds::DDSLoadingDesc>(path);
 					co_yield nullptr;
@@ -174,7 +175,7 @@ namespace details {
 				}
 			}
 			else {
-				param_index = std::find_if(effect_asset->GetParams().begin(), effect_asset->GetParams().end(), [&](const asset::EffectParameterAsset& param) {
+				param_index = std::find_if(effect_asset->GetParams().begin(), effect_asset->GetParams().end(), [&](const asset::ShaderParameterAsset& param) {
 					return param.GetName() == name;
 				}) - effect_asset->GetParams().begin();
 			}

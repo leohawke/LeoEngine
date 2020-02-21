@@ -334,7 +334,7 @@ void platform_ex::Windows::D3D12::ShaderCompose::CreateBarriers()
 
 platform_ex::Windows::D3D12::ShaderCompose::parameter_bind_t platform_ex::Windows::D3D12::ShaderCompose::GetBindFunc(ShaderParameterHandle const & p_handle, platform::Render::Effect::Parameter * param)
 {
-	using platform::Render::EffectParamType;
+	using platform::Render::ShaderParamType;
 
 	parameter_bind_t ret;
 	ret.param = param;
@@ -343,37 +343,37 @@ platform_ex::Windows::D3D12::ShaderCompose::parameter_bind_t platform_ex::Window
 
 	switch (param->GetType())
 	{
-	case EffectParamType::EPT_texture1D:
-	case EffectParamType::EPT_texture2D:
-	case EffectParamType::EPT_texture3D:
-	case EffectParamType::EPT_textureCUBE:
-	case EffectParamType::EPT_texture1DArray:
-	case EffectParamType::EPT_texture2DArray:
-	case EffectParamType::EPT_texture3DArray:
-	case EffectParamType::EPT_textureCUBEArray:
+	case ShaderParamType::SPT_texture1D:
+	case ShaderParamType::SPT_texture2D:
+	case ShaderParamType::SPT_texture3D:
+	case ShaderParamType::SPT_textureCUBE:
+	case ShaderParamType::SPT_texture1DArray:
+	case ShaderParamType::SPT_texture2DArray:
+	case ShaderParamType::SPT_texture3DArray:
+	case ShaderParamType::SPT_textureCUBEArray:
 		ret.func = ::SetTextureSRV(SrvSrcs[p_handle.shader_type][p_handle.offset], Srvs[p_handle.shader_type][p_handle.offset], param);
 		break;
 
-	case EffectParamType::EPT_buffer:
-	case EffectParamType::EPT_StructuredBuffer:
-	case EffectParamType::EPT_ConsumeStructuredBuffer:
-	case EffectParamType::EPT_AppendStructuredBuffer:
-	case EffectParamType::EPT_byteAddressBuffer:
+	case ShaderParamType::SPT_buffer:
+	case ShaderParamType::SPT_StructuredBuffer:
+	case ShaderParamType::SPT_ConsumeStructuredBuffer:
+	case ShaderParamType::SPT_AppendStructuredBuffer:
+	case ShaderParamType::SPT_byteAddressBuffer:
 		ret.func = ::SetBufferSRV(SrvSrcs[p_handle.shader_type][p_handle.offset], Srvs[p_handle.shader_type][p_handle.offset], param);
 		break;
 
 
-	case EffectParamType::EPT_rwtexture1D:
-	case EffectParamType::EPT_rwtexture2D:
-	case EffectParamType::EPT_rwtexture3D:
-	case EffectParamType::EPT_rwtexture1DArray:
-	case EffectParamType::EPT_rwtexture2DArray:
+	case ShaderParamType::SPT_rwtexture1D:
+	case ShaderParamType::SPT_rwtexture2D:
+	case ShaderParamType::SPT_rwtexture3D:
+	case ShaderParamType::SPT_rwtexture1DArray:
+	case ShaderParamType::SPT_rwtexture2DArray:
 		ret.func = ::SetTextureUAV(UavSrcs[p_handle.shader_type][p_handle.offset], Uavs[p_handle.shader_type][p_handle.offset], param);
 		break;
 
-	case EffectParamType::EPT_rwbuffer:
-	case EffectParamType::EPT_rwstructured_buffer:
-	case EffectParamType::EPT_rwbyteAddressBuffer:
+	case ShaderParamType::SPT_rwbuffer:
+	case ShaderParamType::SPT_rwstructured_buffer:
+	case ShaderParamType::SPT_rwbyteAddressBuffer:
 		ret.func = ::SetBufferUAV(UavSrcs[p_handle.shader_type][p_handle.offset], Uavs[p_handle.shader_type][p_handle.offset], param);
 		break;
 	}

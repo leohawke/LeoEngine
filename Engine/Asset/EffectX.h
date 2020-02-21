@@ -19,7 +19,7 @@ namespace platform {
 
 		namespace Shader {
 			Render::ShaderBlob CompileToDXBC(Render::ShaderType type, std::string_view Code,
-				std::string_view entry_point,const std::vector<asset::EffectMacro>& macros,
+				std::string_view entry_point,const std::vector<asset::ShaderMacro>& macros,
 				std::string_view profile, leo::uint32 flags,std::string_view SourceName);
 			Render::ShaderInfo* ReflectDXBC(const Render::ShaderBlob& blob, Render::ShaderType type);
 			Render::ShaderBlob StripDXBC(const Render::ShaderBlob& blob, leo::uint32 flags);

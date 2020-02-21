@@ -221,6 +221,9 @@
     <ClCompile Include="Render\D3D12\RayTracingShader.cpp">
       <Filter>Render\D3D12\RayTracing</Filter>
     </ClCompile>
+    <ClCompile Include="Asset\ShaderAsset.cpp">
+      <Filter>Asset</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -497,6 +500,12 @@
     </ClInclude>
     <ClInclude Include="Core\Hash\CityHash.h">
       <Filter>Core\Hash</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\RayShaderAsset.h">
+      <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\ShaderAsset.h">
+      <Filter>Asset</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

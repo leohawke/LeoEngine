@@ -21,58 +21,6 @@
 
 namespace asset {
 	class EffectAsset;
-
-	enum EffectParamType
-	{
-		EPT_texture1D,
-		EPT_texture2D,
-		EPT_texture3D,
-		EPT_textureCUBE,
-		EPT_texture1DArray,
-		EPT_texture2DArray,
-		EPT_texture3DArray,
-		EPT_textureCUBEArray,
-		EPT_buffer,
-		EPT_StructuredBuffer,
-		EPT_rwbuffer,
-		EPT_rwstructured_buffer,
-		EPT_rwtexture1D,
-		EPT_rwtexture2D,
-		EPT_rwtexture3D,
-		EPT_rwtexture1DArray,
-		EPT_rwtexture2DArray,
-		EPT_AppendStructuredBuffer,
-		EPT_ConsumeStructuredBuffer,
-		EPT_byteAddressBuffer,
-		EPT_rwbyteAddressBuffer,
-		EPT_sampler,
-		EPT_shader,
-		EPT_bool,
-		EPT_string,
-		EPT_uint,
-		EPT_uint2,
-		EPT_uint3,
-		EPT_uint4,
-		EPT_int,
-		EPT_int2,
-		EPT_int3,
-		EPT_int4,
-		EPT_float,
-		EPT_float2,
-		EPT_float2x2,
-		EPT_float2x3,
-		EPT_float2x4,
-		EPT_float3,
-		EPT_float3x2,
-		EPT_float3x3,
-		EPT_float3x4,
-		EPT_float4,
-		EPT_float4x2,
-		EPT_float4x3,
-		EPT_float4x4,
-
-		EPT_ElemEmpty,
-	};
 }
 
 namespace platform {
@@ -80,8 +28,6 @@ namespace platform {
 }
 
 namespace platform::Render {
-	class Texture;
-
 	struct  TextureSubresource
 	{
 		std::shared_ptr<Texture> tex;
@@ -100,15 +46,11 @@ namespace platform::Render {
 		}
 
 
-		TextureSubresource(std::shared_ptr<Texture> const & t, uint32_t fai, uint32_t ni, uint32_t fl, uint32_t nl)
+		TextureSubresource(std::shared_ptr<Texture> const& t, uint32_t fai, uint32_t ni, uint32_t fl, uint32_t nl)
 			: tex(t), first_array_index(fai), num_items(ni), first_level(fl), num_levels(nl)
-
 		{
 		}
 	};
-
-
-	using EffectParamType = asset::EffectParamType;
 
 	class ShaderCompose {
 	public:
@@ -121,47 +63,10 @@ namespace platform::Render {
 
 	};
 
-	struct ShaderInfo {
-		ShaderType Type;
-
-		ShaderInfo(ShaderType t);
-
-		struct ConstantBufferInfo
-		{
-			struct VariableInfo
-			{
-				std::string name;
-				uint32_t start_offset;
-				uint8_t type;
-				uint8_t rows;
-				uint8_t columns;
-				uint16_t elements;
-			};
-			std::vector<VariableInfo> var_desc;
-
-			std::string name;
-			size_t name_hash;
-			uint32_t size = 0;
-		};
-		std::vector<ConstantBufferInfo> ConstantBufferInfos;
-
-		struct BoundResourceInfo
-		{
-			std::string name;
-			uint8_t type;
-			uint8_t dimension;
-			uint16_t bind_point;
-		};
-		std::vector<BoundResourceInfo> BoundResourceInfos;
-
-		ShaderCodeResourceCounts ResourceCounts;
-
-		std::optional<size_t> InputSignature = std::nullopt;
-		std::optional<leo::math::data_storage<uint16,3>> CSBlockSize = std::nullopt;
-	};
 
 	class GraphicsBuffer;
 }
+
 
 namespace platform::Render::Effect {
 	struct NameKey : public leo::noncopyable{
@@ -294,15 +199,15 @@ namespace platform::Render::Effect {
 
 	class Parameter :public NameKey {
 	public:
-		Parameter(const std::string_view& name, EffectParamType type_)
+		Parameter(const std::string_view& name, ShaderParamType type_)
 			:NameKey(name),type(type_)
 		{}
 
-		Parameter(const std::string& name, size_t hash, EffectParamType type_)
+		Parameter(const std::string& name, size_t hash, ShaderParamType type_)
 			:NameKey(name,hash), type(type_)
 		{}
 
-		DefGetter(const lnothrow, EffectParamType,Type,type)
+		DefGetter(const lnothrow, ShaderParamType,Type,type)
 
 		template<typename T>
 		void Value(T& value) {
@@ -322,7 +227,7 @@ namespace platform::Render::Effect {
 	private:
 		Variable var;
 
-		EffectParamType type;
+		ShaderParamType type;
 	};
 
 	class Pass {

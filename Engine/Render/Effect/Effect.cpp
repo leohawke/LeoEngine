@@ -24,36 +24,36 @@ namespace platform::Render {
 namespace platform::Render::Effect {
 	Parameter & Parameter::operator=(const leo::any & val)
 	{
-		static std::unordered_map<EffectParamType, std::function<void(Parameter &, const leo::any &)>> map_fuctors;
+		static std::unordered_map<ShaderParamType, std::function<void(Parameter &, const leo::any &)>> map_fuctors;
 		struct InitBlock final
 		{
 			InitBlock() {
 #define REGISTER_MAP_FUNCTOR(enum_type,value_type) map_fuctors[enum_type] = [](Parameter & paramenter, const leo::any & val) { \
 				paramenter = leo::any_cast<value_type>(val); \
 			}
-				REGISTER_MAP_FUNCTOR(asset::EPT_bool, bool);
-				REGISTER_MAP_FUNCTOR(asset::EPT_string, std::string);
-				REGISTER_MAP_FUNCTOR(asset::EPT_uint, leo::uint32);
-				//REGISTER_MAP_FUNCTOR(asset::EPT_uint2, leo::math::uint2);
-				//REGISTER_MAP_FUNCTOR(asset::EPT_uint3,
-				//REGISTER_MAP_FUNCTOR(asset::EPT_uint4,
-				REGISTER_MAP_FUNCTOR(asset::EPT_int, leo::int32);
-				//REGISTER_MAP_FUNCTOR(asset::EPT_int2,
-				//REGISTER_MAP_FUNCTOR(asset::EPT_int3,
-				//REGISTER_MAP_FUNCTOR(asset::EPT_int4,
-				REGISTER_MAP_FUNCTOR(asset::EPT_float, float);
-				REGISTER_MAP_FUNCTOR(asset::EPT_float2, leo::math::float2);
-				//REGISTER_MAP_FUNCTOR(asset::EPT_float2x2
-				//REGISTER_MAP_FUNCTOR(asset::EPT_float2x3
-				//REGISTER_MAP_FUNCTOR(asset::EPT_float2x4
-				REGISTER_MAP_FUNCTOR(asset::EPT_float3, leo::math::float3);
-				//REGISTER_MAP_FUNCTOR(asset::EPT_float3x2
-				REGISTER_MAP_FUNCTOR(asset::EPT_float3x3, leo::math::float3x3);
-				//REGISTER_MAP_FUNCTOR(asset::EPT_float3x4
-				REGISTER_MAP_FUNCTOR(asset::EPT_float4, leo::math::float4);
-				//REGISTER_MAP_FUNCTOR(asset::EPT_float4x2
-				//REGISTER_MAP_FUNCTOR(asset::EPT_float4x3
-				REGISTER_MAP_FUNCTOR(asset::EPT_float4x4, leo::math::float4x4);
+				REGISTER_MAP_FUNCTOR(SPT_bool, bool);
+				REGISTER_MAP_FUNCTOR(SPT_string, std::string);
+				REGISTER_MAP_FUNCTOR(SPT_uint, leo::uint32);
+				//REGISTER_MAP_FUNCTOR(SPT_uint2, leo::math::uint2);
+				//REGISTER_MAP_FUNCTOR(SPT_uint3,
+				//REGISTER_MAP_FUNCTOR(SPT_uint4,
+				REGISTER_MAP_FUNCTOR(SPT_int, leo::int32);
+				//REGISTER_MAP_FUNCTOR(SPT_int2,
+				//REGISTER_MAP_FUNCTOR(SPT_int3,
+				//REGISTER_MAP_FUNCTOR(SPT_int4,
+				REGISTER_MAP_FUNCTOR(SPT_float, float);
+				REGISTER_MAP_FUNCTOR(SPT_float2, leo::math::float2);
+				//REGISTER_MAP_FUNCTOR(SPT_float2x2
+				//REGISTER_MAP_FUNCTOR(SPT_float2x3
+				//REGISTER_MAP_FUNCTOR(SPT_float2x4
+				REGISTER_MAP_FUNCTOR(SPT_float3, leo::math::float3);
+				//REGISTER_MAP_FUNCTOR(SPT_float3x2
+				REGISTER_MAP_FUNCTOR(SPT_float3x3, leo::math::float3x3);
+				//REGISTER_MAP_FUNCTOR(SPT_float3x4
+				REGISTER_MAP_FUNCTOR(SPT_float4, leo::math::float4);
+				//REGISTER_MAP_FUNCTOR(SPT_float4x2
+				//REGISTER_MAP_FUNCTOR(SPT_float4x3
+				REGISTER_MAP_FUNCTOR(SPT_float4x4, leo::math::float4x4);
 #undef  REGISTER_MAP_FUNCTOR
 			}
 		};
@@ -154,7 +154,7 @@ namespace platform::Render::Effect {
 		if (itr != parameters.end())
 			return itr->second;
 		LF_Trace(platform::Descriptions::Warning, "GetParameter Failed:Effect(%s) ctor pseudo paramter(%s) for robust,It's waste memory!", GetName().c_str(), name.data());
-		return parameters.emplace(hash,Parameter(name,EffectParamType::EPT_ElemEmpty)).first->second;
+		return parameters.emplace(hash,Parameter(name,ShaderParamType::SPT_ElemEmpty)).first->second;
 #endif
 		return GetParameter(leo::constfn_hash(name));
 	}
@@ -225,13 +225,13 @@ namespace platform::Render::Effect {
 					auto VariableInfo = pEffectAsset->GetInfo<ShaderInfo::ConstantBufferInfo::VariableInfo>(asset_param.GetName()).value();
 					uint32 stride;
 					if (VariableInfo.elements > 0) {
-						if (asset_param.GetType() == asset::EPT_float4x4)
+						if (asset_param.GetType() == SPT_float4x4)
 							stride = 64;
 						else
 							stride = 16;
 					}
 					else {
-						if (asset_param.GetType() == asset::EPT_float4x4)
+						if (asset_param.GetType() == SPT_float4x4)
 							stride = 16;
 						else
 							stride = 4;
@@ -258,48 +258,48 @@ namespace platform::Render::Effect {
 
 					auto value = 0;
 					switch (asset_param.GetType()) {
-					case asset::EPT_bool:
+					case SPT_bool:
 						value = 1;
 						break;
-					case asset::EPT_uint:
-					case asset::EPT_int:
-					case asset::EPT_float:
+					case SPT_uint:
+					case SPT_int:
+					case SPT_float:
 						value = 4;
 						break;
-					case asset::EPT_uint2:
-					case asset::EPT_int2:
-					case asset::EPT_float2:
+					case SPT_uint2:
+					case SPT_int2:
+					case SPT_float2:
 						value = 8;
 						break;
-					case asset::EPT_uint3:
-					case asset::EPT_int3:
-					case asset::EPT_float3:
+					case SPT_uint3:
+					case SPT_int3:
+					case SPT_float3:
 						value = 12;
 						break;
-					case asset::EPT_uint4:
-					case asset::EPT_int4:
-					case asset::EPT_float2x2:
-					case asset::EPT_float4:
+					case SPT_uint4:
+					case SPT_int4:
+					case SPT_float2x2:
+					case SPT_float4:
 						value = 16;
 						break;
-					case asset::EPT_float2x3:
+					case SPT_float2x3:
 						value = 20;
 						break;
-					case asset::EPT_float2x4:
-					case asset::EPT_float3x2:
+					case SPT_float2x4:
+					case SPT_float3x2:
 						value = 24;
 						break;
-					case asset::EPT_float4x2:
+					case SPT_float4x2:
 						value = 32;
 						break; 
-					case asset::EPT_float3x3:
+					case SPT_float3x3:
 						value = 36;
 						break;
-					case asset::EPT_float3x4:
-					case asset::EPT_float4x3:
+					case SPT_float3x4:
+					case SPT_float4x3:
 						value = 48;
 						break;
-					case asset::EPT_float4x4:
+					case SPT_float4x4:
 						value = 64;
 						break;
 					default:
@@ -309,13 +309,13 @@ namespace platform::Render::Effect {
 						value *= asset_param.GetArraySize();
 					uint32 stride;
 					if (asset_param.GetArraySize() != 0) {
-						if (asset_param.GetType() == asset::EPT_float4x4)
+						if (asset_param.GetType() == SPT_float4x4)
 							stride = 64;
 						else
 							stride = 16;
 					}
 					else {
-						if (asset_param.GetType() == asset::EPT_float4x4)
+						if (asset_param.GetType() == SPT_float4x4)
 							stride = 16;
 						else
 							stride = 4;
