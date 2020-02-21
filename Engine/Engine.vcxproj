@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Asset\CompressionETC.cpp" />
+    <ClCompile Include="Asset\D3DShaderCompiler.cpp" />
     <ClCompile Include="Asset\DDSX.cpp" />
     <ClCompile Include="Asset\EffectAsset.cpp" />
     <ClCompile Include="Asset\EffectX.cpp" />
@@ -98,6 +99,7 @@
   <ItemGroup>
     <ClInclude Include="Asset\CompressionBC.hpp" />
     <ClInclude Include="Asset\CompressionETC.hpp" />
+    <ClInclude Include="Asset\D3DShaderCompiler.h" />
     <ClInclude Include="Asset\DDSX.h" />
     <ClInclude Include="Asset\EffectAsset.h" />
     <ClInclude Include="Asset\EffectX.h" />

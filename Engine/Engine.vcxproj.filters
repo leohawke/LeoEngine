@@ -224,6 +224,9 @@
     <ClCompile Include="Asset\ShaderAsset.cpp">
       <Filter>Asset</Filter>
     </ClCompile>
+    <ClCompile Include="Asset\D3DShaderCompiler.cpp">
+      <Filter>Asset</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -508,6 +511,9 @@
       <Filter>Asset</Filter>
     </ClInclude>
     <ClInclude Include="Asset\ShaderLoadingDesc.h">
+      <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset\D3DShaderCompiler.h">
       <Filter>Asset</Filter>
     </ClInclude>
   </ItemGroup>

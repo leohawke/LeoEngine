@@ -13,6 +13,7 @@
 
 #include "EffectX.h"
 #include "LSLAssetX.h"
+#include "D3DShaderCompiler.h"
 
 #pragma warning(disable:4715) //return value or throw exception;
 using namespace platform::Render::Shader;
@@ -57,11 +58,12 @@ namespace D3DFlags {
 	};
 }
 
+using namespace platform::Render::Shader;
 
 namespace platform {
 	using namespace scheme;
 
-	std::vector<asset::ShaderMacro> AppendCompileMacros(const std::vector<asset::ShaderMacro>& macros, asset::ShaderBlobAsset::Type type);
+	std::vector<ShaderMacro> AppendCompileMacros(const std::vector<ShaderMacro>& macros, asset::ShaderBlobAsset::Type type);
 	std::string_view CompileProfile(asset::ShaderBlobAsset::Type type);
 
 	class EffectLoadingDesc : public asset::AssetLoading<asset::EffectAsset>,public X::ShaderLoadingDesc<asset::EffectAsset> {
@@ -534,8 +536,8 @@ namespace platform {
 
 		void ComposePassShader(const asset::EffectTechniqueAsset&technique, asset::TechniquePassAsset& pass, scheme::TermNode& pass_node) {
 			size_t seed = 0;
-			auto macro_hash = leo::combined_hash<asset::ShaderMacro>();
-			std::vector<asset::ShaderMacro> macros{ GetAsset()->GetMacros() };
+			auto macro_hash = leo::combined_hash<ShaderMacro>();
+			std::vector<ShaderMacro> macros{ GetAsset()->GetMacros() };
 			for (auto & macro_pair : technique.GetMacros()) {
 				leo::hash_combine(seed, macro_hash(macro_pair));
 				macros.emplace_back(macro_pair);
@@ -582,7 +584,7 @@ namespace platform {
 
 
 					LFL_DEBUG_DECL_TIMER(ComposePassShader,sfmt("CompilerReflectStrip Type:%s ", first.c_str()))
-					auto blob = X::Shader::CompileToDXBC(compile_type, GetCode(), compile_entry_point, AppendCompileMacros(macros, compile_type), profile,
+					auto blob = asset::X::Shader::Compile(compile_type, GetCode(), compile_entry_point, AppendCompileMacros(macros, compile_type), profile,
 						D3DFlags::D3DCOMPILE_ENABLE_STRICTNESS |
 #ifndef NDEBUG
 						D3DFlags::D3DCOMPILE_DEBUG
@@ -591,8 +593,8 @@ namespace platform {
 #endif
 						, path
 					);
-					auto pInfo = leo::unique_raw(X::Shader::ReflectDXBC(blob, compile_type));
-					blob.swap(X::Shader::StripDXBC(blob, D3DFlags::D3DCOMPILER_STRIP_DEBUG_INFO
+					auto pInfo = leo::unique_raw(asset::X::Shader::Reflect(blob, compile_type));
+					blob.swap(asset::X::Shader::DXBC::StripDXBC(blob, D3DFlags::D3DCOMPILER_STRIP_DEBUG_INFO
 						| D3DFlags::D3DCOMPILER_STRIP_PRIVATE_DATA));
 
 					GetAsset()->EmplaceBlob(blob_hash, asset::ShaderBlobAsset(compile_type, std::move(blob),pInfo.release()));
@@ -614,7 +616,7 @@ namespace platform {
 }
 
 namespace platform {
-	std::vector<asset::ShaderMacro> AppendCompileMacros(const std::vector<asset::ShaderMacro>& macros, asset::ShaderBlobAsset::Type type)
+	std::vector<ShaderMacro> AppendCompileMacros(const std::vector<ShaderMacro>& macros, asset::ShaderBlobAsset::Type type)
 	{
 		using namespace  platform::Render;
 
@@ -650,6 +652,11 @@ namespace platform {
 				return "vs_5_0";
 			case ShaderType::PixelShader:
 				return "ps_5_0";
+			case ShaderType::RayGen:
+			case ShaderType::RayMiss:
+			case ShaderType::RayHitGroup:
+			case ShaderType::RayCallable:
+				return "lib_6_3";
 			}
 		}
 		return "";
@@ -657,68 +664,4 @@ namespace platform {
 }
 
 
-#include <LFramework/LCLib/Platform.h>
 
-#ifdef LFL_Win32
-
-namespace platform_ex::Windows::D3D12 {
-	platform::Render::ShaderInfo * ReflectDXBC(const platform::Render::ShaderBlob & blob, platform::Render::ShaderType type);
-}
-
-#include <UniversalDXSDK/d3dcompiler.h>
-namespace platform::X::Shader {
-	Render::ShaderBlob CompileToDXBC(Render::ShaderType type, std::string_view code,
-		std::string_view entry_point, const std::vector<asset::ShaderMacro>& macros,
-		std::string_view profile, leo::uint32 flags, string_view SourceName) {
-		std::vector<D3D_SHADER_MACRO> defines;
-		for (auto& macro : macros) {
-			D3D_SHADER_MACRO define;
-			define.Name = macro.first.c_str();
-			define.Definition = macro.second.c_str();
-			defines.emplace_back(define);
-		}
-		D3D_SHADER_MACRO define_end = { nullptr, nullptr };
-		defines.push_back(define_end);
-
-		platform_ex::COMPtr<ID3DBlob> code_blob;
-		platform_ex::COMPtr<ID3DBlob> error_blob;
-
-		auto hr = D3DCompile(code.data(), code.size(), SourceName.data(), defines.data(), nullptr, entry_point.data(), profile.data(), flags, 0, &code_blob, &error_blob);
-		if (code_blob) {
-			Render::ShaderBlob blob;
-			blob.first = std::make_unique<stdex::byte[]>(code_blob->GetBufferSize());
-			blob.second = code_blob->GetBufferSize();
-			std::memcpy(blob.first.get(), code_blob->GetBufferPointer(), blob.second);
-			return std::move(blob);
-		}
-		//TODO error_blob
-		auto error = reinterpret_cast<char*>(error_blob->GetBufferPointer());
-		LE_LogError(error);
-		platform_ex::CheckHResult(hr);
-	}
-
-	Render::ShaderInfo * ReflectDXBC(const Render::ShaderBlob & blob, Render::ShaderType type)
-	{
-		using namespace Render;
-		auto caps = Context::Instance().GetDevice().GetCaps();
-		switch (caps.type) {
-		case Caps::Type::D3D12:
-			return platform_ex::Windows::D3D12::ReflectDXBC(blob, type);
-		}
-	}
-	
-	Render::ShaderBlob StripDXBC(const Render::ShaderBlob& code_blob, leo::uint32 flags) {
-		platform_ex::COMPtr<ID3DBlob> stripped_blob;
-		platform_ex::CheckHResult(D3DStripShader(code_blob.first.get(), code_blob.second, flags, &stripped_blob));
-		Render::ShaderBlob blob;
-		blob.first = std::make_unique<stdex::byte[]>(stripped_blob->GetBufferSize());
-		blob.second = stripped_blob->GetBufferSize();
-		std::memcpy(blob.first.get(), stripped_blob->GetBufferPointer(), blob.second);
-		return std::move(blob);
-	}
-}
-
-#else
-//TODO CryEngine HLSLCross Compiler?
-//Other Target Platfom Compiler [Tool...]
-#endif

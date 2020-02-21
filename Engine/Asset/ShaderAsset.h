@@ -15,6 +15,7 @@
 namespace asset
 {
 	using platform::Render::ShaderParamType;
+	using platform::Render::ShaderMacro;
 
 	class AssetName {
 	public:
@@ -88,7 +89,6 @@ namespace asset
 		std::unique_ptr<platform::Render::ShaderInfo> pInfo;
 	};
 
-	using ShaderMacro = std::pair<std::string, std::string>;
 
 
 	class ShadersAsset
