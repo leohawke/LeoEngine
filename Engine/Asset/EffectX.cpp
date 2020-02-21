@@ -1,21 +1,18 @@
+#include "LFramework/Win32/LCLib/COM.h"
+#include "LFramework/Helper/ShellHelper.h"
 #include<LBase/typeinfo.h>
+
+#include "ShaderLoadingDesc.h"
 #include <LBase/id.hpp>
 
 #include <LScheme/LScheme.h>
 
-#include "LFramework/Win32/LCLib/COM.h"
-#include "LFramework/Helper/ShellHelper.h"
 
 #include "../Render/IContext.h"
 #include "../Core/AssetResourceScheduler.h"
 
 #include "EffectX.h"
 #include "LSLAssetX.h"
-
-#include <memory>
-#include <fstream>
-#include <iterator>
-
 
 #pragma warning(disable:4715) //return value or throw exception;
 using namespace platform::Render::Shader;
@@ -67,21 +64,13 @@ namespace platform {
 	std::vector<asset::ShaderMacro> AppendCompileMacros(const std::vector<asset::ShaderMacro>& macros, asset::ShaderBlobAsset::Type type);
 	std::string_view CompileProfile(asset::ShaderBlobAsset::Type type);
 
-	class EffectLoadingDesc : public asset::AssetLoading<asset::EffectAsset> {
+	class EffectLoadingDesc : public asset::AssetLoading<asset::EffectAsset>,public X::ShaderLoadingDesc<asset::EffectAsset> {
 	private:
-		struct EffectDesc {
-			X::path effect_path;
-			struct Data {
-				scheme::TermNode effect_node;
-			};
-			std::shared_ptr<Data> data;
-			std::shared_ptr<AssetType> effect_asset;
-			std::string effect_code;
-		} effect_desc;
+		using Super = X::ShaderLoadingDesc<asset::EffectAsset>;
 	public:
 		explicit EffectLoadingDesc(X::path const & effectpath)
+			:Super(effectpath)
 		{
-			effect_desc.effect_path = effectpath;
 		}
 
 		std::size_t Type() const override {
@@ -89,11 +78,11 @@ namespace platform {
 		}
 
 		std::size_t Hash() const override {
-			return leo::hash_combine_seq(Type(), effect_desc.effect_path.wstring());
+			return leo::hash_combine_seq(Type(),Super::Hash());
 		}
 
 		const asset::path& Path() const override {
-			return effect_desc.effect_path;
+			return Super::Path();
 		}
 
 		std::experimental::generator<std::shared_ptr<AssetType>> Coroutine() override {
@@ -105,204 +94,27 @@ namespace platform {
 	private:
 		std::shared_ptr<AssetType> PreCreate()
 		{
-			effect_desc.data = std::make_shared<EffectDesc::Data>();
-			effect_desc.effect_asset = std::make_shared<AssetType>();
-			effect_desc.effect_asset->SetName(effect_desc.effect_path.string());
+			Super::PreCreate();
 			return nullptr;
 		}
 
 		std::shared_ptr<AssetType> LoadNode()
 		{
-			effect_desc.data->effect_node = *LoadNode(effect_desc.effect_path).begin();
-
+			Super::LoadNode();
 			return  nullptr;
 		}
 
 		std::shared_ptr<AssetType> ParseNode()
 		{
-			auto& effect_node = effect_desc.data->effect_node;
-			LAssert(leo::Access<std::string>(*effect_node.begin()) == "effect", R"(Invalid Format:Not Begin With "effect")");
-
-
-			std::vector<std::pair<std::string, scheme::TermNode>> refers;
-			RecursiveReferNode(effect_node, refers);
-
-			auto new_node = leo::MakeNode(MakeIndex(0));
-
-			for (auto& pair : refers) {
-				for (auto & node : pair.second) {
-					new_node.try_emplace(leo::MakeIndex(new_node), std::make_pair(node.begin(), node.end()), leo::MakeIndex(new_node));
-				}
-			}
-
-			for (auto & node : effect_node)
-				new_node.try_emplace(leo::MakeIndex(new_node), std::make_pair(node.begin(), node.end()), leo::MakeIndex(new_node));
-
-			effect_node = new_node;
-
-			auto hash = [](auto param) {
-				return std::hash<decltype(param)>()(param);
-			};
-
-			ParseMacro(effect_desc.effect_asset->GetMacrosRef(), effect_node, false);
-			{
-				auto cbuffer_nodes = X::SelectNodes("cbuffer", effect_node);
-				for (auto & cbuffer_node : cbuffer_nodes) {
-					asset::ShaderConstantBufferAsset cbuffer;
-					cbuffer.SetName(AccessLastNoChild<std::string>(cbuffer_node));
-					auto param_nodes = cbuffer_node.SelectChildren([&](const scheme::TermNode& child) {
-						if (child.empty())
-							return false;
-						try {
-							return  AssetType::GetType(leo::Access<std::string>(*child.begin())) != SPT_shader;
-						}
-						catch (leo::unsupported&) {
-							return false;
-						}
-					});
-					std::vector<leo::uint32> ParamIndices;
-					for (auto & param_node : param_nodes) {
-						auto param_index = ParseParam(param_node,true);
-						ParamIndices.emplace_back(static_cast<leo::uint32>(param_index));
-					}
-					cbuffer.GetParamIndicesRef() = std::move(ParamIndices);
-					effect_desc.effect_asset->EmplaceShaderGenInfo(AssetType::CBUFFER, effect_desc.effect_asset->GetCBuffersRef().size(), std::stoul(cbuffer_node.GetName()));
-					effect_desc.effect_asset->GetCBuffersRef().emplace_back(std::move(cbuffer));
-				}
-			}
-			//parser params
-			{
-				auto param_nodes = effect_node.SelectChildren([&](const scheme::TermNode& child) {
-					if (child.empty())
-						return false;
-					try {
-						return  AssetType::GetType(leo::Access<std::string>(*child.begin())) !=SPT_shader;
-					}
-					catch (leo::unsupported&) {
-						return false;
-					}
-				});
-				for (auto & param_node : param_nodes)
-					ParseParam(param_node,false);
-			}
-			{
-				auto fragments = X::SelectNodes("shader", effect_node);
-				for (auto& fragment : fragments) {
-					effect_desc.effect_asset->EmplaceShaderGenInfo(AssetType::FRAGMENT, effect_desc.effect_asset->GetFragmentsRef().size(), std::stoul(fragment.GetName()));
-					effect_desc.effect_asset->GetFragmentsRef().emplace_back();
-					effect_desc.effect_asset->GetFragmentsRef().back().
-						GetFragmentRef() = scheme::Deliteralize(
-							leo::Access<std::string>(*fragment.rbegin())
-						);
-				}
-			}
-			//TODO:collect material info recrate shader info in material module
-			//Note:the code gen order is immutable
-			effect_desc.effect_asset->PrepareShaderGen();
-			effect_desc.effect_code = effect_desc.effect_asset->GenHLSLShader();
-			ParseTechnique(effect_node);
+			Super::ParseNode();
+			ParseTechnique(GetNode());
 
 			return nullptr;
 		}
 
 		std::shared_ptr<AssetType> CreateAsset()
 		{
-			return effect_desc.effect_asset;
-		}
-
-		template<typename path_type>
-		scheme::TermNode LoadNode(const path_type& path) {
-			std::ifstream fin(path);
-
-			if (!fin.is_open())
-				throw;
-
-			fin >> std::noskipws;
-			using sb_it_t = std::istream_iterator<char>;
-
-			scheme::Session session(sb_it_t(fin), sb_it_t{});
-
-			try {
-				return SContext::Analyze(std::move(session));
-			}
-
-			CatchExpr(..., leo::rethrow_badstate(fin, std::ios_base::failbit))
-		}
-
-		void RecursiveReferNode(const ValueNode& effct_node, std::vector<std::pair<std::string, scheme::TermNode>>& includes) {
-			auto refer_nodes = effct_node.SelectChildren([&](const scheme::TermNode& child) {
-				if (child.size()) {
-					return leo::Access<std::string>(*child.begin()) == "refer";
-				}
-				return false;
-			});
-			for (auto & refer_node : refer_nodes) {
-				auto path = leo::Access<std::string>(*refer_node.rbegin());
-
-				auto include_node = *LoadNode(path).begin();
-				RecursiveReferNode(include_node, includes);
-
-				if (std::find_if(includes.begin(), includes.end(), [&path](const std::pair<std::string, scheme::TermNode>& pair)
-				{
-					return pair.first == path;
-				}
-				) == includes.end())
-				{
-					includes.emplace_back(path, include_node);
-				}
-			}
-		}
-
-		template<typename _type,typename _func>
-		const _type& ReverseAccess(_func f, const scheme::TermNode& node) {
-			auto it = std::find_if(node.rbegin(), node.rend(),f);
-			return leo::Access<_type>(*it);
-		}
-
-		template<typename _type>
-		const _type& AccessLastNoChild(const scheme::TermNode& node) {
-			return ReverseAccess<_type>([&](const scheme::TermNode& child) {return child.empty(); }, node);
-		}
-
-		//根据name判断 取尾部
-		std::string Access(const char* name, const scheme::TermNode& node) {
-			auto it = std::find_if(node.begin(), node.end(), [&](const scheme::TermNode& child) {
-				if (!child.empty())
-					return leo::Access<std::string>(*child.begin()) == name;
-				return false;
-			});
-			return leo::Access<std::string>(*(it->rbegin()));
-		}
-
-		leo::observer_ptr<const string> AccessPtr(const char* name, const scheme::TermNode& node) {
-			auto it = std::find_if(node.begin(), node.end(), [&](const scheme::TermNode& child) {
-				if (!child.empty())
-					return leo::Access<std::string>(*child.begin()) == name;
-				return false;
-			});
-			if (it != node.end())
-				return leo::AccessPtr<std::string>(*(it->rbegin()));
-			else
-				return nullptr;
-		};
-
-		void ParseMacro(std::vector<asset::ShaderMacro>& macros, const scheme::TermNode& node,bool topmacro)
-		{
-			//macro (macro (name foo) (value bar))
-			auto macro_nodes = X::SelectNodes("macro", node);
-			for (auto & macro_node : macro_nodes) {
-				if (!topmacro) {
-					effect_desc.effect_asset->EmplaceShaderGenInfo(AssetType::MACRO, macros.size(), std::stoul(macro_node.GetName()));
-				}
-				else {
-					//当有其他类型使用index 0时，宏会排在前面
-					effect_desc.effect_asset->EmplaceShaderGenInfo(AssetType::MACRO, macros.size(), 0);
-				}
-				macros.emplace_back(
-					Access("name", macro_node),
-					Access("value", macro_node));
-			}
-			UniqueMacro(macros);
+			return ReturnValue();
 		}
 
 		void ParseTechnique(const scheme::TermNode& effect_node)
@@ -313,7 +125,7 @@ namespace platform {
 				technique.SetName(Access("name", technique_node));
 				auto inherit = AccessPtr("inherit", technique_node);
 				if (inherit) {
-					auto exist_techniques = effect_desc.effect_asset->GetTechniques();
+					auto exist_techniques = GetAsset()->GetTechniques();
 					auto inherit_technique = std::find_if(exist_techniques.begin(), exist_techniques.end(), [&inherit](const asset::EffectTechniqueAsset& exist)
 					{
 						return exist.GetName() == *inherit;
@@ -369,7 +181,7 @@ namespace platform {
 					ParsePassState(*pass_ptr, pass_node);
 					ComposePassShader(technique, *pass_ptr, pass_node);
 				}
-				effect_desc.effect_asset->GetTechniquesRef().emplace_back(std::move(technique));
+				GetAsset()->GetTechniquesRef().emplace_back(std::move(technique));
 			}
 		}
 
@@ -723,7 +535,7 @@ namespace platform {
 		void ComposePassShader(const asset::EffectTechniqueAsset&technique, asset::TechniquePassAsset& pass, scheme::TermNode& pass_node) {
 			size_t seed = 0;
 			auto macro_hash = leo::combined_hash<asset::ShaderMacro>();
-			std::vector<asset::ShaderMacro> macros{ effect_desc.effect_asset->GetMacros() };
+			std::vector<asset::ShaderMacro> macros{ GetAsset()->GetMacros() };
 			for (auto & macro_pair : technique.GetMacros()) {
 				leo::hash_combine(seed, macro_hash(macro_pair));
 				macros.emplace_back(macro_pair);
@@ -759,18 +571,18 @@ namespace platform {
 					string_view profile = CompileProfile(compile_type);
 					using namespace leo;
 
-					auto path = effect_desc.effect_path.string();
+					auto path = Path().string();
 #ifndef NDEBUG
 					path += ".hlsl";
 					{
 						std::ofstream fout(path);
-						fout << effect_desc.effect_code;
+						fout << GetCode();
 					}
 #endif
 
 
 					LFL_DEBUG_DECL_TIMER(ComposePassShader,sfmt("CompilerReflectStrip Type:%s ", first.c_str()))
-					auto blob = X::Shader::CompileToDXBC(compile_type, effect_desc.effect_code, compile_entry_point, AppendCompileMacros(macros, compile_type), profile,
+					auto blob = X::Shader::CompileToDXBC(compile_type, GetCode(), compile_entry_point, AppendCompileMacros(macros, compile_type), profile,
 						D3DFlags::D3DCOMPILE_ENABLE_STRICTNESS |
 #ifndef NDEBUG
 						D3DFlags::D3DCOMPILE_DEBUG
@@ -783,103 +595,11 @@ namespace platform {
 					blob.swap(X::Shader::StripDXBC(blob, D3DFlags::D3DCOMPILER_STRIP_DEBUG_INFO
 						| D3DFlags::D3DCOMPILER_STRIP_PRIVATE_DATA));
 
-					effect_desc.effect_asset->EmplaceBlob(blob_hash, asset::ShaderBlobAsset(compile_type, std::move(blob),pInfo.release()));
+					GetAsset()->EmplaceBlob(blob_hash, asset::ShaderBlobAsset(compile_type, std::move(blob),pInfo.release()));
 					pass.AssignOrInsertHash(compile_type, blob_hash);
 				}
 				CatchIgnore(leo::bad_any_cast &)
 			}
-		}
-
-		void UniqueMacro(std::vector<asset::ShaderMacro>& macros)
-		{
-			//TODO! remap shader gen info
-			//宏的覆盖原则 删除前面已定义的宏
-			auto iter = macros.begin();
-			while (iter != macros.end()) {
-				auto exist = std::find_if(iter + 1, macros.end(), [&iter](const asset::ShaderMacro& tail)
-				{
-					return iter->first == tail.first;
-				}
-				);
-				if (exist != macros.end())
-					iter = macros.erase(iter);
-				else
-					++iter;
-			}
-		}
-
-		size_t ParseParam(const scheme::TermNode& param_node,bool cbuffer_param) {
-			asset::ShaderParameterAsset param;
-			param.SetName(AccessLastNoChild<std::string>(param_node));
-			//don't need check type again
-			param.GetTypeRef() = AssetType::GetType(leo::Access<std::string>(*param_node.begin()));
-			if (param.GetType() >= SPT_bool) {
-				if (auto p = leo::AccessChildPtr<std::string>(param_node, "arraysize"))
-					param.GetArraySizeRef() = std::stoul(*p);
-			}
-			else if (param.GetType() <= SPT_ConsumeStructuredBuffer) {
-				if (auto elemtype = AccessPtr("elemtype", param_node)) {
-					try {
-						param.GetElemInfoRef() = AssetType::GetType(*elemtype);
-					}
-					catch (leo::unsupported&) {
-						param.GetElemInfoRef() = *elemtype;
-					}
-				}
-			}
-			auto index = effect_desc.effect_asset->GetParams().size();
-			auto optional_value = ReadParamValue(param_node,param.GetType());
-			if (optional_value.has_value())
-				effect_desc.effect_asset->BindValue(index, optional_value.value());
-			if(!cbuffer_param)
-				effect_desc.effect_asset->EmplaceShaderGenInfo(AssetType::PARAM, index, std::stoul(param_node.GetName()));
-			effect_desc.effect_asset->GetParamsRef().emplace_back(std::move(param));
-			return index;
-		}
-
-		static leo::math::float4 to_float4 (const std::string& value) {
-			leo::math::float4 result;
-			auto iter = result.begin();
-			leo::split(value.begin(), value.end(),
-				[](char c) {return c == ','; },
-				[&](decltype(value.begin()) b, decltype(value.end()) e) {
-				auto v = std::string(b, e);
-				*iter = std::stof(v);
-				++iter;
-			}
-			);
-			return result;
-		};
-
-		static leo::uint8 to_uint8(const std::string& value) {
-			return static_cast<leo::uint8>(std::stoul(value));
-		};
-		
-		std::optional<leo::any> ReadParamValue(const scheme::TermNode& param_node,asset::ShaderParamType type) {
-#define AccessParam(name,expr) if (auto value = AccessPtr(name, param_node)) expr
-			using namespace Render;
-			if (type == SPT_sampler) {
-				SamplerDesc sampler;
-				AccessParam("border_clr", sampler.border_clr = M::Color(to_float4(*value).data));
-
-				AccessParam("address_mode_u",sampler.address_mode_u = SamplerDesc::to_mode(*value));
-				AccessParam("address_mode_v", sampler.address_mode_v = SamplerDesc::to_mode(*value));
-				AccessParam("address_mode_w", sampler.address_mode_w = SamplerDesc::to_mode(*value));
-
-				AccessParam("filtering", sampler.filtering = SamplerDesc::to_op<TexFilterOp>(*value));
-
-				AccessParam("max_anisotropy", sampler.max_anisotropy = to_uint8(*value));
-
-				AccessParam("min_lod", sampler.min_lod = std::stof(*value));
-				AccessParam("max_lod", sampler.max_lod = std::stof(*value));
-				AccessParam("mip_map_lod_bias", sampler.mip_map_lod_bias = std::stof(*value));
-
-				AccessParam("cmp_func", sampler.cmp_func = SamplerDesc::to_op<CompareOp>(*value));
-
-				return leo::any(sampler);
-			}
-#undef AccessParam
-			return std::nullopt;
 		}
 	};
 

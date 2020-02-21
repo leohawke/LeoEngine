@@ -109,6 +109,7 @@
     <ClInclude Include="Asset\MeshX.h" />
     <ClInclude Include="Asset\RayShaderAsset.h" />
     <ClInclude Include="Asset\ShaderAsset.h" />
+    <ClInclude Include="Asset\ShaderLoadingDesc.h" />
     <ClInclude Include="Asset\TexCompression.hpp" />
     <ClInclude Include="Asset\TextureX.h" />
     <ClInclude Include="Core\AssetResourceScheduler.h" />

@@ -507,6 +507,9 @@
     <ClInclude Include="Asset\ShaderAsset.h">
       <Filter>Asset</Filter>
     </ClInclude>
+    <ClInclude Include="Asset\ShaderLoadingDesc.h">
+      <Filter>Asset</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
