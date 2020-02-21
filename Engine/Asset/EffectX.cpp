@@ -17,54 +17,10 @@
 
 #pragma warning(disable:4715) //return value or throw exception;
 using namespace platform::Render::Shader;
-
-namespace D3DFlags {
-	enum COMPILER_FLAGS
-	{
-		D3DCOMPILE_DEBUG = (1 << 0),
-		D3DCOMPILE_SKIP_VALIDATION = (1 << 1),
-		D3DCOMPILE_SKIP_OPTIMIZATION = (1 << 2),
-		D3DCOMPILE_PACK_MATRIX_ROW_MAJOR = (1 << 3),
-		D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR = (1 << 4),
-		D3DCOMPILE_PARTIAL_PRECISION = (1 << 5),
-		D3DCOMPILE_FORCE_VS_SOFTWARE_NO_OPT = (1 << 6),
-		D3DCOMPILE_FORCE_PS_SOFTWARE_NO_OPT = (1 << 7),
-		D3DCOMPILE_NO_PRESHADER = (1 << 8),
-		D3DCOMPILE_AVOID_FLOW_CONTROL = (1 << 9),
-		D3DCOMPILE_PREFER_FLOW_CONTROL = (1 << 10),
-		D3DCOMPILE_ENABLE_STRICTNESS = (1 << 11),
-		D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY = (1 << 12),
-		D3DCOMPILE_IEEE_STRICTNESS = (1 << 13),
-		D3DCOMPILE_OPTIMIZATION_LEVEL0 = (1 << 14),
-		D3DCOMPILE_OPTIMIZATION_LEVEL1 = 0,
-		D3DCOMPILE_OPTIMIZATION_LEVEL2 = ((1 << 14) | (1 << 15)),
-		D3DCOMPILE_OPTIMIZATION_LEVEL3 = (1 << 15),
-		D3DCOMPILE_RESERVED16 = (1 << 16),
-		D3DCOMPILE_RESERVED17 = (1 << 17),
-		D3DCOMPILE_WARNINGS_ARE_ERRORS = (1 << 18),
-		D3DCOMPILE_RESOURCES_MAY_ALIAS = (1 << 19),
-		D3DCOMPILE_ENABLE_UNBOUNDED_DESCRIPTOR_TABLES = (1 << 20),
-		D3DCOMPILE_ALL_RESOURCES_BOUND = (1 << 21),
-	};
-
-	enum COMPILER_STRIP_FLAGS
-	{
-		D3DCOMPILER_STRIP_REFLECTION_DATA = 0x00000001,
-		D3DCOMPILER_STRIP_DEBUG_INFO = 0x00000002,
-		D3DCOMPILER_STRIP_TEST_BLOBS = 0x00000004,
-		D3DCOMPILER_STRIP_PRIVATE_DATA = 0x00000008,
-		D3DCOMPILER_STRIP_ROOT_SIGNATURE = 0x00000010,
-		D3DCOMPILER_STRIP_FORCE_DWORD = 0x7fffffff,
-	};
-}
-
-using namespace platform::Render::Shader;
+using namespace asset::X::Shader;
 
 namespace platform {
 	using namespace scheme;
-
-	std::vector<ShaderMacro> AppendCompileMacros(const std::vector<ShaderMacro>& macros, asset::ShaderBlobAsset::Type type);
-	std::string_view CompileProfile(asset::ShaderBlobAsset::Type type);
 
 	class EffectLoadingDesc : public asset::AssetLoading<asset::EffectAsset>,public X::ShaderLoadingDesc<asset::EffectAsset> {
 	private:
@@ -584,7 +540,7 @@ namespace platform {
 
 
 					LFL_DEBUG_DECL_TIMER(ComposePassShader,sfmt("CompilerReflectStrip Type:%s ", first.c_str()))
-					auto blob = asset::X::Shader::Compile(compile_type, GetCode(), compile_entry_point, AppendCompileMacros(macros, compile_type), profile,
+					auto blob = Compile(compile_type, GetCode(), compile_entry_point, AppendCompileMacros(macros, compile_type), profile,
 						D3DFlags::D3DCOMPILE_ENABLE_STRICTNESS |
 #ifndef NDEBUG
 						D3DFlags::D3DCOMPILE_DEBUG
@@ -593,8 +549,8 @@ namespace platform {
 #endif
 						, path
 					);
-					auto pInfo = leo::unique_raw(asset::X::Shader::Reflect(blob, compile_type));
-					blob.swap(asset::X::Shader::DXBC::StripDXBC(blob, D3DFlags::D3DCOMPILER_STRIP_DEBUG_INFO
+					auto pInfo = leo::unique_raw(Reflect(blob, compile_type));
+					blob.swap(Strip(blob, compile_type, D3DFlags::D3DCOMPILER_STRIP_DEBUG_INFO
 						| D3DFlags::D3DCOMPILER_STRIP_PRIVATE_DATA));
 
 					GetAsset()->EmplaceBlob(blob_hash, asset::ShaderBlobAsset(compile_type, std::move(blob),pInfo.release()));
@@ -615,53 +571,6 @@ namespace platform {
 	}
 }
 
-namespace platform {
-	std::vector<ShaderMacro> AppendCompileMacros(const std::vector<ShaderMacro>& macros, asset::ShaderBlobAsset::Type type)
-	{
-		using namespace  platform::Render;
-
-		auto append_macros = macros;
-		auto caps = Context::Instance().GetDevice().GetCaps();
-		switch (caps.type) {
-		case Caps::Type::D3D12:
-			append_macros.emplace_back("D3D12", "1");
-			//TODO depend feature_level
-			append_macros.emplace_back("SM_VERSION", "50");
-			break;
-		}
-		switch (type) {
-		case ShaderType::VertexShader:
-			append_macros.emplace_back("VS", "1");
-			break;
-		case ShaderType::PixelShader:
-			append_macros.emplace_back("PS", "1");
-			break;
-		}
-		return append_macros;
-	}
-
-	std::string_view CompileProfile(asset::ShaderBlobAsset::Type type)
-	{
-		using namespace  platform::Render;
-
-		auto caps = Context::Instance().GetDevice().GetCaps();
-		switch (caps.type) {
-		case Caps::Type::D3D12:
-			switch (type) {
-			case ShaderType::VertexShader:
-				return "vs_5_0";
-			case ShaderType::PixelShader:
-				return "ps_5_0";
-			case ShaderType::RayGen:
-			case ShaderType::RayMiss:
-			case ShaderType::RayHitGroup:
-			case ShaderType::RayCallable:
-				return "lib_6_3";
-			}
-		}
-		return "";
-	}
-}
 
 
 
