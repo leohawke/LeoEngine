@@ -5,6 +5,8 @@
 #include "../Render/IContext.h"
 #include "../emacro.h"
 
+#include <algorithm>
+
 using namespace platform::Render::Shader;
 using namespace platform_ex;
 using namespace D3DFlags;
@@ -71,7 +73,249 @@ namespace platform_ex::Windows::D3D12 {
 }
 
 #include <UniversalDXSDK/d3dcompiler.h>
+#ifdef LFL_Win64
+#pragma comment(lib,"UniversalDXSDK/Lib/x64/d3dcompiler.lib")
+#else
+#pragma comment(lib,"UniversalDXSDK/Lib/x86/d3dcompiler.lib")
+#endif
 #include <dxc/Support/dxcapi.use.h>
+
+void FillD3D12Reflect(ID3D12ShaderReflection* pReflection, ShaderInfo* pInfo,ShaderType type)
+{
+	D3D12_SHADER_DESC desc;
+	pReflection->GetDesc(&desc);
+
+	for (UINT i = 0; i != desc.ConstantBuffers; ++i) {
+		auto pReflectionConstantBuffer = pReflection->GetConstantBufferByIndex(i);
+
+		D3D12_SHADER_BUFFER_DESC buffer_desc;
+		pReflectionConstantBuffer->GetDesc(&buffer_desc);
+		if ((D3D_CT_CBUFFER == buffer_desc.Type) || (D3D_CT_TBUFFER == buffer_desc.Type)) {
+			ShaderInfo::ConstantBufferInfo  ConstantBufferInfo;
+			ConstantBufferInfo.name = buffer_desc.Name;
+			ConstantBufferInfo.name_hash = leo::constfn_hash(buffer_desc.Name);
+			ConstantBufferInfo.size = buffer_desc.Size;
+
+			for (UINT v = 0; v != buffer_desc.Variables; ++v) {
+				auto pReflectionVar = pReflectionConstantBuffer->GetVariableByIndex(v);
+				D3D12_SHADER_VARIABLE_DESC variable_desc;
+				pReflectionVar->GetDesc(&variable_desc);
+
+				D3D12_SHADER_TYPE_DESC type_desc;
+				pReflectionVar->GetType()->GetDesc(&type_desc);
+
+				ShaderInfo::ConstantBufferInfo::VariableInfo VariableInfo;
+				VariableInfo.name = variable_desc.Name;
+				VariableInfo.start_offset = variable_desc.StartOffset;
+				VariableInfo.type = variable_desc.StartOffset;
+				VariableInfo.rows = variable_desc.StartOffset;
+				VariableInfo.columns = variable_desc.StartOffset;
+				VariableInfo.elements = variable_desc.StartOffset;
+
+				ConstantBufferInfo.var_desc.emplace_back(std::move(VariableInfo));
+			}
+			pInfo->ConstantBufferInfos.emplace_back(std::move(ConstantBufferInfo));
+		}
+	}
+
+	for (UINT i = 0; i != desc.BoundResources; ++i) {
+		D3D12_SHADER_INPUT_BIND_DESC input_bind_desc;
+		pReflection->GetResourceBindingDesc(i, &input_bind_desc);
+
+		auto BindPoint = static_cast<leo::uint16>(input_bind_desc.BindPoint + 1);
+		switch (input_bind_desc.Type)
+		{
+		case D3D_SIT_SAMPLER:
+			pInfo->ResourceCounts.NumSamplers = std::max(pInfo->ResourceCounts.NumSamplers, BindPoint);
+			break;
+
+		case D3D_SIT_TEXTURE:
+		case D3D_SIT_STRUCTURED:
+		case D3D_SIT_BYTEADDRESS:
+			pInfo->ResourceCounts.NumSRVs = std::max(pInfo->ResourceCounts.NumSRVs, BindPoint);
+			break;
+
+		case D3D_SIT_UAV_RWTYPED:
+		case D3D_SIT_UAV_RWSTRUCTURED:
+		case D3D_SIT_UAV_RWBYTEADDRESS:
+		case D3D_SIT_UAV_APPEND_STRUCTURED:
+		case D3D_SIT_UAV_CONSUME_STRUCTURED:
+		case D3D_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
+			pInfo->ResourceCounts.NumUAVs = std::max(pInfo->ResourceCounts.NumUAVs, BindPoint);
+			break;
+
+		default:
+			break;
+		}
+
+		switch (input_bind_desc.Type)
+		{
+		case D3D_SIT_TEXTURE:
+		case D3D_SIT_SAMPLER:
+		case D3D_SIT_STRUCTURED:
+		case D3D_SIT_BYTEADDRESS:
+		case D3D_SIT_UAV_RWTYPED:
+		case D3D_SIT_UAV_RWSTRUCTURED:
+		case D3D_SIT_UAV_RWBYTEADDRESS:
+		case D3D_SIT_UAV_APPEND_STRUCTURED:
+		case D3D_SIT_UAV_CONSUME_STRUCTURED:
+		case D3D_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
+		{
+			ShaderInfo::BoundResourceInfo BoundResourceInfo;
+			BoundResourceInfo.name = input_bind_desc.Name;
+			BoundResourceInfo.type = static_cast<uint8_t>(input_bind_desc.Type);
+			BoundResourceInfo.bind_point = static_cast<uint16_t>(input_bind_desc.BindPoint);
+			pInfo->BoundResourceInfos.emplace_back(std::move(BoundResourceInfo));
+		}
+		break;
+
+		default:
+			break;
+		}
+	}
+
+	if (type == ShaderType::VertexShader) {
+		union {
+			D3D12_SIGNATURE_PARAMETER_DESC signature_desc;
+			stdex::byte signature_data[sizeof(D3D12_SIGNATURE_PARAMETER_DESC)];
+		} s2d;
+
+		size_t signature = 0;
+		for (UINT i = 0; i != desc.InputParameters; ++i) {
+			pReflection->GetInputParameterDesc(i, &s2d.signature_desc);
+			auto seed = leo::hash(s2d.signature_data);
+			leo::hash_combine(signature, seed);
+		}
+
+		pInfo->InputSignature = signature;
+	}
+
+	if (type == ShaderType::ComputeShader) {
+		UINT x, y, z;
+		pReflection->GetThreadGroupSize(&x, &y, &z);
+		pInfo->CSBlockSize = leo::math::data_storage<leo::uint16, 3>(static_cast<leo::uint16>(x),
+			static_cast<leo::uint16>(y), static_cast<leo::uint16>(z));
+	}
+}
+
+void FillD3D11Reflect(ID3D11ShaderReflection* pReflection, ShaderInfo* pInfo, ShaderType type)
+{
+	D3D11_SHADER_DESC desc;
+	pReflection->GetDesc(&desc);
+
+	for (UINT i = 0; i != desc.ConstantBuffers; ++i) {
+		auto pReflectionConstantBuffer = pReflection->GetConstantBufferByIndex(i);
+
+		D3D11_SHADER_BUFFER_DESC buffer_desc;
+		pReflectionConstantBuffer->GetDesc(&buffer_desc);
+		if ((D3D_CT_CBUFFER == buffer_desc.Type) || (D3D_CT_TBUFFER == buffer_desc.Type)) {
+			ShaderInfo::ConstantBufferInfo  ConstantBufferInfo;
+			ConstantBufferInfo.name = buffer_desc.Name;
+			ConstantBufferInfo.name_hash = leo::constfn_hash(buffer_desc.Name);
+			ConstantBufferInfo.size = buffer_desc.Size;
+
+			for (UINT v = 0; v != buffer_desc.Variables; ++v) {
+				auto pReflectionVar = pReflectionConstantBuffer->GetVariableByIndex(v);
+				D3D11_SHADER_VARIABLE_DESC variable_desc;
+				pReflectionVar->GetDesc(&variable_desc);
+
+				D3D11_SHADER_TYPE_DESC type_desc;
+				pReflectionVar->GetType()->GetDesc(&type_desc);
+
+				ShaderInfo::ConstantBufferInfo::VariableInfo VariableInfo;
+				VariableInfo.name = variable_desc.Name;
+				VariableInfo.start_offset = variable_desc.StartOffset;
+				VariableInfo.type = variable_desc.StartOffset;
+				VariableInfo.rows = variable_desc.StartOffset;
+				VariableInfo.columns = variable_desc.StartOffset;
+				VariableInfo.elements = variable_desc.StartOffset;
+
+				ConstantBufferInfo.var_desc.emplace_back(std::move(VariableInfo));
+			}
+			pInfo->ConstantBufferInfos.emplace_back(std::move(ConstantBufferInfo));
+		}
+	}
+
+	for (UINT i = 0; i != desc.BoundResources; ++i) {
+		D3D11_SHADER_INPUT_BIND_DESC input_bind_desc;
+		pReflection->GetResourceBindingDesc(i, &input_bind_desc);
+
+		auto BindPoint = static_cast<leo::uint16>(input_bind_desc.BindPoint + 1);
+		switch (input_bind_desc.Type)
+		{
+		case D3D_SIT_SAMPLER:
+			pInfo->ResourceCounts.NumSamplers = std::max(pInfo->ResourceCounts.NumSamplers, BindPoint);
+			break;
+
+		case D3D_SIT_TEXTURE:
+		case D3D_SIT_STRUCTURED:
+		case D3D_SIT_BYTEADDRESS:
+			pInfo->ResourceCounts.NumSRVs = std::max(pInfo->ResourceCounts.NumSRVs, BindPoint);
+			break;
+
+		case D3D_SIT_UAV_RWTYPED:
+		case D3D_SIT_UAV_RWSTRUCTURED:
+		case D3D_SIT_UAV_RWBYTEADDRESS:
+		case D3D_SIT_UAV_APPEND_STRUCTURED:
+		case D3D_SIT_UAV_CONSUME_STRUCTURED:
+		case D3D_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
+			pInfo->ResourceCounts.NumUAVs = std::max(pInfo->ResourceCounts.NumUAVs, BindPoint);
+			break;
+
+		default:
+			break;
+		}
+
+		switch (input_bind_desc.Type)
+		{
+		case D3D_SIT_TEXTURE:
+		case D3D_SIT_SAMPLER:
+		case D3D_SIT_STRUCTURED:
+		case D3D_SIT_BYTEADDRESS:
+		case D3D_SIT_UAV_RWTYPED:
+		case D3D_SIT_UAV_RWSTRUCTURED:
+		case D3D_SIT_UAV_RWBYTEADDRESS:
+		case D3D_SIT_UAV_APPEND_STRUCTURED:
+		case D3D_SIT_UAV_CONSUME_STRUCTURED:
+		case D3D_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
+		{
+			ShaderInfo::BoundResourceInfo BoundResourceInfo;
+			BoundResourceInfo.name = input_bind_desc.Name;
+			BoundResourceInfo.type = static_cast<uint8_t>(input_bind_desc.Type);
+			BoundResourceInfo.bind_point = static_cast<uint16_t>(input_bind_desc.BindPoint);
+			pInfo->BoundResourceInfos.emplace_back(std::move(BoundResourceInfo));
+		}
+		break;
+
+		default:
+			break;
+		}
+	}
+
+	if (type == ShaderType::VertexShader) {
+		union {
+			D3D11_SIGNATURE_PARAMETER_DESC signature_desc;
+			stdex::byte signature_data[sizeof(D3D12_SIGNATURE_PARAMETER_DESC)];
+		} s2d;
+
+		size_t signature = 0;
+		for (UINT i = 0; i != desc.InputParameters; ++i) {
+			pReflection->GetInputParameterDesc(i, &s2d.signature_desc);
+			auto seed = leo::hash(s2d.signature_data);
+			leo::hash_combine(signature, seed);
+		}
+
+		pInfo->InputSignature = signature;
+	}
+
+	if (type == ShaderType::ComputeShader) {
+		UINT x, y, z;
+		pReflection->GetThreadGroupSize(&x, &y, &z);
+		pInfo->CSBlockSize = leo::math::data_storage<leo::uint16, 3>(static_cast<leo::uint16>(x),
+			static_cast<leo::uint16>(y), static_cast<leo::uint16>(z));
+	}
+}
+
 
 namespace asset::X::Shader::DXBC {
 	ShaderBlob CompileToDXBC(ShaderType type, std::string_view code,
@@ -111,13 +355,20 @@ namespace asset::X::Shader::DXBC {
 
 	ShaderInfo* ReflectDXBC(const ShaderBlob& blob, ShaderType type)
 	{
-		auto caps =platform::Render::Context::Instance().GetDevice().GetCaps();
-		switch (caps.type) {
-		case platform::Render::Caps::Type::D3D12:
-			return platform_ex::Windows::D3D12::ReflectDXBC(blob, type);
+		auto pInfo = std::make_unique<ShaderInfo>(type);
+		platform_ex::COMPtr<ID3D12ShaderReflection> pReflection;
+		if (SUCCEEDED(D3DReflect(blob.first.get(), blob.second, IID_ID3D12ShaderReflection, reinterpret_cast<void**>(&pReflection.GetRef()))))
+		{
+			FillD3D12Reflect(pReflection.Get(), pInfo.get(), type);
+			return pInfo.release();
 		}
 
-		return nullptr;
+		//fallback
+		platform_ex::COMPtr<ID3D11ShaderReflection> pFallbackReflection;
+		CheckHResult(D3DReflect(blob.first.get(), blob.second, IID_ID3D11ShaderReflection, reinterpret_cast<void**>(&pFallbackReflection.GetRef())));
+		FillD3D11Reflect(pFallbackReflection.Get(), pInfo.get(), type);
+
+		return  pInfo.release();
 	}
 
 	ShaderBlob StripDXBC(const ShaderBlob& code_blob, leo::uint32 flags) {
@@ -403,8 +654,29 @@ namespace asset::X::Shader::DXIL {
 		return {};
 	}
 
+	template <typename T>
+	static HRESULT D3DCreateReflectionFromBlob(ID3DBlob* DxilBlob, COMPtr<T>& OutReflection)
+	{
+		dxc::DxcDllSupport& DxcDllHelper = GetDxcDllHelper();
+
+		COMPtr<IDxcContainerReflection> ContainerReflection;
+		CheckHResult(DxcDllHelper.CreateInstance(CLSID_DxcContainerReflection, &ContainerReflection.GetRef()));
+		CheckHResult(ContainerReflection->Load((IDxcBlob*)DxilBlob));
+
+		const uint32 DxilPartKind = DXIL_FOURCC('D', 'X', 'I', 'L');
+		uint32 DxilPartIndex = ~0u;
+		CheckHResult(ContainerReflection->FindFirstPartKind(DxilPartKind, &DxilPartIndex));
+
+		HRESULT Result = ContainerReflection->GetPartReflection(DxilPartIndex, IID_PPV_ARGS(&OutReflection.GetRef()));
+
+		return Result;
+	}
+
 	ShaderInfo* ReflectDXIL(const ShaderBlob& blob, ShaderType type)
 	{
+		bool bIsRayTracingShader = IsRayTracingShader(type);
+
+
 		return nullptr;
 	}
 
@@ -419,9 +691,6 @@ namespace asset::X::Shader::DXIL {
 
 namespace asset::X::Shader
 {
-
-	
-
 	ShaderBlob Compile(ShaderType type, std::string_view Code,
 		std::string_view entry_point, const std::vector<ShaderMacro>& macros,
 		std::string_view profile, leo::uint32 flags, std::string_view SourceName)
