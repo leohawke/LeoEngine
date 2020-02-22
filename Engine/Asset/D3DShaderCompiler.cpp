@@ -3,6 +3,7 @@
 #include <LFramework/Core/LString.h>
 #include "D3DShaderCompiler.h"
 #include "../Render/IContext.h"
+#include "../Render/RayTracingDefinitions.h"
 #include "../emacro.h"
 
 #include <algorithm>
@@ -12,9 +13,6 @@ using namespace platform_ex;
 using namespace D3DFlags;
 
 #define SHADER_OPTIMIZATION_LEVEL_MASK (D3DCOMPILE_OPTIMIZATION_LEVEL0 | D3DCOMPILE_OPTIMIZATION_LEVEL1 | D3DCOMPILE_OPTIMIZATION_LEVEL2 | D3DCOMPILE_OPTIMIZATION_LEVEL3)
-#define RAY_TRACING_REGISTER_SPACE_LOCAL  0
-#define RAY_TRACING_REGISTER_SPACE_GLOBAL 1
-#define RAY_TRACING_REGISTER_SPACE_SYSTEM 2
 
 namespace asset::X::Shader {
 	std::vector<ShaderMacro> AppendCompileMacros(const std::vector<ShaderMacro>& macros, ShaderType type)
@@ -67,11 +65,6 @@ namespace asset::X::Shader {
 
 
 #ifdef LFL_Win32
-
-namespace platform_ex::Windows::D3D12 {
-	platform::Render::ShaderInfo* ReflectDXBC(const platform::Render::ShaderBlob& blob, platform::Render::ShaderType type);
-}
-
 #include <UniversalDXSDK/d3dcompiler.h>
 #ifdef LFL_Win64
 #pragma comment(lib,"UniversalDXSDK/Lib/x64/d3dcompiler.lib")
@@ -80,9 +73,22 @@ namespace platform_ex::Windows::D3D12 {
 #endif
 #include <dxc/Support/dxcapi.use.h>
 
-void FillD3D12Reflect(ID3D12ShaderReflection* pReflection, ShaderInfo* pInfo,ShaderType type)
+template<typename T>
+void UniqueAddByName(std::vector<T>& target, T&& value)
 {
-	D3D12_SHADER_DESC desc;
+	for (auto& compare : target)
+	{
+		if (compare.name == value.name)
+			return;
+	}
+
+	target.emplace_back(std::move(value));
+}
+
+template<typename ID3D1xShaderReflection, typename D3D1x_SHADER_DESC>
+void FillD3D12Reflect(ID3D1xShaderReflection* pReflection, ShaderInfo* pInfo,ShaderType type)
+{
+	D3D1x_SHADER_DESC desc;
 	pReflection->GetDesc(&desc);
 
 	for (UINT i = 0; i != desc.ConstantBuffers; ++i) {
@@ -114,7 +120,7 @@ void FillD3D12Reflect(ID3D12ShaderReflection* pReflection, ShaderInfo* pInfo,Sha
 
 				ConstantBufferInfo.var_desc.emplace_back(std::move(VariableInfo));
 			}
-			pInfo->ConstantBufferInfos.emplace_back(std::move(ConstantBufferInfo));
+			UniqueAddByName(pInfo->ConstantBufferInfos,std::move(ConstantBufferInfo));
 		}
 	}
 
@@ -165,7 +171,7 @@ void FillD3D12Reflect(ID3D12ShaderReflection* pReflection, ShaderInfo* pInfo,Sha
 			BoundResourceInfo.name = input_bind_desc.Name;
 			BoundResourceInfo.type = static_cast<uint8_t>(input_bind_desc.Type);
 			BoundResourceInfo.bind_point = static_cast<uint16_t>(input_bind_desc.BindPoint);
-			pInfo->BoundResourceInfos.emplace_back(std::move(BoundResourceInfo));
+			UniqueAddByName(pInfo->BoundResourceInfos,std::move(BoundResourceInfo));
 		}
 		break;
 
@@ -174,27 +180,30 @@ void FillD3D12Reflect(ID3D12ShaderReflection* pReflection, ShaderInfo* pInfo,Sha
 		}
 	}
 
-	if (type == ShaderType::VertexShader) {
-		union {
-			D3D12_SIGNATURE_PARAMETER_DESC signature_desc;
-			stdex::byte signature_data[sizeof(D3D12_SIGNATURE_PARAMETER_DESC)];
-		} s2d;
+	if constexpr (std::is_same_v<D3D1x_SHADER_DESC, D3D12_SHADER_DESC>)
+	{
+		if (type == ShaderType::VertexShader) {
+			union {
+				D3D12_SIGNATURE_PARAMETER_DESC signature_desc;
+				stdex::byte signature_data[sizeof(D3D12_SIGNATURE_PARAMETER_DESC)];
+			} s2d;
 
-		size_t signature = 0;
-		for (UINT i = 0; i != desc.InputParameters; ++i) {
-			pReflection->GetInputParameterDesc(i, &s2d.signature_desc);
-			auto seed = leo::hash(s2d.signature_data);
-			leo::hash_combine(signature, seed);
+			size_t signature = 0;
+			for (UINT i = 0; i != desc.InputParameters; ++i) {
+				pReflection->GetInputParameterDesc(i, &s2d.signature_desc);
+				auto seed = leo::hash(s2d.signature_data);
+				leo::hash_combine(signature, seed);
+			}
+
+			pInfo->InputSignature = signature;
 		}
 
-		pInfo->InputSignature = signature;
-	}
-
-	if (type == ShaderType::ComputeShader) {
-		UINT x, y, z;
-		pReflection->GetThreadGroupSize(&x, &y, &z);
-		pInfo->CSBlockSize = leo::math::data_storage<leo::uint16, 3>(static_cast<leo::uint16>(x),
-			static_cast<leo::uint16>(y), static_cast<leo::uint16>(z));
+		if (type == ShaderType::ComputeShader) {
+			UINT x, y, z;
+			pReflection->GetThreadGroupSize(&x, &y, &z);
+			pInfo->CSBlockSize = leo::math::data_storage<leo::uint16, 3>(static_cast<leo::uint16>(x),
+				static_cast<leo::uint16>(y), static_cast<leo::uint16>(z));
+		}
 	}
 }
 
@@ -318,9 +327,8 @@ void FillD3D11Reflect(ID3D11ShaderReflection* pReflection, ShaderInfo* pInfo, Sh
 
 
 namespace asset::X::Shader::DXBC {
-	ShaderBlob CompileToDXBC(ShaderType type, std::string_view code,
-		std::string_view entry_point, const std::vector<ShaderMacro>& macros,
-		std::string_view profile, leo::uint32 flags, string_view SourceName) {
+	ShaderBlob CompileToDXBC(const ShaderCompilerInput& input, const std::vector<ShaderMacro>& macros,
+		leo::uint32 flags) {
 		std::vector<D3D_SHADER_MACRO> defines;
 		for (auto& macro : macros) {
 			D3D_SHADER_MACRO define;
@@ -334,7 +342,7 @@ namespace asset::X::Shader::DXBC {
 		platform_ex::COMPtr<ID3DBlob> code_blob;
 		platform_ex::COMPtr<ID3DBlob> error_blob;
 
-		auto hr = D3DCompile(code.data(), code.size(), SourceName.data(), defines.data(), nullptr, entry_point.data(), profile.data(), flags, 0, &code_blob, &error_blob);
+		auto hr = D3DCompile(input.Code.data(), input.Code.size(), input.SourceName.data(), defines.data(), nullptr, input.EntryPoint.data(), CompileProfile(input.Type).data(), flags, 0, &code_blob, &error_blob);
 		if (error_blob)
 		{
 			auto error = reinterpret_cast<char*>(error_blob->GetBufferPointer());
@@ -353,22 +361,19 @@ namespace asset::X::Shader::DXBC {
 		return {};
 	}
 
-	ShaderInfo* ReflectDXBC(const ShaderBlob& blob, ShaderType type)
+	void ReflectDXBC(const ShaderBlob& blob, ShaderType type, ShaderInfo* pInfo)
 	{
-		auto pInfo = std::make_unique<ShaderInfo>(type);
 		platform_ex::COMPtr<ID3D12ShaderReflection> pReflection;
 		if (SUCCEEDED(D3DReflect(blob.first.get(), blob.second, IID_ID3D12ShaderReflection, reinterpret_cast<void**>(&pReflection.GetRef()))))
 		{
-			FillD3D12Reflect(pReflection.Get(), pInfo.get(), type);
-			return pInfo.release();
+			FillD3D12Reflect<ID3D12ShaderReflection,D3D12_SHADER_DESC>(pReflection.Get(), pInfo, type);
+			return ;
 		}
 
 		//fallback
 		platform_ex::COMPtr<ID3D11ShaderReflection> pFallbackReflection;
 		CheckHResult(D3DReflect(blob.first.get(), blob.second, IID_ID3D11ShaderReflection, reinterpret_cast<void**>(&pFallbackReflection.GetRef())));
-		FillD3D11Reflect(pFallbackReflection.Get(), pInfo.get(), type);
-
-		return  pInfo.release();
+		FillD3D11Reflect(pFallbackReflection.Get(), pInfo, type);
 	}
 
 	ShaderBlob StripDXBC(const ShaderBlob& code_blob, leo::uint32 flags) {
@@ -432,19 +437,44 @@ static void ParseRayTracingEntryPoint(const std::string& Input, std::string& Out
 	}
 }
 
-namespace asset::X::Shader::DXIL {
+#ifndef DXIL_FOURCC
+#define DXIL_FOURCC(ch0, ch1, ch2, ch3) (                            \
+  (uint32_t)(uint8_t)(ch0)        | (uint32_t)(uint8_t)(ch1) << 8  | \
+  (uint32_t)(uint8_t)(ch2) << 16  | (uint32_t)(uint8_t)(ch3) << 24   \
+  )
+#endif
 
-	static dxc::DxcDllSupport& GetDxcDllHelper()
+static dxc::DxcDllSupport& GetDxcDllHelper()
+{
+	static dxc::DxcDllSupport DxcDllSupport;
+	static bool DxcDllInitialized = false;
+	if (!DxcDllInitialized)
 	{
-		static dxc::DxcDllSupport DxcDllSupport;
-		static bool DxcDllInitialized = false;
-		if (!DxcDllInitialized)
-		{
-			CheckHResult(DxcDllSupport.Initialize());
-			DxcDllInitialized = true;
-		}
-		return DxcDllSupport;
+		CheckHResult(DxcDllSupport.Initialize());
+		DxcDllInitialized = true;
 	}
+	return DxcDllSupport;
+}
+
+template <typename T>
+static HRESULT D3DCreateReflectionFromBlob(ID3DBlob* DxilBlob, COMPtr<T>& OutReflection)
+{
+	dxc::DxcDllSupport& DxcDllHelper = GetDxcDllHelper();
+
+	COMPtr<IDxcContainerReflection> ContainerReflection;
+	CheckHResult(DxcDllHelper.CreateInstance(CLSID_DxcContainerReflection, &ContainerReflection.GetRef()));
+	CheckHResult(ContainerReflection->Load((IDxcBlob*)DxilBlob));
+
+	const leo::uint32 DxilPartKind = DXIL_FOURCC('D', 'X', 'I', 'L');
+	leo::uint32 DxilPartIndex = ~0u;
+	CheckHResult(ContainerReflection->FindFirstPartKind(DxilPartKind, &DxilPartIndex));
+
+	HRESULT Result = ContainerReflection->GetPartReflection(DxilPartIndex, IID_PPV_ARGS(&OutReflection.GetRef()));
+
+	return Result;
+}
+
+namespace asset::X::Shader::DXIL {
 
 	static void D3DCreateDXCArguments(std::vector<const WCHAR*>& OutArgs, const WCHAR* Exports, leo::uint32 CompileFlags,leo::uint32 AutoBindingSpace = ~0u)
 	{
@@ -559,12 +589,11 @@ namespace asset::X::Shader::DXIL {
 		}
 	}
 
-	ShaderBlob CompileToDXIL(ShaderType type, std::string_view code,
-		std::string_view entry_point, const std::vector<ShaderMacro>& macros,
-		std::string_view profile, leo::uint32 flags, string_view SourceName) {
+	ShaderBlob CompileAndReflect(const ShaderCompilerInput& input, const std::vector<ShaderMacro>& macros,
+		leo::uint32 flags, ShaderInfo* pInfo) {
 		using String = leo::Text::String;
 
-		bool bIsRayTracingShader = IsRayTracingShader(type);
+		bool bIsRayTracingShader = IsRayTracingShader(input.Type);
 
 		std::string RayEntryPoint;
 		std::string RayAnyHitEntryPoint;
@@ -572,7 +601,7 @@ namespace asset::X::Shader::DXIL {
 		std::string RayTracingExports;
 		if (bIsRayTracingShader)
 		{
-			ParseRayTracingEntryPoint(std::string(entry_point), RayEntryPoint, RayAnyHitEntryPoint, RayIntersectionEntryPoint);
+			ParseRayTracingEntryPoint(std::string(input.EntryPoint), RayEntryPoint, RayAnyHitEntryPoint, RayIntersectionEntryPoint);
 
 			RayTracingExports = RayEntryPoint;
 
@@ -599,7 +628,7 @@ namespace asset::X::Shader::DXIL {
 		}
 
 		std::vector<const wchar_t*> args;
-		D3DCreateDXCArguments(args,(wchar_t*)String(RayTracingExports).data(), flags, GetAutoBindingSpace(type));
+		D3DCreateDXCArguments(args,(wchar_t*)String(RayTracingExports).data(), flags, GetAutoBindingSpace(input.Type));
 
 		dxc::DxcDllSupport& DxcDllHelper = GetDxcDllHelper();
 
@@ -610,16 +639,16 @@ namespace asset::X::Shader::DXIL {
 		DxcDllHelper.CreateInstance(CLSID_DxcLibrary, &Library.GetRef());
 
 		COMPtr<IDxcBlobEncoding> TextBlob;
-		Library->CreateBlobWithEncodingFromPinned(code.data(), code.size(), CP_UTF8, &TextBlob.GetRef());
+		Library->CreateBlobWithEncodingFromPinned(input.Code.data(), input.Code.size(), CP_UTF8, &TextBlob.GetRef());
 
-		leo::Text::String wSourceName(SourceName.data(), SourceName.size());
+		leo::Text::String wSourceName(input.SourceName.data(), input.SourceName.size());
 
 		COMPtr<IDxcOperationResult> CompileResult;
 		CheckHResult(Compiler->Compile(
 			TextBlob.Get(),
 			(wchar_t*)wSourceName.data(),
-			(wchar_t*)String(entry_point).data(),
-			(wchar_t*)String(profile).data(),
+			(wchar_t*)String(input.EntryPoint).data(),
+			(wchar_t*)String(CompileProfile(input.Type)).data(),
 			args.data(),
 			args.size(),
 			defs.data(),
@@ -645,39 +674,80 @@ namespace asset::X::Shader::DXIL {
 			CheckHResult(CompileResult->GetResult((IDxcBlob**)&code_blob.GetRef()));
 		}
 
+		if (pInfo)
+		{
+			if (bIsRayTracingShader)
+			{
+				COMPtr<ID3D12LibraryReflection> LibraryReflection;
+
+				HRESULT Result = D3DCreateReflectionFromBlob(code_blob.Get(), LibraryReflection);
+
+				CheckHResult(Result);
+
+				D3D12_LIBRARY_DESC LibraryDesc = {};
+				LibraryReflection->GetDesc(&LibraryDesc);
+
+				//?QualifiedName@ (as described here: https://en.wikipedia.org/wiki/Name_mangling)
+				// Entry point parameters are currently not included in the partial mangling.
+				std::vector<std::string> MangledEntryPoints;
+				if (!RayEntryPoint.empty())
+				{
+					MangledEntryPoints.push_back(leo::sfmt("?%s@", RayEntryPoint.c_str()));
+				}
+				if (!RayAnyHitEntryPoint.empty())
+				{
+					MangledEntryPoints.push_back(leo::sfmt("?%s@", RayAnyHitEntryPoint.c_str()));
+				}
+				if (!RayIntersectionEntryPoint.empty())
+				{
+					MangledEntryPoints.push_back(leo::sfmt("?%s@", RayIntersectionEntryPoint.c_str()));
+				}
+
+				//merges the reflection data for multiple functions 
+				leo::uint32 NumFoundEntryPoints = 0;
+
+				for (leo::uint32 FunctionIndex = 0; FunctionIndex < LibraryDesc.FunctionCount; ++FunctionIndex)
+				{
+					auto FunctionReflection = LibraryReflection->GetFunctionByIndex(FunctionIndex);
+
+					D3D12_FUNCTION_DESC FunctionDesc = {};
+					FunctionReflection->GetDesc(&FunctionDesc);
+
+					for (auto& MangledEntryPoint : MangledEntryPoints)
+					{
+						if (strstr(FunctionDesc.Name, MangledEntryPoint.c_str()))
+						{
+							FillD3D12Reflect<ID3D12FunctionReflection, D3D12_FUNCTION_DESC>(FunctionReflection, pInfo,input.Type);
+
+							++NumFoundEntryPoints;
+						}
+					}
+				}
+
+				RayTracingShaderInfo info;
+				info.EntryPoint = RayEntryPoint;
+				info.AnyHitEntryPoint = RayAnyHitEntryPoint;
+				info.IntersectionEntryPoint = RayIntersectionEntryPoint;
+
+				pInfo->RayTracingInfos = info;
+			}
+			else
+			{
+				COMPtr<ID3D12ShaderReflection> ShaderReflection;
+
+				HRESULT Result = D3DCreateReflectionFromBlob(code_blob.Get(), ShaderReflection);
+
+				CheckHResult(Result);
+
+				FillD3D12Reflect<ID3D12ShaderReflection, D3D12_SHADER_DESC>(ShaderReflection.Get(), pInfo, input.Type);
+			}
+		}
+
 		ShaderBlob blob;
 		blob.first = std::make_unique<stdex::byte[]>(code_blob->GetBufferSize());
 		blob.second = code_blob->GetBufferSize();
 		std::memcpy(blob.first.get(), code_blob->GetBufferPointer(), blob.second);
 		return std::move(blob);
-
-		return {};
-	}
-
-	template <typename T>
-	static HRESULT D3DCreateReflectionFromBlob(ID3DBlob* DxilBlob, COMPtr<T>& OutReflection)
-	{
-		dxc::DxcDllSupport& DxcDllHelper = GetDxcDllHelper();
-
-		COMPtr<IDxcContainerReflection> ContainerReflection;
-		CheckHResult(DxcDllHelper.CreateInstance(CLSID_DxcContainerReflection, &ContainerReflection.GetRef()));
-		CheckHResult(ContainerReflection->Load((IDxcBlob*)DxilBlob));
-
-		const uint32 DxilPartKind = DXIL_FOURCC('D', 'X', 'I', 'L');
-		uint32 DxilPartIndex = ~0u;
-		CheckHResult(ContainerReflection->FindFirstPartKind(DxilPartKind, &DxilPartIndex));
-
-		HRESULT Result = ContainerReflection->GetPartReflection(DxilPartIndex, IID_PPV_ARGS(&OutReflection.GetRef()));
-
-		return Result;
-	}
-
-	ShaderInfo* ReflectDXIL(const ShaderBlob& blob, ShaderType type)
-	{
-		bool bIsRayTracingShader = IsRayTracingShader(type);
-
-
-		return nullptr;
 	}
 
 	ShaderBlob StripDXIL(const ShaderBlob& code_blob, leo::uint32 flags) {
@@ -691,23 +761,27 @@ namespace asset::X::Shader::DXIL {
 
 namespace asset::X::Shader
 {
-	ShaderBlob Compile(ShaderType type, std::string_view Code,
-		std::string_view entry_point, const std::vector<ShaderMacro>& macros,
-		std::string_view profile, leo::uint32 flags, std::string_view SourceName)
+	ShaderBlob CompileAndReflect(const ShaderCompilerInput& input, const std::vector<ShaderMacro>& macros,
+		leo::uint32 flags, ShaderInfo* pInfo)
 	{
-		bool use_dxc = IsRayTracingShader(type);
+		bool use_dxc = IsRayTracingShader(input.Type);
 
-		auto compile_ptr = use_dxc ? DXIL::CompileToDXIL : DXBC::CompileToDXBC;
+		bool use_dxbc = !use_dxc;
 
-		return (*compile_ptr)(type, Code, entry_point, macros, profile, flags, SourceName);
-	}
-	ShaderInfo* Reflect(const ShaderBlob& blob, ShaderType type)
-	{
-		bool use_dxc = IsRayTracingShader(type);
+		if (use_dxbc)
+		{
+			auto blob = DXBC::CompileToDXBC(input, macros, flags);
 
-		auto reflect_ptr = use_dxc ? DXIL::ReflectDXIL : DXBC::ReflectDXBC;
+			if (pInfo)
+				DXBC::ReflectDXBC(blob, input.Type, pInfo);
 
-		return (*reflect_ptr)(blob,type);
+			return blob;
+		}
+
+		if (use_dxc)
+		{
+			return DXIL::CompileAndReflectDXIL(input, macros, flags, pInfo);
+		}
 	}
 
 	ShaderBlob Strip(const ShaderBlob& code_blob, ShaderType type, leo::uint32 flags) {

@@ -94,6 +94,12 @@ namespace platform::Render {
 			SPT_ElemEmpty,
 		};
 
+		struct RayTracingShaderInfo
+		{
+			std::string EntryPoint;
+			std::string AnyHitEntryPoint;
+			std::string IntersectionEntryPoint;
+		};
 
 		struct ShaderInfo {
 			ShaderType Type;
@@ -132,6 +138,8 @@ namespace platform::Render {
 
 			std::optional<size_t> InputSignature = std::nullopt;
 			std::optional<leo::math::data_storage<leo::uint16, 3>> CSBlockSize = std::nullopt;
+
+			std::optional<RayTracingShaderInfo> RayTracingInfos = std::nullopt;
 		};
 
 		using ShaderMacro = std::pair<std::string, std::string>;

@@ -5,6 +5,7 @@
 #include <LBase/span.hpp>
 #include "GraphicsBuffer.hpp"
 #include "RayTracingShader.h"
+#include "../RayTracingDefinitions.h"
 #include <LBase/type_traits.hpp>
 
 using namespace leo::inttype;
@@ -16,9 +17,7 @@ inline t_A RoundUpToNextMultiple(const t_A& a, const t_B& b)
 	return ((a - 1) / b + 1) * b;
 }
 
-#define RAY_TRACING_REGISTER_SPACE_LOCAL  0 // default register space for hit group (closest hit, any hit, intersection) shader resources
-#define RAY_TRACING_REGISTER_SPACE_GLOBAL 1 // register space for ray generation and miss shaders 
-#define RAY_TRACING_REGISTER_SPACE_SYSTEM 2 // register space for "system" parameters (index buffer, vertex buffer, fetch parameters)
+
 
 struct HitGroupSystemRootConstants
 {

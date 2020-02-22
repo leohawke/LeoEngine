@@ -539,17 +539,24 @@ namespace platform {
 #endif
 
 
-					LFL_DEBUG_DECL_TIMER(ComposePassShader,sfmt("CompilerReflectStrip Type:%s ", first.c_str()))
-					auto blob = Compile(compile_type, GetCode(), compile_entry_point, AppendCompileMacros(macros, compile_type), profile,
+					LFL_DEBUG_DECL_TIMER(ComposePassShader, sfmt("CompilerReflectStrip Type:%s ", first.c_str()));
+					ShaderCompilerInput input;
+					input.Type = compile_type;
+					input.Code = GetCode();
+					input.EntryPoint = compile_entry_point;
+					input.SourceName = path;
+
+					auto pInfo = std::make_unique<ShaderInfo>(compile_type);
+
+					auto blob = CompileAndReflect(input, macros,
 						D3DFlags::D3DCOMPILE_ENABLE_STRICTNESS |
 #ifndef NDEBUG
 						D3DFlags::D3DCOMPILE_DEBUG
 #else
 						D3DFlags::D3DCOMPILE_OPTIMIZATION_LEVEL3
 #endif
-						, path
+						, pInfo.get()
 					);
-					auto pInfo = leo::unique_raw(Reflect(blob, compile_type));
 					blob.swap(Strip(blob, compile_type, D3DFlags::D3DCOMPILER_STRIP_DEBUG_INFO
 						| D3DFlags::D3DCOMPILER_STRIP_PRIVATE_DATA));
 

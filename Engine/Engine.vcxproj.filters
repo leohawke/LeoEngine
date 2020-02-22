@@ -516,6 +516,9 @@
     <ClInclude Include="Asset\D3DShaderCompiler.h">
       <Filter>Asset</Filter>
     </ClInclude>
+    <ClInclude Include="Render\RayTracingDefinitions.h">
+      <Filter>Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
