@@ -227,6 +227,9 @@
     <ClCompile Include="Asset\D3DShaderCompiler.cpp">
       <Filter>Asset</Filter>
     </ClCompile>
+    <ClCompile Include="Asset\RayTracingX.cpp">
+      <Filter>Asset</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -519,6 +522,9 @@
     <ClInclude Include="Render\RayTracingDefinitions.h">
       <Filter>Render</Filter>
     </ClInclude>
+    <ClInclude Include="Asset\RayTracingX.h">
+      <Filter>Asset</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
@@ -584,6 +590,12 @@
     <Filter Include="Core\Hash">
       <UniqueIdentifier>{a8d87a4e-523e-4ac2-a78a-ea2f3c546b2d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{560ae77a-67da-46fd-b918-dad253d018e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\RayTracing">
+      <UniqueIdentifier>{73f3839e-b5c2-4624-b87b-281acaaa2950}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Render\Effect\PostProcess.lsl">
@@ -612,6 +624,15 @@
     </None>
     <None Include="Render\CommonTextureImpl.hcc">
       <Filter>Render\DeviceInterface</Filter>
+    </None>
+    <None Include="Shaders\RayTracing\RayTracingHitGroupCommon.lsl">
+      <Filter>Shaders\RayTracing</Filter>
+    </None>
+    <None Include="Shaders\RayTracing\RayTracingBuiltInResources.lsl">
+      <Filter>Shaders\RayTracing</Filter>
+    </None>
+    <None Include="Shaders\RayTracing\RayTracingScreenSpaceShadow.lsl">
+      <Filter>Shaders\RayTracing</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

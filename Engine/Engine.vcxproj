@@ -27,6 +27,7 @@
     <ClCompile Include="Asset\Loader.cpp" />
     <ClCompile Include="Asset\MaterialX.cpp" />
     <ClCompile Include="Asset\MeshX.cpp" />
+    <ClCompile Include="Asset\RayTracingX.cpp" />
     <ClCompile Include="Asset\ShaderAsset.cpp" />
     <ClCompile Include="Asset\TexCompression.cpp" />
     <ClCompile Include="Asset\CompressionBC.cpp" />
@@ -110,6 +111,7 @@
     <ClInclude Include="Asset\MeshAsset.h" />
     <ClInclude Include="Asset\MeshX.h" />
     <ClInclude Include="Asset\RayShaderAsset.h" />
+    <ClInclude Include="Asset\RayTracingX.h" />
     <ClInclude Include="Asset\ShaderAsset.h" />
     <ClInclude Include="Asset\ShaderLoadingDesc.h" />
     <ClInclude Include="Asset\TexCompression.hpp" />
@@ -210,6 +212,9 @@
     <None Include="Render\Effect\PostProcess.lsl" />
     <None Include="Render\Effect\Util.lsl" />
     <None Include="Render\Material\FPDS.mat.lsl" />
+    <None Include="Shaders\RayTracing\RayTracingScreenSpaceShadow.lsl" />
+    <None Include="Shaders\RayTracing\RayTracingBuiltInResources.lsl" />
+    <None Include="Shaders\RayTracing\RayTracingHitGroupCommon.lsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6946CA48-2E7E-4770-9D61-0F59C02D0271}</ProjectGuid>

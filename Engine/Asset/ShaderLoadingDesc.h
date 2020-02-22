@@ -8,11 +8,13 @@
 #include <fstream>
 
 #include "ShaderAsset.h"
+#include "LSLAssetX.h"
 
 namespace platform::X
 {
 	using leo::ValueNode;
 	using path = std::filesystem::path;
+	using namespace platform::Render::Shader;
 
 	template<typename AssetType>
 	class ShaderLoadingDesc{
@@ -83,7 +85,7 @@ namespace platform::X
 			std::vector<std::pair<std::string, scheme::TermNode>> refers;
 			RecursiveReferNode(term_node, refers);
 
-			auto new_node = leo::MakeNode(MakeIndex(0));
+			auto new_node = leo::MakeNode(leo::MakeIndex(0));
 
 			for (auto& pair : refers) {
 				for (auto& node : pair.second) {
@@ -102,7 +104,7 @@ namespace platform::X
 
 			ParseMacro(shader_desc.asset->GetMacrosRef(), term_node, false);
 			{
-				auto cbuffer_nodes = X::SelectNodes("cbuffer", term_node);
+				auto cbuffer_nodes = SelectNodes("cbuffer", term_node);
 				for (auto& cbuffer_node : cbuffer_nodes) {
 					asset::ShaderConstantBufferAsset cbuffer;
 					cbuffer.SetName(AccessLastNoChild<std::string>(cbuffer_node));
@@ -169,7 +171,7 @@ namespace platform::X
 			scheme::Session session(sb_it_t(fin), sb_it_t{});
 
 			try {
-				return SContext::Analyze(std::move(session));
+				return scheme::SContext::Analyze(std::move(session));
 			}
 
 			CatchExpr(..., leo::rethrow_badstate(fin, std::ios_base::failbit))
