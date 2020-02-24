@@ -1,21 +1,24 @@
 #include "RayTracingX.h"
 #include "ShaderAsset.h"
+#include "D3DShaderCompiler.h"
 #include "../Core/AssetResourceScheduler.h"
 #include "ShaderLoadingDesc.h"
+#include <unordered_map>
 
 using namespace platform;
 using namespace asset;
+using namespace platform::Render::Shader;
 
-class RayTracingShaderAsset :public asset::ShadersAsset,public asset::AssetName
+struct RayTracingShaderAsset :public asset::ShadersAsset,public asset::AssetName
 {
-
+	std::unordered_map<ShaderType, std::string> EntryPoints;
 };
 
-class RayTracingShaderLoadingDesc : public asset::AssetLoading<RayTracingShaderAsset>, public X::ShaderLoadingDesc<RayTracingShaderAsset> {
+class RayTracingShaderLoadingDesc : public asset::AssetLoading<RayTracingShaderAsset>, public platform::X::ShaderLoadingDesc<RayTracingShaderAsset> {
 private:
-	using Super = X::ShaderLoadingDesc<RayTracingShaderAsset>;
+	using Super = platform::X::ShaderLoadingDesc<RayTracingShaderAsset>;
 public:
-	explicit RayTracingShaderLoadingDesc(X::path const& shaderpath)
+	explicit RayTracingShaderLoadingDesc(platform::X::path const& shaderpath)
 		:Super(shaderpath)
 	{
 	}
@@ -54,13 +57,74 @@ private:
 	std::shared_ptr<AssetType> ParseNode()
 	{
 		Super::ParseNode();
-
+		ParseEntryPoints();
 		return nullptr;
 	}
 
 	std::shared_ptr<AssetType> CreateAsset()
 	{
+		Compile();
 		return ReturnValue();
+	}
+
+	void ParseEntryPoints()
+	{
+		auto& node = GetNode();
+		if (auto pRayGen = AccessPtr("raygen_shader", node))
+		{
+			GetAsset()->EntryPoints.emplace(ShaderType::RayGen, *pRayGen);
+		}
+		if (auto pRayMiss = AccessPtr("raymiss_shader", node))
+		{
+			GetAsset()->EntryPoints.emplace(ShaderType::RayMiss, *pRayMiss);
+		}
+		if (auto pRayHitGroup = AccessPtr("rayhitgroup_shader", node))
+		{
+			GetAsset()->EntryPoints.emplace(ShaderType::RayHitGroup, *pRayHitGroup);
+		}
+		if (auto pRayCallable = AccessPtr("raycallable_shader", node))
+		{
+			GetAsset()->EntryPoints.emplace(ShaderType::RayCallable, *pRayCallable);
+		}
+	}
+
+	void Compile()
+	{
+		auto path = Path().string();
+#ifndef NDEBUG
+		path += ".hlsl";
+		{
+			std::ofstream fout(path);
+			fout << GetCode();
+		}
+#endif
+
+		asset::X::Shader::ShaderCompilerInput input;
+		input.Code = GetCode();
+		input.SourceName = path;
+
+		std::vector<ShaderMacro> macros{ GetAsset()->GetMacros() };
+		for (auto& pair : GetAsset()->EntryPoints)
+		{
+			input.Type = pair.first;
+			input.EntryPoint = pair.second;
+
+			auto final_macros =  asset::X::Shader::AppendCompileMacros(macros, input.Type);
+
+			auto pInfo = std::make_unique<ShaderInfo>(input.Type);
+
+			auto blob =asset::X::Shader::CompileAndReflect(input, final_macros,
+#ifndef NDEBUG
+				D3DFlags::D3DCOMPILE_DEBUG
+#else
+				D3DFlags::D3DCOMPILE_OPTIMIZATION_LEVEL3
+#endif
+				, pInfo.get()
+			);
+
+			auto blob_hash = leo::constfn_hash(input.EntryPoint);
+			GetAsset()->EmplaceBlob(blob_hash, asset::ShaderBlobAsset(input.Type, std::move(blob), pInfo.release()));
+		}
 	}
 };
 

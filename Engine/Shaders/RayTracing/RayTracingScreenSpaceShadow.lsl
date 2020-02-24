@@ -7,7 +7,7 @@
 	)
 	(shader 
 "
-[shader("raygeneration")]
+[shader(\"raygeneration\")]
 void RayGen()
 {
 		

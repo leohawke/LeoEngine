@@ -625,6 +625,7 @@ namespace asset::X::Shader::DXIL {
 			DxcDefine define;
 			define.Name = (wchar_t*)def_holder.back().first.c_str();
 			define.Value = (wchar_t*)def_holder.back().second.c_str();
+			defs.emplace_back(define);
 		}
 
 		std::vector<const wchar_t*> args;

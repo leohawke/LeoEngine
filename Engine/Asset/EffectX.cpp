@@ -526,7 +526,7 @@ namespace platform {
 					default:
 						continue;
 					}
-					string_view profile = CompileProfile(compile_type);
+				
 					using namespace leo;
 
 					auto path = Path().string();
@@ -546,9 +546,11 @@ namespace platform {
 					input.EntryPoint = compile_entry_point;
 					input.SourceName = path;
 
+					auto final_macros =asset::X::Shader::AppendCompileMacros(macros, input.Type);
+
 					auto pInfo = std::make_unique<ShaderInfo>(compile_type);
 
-					auto blob = CompileAndReflect(input, macros,
+					auto blob = CompileAndReflect(input, final_macros,
 						D3DFlags::D3DCOMPILE_ENABLE_STRICTNESS |
 #ifndef NDEBUG
 						D3DFlags::D3DCOMPILE_DEBUG
