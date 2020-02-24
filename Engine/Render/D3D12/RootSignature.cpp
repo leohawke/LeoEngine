@@ -128,6 +128,7 @@ void RootSignature::AnalyzeSignature(const D3D12_VERSIONED_ROOT_SIGNATURE_DESC& 
 template<typename RootSignatureDescType>
 void RootSignature::InternalAnalyzeSignature(const RootSignatureDescType& Desc, uint32 BindingSpace)
 {
+	std::memset(BindSlotMap, 0xFF, sizeof(BindSlotMap));
 	TotalRootSignatureSizeInDWORDs = 0;
 
 	const uint32 RootDescriptorTableCost = (Desc.Flags & D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE) ? RootDescriptorTableCostLocal : RootDescriptorTableCostGlobal;
@@ -159,6 +160,102 @@ void RootSignature::InternalAnalyzeSignature(const RootSignatureDescType& Desc, 
 		default:
 			lassume(false);
 			break;
+		}
+
+		if (ParameterBindingSpace != BindingSpace)
+		{
+			// Only consider parameters in the requested binding space.
+			continue;
+		}
+
+		ShaderType CurrentVisibleSF = ShaderType::NumStandardType;
+		switch (CurrentParameter.ShaderVisibility)
+		{
+		case D3D12_SHADER_VISIBILITY_ALL:
+			CurrentVisibleSF = ShaderType::VisibilityAll;
+			break;
+
+		case D3D12_SHADER_VISIBILITY_VERTEX:
+			CurrentVisibleSF = ShaderType::VertexShader;
+			break;
+		case D3D12_SHADER_VISIBILITY_HULL:
+			CurrentVisibleSF = ShaderType::HullShader;
+			break;
+		case D3D12_SHADER_VISIBILITY_DOMAIN:
+			CurrentVisibleSF = ShaderType::DomainShader;
+			break;
+		case D3D12_SHADER_VISIBILITY_GEOMETRY:
+			CurrentVisibleSF = ShaderType::GeometryShader;
+			break;
+		case D3D12_SHADER_VISIBILITY_PIXEL:
+			CurrentVisibleSF = ShaderType::PixelShader;
+			break;
+
+		default:
+			lconstraint(false);
+			break;
+		}
+
+		// Determine shader resource counts.
+		{
+			switch (CurrentParameter.ParameterType)
+			{
+			case D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE:
+				lconstraint(CurrentParameter.DescriptorTable.NumDescriptorRanges == 1);	// Code currently assumes a single descriptor range.
+				{
+					const auto& CurrentRange = CurrentParameter.DescriptorTable.pDescriptorRanges[0];
+					lconstraint(CurrentRange.BaseShaderRegister == 0);	// Code currently assumes always starting at register 0.
+					lconstraint(CurrentRange.RegisterSpace == BindingSpace); // Parameters in other binding spaces are expected to be filtered out at this point
+
+					switch (CurrentRange.RangeType)
+					{
+					case D3D12_DESCRIPTOR_RANGE_TYPE_SRV:
+						//SetMaxSRVCount(CurrentVisibleSF, CurrentRange.NumDescriptors);
+						SetSRVRDTBindSlot(CurrentVisibleSF, i);
+						break;
+					case D3D12_DESCRIPTOR_RANGE_TYPE_UAV:
+						//SetMaxUAVCount(CurrentVisibleSF, CurrentRange.NumDescriptors);
+						SetUAVRDTBindSlot(CurrentVisibleSF, i);
+						break;
+					case D3D12_DESCRIPTOR_RANGE_TYPE_CBV:
+						//IncrementMaxCBVCount(CurrentVisibleSF, CurrentRange.NumDescriptors);
+						SetCBVRDTBindSlot(CurrentVisibleSF, i);
+						//UpdateCBVRegisterMaskWithDescriptorRange(CurrentVisibleSF, CurrentRange);
+						break;
+					case D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER:
+						//SetMaxSamplerCount(CurrentVisibleSF, CurrentRange.NumDescriptors);
+						SetSamplersRDTBindSlot(CurrentVisibleSF, i);
+						break;
+
+					default: lconstraint(false); break;
+					}
+				}
+				break;
+
+			case D3D12_ROOT_PARAMETER_TYPE_CBV:
+			{
+				lconstraint(CurrentParameter.Descriptor.RegisterSpace == BindingSpace); // Parameters in other binding spaces are expected to be filtered out at this point
+
+				//IncrementMaxCBVCount(CurrentVisibleSF, 1);
+				if (CurrentParameter.Descriptor.ShaderRegister == 0)
+				{
+					// This is the first CBV for this stage, save it's root parameter index (other CBVs will be indexed using this base root parameter index).
+					SetCBVRDBindSlot(CurrentVisibleSF, i);
+				}
+
+				//UpdateCBVRegisterMaskWithDescriptor(CurrentVisibleSF, CurrentParameter.Descriptor);
+
+				// The first CBV for this stage must come first in the root signature, and subsequent root CBVs for this stage must be contiguous.
+				lconstraint(0xFF != CBVRDBindSlot(CurrentVisibleSF, 0));
+				lconstraint(i == CBVRDBindSlot(CurrentVisibleSF, 0) + CurrentParameter.Descriptor.ShaderRegister);
+			}
+			break;
+
+			default:
+				// Need to update this for the other types. Currently we only use descriptor tables in the root signature.
+				lconstraint(false);
+				break;
+			}
 		}
 	}
 

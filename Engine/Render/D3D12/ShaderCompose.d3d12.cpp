@@ -247,9 +247,9 @@ const std::optional<platform_ex::Windows::D3D12::ShaderCompose::Template::Shader
 	return sc_template->Shaders[static_cast<uint8>(shader_type)];
 }
 
-ID3D12RootSignature * platform_ex::Windows::D3D12::ShaderCompose::RootSignature() const
+platform_ex::Windows::D3D12::ShaderCompose::SignatureType* platform_ex::Windows::D3D12::ShaderCompose::RootSignature() const
 {
-	return sc_template->root_signature->Signature.Get();
+	return sc_template->root_signature.get();
 }
 
 ID3D12DescriptorHeap * platform_ex::Windows::D3D12::ShaderCompose::SamplerHeap() const

@@ -80,7 +80,8 @@ namespace platform_ex::Windows::D3D12 {
 		 const std::optional<Template::ShaderBlobEx>& GetShaderBlob(platform::Render::ShaderType shader_type) const;
 
 	public:
-		ID3D12RootSignature* RootSignature() const;
+		using SignatureType = RootSignature;
+		SignatureType* RootSignature() const;
 
 		ID3D12DescriptorHeap* SamplerHeap() const;
 	public:

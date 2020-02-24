@@ -43,7 +43,7 @@ namespace platform_ex::Windows::D3D12 {
 		if (iter == psos.end()) {
 			auto pso_desc = graphics_ps_desc;
 
-			pso_desc.pRootSignature = shader_compose.RootSignature();
+			pso_desc.pRootSignature = shader_compose.RootSignature()->Signature.Get();
 			pso_desc.VS << shader_compose.sc_template->VertexShader;
 			pso_desc.PS << shader_compose.sc_template->PixelShader;
 

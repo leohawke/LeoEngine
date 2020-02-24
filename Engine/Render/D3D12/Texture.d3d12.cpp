@@ -385,7 +385,7 @@ void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_siz
 		
 		auto& state = static_cast<const PipleState&>(pass.GetState());
 		auto gps_desc = state.graphics_ps_desc;
-		gps_desc.pRootSignature = sc.RootSignature();
+		gps_desc.pRootSignature = sc.RootSignature()->Signature.Get();
 		{
 			gps_desc.VS << sc.sc_template->VertexShader;
 			gps_desc.PS << sc.sc_template->PixelShader;
