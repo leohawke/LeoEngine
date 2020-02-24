@@ -9,6 +9,166 @@ void asset::AssetName::SetName(const std::string& Name)
 	hash = leo::constfn_hash(name);
 }
 
+constexpr int MaxSpace = 4;
+
+class ResourceRegisterSlotAllocator
+{
+public:
+	enum ResourceType
+	{
+		t,// for shader resource views (SRV)
+		s,// for samplers
+		u,//for unordered access views (UAV)
+		b //for constant buffer views (CBV)
+	};
+
+	struct SpaceRegisters
+	{
+		std::unordered_map<ResourceType, std::vector<bool>> registers;
+
+
+		void SetUse(std::vector<bool>& c, int index)
+		{
+			c.resize(index + 1);
+			c[index] = true;
+		}
+
+		void SetUse(ResourceType type, int index)
+		{
+			SetUse(registers[type], index);
+		}
+
+		int FindEmpty(std::vector<bool>& c)
+		{
+			for (int i = 0; i != c.size(); ++i)
+			{
+				if (!c[i])
+				{
+					c[i] = true;
+					return i;
+				}
+			}
+
+			auto index = c.size();
+
+			c.resize(c.size() + 1);
+			c[index] = true;
+			return static_cast<int>(index);
+		}
+
+		int FindEmpty(ResourceType type)
+		{
+			return FindEmpty(registers[type]);
+		}
+	};
+
+	SpaceRegisters Spaces[MaxSpace];
+
+	std::pair<ResourceType, int> AllocatorIndex(const BindDesc& desc, ShaderParamType type)
+	{
+		auto space = desc.GetSpace() == BindDesc::Any ? 0 : desc.GetSpace();
+
+		lconstraint(space < MaxSpace);
+
+		auto register_type = to_type(type);
+
+		if (desc.GetIndex() == BindDesc::Any)
+		{
+			return { register_type,Spaces[space].FindEmpty(register_type) };
+		}
+		else
+		{
+			Spaces[space].SetUse(register_type, desc.GetIndex());
+
+			return { register_type,desc.GetIndex() };
+		}
+	}
+
+	void PreAllocator(const BindDesc& desc, ShaderParamType type)
+	{
+		auto space = desc.GetSpace() == BindDesc::Any ? 0 : desc.GetSpace();
+
+		lconstraint(space < MaxSpace);
+
+		auto register_type = to_type(type);
+
+		if (desc.GetIndex() != BindDesc::Any)
+		{
+			Spaces[space].SetUse(register_type, desc.GetIndex());
+		}
+	}
+
+	static char to_char(ResourceType type)
+	{
+		switch (type)
+		{
+		case ResourceRegisterSlotAllocator::t:
+			return 't';
+			break;
+		case ResourceRegisterSlotAllocator::s:
+			return 's';
+			break;
+		case ResourceRegisterSlotAllocator::u:
+			return 'u';
+			break;
+		case ResourceRegisterSlotAllocator::b:
+			return 'b';
+			break;
+		default:
+			lconstraint(false);
+		}
+	}
+
+	static ResourceType to_type(ShaderParamType type)
+	{
+		if (type == SPT_ConstatnBuffer)
+			return b;
+		if (type == SPT_sampler)
+			return s;
+		switch (type)
+		{
+		case SPT_rwbuffer:
+		case SPT_rwstructured_buffer:
+		case SPT_rwtexture1D:
+		case SPT_rwtexture2D:
+		case SPT_rwtexture3D:
+		case SPT_rwtexture1DArray:
+		case SPT_rwtexture2DArray:
+		case SPT_AppendStructuredBuffer:
+		case SPT_rwbyteAddressBuffer:
+			return u;
+		default:
+			return t;
+		}
+	}
+};
+
+std::string FormatBindDesc(ResourceRegisterSlotAllocator& allocaotr, const BindDesc& desc, ShaderParamType type)
+{
+	if (desc.GetIndex() == BindDesc::Any && desc.GetSpace() == BindDesc::Any)
+		return {};
+
+	auto type_index = allocaotr.AllocatorIndex(desc, type);
+
+	auto empty_space = desc.GetSpace() == BindDesc::Any;
+
+	std::string hlsl = ":register(";
+
+	hlsl += ResourceRegisterSlotAllocator::to_char(type_index.first);
+
+	hlsl += std::to_string(type_index.second);
+
+	if (!empty_space)
+	{
+		hlsl += ",space";
+		hlsl += std::to_string(desc.GetSpace());
+	}
+
+	hlsl += ")";
+
+	return hlsl;
+}
+
 std::string asset::ShadersAsset::GenHLSLShader() const
 {
 	using std::endl;
@@ -17,6 +177,24 @@ std::string asset::ShadersAsset::GenHLSLShader() const
 	auto& cbuffers = GetCBuffers();
 	auto& params = GetParams();
 	auto& fragments = GetFragments();
+
+	ResourceRegisterSlotAllocator allocator;
+	//pre allocator
+	for (auto& gen_index : gen_indices) {
+		auto local_index = std::get<1>(gen_index);
+		switch (std::get<0>(gen_index)) {
+			case	CBUFFER:
+			{
+				auto& cbuffer = cbuffers[local_index];
+				allocator.PreAllocator(cbuffer, SPT_ConstatnBuffer);
+			}
+			case	PARAM:
+			{
+				auto& param = params[local_index];
+				allocator.PreAllocator(param, param.GetType());
+			}
+		}
+	}
 
 	std::stringstream ss;
 
@@ -32,21 +210,37 @@ std::string asset::ShadersAsset::GenHLSLShader() const
 		case	CBUFFER:
 		{
 			auto& cbuffer = cbuffers[local_index];
-			ss << leo::sfmt("cbuffer %s", cbuffer.GetName().c_str()) << endl;
-			ss << '{' << endl;
 
-			for (auto paramindex : cbuffer.GetParamIndices())
+			bool template_synatx = !cbuffer.GetElemInfo().empty();
+
+			if (!template_synatx)
+				ss << leo::sfmt("cbuffer %s", cbuffer.GetName().c_str()) << endl;
+			else
+				ss << leo::sfmt("ConstantBuffer<%s> %s", cbuffer.GetElemInfo().c_str(), cbuffer.GetName().c_str()) << endl;
+
+			ss << FormatBindDesc(allocator, cbuffer, SPT_ConstatnBuffer);
+
+			if (!template_synatx)
 			{
-				const auto& param = GetParams()[paramindex];
-				if (param.GetType() >= SPT_bool) {
-					ss << leo::sfmt("%s %s", GetTypeName(param.GetType()).c_str(), param.GetName().c_str());
-					if (param.GetArraySize())
-						ss << leo::sfmt("[%s]", std::to_string(param.GetArraySize()).c_str());
-					ss << ';' << endl;
-				}
-			}
+				ss << '{' << endl;
 
-			ss << "};" << endl;
+				for (auto paramindex : cbuffer.GetParamIndices())
+				{
+					const auto& param = GetParams()[paramindex];
+					if (param.GetType() >= SPT_bool) {
+						ss << leo::sfmt("%s %s", GetTypeName(param.GetType()).c_str(), param.GetName().c_str());
+						if (param.GetArraySize())
+							ss << leo::sfmt("[%s]", std::to_string(param.GetArraySize()).c_str());
+						ss << ';' << endl;
+					}
+				}
+
+				ss << "};" << endl;
+			}
+			else
+			{
+				ss << ";" << endl;
+			}
 			break;
 		}
 		case	PARAM:
@@ -66,12 +260,14 @@ std::string asset::ShadersAsset::GenHLSLShader() const
 			if (param.GetType() <= SPT_ConsumeStructuredBuffer && !elem_type.empty()) {
 				ss << leo::sfmt("%s<%s> %s", GetTypeName(param.GetType()).c_str(),
 					elem_type.c_str(), param.GetName().c_str())
+					<< FormatBindDesc(allocator, param, param.GetType())
 					<< ';'
 					<< endl;
 			}
 			else {
 				ss << leo::sfmt("%s %s", GetTypeName(param.GetType()).c_str(),
 					param.GetName().c_str())
+					<< FormatBindDesc(allocator, param, param.GetType())
 					<< ';'
 					<< endl;
 			}
@@ -172,6 +368,7 @@ public:
 		types.emplace_back("Texture2DArray");
 		types.emplace_back("Texture3DArray");
 		types.emplace_back("TextureCUBEArray");
+		types.emplace_back("ConstantBuffer");
 		types.emplace_back("Buffer");
 		types.emplace_back("StructuredBuffer");
 		types.emplace_back("RWBuffer");
@@ -185,6 +382,7 @@ public:
 		types.emplace_back("ConsumeStructuredBuffer");
 		types.emplace_back("ByteAddressBuffer");
 		types.emplace_back("RWByteAddressBuffer");
+		types.emplace_back("RaytracingAccelerationStructure");
 		types.emplace_back("sampler");
 		types.emplace_back("shader");
 		types.emplace_back("bool");

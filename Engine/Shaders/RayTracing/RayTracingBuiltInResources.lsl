@@ -32,7 +32,7 @@
 		};
 		"
 	)
-	(ByteAddressBuffer HitGroupSystemIndexBuffer (register 0 (space RAY_TRACING_REGISTER_SPACE_SYSTEM)))
-	(ByteAddressBuffer HitGroupSystemVertexBuffer (register 1 (space RAY_TRACING_REGISTER_SPACE_SYSTEM))
-	(ConstantBuffer  (elemtype HitGroupSystemRootConstants) HitGroupSystemRootConstants (register 0 (space RAY_TRACING_REGISTER_SPACE_SYSTEM))
+	(ByteAddressBuffer (register 0 (space RAY_TRACING_REGISTER_SPACE_SYSTEM)) HitGroupSystemIndexBuffer)
+	(ByteAddressBuffer (register 1 (space RAY_TRACING_REGISTER_SPACE_SYSTEM) HitGroupSystemVertexBuffer)
+	(ConstantBuffer  (elemtype HitGroupSystemRootConstants) (register 0 (space RAY_TRACING_REGISTER_SPACE_SYSTEM) HitGroupSystemRootConstants)
 )

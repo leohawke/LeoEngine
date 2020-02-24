@@ -179,18 +179,9 @@ namespace platform_ex::Windows::D3D12 {
 		if (num_heaps > 0)
 			render_cmd_list->SetDescriptorHeaps(num_heaps, heaps);
 
+		//todo conform to rootsignature
 		uint32 root_param_index = 0;
-		//CBuffer Bind
-		for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
-			for (auto & cbuffer : shader_compose.CBuffs[i]) {
-				auto& resource = static_cast<GraphicsBuffer*>(cbuffer)->resource;
-				if (resource)
-					render_cmd_list->SetGraphicsRootConstantBufferView(root_param_index++, resource->GetGPUVirtualAddress());
-				else
-					render_cmd_list->SetGraphicsRootConstantBufferView(root_param_index, 0);
-			}
-		}
-
+		
 		//SRV/UAV  Bind
 		if (cbv_srv_uav_heap) {
 			auto cbv_srv_uav_desc_size = (*device)->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -237,6 +228,17 @@ namespace platform_ex::Windows::D3D12 {
 
 					++root_param_index;
 				}
+			}
+		}
+
+		//CBuffer Bind
+		for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
+			for (auto& cbuffer : shader_compose.CBuffs[i]) {
+				auto& resource = static_cast<GraphicsBuffer*>(cbuffer)->resource;
+				if (resource)
+					render_cmd_list->SetGraphicsRootConstantBufferView(root_param_index++, resource->GetGPUVirtualAddress());
+				else
+					render_cmd_list->SetGraphicsRootConstantBufferView(root_param_index, 0);
 			}
 		}
 	}

@@ -29,6 +29,17 @@ namespace platform_ex {
 					ppBlob,
 					ppErrorBlob);
 			}
+
+			HRESULT SerializeVersionedRootSignature(
+				const D3D12_VERSIONED_ROOT_SIGNATURE_DESC* pRootSignature,
+				ID3DBlob** ppBlob,
+				ID3DBlob** ppErrorBlob)
+			{
+				return (*LoadProc<decltype(::D3D12SerializeVersionedRootSignature)>(L"d3d12.dll", "D3D12SerializeVersionedRootSignature"))(
+					pRootSignature,
+					ppBlob,
+					ppErrorBlob);
+			}
 		}
 	}
 }

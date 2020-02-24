@@ -117,6 +117,10 @@ namespace platform_ex {
 			HRESULT GetDebugInterface(REFIID riid, void** ppvDebug);
 			HRESULT SerializeRootSignature(D3D12_ROOT_SIGNATURE_DESC const * pRootSignature,
 				D3D_ROOT_SIGNATURE_VERSION Version, ID3D10Blob** ppBlob, ID3D10Blob** ppErrorBlob);
+			HRESULT SerializeVersionedRootSignature(
+				 const D3D12_VERSIONED_ROOT_SIGNATURE_DESC* pRootSignature,
+				 ID3DBlob** ppBlob,
+				 ID3DBlob** ppErrorBlob);
 
 			/*
 			inline D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandleForHeapStart(ID3D12DescriptorHeap * This) {
@@ -585,7 +589,7 @@ namespace platform_ex::Windows::D3D12 {
 			switch (pRootSignatureDesc->Version)
 			{
 			case D3D_ROOT_SIGNATURE_VERSION_1_0:
-				return D3D12SerializeRootSignature(&pRootSignatureDesc->Desc_1_0, D3D_ROOT_SIGNATURE_VERSION_1, ppBlob, ppErrorBlob);
+				return SerializeRootSignature(&pRootSignatureDesc->Desc_1_0, D3D_ROOT_SIGNATURE_VERSION_1, ppBlob, ppErrorBlob);
 
 			case D3D_ROOT_SIGNATURE_VERSION_1_1:
 			{
@@ -657,7 +661,7 @@ namespace platform_ex::Windows::D3D12 {
 				if (SUCCEEDED(hr))
 				{
 					CD3DX12_ROOT_SIGNATURE_DESC desc_1_0(desc_1_1.NumParameters, pParameters_1_0, desc_1_1.NumStaticSamplers, desc_1_1.pStaticSamplers, desc_1_1.Flags);
-					hr = D3D12SerializeRootSignature(&desc_1_0, D3D_ROOT_SIGNATURE_VERSION_1, ppBlob, ppErrorBlob);
+					hr = SerializeRootSignature(&desc_1_0, D3D_ROOT_SIGNATURE_VERSION_1, ppBlob, ppErrorBlob);
 				}
 
 				if (pParameters)
@@ -677,7 +681,7 @@ namespace platform_ex::Windows::D3D12 {
 			break;
 
 		case D3D_ROOT_SIGNATURE_VERSION_1_1:
-			return D3D12SerializeVersionedRootSignature(pRootSignatureDesc, ppBlob, ppErrorBlob);
+			return SerializeVersionedRootSignature(pRootSignatureDesc, ppBlob, ppErrorBlob);
 		}
 
 		return E_INVALIDARG;

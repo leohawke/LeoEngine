@@ -9,6 +9,7 @@
 #include "../../Engine/Asset/EffectX.h"
 #include "../../Engine/Asset/MaterialX.h"
 #include "../../Engine/Asset/LSLAssetX.h"
+#include "../../Engine/Asset/RayTracingX.h"
 #include "../../Engine/System/NinthTimer.h"
 #include "../../Engine/Core/CameraController.h"
 #include "../../Engine/System/SystemEnvironment.h"
@@ -278,6 +279,9 @@ private:
 				pCameraMainpulator->Zoom(offset);
 			}
 		};
+
+		platform::X::LoadRayTracingShader(Context::Instance().GetRayContext().GetDevice(), "RayTracingScreenSpaceShadow.lsl");
+		platform::X::LoadRayTracingShader(Context::Instance().GetRayContext().GetDevice(), "RayTracingHitGroupCommon.lsl");
 	}
 };
 

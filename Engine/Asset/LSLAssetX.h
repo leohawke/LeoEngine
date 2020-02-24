@@ -19,6 +19,16 @@ namespace platform {
 			});
 		}
 
+		inline typename const scheme::TermNode* SelectNode(const char* name, const scheme::TermNode& node) {
+			for (auto& child : node)
+			{
+				if (child.size() && leo::Access<std::string>(*child.begin()) == name) {
+					return &child;
+				}
+			}
+			return nullptr;
+		}
+
 		inline void ReduceLFToTab(std::string& str, size_t length) {
 			auto index = str.find('\n');
 			while (index != std::string::npos) {

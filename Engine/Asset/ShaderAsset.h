@@ -27,15 +27,49 @@ namespace asset
 		std::size_t hash;
 	};
 
-	class ShaderConstantBufferAsset : public AssetName {
+	class BindDesc
+	{
+	public:
+		enum {Any = -1};
+
+		int GetIndex() const
+		{
+			return register_index;
+		}
+
+		int GetSpace() const
+		{
+			return register_space;
+		}
+
+		void SetIndex(int index)
+		{
+			register_index =index;
+		}
+
+		void SetSpace(int space)
+		{
+			register_space = space;
+		}
+	protected:
+		int register_index =Any;
+		int register_space =Any;
+	};
+
+	class ShaderConstantBufferAsset : public AssetName,public BindDesc {
 	public:
 		DefGetter(const lnothrow, const std::vector<leo::uint32>&, ParamIndices, indices)
 			DefGetter(lnothrow, std::vector<leo::uint32>&, ParamIndicesRef, indices)
+
+		DefGetter(const lnothrow, const std::string&, ElemInfo, elem_info)
+		DefGetter(lnothrow, std::string&, ElemInfoRef, elem_info)
 	private:
 		std::vector<leo::uint32> indices;
+
+		std::string elem_info;
 	};
 
-	class ShaderParameterAsset : public AssetName {
+	class ShaderParameterAsset : public AssetName, public BindDesc {
 	public:
 		DefGetter(const lnothrow, const ShaderParamType&, Type, type)
 			DefGetter(lnothrow, ShaderParamType&, TypeRef, type)
@@ -55,6 +89,8 @@ namespace asset
 		leo::uint32 array_size = 0;
 
 		std::variant<ShaderParamType, std::string>  elem_info =platform::Render::SPT_ElemEmpty;
+
+		
 	};
 
 	class ShaderFragmentAsset {

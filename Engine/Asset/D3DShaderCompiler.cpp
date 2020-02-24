@@ -589,7 +589,7 @@ namespace asset::X::Shader::DXIL {
 		}
 	}
 
-	ShaderBlob CompileAndReflect(const ShaderCompilerInput& input, const std::vector<ShaderMacro>& macros,
+	ShaderBlob CompileAndReflectDXIL(const ShaderCompilerInput& input, const std::vector<ShaderMacro>& macros,
 		leo::uint32 flags, ShaderInfo* pInfo) {
 		using String = leo::Text::String;
 
@@ -639,7 +639,7 @@ namespace asset::X::Shader::DXIL {
 		DxcDllHelper.CreateInstance(CLSID_DxcLibrary, &Library.GetRef());
 
 		COMPtr<IDxcBlobEncoding> TextBlob;
-		Library->CreateBlobWithEncodingFromPinned(input.Code.data(), input.Code.size(), CP_UTF8, &TextBlob.GetRef());
+		Library->CreateBlobWithEncodingFromPinned(input.Code.data(),static_cast<UINT32>(input.Code.size()), CP_UTF8, &TextBlob.GetRef());
 
 		leo::Text::String wSourceName(input.SourceName.data(), input.SourceName.size());
 
@@ -650,9 +650,9 @@ namespace asset::X::Shader::DXIL {
 			(wchar_t*)String(input.EntryPoint).data(),
 			(wchar_t*)String(CompileProfile(input.Type)).data(),
 			args.data(),
-			args.size(),
+			static_cast<UINT32>(args.size()),
 			defs.data(),
-			defs.size(),
+			static_cast<UINT32>(defs.size()),
 			nullptr,
 			&CompileResult.GetRef()
 		));
@@ -778,10 +778,7 @@ namespace asset::X::Shader
 			return blob;
 		}
 
-		if (use_dxc)
-		{
-			return DXIL::CompileAndReflectDXIL(input, macros, flags, pInfo);
-		}
+		return DXIL::CompileAndReflectDXIL(input, macros, flags, pInfo);
 	}
 
 	ShaderBlob Strip(const ShaderBlob& code_blob, ShaderType type, leo::uint32 flags) {

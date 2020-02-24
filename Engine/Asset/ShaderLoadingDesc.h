@@ -3,6 +3,7 @@
 #include <LScheme/LScheme.h>
 #include <LFramework/Core/ValueNode.h>
 #include <LBase/type_traits.hpp>
+#include "../Render/RayTracingDefinitions.h"
 
 #include <filesystem>
 #include <fstream>
@@ -27,6 +28,7 @@ namespace platform::X
 			std::shared_ptr<Data> data;
 			std::shared_ptr<AssetType> asset;
 			std::string shader_code;
+			bool is_ray_tracing;
 		} shader_desc;
 
 		static_assert(std::is_convertible_v<std::add_pointer_t<AssetType>, std::add_pointer_t<asset::ShadersAsset>>);
@@ -69,6 +71,7 @@ namespace platform::X
 			shader_desc.data = std::make_shared<ShaderDesc::Data>();
 			shader_desc.asset = std::make_shared<AssetType>();
 			shader_desc.asset->SetName(shader_desc.path.string());
+			shader_desc.is_ray_tracing = false;
 		}
 
 		void LoadNode()
@@ -79,8 +82,10 @@ namespace platform::X
 		void ParseNode()
 		{
 			auto& term_node = shader_desc.data->term_node;
-			LAssert(leo::Access<std::string>(*term_node.begin()) == "effect", R"(Invalid Format:Not Begin With "effect")");
+			auto tag = leo::Access<std::string>(*term_node.begin());
+			shader_desc.is_ray_tracing = tag == "RayTracing";
 
+			LAssert(tag == "effect" || tag == "RayTracing", R"(Invalid Format")");
 
 			std::vector<std::pair<std::string, scheme::TermNode>> refers;
 			RecursiveReferNode(term_node, refers);
@@ -103,31 +108,7 @@ namespace platform::X
 			};
 
 			ParseMacro(shader_desc.asset->GetMacrosRef(), term_node, false);
-			{
-				auto cbuffer_nodes = SelectNodes("cbuffer", term_node);
-				for (auto& cbuffer_node : cbuffer_nodes) {
-					asset::ShaderConstantBufferAsset cbuffer;
-					cbuffer.SetName(AccessLastNoChild<std::string>(cbuffer_node));
-					auto param_nodes = cbuffer_node.SelectChildren([&](const scheme::TermNode& child) {
-						if (child.empty())
-							return false;
-						try {
-							return  AssetType::GetType(leo::Access<std::string>(*child.begin())) != SPT_shader;
-						}
-						catch (leo::unsupported&) {
-							return false;
-						}
-						});
-					std::vector<leo::uint32> ParamIndices;
-					for (auto& param_node : param_nodes) {
-						auto param_index = ParseParam(param_node, true);
-						ParamIndices.emplace_back(static_cast<leo::uint32>(param_index));
-					}
-					cbuffer.GetParamIndicesRef() = std::move(ParamIndices);
-					shader_desc.asset->EmplaceShaderGenInfo(AssetType::CBUFFER, shader_desc.asset->GetCBuffersRef().size(), std::stoul(cbuffer_node.GetName()));
-					shader_desc.asset->GetCBuffersRef().emplace_back(std::move(cbuffer));
-				}
-			}
+			ParseConstatnBuffers(term_node);
 			//parser params
 			{
 				auto param_nodes = term_node.SelectChildren([&](const scheme::TermNode& child) {
@@ -234,6 +215,55 @@ namespace platform::X
 				return nullptr;
 		};
 
+		void ParseConstatnBuffers(const scheme::TermNode& term_node)
+		{
+			auto cbuffer_nodes = SelectNodes("cbuffer", term_node);
+			for (auto& cbuffer_node : cbuffer_nodes) {
+				asset::ShaderConstantBufferAsset cbuffer;
+				cbuffer.SetName(AccessLastNoChild<std::string>(cbuffer_node));
+
+				auto index_space = ParseBind(cbuffer_node);
+				cbuffer.SetIndex(index_space.first);
+				cbuffer.SetSpace(index_space.second);
+
+				auto param_nodes = cbuffer_node.SelectChildren([&](const scheme::TermNode& child) {
+					if (child.empty())
+						return false;
+					try {
+						return  AssetType::GetType(leo::Access<std::string>(*child.begin())) != SPT_shader;
+					}
+					catch (leo::unsupported&) {
+						return false;
+					}
+					});
+				std::vector<leo::uint32> ParamIndices;
+				for (auto& param_node : param_nodes) {
+					auto param_index = ParseParam(param_node, true);
+					ParamIndices.emplace_back(static_cast<leo::uint32>(param_index));
+				}
+				cbuffer.GetParamIndicesRef() = std::move(ParamIndices);
+
+				shader_desc.asset->EmplaceShaderGenInfo(AssetType::CBUFFER, shader_desc.asset->GetCBuffersRef().size(), std::stoul(cbuffer_node.GetName()));
+				shader_desc.asset->GetCBuffersRef().emplace_back(std::move(cbuffer));
+			}
+			auto cbuffer_template_nodes = SelectNodes("ConstantBuffer", term_node);
+			for (auto& cbuffer_node : cbuffer_template_nodes) {
+				asset::ShaderConstantBufferAsset cbuffer;
+				cbuffer.SetName(AccessLastNoChild<std::string>(cbuffer_node));
+
+				auto index_space = ParseBind(cbuffer_node);
+				cbuffer.SetIndex(index_space.first);
+				cbuffer.SetSpace(index_space.second);
+
+				if (auto elemtype = AccessPtr("elemtype", cbuffer_node)) {
+					cbuffer.GetElemInfoRef() = *elemtype;
+				}
+
+				shader_desc.asset->EmplaceShaderGenInfo(AssetType::CBUFFER, shader_desc.asset->GetCBuffersRef().size(), std::stoul(cbuffer_node.GetName()));
+				shader_desc.asset->GetCBuffersRef().emplace_back(std::move(cbuffer));
+			}
+		}
+
 		void ParseMacro(std::vector<asset::ShaderMacro>& macros, const scheme::TermNode& node, bool topmacro)
 		{
 			//macro (macro (name foo) (value bar))
@@ -271,11 +301,19 @@ namespace platform::X
 			}
 		}
 
+		//Param的名字总是位于Node最后
 		size_t ParseParam(const scheme::TermNode& param_node, bool cbuffer_param) {
 			asset::ShaderParameterAsset param;
 			param.SetName(AccessLastNoChild<std::string>(param_node));
 			//don't need check type again
 			param.GetTypeRef() = AssetType::GetType(leo::Access<std::string>(*param_node.begin()));
+
+			if (!cbuffer_param) {
+				auto index_space = ParseBind(param_node);
+				param.SetIndex(index_space.first);
+				param.SetSpace(index_space.second);
+			}
+
 			if (param.GetType() >= SPT_bool) {
 				if (auto p = leo::AccessChildPtr<std::string>(param_node, "arraysize"))
 					param.GetArraySizeRef() = std::stoul(*p);
@@ -298,6 +336,50 @@ namespace platform::X
 				shader_desc.asset->EmplaceShaderGenInfo(AssetType::PARAM, index, std::stoul(param_node.GetName()));
 			shader_desc.asset->GetParamsRef().emplace_back(std::move(param));
 			return index;
+		}
+
+		std::pair<int,int> ParseBind(const scheme::TermNode& param_node) {
+			std::pair<int, int> index_space{asset::BindDesc::Any,asset::BindDesc::Any };
+
+			//(register {index} (space {sapce}))
+			if (auto pRegNode = X::SelectNode("register", param_node))
+			{
+				auto index = leo::Access<std::string>(*std::next(pRegNode->begin()));
+
+				index_space.first = to_uint8(index);
+
+				if (auto pSpaceNode = X::SelectNode("space", param_node))
+				{
+					auto space = leo::Access<std::string>(*std::next(pSpaceNode->begin()));
+
+					index_space.second = MapSpace(space);
+				}
+			}
+			else if (auto pSpaceNode = X::SelectNode("space", param_node))
+			{
+				auto space = leo::Access<std::string>(*std::next(pSpaceNode->begin()));
+
+				index_space.second = MapSpace(space);
+			}
+
+			return index_space;
+		}
+
+		static int MapSpace(const std::string& value)
+		{
+			auto hash = leo::constfn_hash(value);
+
+			switch (hash)
+			{
+			case leo::constfn_hash("RAY_TRACING_REGISTER_SPACE_LOCAL"):
+				return RAY_TRACING_REGISTER_SPACE_LOCAL;
+			case leo::constfn_hash("RAY_TRACING_REGISTER_SPACE_GLOBAL"):
+				return RAY_TRACING_REGISTER_SPACE_GLOBAL;
+			case leo::constfn_hash("RAY_TRACING_REGISTER_SPACE_SYSTEM"):
+				return RAY_TRACING_REGISTER_SPACE_SYSTEM;
+			}
+
+			return -1;
 		}
 
 		static leo::math::float4 to_float4(const std::string& value) {

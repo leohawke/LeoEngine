@@ -175,8 +175,8 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 		// Hit record indexing and local resources access is disabled when using using this SBT.
 
 	::RayTracingShaderTable::Initializer SBTInitializer = {};
-	SBTInitializer.NumRayGenShaders = RayGenShaders.Identifiers.size();
-	SBTInitializer.NumMissShaders = MissShaders.Identifiers.size();
+	SBTInitializer.NumRayGenShaders =static_cast<leo::uint32>(RayGenShaders.Identifiers.size());
+	SBTInitializer.NumMissShaders = static_cast<leo::uint32>(MissShaders.Identifiers.size());
 	SBTInitializer.NumCallableRecords = 0; // Default SBT does not support callable shaders
 	SBTInitializer.NumHitRecords = 0; // Default SBT does not support indexable hit shaders
 	SBTInitializer.LocalRootDataSize = 0; // Shaders in default SBT are not allowed to access any local resources

@@ -67,6 +67,7 @@ namespace platform_ex::Windows::D3D12 {
 				device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &req_feature_levels, sizeof(req_feature_levels));
 
 				DeviceEx(device, cmd_queue, req_feature_levels.MaxSupportedFeatureLevel);
+				CheckFeatureSupport(device);
 
 				auto desc = adapter.Description();
 				char const * feature_level_str;

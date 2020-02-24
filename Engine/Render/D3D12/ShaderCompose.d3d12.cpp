@@ -266,10 +266,10 @@ void platform_ex::Windows::D3D12::ShaderCompose::CreateRootSignature()
 
 	size_t num_sampler = 0;
 	for (auto i = 0; i != NumTypes; ++i) {
-		QBSS.RegisterCounts[i].NumCBs = CBuffs[i].size();
-		QBSS.RegisterCounts[i].NumSRVs = Srvs[i].size();
-		QBSS.RegisterCounts[i].NumUAVs = Uavs[i].size();
-		QBSS.RegisterCounts[i].NumSamplers = Samplers[i].size();
+		QBSS.RegisterCounts[i].NumCBs = static_cast<leo::uint16>(CBuffs[i].size());
+		QBSS.RegisterCounts[i].NumSRVs = static_cast<leo::uint16>(Srvs[i].size());
+		QBSS.RegisterCounts[i].NumUAVs = static_cast<leo::uint16>(Uavs[i].size());
+		QBSS.RegisterCounts[i].NumSamplers = static_cast<leo::uint16>(Samplers[i].size());
 
 		num_sampler += QBSS.RegisterCounts[i].NumSamplers;
 	}
