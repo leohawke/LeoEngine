@@ -179,8 +179,7 @@ namespace platform_ex::Windows::D3D12 {
 		if (num_heaps > 0)
 			render_cmd_list->SetDescriptorHeaps(num_heaps, heaps);
 
-		//todo conform to rootsignature
-		uint32 root_param_index = 0;
+		auto signature = shader_compose.RootSignature();
 		
 		//SRV/UAV  Bind
 		if (cbv_srv_uav_heap) {
@@ -190,27 +189,25 @@ namespace platform_ex::Windows::D3D12 {
 			auto gpu_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
 			for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
 				if (!shader_compose.Srvs[i].empty()) {
-					render_cmd_list->SetGraphicsRootDescriptorTable(root_param_index, gpu_handle);
+					render_cmd_list->SetGraphicsRootDescriptorTable(signature->SRVRDTBindSlot((ShaderType)i), gpu_handle);
 					for (auto& srv : shader_compose.Srvs[i]) {
 						 (*device)->CopyDescriptorsSimple(1, cpu_handle,srv!=nullptr? srv->GetHandle(): device->null_srv_handle,
 								D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 						cpu_handle.ptr += cbv_srv_uav_desc_size;
 						gpu_handle.ptr += cbv_srv_uav_desc_size;
 					}
-					++root_param_index;
 				}
 			}
 
 			for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
 				if (!shader_compose.Uavs[i].empty()) {
-					render_cmd_list->SetGraphicsRootDescriptorTable(root_param_index, gpu_handle);
+					render_cmd_list->SetGraphicsRootDescriptorTable(signature->UAVRDTBindSlot((ShaderType)i), gpu_handle);
 					for (auto& uav : shader_compose.Uavs[i]) {
 						(*device)->CopyDescriptorsSimple(1, cpu_handle,uav!=nullptr? uav->GetHandle():device->null_uav_handle,
 							D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 						cpu_handle.ptr += cbv_srv_uav_desc_size;
 						gpu_handle.ptr += cbv_srv_uav_desc_size;
 					}
-					++root_param_index;
 				}
 			}
 		}
@@ -223,20 +220,20 @@ namespace platform_ex::Windows::D3D12 {
 
 			for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
 				if (!shader_compose.Srvs[i].empty()) {
-					render_cmd_list->SetGraphicsRootDescriptorTable(root_param_index, gpu_sampler_handle);
+					render_cmd_list->SetGraphicsRootDescriptorTable(signature->SamplerRDTBindSlot((ShaderType)i), gpu_sampler_handle);
 					gpu_sampler_handle.ptr += sampler_desc_size * shader_compose.Samplers[i].size();
-
-					++root_param_index;
 				}
 			}
 		}
 
 		//CBuffer Bind
 		for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
+			int BufferIndex = 0;
 			for (auto& cbuffer : shader_compose.CBuffs[i]) {
 				auto& resource = static_cast<GraphicsBuffer*>(cbuffer)->resource;
+				auto root_param_index = signature->CBVRDBindSlot((ShaderType)i, BufferIndex++);
 				if (resource)
-					render_cmd_list->SetGraphicsRootConstantBufferView(root_param_index++, resource->GetGPUVirtualAddress());
+					render_cmd_list->SetGraphicsRootConstantBufferView(root_param_index, resource->GetGPUVirtualAddress());
 				else
 					render_cmd_list->SetGraphicsRootConstantBufferView(root_param_index, 0);
 			}
