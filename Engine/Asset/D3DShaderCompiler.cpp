@@ -123,6 +123,7 @@ void FillD3D12Reflect(ID3D1xShaderReflection* pReflection, ShaderInfo* pInfo,Sha
 			UniqueAddByName(pInfo->ConstantBufferInfos,std::move(ConstantBufferInfo));
 		}
 	}
+	pInfo->ResourceCounts.NumCBs = static_cast<leo::uint16>(pInfo->ConstantBufferInfos.size());
 
 	for (UINT i = 0; i != desc.BoundResources; ++i) {
 		D3D12_SHADER_INPUT_BIND_DESC input_bind_desc;
@@ -244,6 +245,8 @@ void FillD3D11Reflect(ID3D11ShaderReflection* pReflection, ShaderInfo* pInfo, Sh
 			pInfo->ConstantBufferInfos.emplace_back(std::move(ConstantBufferInfo));
 		}
 	}
+
+	pInfo->ResourceCounts.NumCBs =static_cast<leo::uint16>(pInfo->ConstantBufferInfos.size());
 
 	for (UINT i = 0; i != desc.BoundResources; ++i) {
 		D3D11_SHADER_INPUT_BIND_DESC input_bind_desc;
