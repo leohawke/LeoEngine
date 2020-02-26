@@ -525,6 +525,9 @@
     <ClInclude Include="Asset\RayTracingX.h">
       <Filter>Asset</Filter>
     </ClInclude>
+    <ClInclude Include="Render\D3D12\BuiltInRayTracingShaders.h">
+      <Filter>Render\D3D12\RayTracing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
