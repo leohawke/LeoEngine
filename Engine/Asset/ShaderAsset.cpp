@@ -169,6 +169,36 @@ std::string FormatBindDesc(ResourceRegisterSlotAllocator& allocaotr, const BindD
 	return hlsl;
 }
 
+bool asset::RequireStructElemType(ShaderParamType type)
+{
+	switch (type)
+	{
+	case SPT_AppendStructuredBuffer:
+	case SPT_ConsumeStructuredBuffer:
+	case SPT_StructuredBuffer:
+	case SPT_rwstructured_buffer:
+	case SPT_ConstatnBuffer:
+		return true;
+	}
+
+	return false;
+}
+
+
+bool asset::RequireElemType(ShaderParamType type)
+{
+	if (type >= SPT_rwtexture1D && type <= SPT_rwtexture2DArray)
+		return true;
+
+	if (RequireStructElemType(type))
+		return true;
+
+	if (type == SPT_buffer || type == SPT_rwbuffer)
+		return true;
+
+	return false;
+}
+
 std::string asset::ShadersAsset::GenHLSLShader() const
 {
 	using std::endl;
@@ -212,6 +242,8 @@ std::string asset::ShadersAsset::GenHLSLShader() const
 			auto& cbuffer = cbuffers[local_index];
 
 			bool template_synatx = !cbuffer.GetElemInfo().empty();
+
+			lconstraint(!template_synatx || !cbuffer.GetElemInfo().empty());
 
 			if (!template_synatx)
 				ss << leo::sfmt("cbuffer %s", cbuffer.GetName().c_str()) << endl;
@@ -257,6 +289,9 @@ std::string asset::ShadersAsset::GenHLSLShader() const
 					return param.GetElemUserType();
 				}
 			}();
+
+			lconstraint(!RequireElemType(param.GetType())|| !elem_type.empty());
+
 			if (param.GetType() <= SPT_ConsumeStructuredBuffer && !elem_type.empty()) {
 				ss << leo::sfmt("%s<%s> %s", GetTypeName(param.GetType()).c_str(),
 					elem_type.c_str(), param.GetName().c_str())

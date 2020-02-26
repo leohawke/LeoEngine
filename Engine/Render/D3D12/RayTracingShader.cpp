@@ -59,18 +59,18 @@ void QuantizeBoundShaderState(
 
 RayTracingShader::RayTracingShader(const platform::Render::RayTracingShaderInitializer& initializer)
 {
-	auto& blob = initializer.Blob.GetBlob();
+	auto& blob = initializer.pBlob->GetBlob();
 	ShaderByteCode.first = std::make_unique<byte[]>(blob.second);
 	ShaderByteCode.second = blob.second;
 	std::memcpy(ShaderByteCode.first.get(), blob.first.get(), blob.second);
 
-	ResourceCounts = initializer.Blob.GetInfo().ResourceCounts;
+	ResourceCounts = initializer.pBlob->GetInfo().ResourceCounts;
 
 	auto& Device = Context::Instance().GetDevice();
 
 	const D3D12_RESOURCE_BINDING_TIER Tier = Device.GetResourceBindingTier();
 	QuantizedBoundShaderState QBSS;
-	QuantizeBoundShaderState(initializer.Blob.GetShaderType(), Tier, this, QBSS);
+	QuantizeBoundShaderState(initializer.pBlob->GetShaderType(), Tier, this, QBSS);
 
 	pRootSignature = Device.CreateRootSignature(QBSS);
 

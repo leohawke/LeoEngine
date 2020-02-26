@@ -206,4 +206,7 @@ namespace asset
 		std::vector<std::tuple<GenSlot, leo::uint32, leo::uint32>> gen_indices;
 	};
 
+	bool RequireElemType(ShaderParamType type);
+
+	bool RequireStructElemType(ShaderParamType type);
 }

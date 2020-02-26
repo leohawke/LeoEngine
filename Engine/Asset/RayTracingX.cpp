@@ -2,12 +2,14 @@
 #include "ShaderAsset.h"
 #include "D3DShaderCompiler.h"
 #include "../Core/AssetResourceScheduler.h"
+#include "LFramework/Helper/ShellHelper.h"
 #include "ShaderLoadingDesc.h"
 #include <unordered_map>
 
 using namespace platform;
 using namespace asset;
 using namespace platform::Render::Shader;
+using namespace leo;
 
 struct RayTracingShaderAsset :public asset::ShadersAsset,public asset::AssetName
 {
@@ -113,6 +115,7 @@ private:
 
 			auto pInfo = std::make_unique<ShaderInfo>(input.Type);
 
+			LFL_DEBUG_DECL_TIMER(Commpile, sfmt("CompileAndReflect Type:%s ", input.EntryPoint.data()));
 			auto blob =asset::X::Shader::CompileAndReflect(input, final_macros,
 #ifndef NDEBUG
 				D3DFlags::D3DCOMPILE_DEBUG
@@ -128,10 +131,33 @@ private:
 	}
 };
 
+#include "../Render/IContext.h"
+#include "../Render/IRayContext.h"
+
+using namespace platform::Render;
 
 std::shared_ptr<Render::RayTracingShader> platform::X::LoadRayTracingShader(Render::RayDevice& Device, const path& filepath)
 {
 	auto pAsset = AssetResourceScheduler::Instance().SyncLoad<RayTracingShaderLoadingDesc>(filepath);
+
+	auto& RayDevice = Context::Instance().GetRayContext().GetDevice();
+
+	for (auto& pair : pAsset->EntryPoints)
+	{
+		auto blob_hash = leo::constfn_hash(pair.second);
+
+		RayTracingShaderInitializer initializer;
+
+		initializer.pBlob = &(pAsset->GetBlob(blob_hash));
+
+		auto RayTracingInfos = initializer.pBlob->GetInfo().RayTracingInfos.value();
+
+		initializer.EntryPoint = RayTracingInfos.EntryPoint;
+		initializer.AnyHitEntryPoint = RayTracingInfos.AnyHitEntryPoint;
+		initializer.IntersectionEntryPoint = RayTracingInfos.IntersectionEntryPoint;
+
+		return shared_raw_robject(RayDevice.CreateRayTracingSahder(initializer));
+	}
 
 	return std::shared_ptr<Render::RayTracingShader>();
 }

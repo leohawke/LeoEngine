@@ -619,17 +619,22 @@ namespace asset::X::Shader::DXIL {
 		}
 
 		std::vector<std::pair<String, String>> def_holder;
-		std::vector<DxcDefine> defs;
 		for (auto& macro : macros) {
 			def_holder.emplace_back(String(macro.first.c_str(), macro.first.size()), String(macro.second.c_str(), macro.second.size()));
+		}
+		
+		std::vector<DxcDefine> defs;
+		for (auto& def : def_holder)
+		{
 			DxcDefine define;
-			define.Name = (wchar_t*)def_holder.back().first.c_str();
-			define.Value = (wchar_t*)def_holder.back().second.c_str();
+			define.Name = (wchar_t*)def.first.c_str();
+			define.Value = (wchar_t*)def.second.c_str();
 			defs.emplace_back(define);
 		}
 
 		std::vector<const wchar_t*> args;
-		D3DCreateDXCArguments(args,(wchar_t*)String(RayTracingExports).data(), flags, GetAutoBindingSpace(input.Type));
+		String wRayTracingExports(RayTracingExports);
+		D3DCreateDXCArguments(args,(wchar_t*)wRayTracingExports.data(), flags, GetAutoBindingSpace(input.Type));
 
 		dxc::DxcDllSupport& DxcDllHelper = GetDxcDllHelper();
 
@@ -670,13 +675,11 @@ namespace asset::X::Shader::DXIL {
 		}
 
 		platform_ex::COMPtr<ID3DBlob> code_blob;
-		if (SUCCEEDED(CompileResultCode))
-		{
-			CheckHResult(CompileResult->GetResult((IDxcBlob**)&code_blob.GetRef()));
-		}
+		CheckHResult(CompileResult->GetResult((IDxcBlob**)&code_blob.GetRef()));
 
 		if (pInfo)
 		{
+			lconstraint(code_blob.Get());
 			if (bIsRayTracingShader)
 			{
 				COMPtr<ID3D12LibraryReflection> LibraryReflection;
