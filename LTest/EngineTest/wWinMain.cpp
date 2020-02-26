@@ -280,8 +280,9 @@ private:
 			}
 		};
 
+		platform::X::LoadRayTracingShader(Context::Instance().GetRayContext().GetDevice(), "RayTracingDefaultHitShaders.lsl");
 		platform::X::LoadRayTracingShader(Context::Instance().GetRayContext().GetDevice(), "RayTracingScreenSpaceShadow.lsl");
-		platform::X::LoadRayTracingShader(Context::Instance().GetRayContext().GetDevice(), "RayTracingHitGroupCommon.lsl");
+		
 	}
 };
 

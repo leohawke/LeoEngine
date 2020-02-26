@@ -212,6 +212,8 @@
     <None Include="Render\Effect\PostProcess.lsl" />
     <None Include="Render\Effect\Util.lsl" />
     <None Include="Render\Material\FPDS.mat.lsl" />
+    <None Include="Shaders\RayTracing\RayTracingCommon.lsl" />
+    <None Include="Shaders\RayTracing\RayTracingDefaultHitShaders.lsl" />
     <None Include="Shaders\RayTracing\RayTracingScreenSpaceShadow.lsl" />
     <None Include="Shaders\RayTracing\RayTracingBuiltInResources.lsl" />
     <None Include="Shaders\RayTracing\RayTracingHitGroupCommon.lsl" />

@@ -1,4 +1,5 @@
 (RayTracing
+	(refer RayTracingCommon.lsl)
 	(RaytracingAccelerationStructure (space RAY_TRACING_REGISTER_SPACE_GLOBAL) TLAS)
 	(RWTexture2D  (elemtype float) (space RAY_TRACING_REGISTER_SPACE_GLOBAL) Output)
 	(texture2D (space RAY_TRACING_REGISTER_SPACE_GLOBAL) Depth)
@@ -11,13 +12,7 @@
 "
 static const float FLT_MAX = asfloat(0x7F7FFFFF);
 
-struct RayPayload
-{
-	float T;
-};
-
-[shader(\"raygeneration\")]
-void RayGen()
+RAY_TRACING_ENTRY_RAYGEN(RayGen)
 {
 		
 	uint2 DTid = DispatchRaysIndex().xy;
@@ -44,11 +39,14 @@ void RayGen()
         direction,
         FLT_MAX };
 
-	RayPayload payload = {FLT_MAX};
+	FMinimalPayload payload = {-1};
 
 	TraceRay(TLAS, RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH, ~0,0,1,0, rayDesc, payload);
 
-	Output[DispatchRaysIndex().xy] = 1;
+	if(payload.IsHit())
+		Output[DispatchRaysIndex().xy] = 1;
+	else
+		Output[DispatchRaysIndex().xy] = 0;
 }
 "
 	)

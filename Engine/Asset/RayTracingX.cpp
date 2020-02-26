@@ -82,7 +82,7 @@ private:
 		}
 		if (auto pRayHitGroup = AccessPtr("rayhitgroup_shader", node))
 		{
-			GetAsset()->EntryPoints.emplace(ShaderType::RayHitGroup, *pRayHitGroup);
+			GetAsset()->EntryPoints.emplace(ShaderType::RayHitGroup, scheme::Deliteralize(*pRayHitGroup));
 		}
 		if (auto pRayCallable = AccessPtr("raycallable_shader", node))
 		{
