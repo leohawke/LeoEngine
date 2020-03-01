@@ -25,6 +25,8 @@ namespace platform_ex::Windows::D3D12 {
 
 		platform::Render::ShaderCodeResourceCounts ResourceCounts;
 	};
+
+	bool IsRayTracingShader(platform::Render::ShaderType type);
 }
 
 #endif

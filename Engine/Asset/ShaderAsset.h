@@ -8,6 +8,7 @@
 #include <vector>
 #include <utility>
 #include <variant>
+#include <filesystem>
 
 #include "../Render/PipleState.h"
 #include "../Render/Effect/Effect.hpp"
@@ -210,3 +211,10 @@ namespace asset
 
 	bool RequireStructElemType(ShaderParamType type);
 }
+
+namespace platform::X {
+	using path = std::filesystem::path;
+
+	std::string GenHlslShader(const path& filepath);
+}
+

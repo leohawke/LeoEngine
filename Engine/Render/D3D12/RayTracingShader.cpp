@@ -59,22 +59,37 @@ void QuantizeBoundShaderState(
 
 RayTracingShader::RayTracingShader(const platform::Render::RayTracingShaderInitializer& initializer)
 {
-	auto& blob = initializer.pBlob->GetBlob();
+	auto& blob = *initializer.pBlob;
 	ShaderByteCode.first = std::make_unique<byte[]>(blob.second);
 	ShaderByteCode.second = blob.second;
 	std::memcpy(ShaderByteCode.first.get(), blob.first.get(), blob.second);
 
-	ResourceCounts = initializer.pBlob->GetInfo().ResourceCounts;
+	ResourceCounts = initializer.pInfo->ResourceCounts;
 
 	auto& Device = Context::Instance().GetDevice();
 
 	const D3D12_RESOURCE_BINDING_TIER Tier = Device.GetResourceBindingTier();
 	QuantizedBoundShaderState QBSS;
-	QuantizeBoundShaderState(initializer.pBlob->GetShaderType(), Tier, this, QBSS);
+	QuantizeBoundShaderState(initializer.pInfo->Type, Tier, this, QBSS);
 
 	pRootSignature = Device.CreateRootSignature(QBSS);
 
-	EntryPoint = initializer.EntryPoint;
-	AnyHitEntryPoint = initializer.AnyHitEntryPoint;
-	IntersectionEntryPoint = initializer.IntersectionEntryPoint;
+	auto RayTracingInfos = initializer.pInfo->RayTracingInfos.value();
+
+	EntryPoint = RayTracingInfos.EntryPoint;
+	AnyHitEntryPoint = RayTracingInfos.AnyHitEntryPoint;
+	IntersectionEntryPoint = RayTracingInfos.IntersectionEntryPoint;
+}
+
+bool platform_ex::Windows::D3D12::IsRayTracingShader(platform::Render::ShaderType type)
+{
+	switch (type)
+	{
+	case platform::Render::Shader::RayGen:
+	case platform::Render::Shader::RayMiss:
+	case platform::Render::Shader::RayHitGroup:
+	case platform::Render::Shader::RayCallable:
+		return true;
+	}
+	return false;
 }

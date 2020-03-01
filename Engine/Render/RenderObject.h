@@ -29,8 +29,7 @@ namespace platform::Render {
 		}
 
 	private:
-		std::atomic_uint32_t NumRefs;
-
+		std::atomic_uint32_t NumRefs = 1;
 	};
 
 	struct RObjectDeleter

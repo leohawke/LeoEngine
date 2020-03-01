@@ -113,10 +113,8 @@ namespace platform::Render {
 	class RayTracingShaderInitializer
 	{
 	public:
-		const asset::ShaderBlobAsset* pBlob;
-		leo::Text::String EntryPoint;
-		leo::Text::String AnyHitEntryPoint;
-		leo::Text::String IntersectionEntryPoint;
+		const platform::Render::ShaderBlob* pBlob;
+		const platform::Render::ShaderInfo* pInfo;
 	};
 
 	class RayDevice

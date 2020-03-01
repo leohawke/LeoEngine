@@ -148,13 +148,10 @@ std::shared_ptr<Render::RayTracingShader> platform::X::LoadRayTracingShader(Rend
 
 		RayTracingShaderInitializer initializer;
 
-		initializer.pBlob = &(pAsset->GetBlob(blob_hash));
+		auto& blob_asset = pAsset->GetBlob(blob_hash);
 
-		auto RayTracingInfos = initializer.pBlob->GetInfo().RayTracingInfos.value();
-
-		initializer.EntryPoint = RayTracingInfos.EntryPoint;
-		initializer.AnyHitEntryPoint = RayTracingInfos.AnyHitEntryPoint;
-		initializer.IntersectionEntryPoint = RayTracingInfos.IntersectionEntryPoint;
+		initializer.pBlob = &(blob_asset.GetBlob());
+		initializer.pInfo = &(blob_asset.GetInfo());
 
 		return shared_raw_robject(RayDevice.CreateRayTracingSahder(initializer));
 	}

@@ -372,7 +372,7 @@ public:
 	uint32_t type_code(std::string const& name) const
 	{
 		auto lowername = name;
-		std::transform(lowername.begin(), lowername.end(), lowername.begin(), std::tolower);
+		leo::to_lower(lowername);
 		auto const name_hash = leo::constfn_hash(lowername);
 		for (uint32_t i = 0; i < hashs.size(); ++i)
 		{
@@ -445,7 +445,7 @@ public:
 		types.emplace_back("float4x4");
 
 		for (auto type : types) {
-			std::transform(type.begin(), type.end(), type.begin(), std::tolower);
+			leo::to_lower(type);
 			hashs.emplace_back(leo::constfn_hash(type));
 		}
 	}
@@ -465,4 +465,80 @@ std::string asset::ShadersAsset::GetTypeName(ShaderParamType type) {
 ShaderParamType asset::ShadersAsset::GetType(const std::string& name)
 {
 	return (ShaderParamType)type_define::Instance().type_code(name);
+}
+
+#include "../Core/AssetResourceScheduler.h"
+#include "LFramework/Helper/ShellHelper.h"
+#include "ShaderLoadingDesc.h"
+using namespace platform::X;
+
+using namespace platform;
+using namespace asset;
+using namespace platform::Render::Shader;
+using namespace leo;
+
+struct HLSLAsset :public asset::ShadersAsset, public asset::AssetName
+{
+	std::string Code;
+};
+
+class HLSLLoadingDesc : public asset::AssetLoading<HLSLAsset>, public platform::X::ShaderLoadingDesc<HLSLAsset> {
+private:
+	using Super = platform::X::ShaderLoadingDesc<HLSLAsset>;
+public:
+	explicit HLSLLoadingDesc(platform::X::path const& shaderpath)
+		:Super(shaderpath)
+	{
+	}
+
+	std::size_t Type() const override {
+		return leo::type_id<HLSLLoadingDesc>().hash_code();
+	}
+
+	std::size_t Hash() const override {
+		return leo::hash_combine_seq(Type(), Super::Hash());
+	}
+
+	const asset::path& Path() const override {
+		return Super::Path();
+	}
+
+	std::experimental::generator<std::shared_ptr<AssetType>> Coroutine() override {
+		co_yield PreCreate();
+		co_yield LoadNode();
+		co_yield ParseNode();
+		co_yield CreateAsset();
+	}
+private:
+	std::shared_ptr<AssetType> PreCreate()
+	{
+		Super::PreCreate();
+		return nullptr;
+	}
+
+	std::shared_ptr<AssetType> LoadNode()
+	{
+		Super::LoadNode();
+		return  nullptr;
+	}
+
+	std::shared_ptr<AssetType> ParseNode()
+	{
+		Super::ParseNode();
+		return nullptr;
+	}
+
+	std::shared_ptr<AssetType> CreateAsset()
+	{
+		GetAsset()->Code = GetCode();
+		return ReturnValue();
+	}
+};
+
+
+std::string platform::X::GenHlslShader(const path& filepath)
+{
+	auto pAsset = AssetResourceScheduler::Instance().SyncLoad<HLSLLoadingDesc>(filepath);
+
+	return pAsset->Code;;
 }

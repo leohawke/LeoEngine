@@ -1,13 +1,19 @@
 #include "RayTracingPipelineState.h"
 #include "D3D12RayTracing.h"
 #include "Context.h"
+#include "BuiltInRayTracingShaders.h"
 
 using namespace platform_ex::Windows::D3D12;
 
 RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTracingPipelineStateInitializer& initializer)
 {
+	platform::Render::RayTracingShader* DefaultHitShader = GetBuildInRayTracingShader<DefaultCHS>();
+	platform::Render::RayTracingShader* DefaultHitGroupTable[] = { DefaultHitShader };
+
 	//TODO:facll back to default ones if none were provided
-	leo::span<platform::Render::RayTracingShader*> InitializerHitGroups = initializer.HitGroupTable;
+	leo::span<platform::Render::RayTracingShader*> InitializerHitGroups = initializer.HitGroupTable.empty()?
+		leo::make_span(DefaultHitGroupTable):
+		initializer.HitGroupTable;
 	leo::span<platform::Render::RayTracingShader*> InitializerMissShaders = initializer.MissTable;
 
 	leo::span<platform::Render::RayTracingShader*> InitializerRayGenShaders = initializer.RayGenTable;
