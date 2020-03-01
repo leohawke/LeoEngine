@@ -93,4 +93,6 @@ void platform_ex::Windows::D3D12::CompileGlobalShaderMap()
 	}
 }
 
-IMPLEMENT_SHADER(DefaultCHS, "RayTracingDefaultHitShaders.lsl", "DefaultCHS ", platform::Render::RayHitGroup);
+IMPLEMENT_SHADER(DefaultCHS, "RayTracingBuiltInShaders.lsl", "DefaultCHS ", platform::Render::RayHitGroup);
+
+IMPLEMENT_SHADER(DefaultMS, "RayTracingBuiltInShaders.lsl", "DefaultMS ", platform::Render::RayMiss);

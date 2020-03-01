@@ -646,6 +646,9 @@
     <None Include="Shaders\RayTracing\RayTracingDefaultHitShaders.lsl">
       <Filter>Shaders\RayTracing</Filter>
     </None>
+    <None Include="Shaders\RayTracing\RayTracingBuiltInShaders.lsl">
+      <Filter>Shaders\RayTracing</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Render\Effect\Bilt.lsl">
