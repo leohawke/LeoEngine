@@ -30,6 +30,8 @@ namespace platform_ex::Windows::D3D12 {
 		bool Completed(uint64 id);
 
 		uint64 GetLastCompletedFenceFast() const { return last_completed_val; };
+
+		uint64 GetCurrentFence() const { return fence_val; }
 	private:
 		COMPtr<ID3D12Fence> fence;
 		UniqueNtHandle fence_event;

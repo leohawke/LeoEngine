@@ -14,6 +14,7 @@ namespace platform_ex::Windows::D3D12 {
 	class Device;
 	class Context;
 	class RayDevice;
+	class RayContext;
 }
 
 using namespace leo::inttype;
@@ -157,6 +158,7 @@ COMPtr<ID3D12StateObject> CreateRayTracingStateObject(
 using D3D12Context = Windows::D3D12::Context;
 using D3D12Device = Windows::D3D12::Device;
 using D3D12RayDevice = Windows::D3D12::RayDevice;
+using D3D12RayContext = Windows::D3D12::RayContext;
 using D3D12RayTracingPipelineState = platform_ex::Windows::D3D12::RayTracingPipelineState;
 
 class RayDeviceChild
@@ -226,6 +228,7 @@ struct RayTracingDescriptorHeap :RayDeviceChild
 		return Result;
 	}
 
+	void UpdateSyncPoint();
 
 	ID3D12DescriptorHeap* D3D12Heap = nullptr;
 	uint32 MaxNumDescriptors = 0;
@@ -236,6 +239,38 @@ struct RayTracingDescriptorHeap :RayDeviceChild
 	D3D12_GPU_DESCRIPTOR_HANDLE GPUBase = {};
 
 	RayTracingDescriptorHeapCache::Entry HeapCacheEntry;
+};
+
+class RayTracingDescriptorCache : public RayDeviceChild
+{
+public:
+	RayTracingDescriptorCache(D3D12RayDevice* Device)
+		:RayDeviceChild(Device),
+		ViewHeap(Device),
+		SamplerHeap(Device)
+	{}
+
+	void Init(uint32 NumViewDescriptors, uint32 NumSamplerDescriptors)
+	{
+		ViewHeap.Init(NumViewDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		SamplerHeap.Init(NumSamplerDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+	}
+
+	void UpdateSyncPoint()
+	{
+		ViewHeap.UpdateSyncPoint();
+		SamplerHeap.UpdateSyncPoint();
+	}
+
+	void SetDescriptorHeaps(D3D12RayContext& Context);
+
+	uint32 GetDescriptorTableBaseIndex(const D3D12_CPU_DESCRIPTOR_HANDLE* Descriptors, uint32 NumDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE Type);
+private:
+	RayTracingDescriptorHeap ViewHeap;
+	RayTracingDescriptorHeap SamplerHeap;
+
+	std::map<uint64, uint32> ViewDescriptorTableCache;
+	std::map<uint64, uint32> SamplerDescriptorTableCache;
 };
 
 class RayTracingShaderTable
@@ -270,13 +305,28 @@ public:
 		uint32 MaxViewDescriptorsPerRecord = 0;
 	};
 
-	void Init(const Initializer& initializer)
+	void Init(const Initializer& initializer,D3D12RayDevice* Device)
 	{
 		LAssert(initializer.LocalRootDataSize <= 4096, "The maximum size of a local root signature is 4KB."); // as per section 4.22.1 of DXR spec v1.0
 		LAssert(initializer.NumRayGenShaders >= 1, "All shader tables must contain at least one raygen shader.");
 
 		LocalRecordSizeUnaligned = ShaderIdentifierSize + initializer.LocalRootDataSize;
 		LocalRecordStride = RoundUpToNextMultiple(LocalRecordSizeUnaligned, D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT);
+
+		// Custom descriptor cache is only required when local resources may be bound.
+		// If only global resources are used, then transient descriptor cache can be used.
+		const bool bNeedsDescriptorCache = (initializer.NumHitRecords + initializer.NumCallableRecords) * initializer.LocalRootDataSize != 0;
+		if (bNeedsDescriptorCache)
+		{
+			// RT descriptors aren't sub-allocated from the global view descriptor heap.
+			const uint32 MinNumViewDescriptors = 1024;
+
+			auto NumViewDescriptors = std::max(MinNumViewDescriptors, std::min<uint32>(initializer.NumHitRecords * initializer.MaxViewDescriptorsPerRecord, D3D12_MAX_SHADER_VISIBLE_DESCRIPTOR_HEAP_SIZE_TIER_1));
+			const uint32 NumSamplerDescriptors = D3D12_MAX_SHADER_VISIBLE_SAMPLER_HEAP_SIZE;
+
+			DescriptorCache = new RayTracingDescriptorCache(Device);
+			DescriptorCache->Init(NumViewDescriptors, NumSamplerDescriptors);
+		}
 
 		//how about descriptor
 
@@ -426,6 +476,8 @@ public:
 	std::vector<aligned_byte> Data;
 
 	shared_ptr < Windows::D3D12::GraphicsBuffer> Buffer;
+
+	RayTracingDescriptorCache* DescriptorCache = nullptr;
 
 	bool bIsDirty = true;
 };

@@ -1,6 +1,7 @@
 #include "D3D12RayTracing.h"
 #include "Context.h"
 #include "RayTracingPipelineState.h"
+#include "../../Core/Hash/CityHash.h"
 
 void RayTracingShaderTable::UploadToGPU(Windows::D3D12::Device* Device)
 {
@@ -251,4 +252,50 @@ uint32 RayTracingDescriptorHeap::Allocate(uint32 InNumDescriptors)
 	uint32 Result = NumAllocatedDescriptors;
 	NumAllocatedDescriptors += InNumDescriptors;
 	return Result;
+}
+
+void RayTracingDescriptorHeap::UpdateSyncPoint()
+{
+	auto& Fence = Device->GetFence();
+
+	HeapCacheEntry.FenceValue = std::max(HeapCacheEntry.FenceValue, Fence.GetCurrentFence());
+}
+
+void RayTracingDescriptorCache::SetDescriptorHeaps(D3D12RayContext& Context)
+{
+	ID3D12DescriptorHeap* Heaps[2] =
+	{
+		ViewHeap.D3D12Heap,
+		SamplerHeap.D3D12Heap
+	};
+
+	Context.RayTracingCommandList()->SetDescriptorHeaps(2, Heaps);
+}
+
+uint32 RayTracingDescriptorCache::GetDescriptorTableBaseIndex(const D3D12_CPU_DESCRIPTOR_HANDLE* Descriptors, uint32 NumDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE Type)
+{
+	auto& Heap = (Type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) ? ViewHeap : SamplerHeap;
+	auto& Map = (Type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) ? ViewDescriptorTableCache : SamplerDescriptorTableCache;
+
+	const uint64 Key = CityHash64((const char*)Descriptors, sizeof(Descriptors[0]) * NumDescriptors);
+
+	uint32 DescriptorTableBaseIndex = ~0u;
+	auto itr = Map.find(Key);
+
+	if (itr != Map.end())
+	{
+		DescriptorTableBaseIndex = itr->second;
+	}
+	else
+	{
+		DescriptorTableBaseIndex = Heap.Allocate(NumDescriptors);
+
+		D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor = Heap.GetDescriptorCPU(DescriptorTableBaseIndex);
+		LAssert(Heap.CPUBase.ptr, "Ray tracing descriptor heap of type assigned to descriptor cache is invalid.");
+		Device->GetRayTracingDevice()->CopyDescriptors(1, &DestDescriptor, &NumDescriptors, NumDescriptors, Descriptors, nullptr, Type);
+
+		Map.emplace(Key, DescriptorTableBaseIndex);
+	}
+
+	return DescriptorTableBaseIndex;
 }
