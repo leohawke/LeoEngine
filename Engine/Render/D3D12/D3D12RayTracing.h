@@ -321,7 +321,8 @@ public:
 			// RT descriptors aren't sub-allocated from the global view descriptor heap.
 			const uint32 MinNumViewDescriptors = 1024;
 
-			auto NumViewDescriptors = std::max(MinNumViewDescriptors, std::min<uint32>(initializer.NumHitRecords * initializer.MaxViewDescriptorsPerRecord, D3D12_MAX_SHADER_VISIBLE_DESCRIPTOR_HEAP_SIZE_TIER_1));
+			auto NumViewDescriptors =  std::clamp<uint32>(initializer.NumHitRecords * initializer.MaxViewDescriptorsPerRecord, MinNumViewDescriptors, D3D12_MAX_SHADER_VISIBLE_DESCRIPTOR_HEAP_SIZE_TIER_1);
+			
 			const uint32 NumSamplerDescriptors = D3D12_MAX_SHADER_VISIBLE_SAMPLER_HEAP_SIZE;
 
 			DescriptorCache = new RayTracingDescriptorCache(Device);
@@ -517,6 +518,6 @@ struct RayTracingShaderBindings
 	platform::Render::Texture* UAVs[8] = {};
 };
 
-void DispatchRays(ID3D12GraphicsCommandList4* CommandList,const RayTracingShaderBindings& GlobalBindings, const D3D12RayTracingPipelineState* Pipeline,
+void DispatchRays(D3D12RayContext* CommandContext,const RayTracingShaderBindings& GlobalBindings, const D3D12RayTracingPipelineState* Pipeline,
 	uint32 RayGenShaderIndex, RayTracingShaderTable* OptShaderTable, const D3D12_DISPATCH_RAYS_DESC& DispatchDesc);
 

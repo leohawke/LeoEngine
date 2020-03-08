@@ -126,13 +126,7 @@ COMPtr<ID3D12StateObject> CreateRayTracingStateObject(ID3D12Device5* RayTracingD
 	return Result;
 }
 
-void DispatchRays(ID3D12GraphicsCommandList4* CommandList, const RayTracingShaderBindings& GlobalBindings, const D3D12RayTracingPipelineState* Pipeline,
-	uint32 RayGenShaderIndex, RayTracingShaderTable* OptShaderTable, const D3D12_DISPATCH_RAYS_DESC& DispatchDesc)
-{
-	CommandList->SetComputeRootSignature(Pipeline->GetRootSignature());
 
-	auto RayGenShader = Pipeline->RayGenShaders.Shaders[RayGenShaderIndex].get();
-}
 
 RayTracingDescriptorHeapCache::~RayTracingDescriptorHeapCache()
 {
@@ -298,4 +292,73 @@ uint32 RayTracingDescriptorCache::GetDescriptorTableBaseIndex(const D3D12_CPU_DE
 	}
 
 	return DescriptorTableBaseIndex;
+}
+
+struct FD3D12RayTracingGlobalResourceBinder
+{
+	FD3D12RayTracingGlobalResourceBinder(D3D12RayContext& InCommandContext)
+		: CommandContext(InCommandContext)
+	{
+	}
+
+	void SetRootCBV(uint32 BaseSlotIndex, uint32 DescriptorIndex, D3D12_GPU_VIRTUAL_ADDRESS Address)
+	{
+		CommandContext.RayTracingCommandList()->SetComputeRootConstantBufferView(BaseSlotIndex + DescriptorIndex, Address);
+	}
+
+	void SetRootSRV(uint32 BaseSlotIndex, uint32 DescriptorIndex, D3D12_GPU_VIRTUAL_ADDRESS Address)
+	{
+		CommandContext.RayTracingCommandList()->SetComputeRootShaderResourceView(BaseSlotIndex + DescriptorIndex, Address);
+	}
+
+	void SetRootDescriptorTable(uint32 SlotIndex, D3D12_GPU_DESCRIPTOR_HANDLE DescriptorTable)
+	{
+		CommandContext.RayTracingCommandList()->SetComputeRootDescriptorTable(SlotIndex, DescriptorTable);
+	}
+
+	D3D12_GPU_VIRTUAL_ADDRESS CreateTransientConstantBuffer(const void* Data, uint32 DataSize)
+	{
+		LAssert(0, "Loose parameters and transient constant buffers are not implemented for global ray tracing shaders (raygen, miss, callable)");
+		return (D3D12_GPU_VIRTUAL_ADDRESS)0;
+	}
+
+	D3D12RayContext& CommandContext;
+};
+
+template <typename ResourceBinderType>
+static void SetRayTracingShaderResources(
+	D3D12RayContext& CommandContext,
+	const platform_ex::Windows::D3D12::RayTracingShader* Shader,
+	const RayTracingShaderBindings& ResourceBindings,
+	RayTracingDescriptorCache& DescriptorCache,
+	ResourceBinderType& Binder);
+
+void DispatchRays(D3D12RayContext* CommandContext, const RayTracingShaderBindings& GlobalBindings, const D3D12RayTracingPipelineState* Pipeline,
+	uint32 RayGenShaderIndex, RayTracingShaderTable* OptShaderTable, const D3D12_DISPATCH_RAYS_DESC& DispatchDesc)
+{
+	CommandContext->RayTracingCommandList()->SetComputeRootSignature(Pipeline->GetRootSignature());
+
+	auto RayGenShader = Pipeline->RayGenShaders.Shaders[RayGenShaderIndex].get();
+
+	if (OptShaderTable && OptShaderTable->DescriptorCache)
+	{
+		//TODO
+	}
+	else
+	{
+		RayTracingDescriptorCache TransientDescriptorCache(&CommandContext->GetDevice());
+
+		TransientDescriptorCache.Init(MAX_SRVS + MAX_UAVS, MAX_SAMPLERS);
+		TransientDescriptorCache.SetDescriptorHeaps(*CommandContext);
+
+		FD3D12RayTracingGlobalResourceBinder ResourceBinder(*CommandContext);
+		SetRayTracingShaderResources(*CommandContext, RayGenShader, GlobalBindings, TransientDescriptorCache, ResourceBinder);
+	}
+
+	auto StateObject = Pipeline->StateObject.Get();
+
+	auto RayTracingCommandList = CommandContext->RayTracingCommandList();
+
+	RayTracingCommandList->SetPipelineState1(StateObject);
+	RayTracingCommandList->DispatchRays(&DispatchDesc);
 }

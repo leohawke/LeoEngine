@@ -690,10 +690,10 @@ namespace platform_ex::Windows::D3D12 {
 
 // This is a value that should be tweaked to fit the app, lower numbers will have better performance
 // Titles using many terrain layers may want to set MAX_SRVS to 64 to avoid shader compilation errors. This will have a small performance hit of around 0.1%
-#define MAX_SRVS		48
-#define MAX_SAMPLERS	16
-#define MAX_UAVS		16
-#define MAX_CBS			16
+constexpr unsigned MAX_SRVS = 48;
+constexpr unsigned MAX_SAMPLERS = 16;
+constexpr unsigned MAX_UAVS = 16;
+constexpr unsigned MAX_CBS = 16;
 
 // This value controls how many root constant buffers can be used per shader stage in a root signature.
 // Note: Using root descriptors significantly increases the size of root signatures (each root descriptor is 2 DWORDs).
