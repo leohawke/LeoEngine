@@ -7,6 +7,9 @@
 #include "RayTracingScene.h"
 #include "RayTracingPipelineState.h"
 #include "RayTracingShader.h"
+#include "Fence.h"
+
+class RayTracingDescriptorHeapCache;
 
 namespace platform_ex::Windows::D3D12 {
 	class Device;
@@ -34,11 +37,16 @@ namespace platform_ex::Windows::D3D12 {
 		{
 			return d3d_ray_device.Get();
 		}
+
+		const Fence& GetFence() const;
+
+		RayTracingDescriptorHeapCache* GetRayTracingDescriptorHeapCache() const;
 	private:
 		Device* device;
 		Context* context;
 
 		COMPtr<ID3D12Device5> d3d_ray_device;
+		unique_ptr< RayTracingDescriptorHeapCache> ray_tracing_descriptor_heap_cache;
 	};
 
 	bool IsDirectXRaytracingSupported(ID3D12Device* device);

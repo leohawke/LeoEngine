@@ -161,7 +161,7 @@ RayTracingDescriptorHeapCache::Entry RayTracingDescriptorHeapCache::AllocateHeap
 
 	Entry Result = {};
 
-	auto& Fence = Device->GetRenderFence();
+	auto& Fence = Device->GetFence();
 	auto CompletedFenceValue = Fence.GetLastCompletedFenceFast();
 
 	for (unsigned EntryIndex = 0; EntryIndex < Entries.size(); ++EntryIndex)
@@ -189,7 +189,7 @@ RayTracingDescriptorHeapCache::Entry RayTracingDescriptorHeapCache::AllocateHeap
 	Desc.NodeMask = 0;
 
 	ID3D12DescriptorHeap* D3D12Heap = nullptr;
-	Device->GetDevice()->CreateDescriptorHeap(&Desc, IID_PPV_ARGS(&D3D12Heap));
+	Device->GetRayTracingDevice()->CreateDescriptorHeap(&Desc, IID_PPV_ARGS(&D3D12Heap));
 	Windows::D3D::Debug(D3D12Heap, Desc.Type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV ? "RT View Heap" : "RT Sampler Heap");
 
 	Result.NumDescriptors = NumDescriptors;
@@ -216,4 +216,39 @@ void RayTracingDescriptorHeapCache::ReleaseStaleEntries(uint32 MaxAge, uint64 Co
 			++EntryIndex;
 		}
 	}
+}
+
+RayTracingDescriptorHeap::~RayTracingDescriptorHeap()
+{
+	if (D3D12Heap)
+	{
+		Device->GetRayTracingDescriptorHeapCache()->ReleaseHeap(HeapCacheEntry);
+	}
+}
+
+void RayTracingDescriptorHeap::Init(uint32 InMaxNumDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE Type)
+{
+	HeapCacheEntry = Device->GetRayTracingDescriptorHeapCache()->AllocateHeap(Type, InMaxNumDescriptors);
+
+	MaxNumDescriptors = HeapCacheEntry.NumDescriptors;
+	D3D12Heap = HeapCacheEntry.Heap;
+
+	CPUBase = D3D12Heap->GetCPUDescriptorHandleForHeapStart();
+	GPUBase = D3D12Heap->GetGPUDescriptorHandleForHeapStart();
+
+	DescriptorSize = Device->GetRayTracingDevice()->GetDescriptorHandleIncrementSize(Type);
+}
+
+bool RayTracingDescriptorHeap::CanAllocate(uint32 InNumDescriptors) const
+{
+	return NumAllocatedDescriptors + InNumDescriptors <= MaxNumDescriptors;
+}
+
+uint32 RayTracingDescriptorHeap::Allocate(uint32 InNumDescriptors)
+{
+	lconstraint(CanAllocate(InNumDescriptors));
+
+	uint32 Result = NumAllocatedDescriptors;
+	NumAllocatedDescriptors += InNumDescriptors;
+	return Result;
 }

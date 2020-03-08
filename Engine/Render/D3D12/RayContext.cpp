@@ -31,6 +31,8 @@ D12::RayDevice::RayDevice(Device* pDevice, Context* pContext)
 {
 	if (!SUCCEEDED(device->d3d_device->QueryInterface(COMPtr_RefParam(d3d_ray_device, IID_ID3D12Device5))))
 		throw leo::unsupported();
+
+	ray_tracing_descriptor_heap_cache = make_unique<RayTracingDescriptorHeapCache>(this);
 }
 
 D12::RayTracingGeometry* D12::RayDevice::CreateRayTracingGeometry(const R::RayTracingGeometryInitializer& initializer)
@@ -74,6 +76,16 @@ void D12::RayDevice::BuildAccelerationStructure(R::RayTracingScene* scene)
 
 
 	pScene->BuildAccelerationStructure();
+}
+
+const D12::Fence& platform_ex::Windows::D3D12::RayDevice::GetFence() const
+{
+	return device->GetRenderFence();
+}
+
+RayTracingDescriptorHeapCache* platform_ex::Windows::D3D12::RayDevice::GetRayTracingDescriptorHeapCache() const
+{
+	return ray_tracing_descriptor_heap_cache.get();
 }
 
 D12::RayContext::RayContext(Device* pDevice, Context* pContext)

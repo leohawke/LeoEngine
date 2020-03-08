@@ -13,6 +13,7 @@ namespace platform_ex::Windows::D3D12 {
 	class RayTracingPipelineState;
 	class Device;
 	class Context;
+	class RayDevice;
 }
 
 using namespace leo::inttype;
@@ -155,11 +156,23 @@ COMPtr<ID3D12StateObject> CreateRayTracingStateObject(
 
 using D3D12Context = Windows::D3D12::Context;
 using D3D12Device = Windows::D3D12::Device;
+using D3D12RayDevice = Windows::D3D12::RayDevice;
 using D3D12RayTracingPipelineState = platform_ex::Windows::D3D12::RayTracingPipelineState;
+
+class RayDeviceChild
+{
+public:
+	RayDeviceChild(D3D12RayDevice* InDevice)
+		:Device(InDevice)
+	{}
+protected:
+	D3D12RayDevice* Device;
+};
+
 
 // ad-hoc heaps
 // This would allow ray tracing code to sub-allocate heap blocks from the same global heap.
-class RayTracingDescriptorHeapCache
+class RayTracingDescriptorHeapCache : public RayDeviceChild
 {
 public:
 	struct Entry
@@ -170,8 +183,8 @@ public:
 		D3D12_DESCRIPTOR_HEAP_TYPE Type = D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES;
 	};
 
-	RayTracingDescriptorHeapCache(D3D12Device* InDevice)
-		:Device(InDevice)
+	RayTracingDescriptorHeapCache(D3D12RayDevice* InDevice)
+		:RayDeviceChild(InDevice)
 	{
 	}
 
@@ -184,10 +197,45 @@ public:
 	void ReleaseStaleEntries(uint32 MaxAge, uint64 CompletedFenceValue);
 
 private:
-	D3D12Device* Device;
 	std::mutex CriticalSection;
 	std::vector<Entry> Entries;
 	uint32 AllocatedEntries = 0;
+};
+
+struct RayTracingDescriptorHeap :RayDeviceChild
+{
+	RayTracingDescriptorHeap(D3D12RayDevice* Device)
+		:RayDeviceChild(Device)
+	{
+	}
+
+	~RayTracingDescriptorHeap();
+
+	void Init(uint32 InMaxNumDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE Type);
+	bool CanAllocate(uint32 InNumDescriptors) const;
+	uint32 Allocate(uint32 InNumDescriptors);
+
+	D3D12_CPU_DESCRIPTOR_HANDLE GetDescriptorCPU(uint32 Index) const
+	{
+		D3D12_CPU_DESCRIPTOR_HANDLE Result = { CPUBase.ptr + Index * DescriptorSize };
+		return Result;
+	}
+	D3D12_GPU_DESCRIPTOR_HANDLE GetDescriptorGPU(uint32 Index) const
+	{
+		D3D12_GPU_DESCRIPTOR_HANDLE Result = { GPUBase.ptr + Index * DescriptorSize };
+		return Result;
+	}
+
+
+	ID3D12DescriptorHeap* D3D12Heap = nullptr;
+	uint32 MaxNumDescriptors = 0;
+	uint32 NumAllocatedDescriptors = 0;
+
+	uint32 DescriptorSize = 0;
+	D3D12_CPU_DESCRIPTOR_HANDLE CPUBase = {};
+	D3D12_GPU_DESCRIPTOR_HANDLE GPUBase = {};
+
+	RayTracingDescriptorHeapCache::Entry HeapCacheEntry;
 };
 
 class RayTracingShaderTable
