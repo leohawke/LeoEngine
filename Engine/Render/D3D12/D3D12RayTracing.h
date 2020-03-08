@@ -8,6 +8,13 @@
 #include "../RayTracingDefinitions.h"
 #include <LBase/type_traits.hpp>
 
+//pre decl
+namespace platform_ex::Windows::D3D12 {
+	class RayTracingPipelineState;
+	class Device;
+	class Context;
+}
+
 using namespace leo::inttype;
 using namespace platform_ex;
 
@@ -144,6 +151,44 @@ COMPtr<ID3D12StateObject> CreateRayTracingStateObject(
 	const leo::span<D3D12_EXISTING_COLLECTION_DESC>& ExistingCollections,
 	D3D12_STATE_OBJECT_TYPE StateObjectType // Full RTPSO or a Collection
 );
+
+
+using D3D12Context = Windows::D3D12::Context;
+using D3D12Device = Windows::D3D12::Device;
+using D3D12RayTracingPipelineState = platform_ex::Windows::D3D12::RayTracingPipelineState;
+
+// ad-hoc heaps
+// This would allow ray tracing code to sub-allocate heap blocks from the same global heap.
+class RayTracingDescriptorHeapCache
+{
+public:
+	struct Entry
+	{
+		ID3D12DescriptorHeap* Heap = nullptr;
+		uint64 FenceValue = 0;
+		uint32 NumDescriptors = 0;
+		D3D12_DESCRIPTOR_HEAP_TYPE Type = D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES;
+	};
+
+	RayTracingDescriptorHeapCache(D3D12Device* InDevice)
+		:Device(InDevice)
+	{
+	}
+
+	~RayTracingDescriptorHeapCache();
+
+	void ReleaseHeap(Entry& Entry);
+
+	Entry AllocateHeap(D3D12_DESCRIPTOR_HEAP_TYPE Type, uint32 NumDescriptors);
+
+	void ReleaseStaleEntries(uint32 MaxAge, uint64 CompletedFenceValue);
+
+private:
+	D3D12Device* Device;
+	std::mutex CriticalSection;
+	std::vector<Entry> Entries;
+	uint32 AllocatedEntries = 0;
+};
 
 class RayTracingShaderTable
 {
@@ -362,4 +407,16 @@ public:
 		Callable,
 	};
 };
+
+struct RayTracingShaderBindings
+{
+	platform::Render::Texture* Textures[32] = {};
+	platform::Render::Texture* SRVs[32] = {};
+	platform::Render::GraphicsBuffer* UniformBuffers[32] = {};
+	platform::Render::SamplerDesc* Samplers[32] = {};
+	platform::Render::Texture* UAVs[8] = {};
+};
+
+void DispatchRays(ID3D12GraphicsCommandList4* CommandList,const RayTracingShaderBindings& GlobalBindings, const D3D12RayTracingPipelineState* Pipeline,
+	uint32 RayGenShaderIndex, RayTracingShaderTable* OptShaderTable, const D3D12_DISPATCH_RAYS_DESC& DispatchDesc);
 

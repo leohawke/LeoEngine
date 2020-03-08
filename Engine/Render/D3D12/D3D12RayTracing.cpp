@@ -1,5 +1,6 @@
 #include "D3D12RayTracing.h"
 #include "Context.h"
+#include "RayTracingPipelineState.h"
 
 void RayTracingShaderTable::UploadToGPU(Windows::D3D12::Device* Device)
 {
@@ -122,4 +123,97 @@ COMPtr<ID3D12StateObject> CreateRayTracingStateObject(ID3D12Device5* RayTracingD
 	CheckHResult(RayTracingDevice->CreateStateObject(&Desc, COMPtr_RefParam(Result, IID_ID3D12StateObject)));
 
 	return Result;
+}
+
+void DispatchRays(ID3D12GraphicsCommandList4* CommandList, const RayTracingShaderBindings& GlobalBindings, const D3D12RayTracingPipelineState* Pipeline,
+	uint32 RayGenShaderIndex, RayTracingShaderTable* OptShaderTable, const D3D12_DISPATCH_RAYS_DESC& DispatchDesc)
+{
+	CommandList->SetComputeRootSignature(Pipeline->GetRootSignature());
+
+	auto RayGenShader = Pipeline->RayGenShaders.Shaders[RayGenShaderIndex].get();
+}
+
+RayTracingDescriptorHeapCache::~RayTracingDescriptorHeapCache()
+{
+	std::unique_lock Lock{ CriticalSection };
+
+	for (auto& It : Entries)
+	{
+		It.Heap->Release();
+	}
+	Entries.clear();
+}
+
+void RayTracingDescriptorHeapCache::ReleaseHeap(Entry& Entry)
+{
+	std::unique_lock Lock{ CriticalSection };
+
+	Entries.emplace_back(Entry);
+
+	--AllocatedEntries;
+}
+
+RayTracingDescriptorHeapCache::Entry RayTracingDescriptorHeapCache::AllocateHeap(D3D12_DESCRIPTOR_HEAP_TYPE Type, uint32 NumDescriptors)
+{
+	std::unique_lock Lock{ CriticalSection };
+
+	++AllocatedEntries;
+
+	Entry Result = {};
+
+	auto& Fence = Device->GetRenderFence();
+	auto CompletedFenceValue = Fence.GetLastCompletedFenceFast();
+
+	for (unsigned EntryIndex = 0; EntryIndex < Entries.size(); ++EntryIndex)
+	{
+		auto& It = Entries[EntryIndex];
+
+		if (It.Type == Type && It.NumDescriptors >= NumDescriptors && It.FenceValue <= CompletedFenceValue)
+		{
+			Result = It;
+			Entries[EntryIndex] = Entries.back();
+			Entries.pop_back();
+
+			return Result;
+		}
+	}
+
+	// Compatible heap was not found in cache, so create a new one.
+	ReleaseStaleEntries(100, CompletedFenceValue); // Release heaps that were not used for 100 frames before allocating new.
+
+	D3D12_DESCRIPTOR_HEAP_DESC Desc = {};
+
+	Desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	Desc.Type = Type;
+	Desc.NumDescriptors = NumDescriptors;
+	Desc.NodeMask = 0;
+
+	ID3D12DescriptorHeap* D3D12Heap = nullptr;
+	Device->GetDevice()->CreateDescriptorHeap(&Desc, IID_PPV_ARGS(&D3D12Heap));
+	Windows::D3D::Debug(D3D12Heap, Desc.Type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV ? "RT View Heap" : "RT Sampler Heap");
+
+	Result.NumDescriptors = NumDescriptors;
+	Result.Type = Type;
+	Result.Heap = D3D12Heap;
+
+	return Result;
+}
+
+void RayTracingDescriptorHeapCache::ReleaseStaleEntries(uint32 MaxAge, uint64 CompletedFenceValue)
+{
+	unsigned EntryIndex = 0;
+	while (EntryIndex < Entries.size())
+	{
+		auto& It = Entries[EntryIndex];
+		if (It.FenceValue + MaxAge <= CompletedFenceValue)
+		{
+			It.Heap->Release();
+			Entries[EntryIndex] = Entries.back();
+			Entries.pop_back();
+		}
+		else
+		{
+			++EntryIndex;
+		}
+	}
 }

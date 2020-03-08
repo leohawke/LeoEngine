@@ -180,6 +180,11 @@ namespace platform_ex::Windows::D3D12 {
 			lconstraint(ShaderStage == ShaderType::PixelShader || ShaderStage == ShaderType::ComputeShader);
 			return BindSlotMap[ALL_UAVs];
 		}
+
+		ID3D12RootSignature* GetSignature() const
+		{
+			return Signature.Get();
+		}
 	private:
 		void AnalyzeSignature(const D3D12_VERSIONED_ROOT_SIGNATURE_DESC& Desc, uint32 BindingSpace);
 		template<typename RootSignatureDescType>

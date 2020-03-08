@@ -272,6 +272,11 @@ namespace platform_ex::Windows::D3D12 {
 		}
 	}
 
+	const Fence& platform_ex::Windows::D3D12::Device::GetRenderFence() const
+	{
+		return *fences[Command_Render];
+	}
+
 
 	void Device::DeviceEx(ID3D12Device * device, ID3D12CommandQueue * cmd_queue, D3D_FEATURE_LEVEL feature_level)
 	{

@@ -81,6 +81,13 @@ namespace platform_ex {
 				leo::observer_ptr<ID3D12DescriptorHeap> CreateDynamicCBVSRVUAVDescriptorHeap(uint32_t num);
 
 				leo::observer_ptr<ID3D12PipelineState> CreateRenderPSO(const D3D12_GRAPHICS_PIPELINE_STATE_DESC&);
+
+				const Fence& GetRenderFence() const;
+
+				ID3D12Device* GetDevice() const
+				{
+					return d3d_device.Get();
+				}
 			public:
 				friend class Context;
 				friend class RayContext;

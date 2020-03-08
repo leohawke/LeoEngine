@@ -13,6 +13,11 @@ namespace platform_ex::Windows::D3D12 {
 	{
 	public:
 		RayTracingPipelineState(const platform::Render::RayTracingPipelineStateInitializer& initializer);
+
+		ID3D12RootSignature* GetRootSignature() const
+		{
+			return GlobalRootSignature->GetSignature();
+		}
 	public:
 		COMPtr<ID3D12StateObject> StateObject;
 		COMPtr<ID3D12StateObjectProperties> PipelineProperties;
