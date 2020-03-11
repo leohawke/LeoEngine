@@ -18,7 +18,7 @@ namespace platform_ex {
 			DXGI_FORMAT Convert(platform::Render::EFormat format);
 			platform::Render::EFormat Convert(DXGI_FORMAT format);
 
-			D3D12_SAMPLER_DESC Convert(platform::Render::SamplerDesc desc);
+			D3D12_SAMPLER_DESC Convert(platform::Render::TextureSampleDesc desc);
 
 			D3D12_TEXTURE_ADDRESS_MODE Convert(platform::Render::TexAddressingMode mode);
 			D3D12_FILTER Convert(platform::Render::TexFilterOp op);

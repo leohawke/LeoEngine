@@ -307,7 +307,7 @@ platform_ex::Windows::D3D12::RootSignatureDesc::RootSignatureDesc(const Quantize
 		D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE :
 		D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE | D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
 
-	const D3D12_DESCRIPTOR_RANGE_FLAGS SamplerDescriptorRangeFlags = (ResourceBindingTier <= D3D12_RESOURCE_BINDING_TIER_1) ?
+	const D3D12_DESCRIPTOR_RANGE_FLAGS TextureSampleDescriptorRangeFlags = (ResourceBindingTier <= D3D12_RESOURCE_BINDING_TIER_1) ?
 		D3D12_DESCRIPTOR_RANGE_FLAG_NONE :
 		D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
 
@@ -405,7 +405,7 @@ platform_ex::Windows::D3D12::RootSignatureDesc::RootSignatureDesc(const Quantize
 				if (Shader.NumSamplers > 0)
 				{
 					lconstraint(RootParameterCount < MaxRootParameters);
-					DescriptorRanges[RootParameterCount].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER, Shader.NumSamplers, 0u, BindingSpace, SamplerDescriptorRangeFlags);
+					DescriptorRanges[RootParameterCount].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER, Shader.NumSamplers, 0u, BindingSpace, TextureSampleDescriptorRangeFlags);
 					TableSlots[RootParameterCount].InitAsDescriptorTable(1, &DescriptorRanges[RootParameterCount], GetD3D12ShaderVisibility(Visibility));
 					RootParameterCount++;
 					RootParametersSize += RootDescriptorTableCost;

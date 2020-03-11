@@ -42,6 +42,13 @@ namespace platform {
 			virtual ~DepthStencilView();
 		};
 
+		class ShaderResourceView :public GPUView {
+		public:
+			using GPUView::GPUView;
+
+			virtual ~ShaderResourceView();
+		};
+
 		class UnorderedAccessView :public GPUView {
 		public:
 			using GPUView::GPUView;

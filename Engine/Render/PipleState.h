@@ -390,7 +390,7 @@ namespace platform::Render {
 		BlendDesc BlendState;
 	};
 
-	struct SamplerDesc
+	struct TextureSampleDesc
 	{
 		M::Color border_clr;
 
@@ -407,9 +407,9 @@ namespace platform::Render {
 
 		CompareOp cmp_func;
 
-		SamplerDesc();
+		TextureSampleDesc();
 
-		friend bool operator<(const SamplerDesc  & lhs, const SamplerDesc  & rhs);
+		friend bool operator<(const TextureSampleDesc  & lhs, const TextureSampleDesc  & rhs);
 
 		template<typename T>
 		static T to_op(const std::string & value);
@@ -437,12 +437,12 @@ namespace platform::Render {
 	};
 
 	template<>
-	inline CompareOp SamplerDesc::to_op<CompareOp>(const std::string & value) {
+	inline CompareOp TextureSampleDesc::to_op<CompareOp>(const std::string & value) {
 		return DepthStencilDesc::to_op<CompareOp>(value);
 	}
 
 	template<>
-	inline TexFilterOp SamplerDesc::to_op<TexFilterOp>(const std::string& value) {
+	inline TexFilterOp TextureSampleDesc::to_op<TexFilterOp>(const std::string& value) {
 		auto lower_value = value;
 		leo::to_lower(lower_value);
 		auto hash = leo::constfn_hash(lower_value.c_str());

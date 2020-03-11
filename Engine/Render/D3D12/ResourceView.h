@@ -48,7 +48,7 @@ namespace platform_ex {
 				GPUDataStructView(ResourceHolder* res,ViewSimulation* view, uint16 first_subres, uint16 num_subres);
 
 				observer_ptr<ViewSimulation> View();
-
+				const D3D12_CPU_DESCRIPTOR_HANDLE& GetHandle() const { return view->GetHandle();}
 
 				uint16 FirstSubResIndex();
 				uint16 SubResNum();
@@ -87,6 +87,16 @@ namespace platform_ex {
 				void ClearDepthStencil(float depth, leo::int32 stencil);
 				void ClearDepth(float depth);
 				void ClearStencil(leo::int32 stencil);
+			};
+
+			class ShaderResourceView : public GPUDataStructView, public platform::Render::ShaderResourceView {
+			public:
+				using base = platform::Render::ShaderResourceView;
+
+				ShaderResourceView(Texture2D& texture_1d_2d_cube, uint8 first_array_index, uint8 array_size, uint8 level);
+				ShaderResourceView(Texture3D& texture_3d, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level);
+				ShaderResourceView(TextureCube& texture_cube, uint8 array_index,uint8 level);
+				ShaderResourceView(GraphicsBuffer& gb, platform::Render::EFormat pf);
 			};
 
 			class UnorderedAccessView : public GPUDataStructView,public platform::Render::UnorderedAccessView {

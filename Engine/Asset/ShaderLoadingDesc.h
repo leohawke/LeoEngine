@@ -404,14 +404,14 @@ namespace platform::X
 #define AccessParam(name,expr) if (auto value = AccessPtr(name, param_node)) expr
 			using namespace Render;
 			if (type == SPT_sampler) {
-				SamplerDesc sampler;
+				TextureSampleDesc sampler;
 				AccessParam("border_clr", sampler.border_clr = M::Color(to_float4(*value).data));
 
-				AccessParam("address_mode_u", sampler.address_mode_u = SamplerDesc::to_mode(*value));
-				AccessParam("address_mode_v", sampler.address_mode_v = SamplerDesc::to_mode(*value));
-				AccessParam("address_mode_w", sampler.address_mode_w = SamplerDesc::to_mode(*value));
+				AccessParam("address_mode_u", sampler.address_mode_u = TextureSampleDesc::to_mode(*value));
+				AccessParam("address_mode_v", sampler.address_mode_v = TextureSampleDesc::to_mode(*value));
+				AccessParam("address_mode_w", sampler.address_mode_w = TextureSampleDesc::to_mode(*value));
 
-				AccessParam("filtering", sampler.filtering = SamplerDesc::to_op<TexFilterOp>(*value));
+				AccessParam("filtering", sampler.filtering = TextureSampleDesc::to_op<TexFilterOp>(*value));
 
 				AccessParam("max_anisotropy", sampler.max_anisotropy = to_uint8(*value));
 
@@ -419,7 +419,7 @@ namespace platform::X
 				AccessParam("max_lod", sampler.max_lod = std::stof(*value));
 				AccessParam("mip_map_lod_bias", sampler.mip_map_lod_bias = std::stof(*value));
 
-				AccessParam("cmp_func", sampler.cmp_func = SamplerDesc::to_op<CompareOp>(*value));
+				AccessParam("cmp_func", sampler.cmp_func = TextureSampleDesc::to_op<CompareOp>(*value));
 
 				return leo::any(sampler);
 			}

@@ -193,7 +193,7 @@ platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<pla
 			if (D3D_SIT_SAMPLER == BoundResourceInfo.type)
 			{
 				p_handle.param_type = D3D_SVT_SAMPLER;
-				platform::Render::SamplerDesc sampler_desc;
+				platform::Render::TextureSampleDesc sampler_desc;
 				Parameter.Value(sampler_desc);
 				Samplers[p_handle.shader_type][p_handle.offset] = Convert(sampler_desc);
 			}

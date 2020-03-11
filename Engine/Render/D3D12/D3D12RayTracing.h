@@ -6,6 +6,7 @@
 #include "GraphicsBuffer.hpp"
 #include "RayTracingShader.h"
 #include "../RayTracingDefinitions.h"
+#include "../IGPUResourceView.h"
 #include <LBase/type_traits.hpp>
 
 //pre decl
@@ -250,10 +251,10 @@ public:
 		SamplerHeap(Device)
 	{}
 
-	void Init(uint32 NumViewDescriptors, uint32 NumSamplerDescriptors)
+	void Init(uint32 NumViewDescriptors, uint32 NumTextureSampleDescriptors)
 	{
 		ViewHeap.Init(NumViewDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		SamplerHeap.Init(NumSamplerDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+		SamplerHeap.Init(NumTextureSampleDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 	}
 
 	void UpdateSyncPoint()
@@ -270,7 +271,7 @@ private:
 	RayTracingDescriptorHeap SamplerHeap;
 
 	std::map<uint64, uint32> ViewDescriptorTableCache;
-	std::map<uint64, uint32> SamplerDescriptorTableCache;
+	std::map<uint64, uint32> TextureSampleDescriptorTableCache;
 };
 
 class RayTracingShaderTable
@@ -323,10 +324,10 @@ public:
 
 			auto NumViewDescriptors =  std::clamp<uint32>(initializer.NumHitRecords * initializer.MaxViewDescriptorsPerRecord, MinNumViewDescriptors, D3D12_MAX_SHADER_VISIBLE_DESCRIPTOR_HEAP_SIZE_TIER_1);
 			
-			const uint32 NumSamplerDescriptors = D3D12_MAX_SHADER_VISIBLE_SAMPLER_HEAP_SIZE;
+			const uint32 NumTextureSampleDescriptors = D3D12_MAX_SHADER_VISIBLE_SAMPLER_HEAP_SIZE;
 
 			DescriptorCache = new RayTracingDescriptorCache(Device);
-			DescriptorCache->Init(NumViewDescriptors, NumSamplerDescriptors);
+			DescriptorCache->Init(NumViewDescriptors, NumTextureSampleDescriptors);
 		}
 
 		//how about descriptor
@@ -512,10 +513,10 @@ public:
 struct RayTracingShaderBindings
 {
 	platform::Render::Texture* Textures[32] = {};
-	platform::Render::Texture* SRVs[32] = {};
+	platform::Render::ShaderResourceView* SRVs[32] = {};
 	platform::Render::GraphicsBuffer* UniformBuffers[32] = {};
-	platform::Render::SamplerDesc* Samplers[32] = {};
-	platform::Render::Texture* UAVs[8] = {};
+	platform::Render::TextureSampleDesc* Samplers[32] = {};
+	platform::Render::UnorderedAccessView* UAVs[8] = {};
 };
 
 void DispatchRays(D3D12RayContext* CommandContext,const RayTracingShaderBindings& GlobalBindings, const D3D12RayTracingPipelineState* Pipeline,

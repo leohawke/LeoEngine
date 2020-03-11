@@ -422,7 +422,7 @@ platform::Render::EFormat platform_ex::Windows::D3D12::Convert(DXGI_FORMAT forma
 	leo::raise_exception(leo::unsupported());
 }
 
-D3D12_SAMPLER_DESC platform_ex::Windows::D3D12::Convert(platform::Render::SamplerDesc desc)
+D3D12_SAMPLER_DESC platform_ex::Windows::D3D12::Convert(platform::Render::TextureSampleDesc desc)
 {
 	D3D12_SAMPLER_DESC sampler_desc;
 	sampler_desc.Filter = Convert(desc.filtering);

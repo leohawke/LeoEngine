@@ -65,7 +65,7 @@ namespace platform::Render {
 		return std::memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
 	}
 
-	SamplerDesc::SamplerDesc()
+	TextureSampleDesc::TextureSampleDesc()
 		: border_clr(0, 0, 0, 0),
 		address_mode_u(TexAddressingMode::Wrap), address_mode_v(TexAddressingMode::Wrap), address_mode_w(TexAddressingMode::Wrap),
 		filtering(TexFilterOp::Min_Mag_Mip_Point),
@@ -76,7 +76,7 @@ namespace platform::Render {
 	{
 	}
 
-	bool operator<(SamplerDesc const & lhs, SamplerDesc const & rhs)
+	bool operator<(TextureSampleDesc const & lhs, TextureSampleDesc const & rhs)
 	{
 		return std::memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
 	}

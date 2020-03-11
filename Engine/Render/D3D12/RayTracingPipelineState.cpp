@@ -113,7 +113,8 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 
 	std::vector<D3D12_EXISTING_COLLECTION_DESC> UniqueShaderCollectionDescs;
 
-	auto RayTracingDevice = Context::Instance().GetRayContext().GetDevice().GetRayTracingDevice();
+	auto& RayDevice = Context::Instance().GetRayContext().GetDevice();
+	auto RayTracingDevice = RayDevice.GetRayTracingDevice();
 
 	StateObject = CreateRayTracingStateObject(
 		RayTracingDevice,
@@ -187,7 +188,7 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 	SBTInitializer.NumHitRecords = 0; // Default SBT does not support indexable hit shaders
 	SBTInitializer.LocalRootDataSize = 0; // Shaders in default SBT are not allowed to access any local resources
 
-	DefaultShaderTable.Init(SBTInitializer);
+	DefaultShaderTable.Init(SBTInitializer,&RayDevice);
 	DefaultShaderTable.SetRayGenIdentifiers(RayGenShaders.Identifiers);
 	DefaultShaderTable.SetMissIdentifiers(MissShaders.Identifiers);
 	DefaultShaderTable.SetDefaultHitGroupIdentifier(HitGroupShaders.Identifiers[0]);
