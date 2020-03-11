@@ -2,6 +2,11 @@
 #include "Context.h"
 #include "RayTracingPipelineState.h"
 #include "../../Core/Hash/CityHash.h"
+#include "ResourceView.h"
+#include "Texture.h"
+#include "GraphicsBuffer.hpp"
+
+using platform::Render::ShaderType;
 
 void RayTracingShaderTable::UploadToGPU(Windows::D3D12::Device* Device)
 {
@@ -269,7 +274,7 @@ void RayTracingDescriptorCache::SetDescriptorHeaps(D3D12RayContext& Context)
 uint32 RayTracingDescriptorCache::GetDescriptorTableBaseIndex(const D3D12_CPU_DESCRIPTOR_HANDLE* Descriptors, uint32 NumDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE Type)
 {
 	auto& Heap = (Type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) ? ViewHeap : SamplerHeap;
-	auto& Map = (Type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) ? ViewDescriptorTableCache : SamplerDescriptorTableCache;
+	auto& Map = (Type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) ? ViewDescriptorTableCache : TextureSampleDescriptorTableCache;
 
 	const uint64 Key = CityHash64((const char*)Descriptors, sizeof(Descriptors[0]) * NumDescriptors);
 
@@ -325,13 +330,196 @@ struct FD3D12RayTracingGlobalResourceBinder
 	D3D12RayContext& CommandContext;
 };
 
+using platform::Render::Texture;
+using platform::Render::GraphicsBuffer;
+using platform::Render::TextureSampleDesc;
+using platform::Render::ShaderResourceView;
+using platform::Render::UnorderedAccessView;
+
+using D3D12ShaderResourceView = Windows::D3D12::ShaderResourceView;
+using D3D12UnorderedAccessView = Windows::D3D12::UnorderedAccessView;
+using D3D12Texture = Windows::D3D12::Texture;
+using D3D12ResourceHolder = Windows::D3D12::ResourceHolder;
+using D3D12GraphicsBuffer = Windows::D3D12::GraphicsBuffer;
+
+template <typename ResourceBinderType>
+static void SetRayTracingShaderResources(
+	D3D12RayContext& CommandContext,
+	const platform_ex::Windows::D3D12::RayTracingShader* Shader,
+	uint32 InNumTextures, Texture* const* Textures,
+	uint32 InNumSRVs, ShaderResourceView* const* SRVs,
+	uint32 InNumUniformBuffers, GraphicsBuffer* const* UniformBuffers,
+	uint32 InNumSamplers, TextureSampleDesc* const* Samplers,
+	uint32 InNumUAVs, UnorderedAccessView* const* UAVs,
+	uint32 InLooseParameterDataSize, const void* InLooseParameterData,
+	RayTracingDescriptorCache& DescriptorCache,
+	ResourceBinderType& Binder)
+{
+	ID3D12Device* Device = CommandContext.GetDevice().GetRayTracingDevice();
+
+	auto RootSignature = Shader->pRootSignature.get();
+
+	D3D12_GPU_VIRTUAL_ADDRESS   LocalCBVs[MAX_CBS];
+	D3D12_CPU_DESCRIPTOR_HANDLE LocalSRVs[MAX_SRVS];
+	D3D12_CPU_DESCRIPTOR_HANDLE LocalUAVs[MAX_UAVS];
+	D3D12_CPU_DESCRIPTOR_HANDLE LocalSamplers[MAX_SAMPLERS];
+
+	uint64 BoundSRVMask = 0;
+	uint64 BoundCBVMask = 0;
+	uint64 BoundUAVMask = 0;
+	uint64 BoundSamplerMask = 0;
+
+	for (uint32 SRVIndex = 0; SRVIndex < InNumTextures; ++SRVIndex)
+	{
+		auto Resource = Textures[SRVIndex];
+		if (Resource)
+		{
+			auto Texture =dynamic_cast<D3D12Texture*>(Resource);
+			LocalSRVs[SRVIndex] = Texture->RetriveShaderResourceView(0,Resource->GetArraySize(),0,Resource->GetNumMipMaps())->GetHandle();
+			BoundSRVMask |= 1ull << SRVIndex;
+		}
+	}
+
+	for (uint32 SRVIndex = 0; SRVIndex < InNumSRVs; ++SRVIndex)
+	{
+		auto Resource = SRVs[SRVIndex];
+		if (Resource)
+		{
+			auto SRV = static_cast<D3D12ShaderResourceView*>(Resource);
+			LocalSRVs[SRVIndex] = SRV->GetHandle();
+			BoundSRVMask |= 1ull << SRVIndex;
+		}
+	}
+
+	for (uint32 CBVIndex = 0; CBVIndex < InNumUniformBuffers; ++CBVIndex)
+	{
+		auto Resource = UniformBuffers[CBVIndex];
+		if (Resource)
+		{
+			auto CBV = static_cast<D3D12GraphicsBuffer*>(Resource);
+			LocalCBVs[CBVIndex] = CBV->Resource()->GetGPUVirtualAddress();
+			BoundCBVMask |= 1ull << CBVIndex;
+		}
+	}
+
+	//don't support SamplerState
+	for (uint32 SamplerIndex = 0; SamplerIndex < InNumSamplers; ++SamplerIndex)
+	{
+		auto Resource = Samplers[SamplerIndex];
+		if (Resource)
+		{
+			LocalSamplers[SamplerIndex] = {};
+			BoundSamplerMask |= 1ull << SamplerIndex;
+		}
+	}
+
+	for (uint32 UAVIndex = 0; UAVIndex < InNumUAVs; ++UAVIndex)
+	{
+		auto Resource = UAVs[UAVIndex];
+		if (Resource)
+		{
+			auto UAV = static_cast<D3D12UnorderedAccessView*>(Resource);
+			LocalUAVs[UAVIndex] = UAV->GetHandle();
+			BoundUAVMask |= 1ull << UAVIndex;
+		}
+	}
+
+
+	// Bind loose parameters
+	if (InLooseParameterData)
+	{
+		const uint32 CBVIndex = 0; // Global uniform buffer is always assumed to be in slot 0
+		LocalCBVs[CBVIndex] = Binder.CreateTransientConstantBuffer(InLooseParameterData, InLooseParameterDataSize);
+		BoundCBVMask |= 1ull << CBVIndex;
+	}
+
+	// Validate that all resources required by the shader are set
+
+	auto IsCompleteBinding = [](uint32 ExpectedCount, uint64 BoundMask)
+	{
+		if (ExpectedCount > 64) return false; // Bound resource mask can't be represented by uint64
+
+		// All bits of the mask [0..ExpectedCount) are expected to be set
+		uint64 ExpectedMask = ExpectedCount == 64 ? ~0ull : ((1ull << ExpectedCount) - 1);
+		return (ExpectedMask & BoundMask) == ExpectedMask;
+	};
+	lconstraint(IsCompleteBinding(Shader->ResourceCounts.NumSRVs, BoundSRVMask));
+	lconstraint(IsCompleteBinding(Shader->ResourceCounts.NumUAVs, BoundUAVMask));
+	lconstraint(IsCompleteBinding(Shader->ResourceCounts.NumCBs, BoundCBVMask));
+	lconstraint(IsCompleteBinding(Shader->ResourceCounts.NumSamplers, BoundSamplerMask));
+
+	const uint32 NumSRVs = Shader->ResourceCounts.NumSRVs;
+	if (NumSRVs)
+	{
+		const uint32 DescriptorTableBaseIndex = DescriptorCache.GetDescriptorTableBaseIndex(LocalSRVs, NumSRVs, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+		const uint32 BindSlot = RootSignature->SRVRDTBindSlot(ShaderType::ComputeShader);
+		lconstraint(BindSlot != 0xFF);
+
+		const D3D12_GPU_DESCRIPTOR_HANDLE ResourceDescriptorTableBaseGPU = DescriptorCache.ViewHeap.GetDescriptorGPU(DescriptorTableBaseIndex);
+		Binder.SetRootDescriptorTable(BindSlot, ResourceDescriptorTableBaseGPU);
+	}
+
+	const uint32 NumUAVs = Shader->ResourceCounts.NumUAVs;
+	if (NumUAVs)
+	{
+		const uint32 DescriptorTableBaseIndex = DescriptorCache.GetDescriptorTableBaseIndex(LocalUAVs, NumUAVs, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+		const uint32 BindSlot = RootSignature->UAVRDTBindSlot(ShaderType::ComputeShader);
+		lconstraint(BindSlot != 0xFF);
+
+		const D3D12_GPU_DESCRIPTOR_HANDLE ResourceDescriptorTableBaseGPU = DescriptorCache.ViewHeap.GetDescriptorGPU(DescriptorTableBaseIndex);
+		Binder.SetRootDescriptorTable(BindSlot, ResourceDescriptorTableBaseGPU);
+	}
+
+	if (Shader->ResourceCounts.NumCBs)
+	{
+		LAssert(RootSignature->CBVRDTBindSlot(ShaderType::ComputeShader) == 0xFF,"Root CBV descriptor tables are not implemented for ray tracing shaders.");
+
+		const uint32 BindSlot = RootSignature->CBVRDBaseBindSlot(ShaderType::ComputeShader);
+		lconstraint(BindSlot != 0xFF);
+
+		for (uint32 i = 0; i < Shader->ResourceCounts.NumCBs; ++i)
+		{
+			const uint64 SlotMask = (1ull << i);
+			D3D12_GPU_VIRTUAL_ADDRESS BufferAddress = (BoundCBVMask & SlotMask) ? LocalCBVs[i] : 0;
+			Binder.SetRootCBV(BindSlot, i, BufferAddress);
+		}
+	}
+
+	// Bind samplers
+
+	const uint32 NumSamplers = Shader->ResourceCounts.NumSamplers;
+	if (NumSamplers)
+	{
+		const uint32 DescriptorTableBaseIndex = DescriptorCache.GetDescriptorTableBaseIndex(LocalSamplers, NumSamplers, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+
+		const uint32 BindSlot = RootSignature->SamplerRDTBindSlot(ShaderType::ComputeShader);
+		lconstraint(BindSlot != 0xFF);
+
+		const D3D12_GPU_DESCRIPTOR_HANDLE ResourceDescriptorTableBaseGPU = DescriptorCache.SamplerHeap.GetDescriptorGPU(DescriptorTableBaseIndex);
+		Binder.SetRootDescriptorTable(BindSlot, ResourceDescriptorTableBaseGPU);
+	}
+}
+
 template <typename ResourceBinderType>
 static void SetRayTracingShaderResources(
 	D3D12RayContext& CommandContext,
 	const platform_ex::Windows::D3D12::RayTracingShader* Shader,
 	const RayTracingShaderBindings& ResourceBindings,
 	RayTracingDescriptorCache& DescriptorCache,
-	ResourceBinderType& Binder);
+	ResourceBinderType& Binder)
+{
+	SetRayTracingShaderResources(CommandContext, Shader,
+		leo::size(ResourceBindings.Textures), ResourceBindings.Textures,
+		leo::size(ResourceBindings.SRVs), ResourceBindings.SRVs,
+		leo::size(ResourceBindings.UniformBuffers), ResourceBindings.UniformBuffers,
+		leo::size(ResourceBindings.Samplers), ResourceBindings.Samplers,
+		leo::size(ResourceBindings.UAVs), ResourceBindings.UAVs,
+		0,nullptr,
+		DescriptorCache,Binder
+		);
+}
 
 void DispatchRays(D3D12RayContext* CommandContext, const RayTracingShaderBindings& GlobalBindings, const D3D12RayTracingPipelineState* Pipeline,
 	uint32 RayGenShaderIndex, RayTracingShaderTable* OptShaderTable, const D3D12_DISPATCH_RAYS_DESC& DispatchDesc)

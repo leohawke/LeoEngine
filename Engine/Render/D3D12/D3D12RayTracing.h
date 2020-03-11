@@ -266,10 +266,10 @@ public:
 	void SetDescriptorHeaps(D3D12RayContext& Context);
 
 	uint32 GetDescriptorTableBaseIndex(const D3D12_CPU_DESCRIPTOR_HANDLE* Descriptors, uint32 NumDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE Type);
-private:
+public:
 	RayTracingDescriptorHeap ViewHeap;
 	RayTracingDescriptorHeap SamplerHeap;
-
+private:
 	std::map<uint64, uint32> ViewDescriptorTableCache;
 	std::map<uint64, uint32> TextureSampleDescriptorTableCache;
 };

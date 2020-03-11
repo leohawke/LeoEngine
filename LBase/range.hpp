@@ -212,8 +212,8 @@ namespace leo
 	{
 		return c.size();
 	}
-	template<typename _type, size_t _vN>
-	lconstfn size_t
+	template<typename _type, std::uint32_t _vN>
+	lconstfn  std::uint32_t
 		size(const _type(&)[_vN]) lnothrow
 	{
 		return _vN;
