@@ -9,6 +9,8 @@
 #include "d3d12_dxgi.h"
 
 namespace platform_ex::Windows::D3D12 {
+	class DepthStencilView;
+
 	class FrameBuffer :public platform::Render::FrameBuffer {
 	public:
 		FrameBuffer();

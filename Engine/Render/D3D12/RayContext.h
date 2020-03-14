@@ -8,6 +8,7 @@
 namespace platform_ex::Windows::D3D12 {
 	class Device;
 	class Context;
+	class BasicRayTracingPipeline;
 
 	class RayContext :public platform::Render::RayContext
 	{
@@ -19,6 +20,8 @@ namespace platform_ex::Windows::D3D12 {
 		ID3D12GraphicsCommandList4* RayTracingCommandList() const;
 
 		void RayTraceShadow(platform::Render::RayTracingScene* InScene, platform::Render::FrameBuffer* InDepth, platform::Render::UnorderedAccessView* Ouput, platform::Render::GraphicsBuffer* InConstants) final;
+
+		BasicRayTracingPipeline* GetBasicRayTracingPipeline() const;
 	private:
 		std::shared_ptr<RayDevice> ray_device;
 

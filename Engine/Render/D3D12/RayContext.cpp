@@ -3,6 +3,7 @@
 #include "Context.h"
 #include "GraphicsBuffer.hpp"
 #include "ResourceView.h"
+#include "BuiltInRayTracingShaders.h"
 
 namespace D12 = platform_ex::Windows::D3D12;
 namespace R = platform::Render;
@@ -100,6 +101,28 @@ D12::RayContext::RayContext(Device* pDevice, Context* pContext)
 		throw leo::unsupported();
 }
 
+namespace platform_ex::Windows::D3D12 {
+	class BasicRayTracingPipeline
+	{
+	public:
+		BasicRayTracingPipeline(RayDevice* InDevice)
+		{
+			//Shadow pipeline
+			{
+				R::RayTracingPipelineStateInitializer ShadowInitializer;
+
+				R::RayTracingShader* ShadowRGSTable[] = { GetBuildInRayTracingShader<ShadowRG>() };
+				ShadowInitializer.RayGenTable = leo::make_span(ShadowRGSTable);
+				ShadowInitializer.bAllowHitGroupIndexing = false;
+
+				Shadow = new RayTracingPipelineState(ShadowInitializer);
+			}
+		}
+	public:
+		RayTracingPipelineState* Shadow;
+	};
+}
+
 void D12::RayContext::RayTraceShadow(R::RayTracingScene* InScene, R::FrameBuffer* InDepth,R::UnorderedAccessView* Output, R::GraphicsBuffer* InConstants)
 {
 	auto Depth = static_cast<D12::FrameBuffer*>(InDepth);
@@ -126,7 +149,7 @@ void D12::RayContext::RayTraceShadow(R::RayTracingScene* InScene, R::FrameBuffer
 	Bindings.UniformBuffers[0] = InConstants;
 	Bindings.UAVs[0] = Output;
 
-	D12::RayTracingPipelineState* Pipeline = nullptr;//GetBasicRayTracingPipeline()->Shadow;
+	D12::RayTracingPipelineState* Pipeline = GetBasicRayTracingPipeline()->Shadow;
 
 	auto& ShaderTable = Pipeline->DefaultShaderTable;
 	ShaderTable.UploadToGPU(&Context::Instance().GetDevice());
@@ -137,4 +160,12 @@ void D12::RayContext::RayTraceShadow(R::RayTracingScene* InScene, R::FrameBuffer
 	DispatchDesc.Depth = 1;
 
 	DispatchRays(this, Bindings, Pipeline, 0, nullptr, DispatchDesc);
+}
+
+
+D12::BasicRayTracingPipeline* D12::RayContext::GetBasicRayTracingPipeline() const
+{
+	static BasicRayTracingPipeline Basics(ray_device.get());
+
+	return &Basics;
 }

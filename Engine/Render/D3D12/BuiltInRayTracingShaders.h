@@ -119,4 +119,9 @@ public:\
 	{
 		EXPORTED_SHADER_TYPE(DefaultMS);
 	};
+
+	class ShadowRG : public BuiltInRayTracingShader
+	{
+		EXPORTED_SHADER_TYPE(ShadowRG);
+	};
 }
