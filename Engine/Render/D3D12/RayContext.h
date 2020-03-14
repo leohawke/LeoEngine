@@ -17,6 +17,8 @@ namespace platform_ex::Windows::D3D12 {
 		RayDevice& GetDevice() override;
 
 		ID3D12GraphicsCommandList4* RayTracingCommandList() const;
+
+		void RayTraceShadow(platform::Render::RayTracingScene* InScene, platform::Render::FrameBuffer* InDepth, platform::Render::UnorderedAccessView* Ouput, platform::Render::GraphicsBuffer* InConstants) final;
 	private:
 		std::shared_ptr<RayDevice> ray_device;
 

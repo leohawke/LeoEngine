@@ -6,13 +6,27 @@
 #define LE_RENDER_IRayContext_h 1
 
 #include "IRayDevice.h"
+#include "IFrameBuffer.h"
 
 namespace platform::Render {
+
+	struct GenShaowConstants
+	{
+		leo::math::float3 LightDirection;
+		float Padding0;
+		leo::math::float4x4 CameraToWorld;
+		leo::math::float2 Resolution;
+		leo::math::float2 Padding1;
+	};
+
+	static_assert(loffsetof(GenShaowConstants, CameraToWorld) == 16);
+
 	class RayContext
 	{
 	public:
 		virtual RayDevice& GetDevice() = 0;
 
+		virtual void RayTraceShadow(RayTracingScene* InScene, FrameBuffer* InDepth, UnorderedAccessView* Ouput, GraphicsBuffer* InConstants);
 	};
 }
 

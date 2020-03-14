@@ -21,6 +21,11 @@ namespace platform_ex::Windows::D3D12 {
 		RayTracingScene(const platform::Render::RayTracingSceneInitializer& initializer);
 
 		void BuildAccelerationStructure();
+
+		ShaderResourceView* GetShaderResourceView() const
+		{
+			return AccelerationStructureView.get();
+		}
 	private:
 		leo::vector<platform::Render::RayTracingGeometryInstance> Instances;
 
@@ -31,7 +36,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		ID3D12Device5* RayTracingDevice;
 
-		leo::unique_ptr<ViewSimulation> AccelerationStructureView;
+		leo::unique_ptr<ShaderResourceView> AccelerationStructureView;
 	};
 }
 

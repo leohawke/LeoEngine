@@ -550,3 +550,4 @@ void DispatchRays(D3D12RayContext* CommandContext, const RayTracingShaderBinding
 	RayTracingCommandList->SetPipelineState1(StateObject);
 	RayTracingCommandList->DispatchRays(&DispatchDesc);
 }
+

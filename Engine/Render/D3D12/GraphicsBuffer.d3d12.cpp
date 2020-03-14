@@ -205,6 +205,17 @@ namespace platform_ex::Windows::D3D12 {
 			srv = std::make_unique<ViewSimulation>(resource, desc);
 		}
 
+		if (usage & Usage::AccelerationStructure)
+		{
+			D3D12_SHADER_RESOURCE_VIEW_DESC desc = {};
+			desc.Format = DXGI_FORMAT_UNKNOWN;
+			desc.ViewDimension = D3D12_SRV_DIMENSION_RAYTRACING_ACCELERATION_STRUCTURE;
+			desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			desc.RaytracingAccelerationStructure.Location = Resource()->GetGPUVirtualAddress();
+
+			srv = std::make_unique<ViewSimulation>(resource, desc);
+		}
+
 		if ((access & EAccessHint::EA_GPUWrite)
 			&& !((access & EAccessHint::EA_GPUStructured) || (access & EAccessHint::EA_GPUUnordered)))
 		{

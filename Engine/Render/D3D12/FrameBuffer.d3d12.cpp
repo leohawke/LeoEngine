@@ -115,4 +115,11 @@ namespace platform_ex::Windows::D3D12 {
 				static_cast<DepthStencilView*>(ds_view.get())->ClearStencil(stencil);
 		}
 	}
+
+	DepthStencilView* D3D12::FrameBuffer::GetDepthStencilView() const
+	{
+		if (ds_view)
+			return static_cast<DepthStencilView*>(ds_view.get());
+		return nullptr;
+	}
 }

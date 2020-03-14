@@ -248,7 +248,7 @@ ShaderResourceView::ShaderResourceView(TextureCube& texture, uint8 array_index, 
 	:
 	GPUDataStructView(
 		&texture,
-		texture.RetriveShaderResourceView(array_index, 0, 1, level),
+		texture.RetriveShaderResourceView(array_index, 1, 0, level),
 		(array_index * 6)* texture.GetNumMipMaps() + level,
 		1)
 	, base(texture.GetWidth(level), texture.GetHeight(level), texture.GetFormat())
@@ -262,6 +262,17 @@ ShaderResourceView::ShaderResourceView(GraphicsBuffer& gb, platform::Render::EFo
 		0,
 		1)
 	, base(width, height, pf)
+{
+}
+
+platform_ex::Windows::D3D12::ShaderResourceView::ShaderResourceView(Texture* Tex, platform::Render::Texture* ITex, uint16 width, uint16 height)
+	:GPUDataStructView(
+		Tex,
+		Tex->RetriveShaderResourceView(0,ITex->GetArraySize(),0,ITex->GetNumMipMaps()),
+		0,
+		ITex->GetArraySize()* ITex->GetNumMipMaps()
+	),
+	base(width,height,ITex->GetFormat())
 {
 }
 

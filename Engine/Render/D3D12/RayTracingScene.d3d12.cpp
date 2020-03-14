@@ -41,15 +41,7 @@ void RayTracingScene::BuildAccelerationStructure()
 
 	Context::Instance().GetCommandList(Device::Command_Resource)->ResourceBarrier(1, &barrier);
 
-	{
-		D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
-		SRVDesc.Format = DXGI_FORMAT_UNKNOWN;
-		SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_RAYTRACING_ACCELERATION_STRUCTURE;
-		SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		SRVDesc.RaytracingAccelerationStructure.Location = AccelerationStructureBuffer->Resource()->GetGPUVirtualAddress();
-
-		AccelerationStructureView = leo::make_unique< ViewSimulation>(COMPtr<ID3D12Resource>(AccelerationStructureBuffer->Resource()), SRVDesc);
-	}
+	AccelerationStructureView = leo::make_unique<ShaderResourceView>(*AccelerationStructureBuffer,EF_Unknown);
 
 	// Create and fill instance buffer
 	const uint32 NumSceneInstances =static_cast<uint32>(Instances.size());
