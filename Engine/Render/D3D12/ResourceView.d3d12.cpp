@@ -12,7 +12,10 @@ ViewSimulation::ViewSimulation(COMPtr<ID3D12Resource> & Res, D3D12_DESCRIPTOR_HE
 }
 ViewSimulation::ViewSimulation(COMPtr<ID3D12Resource> & resource, D3D12_SHADER_RESOURCE_VIEW_DESC const & desc)
 	:ViewSimulation(resource, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) {
-	device->CreateShaderResourceView(resource.Get(), &desc, handle);
+	device->CreateShaderResourceView(
+		desc.ViewDimension == D3D12_SRV_DIMENSION_RAYTRACING_ACCELERATION_STRUCTURE? nullptr: resource.Get(),
+		&desc,
+		handle);
 }
 ViewSimulation::ViewSimulation(COMPtr<ID3D12Resource> & resource, D3D12_RENDER_TARGET_VIEW_DESC const & desc)
 	:ViewSimulation(resource, D3D12_DESCRIPTOR_HEAP_TYPE_RTV) {

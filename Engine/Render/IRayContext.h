@@ -26,7 +26,7 @@ namespace platform::Render {
 	public:
 		virtual RayDevice& GetDevice() = 0;
 
-		virtual void RayTraceShadow(RayTracingScene* InScene, FrameBuffer* InDepth, UnorderedAccessView* Ouput, GraphicsBuffer* InConstants);
+		virtual void RayTraceShadow(RayTracingScene* InScene, FrameBuffer* InDepth, UnorderedAccessView* Ouput, GraphicsBuffer* InConstants) =0;
 	};
 }
 

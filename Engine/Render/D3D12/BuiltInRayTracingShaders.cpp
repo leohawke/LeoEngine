@@ -59,7 +59,8 @@ void platform_ex::Windows::D3D12::CompileGlobalShaderMap()
 
 		asset::X::Shader::ShaderCompilerInput input;
 
-		input.Code = platform::X::GenHlslShader(meta->GetSourceFileName());
+		auto ShaderCode = platform::X::GenHlslShader(meta->GetSourceFileName());
+		input.Code = ShaderCode;
 		input.EntryPoint = meta->GetEntryPoint();
 		input.Type = meta->GetShaderType();
 

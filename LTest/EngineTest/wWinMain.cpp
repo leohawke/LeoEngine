@@ -296,7 +296,7 @@ private:
 
 		pGenShaderConstants = leo::share_raw(Device.CreateConstanBuffer(platform::Render::Buffer::Usage::Dynamic, 0, sizeof(platform::Render::GenShadowConstants), EFormat::EF_Unknown));
 
-		ShadowMap = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_R32F, EAccessHint::EA_GPURead | EA_GPUWrite, {}));
+		ShadowMap = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_R32F,EA_GPURead | EA_GPUWrite | EA_GPUUnordered, {}));
 
 		ShadowMapUAV = leo::share_raw(Device.CreateUnorderedAccessView(ShadowMap.get()));
 

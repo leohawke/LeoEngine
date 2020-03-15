@@ -650,7 +650,7 @@ namespace asset::X::Shader::DXIL {
 		COMPtr<IDxcBlobEncoding> TextBlob;
 		Library->CreateBlobWithEncodingFromPinned(input.Code.data(),static_cast<UINT32>(input.Code.size()), CP_UTF8, &TextBlob.GetRef());
 
-		leo::Text::String wSourceName(input.SourceName.data(), input.SourceName.size());
+		leo::Text::String wSourceName(input.SourceName);
 
 		COMPtr<IDxcOperationResult> CompileResult;
 		CheckHResult(Compiler->Compile(

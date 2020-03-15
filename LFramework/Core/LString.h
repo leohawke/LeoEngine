@@ -62,7 +62,7 @@ namespace leo
 			template<typename _tChar>
 			explicit
 				String(basic_string_view<_tChar> sv, Encoding enc = CS_Default)
-				: u16string(MakeUCS2LE<u16string>(sv.data(), enc))
+				: u16string(sv.empty() ? u16string() : MakeUCS2LE<u16string>(sv.data(), enc))
 			{}
 			/*
 			\brief 构造：使用指定字符类型的 basic_string 和指定编码。
