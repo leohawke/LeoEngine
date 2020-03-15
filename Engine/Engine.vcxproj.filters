@@ -649,6 +649,9 @@
     <None Include="Shaders\RayTracing\RayTracingBuiltInShaders.lsl">
       <Filter>Shaders\RayTracing</Filter>
     </None>
+    <None Include="Render\Effect\PreZ.lsl">
+      <Filter>Render\Effect</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Render\Effect\Bilt.lsl">

@@ -150,6 +150,10 @@ public:
 
 	std::vector<DirectLight> lights;
 	std::shared_ptr<GraphicsBuffer> pLightConstatnBuffer;
+	std::shared_ptr<GraphicsBuffer> pGenShaderConstants;
+
+	std::shared_ptr<Texture2D> ShadowMap;
+	std::shared_ptr<UnorderedAccessView> ShadowMapUAV;
 private:
 	leo::uint32 DoUpdate(leo::uint32 pass) override {
 		auto& timer = platform::chrono::FetchGlobalTimer();
@@ -178,11 +182,7 @@ private:
 		auto projmatrix = LeoEngine::X::perspective_fov_lh(3.14f / 4, 720.f / 1280, 1, 1000);
 		auto viewmatrix = camera.GetViewMatrix();
 
-		auto viewporj = viewmatrix * projmatrix;
-
-		DirectLight& point_light = lights[0];
-		point_light.position = lm::float3(0, 40, 0);
-		pLightConstatnBuffer->UpdateSubresource(0, static_cast<leo::uint32>(sizeof(DirectLight)*lights.size()),&lights[0]);
+		auto viewproj = viewmatrix * projmatrix;
 
 		auto pEffect = platform::X::LoadEffect("ForwardDirectLightShading");
 
@@ -191,7 +191,7 @@ private:
 		pEffect->GetParameter("world"sv) = lm::transpose(worldmatrix);
 		//camera
 		pEffect->GetParameter("camera_pos"sv) = camera.GetEyePos();
-		pEffect->GetParameter("viewproj"sv) = lm::transpose(viewporj);
+		pEffect->GetParameter("viewproj"sv) = lm::transpose(viewproj);
 
 		//light
 		pEffect->GetParameter("light_count"sv) = static_cast<leo::uint32>(lights.size());
@@ -204,8 +204,41 @@ private:
 		pEffect->GetParameter("ambient_color") = leo::math::float3(0.1f, 0.1f, 0.1f);
 		
 		auto pView = passInfo.GetRenderView();
-		 
 
+		auto pPreZEffect = platform::X::LoadEffect("PreZ");
+		{
+			//obj
+			pPreZEffect->GetParameter("world"sv) = lm::transpose(worldmatrix);
+			//camera
+			pPreZEffect->GetParameter("camera_pos"sv) = camera.GetEyePos();
+			pPreZEffect->GetParameter("viewproj"sv) = lm::transpose(viewproj);
+		}
+
+		//pre-z
+		for (auto& entity : pEntities->GetRenderables())
+		{
+			Context::Instance().Render(*pPreZEffect, pPreZEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
+		}
+
+		//ray-shadow
+		//unbind
+		Context::Instance().SetFrame(nullptr);
+
+		platform::Render::GenShadowConstants shadowconstant;
+		{
+			shadowconstant.LightDirection = lights[0].direction;
+			shadowconstant.CameraToWorld = lm::transpose(lm::inverse(viewproj));
+			shadowconstant.Resolution = lm::float2(1280, 720);
+			pGenShaderConstants->UpdateSubresource(0, static_cast<leo::uint32>(sizeof(shadowconstant)), &shadowconstant);
+		}
+		auto Scene = pEntities->BuildRayTracingScene();
+		Context::Instance().GetRayContext().RayTraceShadow(Scene.get(),
+			Context::Instance().GetScreenFrame().get(),
+			ShadowMapUAV.get(),
+			pGenShaderConstants.get());
+
+		//re-bind
+		Context::Instance().SetFrame(Context::Instance().GetScreenFrame());
 		for (auto& entity : pEntities->GetRenderables())
 		{
 			entity.GetMaterial().UpdateParams(reinterpret_cast<const platform::Renderable*>(&entity));
@@ -259,7 +292,13 @@ private:
 		lights.push_back(directioal_light);
 
 		auto& Device = Context::Instance().GetDevice();
-		pLightConstatnBuffer = leo::share_raw(Device.CreateConstanBuffer(Buffer::Usage::Dynamic, EAccessHint::EA_GPURead | EAccessHint::EA_GPUStructured, sizeof(DirectLight)*lights.size(), static_cast<EFormat>(sizeof(DirectLight)),nullptr));
+		pLightConstatnBuffer = leo::share_raw(Device.CreateConstanBuffer(Buffer::Usage::Dynamic, EAccessHint::EA_GPURead | EAccessHint::EA_GPUStructured, sizeof(DirectLight)*lights.size(), static_cast<EFormat>(sizeof(DirectLight)),lights.data()));
+
+		pGenShaderConstants = leo::share_raw(Device.CreateConstanBuffer(platform::Render::Buffer::Usage::Dynamic, 0, sizeof(platform::Render::GenShadowConstants), EFormat::EF_Unknown));
+
+		ShadowMap = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_R32F, EAccessHint::EA_GPURead | EA_GPUWrite, {}));
+
+		ShadowMapUAV = leo::share_raw(Device.CreateUnorderedAccessView(ShadowMap.get()));
 
 		GetMessageMap()[WM_MOUSEMOVE] += [&](::WPARAM wParam, ::LPARAM lParam) {
 			static auto lastxPos = GET_X_LPARAM(lParam);

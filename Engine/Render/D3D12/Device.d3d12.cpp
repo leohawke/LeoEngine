@@ -215,6 +215,12 @@ namespace platform_ex::Windows::D3D12 {
 		return std::make_unique<InputLayout>().release();
 	}
 
+	UnorderedAccessView* Device::CreateUnorderedAccessView(platform::Render::Texture2D* InTexture)
+	{
+		return std::make_unique<UnorderedAccessView>(static_cast<Texture2D&>(*InTexture),0,InTexture->GetArraySize(),0).release();
+	}
+
+
 	GraphicsBuffer *Device::CreateBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const*> init_data)
 	{
 		auto buffer = std::make_unique<GraphicsBuffer>(usage, access, size_in_byte, format);

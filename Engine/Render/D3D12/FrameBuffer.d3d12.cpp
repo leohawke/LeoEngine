@@ -95,6 +95,15 @@ namespace platform_ex::Windows::D3D12 {
 			static_cast<UnorderedAccessView*>(uav_view.get())->ResetInitCount();
 		}
 	}
+
+	void FrameBuffer::OnUnBind()
+	{
+		auto& cmd_list = Context::Instance().GetCommandList(Device::Command_Render);
+
+		cmd_list->OMSetRenderTargets(0,
+			nullptr , false, nullptr);
+	}
+
 	void FrameBuffer::Clear(leo::uint32 flags, const leo::math::float4 & clr, float depth, leo::int32 stencil)
 	{
 		if (flags & Color) {

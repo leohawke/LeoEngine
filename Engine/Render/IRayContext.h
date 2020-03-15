@@ -10,7 +10,7 @@
 
 namespace platform::Render {
 
-	struct GenShaowConstants
+	struct GenShadowConstants
 	{
 		leo::math::float3 LightDirection;
 		float Padding0;
@@ -19,7 +19,7 @@ namespace platform::Render {
 		leo::math::float2 Padding1;
 	};
 
-	static_assert(loffsetof(GenShaowConstants, CameraToWorld) == 16);
+	static_assert(loffsetof(GenShadowConstants, CameraToWorld) == 16);
 
 	class RayContext
 	{

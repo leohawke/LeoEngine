@@ -23,12 +23,10 @@ namespace platform {
 
 		void Context::SetFrame(const std::shared_ptr<FrameBuffer>& framebuffer)
 		{
-			//TODO Support null
-			//TODO State Cache [Depend Default Frame]
-			if (/*!framebuffer ||*/ (framebuffer /*&& framebuffer->Dirty()*/)) {
-				if (curr_frame_buffer)
-					curr_frame_buffer->OnUnBind();
+			if(!framebuffer && curr_frame_buffer)
+				curr_frame_buffer->OnUnBind();
 
+			if (framebuffer) {
 				curr_frame_buffer = framebuffer;
 				curr_frame_buffer->OnBind();
 

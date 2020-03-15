@@ -10,6 +10,7 @@
 #include "Effect/Effect.hpp"
 #include "IGraphicsBuffer.hpp"
 #include "InputLayout.hpp"
+#include "IGPUResourceView.h"
 
 namespace asset {
 	class ShaderBlobAsset;
@@ -41,6 +42,8 @@ namespace platform::Render {
 		virtual PipleState* CreatePipleState(const PipleState& state) = 0;
 
 		virtual InputLayout* CreateInputLayout() = 0;
+
+		virtual UnorderedAccessView* CreateUnorderedAccessView(Texture2D* InTexture) =0;
 	};
 }
 

@@ -74,6 +74,8 @@ namespace platform_ex {
 
 				InputLayout* CreateInputLayout() override;
 
+				UnorderedAccessView* CreateUnorderedAccessView(platform::Render::Texture2D* InTexture) override;
+
 				platform::Render::Effect::CopyEffect& BiltEffect();
 
 				platform::Render::InputLayout& PostProcessLayout();

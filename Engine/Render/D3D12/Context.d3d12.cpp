@@ -351,16 +351,15 @@ namespace platform_ex::Windows::D3D12 {
 		screen_frame_buffer = display->GetFrameBuffer();
 		SetFrame(display->GetFrameBuffer());
 	}
-	void Context::DoBindFrameBuffer(const std::shared_ptr<platform::Render::FrameBuffer>&)
+	void Context::DoBindFrameBuffer(const std::shared_ptr<platform::Render::FrameBuffer>& framebuffer)
 	{
+		static_cast<FrameBuffer*>(framebuffer.get())->BindBarrier();
 	}
 	void Context::Render(const Effect::Effect & effect, const Effect::Technique & tech, const platform::Render::InputLayout & layout)
 	{
 		//TODO Compute/Copy State -> SyncCPUGPU(true)
 
 		auto& framebuffer = static_pointer_cast<FrameBuffer>(GetCurrFrame());
-		framebuffer->SetRenderTargets();
-		framebuffer->BindBarrier();
 
 		std::vector<D3D12_RESOURCE_BARRIER> barriers;
 
@@ -465,6 +464,7 @@ namespace platform_ex::Windows::D3D12 {
 	}
 	void Context::BeginFrame()
 	{
+		SetFrame(GetScreenFrame());
 	}
 	void Context::EndFrame()
 	{
