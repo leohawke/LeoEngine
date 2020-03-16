@@ -31,6 +31,7 @@ void RayTracingScene::BuildAccelerationStructure()
 
 	RayTracingDevice->GetRaytracingAccelerationStructurePrebuildInfo(&PrebuildDescInputs, &PrebuildInfo);
 
+	//TODO keep reference in commandlist
 	shared_ptr<GraphicsBuffer> ScratchBuffer;
 	CreateAccelerationStructureBuffers(AccelerationStructureBuffer, ScratchBuffer, device, PrebuildInfo);
 
