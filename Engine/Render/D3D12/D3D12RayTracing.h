@@ -565,6 +565,18 @@ public:
 		std::vector<leo::Text::String> ExportNames;
 		std::vector<D3D12_EXPORT_DESC> ExportDescs;
 
+		D3D12_EXISTING_COLLECTION_DESC GetCollectionDesc()
+		{
+			lconstraint(StateObject);
+
+			D3D12_EXISTING_COLLECTION_DESC Result = {};
+			Result.pExistingCollection = StateObject.Get();
+			Result.pExports = ExportDescs.data();
+			Result.NumExports =static_cast<UINT32>(ExportDescs.size());
+
+			return Result;
+		}
+
 		const wchar_t* GetPrimaryExportNameChars()
 		{
 			LAssert(ExportNames.size() != 0,"This ray tracing shader collection does not export any symbols.");

@@ -45,7 +45,7 @@ COMPtr<ID3D12StateObject> CreateRayTracingStateObject(ID3D12Device5* RayTracingD
 	);
 
 	leo::vector<D3D12_SUBOBJECT_TO_EXPORTS_ASSOCIATION> ExportAssociations;
-	ExportAssociations.reserve(Exports.size());
+	ExportAssociations.resize(Exports.size());
 	auto NumExports = Exports.size();
 
 	//Shader libraries

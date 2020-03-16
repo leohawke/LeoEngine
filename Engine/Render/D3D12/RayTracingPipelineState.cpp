@@ -25,13 +25,17 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 	const uint32 MaxTotalShaders =static_cast<uint32>(InitializerRayGenShaders.size() + InitializerMissShaders.size() + InitializerHitGroups.size() + InitializerCallableShaders.size());
 
 	// All raygen and miss shaders must share the same global root signature, so take the first one and validate the rest
-
 	GlobalRootSignature =static_cast<RayTracingShader*>(InitializerRayGenShaders[0])->pRootSignature;
+
+	std::set<RayTracingPipelineCache::Entry*> UniqueShaderHashes;
+	std::vector<RayTracingPipelineCache::Entry*> UniqueShaderCollections;
 
 	auto PipelineCache = RayDevice.GetRayTracingPipelineCache();
 
 	auto GetPrimaryExportNameChars = [RayTracingDevice, PipelineCache,
-		GlobalRootSignature = this->GlobalRootSignature->GetSignature(),&initializer](RayTracingShader* Shader, RayTracingPipelineCache::CollectionType CollectionType)
+		GlobalRootSignature = this->GlobalRootSignature->GetSignature(),&initializer,
+		&UniqueShaderHashes,&UniqueShaderCollections
+	](RayTracingShader* Shader, RayTracingPipelineCache::CollectionType CollectionType)
 	{
 		auto Entry = PipelineCache->GetOrCompileShader(
 			RayTracingDevice,
@@ -40,6 +44,11 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 			initializer.MaxPayloadSizeInBytes,
 			CollectionType
 		);
+
+		bool bIsAlreadyInSet = !UniqueShaderHashes.emplace(Entry).second;
+
+		if (!bIsAlreadyInSet)
+			UniqueShaderCollections.push_back(Entry);
 
 		return Entry->GetPrimaryExportNameChars();
 	};
@@ -125,7 +134,10 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 	}
 
 	std::vector<D3D12_EXISTING_COLLECTION_DESC> UniqueShaderCollectionDescs;
-
+	for (auto Entry : UniqueShaderCollections)
+	{
+		UniqueShaderCollectionDescs.push_back(Entry->GetCollectionDesc());
+	}
 	
 
 	StateObject = CreateRayTracingStateObject(
@@ -162,28 +174,28 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 
 	// Query shader identifiers from the pipeline state object
 
-	HitGroupShaders.Identifiers.reserve(InitializerHitGroups.size());
+	HitGroupShaders.Identifiers.resize(InitializerHitGroups.size());
 	for (int32 HitGroupIndex = 0; HitGroupIndex < HitGroupNames.size(); ++HitGroupIndex)
 	{
 		LPCWSTR ExportNameChars = HitGroupNames[HitGroupIndex];
 		HitGroupShaders.Identifiers[HitGroupIndex] = GetShaderIdentifier(ExportNameChars);
 	}
 
-	RayGenShaders.Identifiers.reserve(RayGenShaderNames.size());
+	RayGenShaders.Identifiers.resize(RayGenShaderNames.size());
 	for (int32 ShaderIndex = 0; ShaderIndex < RayGenShaderNames.size(); ++ShaderIndex)
 	{
 		LPCWSTR ExportNameChars = RayGenShaderNames[ShaderIndex];
 		RayGenShaders.Identifiers[ShaderIndex] = GetShaderIdentifier(ExportNameChars);
 	}
 
-	MissShaders.Identifiers.reserve(MissShaderNames.size());
+	MissShaders.Identifiers.resize(MissShaderNames.size());
 	for (int32 ShaderIndex = 0; ShaderIndex < MissShaderNames.size(); ++ShaderIndex)
 	{
 		LPCWSTR ExportNameChars = MissShaderNames[ShaderIndex];
 		MissShaders.Identifiers[ShaderIndex] = GetShaderIdentifier(ExportNameChars);
 	}
 
-	CallableShaders.Identifiers.reserve(CallableShaderNames.size());
+	CallableShaders.Identifiers.resize(CallableShaderNames.size());
 	for (int32 ShaderIndex = 0; ShaderIndex < CallableShaderNames.size(); ++ShaderIndex)
 	{
 		LPCWSTR ExportNameChars = CallableShaderNames[ShaderIndex];
