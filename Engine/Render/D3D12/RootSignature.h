@@ -88,6 +88,9 @@ namespace platform_ex::Windows::D3D12 {
 	class RootSignature
 	{
 	public:
+		RootSignature()
+		{}
+
 		RootSignature(const ShaderBlob& blob)
 		{
 			Init(blob);

@@ -1094,7 +1094,10 @@ namespace leo
 		if (l != 0)
 		{
 			lassume(str.length() > 0 && str[0] == _tChar());
-			std::vsprintf(&str[0], fmt, args);
+			if constexpr (std::is_same_v<wchar_t, _tChar>)
+				std::vswprintf(&str[0],l+1, fmt, args);
+			else
+				std::vsprintf(&str[0], fmt, args);
 		}
 		return str;
 	}

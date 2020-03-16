@@ -35,6 +35,8 @@ D12::RayDevice::RayDevice(Device* pDevice, Context* pContext)
 		throw leo::unsupported();
 
 	ray_tracing_descriptor_heap_cache = make_unique<RayTracingDescriptorHeapCache>(this);
+
+	ray_tracing_pipeline_cache = make_unique<RayTracingPipelineCache>(d3d_ray_device.Get());
 }
 
 D12::RayTracingGeometry* D12::RayDevice::CreateRayTracingGeometry(const R::RayTracingGeometryInitializer& initializer)
@@ -88,6 +90,11 @@ const D12::Fence& platform_ex::Windows::D3D12::RayDevice::GetFence() const
 RayTracingDescriptorHeapCache* platform_ex::Windows::D3D12::RayDevice::GetRayTracingDescriptorHeapCache() const
 {
 	return ray_tracing_descriptor_heap_cache.get();
+}
+
+RayTracingPipelineCache* platform_ex::Windows::D3D12::RayDevice::GetRayTracingPipelineCache() const
+{
+	return ray_tracing_pipeline_cache.get();
 }
 
 D12::RayContext::RayContext(Device* pDevice, Context* pContext)

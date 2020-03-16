@@ -7,6 +7,9 @@ using namespace platform_ex::Windows::D3D12;
 
 RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTracingPipelineStateInitializer& initializer)
 {
+	auto& RayDevice = Context::Instance().GetRayContext().GetDevice();
+	auto RayTracingDevice = RayDevice.GetRayTracingDevice();
+
 	platform::Render::RayTracingShader* DefaultHitShader = GetBuildInRayTracingShader<DefaultCHS>();
 	platform::Render::RayTracingShader* DefaultHitGroupTable[] = { DefaultHitShader };
 
@@ -25,10 +28,20 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 
 	GlobalRootSignature =static_cast<RayTracingShader*>(InitializerRayGenShaders[0])->pRootSignature;
 
-	//TODO:CompieShader GetName
-	auto GetPrimaryExportNameChars = [](RayTracingShader* Shader, RayTracingPipelineCache::CollectionType CollectionType)
+	auto PipelineCache = RayDevice.GetRayTracingPipelineCache();
+
+	auto GetPrimaryExportNameChars = [RayTracingDevice, PipelineCache,
+		GlobalRootSignature = this->GlobalRootSignature->GetSignature(),&initializer](RayTracingShader* Shader, RayTracingPipelineCache::CollectionType CollectionType)
 	{
-		return L"";
+		auto Entry = PipelineCache->GetOrCompileShader(
+			RayTracingDevice,
+			Shader,
+			GlobalRootSignature,
+			initializer.MaxPayloadSizeInBytes,
+			CollectionType
+		);
+
+		return Entry->GetPrimaryExportNameChars();
 	};
 
 	bAllowHitGroupIndexing = initializer.HitGroupTable.size() ? initializer.bAllowHitGroupIndexing : false;
@@ -113,8 +126,7 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 
 	std::vector<D3D12_EXISTING_COLLECTION_DESC> UniqueShaderCollectionDescs;
 
-	auto& RayDevice = Context::Instance().GetRayContext().GetDevice();
-	auto RayTracingDevice = RayDevice.GetRayTracingDevice();
+	
 
 	StateObject = CreateRayTracingStateObject(
 		RayTracingDevice,

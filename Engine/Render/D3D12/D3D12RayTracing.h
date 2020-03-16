@@ -5,6 +5,7 @@
 #include <LBase/span.hpp>
 #include "GraphicsBuffer.hpp"
 #include "RayTracingShader.h"
+#include "RootSignature.h"
 #include "../RayTracingDefinitions.h"
 #include "../IGPUResourceView.h"
 #include <LBase/type_traits.hpp>
@@ -161,6 +162,7 @@ using D3D12Device = Windows::D3D12::Device;
 using D3D12RayDevice = Windows::D3D12::RayDevice;
 using D3D12RayContext = Windows::D3D12::RayContext;
 using D3D12RayTracingPipelineState = platform_ex::Windows::D3D12::RayTracingPipelineState;
+using D3D12RayTracingShader = Windows::D3D12::RayTracingShader;
 
 class RayDeviceChild
 {
@@ -501,6 +503,8 @@ struct RayTracingShaderLibrary
 class RayTracingPipelineCache
 {
 public:
+	RayTracingPipelineCache(ID3D12Device5* Device);
+
 	enum class CollectionType
 	{
 		RayGen,
@@ -508,6 +512,76 @@ public:
 		HitGroup,
 		Callable,
 	};
+
+	static const char* GetCollectionTypeName(CollectionType Type)
+	{
+		switch (Type)
+		{
+		case CollectionType::RayGen:
+			return "RayGen";
+		case CollectionType::Miss:
+			return "Miss";
+		case CollectionType::HitGroup:
+			return "HitGroup";
+		case CollectionType::Callable:
+			return "Callable";
+		default:
+			return "";
+		}
+	}
+
+	struct Key
+	{
+		union
+		{
+			uint64 ShaderHash;
+			intptr_t ShaderPoint;
+		};
+		uint32 MaxPayloadSizeInBytes = 0;
+		ID3D12RootSignature* GlobalRootSignature = nullptr;
+		ID3D12RootSignature* LocalRootSignature = nullptr;
+
+		bool operator == (const Key& Other) const
+		{
+			return ShaderHash == Other.ShaderHash
+				&& MaxPayloadSizeInBytes == Other.MaxPayloadSizeInBytes
+				&& GlobalRootSignature == Other.GlobalRootSignature
+				&& LocalRootSignature == Other.LocalRootSignature;
+		}
+	};
+
+	struct KeyHash
+	{
+		std::size_t operator()(const Key& key) const
+		{
+			return key.ShaderHash;
+		}
+	};
+
+	struct Entry
+	{
+		leo::observer_ptr<Windows::D3D12::RayTracingShader> Shader;
+		COMPtr<ID3D12StateObject> StateObject;
+		std::vector<leo::Text::String> ExportNames;
+		std::vector<D3D12_EXPORT_DESC> ExportDescs;
+
+		const wchar_t* GetPrimaryExportNameChars()
+		{
+			LAssert(ExportNames.size() != 0,"This ray tracing shader collection does not export any symbols.");
+			return reinterpret_cast<const wchar_t*>(ExportNames[0].c_str());
+		}
+	};
+
+	Entry* GetOrCompileShader(ID3D12Device5* RayTracingDevice,
+		D3D12RayTracingShader* Shader,
+		ID3D12RootSignature* GlobalRootSignature,
+		uint32 MaxPayloadSizeInBytes,
+		CollectionType CollectionType);
+
+private:
+	std::mutex CriticalSection;
+	std::unordered_map<Key, Entry*, KeyHash> Cache;
+	Windows::D3D12::RootSignature DefaultLocalRootSignature;
 };
 
 struct RayTracingShaderBindings

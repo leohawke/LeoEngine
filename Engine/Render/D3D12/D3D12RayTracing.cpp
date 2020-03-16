@@ -299,6 +299,169 @@ uint32 RayTracingDescriptorCache::GetDescriptorTableBaseIndex(const D3D12_CPU_DE
 	return DescriptorTableBaseIndex;
 }
 
+inline leo::Text::String GenerateShaderName(const char* Prefix, uint64 Hash)
+{
+	return leo::sfmt("%s_%016llx", Prefix, Hash);
+}
+
+class ShaderCompile
+{
+public:
+	using ECollectionType = RayTracingPipelineCache::CollectionType;
+
+	ShaderCompile(
+		RayTracingPipelineCache::Entry& InEntry,
+		RayTracingPipelineCache::Key InCacheKey,
+		ID3D12Device5* InRayTracingDevice,
+		ECollectionType InCollectionType)
+		: Entry(InEntry)
+		, CacheKey(InCacheKey)
+		, RayTracingDevice(InRayTracingDevice)
+		, CollectionType(InCollectionType)
+	{
+	}
+	
+	void Do()
+	{
+		auto Shader = Entry.Shader.get();
+
+
+		static constexpr uint32 MaxEntryPoints = 3; // CHS+AHS+IS for HitGroup or just a single entry point for other collection types
+		std::vector<LPCWSTR> OriginalEntryPoints;
+		std::vector<LPCWSTR> RenamedEntryPoints;
+
+		const uint32 NumHitGroups = CollectionType == ECollectionType::HitGroup ? 1 : 0;
+		const uint64 ShaderHash = CacheKey.ShaderHash;
+		ID3D12RootSignature* GlobalRootSignature = CacheKey.GlobalRootSignature;
+		ID3D12RootSignature* LocalRootSignature = CacheKey.LocalRootSignature;
+		const uint32 DefaultLocalRootSignatureIndex = 0;
+		uint32 MaxPayloadSizeInBytes = CacheKey.MaxPayloadSizeInBytes;
+
+		D3D12_HIT_GROUP_DESC HitGroupDesc = {};
+
+		if (CollectionType == ECollectionType::HitGroup)
+		{
+			HitGroupDesc.HitGroupExport = Entry.GetPrimaryExportNameChars();
+			HitGroupDesc.Type = Shader->IntersectionEntryPoint.empty() ? D3D12_HIT_GROUP_TYPE_TRIANGLES : D3D12_HIT_GROUP_TYPE_PROCEDURAL_PRIMITIVE;
+
+			{
+				const auto& ExportName = Entry.ExportNames.emplace_back(GenerateShaderName("CHS", ShaderHash));
+
+				HitGroupDesc.ClosestHitShaderImport = reinterpret_cast<LPCWSTR>(ExportName.c_str());
+
+				OriginalEntryPoints.push_back(reinterpret_cast<LPCWSTR>(Shader->EntryPoint.c_str()));
+				RenamedEntryPoints.push_back(reinterpret_cast<LPCWSTR>(ExportName.c_str()));
+			}
+
+			if (!Shader->AnyHitEntryPoint.empty())
+			{
+				const auto& ExportName = Entry.ExportNames.emplace_back(GenerateShaderName("AHS", ShaderHash));
+
+				HitGroupDesc.AnyHitShaderImport = reinterpret_cast<LPCWSTR>(ExportName.c_str());
+
+				OriginalEntryPoints.push_back(reinterpret_cast<LPCWSTR>(Shader->AnyHitEntryPoint.c_str()));
+				RenamedEntryPoints.push_back(reinterpret_cast<LPCWSTR>(ExportName.c_str()));
+			}
+
+			if (!Shader->IntersectionEntryPoint.empty())
+			{
+				const auto& ExportName = Entry.ExportNames.emplace_back(GenerateShaderName("IS", ShaderHash));
+
+				HitGroupDesc.IntersectionShaderImport = reinterpret_cast<LPCWSTR>(ExportName.c_str());
+
+				OriginalEntryPoints.push_back(reinterpret_cast<LPCWSTR>(Shader->IntersectionEntryPoint.c_str()));
+				RenamedEntryPoints.push_back(reinterpret_cast<LPCWSTR>(ExportName.c_str()));
+			}
+		}
+		else
+		{
+			LAssert(CollectionType == ECollectionType::Miss || CollectionType == ECollectionType::RayGen || CollectionType == ECollectionType::Callable, "Unexpected RT sahder collection type");
+
+			OriginalEntryPoints.push_back(reinterpret_cast<LPCWSTR>(Shader->EntryPoint.c_str()));
+			RenamedEntryPoints.push_back(Entry.GetPrimaryExportNameChars());
+		}
+
+
+		for (const auto& ExportName : Entry.ExportNames)
+		{
+			D3D12_EXPORT_DESC ExportDesc = {};
+			ExportDesc.Name = reinterpret_cast<LPCWSTR>(ExportName.c_str());
+			ExportDesc.Flags = D3D12_EXPORT_FLAG_NONE;
+			Entry.ExportDescs.push_back(ExportDesc);
+		}
+
+		DXILLibrary Library(Shader->ShaderByteCode.first.get(),Shader->ShaderByteCode.second,
+			OriginalEntryPoints.data(),RenamedEntryPoints.data(),OriginalEntryPoints.size());
+
+		const DXILLibrary* LibraryPtr = &Library;
+		Entry.StateObject = CreateRayTracingStateObject(
+			RayTracingDevice,
+			leo::make_span(&LibraryPtr, 1),
+			leo::make_span(RenamedEntryPoints),
+			MaxPayloadSizeInBytes,
+			leo::make_span(&HitGroupDesc, NumHitGroups),
+			GlobalRootSignature,
+			leo::make_span(&LocalRootSignature, 1),
+			{},
+			{},
+			D3D12_STATE_OBJECT_TYPE_COLLECTION
+		);
+	}
+
+	RayTracingPipelineCache::Entry& Entry;
+	RayTracingPipelineCache::Key CacheKey;
+	ID3D12Device5* RayTracingDevice;
+	RayTracingPipelineCache::CollectionType CollectionType;
+};
+
+RayTracingPipelineCache::RayTracingPipelineCache(ID3D12Device5* Device)
+{
+	D3D12_VERSIONED_ROOT_SIGNATURE_DESC LocalRootSignatureDesc = {};
+	LocalRootSignatureDesc.Version = D3D_ROOT_SIGNATURE_VERSION_1_0;
+	LocalRootSignatureDesc.Desc_1_0.Flags |= D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE;
+	DefaultLocalRootSignature.Init(LocalRootSignatureDesc,0, Device);
+}
+
+RayTracingPipelineCache::Entry* RayTracingPipelineCache::GetOrCompileShader(ID3D12Device5* RayTracingDevice, D3D12RayTracingShader* Shader, ID3D12RootSignature* GlobalRootSignature, uint32 MaxPayloadSizeInBytes, CollectionType CollectionType)
+{
+	std::unique_lock Lock{ CriticalSection };
+
+	auto ShaderHash = reinterpret_cast<intptr_t>(Shader);
+	ID3D12RootSignature* LocalRootSignature = nullptr;
+	if (CollectionType == CollectionType::HitGroup || CollectionType == CollectionType::Callable)
+	{
+		// Only hit group and callable shaders have a local root signature
+		LocalRootSignature = Shader->pRootSignature->GetSignature();
+	}
+	else
+	{
+		// ... all other shaders share a default empty local root signature
+		LocalRootSignature = DefaultLocalRootSignature.GetSignature();
+	}
+
+	Key CacheKey;
+	CacheKey.ShaderHash = ShaderHash;
+	CacheKey.MaxPayloadSizeInBytes = MaxPayloadSizeInBytes;
+	CacheKey.GlobalRootSignature = GlobalRootSignature;
+	CacheKey.LocalRootSignature = LocalRootSignature;
+
+	auto& FindResult = Cache[CacheKey];
+	if (!FindResult)
+	{
+		FindResult = new Entry();
+
+		auto& Entry = *FindResult;
+
+		Entry.Shader =leo::make_observer(Shader);
+
+		Entry.ExportNames.push_back(GenerateShaderName(GetCollectionTypeName(CollectionType), ShaderHash));
+
+		ShaderCompile(Entry, CacheKey, RayTracingDevice, CollectionType).Do();
+	}
+
+	return FindResult;
+}
+
 struct FD3D12RayTracingGlobalResourceBinder
 {
 	FD3D12RayTracingGlobalResourceBinder(D3D12RayContext& InCommandContext)

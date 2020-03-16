@@ -14,7 +14,7 @@
 					out float4 ClipPos:SV_POSITION
 		)
 		{
-			WorldPos = mul(float4(Postion,1.0f),world);
+			float3 WorldPos = mul(float4(Postion,1.0f),world).xyz;
 
 			ClipPos = mul(float4(WorldPos,1.0f),viewproj);
 		}
