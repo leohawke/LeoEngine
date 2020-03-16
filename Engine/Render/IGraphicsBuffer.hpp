@@ -67,8 +67,8 @@ namespace platform::Render {
 			friend class ::platform::Render::GraphicsBuffer;
 
 		public:
-			Mapper(GraphicsBuffer& buffer_, Access ba)
-				: buffer(buffer)
+			Mapper(GraphicsBuffer& InBuffer, Access ba)
+				: buffer(InBuffer)
 			{
 				data = buffer.Map(ba);
 			}

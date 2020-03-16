@@ -132,6 +132,9 @@ namespace platform_ex::Windows::D3D12 {
 
 void D12::RayContext::RayTraceShadow(R::RayTracingScene* InScene, R::FrameBuffer* InDepth,R::UnorderedAccessView* Output, R::GraphicsBuffer* InConstants)
 {
+	lconstraint(Output);
+	lconstraint(InConstants);
+
 	auto Depth = static_cast<D12::FrameBuffer*>(InDepth);
 	auto DepthView = Depth->GetDepthStencilView();
 
@@ -155,6 +158,8 @@ void D12::RayContext::RayTraceShadow(R::RayTracingScene* InScene, R::FrameBuffer
 	Bindings.SRVs[1] = &DepthSRV;
 	Bindings.UniformBuffers[0] = InConstants;
 	Bindings.UAVs[0] = Output;
+
+	lconstraint(Bindings.SRVs[0]);
 
 	D12::RayTracingPipelineState* Pipeline = GetBasicRayTracingPipeline()->Shadow;
 

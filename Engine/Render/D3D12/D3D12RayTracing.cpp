@@ -16,7 +16,7 @@ void RayTracingShaderTable::UploadToGPU(Windows::D3D12::Device* Device)
 
 	Buffer = leo::share_raw(Device->CreateVertexBuffer(
 		platform::Render::Buffer::Static,
-		0,
+		platform::Render::EAccessHint::EA_GPURead,
 		static_cast<uint32>(Data.size()),
 		platform::Render::EF_Unknown,
 		Data.data()

@@ -111,6 +111,8 @@ public:
 			Instances.push_back(Instance);
 		}
 
+		initializer.Instances = leo::make_span(Instances);
+
 		return leo::unique_raw(Context::Instance().GetRayContext().GetDevice().CreateRayTracingScene(initializer));
 	}
 
@@ -232,6 +234,8 @@ private:
 			pGenShaderConstants->UpdateSubresource(0, static_cast<leo::uint32>(sizeof(shadowconstant)), &shadowconstant);
 		}
 		auto Scene = pEntities->BuildRayTracingScene();
+		Context::Instance().GetRayContext().GetDevice().BuildAccelerationStructure(Scene.get());
+
 		Context::Instance().GetRayContext().RayTraceShadow(Scene.get(),
 			Context::Instance().GetScreenFrame().get(),
 			ShadowMapUAV.get(),
