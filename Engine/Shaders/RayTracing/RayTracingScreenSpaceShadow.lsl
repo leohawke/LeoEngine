@@ -26,8 +26,11 @@ RAY_TRACING_ENTRY_RAYGEN(RayGen)
 	 // Screen position for the ray
     float2 screenPos = xy / Resolution * 2.0 - 1.0;
 
+	// Invert Y for DirectX-style coordinates
+    screenPos.y = -screenPos.y;
+
 	// Unproject into the world position using depth
-	float4 unprojected = mul(CameraToWorld, float4(screenPos, sceneDepth, 1));
+	float4 unprojected = mul(float4(screenPos, sceneDepth, 1),CameraToWorld);
 	float3 world = unprojected.xyz / unprojected.w;
 
 	// R
@@ -43,10 +46,10 @@ RAY_TRACING_ENTRY_RAYGEN(RayGen)
 
 	TraceRay(TLAS, RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH, ~0,0,1,0, rayDesc, payload);
 
-	if(payload.IsHit())
-		Output[DispatchRaysIndex().xy] = 1;
-	else
+	if(payload.IsHit() && payload.HitT < FLT_MAX)
 		Output[DispatchRaysIndex().xy] = 0;
+	else
+		Output[DispatchRaysIndex().xy] = 1;
 }
 "
 	)

@@ -9,6 +9,7 @@
 	)
 	(cbuffer global
 		(uint light_count)
+		(float2 inv_sscreen)
 	)
 	(StructuredBuffer (elemtype DirectLight) lights)
 	(cbuffer obj
@@ -21,6 +22,7 @@
 	(texture2D albedo_tex)
 	(texture2D glossiness_tex)
 	(texture2D normal_tex)
+	(texture2D shadow_tex)
 	(sampler bilinear_sampler
 		(filtering min_mag_linear_mip_point)
 		(address_u clamp)
@@ -131,7 +133,7 @@
 			float3 diffuse,specular = 0;
 			ShadingMaterial(material,view_dir,shadow,occlusion,diffuse,specular);
 
-			color.xyz = diffuse + specular;
+			color.xyz = (diffuse + specular)*shadow_tex.Sample(bilinear_sampler,ClipPos.xy*inv_sscreen).r;
 			color.w = 1.0f;
 		}
 		"
@@ -140,6 +142,7 @@
 		(pass (name p0)
 			(vertex_shader ForwardVS)
 			(pixel_shader ForwardLightPS)
+			(depth_func less_equal)
 		)
 	)
 )

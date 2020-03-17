@@ -197,6 +197,8 @@ private:
 
 		//light
 		pEffect->GetParameter("light_count"sv) = static_cast<leo::uint32>(lights.size());
+		pEffect->GetParameter("inv_sscreen"sv) = lm::float2(1 / 1280.f, 1 / 720.f);
+
 		pEffect->GetParameter("lights") = pLightConstatnBuffer;
 
 		//mat
@@ -240,6 +242,8 @@ private:
 			Context::Instance().GetScreenFrame().get(),
 			ShadowMapUAV.get(),
 			pGenShaderConstants.get());
+
+		pEffect->GetParameter("shadow_tex") = TextureSubresource(ShadowMap, 0, ShadowMap->GetArraySize(), 0, ShadowMap->GetNumMipMaps());
 
 		//re-bind
 		Context::Instance().SetFrame(Context::Instance().GetScreenFrame());
