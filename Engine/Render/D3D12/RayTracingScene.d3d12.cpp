@@ -33,7 +33,7 @@ void RayTracingScene::BuildAccelerationStructure()
 
 	//TODO keep reference in commandlist
 	shared_ptr<GraphicsBuffer> ScratchBuffer;
-	CreateAccelerationStructureBuffers(AccelerationStructureBuffer, ScratchBuffer, device, PrebuildInfo);
+	CreateAccelerationStructureBuffers(AccelerationStructureBuffer, ScratchBuffer, device, PrebuildInfo, PrebuildDescInputs.Type);
 
 	//scratch buffers should be created in UAV state from the start
 	D3D12_RESOURCE_BARRIER barrier;
@@ -96,9 +96,16 @@ void RayTracingScene::BuildAccelerationStructure()
 
 			MappedData[InstanceIndex] = InstanceDesc;
 		}
+
+		Context::Instance().ResidencyResource(*InstanceBuffer->Resource());
 	}
 
 	const bool IsUpdateMode = false;
+
+	Context::Instance().ResidencyResource(*ScratchBuffer->Resource());
+
+	Context::Instance().CommitCommandList(Device::Command_Resource);
+
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC BuildDesc = {};
 	BuildDesc.Inputs = PrebuildDescInputs;
 	BuildDesc.Inputs.InstanceDescs = InstanceBuffer->Resource()->GetGPUVirtualAddress();

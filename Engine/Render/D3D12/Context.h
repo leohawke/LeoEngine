@@ -128,6 +128,7 @@ namespace platform_ex {
 					std::vector<COMPtr<ID3D12DescriptorHeap>> cbv_srv_uav_heap_cache;
 					std::vector<std::pair<COMPtr<ID3D12Resource>, uint32_t>> recycle_after_sync_upload_buffs;
 					std::vector<std::pair<COMPtr<ID3D12Resource>, uint32_t>> recycle_after_sync_readback_buffs;
+					std::vector<COMPtr<ID3D12Resource>> recycle_after_sync_residency_buffs;
 				};
 				std::shared_ptr<CmdAllocatorDependencies> CmdAllocatorAlloc();
 				void CmdAllocatorRecycle(std::shared_ptr<CmdAllocatorDependencies> const & cmd_allocator, uint64_t fence_val);
@@ -259,6 +260,8 @@ namespace platform_ex {
 				void InnerResourceRecycle(COMPtr<ID3D12Resource> resource, leo::uint32 size) {
 					return InnerResourceRecycle(type,resource, size);
 				}
+
+				void ResidencyResource(COMPtr<ID3D12Resource> resource);
 			private:
 				void ContextEx(ID3D12Device* device, ID3D12CommandQueue* cmd_queue);
 

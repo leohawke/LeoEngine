@@ -22,6 +22,7 @@ void RayTracingShaderTable::UploadToGPU(Windows::D3D12::Device* Device)
 		Data.data()
 	));
 
+	Buffer->SetName("RayTracingShaderTable::Buffer");
 
 	bIsDirty = false;
 }

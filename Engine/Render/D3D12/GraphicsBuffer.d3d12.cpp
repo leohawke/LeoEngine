@@ -153,10 +153,6 @@ namespace platform_ex::Windows::D3D12 {
 			&res_desc, init_state, nullptr,
 			COMPtr_RefParam(resource, IID_ID3D12Resource)));
 
-		auto DebugName = sfmt("GraphicsBuffer::resource size:%d", total_size);
-		D3D::Debug(resource, DebugName.c_str());
-
-
 		curr_state = init_state;
 
 		if (init_data != nullptr) {

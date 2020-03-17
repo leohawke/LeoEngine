@@ -126,7 +126,7 @@ void D12::RayTracingGeometry::BuildAccelerationStructure()
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO PrebuildInfo = {};
 	RayTracingDevice->GetRaytracingAccelerationStructurePrebuildInfo(&PrebuildDescInputs, &PrebuildInfo);
 
-	CreateAccelerationStructureBuffers(AccelerationStructureBuffer,ScratchBuffer, Context::Instance().GetDevice(), PrebuildInfo);
+	CreateAccelerationStructureBuffers(AccelerationStructureBuffer,ScratchBuffer, Context::Instance().GetDevice(), PrebuildInfo, PrebuildDescInputs.Type);
 
 	//scratch buffers should be created in UAV state from the start
 	D3D12_RESOURCE_BARRIER barrier;
@@ -148,6 +148,7 @@ void D12::RayTracingGeometry::BuildAccelerationStructure()
 	ID3D12GraphicsCommandList4* RayTracingCommandList = Context::Instance().GetRayContext().RayTracingCommandList();
 	RayTracingCommandList->BuildRaytracingAccelerationStructure(&BuildDesc, 0, nullptr);
 
+	Context::Instance().ResidencyResource(*ScratchBuffer->Resource());
 	// We don't need to keep a scratch buffer after initial build if acceleration structure is static.
 	if (!(BuildFlags & D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE))
 	{
@@ -158,7 +159,7 @@ void D12::RayTracingGeometry::BuildAccelerationStructure()
 using namespace R::Buffer;
 namespace D3D = platform_ex::Windows::D3D;
 
-void D12::CreateAccelerationStructureBuffers(shared_ptr<GraphicsBuffer>& AccelerationStructureBuffer, shared_ptr<GraphicsBuffer>& ScratchBuffer, Device& Creator, const D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO& PrebuildInfo)
+void D12::CreateAccelerationStructureBuffers(shared_ptr<GraphicsBuffer>& AccelerationStructureBuffer, shared_ptr<GraphicsBuffer>& ScratchBuffer, Device& Creator, const D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO& PrebuildInfo, D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE Type)
 {
 	lconstraint(PrebuildInfo.ResultDataMaxSizeInBytes <= std::numeric_limits<uint32>::max());
 
@@ -169,7 +170,9 @@ void D12::CreateAccelerationStructureBuffers(shared_ptr<GraphicsBuffer>& Acceler
 		EF_Unknown
 	));
 
-	D3D::Debug(AccelerationStructureBuffer->Resource(), "Acceleration structure");
+	bool isTopLevel = Type == D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
+
+	AccelerationStructureBuffer->SetName(isTopLevel? "Acceleration structure[Scene]": "Acceleration structure[Geometry]");
 
 	auto ScratchBufferWidth = std::max(PrebuildInfo.UpdateScratchDataSizeInBytes, PrebuildInfo.ScratchDataSizeInBytes);
 
@@ -182,5 +185,5 @@ void D12::CreateAccelerationStructureBuffers(shared_ptr<GraphicsBuffer>& Acceler
 		EF_Unknown
 	));
 
-	D3D::Debug(AccelerationStructureBuffer->Resource(), "Acceleration structure scratch");
+	ScratchBuffer->SetName(isTopLevel ?"Acceleration structure scratch[Scene]": "Acceleration structure scratch[Geometry]");
 }

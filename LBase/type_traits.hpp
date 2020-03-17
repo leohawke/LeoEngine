@@ -115,9 +115,8 @@ namespace leo {
 		using std::is_const;
 		using std::is_volatile;
 		using std::is_trivial;
-		//	using std::is_trivially_copyable;
+		using std::is_trivially_copyable;
 		using std::is_standard_layout;
-		using std::is_pod;
 		using std::is_empty;
 		using std::is_polymorphic;
 		using std::is_abstract;
@@ -788,13 +787,13 @@ namespace leo {
 	//@{
 	//! \brief 判断指定类型是否是 POD struct 。
 	template<typename _type>
-	struct is_pod_struct : and_<is_pod<_type>, is_class<_type>>
+	struct is_pod_struct : and_<is_trivially_copyable<_type>, is_class<_type>>
 	{};
 
 
 	//! \brief 判断指定类型是否是 POD union 。
 	template<typename _type>
-	struct is_pod_union : and_<is_pod<_type>, is_union<_type>>
+	struct is_pod_union : and_<is_trivially_copyable<_type>, is_union<_type>>
 	{};
 	//@}
 	//@}

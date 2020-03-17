@@ -20,6 +20,8 @@ namespace platform_ex::Windows {
 			ID3D12Resource* Resource() const {
 				return resource.Get();
 			}
+
+			void SetName(const char* name);
 		protected:
 			ResourceHolder();
 			ResourceHolder(const COMPtr<ID3D12Resource>& pResource);

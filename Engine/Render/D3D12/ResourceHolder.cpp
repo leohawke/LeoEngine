@@ -21,6 +21,11 @@ namespace platform_ex::Windows {
 			}
 		}
 
+		void Windows::D3D12::ResourceHolder::SetName(const char* name)
+		{
+			D3D::Debug(resource, name);
+		}
+
 		ResourceHolder::ResourceHolder() 
 		: curr_state(D3D12_RESOURCE_STATE_COMMON){
 		}
