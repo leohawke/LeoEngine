@@ -94,6 +94,16 @@ Display::Display(IDXGIFactory4 * factory_4, ID3D12CommandQueue* cmd_queue, const
 	UpdateFramewBufferView();
 }
 
+bool platform_ex::Windows::D3D12::Display::CheckHDRSupport()
+{
+	uint32 ColorSpaceSupport = 0;
+	if (SUCCEEDED(swap_chain->CheckColorSpaceSupport(DXGI_HDR_ColorSpace, &ColorSpaceSupport)))
+	{
+		return ColorSpaceSupport & DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG_PRESENT;
+	}
+	return false;
+}
+
 void platform_ex::Windows::D3D12::Display::SwapBuffers()
 {
 	if (swap_chain) {

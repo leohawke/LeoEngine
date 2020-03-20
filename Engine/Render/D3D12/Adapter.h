@@ -47,6 +47,8 @@ namespace platform_ex {
 				VideoMode GetVideoMode(size_t index) const;
 
 				HRESULT Set(COMPtr<IDXGIAdapter1> const& adapter_);
+
+				bool CheckHDRSupport();
 			private:
 				HRESULT Enumerate();
 			private:

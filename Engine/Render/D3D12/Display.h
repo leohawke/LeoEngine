@@ -50,6 +50,8 @@ namespace platform_ex {
 
 				void SwapBuffers() override;
 				void WaitOnSwapBuffers() override;
+
+				bool CheckHDRSupport();
 			private:
 				void CreateSwapChain(IDXGIFactory4* factory_4,ID3D12CommandQueue* cmd_queue);
 
@@ -85,6 +87,8 @@ namespace platform_ex {
 				HANDLE frame_waitable_object;
 
 				StereoMethod stereo_method;
+
+				DXGI_COLOR_SPACE_TYPE ColorSpace = DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709;
 			};
 		}
 	}

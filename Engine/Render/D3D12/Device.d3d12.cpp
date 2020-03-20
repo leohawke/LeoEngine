@@ -9,7 +9,8 @@ namespace Vertex = platform::Render::Vertex;
 namespace Buffer = platform::Render::Buffer;
 
 namespace platform_ex::Windows::D3D12 {
-	Device::Device(DXGI::Adapter & adapter)
+	Device::Device(DXGI::Adapter & InAdapter)
+		:adapter(InAdapter)
 	{
 		std::vector<D3D_FEATURE_LEVEL> feature_levels = {
 			D3D_FEATURE_LEVEL_12_1 ,
@@ -627,6 +628,10 @@ namespace platform_ex::Windows::D3D12 {
 			}
 			return false;
 		};
+
+		d3d_caps.support_hdr = [&]() {
+			return adapter.CheckHDRSupport();
+		}();
 	}
 
 	platform::Render::Caps& Device::GetCaps() {

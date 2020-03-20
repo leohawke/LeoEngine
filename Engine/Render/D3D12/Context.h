@@ -38,7 +38,7 @@ namespace platform_ex {
 
 			class Device final : platform::Render::Device  {
 			public:
-				Device(DXGI::Adapter& adapter);
+				Device(DXGI::Adapter& InAdapter);
 
 				D3D12_CPU_DESCRIPTOR_HANDLE AllocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE Type);
 				void DeallocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE Type, D3D12_CPU_DESCRIPTOR_HANDLE Handle);
@@ -133,6 +133,8 @@ namespace platform_ex {
 				std::shared_ptr<CmdAllocatorDependencies> CmdAllocatorAlloc();
 				void CmdAllocatorRecycle(std::shared_ptr<CmdAllocatorDependencies> const & cmd_allocator, uint64_t fence_val);
 			private:
+				DXGI::Adapter& adapter;
+
 				//@{
 				//\brief base object for swapchain
 				COMPtr<ID3D12Device> d3d_device;

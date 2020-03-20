@@ -8,7 +8,7 @@
 #include <LFramework/Win32/LCLib/Mingw32.h>
 
 #include <UniversalDXSDK/d3d12.h>
-#include <UniversalDXSDK/dxgi1_5.h>
+#include <UniversalDXSDK/dxgi1_6.h>
 
 #include <LFramework/Win32/LCLib/COM.h>
 
@@ -698,5 +698,7 @@ constexpr unsigned MAX_CBS = 16;
 // This value controls how many root constant buffers can be used per shader stage in a root signature.
 // Note: Using root descriptors significantly increases the size of root signatures (each root descriptor is 2 DWORDs).
 #define MAX_ROOT_CBVS	MAX_CBS
+
+constexpr DXGI_COLOR_SPACE_TYPE DXGI_HDR_ColorSpace = DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020;
 
 #endif

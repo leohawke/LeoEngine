@@ -2,6 +2,8 @@
 #include "d3d12_dxgi.h"
 #include <LFramework/Win32/LCLib/NLS.h>
 
+using namespace platform;
+
 namespace platform_ex {
 	namespace Windows {
 		namespace DXGI {
@@ -100,6 +102,44 @@ namespace platform_ex {
 				return i > 0 ? S_OK : DXGI_ERROR_NOT_FOUND;
 			}
 
+			bool Adapter::CheckHDRSupport()
+			{
+				bool bSupportsHDROutput = false;
+
+				UINT i = 0;
+				IDXGIOutput* output = nullptr;
+				while (adapter->EnumOutputs(i, &output) != DXGI_ERROR_NOT_FOUND)
+				{
+					if (output)
+					{
+						COMPtr<IDXGIOutput6> Output6;
+						if (SUCCEEDED(output->QueryInterface(COMPtr_RefParam(Output6, IID_IDXGIOutput6))))
+						{
+							DXGI_OUTPUT_DESC1 OutputDesc;
+							Output6->GetDesc1(&OutputDesc);
+							const bool bDisplaySupportsHDROutput = (OutputDesc.ColorSpace == DXGI_HDR_ColorSpace);
+
+							if (bDisplaySupportsHDROutput)
+							{
+								bSupportsHDROutput = true;
+
+								LF_TraceRaw(Descriptions::Informative, "HDR output is supported on adapter %u(Description:%s), display %u", adapter_id, i, adapter_desc.Description);
+								LF_TraceRaw(Descriptions::Informative, "\tMinLuminance = %f", OutputDesc.MinLuminance);
+								LF_TraceRaw(Descriptions::Informative, "\tMaxLuminance = %f", OutputDesc.MaxLuminance);
+								LF_TraceRaw(Descriptions::Informative, "\tMaxFullFrameLuminance = %f",OutputDesc.MaxFullFrameLuminance);
+
+								break;
+							}
+						}
+
+						output->Release();
+						output = nullptr;
+					}
+
+					++i;
+				}
+				return bSupportsHDROutput;
+			}
 
 			AdapterList::AdapterList()
 				:current_iterator(end())

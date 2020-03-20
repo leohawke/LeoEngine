@@ -20,6 +20,8 @@ namespace platform{
 
 			uint16 max_texture_depth;
 
+			bool support_hdr;
+
 			std::function<bool(EFormat)> TextureFormatSupport;
 			std::function<bool(EFormat)> VertexFormatSupport;
 			std::function<bool(EFormat, SampleDesc)>	RenderTargetMSAASupport;
