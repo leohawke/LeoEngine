@@ -110,9 +110,6 @@
     <ClCompile Include="Core\CameraController.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsPipeline\IGraphicsPipelineStage.cpp">
-      <Filter>GraphicsPipeline</Filter>
-    </ClCompile>
     <ClCompile Include="Render\D3D12\ResourceView.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
@@ -140,9 +137,6 @@
     <ClCompile Include="Render\GraphicsBuffer.cpp">
       <Filter>Render\DeviceInterface</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsPipeline\GraphicsView.cpp">
-      <Filter>GraphicsPipeline</Filter>
-    </ClCompile>
     <ClCompile Include="Core\ResourcesHolder.cpp">
       <Filter>Core\Resource</Filter>
     </ClCompile>
@@ -161,26 +155,11 @@
     <ClCompile Include="Core\LSLBuilder.cpp">
       <Filter>Core\LSL</Filter>
     </ClCompile>
-    <ClCompile Include="Core\GraphicsEngine.cpp">
-      <Filter>Core\Engine</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Camera.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="System\SystemEnvironment.cpp">
       <Filter>System</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\WhiteEngine.cpp">
-      <Filter>Core\Engine\WhiteEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\LeoEngine.cpp">
-      <Filter>Core\Engine\LeoEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\LeoEngine\ShadingElements\SEMesh.cpp">
-      <Filter>Core\Engine\LeoEngine\ShadingElements</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Threading\JobDispacther.cpp">
-      <Filter>Core\Threading</Filter>
     </ClCompile>
     <ClCompile Include="Render\IRayTracingGeometry.cpp">
       <Filter>Render\DeviceInterface\RayTracing</Filter>
@@ -351,12 +330,6 @@
     <ClInclude Include="Core\CameraController.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsPipeline\IGraphicsPipelineStage.h">
-      <Filter>GraphicsPipeline</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicsPipeline\IGraphicsView.h">
-      <Filter>GraphicsPipeline</Filter>
-    </ClInclude>
     <ClInclude Include="Render\DataStructures.h">
       <Filter>Render</Filter>
     </ClInclude>
@@ -402,12 +375,6 @@
     <ClInclude Include="Render\ShadingObject.h">
       <Filter>Render</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsPipeline\GraphicsView.h">
-      <Filter>GraphicsPipeline</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicsPipeline\ShadingPipeline.h">
-      <Filter>GraphicsPipeline</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Resource.h">
       <Filter>Core\Resource</Filter>
     </ClInclude>
@@ -429,9 +396,6 @@
     <ClInclude Include="Core\LSLBuilder.h">
       <Filter>Core\LSL</Filter>
     </ClInclude>
-    <ClInclude Include="Core\GraphicsEngine.h">
-      <Filter>Core\Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Camera.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -440,24 +404,6 @@
     </ClInclude>
     <ClInclude Include="System\SystemEnvironment.h">
       <Filter>System</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\WhiteEngine.h">
-      <Filter>Core\Engine\WhiteEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\LeoEngine.h">
-      <Filter>Core\Engine\LeoEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\LeoEngine\ShadingElements\SEMesh.h">
-      <Filter>Core\Engine\LeoEngine\ShadingElements</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\LeoEngine\ShadingElements\SEMeshImpl.h">
-      <Filter>Core\Engine\LeoEngine\ShadingElements</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Threading\ThreadSafeWorkerContainer.hpp">
-      <Filter>Core\Threading</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Threading\JobDispatcher.h">
-      <Filter>Core\Threading</Filter>
     </ClInclude>
     <ClInclude Include="Render\IRayContext.h">
       <Filter>Render\DeviceInterface\RayTracing</Filter>
@@ -557,9 +503,6 @@
     <Filter Include="System">
       <UniqueIdentifier>{0005d704-97d9-4add-85d4-7c2e2e625828}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GraphicsPipeline">
-      <UniqueIdentifier>{13d84a08-8875-4539-a5d5-698bdb39898d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Render\DeviceInterface">
       <UniqueIdentifier>{f5398575-73b2-48e9-a4a5-539b3edd2f2c}</UniqueIdentifier>
     </Filter>
@@ -580,9 +523,6 @@
     </Filter>
     <Filter Include="Core\Engine\LeoEngine">
       <UniqueIdentifier>{8ecf8778-317a-4554-a213-d94ef458eca9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Core\Engine\LeoEngine\ShadingElements">
-      <UniqueIdentifier>{6937e48e-9eb5-49ab-8e57-1a4b77f48cc6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Core\Threading">
       <UniqueIdentifier>{551030a7-f19e-45ed-87c8-0cd0d623401e}</UniqueIdentifier>

@@ -4,8 +4,6 @@
 #include "../../Engine/Core/Mesh.h"
 #include "../../Engine/Render/IFrameBuffer.h"
 #include "../../Engine/Render/DataStructures.h"
-#include "../../Engine/GraphicsPipeline/GraphicsView.h"
-#include "../../Engine/Core/LeoEngine/ShadingElements/SEMesh.h"
 #include "../../Engine/Asset/EffectX.h"
 #include "../../Engine/Asset/MaterialX.h"
 #include "../../Engine/Asset/LSLAssetX.h"
@@ -30,7 +28,6 @@
 
 using namespace platform::Render;
 using namespace LeoEngine::Render;
-using namespace LeoEngine::GraphicsEngine;
 namespace fs = std::filesystem;
 
 namespace lm = leo::math;
@@ -43,8 +40,6 @@ public:
 
 		pMesh = platform::X::LoadMesh(mesh_name + ".asset", mesh_name);
 		pMaterial = platform::X::LoadMaterial(material_name + ".mat.lsl", material_name);
-
-		pShadingElement = leo::unique_raw(Environment->LeoEngine->CreateShadingElement(SED_Mesh));
 	}
 
 	const platform::Material& GetMaterial() const {
@@ -70,8 +65,6 @@ private:
 
 	std::shared_ptr<platform::Material> pMaterial;
 	std::shared_ptr<platform::Mesh> pMesh;
-
-	std::unique_ptr<ShadingElement> pShadingElement;
 };
 
 class Entities {
@@ -162,8 +155,6 @@ private:
 		timer.UpdateOnFrameStart();
 		platform::Material::GetInstanceEvaluator().Define("time", timer.GetFrameTime(), true);
 
-		auto passInfo = GraphicsPassInfo::CreateGeneralPassGraphicsInfo(camera);
-
 		auto entityId = ecs::EntitySystem::Instance().AddEntity<ecs::Entity>();
 
 		Context::Instance().BeginFrame();
@@ -207,8 +198,6 @@ private:
 		//light_ext
 		pEffect->GetParameter("ambient_color") = leo::math::float3(0.1f, 0.1f, 0.1f);
 		
-		auto pView = passInfo.GetRenderView();
-
 		auto pPreZEffect = platform::X::LoadEffect("PreZ");
 		{
 			//obj
