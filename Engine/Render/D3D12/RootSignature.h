@@ -9,7 +9,7 @@
 #include <mutex>
 
 namespace platform_ex::Windows::D3D12 {
-	using namespace platform::Render::Shader;
+	using namespace platform::Render::ShaderCore;
 	using platform::Render::ShaderBlob;
 	using platform::Render::ShaderCodeResourceCounts;
 

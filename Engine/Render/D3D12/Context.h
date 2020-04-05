@@ -15,6 +15,7 @@
 #include "GraphicsBuffer.hpp"
 #include "Fence.h"
 #include "RayContext.h"
+#include "GraphicsPipelineState.h"
 
 
 #include <LBase/concurrency.h>
@@ -73,6 +74,8 @@ namespace platform_ex {
 				PipleState* CreatePipleState(const platform::Render::PipleState& state) override;
 
 				InputLayout* CreateInputLayout() override;
+
+				GraphicsPipelineState* CreateGraphicsPipelineState(const platform::Render::GraphicsPipelineStateInitializer& initializer) override;
 
 				UnorderedAccessView* CreateUnorderedAccessView(platform::Render::Texture2D* InTexture) override;
 

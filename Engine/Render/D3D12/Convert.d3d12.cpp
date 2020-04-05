@@ -612,42 +612,42 @@ std::vector<D3D12_INPUT_ELEMENT_DESC> platform_ex::Windows::D3D12::Convert(const
 }
 
 template<>
-D3D12_PRIMITIVE_TOPOLOGY_TYPE platform_ex::Windows::D3D12::Convert<D3D12_PRIMITIVE_TOPOLOGY_TYPE>(platform::Render::InputLayout::TopologyType type)
+D3D12_PRIMITIVE_TOPOLOGY_TYPE platform_ex::Windows::D3D12::Convert<D3D12_PRIMITIVE_TOPOLOGY_TYPE>(platform::Render::PrimtivteType type)
 {
 	switch (type)
 	{
-	case platform::Render::InputLayout::PointList:
+	case platform::Render::PrimtivteType::PointList:
 		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
-	case platform::Render::InputLayout::LineList:
+	case platform::Render::PrimtivteType::LineList:
 		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-	case platform::Render::InputLayout::LineStrip:
+	case platform::Render::PrimtivteType::LineStrip:
 		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-	case platform::Render::InputLayout::TriangleList:
+	case platform::Render::PrimtivteType::TriangleList:
 		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	case platform::Render::InputLayout::TriangleStrip:
+	case platform::Render::PrimtivteType::TriangleStrip:
 		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	}
 	return D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED;
 }
 
 template<>
-D3D12_PRIMITIVE_TOPOLOGY  platform_ex::Windows::D3D12::Convert<D3D12_PRIMITIVE_TOPOLOGY>(platform::Render::InputLayout::TopologyType type)
+D3D12_PRIMITIVE_TOPOLOGY  platform_ex::Windows::D3D12::Convert<D3D12_PRIMITIVE_TOPOLOGY>(platform::Render::PrimtivteType type)
 {
 	switch (type)
 	{
-	case platform::Render::InputLayout::PointList:
+	case platform::Render::PrimtivteType::PointList:
 		return D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
 
-	case platform::Render::InputLayout::LineList:
+	case platform::Render::PrimtivteType::LineList:
 		return D3D_PRIMITIVE_TOPOLOGY_LINELIST;
 
-	case platform::Render::InputLayout::LineStrip:
+	case platform::Render::PrimtivteType::LineStrip:
 		return D3D_PRIMITIVE_TOPOLOGY_LINESTRIP;
 
-	case platform::Render::InputLayout::TriangleList:
+	case platform::Render::PrimtivteType::TriangleList:
 		return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-	case platform::Render::InputLayout::TriangleStrip:
+	case platform::Render::PrimtivteType::TriangleStrip:
 		return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 	}
 

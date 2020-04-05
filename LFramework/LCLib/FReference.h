@@ -7,6 +7,7 @@
 #define FrameWork_FReference_h 1
 
 #include<LBase/memory.hpp>
+#include<LBase/smart_ptr.hpp>
 #include<LBase/ref.hpp>
 #include<LBase/pointer.hpp>
 #include<utility>
@@ -25,7 +26,7 @@ namespace platform
 		using limpl(std)::make_shared;
 		using std::make_shared;
 		using limpl(leo)::make_observer;
-		using limpl(leo)::make_unique;
+		using limpl(std)::make_unique;
 		using limpl(leo)::make_unique_default_init;
 		using leo::get_raw;
 		using limpl(std)::owner_less;

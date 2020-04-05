@@ -7,7 +7,7 @@
 using namespace platform;
 using namespace scheme;
 using namespace v1;
-using namespace platform::Render::Shader;
+using namespace platform::Render::ShaderCore;
 
 namespace fs = std::filesystem;
 

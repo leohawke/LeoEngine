@@ -69,6 +69,7 @@
     <ClInclude Include="lmath.hpp" />
     <ClInclude Include="lmathquaternion.hpp" />
     <ClInclude Include="span.hpp" />
+    <ClInclude Include="smart_ptr.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="any.cpp" />

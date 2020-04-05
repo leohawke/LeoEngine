@@ -15,7 +15,7 @@ namespace platform::X
 {
 	using leo::ValueNode;
 	using path = std::filesystem::path;
-	using namespace platform::Render::Shader;
+	using namespace platform::Render::ShaderCore;
 
 	template<typename AssetType>
 	class ShaderLoadingDesc{

@@ -216,6 +216,11 @@ namespace platform_ex::Windows::D3D12 {
 		return std::make_unique<InputLayout>().release();
 	}
 
+	GraphicsPipelineState* Device::CreateGraphicsPipelineState(const platform::Render::GraphicsPipelineStateInitializer& initializer)
+	{
+		return nullptr;
+	}
+
 	UnorderedAccessView* Device::CreateUnorderedAccessView(platform::Render::Texture2D* InTexture)
 	{
 		return std::make_unique<UnorderedAccessView>(static_cast<Texture2D&>(*InTexture),0,InTexture->GetArraySize(),0).release();
@@ -650,7 +655,7 @@ namespace platform_ex::Windows::D3D12 {
 		if (!postprocess_layout)
 		{
 			postprocess_layout = std::make_unique<InputLayout>();
-			postprocess_layout->SetTopoType(platform::Render::InputLayout::TriangleStrip);
+			postprocess_layout->SetTopoType(platform::Render::PrimtivteType::TriangleStrip);
 
 			math::float2 postprocess_pos[] = {
 				math::float2(-1,+1),

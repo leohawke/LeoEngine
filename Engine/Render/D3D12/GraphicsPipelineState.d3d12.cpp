@@ -23,5 +23,5 @@ void platform_ex::Windows::D3D12::GraphicsPipelineState::Create(const GraphicsPi
 KeyGraphicsPipelineStateDesc GetKeyGraphicsPipelineStateDesc(
 	platform::Render::GraphicsPipelineStateInitializer& initializer, RootSignature* RootSignature)
 {
-
+	return {};
 }

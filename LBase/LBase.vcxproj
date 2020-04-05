@@ -69,6 +69,7 @@
     <ClInclude Include="ref.hpp" />
     <ClInclude Include="scope_gurad.hpp" />
     <ClInclude Include="set.hpp" />
+    <ClInclude Include="smart_ptr.hpp" />
     <ClInclude Include="span.hpp" />
     <ClInclude Include="streambuf.hpp" />
     <ClInclude Include="string.hpp" />

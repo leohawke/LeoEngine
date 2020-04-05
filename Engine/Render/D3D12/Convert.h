@@ -27,9 +27,9 @@ namespace platform_ex {
 			std::vector<D3D12_INPUT_ELEMENT_DESC> Convert(const platform::Render::Vertex::Stream& stream);
 
 			template<typename T> 
-			T Convert(platform::Render::InputLayout::TopologyType type);
+			T Convert(platform::Render::PrimtivteType type);
 
-			D3D12_PRIMITIVE_TOPOLOGY_TYPE Convert(platform::Render::InputLayout::TopologyType type);
+			D3D12_PRIMITIVE_TOPOLOGY_TYPE Convert(platform::Render::PrimtivteType type);
 
 			D3D12_BLEND_DESC Convert(const platform::Render::BlendDesc& desc);
 			D3D12_RASTERIZER_DESC Convert(const platform::Render::RasterizerDesc& desc);

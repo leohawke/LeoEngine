@@ -86,7 +86,6 @@
     <ClCompile Include="Render\PipleState.cpp" />
     <ClCompile Include="Render\RenderObject.cpp" />
     <ClCompile Include="Render\ResourceView.cpp" />
-    <ClCompile Include="Render\ShadingElement.cpp" />
     <ClCompile Include="System\NinthTimer.cpp" />
     <ClCompile Include="System\SystemEnvironment.cpp" />
     <ClCompile Include="test.cpp" />

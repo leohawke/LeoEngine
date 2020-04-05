@@ -8,7 +8,7 @@
 
 #include <algorithm>
 
-using namespace platform::Render::Shader;
+using namespace platform::Render::ShaderCore;
 using namespace platform_ex;
 using namespace D3DFlags;
 
@@ -394,10 +394,10 @@ bool IsRayTracingShader(ShaderType type)
 {
 	switch (type)
 	{
-	case platform::Render::Shader::RayGen:
-	case platform::Render::Shader::RayMiss:
-	case platform::Render::Shader::RayHitGroup:
-	case platform::Render::Shader::RayCallable:
+	case ShaderType::RayGen:
+	case ShaderType::RayMiss:
+	case ShaderType::RayHitGroup:
+	case ShaderType::RayCallable:
 		return true;
 	default:
 		return false;

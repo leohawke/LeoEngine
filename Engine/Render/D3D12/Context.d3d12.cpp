@@ -418,16 +418,16 @@ namespace platform_ex::Windows::D3D12 {
 		auto prim_count = vertex_count;
 		switch (tt)
 		{
-		case platform::Render::InputLayout::LineList:
+		case platform::Render::PrimtivteType::LineList:
 			prim_count /= 2;
 			break;
-		case platform::Render::InputLayout::LineStrip:
+		case platform::Render::PrimtivteType::LineStrip:
 			--prim_count;
 			break;
-		case platform::Render::InputLayout::TriangleList:
+		case platform::Render::PrimtivteType::TriangleList:
 			prim_count /= 3;
 			break;
-		case platform::Render::InputLayout::TriangleStrip:
+		case platform::Render::PrimtivteType::TriangleStrip:
 			prim_count -= 2;
 			break;
 		}

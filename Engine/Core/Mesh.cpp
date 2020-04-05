@@ -63,7 +63,7 @@ namespace platform {
 		input_layout->BindIndexStream(index_stream, asset.GetIndexFormat());
 
 		//Topo
-		input_layout->SetTopoType(InputLayout::TriangleList);
+		input_layout->SetTopoType(PrimtivteType::TriangleList);
 	}
 	const asset::MeshAsset::SubMeshDescrption::LodDescription & Mesh::GetSubMeshCurretnLodDescription(int submesh_index)
 	{

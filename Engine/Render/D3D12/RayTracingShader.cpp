@@ -2,7 +2,7 @@
 #include "Context.h"
 
 using namespace platform_ex::Windows::D3D12;
-using namespace platform::Render::Shader;
+using namespace platform::Render::ShaderCore;
 
 void QuantizeBoundShaderState(
 	ShaderType Type,
@@ -85,10 +85,10 @@ bool platform_ex::Windows::D3D12::IsRayTracingShader(platform::Render::ShaderTyp
 {
 	switch (type)
 	{
-	case platform::Render::Shader::RayGen:
-	case platform::Render::Shader::RayMiss:
-	case platform::Render::Shader::RayHitGroup:
-	case platform::Render::Shader::RayCallable:
+	case ShaderType::RayGen:
+	case ShaderType::RayMiss:
+	case ShaderType::RayHitGroup:
+	case ShaderType::RayCallable:
 		return true;
 	}
 	return false;

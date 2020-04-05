@@ -11,7 +11,7 @@ namespace platform::Render {
 
 	class Texture;
 
-	inline namespace Shader
+	inline namespace ShaderCore
 	{
 		struct ShaderCodeResourceCounts
 		{

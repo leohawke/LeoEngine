@@ -61,7 +61,7 @@ namespace platform::Render {
 
 		virtual UnorderedAccessView* CreateUnorderedAccessView(Texture2D* InTexture) =0;
 
-		virtual GraphicsPipelineStateInitializer* CreateGraphicsPipelineState(const GraphicsPipelineStateInitializer& initializer) =0;
+		virtual GraphicsPipelineState* CreateGraphicsPipelineState(const GraphicsPipelineStateInitializer& initializer) =0;
 	};
 }
 

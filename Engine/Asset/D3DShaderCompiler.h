@@ -44,7 +44,7 @@ namespace D3DFlags {
 
 namespace asset::X::Shader
 {
-	using namespace platform::Render::Shader;
+	using namespace platform::Render::ShaderCore;
 
 	struct ShaderCompilerInput
 	{
