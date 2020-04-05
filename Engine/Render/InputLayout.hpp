@@ -73,24 +73,27 @@ namespace platform::Render {
 		};
 	}
 
+	enum class PrimtivteType
+	{
+		TriangleList,
+		TriangleStrip,
+		LineList,
+		LineStrip,
+		PointList,
+
+		ControlPoint_0,
+		ControlPoint_1 = ControlPoint_0 + 1,
+		ControlPoint_32 = ControlPoint_0+32,
+	};
+
+	//fixme:error class name
 	class InputLayout :public leo::noncopyable {
-	public:
-		enum TopologyType {
-			TriangleList,
-			TriangleStrip,
-			LineList,
-			LineStrip,
-			PointList,
-
-			//TODO
-		};
-
 	public:
 		InputLayout();
 		virtual ~InputLayout();
 
-		DefGetter(const lnothrow, TopologyType, TopoType, topology_type)
-			DefSetter(,TopologyType, TopoType, topology_type)
+		DefGetter(const lnothrow, PrimtivteType, TopoType, topology_type)
+			DefSetter(, PrimtivteType, TopoType, topology_type)
 
 		uint32 GetNumVertices() const lnothrow;
 
@@ -120,7 +123,7 @@ namespace platform::Render {
 		void Dirty();
 
 	protected:
-		TopologyType topology_type;
+		PrimtivteType topology_type;
 
 		std::vector<Vertex::Stream> vertex_streams;
 		//Vertex::Stream instance_stream;

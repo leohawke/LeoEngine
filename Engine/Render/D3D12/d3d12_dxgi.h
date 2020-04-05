@@ -171,6 +171,101 @@ namespace platform_ex {
 namespace platform_ex::Windows::D3D12 {
 	constexpr inline struct CD3DX12_DEFAULT {} D3D12_DEFAULT;
 
+	struct CD3DX12_DEPTH_STENCIL_DESC1 : public D3D12_DEPTH_STENCIL_DESC1
+	{
+		CD3DX12_DEPTH_STENCIL_DESC1()
+		{}
+		explicit CD3DX12_DEPTH_STENCIL_DESC1(const D3D12_DEPTH_STENCIL_DESC1& o) :
+			D3D12_DEPTH_STENCIL_DESC1(o)
+		{}
+		explicit CD3DX12_DEPTH_STENCIL_DESC1(const D3D12_DEPTH_STENCIL_DESC& o)
+		{
+			DepthEnable = o.DepthEnable;
+			DepthWriteMask = o.DepthWriteMask;
+			DepthFunc = o.DepthFunc;
+			StencilEnable = o.StencilEnable;
+			StencilReadMask = o.StencilReadMask;
+			StencilWriteMask = o.StencilWriteMask;
+			FrontFace.StencilFailOp = o.FrontFace.StencilFailOp;
+			FrontFace.StencilDepthFailOp = o.FrontFace.StencilDepthFailOp;
+			FrontFace.StencilPassOp = o.FrontFace.StencilPassOp;
+			FrontFace.StencilFunc = o.FrontFace.StencilFunc;
+			BackFace.StencilFailOp = o.BackFace.StencilFailOp;
+			BackFace.StencilDepthFailOp = o.BackFace.StencilDepthFailOp;
+			BackFace.StencilPassOp = o.BackFace.StencilPassOp;
+			BackFace.StencilFunc = o.BackFace.StencilFunc;
+			DepthBoundsTestEnable = FALSE;
+		}
+		explicit CD3DX12_DEPTH_STENCIL_DESC1(CD3DX12_DEFAULT)
+		{
+			DepthEnable = TRUE;
+			DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+			DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+			StencilEnable = FALSE;
+			StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
+			StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;
+			const D3D12_DEPTH_STENCILOP_DESC defaultStencilOp =
+			{ D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_COMPARISON_FUNC_ALWAYS };
+			FrontFace = defaultStencilOp;
+			BackFace = defaultStencilOp;
+			DepthBoundsTestEnable = FALSE;
+		}
+		explicit CD3DX12_DEPTH_STENCIL_DESC1(
+			BOOL depthEnable,
+			D3D12_DEPTH_WRITE_MASK depthWriteMask,
+			D3D12_COMPARISON_FUNC depthFunc,
+			BOOL stencilEnable,
+			UINT8 stencilReadMask,
+			UINT8 stencilWriteMask,
+			D3D12_STENCIL_OP frontStencilFailOp,
+			D3D12_STENCIL_OP frontStencilDepthFailOp,
+			D3D12_STENCIL_OP frontStencilPassOp,
+			D3D12_COMPARISON_FUNC frontStencilFunc,
+			D3D12_STENCIL_OP backStencilFailOp,
+			D3D12_STENCIL_OP backStencilDepthFailOp,
+			D3D12_STENCIL_OP backStencilPassOp,
+			D3D12_COMPARISON_FUNC backStencilFunc,
+			BOOL depthBoundsTestEnable)
+		{
+			DepthEnable = depthEnable;
+			DepthWriteMask = depthWriteMask;
+			DepthFunc = depthFunc;
+			StencilEnable = stencilEnable;
+			StencilReadMask = stencilReadMask;
+			StencilWriteMask = stencilWriteMask;
+			FrontFace.StencilFailOp = frontStencilFailOp;
+			FrontFace.StencilDepthFailOp = frontStencilDepthFailOp;
+			FrontFace.StencilPassOp = frontStencilPassOp;
+			FrontFace.StencilFunc = frontStencilFunc;
+			BackFace.StencilFailOp = backStencilFailOp;
+			BackFace.StencilDepthFailOp = backStencilDepthFailOp;
+			BackFace.StencilPassOp = backStencilPassOp;
+			BackFace.StencilFunc = backStencilFunc;
+			DepthBoundsTestEnable = depthBoundsTestEnable;
+		}
+		~CD3DX12_DEPTH_STENCIL_DESC1() {}
+		operator const D3D12_DEPTH_STENCIL_DESC1& () const { return *this; }
+		operator D3D12_DEPTH_STENCIL_DESC() const
+		{
+			D3D12_DEPTH_STENCIL_DESC D;
+			D.DepthEnable = DepthEnable;
+			D.DepthWriteMask = DepthWriteMask;
+			D.DepthFunc = DepthFunc;
+			D.StencilEnable = StencilEnable;
+			D.StencilReadMask = StencilReadMask;
+			D.StencilWriteMask = StencilWriteMask;
+			D.FrontFace.StencilFailOp = FrontFace.StencilFailOp;
+			D.FrontFace.StencilDepthFailOp = FrontFace.StencilDepthFailOp;
+			D.FrontFace.StencilPassOp = FrontFace.StencilPassOp;
+			D.FrontFace.StencilFunc = FrontFace.StencilFunc;
+			D.BackFace.StencilFailOp = BackFace.StencilFailOp;
+			D.BackFace.StencilDepthFailOp = BackFace.StencilDepthFailOp;
+			D.BackFace.StencilPassOp = BackFace.StencilPassOp;
+			D.BackFace.StencilFunc = BackFace.StencilFunc;
+			return D;
+		}
+	};
+
 	struct CD3DX12_ROOT_CONSTANTS : public D3D12_ROOT_CONSTANTS
 	{
 		CD3DX12_ROOT_CONSTANTS() {}

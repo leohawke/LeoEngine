@@ -212,6 +212,10 @@
     <ClCompile Include="Render\D3D12\BuiltInRayTracingShaders.cpp">
       <Filter>Render\D3D12\RayTracing</Filter>
     </ClCompile>
+    <ClCompile Include="Render\D3D12\GraphicsPipelineState.d3d12.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\GraphicsPipelineState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -476,6 +480,18 @@
     </ClInclude>
     <ClInclude Include="Render\D3D12\BuiltInRayTracingShaders.h">
       <Filter>Render\D3D12\RayTracing</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IGraphicsPipelineState.h">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\IShader.h">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\GraphicsPipelineState.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\ShaderPass.h">
+      <Filter>Render\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

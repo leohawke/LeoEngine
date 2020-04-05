@@ -11,12 +11,28 @@
 #include "IGraphicsBuffer.hpp"
 #include "InputLayout.hpp"
 #include "IGPUResourceView.h"
+#include "PipleState.h"
+#include "IShader.h"
+#include "IGraphicsPipelineState.h"
 
 namespace asset {
 	class ShaderBlobAsset;
 }
 
 namespace platform::Render {
+	class GraphicsPipelineStateInitializer
+	{
+	public:
+		RasterizerDesc RasterizerState;
+		DepthStencilDesc DepthStencilState;
+		BlendDesc BlendState;
+
+		PrimtivteType Primitive;
+
+		ShaderPass* ShaderState;
+	};
+
+
 	class Device {
 	public:
 		virtual Caps& GetCaps() = 0;
@@ -44,6 +60,8 @@ namespace platform::Render {
 		virtual InputLayout* CreateInputLayout() = 0;
 
 		virtual UnorderedAccessView* CreateUnorderedAccessView(Texture2D* InTexture) =0;
+
+		virtual GraphicsPipelineStateInitializer* CreateGraphicsPipelineState(const GraphicsPipelineStateInitializer& initializer) =0;
 	};
 }
 

@@ -53,6 +53,8 @@
     <ClCompile Include="Render\D3D12\Fence.cpp" />
     <ClCompile Include="Render\D3D12\FrameBuffer.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\GraphicsBuffer.d3d12.cpp" />
+    <ClCompile Include="Render\D3D12\GraphicsPipelineState.cpp" />
+    <ClCompile Include="Render\D3D12\GraphicsPipelineState.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\InputLayout.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\PipleState.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\RayContext.cpp" />
@@ -131,6 +133,7 @@
     <ClInclude Include="Render\D3D12\Fence.h" />
     <ClInclude Include="Render\D3D12\FrameBuffer.h" />
     <ClInclude Include="Render\D3D12\GraphicsBuffer.hpp" />
+    <ClInclude Include="Render\D3D12\GraphicsPipelineState.h" />
     <ClInclude Include="Render\D3D12\InputLayout.hpp" />
     <ClInclude Include="Render\D3D12\PipleState.h" />
     <ClInclude Include="Render\D3D12\RayContext.h" />
@@ -145,6 +148,7 @@
     <ClInclude Include="Render\D3D12\d3d12_dxgi.h" />
     <ClInclude Include="Render\D3D12\Display.h" />
     <ClInclude Include="Render\D3D12\ResourceView.h" />
+    <ClInclude Include="Render\D3D12\ShaderPass.h" />
     <ClInclude Include="Render\D3D12\test.h" />
     <ClInclude Include="Render\D3D12\Texture.h" />
     <ClInclude Include="Render\DataStructures.h" />
@@ -153,12 +157,14 @@
     <ClInclude Include="Render\Effect\CopyEffect.h" />
     <ClInclude Include="Render\Effect\Effect.hpp" />
     <ClInclude Include="Render\Effect\EffectProperty.h" />
+    <ClInclude Include="Render\IGraphicsPipelineState.h" />
     <ClInclude Include="Render\IRayContext.h" />
     <ClInclude Include="Render\IRayDevice.h" />
     <ClInclude Include="Render\IRayTracingGeometry.h" />
     <ClInclude Include="Render\IRayTracingPipelineState.h" />
     <ClInclude Include="Render\IRayTracingScene.h" />
     <ClInclude Include="Render\IRayTracingShader.h" />
+    <ClInclude Include="Render\IShader.h" />
     <ClInclude Include="Render\RayTracingDefinitions.h" />
     <ClInclude Include="Render\RenderObject.h" />
     <ClInclude Include="Render\ShaderCore.h" />

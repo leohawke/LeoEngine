@@ -2,7 +2,7 @@
 
 namespace platform::Render {
 	InputLayout::InputLayout()
-		:topology_type(PointList),
+		:topology_type(PrimtivteType::TriangleList),
 		index_format(EF_Unknown),
 		start_vertex_location(0),
 		start_index_location(0),
