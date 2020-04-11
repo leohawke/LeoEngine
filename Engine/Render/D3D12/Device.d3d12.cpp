@@ -4,9 +4,13 @@
 #include "Texture.h"
 #include "RootSignature.h"
 #include "../Effect/CopyEffect.h"
+#include <LFramework/LCLib/Debug.h>
+#include <LFramework/LCLib/Logger.h>
 
 namespace Vertex = platform::Render::Vertex;
 namespace Buffer = platform::Render::Buffer;
+
+using std::make_shared;
 
 namespace platform_ex::Windows::D3D12 {
 	Device::Device(DXGI::Adapter & InAdapter)
@@ -94,7 +98,7 @@ namespace platform_ex::Windows::D3D12 {
 					feature_level_str = " D3D_FEATURE_LEVEL_UN_0";
 					break;
 				}
-				LF_Trace(Notice, "%s Adapter Description:%s", lfname, desc.c_str());
+				LF_Trace(platform::Descriptions::Notice, "%s Adapter Description:%s", lfname, desc.c_str());
 
 				//todo if something
 
@@ -196,7 +200,7 @@ namespace platform_ex::Windows::D3D12 {
 		return texture.release();
 	}
 
-	ShaderCompose * platform_ex::Windows::D3D12::Device::CreateShaderCompose(std::unordered_map<platform::Render::ShaderType, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect)
+	ShaderCompose * platform_ex::Windows::D3D12::Device::CreateShaderCompose(std::unordered_map<platform::Render::ShaderType, const asset::ShaderBlobAsset*> pShaderBlob, platform::Render::Effect::Effect* pEffect)
 	{
 		return std::make_unique<ShaderCompose>(pShaderBlob, pEffect).release();
 	}
@@ -666,7 +670,7 @@ namespace platform_ex::Windows::D3D12 {
 
 			postprocess_layout->BindVertexStream(share_raw(CreateBuffer(Buffer::Usage::Static, EAccessHint::EA_GPURead | EAccessHint::EA_Immutable, sizeof(postprocess_pos), EFormat::EF_Unknown, postprocess_pos)), { Vertex::Element{ Vertex::Position,0,EFormat::EF_GR32F } });
 		}
-		return Deref(postprocess_layout);
+		return platform::Deref(postprocess_layout);
 	}
 
 	void D3D12::Device::CheckFeatureSupport(ID3D12Device* device)

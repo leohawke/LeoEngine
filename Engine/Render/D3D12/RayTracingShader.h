@@ -2,7 +2,7 @@
 #ifndef LE_RENDER_D3D12_RayTracingShader_h
 #define LE_RENDER_D3D12_RayTracingShader_h 1
 
-#include <LBase/lmemory.hpp>
+#include <LBase/observer_ptr.hpp>
 #include "../ShaderCore.h"
 #include "../IRayTracingShader.h"
 #include "../IRayDevice.h"

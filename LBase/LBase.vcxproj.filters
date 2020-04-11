@@ -74,6 +74,7 @@
     <ClInclude Include="linttype_utility.hpp" />
     <ClInclude Include="string_utility.hpp" />
     <ClInclude Include="exception_type.h" />
+    <ClInclude Include="observer_ptr.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="any.cpp" />

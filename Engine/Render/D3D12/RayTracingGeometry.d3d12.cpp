@@ -6,6 +6,8 @@ namespace D12 = platform_ex::Windows::D3D12;
 namespace R = platform::Render;
 
 using namespace D12;
+using std::shared_ptr;
+using std::unique_ptr;
 
 D12::RayTracingGeometry::RayTracingGeometry(const platform::Render::RayTracingGeometryInitializer& initializer)
 {

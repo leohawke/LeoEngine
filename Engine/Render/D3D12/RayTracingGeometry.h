@@ -59,13 +59,13 @@ namespace platform_ex::Windows::D3D12 {
 
 		GraphicsBuffer* IndexBuffer;
 
-		shared_ptr<GraphicsBuffer> AccelerationStructureBuffer;
-		shared_ptr<GraphicsBuffer> ScratchBuffer;
+		std::shared_ptr<GraphicsBuffer> AccelerationStructureBuffer;
+		std::shared_ptr<GraphicsBuffer> ScratchBuffer;
 
 		void BuildAccelerationStructure();
 	};
 
-	void CreateAccelerationStructureBuffers(shared_ptr<GraphicsBuffer>& AccelerationStructureBuffer, shared_ptr<GraphicsBuffer>& ScratchBuffer, Device& Deivce, const D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO& PrebuildInfo, D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE Type);
+	void CreateAccelerationStructureBuffers(std::shared_ptr<GraphicsBuffer>& AccelerationStructureBuffer, std::shared_ptr<GraphicsBuffer>& ScratchBuffer, Device& Deivce, const D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO& PrebuildInfo, D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE Type);
 }
 
 #endif

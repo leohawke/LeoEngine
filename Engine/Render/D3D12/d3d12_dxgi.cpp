@@ -1,4 +1,5 @@
 #include "d3d12_dxgi.h"
+#include <LFramework/Win32/LCLib/Mingw32.h>
 
 namespace platform_ex {
 	namespace Windows {

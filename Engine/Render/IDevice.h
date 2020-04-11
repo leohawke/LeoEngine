@@ -14,7 +14,7 @@
 #include "PipleState.h"
 #include "IShader.h"
 #include "IGraphicsPipelineState.h"
-#include "ShaderCompose.h"
+#include "IShaderCompose.h"
 #include "ShaderCore.h"
 #include <optional>
 
@@ -24,6 +24,7 @@ namespace asset {
 
 namespace platform::Render::Effect {
 	class Effect;
+	class Technique;
 }
 
 namespace platform::Render {

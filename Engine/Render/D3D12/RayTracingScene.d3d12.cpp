@@ -5,6 +5,9 @@
 using namespace platform_ex::Windows::D3D12;
 using namespace platform::Render::Buffer;
 
+using std::shared_ptr;
+using std::unique_ptr;
+
 RayTracingScene::RayTracingScene(const platform::Render::RayTracingSceneInitializer& initializer)
 	:Instances(initializer.Instances.begin(),initializer.Instances.end()),
 	ShaderSlotsPerGeometrySegment(initializer.ShaderSlotsPerGeometrySegment),
@@ -42,7 +45,7 @@ void RayTracingScene::BuildAccelerationStructure()
 
 	Context::Instance().GetCommandList(Device::Command_Resource)->ResourceBarrier(1, &barrier);
 
-	AccelerationStructureView = leo::make_unique<ShaderResourceView>(*AccelerationStructureBuffer,EF_Unknown);
+	AccelerationStructureView = std::make_unique<ShaderResourceView>(*AccelerationStructureBuffer,EF_Unknown);
 
 	// Create and fill instance buffer
 	const uint32 NumSceneInstances =static_cast<uint32>(Instances.size());

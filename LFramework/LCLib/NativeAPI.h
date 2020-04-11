@@ -7,7 +7,6 @@
 #define FrameWork_NativeAPI_h 1
 
 #include <LFramework/LCLib/Platform.h>
-#include <LBase/type_op.hpp>
 #include <LBase/lmacro.h>
 
 #ifndef  LF_Platform

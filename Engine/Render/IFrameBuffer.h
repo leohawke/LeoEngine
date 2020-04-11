@@ -9,6 +9,7 @@
 #include "ViewPort.h"
 
 #include <LBase/lmathtype.hpp>
+#include <LBase/observer_ptr.hpp>
 
 #include <vector>
 #include <memory>

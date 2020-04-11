@@ -11,6 +11,7 @@
 #include "..\ITexture.hpp"
 #include "ResourceHolder.h"
 #include <LBase/lmathtype.hpp>
+#include <LBase/observer_ptr.hpp>
 
 namespace platform_ex {
 	namespace Windows {

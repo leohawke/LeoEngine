@@ -4,6 +4,7 @@
 #include "ResourceView.h"
 #include "../Effect/CopyEffect.h"
 #include <LBase/id.hpp>
+#include <LFramework/LCLib/Debug.h>
 
 
 using namespace platform_ex::Windows::D3D12;
@@ -437,7 +438,7 @@ void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_siz
 			cmd_list->SetGraphicsRootDescriptorTable(1, sampler_heap->GetGPUDescriptorHandleForHeapStart());
 
 
-		auto & vb = static_cast<GraphicsBuffer&>(Deref(rl.GetVertexStream(0).stream));
+		auto & vb = static_cast<GraphicsBuffer&>(platform::Deref(rl.GetVertexStream(0).stream));
 
 		D3D12_VERTEX_BUFFER_VIEW vbv;
 		vbv.BufferLocation = vb.Resource()->GetGPUVirtualAddress();

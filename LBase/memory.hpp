@@ -752,30 +752,7 @@ namespace leo
 	//@}
 }
 
-namespace std
-{
 
-	/*!
-	\brief leo::observer_ptr É¢ÁÐÖ§³Ö¡£
-	\see ISO WG21 N4529 8.12.7[memory.observer.ptr.hash] ¡£
-	\since build 1.4
-	*/
-	//@{
-	template<typename>
-	struct hash;
-
-	template<typename _type>
-	struct hash<leo::observer_ptr<_type>>
-	{
-		size_t
-			operator()(const leo::observer_ptr<_type>& p) const limpl(lnothrow)
-		{
-			return hash<_type*>(p.get());
-		}
-	};
-	//@}
-
-} // namespace std;
 
 
 #endif

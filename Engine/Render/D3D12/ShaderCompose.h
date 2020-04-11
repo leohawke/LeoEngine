@@ -72,7 +72,7 @@ namespace platform_ex::Windows::D3D12 {
 
 	public:
 
-		ShaderCompose(std::unordered_map<platform::Render::ShaderType, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect);
+		ShaderCompose(std::unordered_map<platform::Render::ShaderType, const asset::ShaderBlobAsset*> pShaderBlob, platform::Render::Effect::Effect* pEffect);
 
 		 void Bind() override;
 		 void UnBind() override;

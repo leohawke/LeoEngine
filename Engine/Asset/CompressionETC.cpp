@@ -1,5 +1,6 @@
 
 #include "CompressionETC.hpp"
+#include <LBase/exception_type.h>
 #include <mutex>
 
 namespace etc

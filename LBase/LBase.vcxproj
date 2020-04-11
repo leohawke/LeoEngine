@@ -60,6 +60,7 @@
     <ClInclude Include="lmemory.hpp" />
     <ClInclude Include="lmathquaternion.hpp" />
     <ClInclude Include="mixin.hpp" />
+    <ClInclude Include="observer_ptr.hpp" />
     <ClInclude Include="path.hpp" />
     <ClInclude Include="MCF\Abstract.hpp" />
     <ClInclude Include="memory.hpp" />

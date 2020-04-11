@@ -27,16 +27,16 @@ namespace platform_ex::Windows::D3D12 {
 			return AccelerationStructureView.get();
 		}
 	private:
-		leo::vector<platform::Render::RayTracingGeometryInstance> Instances;
+		std::vector<platform::Render::RayTracingGeometryInstance> Instances;
 
 		leo::uint32 ShaderSlotsPerGeometrySegment;
 		leo::uint32 NumCallableShaderSlots;
 
-		leo::shared_ptr<GraphicsBuffer> AccelerationStructureBuffer;
+		std::shared_ptr<GraphicsBuffer> AccelerationStructureBuffer;
 
 		ID3D12Device5* RayTracingDevice;
 
-		leo::unique_ptr<ShaderResourceView> AccelerationStructureView;
+		std::unique_ptr<ShaderResourceView> AccelerationStructureView;
 	};
 }
 

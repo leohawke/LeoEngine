@@ -7,6 +7,7 @@
 #include "RayContext.h"
 #include "RootSignature.h"
 #include "../Effect/CopyEffect.h"
+#include <LFramework/Core/LException.h>
 
 #define TEST_CODE 1
 #if TEST_CODE
@@ -277,7 +278,7 @@ namespace platform_ex::Windows::D3D12 {
 			fence.swap(std::make_unique<Fence>());
 
 		FilterExceptions([&, this] {
-			ray_context = make_shared<RayContext>(device.get(), this);
+			ray_context = std::make_shared<RayContext>(device.get(), this);
 			},"ERROR: DirectX Raytracing is not supported by your OS, GPU and/or driver.");
 	}
 
@@ -353,10 +354,10 @@ namespace platform_ex::Windows::D3D12 {
 	}
 
 	void Context::CreateDeviceAndDisplay() {
-		device = leo::make_shared<Device>(DefaultAdapter());
+		device = std::make_shared<Device>(DefaultAdapter());
 		ContextEx(device->d3d_device.Get(), device->d3d_cmd_queue.Get());
 		DisplaySetting setting;
-		display = leo::make_shared<Display>(GetDXGIFactory4(), device->d3d_cmd_queue.Get(), setting, g_hwnd);//test code
+		display = std::make_shared<Display>(GetDXGIFactory4(), device->d3d_cmd_queue.Get(), setting, g_hwnd);//test code
 		screen_frame_buffer = display->GetFrameBuffer();
 		SetFrame(display->GetFrameBuffer());
 	}

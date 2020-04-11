@@ -6,6 +6,7 @@
 #include "Texture.h"
 #include "Convert.h"
 #include "RootSignature.h"
+#include <LFramework/LCLib/Logger.h>
 
 using namespace platform_ex::Windows;
 using platform::Render::ShaderType;
@@ -142,7 +143,7 @@ platform_ex::Windows::D3D12::ShaderCompose::Template::Template()
 	//uname union uname struct init
 }
 
-platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<platform::Render::ShaderType, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect) :
+platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<platform::Render::ShaderType, const asset::ShaderBlobAsset*> pShaderBlob, platform::Render::Effect::Effect* pEffect) :
 	sc_template(std::make_unique<Template>())
 {
 	auto CopyShader = [&](auto& shader, auto type) {

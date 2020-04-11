@@ -6,6 +6,7 @@
 #define LE_RENDER_EFFECT_h 1
 
 #include <LBase/linttype.hpp>
+#include <LBase/observer_ptr.hpp>
 #include <any>
 #include <LBase/examiner.hpp>
 #include <LBase/pointer.hpp>

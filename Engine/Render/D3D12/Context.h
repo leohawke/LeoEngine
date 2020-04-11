@@ -60,7 +60,7 @@ namespace platform_ex {
 
 				platform::Render::Caps& GetCaps() override;
 
-				ShaderCompose* CreateShaderCompose(std::unordered_map<platform::Render::ShaderType, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<platform::Render::Effect::Effect> pEffect) override;
+				ShaderCompose* CreateShaderCompose(std::unordered_map<platform::Render::ShaderType, const asset::ShaderBlobAsset*> pShaderBlob, platform::Render::Effect::Effect* pEffect) override;
 
 				//\brief D3D12 Buffer 创建时没有BIND_FLAG
 				GraphicsBuffer* CreateBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const*>  init_data = nullptr);
@@ -277,10 +277,10 @@ namespace platform_ex {
 			private:
 				DXGI::AdapterList adapter_list;
 
-				shared_ptr<Device> device;
-				shared_ptr<Display> display;
+				std::shared_ptr<Device> device;
+				std::shared_ptr<Display> display;
 
-				shared_ptr<RayContext> ray_context;
+				std::shared_ptr<RayContext> ray_context;
 
 				array<COMPtr<ID3D12GraphicsCommandList>,Device::CommandTypeCount> d3d_cmd_lists;
 				array<std::mutex, Device::CommandTypeCount> cmd_list_mutexs;

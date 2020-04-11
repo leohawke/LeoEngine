@@ -48,9 +48,9 @@ namespace platform_ex::Windows::D3D12 {
 		Context* context;
 
 		COMPtr<ID3D12Device5> d3d_ray_device;
-		unique_ptr< RayTracingDescriptorHeapCache> ray_tracing_descriptor_heap_cache;
+		std::unique_ptr< RayTracingDescriptorHeapCache> ray_tracing_descriptor_heap_cache;
 
-		unique_ptr<RayTracingPipelineCache> ray_tracing_pipeline_cache;
+		std::unique_ptr<RayTracingPipelineCache> ray_tracing_pipeline_cache;
 	};
 
 	bool IsDirectXRaytracingSupported(ID3D12Device* device);

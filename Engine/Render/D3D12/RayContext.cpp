@@ -5,6 +5,8 @@
 #include "ResourceView.h"
 #include "BuiltInRayTracingShaders.h"
 
+using std::make_unique;
+
 namespace D12 = platform_ex::Windows::D3D12;
 namespace R = platform::Render;
 

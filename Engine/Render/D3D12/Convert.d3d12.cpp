@@ -660,7 +660,7 @@ D3D12_BLEND_DESC platform_ex::Windows::D3D12::Convert(const platform::Render::Bl
 	D3D12_BLEND_DESC result;
 	result.AlphaToCoverageEnable = desc.alpha_to_coverage_enable;
 	result.IndependentBlendEnable = desc.independent_blend_enable;
-	for (auto i = 0; i != leo::arrlen(result.RenderTarget); ++i) {
+	for (auto i = 0; i != std::size(result.RenderTarget); ++i) {
 		result.RenderTarget[i].BlendEnable = desc.blend_enable[i];
 		//TODO Support LogicOp
 		result.RenderTarget[i].LogicOpEnable = false/* desc.logic_op_enable[i]*/;

@@ -8,6 +8,8 @@
 using namespace platform_ex::Windows::D3D12;
 using namespace platform_ex;
 
+using std::make_shared;
+
 Display::Display(IDXGIFactory4 * factory_4, ID3D12CommandQueue* cmd_queue, const DisplaySetting& setting, HWND hWnd)
 	:hwnd(hWnd), frame_buffer(std::make_shared<FrameBuffer>()), frame_waitable_object(nullptr)
 {

@@ -5,8 +5,10 @@
 #ifndef LE_WIN32_COM_H
 #define LE_WIN32_COM_H 1
 
-#include <LFramework/LCLib/Platform.h>
+#include <LFramework/LCLib/Debug.h>
+#include <LFramework/LCLib/NativeAPI.h>
 #include <objbase.h>
+#include <stdexcept>
 
 namespace platform_ex {
 

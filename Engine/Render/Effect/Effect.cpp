@@ -388,11 +388,11 @@ namespace platform::Render::Effect {
 				Pass pass{};
 
 				auto& asset_blob_hashs = asset_pass.GetBlobs();
-				std::unordered_map<ShaderType, leo::observer_ptr<const asset::ShaderBlobAsset>> asset_blobs;
+				std::unordered_map<ShaderType, const asset::ShaderBlobAsset*> asset_blobs;
 				for (auto&pair : asset_blob_hashs) {
 					asset_blobs.emplace(pair.first, &pEffectAsset->GetBlob(pair.second));
 				}
-				ShaderCompose* pCompose = Context::Instance().GetDevice().CreateShaderCompose(asset_blobs, leo::make_observer(this));
+				ShaderCompose* pCompose = Context::Instance().GetDevice().CreateShaderCompose(asset_blobs, this);
 				pass.bind_index = static_cast<leo::uint8>(shaders.size());
 				shaders.emplace_back(pCompose);
 				pass.state = leo::unique_raw(Context::Instance().GetDevice().CreatePipleState(asset_pass.GetPipleState()));

@@ -9,6 +9,7 @@
 #include <LBase/any.h>
 #include <LBase/examiner.hpp>
 #include <LBase/operators.hpp>
+#include <LBase/observer_ptr.hpp>
 #include <LFramework/Core/LCoreUtilities.h>
 
 #ifdef LB_IMPL_MSCPP

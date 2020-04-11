@@ -1,5 +1,6 @@
 
 #include "CompressionBC.hpp"
+#include <LBase/exception_type.h>
 #include <mutex>
 
 namespace bc

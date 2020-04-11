@@ -57,7 +57,7 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 
 	// Add ray generation shaders
 
-	leo::vector<LPCWSTR> RayGenShaderNames;
+	std::vector<LPCWSTR> RayGenShaderNames;
 
 	RayGenShaders.Reserve(static_cast<uint32>(InitializerRayGenShaders.size()));
 	RayGenShaderNames.reserve(InitializerRayGenShaders.size());
@@ -75,7 +75,7 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 	}
 
 	// Add miss shaders
-	leo::vector<LPCWSTR> MissShaderNames;
+	std::vector<LPCWSTR> MissShaderNames;
 
 	MissShaders.Reserve(static_cast<uint32>(InitializerRayGenShaders.size()));
 	MissShaderNames.reserve(InitializerRayGenShaders.size());
@@ -97,7 +97,7 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 	MaxHitGroupViewDescriptors = 0;
 	MaxLocalRootSignatureSize = 0;
 
-	leo::vector<LPCWSTR> HitGroupNames;
+	std::vector<LPCWSTR> HitGroupNames;
 	HitGroupShaders.Reserve(static_cast<uint32>(InitializerHitGroups.size()));
 	HitGroupNames.reserve(InitializerHitGroups.size());
 
@@ -115,7 +115,7 @@ RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTrac
 		HitGroupShaders.Shaders.emplace_back(platform::Render::shared_raw_robject(Shader));
 	}
 
-	leo::vector<LPCWSTR> CallableShaderNames;
+	std::vector<LPCWSTR> CallableShaderNames;
 	CallableShaders.Reserve(static_cast<uint32>(InitializerCallableShaders.size()));
 	CallableShaderNames.reserve(InitializerCallableShaders.size());
 

@@ -9,6 +9,7 @@
 #include "../RayTracingDefinitions.h"
 #include "../IGPUResourceView.h"
 #include <LBase/type_traits.hpp>
+#include <map>
 
 //pre decl
 namespace platform_ex::Windows::D3D12 {
@@ -137,9 +138,9 @@ struct DXILLibrary
 		return Subobject;
 	}
 
-	leo::vector<D3D12_EXPORT_DESC> ExportDesc;
-	leo::vector<leo::wstring> EntryNames;
-	leo::vector<leo::wstring> ExportNames;
+	std::vector<D3D12_EXPORT_DESC> ExportDesc;
+	std::vector<std::wstring> EntryNames;
+	std::vector<std::wstring> ExportNames;
 	D3D12_DXIL_LIBRARY_DESC Desc = {};
 };
 
@@ -479,7 +480,7 @@ public:
 	using aligned_byte =typename std::aligned_storage<1, 64>::type;
 	std::vector<aligned_byte> Data;
 
-	shared_ptr < Windows::D3D12::GraphicsBuffer> Buffer;
+	std::shared_ptr < Windows::D3D12::GraphicsBuffer> Buffer;
 
 	RayTracingDescriptorCache* DescriptorCache = nullptr;
 
@@ -490,8 +491,8 @@ public:
 
 struct RayTracingShaderLibrary
 {
-	leo::vector <leo::shared_ptr<Windows::D3D12::RayTracingShader>> Shaders;
-	leo::vector<ShaderIdentifier> Identifiers;
+	std::vector <std::shared_ptr<Windows::D3D12::RayTracingShader>> Shaders;
+	std::vector<ShaderIdentifier> Identifiers;
 
 	void Reserve(leo::uint32 Num)
 	{
