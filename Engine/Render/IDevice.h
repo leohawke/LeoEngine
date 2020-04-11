@@ -5,21 +5,29 @@
 #ifndef LE_RENDER_IDevice_h
 #define LE_RENDER_IDevice_h 1
 
+#include <LBase/ldef.h>
 #include "DeviceCaps.h"
 #include "ITexture.hpp"
-#include "Effect/Effect.hpp"
 #include "IGraphicsBuffer.hpp"
 #include "InputLayout.hpp"
 #include "IGPUResourceView.h"
 #include "PipleState.h"
 #include "IShader.h"
 #include "IGraphicsPipelineState.h"
+#include "ShaderCompose.h"
+#include "ShaderCore.h"
+#include <optional>
 
 namespace asset {
 	class ShaderBlobAsset;
 }
 
+namespace platform::Render::Effect {
+	class Effect;
+}
+
 namespace platform::Render {
+
 	class GraphicsPipelineStateInitializer
 	{
 	public:
@@ -49,7 +57,7 @@ namespace platform::Render {
 		virtual TextureCube* CreateTextureCube(uint16 size, uint8 num_mipmaps, uint8 array_size,
 			EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const *>  init_data = nullptr) = 0;
 
-		virtual ShaderCompose* CreateShaderCompose(std::unordered_map<ShaderType, leo::observer_ptr<const asset::ShaderBlobAsset>> pShaderBlob, leo::observer_ptr<Effect::Effect> pEffect) = 0;
+		virtual ShaderCompose* CreateShaderCompose(std::unordered_map<ShaderType,const asset::ShaderBlobAsset*> pShaderBlob, Effect::Effect* pEffect) = 0;
 
 		virtual GraphicsBuffer* CreateConstanBuffer(Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const *>  init_data = nullptr) = 0;
 		virtual GraphicsBuffer* CreateVertexBuffer(Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const *>  init_data = nullptr) = 0;

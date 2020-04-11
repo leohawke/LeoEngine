@@ -168,6 +168,7 @@
     <ClInclude Include="Render\IShader.h" />
     <ClInclude Include="Render\RayTracingDefinitions.h" />
     <ClInclude Include="Render\RenderObject.h" />
+    <ClInclude Include="Render\IShaderCompose.h" />
     <ClInclude Include="Render\ShaderCore.h" />
     <ClInclude Include="Render\ShadingElement.h" />
     <ClInclude Include="Render\IContext.h" />

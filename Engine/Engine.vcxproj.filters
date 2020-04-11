@@ -490,6 +490,9 @@
     <ClInclude Include="Render\ShaderCore.h">
       <Filter>Render\DeviceInterface</Filter>
     </ClInclude>
+    <ClInclude Include="Render\IShaderCompose.h">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

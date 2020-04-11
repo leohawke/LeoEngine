@@ -14,6 +14,7 @@
 #include "../PipleState.h"
 #include "../../Core/ResourcesHolder.h"
 #include "../ShaderCore.h"
+#include "../IShaderCompose.h"
 
 #include <tuple>
 #include <vector>
@@ -52,20 +53,6 @@ namespace platform::Render {
 		{
 		}
 	};
-
-	class ShaderCompose {
-	public:
-		virtual ~ShaderCompose();
-
-		static const leo::uint8 NumTypes = (leo::uint8)ShaderType::ComputeShader + 1;
-
-		virtual void Bind() = 0;
-		virtual void UnBind() = 0;
-
-	};
-
-
-	class GraphicsBuffer;
 }
 
 
