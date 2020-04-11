@@ -4,6 +4,7 @@
 #include "../Asset/MeshX.h"
 #include "../Render/IRayDevice.h"
 #include "../Render/IRayContext.h"
+#include <LBase/smart_ptr.hpp>
 
 namespace platform {
 	using namespace Render;

@@ -8,6 +8,7 @@
 
 #include <LBase/cache.hpp>
 #include "../Asset/Loader.hpp"
+#include <LBase/sutility.h>
 
 namespace platform {
 

@@ -5,6 +5,7 @@
 #include "ResourceView.h"
 #include "Texture.h"
 #include "GraphicsBuffer.hpp"
+#include <LFramework/Core/LString.h>
 
 using platform::Render::ShaderType;
 

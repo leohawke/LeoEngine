@@ -18,6 +18,8 @@
 #include "../../Engine/Render/IRayTracingScene.h"
 #include "../../Engine/Render/IRayDevice.h"
 #include "../../Engine/Render/IRayContext.h"
+#include <LFramework/LCLib/Logger.h>
+#include <LFramework/LCLib/Debug.h>
 
 #include <LScheme/LScheme.h>
 #include <windowsx.h>
@@ -325,7 +327,8 @@ private:
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR cmdLine, int nCmdShow)
 {
-	leo::FetchCommonLogger().SetSender(platform_ex::SendDebugString);
+	leo::FetchCommonLogger().SetSender([](platform::Descriptions::RecordLevel lv, platform::Logger& logger, const char* str) {return
+		platform_ex::SendDebugString(lv,str); });
 
 	EngineTest Test(L"EnginetTest");
 	Test.Create();

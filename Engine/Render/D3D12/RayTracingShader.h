@@ -19,9 +19,9 @@ namespace platform_ex::Windows::D3D12 {
 
 		platform::Render::ShaderBlob ShaderByteCode;
 
-		leo::Text::String EntryPoint;
-		leo::Text::String AnyHitEntryPoint;
-		leo::Text::String IntersectionEntryPoint;
+		std::u16string EntryPoint;
+		std::u16string AnyHitEntryPoint;
+		std::u16string IntersectionEntryPoint;
 
 		platform::Render::ShaderCodeResourceCounts ResourceCounts;
 	};

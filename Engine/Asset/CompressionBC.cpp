@@ -1,5 +1,6 @@
 
 #include "CompressionBC.hpp"
+#include <mutex>
 
 namespace bc
 {

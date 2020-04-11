@@ -1,8 +1,8 @@
 #pragma once
 
+#include <LBase/cassert.h>
 #include "Platform.h"
 #include "LDescriptions.h"
-#include <LBase/cassert.h>
 
 namespace platform_ex {
 #if LF_Multithread == 1

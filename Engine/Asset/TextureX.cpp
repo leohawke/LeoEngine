@@ -9,8 +9,9 @@
 
 #include "../Core/AssetResourceScheduler.h"
 
-
 #include <LFramework/LCLib/Debug.h>
+#include <LBase/smart_ptr.hpp>
+#include <fstream>
 
 namespace platform {
 	using namespace Render::IFormat;

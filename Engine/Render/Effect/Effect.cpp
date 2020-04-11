@@ -12,6 +12,8 @@
 #include "../ITexture.hpp"
 
 #include "../../Core/AssetResourceScheduler.h"
+#include <LFramework/LCLib/Logger.h>
+#include <LBase/smart_ptr.hpp>
 
 namespace platform::Render {
 	ShaderInfo::ShaderInfo(ShaderType t)
@@ -58,7 +60,7 @@ namespace platform::Render::Effect {
 			}
 		};
 
-		static leo::call_once_init<InitBlock, leo::once_flag> init {};
+		static leo::call_once_init<InitBlock, std::once_flag> init {};
 
 
 		if (!var.bind.target)

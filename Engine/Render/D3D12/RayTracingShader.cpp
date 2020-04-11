@@ -1,5 +1,6 @@
 #include "RayTracingShader.h"
 #include "Context.h"
+#include <LFramework/Core/LString.h>
 
 using namespace platform_ex::Windows::D3D12;
 using namespace platform::Render::ShaderCore;
@@ -76,9 +77,9 @@ RayTracingShader::RayTracingShader(const platform::Render::RayTracingShaderIniti
 
 	auto RayTracingInfos = initializer.pInfo->RayTracingInfos.value();
 
-	EntryPoint = RayTracingInfos.EntryPoint;
-	AnyHitEntryPoint = RayTracingInfos.AnyHitEntryPoint;
-	IntersectionEntryPoint = RayTracingInfos.IntersectionEntryPoint;
+	EntryPoint =leo::Text::String(RayTracingInfos.EntryPoint);
+	AnyHitEntryPoint = leo::Text::String(RayTracingInfos.AnyHitEntryPoint);
+	IntersectionEntryPoint = leo::Text::String(RayTracingInfos.IntersectionEntryPoint);
 }
 
 bool platform_ex::Windows::D3D12::IsRayTracingShader(platform::Render::ShaderType type)

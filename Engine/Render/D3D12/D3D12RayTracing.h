@@ -562,7 +562,7 @@ public:
 	{
 		leo::observer_ptr<Windows::D3D12::RayTracingShader> Shader;
 		COMPtr<ID3D12StateObject> StateObject;
-		std::vector<leo::Text::String> ExportNames;
+		std::vector<std::u16string> ExportNames;
 		std::vector<D3D12_EXPORT_DESC> ExportDescs;
 
 		D3D12_EXISTING_COLLECTION_DESC GetCollectionDesc()

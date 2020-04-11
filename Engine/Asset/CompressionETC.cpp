@@ -1,5 +1,6 @@
 
 #include "CompressionETC.hpp"
+#include <mutex>
 
 namespace etc
 {
