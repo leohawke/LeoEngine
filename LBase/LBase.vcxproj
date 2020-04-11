@@ -38,6 +38,7 @@
     <ClInclude Include="enum.hpp" />
     <ClInclude Include="examiner.hpp" />
     <ClInclude Include="exception.h" />
+    <ClInclude Include="exception_type.h" />
     <ClInclude Include="functional.hpp" />
     <ClInclude Include="functor.hpp" />
     <ClInclude Include="future.hpp" />
@@ -50,6 +51,7 @@
     <ClInclude Include="iterator_trait.hpp" />
     <ClInclude Include="lcompiler.h" />
     <ClInclude Include="ldef.h" />
+    <ClInclude Include="linttype_utility.hpp" />
     <ClInclude Include="lmath.hpp" />
     <ClInclude Include="lmathhalf.h" />
     <ClInclude Include="lmathtype.hpp" />
@@ -75,6 +77,7 @@
     <ClInclude Include="span.hpp" />
     <ClInclude Include="streambuf.hpp" />
     <ClInclude Include="string.hpp" />
+    <ClInclude Include="string_utility.hpp" />
     <ClInclude Include="sutility.h" />
     <ClInclude Include="tuple.hpp" />
     <ClInclude Include="typeindex.h" />

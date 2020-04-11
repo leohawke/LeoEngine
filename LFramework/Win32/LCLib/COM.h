@@ -5,9 +5,7 @@
 #ifndef LE_WIN32_COM_H
 #define LE_WIN32_COM_H 1
 
-#include <LFramework/Win32/LCLib/Mingw32.h>
-#include <LBase/type_traits.hpp>
-
+#include <LFramework/LCLib/Platform.h>
 #include <objbase.h>
 
 namespace platform_ex {

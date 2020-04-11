@@ -8,8 +8,8 @@
 
 
 #include "ldef.h"
-#include "tuple.hpp"
 #include <limits>
+#include <tuple>
 #include <functional> //for std::hash
 #include <numeric> //for std::accmulate
 #include <string>
@@ -94,7 +94,7 @@ namespace leo {
 		struct combined_hash_tuple;
 
 		template<typename _type, size_t... _vSeq>
-		struct combined_hash_tuple<_type, index_sequence<_vSeq...>>
+		struct combined_hash_tuple<_type, std::index_sequence<_vSeq...>>
 		{
 			static lconstfn size_t
 				call(const _type& tp)

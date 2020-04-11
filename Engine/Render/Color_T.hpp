@@ -6,7 +6,6 @@
 #ifndef LE_RENDER_ColorT_hpp
 #define LE_RENDER_ColorT_hpp 1
 
-#include <LBase/operators.hpp>
 #include <LBase/lmath.hpp>
 
 #include "../emacro.h"
@@ -45,21 +44,10 @@ namespace platform {
 		template <typename T>
 		class Color_T;
 
-		namespace ColorF {
-			using equality_comparable = leo::equality_comparable<Color_T<float>>;
-
-			using multipliable = leo::multipliable<Color_T<float>, equality_comparable>;
-
-			using subtractable = leo::subtractable<Color_T<float>, multipliable>;
-
-			using addable = leo::addable<Color_T<float>, subtractable>;
-		}
-
 		// RGBA，用4个浮点数表示r, g, b, a
 		///////////////////////////////////////////////////////////////////////////////
 		template <typename T>
-		//FUCK MS
-		class Color_T /*: ColorF::addable*/
+		class Color_T
 		{
 		public:
 			typedef T value_type;

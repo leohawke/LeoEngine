@@ -24,14 +24,14 @@ namespace platform::Render {
 }
 
 namespace platform::Render::Effect {
-	Parameter & Parameter::operator=(const leo::any & val)
+	Parameter & Parameter::operator=(const std::any & val)
 	{
-		static std::unordered_map<ShaderParamType, std::function<void(Parameter &, const leo::any &)>> map_fuctors;
+		static std::unordered_map<ShaderParamType, std::function<void(Parameter &, const std::any &)>> map_fuctors;
 		struct InitBlock final
 		{
 			InitBlock() {
-#define REGISTER_MAP_FUNCTOR(enum_type,value_type) map_fuctors[enum_type] = [](Parameter & paramenter, const leo::any & val) { \
-				paramenter = leo::any_cast<value_type>(val); \
+#define REGISTER_MAP_FUNCTOR(enum_type,value_type) map_fuctors[enum_type] = [](Parameter & paramenter, const std::any & val) { \
+				paramenter = std::any_cast<value_type>(val); \
 			}
 				REGISTER_MAP_FUNCTOR(SPT_bool, bool);
 				REGISTER_MAP_FUNCTOR(SPT_string, std::string);
@@ -415,10 +415,10 @@ namespace platform::Render::Effect {
 	{
 	}
 
-	std::shared_ptr<void> EffectsHolder::FindResource(const leo::any& key) {
-		if (auto pstr = leo::any_cast<std::string>(&key))
+	std::shared_ptr<void> EffectsHolder::FindResource(const std::any& key) {
+		if (auto pstr = std::any_cast<std::string>(&key))
 			return FindResource(*pstr);
-		if (auto passet = leo::any_cast<std::shared_ptr<asset::EffectAsset>>(&key))
+		if (auto passet = std::any_cast<std::shared_ptr<asset::EffectAsset>>(&key))
 			return FindResource(*passet);
 		return {};
 	}

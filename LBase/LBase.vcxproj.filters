@@ -71,6 +71,9 @@
     <ClInclude Include="span.hpp" />
     <ClInclude Include="smart_ptr.hpp" />
     <ClInclude Include="cformat.h" />
+    <ClInclude Include="linttype_utility.hpp" />
+    <ClInclude Include="string_utility.hpp" />
+    <ClInclude Include="exception_type.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="any.cpp" />

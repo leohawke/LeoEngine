@@ -6,9 +6,8 @@
 #ifndef LE_RENDER_ITexture_hpp
 #define LE_RENDER_ITexture_hpp 1
 
-#include <LBase/memory.hpp>
 #include <LBase/sutility.h>
-#include <LBase/functional.hpp>
+#include <functional>
 #include "../emacro.h"
 #include "IFormat.hpp"
 
@@ -352,7 +351,7 @@ namespace platform::Render {
 
 		~Mapper()
 		{
-			leo::invoke(finally, TexRef);
+			std::invoke(finally, TexRef);
 		}
 
 		template <typename T>

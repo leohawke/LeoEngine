@@ -1,3 +1,4 @@
+#include <LBase/ldef.h>
 #include "GraphicsPipelineState.h"
 #include "ShaderPass.h"
 #include "RootSignature.h"

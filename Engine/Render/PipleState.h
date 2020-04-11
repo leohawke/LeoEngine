@@ -8,8 +8,8 @@
 
 #include <LBase/linttype.hpp>
 #include <LBase/id.hpp>
-#include <LBase/string.hpp>
-#include <LBase/exception.h>
+#include <LBase/string_utility.hpp>
+#include <LBase/exception_type.h>
 #include "Color_T.hpp"
 
 #include <cctype>

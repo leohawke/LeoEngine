@@ -154,26 +154,6 @@ namespace leo {
 		&& !is_void<detected_t<details::subscription_t, _type1, _type2>>::value>
 	{};
 
-#ifdef LB_IMPL_MSCPP
-	template<typename _type, typename _type2 = _type,class = std::void_t<>>
-	struct has_equality_operator : std::false_type 
-	{};
-
-	template<typename _type,typename _type2>
-	struct has_equality_operator<_type, _type2,
-		std::void_t<decltype(std::declval<_type>() == std::declval<_type2>())>> : std::true_type
-	{};
-#else
-	/*!
-	\brief 判断是否存在合式的结果可转换为 bool 类型的 == 操作符接受指定类型的表达式。
-	\since build 1.4
-	*/
-	template<typename _type, typename _type2 = _type>
-	struct has_equality_operator : is_detected_convertible<bool,
-		details::equality_operator_t, _type, _type2>
-	{};
-#endif
-
 
 	/*!
 	\brief 判断指定类型是否有非空虚基类。

@@ -6,8 +6,9 @@
 #define LE_RENDER_EFFECT_h 1
 
 #include <LBase/linttype.hpp>
-#include <LBase/any.h>
+#include <any>
 #include <LBase/examiner.hpp>
+#include <LBase/pointer.hpp>
 #include <LFramework/LCLib/Debug.h>
 
 #include "../PipleState.h"
@@ -158,7 +159,7 @@ namespace platform::Render::Effect {
 			if (bind.target)
 				return bind.target->template VariableInBuff<T>(bind.offset);
 			else
-				return leo::any_cast<T>(value);
+				return std::any_cast<T>(value);
 		}
 
 #if ENGINE_TOOL
@@ -186,10 +187,10 @@ namespace platform::Render::Effect {
 			if (bind.target)
 				return bind.target->template VariableInBuff<T>(bind.offset);
 			else
-				return Deref(*leo::any_cast<T*>(&value));
+				return Deref(*std::any_cast<T*>(&value));
 		}
 	private:
-		leo::any value;
+		std::any value;
 		struct CBufferBind {
 			std::shared_ptr<ConstantBuffer> target;
 			uint32 offset =0;
@@ -223,7 +224,7 @@ namespace platform::Render::Effect {
 		friend class Effect;
 		friend class Material;
 	private:
-		Parameter& operator=(const leo::any& val);
+		Parameter& operator=(const std::any& val);
 	private:
 		Variable var;
 
@@ -310,7 +311,7 @@ namespace platform::Render::Effect {
 		EffectsHolder();
 		~EffectsHolder();
 		
-		std::shared_ptr<void> FindResource(const leo::any& key) override;
+		std::shared_ptr<void> FindResource(const std::any& key) override;
 		std::shared_ptr<Effect> FindResource(const std::string& name);
 		std::shared_ptr<Effect> FindResource(const std::shared_ptr<asset::EffectAsset>& asset);
 

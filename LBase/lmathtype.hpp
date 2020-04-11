@@ -22,6 +22,7 @@
 #include "lmathhalf.h"
 #include "type_traits.hpp"
 #include "ref.hpp"
+#include "cassert.h"
 
 #include <cmath>
 #include <algorithm> //std::max,std::min

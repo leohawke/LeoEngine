@@ -16,7 +16,7 @@
 #include <LBase/iterator.hpp> // for leo::indirect_input_iterator;
 #include <ctime> // for std::time_t;
 #include  <LFramework/LCLib/Debug.h>
-#include <LBase/linttype.hpp> // for leo::read_uint_le;
+#include <LBase/linttype_utility.hpp> // for leo::read_uint_le;
 
 #if !LFL_Win32 && !LFL_API_POSIXFileSystem
 #	error "Unsupported platform found."

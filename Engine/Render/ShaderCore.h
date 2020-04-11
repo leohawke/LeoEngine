@@ -3,7 +3,6 @@
 #define LE_RENDER_ShaderCore_h 1
 
 #include <LBase/linttype.hpp>
-#include <LBase/lmemory.hpp>
 #include <LBase/lmathtype.hpp>
 #include <optional>
 

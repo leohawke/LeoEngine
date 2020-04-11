@@ -7,7 +7,7 @@
 #define LE_Core_ResourcesHolder_h 1
 
 #include <LBase/sutility.h>
-#include <LBase/any.h>
+#include <any>
 #include <LBase/tuple.hpp>
 #include "Resource.h"
 
@@ -16,7 +16,7 @@
 namespace platform {
 	class IResourcesHolder :leo::nonmovable, leo::noncopyable {
 	public:
-		virtual std::shared_ptr<void> FindResource(const leo::any& key) = 0;
+		virtual std::shared_ptr<void> FindResource(const std::any& key) = 0;
 
 		template<typename _type,typename ... _tParams>
 		std::shared_ptr<void> FindResource(const std::shared_ptr<_type> &asset, _tParams&&... args) {
@@ -26,7 +26,7 @@ namespace platform {
 		}
 
 		template<typename _type, typename ... _tParams>
-		static leo::any MakeKey(const std::shared_ptr<_type> &asset, _tParams&&... args) {
+		static std::any MakeKey(const std::shared_ptr<_type> &asset, _tParams&&... args) {
 			std::weak_ptr<void> base = asset;
 			return { std::make_tuple(base, lforward(args)...) };
 		}

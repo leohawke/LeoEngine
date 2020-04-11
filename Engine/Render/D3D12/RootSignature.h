@@ -344,7 +344,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		ID3D12Device* Device;
 
-		leo::unordered_map< QuantizedBoundShaderState,leo::unique_ptr<RootSignature>, KeyHash, std::equal_to<QuantizedBoundShaderState>> Map;
+		std::unordered_map< QuantizedBoundShaderState,std::unique_ptr<RootSignature>, KeyHash, std::equal_to<QuantizedBoundShaderState>> Map;
 	};
 }
 
