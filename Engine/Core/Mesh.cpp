@@ -91,9 +91,9 @@ namespace platform {
 	platform::MeshesHolder::~MeshesHolder()
 	{
 	}
-	std::shared_ptr<void> platform::MeshesHolder::FindResource(const leo::any & key)
+	std::shared_ptr<void> platform::MeshesHolder::FindResource(const std::any & key)
 	{
-		if (auto ptuple = leo::any_cast<std::tuple<std::shared_ptr<asset::MeshAsset>, std::string>>(&key))
+		if (auto ptuple = std::any_cast<std::tuple<std::shared_ptr<asset::MeshAsset>, std::string>>(&key))
 			return FindResource(std::get<0>(*ptuple), std::get<1>(*ptuple));
 		return {};
 	}

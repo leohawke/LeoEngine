@@ -49,7 +49,7 @@ namespace platform {
 		MeshesHolder();
 		~MeshesHolder();
 
-		std::shared_ptr<void> FindResource(const leo::any& key) override;
+		std::shared_ptr<void> FindResource(const std::any& key) override;
 		std::shared_ptr<Mesh> FindResource(const std::shared_ptr<asset::MeshAsset>& asset, const std::string& name);
 
 		void Connect(const std::shared_ptr<asset::MeshAsset>& asset, const std::shared_ptr<Mesh>& mesh);
