@@ -18,6 +18,7 @@
 //	'uf*', 'up*', etc;
 #include <LFramework/LCLib/FileSystem.h>
 #include <LFramework/LCLib/MemoryMapping.h>
+#include <LFramework/LCLib/Logger.h>
 
 namespace leo {
 	using platform::deque;

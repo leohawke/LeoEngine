@@ -57,9 +57,6 @@
     <ClInclude Include="CHRLib\StaticMapping.hpp">
       <Filter>CHRLib</Filter>
     </ClInclude>
-    <ClInclude Include="LCLib\Debug.h">
-      <Filter>LCLib</Filter>
-    </ClInclude>
     <ClInclude Include="LCLib\FCommon.h">
       <Filter>LCLib</Filter>
     </ClInclude>
@@ -174,6 +171,15 @@
     <ClInclude Include="LCLib\Timer.h">
       <Filter>LCLib</Filter>
     </ClInclude>
+    <ClInclude Include="LCLib\Debug.h">
+      <Filter>LCLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LCLib\Logger.h">
+      <Filter>LCLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LCLib\LDescriptions.h">
+      <Filter>LCLib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Win32\LCLib\Consoles.cpp">
@@ -193,9 +199,6 @@
     </ClCompile>
     <ClCompile Include="CHRLib\MappingEx.cpp">
       <Filter>CHRLib</Filter>
-    </ClCompile>
-    <ClCompile Include="LCLib\Debug.cpp">
-      <Filter>LCLib</Filter>
     </ClCompile>
     <ClCompile Include="LCLib\FCommon.cpp">
       <Filter>LCLib</Filter>
@@ -274,6 +277,12 @@
     </ClCompile>
     <ClCompile Include="Core\LCoreUtilities.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="LCLib\Logger.cpp">
+      <Filter>LCLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LCLib\Debug.cpp">
+      <Filter>LCLib</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

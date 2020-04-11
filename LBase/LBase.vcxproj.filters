@@ -70,6 +70,7 @@
     <ClInclude Include="lmathquaternion.hpp" />
     <ClInclude Include="span.hpp" />
     <ClInclude Include="smart_ptr.hpp" />
+    <ClInclude Include="cformat.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="any.cpp" />
@@ -81,5 +82,6 @@
     <ClCompile Include="concurrency.cpp" />
     <ClCompile Include="operators.hpp" />
     <ClCompile Include="LBase.cpp" />
+    <ClCompile Include="cformat.cpp" />
   </ItemGroup>
 </Project>

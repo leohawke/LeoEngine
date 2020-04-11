@@ -113,9 +113,6 @@
     <ClCompile Include="Render\D3D12\ResourceView.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="Render\ShadingElement.cpp">
-      <Filter>Render</Filter>
-    </ClCompile>
     <ClCompile Include="Render\IContext.cpp">
       <Filter>Render\DeviceInterface</Filter>
     </ClCompile>

@@ -6,9 +6,8 @@
 #define LE_emacro_H 1
 
 
-#include <LBase/ldef.h>
+#include <LBase/cformat.h>
 #include <LFramework/LCLib/Debug.h>
-#include <LFramework/Adaptor/LAdaptor.h>
 
 /*!
 \def LE_DLL
@@ -46,7 +45,7 @@
 #endif
 
 #ifndef LE_LogError
-#define LE_LogError(...) TraceDe(platform::Descriptions::Err,__VA_ARGS__)
+#define LE_LogError(...) platform_ex::SendDebugString(platform::Descriptions::Err,leo::sfmt(__VA_ARGS__).c_str())
 #endif
 
 #endif

@@ -150,6 +150,8 @@
     <ClInclude Include="Helper\ShellHelper.h" />
     <ClInclude Include="Helper\WindowThread.h" />
     <ClInclude Include="LCLib\Debug.h" />
+    <ClInclude Include="LCLib\LDescriptions.h" />
+    <ClInclude Include="LCLib\Logger.h" />
     <ClInclude Include="LCLib\FCommon.h" />
     <ClInclude Include="LCLib\FContainer.h" />
     <ClInclude Include="LCLib\FFileIO.h" />
@@ -190,6 +192,7 @@
     <ClCompile Include="Helper\ShellHelper.cpp" />
     <ClCompile Include="Helper\WindowThread.cpp" />
     <ClCompile Include="LCLib\Debug.cpp" />
+    <ClCompile Include="LCLib\Logger.cpp" />
     <ClCompile Include="LCLib\FCommon.cpp" />
     <ClCompile Include="LCLib\FFileIO.cpp" />
     <ClCompile Include="LCLib\FileSystem.LCLib.cpp">

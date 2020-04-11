@@ -109,30 +109,6 @@ namespace platform
 		terminate() lnothrow;
 
 
-	/*!
-	\brief 平台描述空间。
-	*/
-	namespace Descriptions
-	{
-
-		/*!
-		\brief 记录等级。
-		*/
-		enum RecordLevel : std::uint8_t
-		{
-			Emergent = 0x00,
-			Alert = 0x20,
-			Critical = 0x40,
-			Err = 0x60,
-			Warning = 0x80,
-			Notice = 0xA0,
-			Informative = 0xC0,
-			Debug = 0xE0
-		};
-
-	} // namespace Descriptions;
-
-
 	  /*!
 	  \brief 检查默认区域下指定字符是否为可打印字符。
 	  \note MSVCRT 的 isprint/iswprint 实现缺陷的变通。

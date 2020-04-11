@@ -10,7 +10,6 @@
 #include "../Asset/EffectAsset.h"
 #include <LBase/span.hpp>
 #include <LBase/lmathtype.hpp>
-#include <LFramework/Core/LString.h>
 
 namespace platform::Render {
 

@@ -14,19 +14,6 @@ namespace leo
 	using stdex::byte;
 
 	/*!
-	\brief 计算指定格式字符串输出的占用的字节数。
-	\pre 断言：第一参数非空。
-	\return 成功为字节数，否则为 size_t(-1) 。
-	\note 分别使用 std::vsnprintf 和 std::vswprintf 实现。
-	*/
-	//@{
-	LB_API LB_NONNULL(1) size_t
-		vfmtlen(const char*, std::va_list) lnothrow;
-	LB_API LB_NONNULL(1) size_t
-		vfmtlen(const wchar_t*, std::va_list) lnothrow;
-	//@}
-
-	/*!
 	\brief 关闭流缓冲。
 	\pre 参数非空。
 	*/

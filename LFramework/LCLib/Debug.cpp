@@ -1,5 +1,4 @@
-#include "Debug.h"
-#include <LFramework/LCLib/Host.h>
+#include "Logger.h"
 #if LFL_Win32
 #include <csignal>
 #include <LFramework/LCLib/NativeAPI.h>
@@ -9,6 +8,7 @@
 #if LF_Multithread == 1
 #include <LBase/concurrency.h>
 #endif
+#include <LBase/cformat.h>
 #include <iostream>
 #include <cstdarg>
 
@@ -47,219 +47,7 @@ namespace platform
 		using namespace Concurrency;
 
 	} // unnamed namespace;
-
-	bool
-		Echo(string_view sv) lnoexcept(false)
-	{
-#if LFL_Win32
-		wstring wstr;
-		size_t n(0);
-
-		TryExpr(n = WConsoleOutput(wstr, STD_OUTPUT_HANDLE, sv.data()))
-			CatchIgnore(platform_ex::Windows::Win32Exception&)
-			if (n < wstr.length())
-				std::cout << &wstr[n];
-		return bool(std::cout.flush());
-#elif LF_Hosted
-		return bool(std::cout << platform_ex::EncodeArg(sv) << std::endl);
-#else
-		return bool(std::cout << sv << std::endl);
-#endif
-	}
-
-	Logger::Logger(const Logger& logger)
-		: FilterLevel(logger.FilterLevel), filter(logger.filter),
-		sender(logger.sender)
-	{}
-	Logger::Logger(Logger&& logger) lnothrow
-		: Logger()
-	{
-		swap(logger, *this);
-	}
-
-	void
-		Logger::SetFilter(Filter f)
-	{
-		if (f)
-			filter = std::move(f);
-	}
-	void
-		Logger::SetSender(Sender s)
-	{
-		if (s)
-			sender = std::move(s);
-	}
-
-	bool
-		Logger::DefaultFilter(Level lv, Logger& logger) lnothrow
-	{
-		return lv <= logger.FilterLevel;
-	}
-
-	void
-		Logger::DefaultSendLog(Level lv, Logger& logger, const char* str) lnothrowv
-	{
-		SendLog(std::cerr, lv, logger, str);
-	}
-
-	void
-		Logger::DefaultSendLogToFile(Level lv, Logger& logger, const char* str)
-		lnothrowv
-	{
-		SendLogToFile(stderr, lv, logger, str);
-	}
-
-	void
-		Logger::DoLog(Level level, const char* str)
-	{
-		if (str)
-		{
-			lock_guard<recursive_mutex> lck(record_mutex);
-
-			DoLogRaw(level, str);
-		}
-	}
-
-	void
-		Logger::DoLogRaw(Level level, const char* str)
-	{
-		sender(level, *this, Nonnull(str));
-	}
-
-	void
-		Logger::DoLogException(Level lv, const std::exception& e) lnothrow
-	{
-		const auto do_log_excetpion_raw([this](const char* msg) LB_NONNULL(1)
-			lnothrow {
-			try
-			{
-				DoLogRaw(Descriptions::Emergent,
-					"Another exception thrown when handling exception.");
-				DoLogRaw(Descriptions::Emergent, msg);
-			}
-			CatchExpr(...,
-				leo::ltrace(stderr, Descriptions::Emergent, Descriptions::Notice,
-					__FILE__, __LINE__, "Logging error: unhandled exception."))
-		});
-		const auto& msg(e.what());
-		lock_guard<recursive_mutex> lck(record_mutex);
-
-		try
-		{
-			// XXX: Provide no throw guarantee and put it out of the critical
-			//	section?
-			// XXX: Log demangled type name.
-			DoLogRaw(lv, sfmt("<%s>: %s", typeid(e).name(), msg));
-		}
-		CatchExpr(std::exception& ex, do_log_excetpion_raw(ex.what()))
-			CatchExpr(..., do_log_excetpion_raw({}))
-	}
-
-	Logger::Sender
-		Logger::FetchDefaultSender(string_view tag)
-	{
-		LAssertNonnull(tag.data());
-#if LFL_Win32
-		return [](Level lv, Logger& logger, const char* str) {
-			// TODO: Avoid throwing of %WriteString here for better performance?
-			// FIXME: Output may be partially updated?
-			try
-			{
-				wstring wstr;
-
-				WConsoleOutput(wstr, STD_ERROR_HANDLE, str);
-			}
-			CatchExpr(platform_ex::Windows::Win32Exception&, DefaultSendLog(lv, logger, str))
-		};
-#endif
-		return DefaultSendLog;
-	}
-
-	void
-		Logger::SendLog(std::ostream& os, Level lv, Logger&, const char* str)
-		lnothrowv
-	{
-		try
-		{
-#if LF_Multithread == 1
-			const auto& t_id(FetchCurrentThreadID());
-
-			if (!t_id.empty())
-				os << leo::sfmt("[%s:%#X]: %s\n", t_id.c_str(), unsigned(lv),
-					Nonnull(str));
-			else
-#endif
-				os << leo::sfmt("[%#X]: %s\n", unsigned(lv), Nonnull(str));
-			os.flush();
-		}
-		CatchIgnore(...)
-	}
-
-	void
-		Logger::SendLogToFile(std::FILE* stream, Level lv, Logger&, const char* str)
-		lnothrowv
-	{
-		LAssertNonnull(stream);
-#if LF_Multithread == 1
-		const auto& t_id(FetchCurrentThreadID());
-
-		if (!t_id.empty())
-			std::fprintf(stream, "[%s:%#X]: %s\n", t_id.c_str(), unsigned(lv),
-				Nonnull(str));
-		else
-#endif
-			std::fprintf(stream, "[%#X]: %s\n", unsigned(lv), Nonnull(str));
-		std::fflush(stream);
-	}
-
-	void
-		swap(Logger& x, Logger& y) lnothrow
-	{
-		// TODO: Wait for C++17.
-		// XXX: See discussion in LWG 2062.
-#if !__GLIBCXX__
-		lnoexcept_assert("Unsupported luanguage implementation found.",
-			x.filter.swap(y.filter));
-		lnoexcept_assert("Unsupported luanguage implementation found.",
-			x.sender.swap(y.sender));
-#endif
-
-		std::swap(x.FilterLevel, y.FilterLevel);
-		x.filter.swap(y.filter);
-		x.sender.swap(y.sender);
-	}
-
-
-	Logger&
-		FetchCommonLogger()
-	{
-		static Logger logger;
-
-		return logger;
-	}
-
-
-	string
-		LogWithSource(const char* file, int line, const char* fmt, ...) lnothrow
-	{
-		try
-		{
-			std::va_list args;
-
-			va_start(args, fmt);
-
-			string str(vsfmt(fmt, args));
-
-			va_end(args);
-			return sfmt("\"%s\":%i:\n", chk_null(file), line) + std::move(str);
-		}
-		CatchExpr(...,
-			leo::ltrace(stderr, Descriptions::Emergent, Descriptions::Notice,
-				chk_null(file), line, "LogWithSource error: unhandled exception."))
-			return{};
-	}
-
-} // namespace platform;
+}
 
 using namespace platform;
 
@@ -270,11 +58,11 @@ namespace platform_ex
 		LogAssert(const char* expr_str, const char* file, int line,
 			const char* msg) lnothrow
 	{
-//#	if LFL_Android
-		//::__android_log_assert(expr_str, "YFramework",
-			//"Assertion failed @ \"%s\":%i:\n %s .\nMessage: \n%s\n", file, line,
-			//expr_str, msg);
-//#	else
+		//#	if LFL_Android
+				//::__android_log_assert(expr_str, "YFramework",
+					//"Assertion failed @ \"%s\":%i:\n %s .\nMessage: \n%s\n", file, line,
+					//expr_str, msg);
+		//#	else
 #		if LFL_Win32
 		try
 		{
@@ -310,18 +98,18 @@ namespace platform_ex
 #		endif
 		TryExpr(FetchCommonLogger().AccessRecord([=] {
 			leo::lassert(expr_str, file, line, msg);
-		}))
+			}))
 			catch (...)
-		{
-			std::fprintf(stderr, "Fetch logger failed.");
-			std::fflush(stderr);
-			leo::lassert(expr_str, file, line, msg);
-		}
+			{
+				std::fprintf(stderr, "Fetch logger failed.");
+				std::fflush(stderr);
+				leo::lassert(expr_str, file, line, msg);
+			}
 	}
 #endif
 
 #if LFL_Win32
-	const char* sfmt(Logger::Level lv) {
+	const char* sfmt(Descriptions::RecordLevel lv) {
 		switch (lv) {
 		case Logger::Level::Emergent:
 			return "Emergent";
@@ -344,7 +132,7 @@ namespace platform_ex
 	}
 
 	void
-		SendDebugString(Logger::Level lv, Logger&, const char* str) lnothrowv
+		SendDebugString(Descriptions::RecordLevel lv, const char* str) lnothrowv
 	{
 		try
 		{

@@ -10,6 +10,7 @@
 #include <LBase/string.hpp>
 #include <string_view>
 #include <LBase/array.hpp>
+#include <LBase/cformat.h>
 #include <deque>
 #include <forward_list>
 #include <list>

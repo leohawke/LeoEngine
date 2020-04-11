@@ -11,6 +11,7 @@
 #include <LBase/string.hpp>
 #include <LFramework/LCLib/Debug.h>
 #include <LFramework/LCLib/FReference.h>
+#include <LFramework/LCLib/FContainer.h>
 #include <LBase/container.hpp>
 
 #include <chrono>
@@ -25,6 +26,29 @@
 
 namespace platform
 {
+	/*!
+	\ingroup diagnostic
+	\brief 组合消息和函数签名字符串。
+	\pre 间接断言：指针参数非空。
+	\note 使用 ADL to_string 。
+	*/
+	//@{
+	inline LB_NONNULL(2) PDefH(string, ComposeMessageWithSignature,
+		const string& msg, const char* sig)
+		ImplRet(msg + " @ " + Nonnull(sig))
+		inline LB_NONNULL(1, 2) PDefH(string, ComposeMessageWithSignature,
+			const char* msg, const char* sig)
+		ImplRet(string(Nonnull(msg)) + " @ " + Nonnull(sig))
+		template<class _type>
+	inline LB_NONNULL(2) string
+		ComposeMessageWithSignature(const _type& msg, const char* sig)
+	{
+		using leo::to_string;
+
+		return to_string(msg) + " @ " + Nonnull(sig);
+	}
+	//@}
+
 	/*!
 	\brief 构造适合表示路径的 \c char 字符串。
 	\note 字符类型非 \c char 时转换。

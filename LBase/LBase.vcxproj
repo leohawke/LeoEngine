@@ -27,6 +27,7 @@
     <ClInclude Include="cache.hpp" />
     <ClInclude Include="cast.hpp" />
     <ClInclude Include="cctype.h" />
+    <ClInclude Include="cformat.h" />
     <ClInclude Include="concurrency.h" />
     <ClInclude Include="container.hpp" />
     <ClInclude Include="cstdio.h" />
@@ -60,6 +61,7 @@
     <ClInclude Include="path.hpp" />
     <ClInclude Include="MCF\Abstract.hpp" />
     <ClInclude Include="memory.hpp" />
+    <ClCompile Include="cformat.cpp" />
     <ClCompile Include="operators.hpp" />
     <ClInclude Include="optional.hpp" />
     <ClInclude Include="placement.hpp" />
