@@ -5,6 +5,7 @@
 #include "RootSignature.h"
 #include "ShaderCompose.h"
 #include "VertexDeclaration.h"
+#include "Context.h"
 using namespace platform_ex::Windows::D3D12;
 
 
@@ -18,13 +19,19 @@ GraphicsPipelineState::GraphicsPipelineState(const platform::Render::GraphicsPip
 	//retrive RootSignature
 	auto graphicspass = static_cast<GraphicsShaderPass*>(initializer.ShaderState);
 
-	auto Key{ GetKeyGraphicsPipelineStateDesc(initializer,graphicspass->RootSignature()) };
+	Key =  GetKeyGraphicsPipelineStateDesc(initializer,graphicspass->RootSignature());
 
+	Key.Desc.NodeMask = 0;
 
+	Create(GraphicsPipelineStateCreateArgs(&Key, nullptr));
 }
+
 
 void platform_ex::Windows::D3D12::GraphicsPipelineState::Create(const GraphicsPipelineStateCreateArgs& InCreationArgs)
 {
+	auto Desc = InCreationArgs.Desc->Desc.GraphicsDesc();
+
+	Context::Instance().GetDevice().GetDevice()->CreateGraphicsPipelineState(&Desc, COMPtr_RefParam(PipelineState, IID_ID3D12PipelineState));
 }
 
 static void TranslateRenderTargetFormats(

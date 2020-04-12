@@ -42,10 +42,16 @@ namespace platform_ex::Windows::D3D12
 		D3DGraphicsPipelineStateDesc Desc;
 	};
 
-	class GraphicsPipelineStateCreateArgs
+	struct GraphicsPipelineStateCreateArgs
 	{
 		const KeyGraphicsPipelineStateDesc* Desc;
 		ID3D12PipelineLibrary* Library;
+
+		GraphicsPipelineStateCreateArgs(const KeyGraphicsPipelineStateDesc* InDesc, ID3D12PipelineLibrary* InLibrary)
+		{
+			Desc = InDesc;
+			Library = InLibrary;
+		}
 	};
 
 	class GraphicsPipelineState : public platform::Render::GraphicsPipelineState
@@ -56,6 +62,8 @@ namespace platform_ex::Windows::D3D12
 	private:
 		void Create(const GraphicsPipelineStateCreateArgs& InCreationArgs);
 	private:
+		KeyGraphicsPipelineStateDesc Key;
+
 		COMPtr<ID3D12PipelineState> PipelineState;
 	};
 }
