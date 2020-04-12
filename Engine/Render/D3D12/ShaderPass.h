@@ -15,11 +15,15 @@ namespace platform_ex::Windows::D3D12
 	private:
 		using ShaderBlob = platform::Render::ShaderBlob;
 
+		leo::observer_ptr<RootSignature> root_signature;
+	public:
 		ShaderBlob VertexShader;
 		ShaderBlob PixelShader;
 
-		leo::observer_ptr<RootSignature> root_signature;
+		std::optional<ShaderBlob> GeometryShader;
 
+		std::optional<ShaderBlob> HullShader;
+		std::optional<ShaderBlob> DomainShader;
 	public:
 		RootSignature* RootSignature() const;
 	};

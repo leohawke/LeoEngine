@@ -29,16 +29,57 @@ namespace platform::Render::Effect {
 
 namespace platform::Render {
 
+	/** The number of render-targets that may be simultaneously written to. */
+	enum
+	{
+		MaxSimultaneousRenderTargets = 8,
+	};
+
 	class GraphicsPipelineStateInitializer
 	{
 	public:
+		using RenderTargetFormatsType = std::array<EFormat, MaxSimultaneousRenderTargets>;
+
 		RasterizerDesc RasterizerState;
 		DepthStencilDesc DepthStencilState;
 		BlendDesc BlendState;
 
+		VertexDeclarationElements VertexDeclaration;
 		PrimtivteType Primitive;
 
 		ShaderPass* ShaderState;
+
+	public:
+		GraphicsPipelineStateInitializer()
+		{
+			RenderTargetFormats.fill(EF_Unknown);
+		}
+
+		uint32 GetNumRenderTargets() const
+		{
+			if (RenderTargetsEnabled > 0)
+			{
+				int32 LastValidTarget = -1;
+				for (int32 i = (int32)RenderTargetsEnabled - 1; i >= 0; i--)
+				{
+					if (RenderTargetFormats[i] != EF_Unknown)
+					{
+						LastValidTarget = i;
+						break;
+					}
+				}
+				return uint32(LastValidTarget + 1);
+			}
+
+			return RenderTargetsEnabled;
+		}
+
+		uint32						RenderTargetsEnabled = 0;
+		RenderTargetFormatsType		RenderTargetFormats;
+
+		EFormat						DepthStencilTargetFormat;
+
+		uint16						NumSamples = 1;
 	};
 
 

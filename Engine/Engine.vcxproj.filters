@@ -213,6 +213,9 @@
       <Filter>Render\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="Render\D3D12\GraphicsPipelineState.cpp" />
+    <ClCompile Include="Render\D3D12\VertexDeclaration.d3d12.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -492,6 +495,9 @@
     </ClInclude>
     <ClInclude Include="Render\IShaderCompose.h">
       <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\VertexDeclaration.h">
+      <Filter>Render\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

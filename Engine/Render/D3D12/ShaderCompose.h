@@ -162,6 +162,12 @@ namespace platform_ex::Windows::D3D12 {
 		}
 	}
 
+	inline void operator<<(D3D12_SHADER_BYTECODE& desc, const platform::Render::ShaderBlob& blob)
+	{
+		desc.BytecodeLength = blob.second;
+		desc.pShaderBytecode = blob.first.get();
+	}
+
 }
 
 #endif

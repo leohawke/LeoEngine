@@ -86,6 +86,18 @@ namespace platform::Render {
 		ControlPoint_32 = ControlPoint_0+32,
 	};
 
+	struct VertexElement
+	{
+		uint8 StreamIndex;
+		uint8 Offset;
+		Vertex::Usage Usage;
+		leo::uint8 UsageIndex;
+		EFormat Format;
+		uint16 Stride;
+	};
+
+	using VertexDeclarationElements = std::vector<VertexElement>;
+
 	//fixme:error class name
 	class InputLayout :public leo::noncopyable {
 	public:

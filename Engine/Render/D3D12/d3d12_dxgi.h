@@ -781,6 +781,9 @@ namespace platform_ex::Windows::D3D12 {
 	}
 }
 
+// DX12 doesn't support higher MSAA count
+constexpr unsigned DX_MAX_MSAA_COUNT = 8;
+
 // This is a value that should be tweaked to fit the app, lower numbers will have better performance
 // Titles using many terrain layers may want to set MAX_SRVS to 64 to avoid shader compilation errors. This will have a small performance hit of around 0.1%
 constexpr unsigned MAX_SRVS = 48;
