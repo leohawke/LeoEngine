@@ -1,5 +1,6 @@
 #include "VertexDeclaration.h"
 #include "Convert.h"
+#include <mutex>
 using namespace platform_ex::Windows::D3D12;
 
 namespace std
@@ -57,9 +58,64 @@ struct VertexDeclarationKey
 	}
 };
 
+namespace std
+{
+	template<>
+	struct hash< VertexDeclarationKey>
+	{
+		std::size_t operator()(const VertexDeclarationKey& key) const
+		{
+			return key.Hash;
+		}
+	};
+}
+
+struct VertexDeclarationCache
+{
+	VertexDeclaration* Find(VertexDeclarationKey Key)
+	{
+		std::unique_lock RWGuard{ LockGuard };
+		auto itr = Cache.find(Key);
+
+		if (itr == Cache.end())
+			return nullptr;
+		return itr->second;
+	}
+
+	VertexDeclaration* Add(const VertexDeclarationKey& InKey,VertexDeclaration* InValue)
+	{
+		std::unique_lock RWGuard{ LockGuard };
+
+		Cache.emplace(InKey, InValue);
+		
+		return InValue;
+	}
+
+	VertexDeclaration* FindOrAdd(const VertexDeclarationKey& InKey)
+	{
+		auto itr = Cache.find(InKey);
+
+		if (itr == Cache.end())
+		{
+			return Cache.emplace(InKey, new VertexDeclaration(InKey.VertexElements)).first->second;
+		}
+
+		return itr->second;
+	}
+
+
+
+	std::mutex LockGuard;
+	std::unordered_map<VertexDeclarationKey, VertexDeclaration*> Cache;
+} GVertexDeclarationCache;
+
 VertexDeclaration* platform_ex::Windows::D3D12::CreateVertexDeclaration(const platform::Render::VertexDeclarationElements& Elements)
 {
-	return nullptr;
+	VertexDeclarationKey Key{ Elements };
+
+	auto VertexDeclaration = GVertexDeclarationCache.FindOrAdd(Key);
+
+	return VertexDeclaration;
 }
 
 const char* platform_ex::Windows::D3D12::SemanticName(platform::Render::Vertex::Usage usage)
