@@ -18,4 +18,6 @@ namespace platform_ex::Windows::D3D12
 	};
 
 	VertexDeclaration* CreateVertexDeclaration(const platform::Render::VertexDeclarationElements& Elements);
+
+	const char* SemanticName(platform::Render::Vertex::Usage usage);
 }
