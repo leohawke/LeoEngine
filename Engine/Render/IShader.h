@@ -1,14 +1,14 @@
 #pragma once
 
 namespace platform::Render {
-	class Shader
+	class HardwareShader
 	{
 	};
 
-	class VertexShader : public Shader
+	class VertexShader : public HardwareShader
 	{};
 
-	class PixelShader : public Shader
+	class PixelShader : public HardwareShader
 	{};
 
 

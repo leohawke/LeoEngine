@@ -35,6 +35,9 @@ namespace platform::Render {
 		MaxSimultaneousRenderTargets = 8,
 	};
 
+	/** The number of UAVs that may be simultaneously bound to a shader. */
+	enum { MaxSimultaneousUAVs = 8 };
+
 	class GraphicsPipelineStateInitializer
 	{
 	public:
@@ -82,6 +85,17 @@ namespace platform::Render {
 		uint16						NumSamples = 1;
 	};
 
+	struct RenderPassInfo
+	{
+		RenderTargetView* ColorRenderTargets[MaxSimultaneousRenderTargets];
+
+		DepthStencilView* DepthStencilTarget;
+
+		int32 NumUAVs = 0;
+		UnorderedAccessView* UAVs[MaxSimultaneousUAVs];
+
+		bool bIsMSAA = false;
+	};
 
 	class Device {
 	public:
