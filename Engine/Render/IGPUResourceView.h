@@ -32,6 +32,8 @@ namespace platform {
 		public:
 			using GPUView::GPUView;
 
+			virtual uint16 GetNumSamples() const = 0;
+
 			virtual ~RenderTargetView();
 		};
 
