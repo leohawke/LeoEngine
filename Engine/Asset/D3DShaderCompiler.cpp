@@ -390,20 +390,6 @@ namespace asset::X::Shader::DXBC {
 	}
 }
 
-bool IsRayTracingShader(ShaderType type)
-{
-	switch (type)
-	{
-	case ShaderType::RayGen:
-	case ShaderType::RayMiss:
-	case ShaderType::RayHitGroup:
-	case ShaderType::RayCallable:
-		return true;
-	default:
-		return false;
-	}
-}
-
 // Parses ray tracing shader entry point specification string in one of the following formats:
 // 1) Verbatim single entry point name, e.g. "MainRGS"
 // 2) Complex entry point for ray tracing hit group shaders:

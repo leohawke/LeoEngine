@@ -15,7 +15,6 @@ namespace platform::Render {
 
 	class RayTracingGeometry;
 	class RayTracingScene;
-	class RayTracingShader;
 	class RayTracingPipelineState;
 
 	enum class ERayTracingGeometryType

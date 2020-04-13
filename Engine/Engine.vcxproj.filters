@@ -218,6 +218,9 @@
     <ClCompile Include="Render\D3D12\GraphicsPipelineState.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Shader.cpp">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">

@@ -21,7 +21,7 @@ namespace leo {
 		DebugTimer(string_view = "");
 		~DebugTimer();
 	};
-#	define LFL_DEBUG_DECL_TIMER(_name, ...) DebugTimer _name(__VA_ARGS__);
+#	define LFL_DEBUG_DECL_TIMER(_name, ...) leo::DebugTimer _name(__VA_ARGS__);
 #else
 #	define LFL_DEBUG_DECL_TIMER(...)
 #endif
