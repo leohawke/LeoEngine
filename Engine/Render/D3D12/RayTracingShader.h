@@ -3,7 +3,7 @@
 #define LE_RENDER_D3D12_RayTracingShader_h 1
 
 #include <LBase/observer_ptr.hpp>
-#include "../ShaderCore.h"
+#include "../Shader.h"
 #include "../IRayTracingShader.h"
 #include "../IRayDevice.h"
 #include "d3d12_dxgi.h"

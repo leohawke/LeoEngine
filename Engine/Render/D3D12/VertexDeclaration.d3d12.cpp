@@ -56,6 +56,11 @@ struct VertexDeclarationKey
 
 		Hash = leo::hash(VertexElements.begin(), VertexElements.end()) & 0XFFFFFFFF;
 	}
+
+	friend bool operator==(const VertexDeclarationKey& lhs,const VertexDeclarationKey& rhs)
+	{
+		return lhs.Hash == rhs.Hash;
+	}
 };
 
 namespace std

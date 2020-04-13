@@ -79,7 +79,7 @@ RenderTargetView::RenderTargetView(Texture2D & texture, uint8 first_array_index,
 		texture.RetriveRenderTargetView(first_array_index,array_size,level),
 		first_array_index *texture.GetNumMipMaps() + level,
 		1)
-	, base(texture.GetWidth(level), texture.GetHeight(level), texture.GetFormat())
+	, base(texture.GetWidth(level), texture.GetHeight(level), texture.GetFormat()),Sample(texture.GetSampleCount())
 {
 }
 
@@ -88,7 +88,7 @@ RenderTargetView::RenderTargetView(Texture3D & texture, uint8 array_index, uint8
 	texture.RetriveRenderTargetView(array_index,first_slice,num_slices,level),
 	(array_index * texture.GetDepth(level) + first_slice) * texture.GetNumMipMaps() + level,
 	num_slices * texture.GetNumMipMaps() + level)
-	, base(texture.GetWidth(level), texture.GetHeight(level), texture.GetFormat())
+	, base(texture.GetWidth(level), texture.GetHeight(level), texture.GetFormat()), Sample(texture.GetSampleCount())
 {
 }
 
@@ -98,7 +98,7 @@ RenderTargetView::RenderTargetView(TextureCube & texture, uint8 array_index, pla
 		texture.RetriveRenderTargetView(array_index,face,level),
 		(array_index * 6 + face) * texture.GetNumMipMaps() + level,
 		1)
-	, base(texture.GetWidth(level), texture.GetHeight(level), texture.GetFormat())
+	, base(texture.GetWidth(level), texture.GetHeight(level), texture.GetFormat()), Sample(texture.GetSampleCount())
 {
 }
 
@@ -108,7 +108,7 @@ RenderTargetView::RenderTargetView(GraphicsBuffer & gb, uint16 width, uint16 hei
 		gb.RetriveRenderTargetView(width,height,pf),
 		0,
 		1)
-	, base(width,height, pf)
+	, base(width,height, pf), Sample(1)
 {
 }
 

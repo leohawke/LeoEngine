@@ -76,6 +76,13 @@ namespace platform_ex {
 				RenderTargetView(GraphicsBuffer& gb, uint16 width, uint16 height, platform::Render::EFormat pf);
 
 				void ClearColor(const leo::math::float4& clr);
+
+				uint16 GetNumSamples() const
+				{
+					return Sample;
+				}
+
+				uint16 Sample;
 			};
 
 			class DepthStencilView :public GPUDataStructView,public platform::Render::DepthStencilView {

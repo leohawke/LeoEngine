@@ -16,7 +16,7 @@
 #include "D3DShaderCompiler.h"
 
 #pragma warning(disable:4715) //return value or throw exception;
-using namespace platform::Render::ShaderCore;
+using namespace platform::Render::Shader;
 using namespace asset::X::Shader;
 
 namespace platform {

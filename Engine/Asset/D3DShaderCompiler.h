@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Render/ShaderCore.h"
+#include "../Render/Shader.h"
 
 namespace D3DFlags {
 	enum COMPILER_FLAGS
@@ -44,7 +44,7 @@ namespace D3DFlags {
 
 namespace asset::X::Shader
 {
-	using namespace platform::Render::ShaderCore;
+	using namespace platform::Render::Shader;
 
 	struct ShaderCompilerInput
 	{

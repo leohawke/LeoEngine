@@ -8,7 +8,7 @@
 
 #include <algorithm>
 
-using namespace platform::Render::ShaderCore;
+using namespace platform::Render::Shader;
 using namespace platform_ex;
 using namespace D3DFlags;
 

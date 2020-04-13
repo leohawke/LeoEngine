@@ -3,7 +3,7 @@
 #include <LFramework/Core/LString.h>
 
 using namespace platform_ex::Windows::D3D12;
-using namespace platform::Render::ShaderCore;
+using namespace platform::Render::Shader;
 
 void QuantizeBoundShaderState(
 	ShaderType Type,

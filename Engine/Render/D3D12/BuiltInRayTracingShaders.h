@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ShaderCore.h"
+#include "../Shader.h"
 #include <list>
 
 namespace platform_ex::Windows::D3D12 {

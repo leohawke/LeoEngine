@@ -483,9 +483,6 @@
     <ClInclude Include="Render\IGraphicsPipelineState.h">
       <Filter>Render\DeviceInterface</Filter>
     </ClInclude>
-    <ClInclude Include="Render\IShader.h">
-      <Filter>Render\DeviceInterface</Filter>
-    </ClInclude>
     <ClInclude Include="Render\D3D12\GraphicsPipelineState.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
@@ -505,6 +502,9 @@
       <Filter>Render\DeviceInterface</Filter>
     </ClInclude>
     <ClInclude Include="Render\ICommandList.h">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Shader.h">
       <Filter>Render\DeviceInterface</Filter>
     </ClInclude>
   </ItemGroup>

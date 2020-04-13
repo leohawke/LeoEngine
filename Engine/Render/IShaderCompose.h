@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ShaderCore.h"
+#include "Shader.h"
 
 namespace platform::Render {
 

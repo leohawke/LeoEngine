@@ -1,7 +1,7 @@
 #pragma once
 
 #include <LBase/lmemory.hpp>
-#include "../IShader.h"
+#include "../Shader.h"
 #include "../Effect/Effect.hpp"
 
 namespace platform_ex::Windows::D3D12

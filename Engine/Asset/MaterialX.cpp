@@ -8,7 +8,7 @@
 
 using namespace platform;
 using namespace scheme;
-using namespace platform::Render::ShaderCore;
+using namespace platform::Render::Shader;
 
 namespace details {
 	class MaterailLoadingDesc : public asset::AssetLoading<asset::MaterailAsset> {

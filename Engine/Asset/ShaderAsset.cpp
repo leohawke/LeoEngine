@@ -1,7 +1,7 @@
 #include "ShaderAsset.h"
 
 using namespace asset;
-using namespace platform::Render::ShaderCore;
+using namespace platform::Render::Shader;
 
 void asset::AssetName::SetName(const std::string& Name)
 {
@@ -474,7 +474,7 @@ using namespace platform::X;
 
 using namespace platform;
 using namespace asset;
-using namespace platform::Render::ShaderCore;
+using namespace platform::Render::Shader;
 using namespace leo;
 
 struct HLSLAsset :public asset::ShadersAsset, public asset::AssetName

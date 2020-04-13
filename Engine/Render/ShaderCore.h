@@ -10,7 +10,7 @@ namespace platform::Render {
 
 	class Texture;
 
-	inline namespace ShaderCore
+	inline namespace Shader
 	{
 		struct ShaderCodeResourceCounts
 		{
@@ -145,9 +145,6 @@ namespace platform::Render {
 
 		using ShaderMacro = std::pair<std::string, std::string>;
 	}
-
-
-
 }
 
 #endif

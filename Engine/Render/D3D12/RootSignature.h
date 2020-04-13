@@ -3,13 +3,13 @@
 #ifndef LE_RENDER_D3D12_RootSignature_h
 #define LE_RENDER_D3D12_RootSignature_h 1
 
-#include "../ShaderCore.h"
+#include "../Shader.h"
 #include "d3d12_dxgi.h"
 #include <LBase/lmemory.hpp>
 #include <mutex>
 
 namespace platform_ex::Windows::D3D12 {
-	using namespace platform::Render::ShaderCore;
+	using namespace platform::Render::Shader;
 	using platform::Render::ShaderBlob;
 	using platform::Render::ShaderCodeResourceCounts;
 

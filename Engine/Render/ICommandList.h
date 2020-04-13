@@ -63,17 +63,17 @@ namespace platform::Render {
 			GetContext().SetGraphicsPipelineState(pso);
 		}
 
-		void SetShaderSampler(ShaderPass* Pass, ShaderCore::ShaderType Type, uint32 SamplerIndex, const TextureSampleDesc& Desc)
+		void SetShaderSampler(ShaderPass* Pass, Shader::ShaderType Type, uint32 SamplerIndex, const TextureSampleDesc& Desc)
 		{
 			GetContext().SetShaderSampler(Pass, Type, SamplerIndex, Desc);
 		}
 
-		void SetShaderTexture(ShaderPass* Pass, ShaderCore::ShaderType Type, uint32 TextureIndex, Texture* Texture)
+		void SetShaderTexture(ShaderPass* Pass, Shader::ShaderType Type, uint32 TextureIndex, Texture* Texture)
 		{
 			GetContext().SetShaderTexture(Pass, Type, TextureIndex, Texture);
 		}
 
-		void SetShaderConstantBuffer(ShaderPass* Pass, ShaderCore::ShaderType Type, uint32 BaseIndex, GraphicsBuffer* Buffer)
+		void SetShaderConstantBuffer(ShaderPass* Pass, Shader::ShaderType Type, uint32 BaseIndex, GraphicsBuffer* Buffer)
 		{
 			GetContext().SetShaderConstantBuffer(Pass, Type, BaseIndex, Buffer);
 		}

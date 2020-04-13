@@ -21,11 +21,11 @@ namespace platform::Render {
 
 		virtual void SetGraphicsPipelineState(GraphicsPipelineState* pso) = 0;
 
-		virtual void SetShaderSampler(ShaderPass* Pass, ShaderCore::ShaderType Type, uint32 SamplerIndex,const TextureSampleDesc& Desc) = 0;
+		virtual void SetShaderSampler(ShaderPass* Pass, Shader::ShaderType Type, uint32 SamplerIndex,const TextureSampleDesc& Desc) = 0;
 
-		virtual void SetShaderTexture(ShaderPass* Pass, ShaderCore::ShaderType Type,uint32 TextureIndex,Texture* Texture) = 0;
+		virtual void SetShaderTexture(ShaderPass* Pass, Shader::ShaderType Type,uint32 TextureIndex,Texture* Texture) = 0;
 
-		virtual void SetShaderConstantBuffer(ShaderPass* Pass, ShaderCore::ShaderType Type,uint32 BaseIndex, GraphicsBuffer* Buffer) = 0;
+		virtual void SetShaderConstantBuffer(ShaderPass* Pass, Shader::ShaderType Type,uint32 BaseIndex, GraphicsBuffer* Buffer) = 0;
 
 		virtual void DrawIndexPrimitive(GraphicsBuffer* IndexBuffer, int32 BaseVertexIndex, uint32 FirstInstance, uint32 NumVertices, uint32 StartIndex, uint32 NumPrimitives, uint32 NumInstances) = 0;
 

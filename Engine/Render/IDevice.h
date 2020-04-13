@@ -12,10 +12,10 @@
 #include "InputLayout.hpp"
 #include "IGPUResourceView.h"
 #include "PipleState.h"
-#include "IShader.h"
+#include "Shader.h"
 #include "IGraphicsPipelineState.h"
 #include "IShaderCompose.h"
-#include "ShaderCore.h"
+#include "Shader.h"
 #include <optional>
 
 namespace asset {
@@ -28,6 +28,22 @@ namespace platform::Render::Effect {
 }
 
 namespace platform::Render {
+
+	class HardwareShader
+	{
+	};
+
+	class VertexShader : public HardwareShader
+	{};
+
+	class PixelShader : public HardwareShader
+	{};
+
+
+	class ShaderPass
+	{
+
+	};
 
 	/** The number of render-targets that may be simultaneously written to. */
 	enum

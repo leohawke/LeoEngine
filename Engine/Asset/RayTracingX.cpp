@@ -8,7 +8,7 @@
 
 using namespace platform;
 using namespace asset;
-using namespace platform::Render::ShaderCore;
+using namespace platform::Render::Shader;
 using namespace leo;
 
 struct RayTracingShaderAsset :public asset::ShadersAsset,public asset::AssetName
