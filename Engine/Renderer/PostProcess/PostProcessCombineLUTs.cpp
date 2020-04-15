@@ -1,7 +1,8 @@
 #include "PostProcessCombineLUTs.h"
+#include <Engine/Render/BuiltInShader.h>
 
 using namespace platform;
-
+using namespace platform::Render::Shader;
 
 platform::ColorCorrectParameters::ColorCorrectParameters()
 {
@@ -30,7 +31,21 @@ platform::ColorCorrectParameters::ColorCorrectParameters()
 	ColorOffsetHighlights = leo::math::float4(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
-leo::shared_ptr<Render::Texture> platform::CombineLUTPass()
+class LUTBlenderShader : public BuiltInShader
 {
-	return leo::shared_ptr<Render::Texture>();
+	//SetDefine("USE_VOLUME_LUT", true);
+};
+
+class LUTBlenderPS : public LUTBlenderShader
+{
+public:
+	EXPORTED_SHADER_TYPE(LUTBlenderPS);
+	//SHADER_USE_PARAMETER_STRUCT(LUTBlenderPS,ColorCorrectParameters)
+};
+
+IMPLEMENT_SHADER(LUTBlenderPS, "PostProcessCombineLUTs.lsl", "MainPS", platform::Render::PixelShader);
+
+std::shared_ptr<Render::Texture> platform::CombineLUTPass()
+{
+	return std::shared_ptr<Render::Texture>();
 }

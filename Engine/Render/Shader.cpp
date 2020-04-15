@@ -1,4 +1,5 @@
 #include "Shader.h"
+#include "BuiltInRayTracingShader.h"
 #include "IContext.h"
 #include "IRayContext.h"
 #include "../Asset/D3DShaderCompiler.h"

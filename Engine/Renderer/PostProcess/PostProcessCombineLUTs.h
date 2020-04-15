@@ -34,5 +34,5 @@ namespace platform
 		float ColorCorrectionHighlightsMin = 0.5;
 	};
 
-	leo::shared_ptr<Render::Texture> CombineLUTPass();
+	std::shared_ptr<Render::Texture> CombineLUTPass();
 }

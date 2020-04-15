@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Shader.h"
+#include "../BuiltInRayTracingShader.h"
 #include <list>
 
 namespace platform_ex::Windows::D3D12 {

@@ -41,6 +41,8 @@
     <ClCompile Include="Core\Materail.cpp" />
     <ClCompile Include="Core\Mesh.cpp" />
     <ClCompile Include="Core\ResourcesHolder.cpp" />
+    <ClCompile Include="Renderer\PostProcess\PostProcessCombineLUTs.cpp" />
+    <ClCompile Include="Renderer\VolumeRendering.cpp" />
     <ClCompile Include="Render\Color_T.cpp" />
     <ClCompile Include="Render\D3D12\Adapter.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\BuiltInRayTracingShaders.cpp" />
@@ -125,6 +127,10 @@
     <ClInclude Include="Core\Resource.h" />
     <ClInclude Include="Core\ResourcesHolder.h" />
     <ClInclude Include="emacro.h" />
+    <ClInclude Include="Renderer\PostProcess\PostProcessCombineLUTs.h" />
+    <ClInclude Include="Renderer\VolumeRendering.h" />
+    <ClInclude Include="Render\BuiltInRayTracingShader.h" />
+    <ClInclude Include="Render\BuiltInShader.h" />
     <ClInclude Include="Render\Color_T.hpp" />
     <ClInclude Include="Render\D3D12\Adapter.h" />
     <ClInclude Include="Render\D3D12\BuiltInRayTracingShaders.h" />

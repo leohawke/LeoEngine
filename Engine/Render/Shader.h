@@ -9,6 +9,33 @@ PR_NAMESPACE_BEGIN
 inline namespace Shader
 {
 	class BuiltInShaderMeta;
+	class ShaderMeta;
+
+	/** Define a shader permutation uniquely according to its type, and permutation id.*/
+	template<typename MetaShaderType>
+	struct ShaderTypePermutation
+	{
+		MetaShaderType* const Type;
+		const int32 PermutationId;
+
+		ShaderTypePermutation(MetaShaderType* InType, int32 InPermutationId)
+			: Type(InType)
+			, PermutationId(InPermutationId)
+		{
+		}
+
+		bool operator==(const ShaderTypePermutation& Other)const
+		{
+			return Type == Other.Type && PermutationId == Other.PermutationId;
+		}
+
+		bool operator!=(const ShaderTypePermutation& Other)const
+		{
+			return !(*this == Other);
+		}
+	};
+
+	using ShaderPermutation = ShaderTypePermutation<ShaderMeta>;
 
 	class ShaderMeta
 	{
@@ -47,7 +74,7 @@ inline namespace Shader
 
 #define EXPORTED_SHADER_TYPE(ShaderClass) \
 public:\
-	using ShaderMetaType = ShaderMeta;\
+	using ShaderMetaType = platform::Render::ShaderMeta;\
 	static ShaderMetaType StaticType; \
 	static RenderShader* ConstructInstance() { return new ShaderClass();}
 
@@ -93,18 +120,6 @@ public:\
 
 	void CompileGlobalShaderMap();
 
-	bool IsRayTracingShader(platform::Render::ShaderType type);
-
-	class RayTracingShader;
-
-	class BuiltInRayTracingShader :public RenderShader
-	{
-	public:
-		RayTracingShader* GetRayTracingShader();
-		void SetRayTracingShader(RayTracingShader* pShader);
-	private:
-		std::shared_ptr<RayTracingShader> pRayTracingShader;
-	};
 }
 PR_NAMESPACE_END
 

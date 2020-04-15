@@ -221,6 +221,12 @@
     <ClCompile Include="Render\Shader.cpp">
       <Filter>Render\DeviceInterface</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\PostProcess\PostProcessCombineLUTs.cpp">
+      <Filter>Renderer\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\VolumeRendering.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -510,6 +516,18 @@
     <ClInclude Include="Render\Shader.h">
       <Filter>Render\DeviceInterface</Filter>
     </ClInclude>
+    <ClInclude Include="Render\BuiltInShader.h">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\BuiltInRayTracingShader.h">
+      <Filter>Render\DeviceInterface\RayTracing</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\PostProcess\PostProcessCombineLUTs.h">
+      <Filter>Renderer\PostProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\VolumeRendering.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
@@ -574,6 +592,12 @@
     </Filter>
     <Filter Include="Shaders\RayTracing">
       <UniqueIdentifier>{73f3839e-b5c2-4624-b87b-281acaaa2950}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer">
+      <UniqueIdentifier>{b7649f30-fc79-43ee-822e-8c91c73332c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\PostProcess">
+      <UniqueIdentifier>{13811411-eaf2-4603-a4a1-32513bf1e4cf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
