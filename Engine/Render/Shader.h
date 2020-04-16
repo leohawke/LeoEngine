@@ -8,6 +8,8 @@
 PR_NAMESPACE_BEGIN
 inline namespace Shader
 {
+	using leo::int32;
+
 	class BuiltInShaderMeta;
 	class ShaderMeta;
 
