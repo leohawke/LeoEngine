@@ -227,6 +227,9 @@
     <ClCompile Include="Renderer\VolumeRendering.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="Render\ShaderParamterTraits.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -527,6 +530,9 @@
     </ClInclude>
     <ClInclude Include="Renderer\VolumeRendering.h">
       <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShaderParamterTraits.hpp">
+      <Filter>Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

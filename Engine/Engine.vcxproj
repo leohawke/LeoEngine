@@ -90,6 +90,9 @@
     <ClCompile Include="Render\RenderObject.cpp" />
     <ClCompile Include="Render\ResourceView.cpp" />
     <ClCompile Include="Render\Shader.cpp" />
+    <ClCompile Include="Render\ShaderParamterTraits.cpp">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
+    </ClCompile>
     <ClCompile Include="System\NinthTimer.cpp" />
     <ClCompile Include="System\SystemEnvironment.cpp" />
     <ClCompile Include="test.cpp" />
@@ -179,6 +182,7 @@
     <ClInclude Include="Render\RenderObject.h" />
     <ClInclude Include="Render\IShaderCompose.h" />
     <ClInclude Include="Render\ShaderCore.h" />
+    <ClInclude Include="Render\ShaderParamterTraits.hpp" />
     <ClInclude Include="Render\ShadingElement.h" />
     <ClInclude Include="Render\IContext.h" />
     <ClInclude Include="Render\IDevice.h" />
