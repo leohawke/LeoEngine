@@ -230,6 +230,9 @@
     <ClCompile Include="Render\ShaderParamterTraits.cpp">
       <Filter>Render</Filter>
     </ClCompile>
+    <ClCompile Include="Render\ICommandList.cpp">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">

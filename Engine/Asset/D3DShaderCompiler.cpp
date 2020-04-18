@@ -4,6 +4,7 @@
 #include "D3DShaderCompiler.h"
 #include "../Render/IContext.h"
 #include "../Render/RayTracingDefinitions.h"
+#include "../Render/BuiltInRayTracingShader.h"
 #include "../emacro.h"
 
 #include <algorithm>

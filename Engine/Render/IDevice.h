@@ -33,10 +33,10 @@ namespace platform::Render {
 	{
 	};
 
-	class VertexShader : public HardwareShader
+	class VertexHWShader : public HardwareShader
 	{};
 
-	class PixelShader : public HardwareShader
+	class PixelHWShader : public HardwareShader
 	{};
 
 

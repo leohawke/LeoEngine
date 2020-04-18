@@ -6,11 +6,12 @@
 #define PR_NAMESPACE_END }
 
 PR_NAMESPACE_BEGIN
+class RayTracingShader;
+
 inline namespace Shader
 {
 	bool IsRayTracingShader(platform::Render::ShaderType type);
 
-	class RayTracingShader;
 
 	class BuiltInRayTracingShader :public RenderShader
 	{

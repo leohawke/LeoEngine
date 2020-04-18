@@ -10,6 +10,7 @@
 #include "../Asset/EffectAsset.h"
 #include <LBase/span.hpp>
 #include <LBase/lmathtype.hpp>
+#include "IRayTracingShader.h"
 
 namespace platform::Render {
 

@@ -828,6 +828,10 @@ namespace leo {
 				*this = *this + rhs;
 				return *this;
 			}
+
+			explicit int3(int value)
+				:base(value,value,value)
+			{}
 		};
 
 		struct uint4 :vector4<uint32>

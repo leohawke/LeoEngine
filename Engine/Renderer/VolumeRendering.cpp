@@ -15,24 +15,34 @@ struct ScreenVertex
 
 std::shared_ptr<Render::GraphicsBuffer> platform::GVolumeRasterizeVertexBuffer()
 {
-	ScreenVertex DestVertex[4];
+	static struct VolumeRasterizeVertexBuffer
+	{
+		VolumeRasterizeVertexBuffer()
+		{
+			ScreenVertex DestVertex[4];
 
-	DestVertex[0].Position = leo::math::float2(1, -1);
-	DestVertex[0].UV = leo::math::float2(1, 1);
+			DestVertex[0].Position = leo::math::float2(1, -1);
+			DestVertex[0].UV = leo::math::float2(1, 1);
 
-	DestVertex[1].Position = leo::math::float2(1,1);
-	DestVertex[1].UV = leo::math::float2(1, 0);
+			DestVertex[1].Position = leo::math::float2(1, 1);
+			DestVertex[1].UV = leo::math::float2(1, 0);
 
-	DestVertex[2].Position = leo::math::float2(-1, -1);
-	DestVertex[2].UV = leo::math::float2(0, 1);
+			DestVertex[2].Position = leo::math::float2(-1, -1);
+			DestVertex[2].UV = leo::math::float2(0, 1);
 
-	DestVertex[3].Position = leo::math::float2(-1, 1);
-	DestVertex[3].UV = leo::math::float2(0, 0);
+			DestVertex[3].Position = leo::math::float2(-1, 1);
+			DestVertex[3].UV = leo::math::float2(0, 0);
 
-	return leo::share_raw(Render::Context::Instance().GetDevice().CreateVertexBuffer(Render::Buffer::Usage::Static,
-		Render::EAccessHint::EA_GPURead | Render::EAccessHint::EA_Immutable,
-		sizeof(DestVertex),
-		Render::EF_Unknown, DestVertex));
+			VettexBuffer = leo::share_raw(Render::Context::Instance().GetDevice().CreateVertexBuffer(Render::Buffer::Usage::Static,
+				Render::EAccessHint::EA_GPURead | Render::EAccessHint::EA_Immutable,
+				sizeof(DestVertex),
+				Render::EF_Unknown, DestVertex));
+		}
+
+		std::shared_ptr<Render::GraphicsBuffer> VettexBuffer;
+	} Buffer;
+
+	return Buffer.VettexBuffer;
 }
 
 Render::VertexDeclarationElements platform::GScreenVertexDeclaration()
@@ -44,4 +54,14 @@ Render::VertexDeclarationElements platform::GScreenVertexDeclaration()
 	} };
 
 	return { Elements.begin(),Elements.end()};
+}
+
+void platform::RasterizeToVolumeTexture(Render::CommandList& CmdList, VolumeBounds VolumeBounds)
+{
+	CmdList.SetViewport(VolumeBounds.MinX, VolumeBounds.MinY, 0, VolumeBounds.MaxX, VolumeBounds.MaxY, 0);
+	CmdList.SetVertexBuffer(0, GVolumeRasterizeVertexBuffer().get());
+
+	const auto NumInstances = VolumeBounds.MaxZ - VolumeBounds.MinZ;
+
+	CmdList.DrawPrimitive(0, 2, NumInstances);
 }

@@ -21,7 +21,7 @@ namespace platform::Render {
 		CommandContext* Context;
 	};
 
-	class CommandList : CommandListBase
+	class CommandList :public CommandListBase
 	{
 	public:
 		void BeginRenderPass(const RenderPassInfo& Info, const char* Name)
@@ -143,4 +143,6 @@ namespace platform::Render {
 			PSOContext.CachedDepthStencilTarget = DepthStencilTarget ;
 		}
 	};
+
+	CommandList& GetCommandList();
 }

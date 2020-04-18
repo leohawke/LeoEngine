@@ -8,7 +8,7 @@ namespace platform_ex::Windows::D3D12 {
 	using namespace platform::Render::Shader;
 
 	template<typename ShaderType>
-	inline RayTracingShader* GetBuildInRayTracingShader()
+	inline platform::Render::RayTracingShader* GetBuildInRayTracingShader()
 	{
 		auto ShaderMap = GetGlobalShaderMap();
 

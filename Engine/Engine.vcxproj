@@ -78,6 +78,7 @@
     <ClCompile Include="Render\Effect\CopyEffect.cpp" />
     <ClCompile Include="Render\Effect\Effect.cpp" />
     <ClCompile Include="Render\GraphicsBuffer.cpp" />
+    <ClCompile Include="Render\ICommandList.cpp" />
     <ClCompile Include="Render\IContext.cpp" />
     <ClCompile Include="Render\FrameBuffer.cpp" />
     <ClCompile Include="Render\InputLayout.cpp" />

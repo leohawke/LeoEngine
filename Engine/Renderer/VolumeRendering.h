@@ -3,6 +3,7 @@
 #include <Engine/Render/BuiltInShader.h>
 #include <Engine/Render/IGraphicsBuffer.hpp>
 #include <Engine/Render/IDevice.h>
+#include <Engine/Render/ICommandList.h>
 
 namespace platform
 {
@@ -38,13 +39,17 @@ namespace platform
 		}
 	};
 
-	class WrtieToSliceVS : public Render::BuiltInShader
+	class WriteToSliceVS : public Render::BuiltInShader
 	{
-		EXPORTED_SHADER_TYPE(WrtieToSliceVS);
+		EXPORTED_SHADER_TYPE(WriteToSliceVS);
 
 		//CompilerFlags.Add( CFLAG_VertexToGeometryShader );
 
-		//SetParameters
+		template<class CommandList>
+		void SetParameters(CommandList&, const VolumeBounds& bounds, leo::math::int3 Resolution)
+		{
+
+		}
 
 	private:
 		//ShaderParameter UVScaleBias;
@@ -65,4 +70,6 @@ namespace platform
 
 	//todo:ScreenRendering.h
 	Render::VertexDeclarationElements GScreenVertexDeclaration();
+
+	void RasterizeToVolumeTexture(Render::CommandList& CmdList, VolumeBounds VolumeBounds);
 }
