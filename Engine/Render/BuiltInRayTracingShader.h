@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Shader.h"
+#include "BuiltInShader.h"
 
 #define PR_NAMESPACE_BEGIN  namespace platform::Render {
 #define PR_NAMESPACE_END }
@@ -13,7 +13,7 @@ inline namespace Shader
 	bool IsRayTracingShader(platform::Render::ShaderType type);
 
 
-	class BuiltInRayTracingShader :public RenderShader
+	class BuiltInRayTracingShader :public BuiltInShader
 	{
 	public:
 		RayTracingShader* GetRayTracingShader();

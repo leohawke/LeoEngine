@@ -9,9 +9,12 @@ PR_NAMESPACE_BEGIN
 inline namespace Shader
 {
 	using leo::int32;
+	using leo::uint16;
 
 	class BuiltInShaderMeta;
 	class ShaderMeta;
+	class RenderShader;
+	class ShaderParametersMetadata;
 
 	/** Define a shader permutation uniquely according to its type, and permutation id.*/
 	template<typename MetaShaderType>
@@ -38,6 +41,40 @@ inline namespace Shader
 	};
 
 	using ShaderPermutation = ShaderTypePermutation<ShaderMeta>;
+
+	//shader parameter bindings and their offset and size in the shader's parameters struct.
+	class RenderShaderParameterBindings
+	{
+	public:
+		struct Paramter
+		{
+			uint16 BufferIndex;
+			uint16 BaseIndex;
+			//shader's parameters struct
+			uint16 ByteOffset;
+			uint16 ByteSize;
+		};
+
+		struct ResourceParameter
+		{
+			uint16 BaseIndex;
+			//shader's parameters struct
+			uint16 ByteOffset;
+		};
+
+		std::vector<Paramter> Paramters;
+		std::vector<ResourceParameter> Textures;
+		std::vector<ResourceParameter> Samplers;
+
+		void BindForLegacyShaderParameters(const RenderShader* Shader, const ShaderParameterMap& ParameterMaps, const ShaderParametersMetadata& StructMetaData);
+	};
+
+	
+	class RenderShader
+	{
+	public:
+		RenderShaderParameterBindings Bindings;
+	};
 
 	class ShaderMeta
 	{
@@ -69,16 +106,46 @@ inline namespace Shader
 		ConstructType ConstructRef;
 	};
 
-	class RenderShader
+	template <typename ParameterStruct>
+	void BindForLegacyShaderParameters(RenderShader* Shader, const ShaderParameterMap& ParameterMap)
 	{
+		Shader->Bindings.BindForLegacyShaderParameters(Shader, ParameterMap, *FParameterStruct::TypeInfo::GetStructMetadata());
+	}
 
+	template<>
+	void BindForLegacyShaderParameters<void>(RenderShader* Shader, const ShaderParameterMap& ParameterMap)
+	{
+	}
+
+	template<class>
+	struct ShaderParametersType
+	{
+		static constexpr bool HasParameters = false;
+		using type = void;
 	};
+
+	template<class ShaderClass>
+		requires requires{typename ShaderClass::Parameters; }
+	struct ShaderParametersType<ShaderClass>
+	{
+		static constexpr bool HasParameters = true;
+
+		using type = typename ShaderClass::Parameters;
+	};
+
+	template<class ShaderClass>
+	using ShaderParametersType_t = typename ShaderParametersType<ShaderClass>::type;
 
 #define EXPORTED_SHADER_TYPE(ShaderClass) \
 public:\
 	using ShaderMetaType = platform::Render::ShaderMeta;\
 	static ShaderMetaType StaticType; \
-	static RenderShader* ConstructInstance() { return new ShaderClass();}
+	static RenderShader* ConstructInstance() { return new ShaderClass();} \
+	static constexpr bool HasParameters =  ShaderParametersType<ShaderClass>::HasParameters;\
+	ShaderClass() \
+	{\
+		BindForLegacyShaderParameters<ShaderParametersType_t<ShaderClass>>(this,{});\
+	}
 
 #define IMPLEMENT_SHADER(ShaderClass,SourceFileName,FunctionName,Frequency) \
 	ShaderClass::ShaderMetaType ShaderClass::StaticType( \

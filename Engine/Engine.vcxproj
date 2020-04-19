@@ -183,8 +183,8 @@
     <ClInclude Include="Render\RenderObject.h" />
     <ClInclude Include="Render\IShaderCompose.h" />
     <ClInclude Include="Render\ShaderCore.h" />
+    <ClInclude Include="Render\ShaderParametersMetadata.h" />
     <ClInclude Include="Render\ShaderParamterTraits.hpp" />
-    <ClInclude Include="Render\ShadingElement.h" />
     <ClInclude Include="Render\IContext.h" />
     <ClInclude Include="Render\IDevice.h" />
     <ClInclude Include="Render\IDisplay.h" />
@@ -195,7 +195,6 @@
     <ClInclude Include="Render\ITexture.hpp" />
     <ClInclude Include="Render\PipleState.h" />
     <ClInclude Include="Render\InputLayout.hpp" />
-    <ClInclude Include="Render\ShadingObject.h" />
     <ClInclude Include="Render\ViewPort.h" />
     <ClInclude Include="System\NinthTimer.h" />
     <ClInclude Include="System\SystemEnvironment.h" />

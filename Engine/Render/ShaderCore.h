@@ -144,6 +144,11 @@ namespace platform::Render {
 		};
 
 		using ShaderMacro = std::pair<std::string, std::string>;
+
+		class ShaderParameterMap
+		{
+
+		};
 	}
 }
 

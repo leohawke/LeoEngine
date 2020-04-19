@@ -218,20 +218,20 @@
     <ClCompile Include="Render\D3D12\GraphicsPipelineState.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Shader.cpp">
-      <Filter>Render\DeviceInterface</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer\PostProcess\PostProcessCombineLUTs.cpp">
       <Filter>Renderer\PostProcess</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\VolumeRendering.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Render\ShaderParamterTraits.cpp">
-      <Filter>Render</Filter>
-    </ClCompile>
     <ClCompile Include="Render\ICommandList.cpp">
       <Filter>Render\DeviceInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ShaderParamterTraits.cpp">
+      <Filter>Render\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Shader.cpp">
+      <Filter>Render\Shader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -360,9 +360,6 @@
     <ClInclude Include="Render\ViewPort.h">
       <Filter>Render</Filter>
     </ClInclude>
-    <ClInclude Include="Render\ShadingElement.h">
-      <Filter>Render</Filter>
-    </ClInclude>
     <ClInclude Include="Render\DeviceCaps.h">
       <Filter>Render\DeviceInterface</Filter>
     </ClInclude>
@@ -392,9 +389,6 @@
     </ClInclude>
     <ClInclude Include="Render\PipleState.h">
       <Filter>Render\DeviceInterface</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\ShadingObject.h">
-      <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="Core\Resource.h">
       <Filter>Core\Resource</Filter>
@@ -504,9 +498,6 @@
     <ClInclude Include="Render\D3D12\ShaderPass.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="Render\ShaderCore.h">
-      <Filter>Render\DeviceInterface</Filter>
-    </ClInclude>
     <ClInclude Include="Render\IShaderCompose.h">
       <Filter>Render\DeviceInterface</Filter>
     </ClInclude>
@@ -519,15 +510,6 @@
     <ClInclude Include="Render\ICommandList.h">
       <Filter>Render\DeviceInterface</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Shader.h">
-      <Filter>Render\DeviceInterface</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\BuiltInShader.h">
-      <Filter>Render\DeviceInterface</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\BuiltInRayTracingShader.h">
-      <Filter>Render\DeviceInterface\RayTracing</Filter>
-    </ClInclude>
     <ClInclude Include="Renderer\PostProcess\PostProcessCombineLUTs.h">
       <Filter>Renderer\PostProcess</Filter>
     </ClInclude>
@@ -535,7 +517,22 @@
       <Filter>Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Render\ShaderParamterTraits.hpp">
-      <Filter>Render</Filter>
+      <Filter>Render\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShaderCore.h">
+      <Filter>Render\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Shader.h">
+      <Filter>Render\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\BuiltInShader.h">
+      <Filter>Render\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\BuiltInRayTracingShader.h">
+      <Filter>Render\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShaderParametersMetadata.h">
+      <Filter>Render\Shader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -607,6 +604,9 @@
     </Filter>
     <Filter Include="Renderer\PostProcess">
       <UniqueIdentifier>{13811411-eaf2-4603-a4a1-32513bf1e4cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render\Shader">
+      <UniqueIdentifier>{6e38963e-768a-4adf-89c0-524ac94af2a1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
