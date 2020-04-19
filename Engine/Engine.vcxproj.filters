@@ -233,7 +233,15 @@
     <ClCompile Include="Render\Shader.cpp">
       <Filter>Render\Shader</Filter>
     </ClCompile>
-    <ClCompile Include="Render\ShaderParametersMetadata.cpp" />
+    <ClCompile Include="Render\ShaderParameterUtility.cpp">
+      <Filter>Render\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ShaderCore.cpp">
+      <Filter>Render\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ShaderParametersMetadata.cpp">
+      <Filter>Render\Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">

@@ -12,12 +12,15 @@ namespace platform::Render {
 
 	inline namespace Shader
 	{
+		using leo::uint16;
+		using leo::uint32;
+
 		struct ShaderCodeResourceCounts
 		{
-			leo::uint16 NumSamplers = 0;
-			leo::uint16 NumSRVs = 0;
-			leo::uint16 NumUAVs = 0;
-			leo::uint16 NumCBs;
+			uint16 NumSamplers = 0;
+			uint16 NumSRVs = 0;
+			uint16 NumUAVs = 0;
+			uint16 NumCBs;
 		};
 
 		enum ShaderType : leo::uint8
@@ -145,9 +148,31 @@ namespace platform::Render {
 
 		using ShaderMacro = std::pair<std::string, std::string>;
 
+		enum class ShaderParamClass
+		{
+			LooseData,
+			UniformBuffer,
+			Sampler,
+			SRV,
+
+			Num
+		};
+		
+		struct ParameterAllocation
+		{
+			uint16 BufferIndex;
+			uint16 BaseIndex;
+			uint16 Size;
+			ShaderParamClass Class = ShaderParamClass::Num;
+		};
+
 		class ShaderParameterMap
 		{
+		public:
+			bool FindParameterAllocation(const std::string& ParameterName, uint16& OutBufferIndex, uint16& OutBaseIndex, uint16& OutSize) const;
 
+		private:
+			std::unordered_map<std::string, ParameterAllocation> ParameterMap;
 		};
 	}
 }

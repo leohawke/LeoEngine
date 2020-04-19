@@ -27,6 +27,12 @@ inline namespace Shader
 				Type(InType)
 			{}
 
+			const char* GetName() const { return Name; }
+
+			uint32 GetOffset() const { return Offset; }
+
+			ShaderParamType GetShaderType() const { return Type; }
+
 		private:
 			const char* Name;
 			uint32 Offset;

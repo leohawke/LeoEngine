@@ -46,7 +46,7 @@ inline namespace Shader
 	class RenderShaderParameterBindings
 	{
 	public:
-		struct Paramter
+		struct Parameter
 		{
 			uint16 BufferIndex;
 			uint16 BaseIndex;
@@ -62,7 +62,7 @@ inline namespace Shader
 			uint16 ByteOffset;
 		};
 
-		std::vector<Paramter> Paramters;
+		std::vector<Parameter> Paramters;
 		std::vector<ResourceParameter> Textures;
 		std::vector<ResourceParameter> Samplers;
 

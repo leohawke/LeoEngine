@@ -91,7 +91,9 @@
     <ClCompile Include="Render\RenderObject.cpp" />
     <ClCompile Include="Render\ResourceView.cpp" />
     <ClCompile Include="Render\Shader.cpp" />
+    <ClCompile Include="Render\ShaderCore.cpp" />
     <ClCompile Include="Render\ShaderParametersMetadata.cpp" />
+    <ClCompile Include="Render\ShaderParameterUtility.cpp" />
     <ClCompile Include="Render\ShaderParamterTraits.cpp">
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
     </ClCompile>
