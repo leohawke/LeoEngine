@@ -81,16 +81,3 @@ RayTracingShader::RayTracingShader(const platform::Render::RayTracingShaderIniti
 	AnyHitEntryPoint = leo::Text::String(RayTracingInfos.AnyHitEntryPoint);
 	IntersectionEntryPoint = leo::Text::String(RayTracingInfos.IntersectionEntryPoint);
 }
-
-bool platform_ex::Windows::D3D12::IsRayTracingShader(platform::Render::ShaderType type)
-{
-	switch (type)
-	{
-	case ShaderType::RayGen:
-	case ShaderType::RayMiss:
-	case ShaderType::RayHitGroup:
-	case ShaderType::RayCallable:
-		return true;
-	}
-	return false;
-}

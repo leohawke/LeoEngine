@@ -63,19 +63,22 @@ namespace platform::Render {
 			GetContext().SetGraphicsPipelineState(pso);
 		}
 
-		void SetShaderSampler(ShaderPass* Pass, Shader::ShaderType Type, uint32 SamplerIndex, const TextureSampleDesc& Desc)
+		template<typename THardwareShader>
+		void SetShaderSampler(THardwareShader* Shader, Shader::ShaderType Type, uint32 SamplerIndex, const TextureSampleDesc& Desc)
 		{
-			GetContext().SetShaderSampler(Pass, Type, SamplerIndex, Desc);
+			GetContext().SetShaderSampler(Shader, Type, SamplerIndex, Desc);
 		}
 
-		void SetShaderTexture(ShaderPass* Pass, Shader::ShaderType Type, uint32 TextureIndex, Texture* Texture)
+		template<typename THardwareShader>
+		void SetShaderTexture(THardwareShader* Shader, Shader::ShaderType Type, uint32 TextureIndex, Texture* Texture)
 		{
-			GetContext().SetShaderTexture(Pass, Type, TextureIndex, Texture);
+			GetContext().SetShaderTexture(Shader, Type, TextureIndex, Texture);
 		}
 
-		void SetShaderConstantBuffer(ShaderPass* Pass, Shader::ShaderType Type, uint32 BaseIndex, GraphicsBuffer* Buffer)
+		template<typename THardwareShader>
+		void SetShaderConstantBuffer(THardwareShader* Shader, Shader::ShaderType Type, uint32 BaseIndex, GraphicsBuffer* Buffer)
 		{
-			GetContext().SetShaderConstantBuffer(Pass, Type, BaseIndex, Buffer);
+			GetContext().SetShaderConstantBuffer(Shader, Type, BaseIndex, Buffer);
 		}
 
 		void DrawIndexPrimitive(GraphicsBuffer* IndexBuffer, int32 BaseVertexIndex, uint32 FirstInstance, uint32 NumVertices, uint32 StartIndex, uint32 NumPrimitives, uint32 NumInstances)
@@ -86,6 +89,12 @@ namespace platform::Render {
 		void DrawPrimitive(uint32 BaseVertexIndex, uint32 NumPrimitives, uint32 NumInstances)
 		{
 			GetContext().DrawPrimitive(BaseVertexIndex, NumPrimitives, NumInstances);
+		}
+
+		template<typename THardwareShader>
+		void SetShaderParameter(THardwareShader* Shader, uint32 BufferIndex, uint32 BaseIndex, uint32 NumBytes, const void* NewValue)
+		{
+			GetContext().SetShaderParameter(Shader, BufferIndex, BaseIndex, NumBytes, NewValue);
 		}
 
 

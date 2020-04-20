@@ -21,11 +21,17 @@ namespace platform::Render {
 
 		virtual void SetGraphicsPipelineState(GraphicsPipelineState* pso) = 0;
 
-		virtual void SetShaderSampler(ShaderPass* Pass, Shader::ShaderType Type, uint32 SamplerIndex,const TextureSampleDesc& Desc) = 0;
+		virtual void SetShaderSampler(VertexHWShader* Shader, uint32 SamplerIndex, const TextureSampleDesc& Desc) = 0;
+		virtual void SetShaderSampler(PixelHWShader* Shader, uint32 SamplerIndex,const TextureSampleDesc& Desc) = 0;
 
-		virtual void SetShaderTexture(ShaderPass* Pass, Shader::ShaderType Type,uint32 TextureIndex,Texture* Texture) = 0;
+		virtual void SetShaderTexture(VertexHWShader* Shader, uint32 TextureIndex, Texture* Texture) = 0;
+		virtual void SetShaderTexture(PixelHWShader* Shader,uint32 TextureIndex,Texture* Texture) = 0;
 
-		virtual void SetShaderConstantBuffer(ShaderPass* Pass, Shader::ShaderType Type,uint32 BaseIndex, GraphicsBuffer* Buffer) = 0;
+		virtual void SetShaderConstantBuffer(VertexHWShader* Shader, uint32 BaseIndex, GraphicsBuffer* Buffer) = 0;
+		virtual void SetShaderConstantBuffer(PixelHWShader* Shader,uint32 BaseIndex, GraphicsBuffer* Buffer) = 0;
+
+		virtual void SetShaderParameter(VertexHWShader* Shader, uint32 BufferIndex, uint32 BaseIndex, uint32 NumBytes, const void* NewValue) = 0;
+		virtual void SetShaderParameter(PixelHWShader* Shader, uint32 BufferIndex, uint32 BaseIndex, uint32 NumBytes, const void* NewValue) = 0;
 
 		virtual void DrawIndexPrimitive(GraphicsBuffer* IndexBuffer, int32 BaseVertexIndex, uint32 FirstInstance, uint32 NumVertices, uint32 StartIndex, uint32 NumPrimitives, uint32 NumInstances) = 0;
 

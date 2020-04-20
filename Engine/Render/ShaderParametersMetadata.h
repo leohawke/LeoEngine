@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ShaderCore.h"
+#include <LBase/exception_type.h>
 
 #define PR_NAMESPACE_BEGIN  namespace platform::Render {
 #define PR_NAMESPACE_END }
@@ -33,6 +34,7 @@ inline namespace Shader
 
 			ShaderParamType GetShaderType() const { return Type; }
 
+			uint32 GetMemberSize() const { throw leo::unimplemented(); }
 		private:
 			const char* Name;
 			uint32 Offset;

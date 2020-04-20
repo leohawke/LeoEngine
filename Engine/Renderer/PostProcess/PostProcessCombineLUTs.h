@@ -30,8 +30,8 @@ namespace platform
 		leo::math::float4 ColorGainHighlights;
 		leo::math::float4 ColorOffsetHighlights;
 
-		float ColorCorrectionShadowsMax = 0.09;
-		float ColorCorrectionHighlightsMin = 0.5;
+		float ColorCorrectionShadowsMax = 0.09f;
+		float ColorCorrectionHighlightsMin = 0.5f;
 	};
 
 	std::shared_ptr<Render::Texture> CombineLUTPass(const ColorCorrectParameters& args);

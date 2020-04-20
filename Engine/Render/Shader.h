@@ -107,13 +107,13 @@ inline namespace Shader
 	};
 
 	template <typename ParameterStruct>
-	void BindForLegacyShaderParameters(RenderShader* Shader, const ShaderParameterMap& ParameterMap)
+	inline void BindForLegacyShaderParameters(RenderShader* Shader, const ShaderParameterMap& ParameterMap)
 	{
 		Shader->Bindings.BindForLegacyShaderParameters(Shader, ParameterMap, *FParameterStruct::TypeInfo::GetStructMetadata());
 	}
 
 	template<>
-	void BindForLegacyShaderParameters<void>(RenderShader* Shader, const ShaderParameterMap& ParameterMap)
+	inline void BindForLegacyShaderParameters<void>(RenderShader* Shader, const ShaderParameterMap& ParameterMap)
 	{
 	}
 
@@ -141,10 +141,10 @@ public:\
 	using ShaderMetaType = platform::Render::ShaderMeta;\
 	static ShaderMetaType StaticType; \
 	static RenderShader* ConstructInstance() { return new ShaderClass();} \
-	static constexpr bool HasParameters =  ShaderParametersType<ShaderClass>::HasParameters;\
+	static constexpr bool HasParameters =  platform::Render::ShaderParametersType<ShaderClass>::HasParameters;\
 	ShaderClass() \
 	{\
-		BindForLegacyShaderParameters<ShaderParametersType_t<ShaderClass>>(this,{});\
+		platform::Render::BindForLegacyShaderParameters<platform::Render::ShaderParametersType_t<ShaderClass>>(this,{});\
 	}
 
 #define IMPLEMENT_SHADER(ShaderClass,SourceFileName,FunctionName,Frequency) \
