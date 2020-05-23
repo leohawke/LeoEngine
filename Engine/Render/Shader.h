@@ -6,6 +6,11 @@
 #define PR_NAMESPACE_END }
 
 PR_NAMESPACE_BEGIN
+class HardwareShader;
+class VertexHWShader;
+class PixelHWShader;
+class GeometryHWShader;
+
 inline namespace Shader
 {
 	using leo::int32;
@@ -73,6 +78,29 @@ inline namespace Shader
 	class RenderShader
 	{
 	public:
+		struct CompiledShaderInitializer
+		{
+			HardwareShader* Shader;
+		};
+
+		RenderShader();
+
+		virtual ~RenderShader();
+
+		RenderShader(const CompiledShaderInitializer& initializer);
+
+		VertexHWShader* GetVertexShader() const
+		{
+			return GetHardwareShader<VertexHWShader>();
+		}
+	private:
+		template<class THardwareShader>
+		THardwareShader* GetHardwareShader() const
+		{
+			return (THardwareShader*)(Shader.get());
+		}
+	public:
+		std::unique_ptr<HardwareShader> Shader;
 		RenderShaderParameterBindings Bindings;
 	};
 
@@ -136,9 +164,9 @@ inline namespace Shader
 	template<class ShaderClass>
 	using ShaderParametersType_t = typename ShaderParametersType<ShaderClass>::type;
 
-#define EXPORTED_SHADER_TYPE(ShaderClass) \
+#define EXPORTED_SHADER_TYPE(ShaderClass,ShaderMetaTypeShortcut) \
 public:\
-	using ShaderMetaType = platform::Render::ShaderMeta;\
+	using ShaderMetaType = platform::Render::##ShaderMetaTypeShortcut##ShaderMeta;\
 	static ShaderMetaType StaticType; \
 	static RenderShader* ConstructInstance() { return new ShaderClass();} \
 	static constexpr bool HasParameters =  platform::Render::ShaderParametersType<ShaderClass>::HasParameters;\
@@ -190,6 +218,14 @@ public:\
 	void CompileGlobalShaderMap();
 
 }
+
+class ShaderInitializer
+{
+public:
+	const platform::Render::ShaderBlob* pBlob;
+	const platform::Render::ShaderInfo* pInfo;
+};
+
 PR_NAMESPACE_END
 
 #undef PR_NAMESPACE_BEGIN

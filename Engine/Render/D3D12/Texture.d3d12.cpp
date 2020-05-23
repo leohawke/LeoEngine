@@ -105,6 +105,7 @@ void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uin
 		break;
 	case D3D12_RESOURCE_DIMENSION_TEXTURE3D:
 		tex_desc.DepthOrArraySize = array_size;
+		break;
 	default:
 		LAssert(false, "RESOURCE_DIMENSION Type Error:Must TEXTURE_TYPE");
 	}

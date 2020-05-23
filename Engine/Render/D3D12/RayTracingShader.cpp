@@ -59,12 +59,8 @@ void QuantizeBoundShaderState(
 }
 
 RayTracingShader::RayTracingShader(const platform::Render::RayTracingShaderInitializer& initializer)
+	:D3D12HardwareShader(initializer)
 {
-	auto& blob = *initializer.pBlob;
-	ShaderByteCode.first = std::make_unique<byte[]>(blob.second);
-	ShaderByteCode.second = blob.second;
-	std::memcpy(ShaderByteCode.first.get(), blob.first.get(), blob.second);
-
 	ResourceCounts = initializer.pInfo->ResourceCounts;
 
 	auto& Device = Context::Instance().GetDevice();

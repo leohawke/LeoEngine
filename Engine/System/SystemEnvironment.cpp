@@ -1,4 +1,5 @@
 #include "SystemEnvironment.h"
+#include "../Render/Shader.h"
 
 using namespace LeoEngine::System;
 
@@ -15,9 +16,8 @@ struct GlobalEnvironmentGurad {
 		static platform::chrono::NinthTimer Timer;
 		pEnvironment->Timer = &Timer;
 
-		//初始化图形引擎
-
-		//初始化3D引擎
+		//编译Shader
+		platform::Render::CompileGlobalShaderMap();
 	}
 
 	~GlobalEnvironmentGurad() {

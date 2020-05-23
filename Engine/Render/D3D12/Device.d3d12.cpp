@@ -3,6 +3,7 @@
 #include "Convert.h"
 #include "Texture.h"
 #include "RootSignature.h"
+#include "HardwareShader.h"
 #include "../Effect/CopyEffect.h"
 #include <LFramework/LCLib/Debug.h>
 #include <LFramework/LCLib/Logger.h>
@@ -252,6 +253,21 @@ namespace platform_ex::Windows::D3D12 {
 	GraphicsBuffer * Device::CreateIndexBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const*> init_data)
 	{
 		return CreateBuffer(usage, access, size_in_byte, format, init_data);
+	}
+
+	platform::Render::HardwareShader* Device::CreateShader(const platform::Render::ShaderInitializer& initializer)
+	{
+		switch (initializer.pInfo->Type)
+		{
+		case platform::Render::VertexShader:
+				return new VertexHWShader(initializer);
+		case platform::Render::PixelShader:
+			return new PixelHWShader(initializer);
+		case platform::Render::GeometryShader:
+			return new GeometryHWShader(initializer);
+		}
+		LAssert(false, "unimpl shader type");
+		return nullptr;
 	}
 
 	ID3D12Device*  Device::operator->() lnoexcept {

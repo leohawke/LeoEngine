@@ -15,7 +15,6 @@
 #include "Shader.h"
 #include "IGraphicsPipelineState.h"
 #include "IShaderCompose.h"
-#include "Shader.h"
 #include <optional>
 
 namespace asset {
@@ -31,12 +30,17 @@ namespace platform::Render {
 
 	class HardwareShader
 	{
+	public:
+		virtual ~HardwareShader() = 0;
 	};
 
 	class VertexHWShader : public HardwareShader
 	{};
 
 	class PixelHWShader : public HardwareShader
+	{};
+
+	class GeometryHWShader : public HardwareShader
 	{};
 
 
@@ -142,6 +146,8 @@ namespace platform::Render {
 		virtual UnorderedAccessView* CreateUnorderedAccessView(Texture2D* InTexture) =0;
 
 		virtual GraphicsPipelineState* CreateGraphicsPipelineState(const GraphicsPipelineStateInitializer& initializer) =0;
+
+		virtual HardwareShader* CreateShader(const ShaderInitializer& initializer) = 0;
 	};
 }
 

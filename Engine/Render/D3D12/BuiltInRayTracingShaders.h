@@ -21,16 +21,16 @@ namespace platform_ex::Windows::D3D12 {
 
 	class DefaultCHS :public BuiltInRayTracingShader
 	{
-		EXPORTED_SHADER_TYPE(DefaultCHS);
+		EXPORTED_SHADER_TYPE(DefaultCHS,);
 	};
 
 	class DefaultMS :public BuiltInRayTracingShader
 	{
-		EXPORTED_SHADER_TYPE(DefaultMS);
+		EXPORTED_SHADER_TYPE(DefaultMS,);
 	};
 
 	class ShadowRG : public BuiltInRayTracingShader
 	{
-		EXPORTED_SHADER_TYPE(ShadowRG);
+		EXPORTED_SHADER_TYPE(ShadowRG,);
 	};
 }

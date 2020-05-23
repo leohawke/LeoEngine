@@ -17,7 +17,6 @@
 #include "RayContext.h"
 #include "GraphicsPipelineState.h"
 
-
 #include <LBase/concurrency.h>
 
 #include <unordered_map>
@@ -68,6 +67,8 @@ namespace platform_ex {
 				GraphicsBuffer* CreateConstanBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const *>  init_data = nullptr) override;
 				GraphicsBuffer* CreateVertexBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const *>  init_data = nullptr) override;
 				GraphicsBuffer* CreateIndexBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const *>  init_data = nullptr) override;
+
+				platform::Render::HardwareShader* CreateShader(const platform::Render::ShaderInitializer& initializer) override;
 
 				leo::observer_ptr<RootSignature> CreateRootSignature(const QuantizedBoundShaderState& QBSS);
 

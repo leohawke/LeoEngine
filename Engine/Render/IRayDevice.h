@@ -11,6 +11,7 @@
 #include <LBase/span.hpp>
 #include <LBase/lmathtype.hpp>
 #include "IRayTracingShader.h"
+#include "Shader.h"
 
 namespace platform::Render {
 
@@ -109,12 +110,7 @@ namespace platform::Render {
 		leo::span<RayTracingShader*> CallableTable;
 	};
 
-	class RayTracingShaderInitializer
-	{
-	public:
-		const platform::Render::ShaderBlob* pBlob;
-		const platform::Render::ShaderInfo* pInfo;
-	};
+	using RayTracingShaderInitializer = ShaderInitializer;
 
 	class RayDevice
 	{

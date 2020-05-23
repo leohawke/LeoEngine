@@ -41,7 +41,7 @@ namespace platform
 
 	class WriteToSliceVS : public Render::BuiltInShader
 	{
-		EXPORTED_SHADER_TYPE(WriteToSliceVS);
+		EXPORTED_BUILTIN_SHADER(WriteToSliceVS);
 
 		//CompilerFlags.Add( CFLAG_VertexToGeometryShader );
 
@@ -58,7 +58,7 @@ namespace platform
 
 	class WriteToSliceGS : public Render::BuiltInShader
 	{
-		EXPORTED_SHADER_TYPE(WriteToSliceGS);
+		EXPORTED_BUILTIN_SHADER(WriteToSliceGS);
 
 		//SetParameters
 	private:

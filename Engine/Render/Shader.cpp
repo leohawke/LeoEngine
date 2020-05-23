@@ -10,7 +10,7 @@ using namespace platform::Render;
 
 namespace platform::Render::Shader
 {
-	std::list<ShaderMeta*> GShaderTypeList;
+	std::list<ShaderMeta*>* GShaderTypeList;
 	ShaderMap<ShaderMeta> GGlobalShaderMap;
 
 	bool IsRayTracingShader(ShaderType type)
@@ -29,7 +29,9 @@ namespace platform::Render::Shader
 
 	std::list<ShaderMeta*>& ShaderMeta::GetTypeList()
 	{
-		return GShaderTypeList;
+		if (GShaderTypeList == nullptr)
+			GShaderTypeList = new std::list<ShaderMeta*>();
+		return *GShaderTypeList;
 	}
 
 	RenderShader* ShaderMeta::Construct() const
@@ -54,15 +56,22 @@ namespace platform::Render::Shader
 		GetTypeList().emplace_front(this);
 	}
 
+	ImplDeCtor(RenderShader);
+	ImplDeDtor(RenderShader);
+
+	RenderShader::RenderShader(const CompiledShaderInitializer& initializer)
+	{
+		Shader = leo::unique_raw(initializer.Shader);
+	}
+
 	void CompileGlobalShaderMap()
 	{
+		auto& Device = Context::Instance().GetDevice();
 		auto& RayDevice = Context::Instance().GetRayContext().GetDevice();
 
 		for (auto meta : ShaderMeta::GetTypeList())
 		{
-			if (!IsRayTracingShader(meta->GetShaderType()))
-				continue;
-
+			
 			asset::X::Shader::ShaderCompilerInput input;
 
 			auto ShaderCode = platform::X::GenHlslShader(meta->GetSourceFileName());
@@ -84,19 +93,33 @@ namespace platform::Render::Shader
 				, &Info
 			);
 
+			if (IsRayTracingShader(meta->GetShaderType()))
+			{
+				platform::Render::RayTracingShaderInitializer initializer;
+				initializer.pBlob = &blob;
+				initializer.pInfo = &Info;
 
+				auto pRayTracingShaderRHI = RayDevice.CreateRayTracingSahder(initializer);
 
-			platform::Render::RayTracingShaderInitializer initializer;
-			initializer.pBlob = &blob;
-			initializer.pInfo = &Info;
+				auto pShader = static_cast<BuiltInRayTracingShader*>(meta->Construct());
 
-			auto pRayTracingShaderRHI = RayDevice.CreateRayTracingSahder(initializer);
+				pShader->SetRayTracingShader(pRayTracingShaderRHI);
 
-			auto pShader = static_cast<BuiltInRayTracingShader*>(meta->Construct());
+				GGlobalShaderMap.AddShader(meta, pShader);
+			}
+			else {
+				platform::Render::ShaderInitializer initializer;
+				initializer.pBlob = &blob;
+				initializer.pInfo = &Info;
 
-			pShader->SetRayTracingShader(pRayTracingShaderRHI);
+				auto pShaderRHI = Device.CreateShader(initializer);
 
-			GGlobalShaderMap.AddShader(meta, pShader);
+				auto pShader = static_cast<RenderShader*>(meta->Construct());
+
+				GGlobalShaderMap.AddShader(meta, pShader);
+			}
 		}
 	}
 }
+
+

@@ -8,16 +8,16 @@
 #include "../IRayDevice.h"
 #include "d3d12_dxgi.h"
 #include "RootSignature.h"
+#include "HardwareShader.h"
 
 namespace platform_ex::Windows::D3D12 {
-	class RayTracingShader : public platform::Render::RayTracingShader
+	class RayTracingShader : public platform::Render::RayTracingShader,public D3D12HardwareShader
 	{
 	public:
 		RayTracingShader(const  platform::Render::RayTracingShaderInitializer& initializer);
 	public:
 		leo::observer_ptr<RootSignature> pRootSignature = nullptr;
 
-		platform::Render::ShaderBlob ShaderByteCode;
 
 		std::u16string EntryPoint;
 		std::u16string AnyHitEntryPoint;

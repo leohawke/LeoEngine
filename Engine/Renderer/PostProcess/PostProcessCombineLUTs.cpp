@@ -38,6 +38,8 @@ platform::ColorCorrectParameters::ColorCorrectParameters()
 
 class LUTBlenderShader : public BuiltInShader
 {
+public:
+	using BuiltInShader::BuiltInShader;
 	//SetDefine("USE_VOLUME_LUT", true);
 };
 
@@ -71,7 +73,7 @@ END_SHADER_PARAMETER_STRUCT();
 class LUTBlenderPS : public LUTBlenderShader
 {
 public:
-	EXPORTED_SHADER_TYPE(LUTBlenderPS);
+	EXPORTED_BUILTIN_SHADER(LUTBlenderPS);
 };
 
 IMPLEMENT_SHADER(LUTBlenderPS, "PostProcessCombineLUTs.lsl", "MainPS", platform::Render::PixelShader);
