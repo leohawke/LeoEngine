@@ -245,7 +245,7 @@ namespace platform::Render::Effect {
 					//Design TODO [Material Also Have Values!]
 					auto optional_value = pEffectAsset->GetValue(param_index);
 					if (optional_value.has_value()) {
-						Param = optional_value.value().get();
+						Param = optional_value.value();
 					}
 				}
 
@@ -355,7 +355,7 @@ namespace platform::Render::Effect {
 
 					auto optional_value = pEffectAsset->GetValue(param_index);
 					if (optional_value.has_value()) {
-						Param = optional_value.value().get();
+						Param = optional_value.value();
 					}
 				}
 				constantbuffs.emplace_back(pConstantBuffer);

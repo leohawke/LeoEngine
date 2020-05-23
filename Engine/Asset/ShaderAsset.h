@@ -158,8 +158,8 @@ namespace asset
 			bind_values.emplace_back(param_index, lforward(value));
 		}
 
-		std::optional<leo::any> GetValue(size_t param_index) {
-			auto iter = std::find_if(bind_values.begin(), bind_values.end(), [&](const std::pair<size_t, leo::any>& pair) {
+		std::optional<std::any> GetValue(size_t param_index) {
+			auto iter = std::find_if(bind_values.begin(), bind_values.end(), [&](const std::pair<size_t, std::any>& pair) {
 				return pair.first == param_index;
 				});
 			if (iter != bind_values.end())
@@ -178,7 +178,7 @@ namespace asset
 
 		std::vector<ShaderConstantBufferAsset> cbuffers;
 		std::vector<ShaderParameterAsset> params;
-		std::vector<std::pair<size_t, leo::any>> bind_values;
+		std::vector<std::pair<size_t, std::any>> bind_values;
 		std::vector<ShaderFragmentAsset> fragements;
 		std::unordered_map<size_t, ShaderBlobAsset> blobs;
 	public:

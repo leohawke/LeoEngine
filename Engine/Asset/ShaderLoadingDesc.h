@@ -400,7 +400,7 @@ namespace platform::X
 			return static_cast<leo::uint8>(std::stoul(value));
 		};
 
-		std::optional<leo::any> ReadParamValue(const scheme::TermNode& param_node, asset::ShaderParamType type) {
+		std::optional<std::any> ReadParamValue(const scheme::TermNode& param_node, asset::ShaderParamType type) {
 #define AccessParam(name,expr) if (auto value = AccessPtr(name, param_node)) expr
 			using namespace Render;
 			if (type == SPT_sampler) {
@@ -421,7 +421,7 @@ namespace platform::X
 
 				AccessParam("cmp_func", sampler.cmp_func = TextureSampleDesc::to_op<CompareOp>(*value));
 
-				return leo::any(sampler);
+				return std::any(sampler);
 			}
 #undef AccessParam
 			return std::nullopt;

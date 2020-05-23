@@ -4,6 +4,7 @@
 #include "../../Engine/Core/Mesh.h"
 #include "../../Engine/Render/IFrameBuffer.h"
 #include "../../Engine/Render/DataStructures.h"
+#include "../../Engine/Renderer/PostProcess/PostProcessCombineLUTs.h"
 #include "../../Engine/Asset/EffectX.h"
 #include "../../Engine/Asset/MaterialX.h"
 #include "../../Engine/Asset/LSLAssetX.h"
@@ -163,6 +164,8 @@ private:
 		Context::Instance().GetScreenFrame()->Clear(FrameBuffer::Color | FrameBuffer::Depth | FrameBuffer::Stencil, { 0,0,0,1 }, 1, 0);
 		auto& Device = Context::Instance().GetDevice();
 
+		platform::ColorCorrectParameters params;
+		auto pTex = platform::CombineLUTPass(params);
 		//auto pRayScene = pEntities->BuildRayTracingScene();
 
 
