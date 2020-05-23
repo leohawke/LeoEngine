@@ -43,6 +43,7 @@
     <ClCompile Include="Core\ResourcesHolder.cpp" />
     <ClCompile Include="Renderer\PostProcess\PostProcessCombineLUTs.cpp" />
     <ClCompile Include="Renderer\VolumeRendering.cpp" />
+    <ClCompile Include="Render\BuiltInRayTracingShader.cpp" />
     <ClCompile Include="Render\Color_T.cpp" />
     <ClCompile Include="Render\D3D12\Adapter.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\BuiltInRayTracingShaders.cpp" />
