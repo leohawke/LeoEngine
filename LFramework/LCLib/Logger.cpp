@@ -58,8 +58,8 @@ namespace platform
 		TryExpr(n = WConsoleOutput(wstr, STD_OUTPUT_HANDLE, sv.data()))
 			CatchIgnore(platform_ex::Windows::Win32Exception&)
 			if (n < wstr.length())
-				std::cout << &wstr[n];
-		return bool(std::cout.flush());
+				std::wcout << &wstr[n];
+		return bool(std::wcout.flush());
 #elif LF_Hosted
 		return bool(std::cout << platform_ex::EncodeArg(sv) << std::endl);
 #else

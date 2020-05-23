@@ -15,10 +15,9 @@ namespace leo
 		using traits_type = typename std::char_traits < value_type >;
 		//! \since build 1.4
 		//@{
-		using allocator_type = typename string_type::allocator_type;
-		using size_type = typename std::allocator_traits<allocator_type>::size_type;
+		using size_type = typename string_type::size_type;
 		using difference_type
-			= typename std::allocator_traits<allocator_type>::difference_type;
+			= typename string_type::difference_type;
 		using reference = value_type&;
 		using const_reference = const value_type&;
 		//@}
