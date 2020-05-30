@@ -76,7 +76,7 @@ public:
 	EXPORTED_BUILTIN_SHADER(LUTBlenderPS);
 };
 
-IMPLEMENT_SHADER(LUTBlenderPS, "PostProcessCombineLUTs.lsl", "MainPS", platform::Render::PixelShader);
+IMPLEMENT_BUILTIN_SHADER(LUTBlenderPS, "PostProcessCombineLUTs.lsl", "MainPS", platform::Render::PixelShader);
 
 void GetCombineLUTParameters(CombineLUTParameters& Parameters, const ColorCorrectParameters& args)
 {

@@ -7,8 +7,8 @@
 using namespace platform;
 using namespace platform::Render::Shader;
 
-IMPLEMENT_SHADER(WriteToSliceVS, "PostProcess/VolumeRendering.lsl", "WriteToSliceMainVS", platform::Render::VertexShader);
-IMPLEMENT_SHADER(WriteToSliceGS, "PostProcess/VolumeRendering.lsl", "WriteToSliceMainGS", platform::Render::GeometryShader);
+IMPLEMENT_BUILTIN_SHADER(WriteToSliceVS, "PostProcess/VolumeRendering.lsl", "WriteToSliceMainVS", platform::Render::VertexShader);
+IMPLEMENT_BUILTIN_SHADER(WriteToSliceGS, "PostProcess/VolumeRendering.lsl", "WriteToSliceMainGS", platform::Render::GeometryShader);
 
 
 struct ScreenVertex

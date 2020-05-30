@@ -224,6 +224,9 @@
     <None Include="Render\Effect\PreZ.lsl" />
     <None Include="Render\Effect\Util.lsl" />
     <None Include="Render\Material\FPDS.mat.lsl" />
+    <None Include="Shaders\Common.lsl" />
+    <None Include="Shaders\PostProcess\PostProcessCombineLUTs.lsl" />
+    <None Include="Shaders\PostProcess\VolumeRendering.lsl" />
     <None Include="Shaders\RayTracing\RayTracingBuiltInShaders.lsl" />
     <None Include="Shaders\RayTracing\RayTracingCommon.lsl" />
     <None Include="Shaders\RayTracing\RayTracingDefaultHitShaders.lsl" />

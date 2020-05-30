@@ -626,6 +626,9 @@
     <Filter Include="Render\Shader">
       <UniqueIdentifier>{6e38963e-768a-4adf-89c0-524ac94af2a1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\PostProcess">
+      <UniqueIdentifier>{12c18834-075b-4cc8-9dc6-689f35954d1e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Render\Effect\PostProcess.lsl">
@@ -675,6 +678,15 @@
     </None>
     <None Include="Render\Effect\PreZ.lsl">
       <Filter>Render\Effect</Filter>
+    </None>
+    <None Include="Shaders\Common.lsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\PostProcess\PostProcessCombineLUTs.lsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </None>
+    <None Include="Shaders\PostProcess\VolumeRendering.lsl">
+      <Filter>Shaders\PostProcess</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

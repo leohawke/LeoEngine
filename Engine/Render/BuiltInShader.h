@@ -12,8 +12,27 @@ inline namespace Shader
 	{
 	public:
 		using CompiledShaderInitializer = RenderShader::CompiledShaderInitializer;
+		typedef RenderShader* (*ConstructCompiledType)(const CompiledShaderInitializer&);
 
-		using ShaderMeta::ShaderMeta;
+		BuiltInShaderMeta(
+			const char* InName,
+			const char* InSourceFileName,
+			const char* InEntryPoint,
+			platform::Render::ShaderType  InFrequency,
+			ConstructType InConstructRef,
+			ConstructCompiledType InConstructCompiledRef
+		):
+		 ShaderMeta(EShaderMetaForDownCast::BuitlIn,InName,InSourceFileName,InEntryPoint,InFrequency,InConstructRef),
+			ConstructCompiledRef(InConstructCompiledRef)
+		{}
+
+		RenderShader* Construct(const CompiledShaderInitializer& initializer) const
+		{
+			return (*ConstructCompiledRef)(initializer);
+		}
+
+	private:
+		ConstructCompiledType ConstructCompiledRef;
 	};
 
 	class BuiltInShader :public RenderShader
@@ -40,6 +59,16 @@ public:\
 		:ShaderClass()\
 	{\
 	}
+
+#define IMPLEMENT_BUILTIN_SHADER(ShaderClass,SourceFileName,FunctionName,Frequency) \
+	ShaderClass::ShaderMetaType ShaderClass::StaticType( \
+		#ShaderClass, \
+		SourceFileName, \
+		FunctionName, \
+		Frequency, \
+		ShaderClass::ConstructInstance, \
+		ShaderClass::ConstructCompiledInstance\
+	)
 }
 PR_NAMESPACE_END
 

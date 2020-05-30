@@ -8,7 +8,7 @@
         {
             ScreenVertexOutput Vertex;
             uint LayerIndex : SV_RenderTargetArrayIndex;
-        }
+        };
 
         /** Vertex shader that writes to a range of slices of a volume texture. */
         void WriteToSliceMainVS(

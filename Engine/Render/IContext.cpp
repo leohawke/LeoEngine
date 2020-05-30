@@ -17,6 +17,8 @@ namespace platform_ex {
 
 namespace platform {
 	namespace Render {
+		HardwareShader::~HardwareShader() = default;
+
 		Context& Context::Instance() {
 			return platform_ex::Windows::D3D12::GetContext();
 		}

@@ -12,7 +12,7 @@
         {
             ScreenVertexOutput Vertex;
             uint LayerIndex : SV_RenderTargetArrayIndex;
-        }
+        };
     "
     )
 )

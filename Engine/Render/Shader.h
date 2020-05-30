@@ -104,14 +104,23 @@ inline namespace Shader
 		RenderShaderParameterBindings Bindings;
 	};
 
+	class BuiltInShaderMeta;
+
 	class ShaderMeta
 	{
 	public:
+		enum class EShaderMetaForDownCast :uint32
+		{
+			Reserve,
+			BuitlIn,
+		};
+
 		typedef class RenderShader* (*ConstructType)();
 
 		static std::list<ShaderMeta*>& GetTypeList();
 	public:
 		ShaderMeta(
+			EShaderMetaForDownCast InShaderMetaForDownCast,
 			const char* InName,
 			const char* InSourceFileName,
 			const char* InEntryPoint,
@@ -125,7 +134,14 @@ inline namespace Shader
 		platform::Render::ShaderType GetShaderType() const { return Frequency; }
 
 		RenderShader* Construct() const;
+
+		BuiltInShaderMeta* GetBuiltInShaderType()
+		{
+			return ShaderMetaForDownCast == EShaderMetaForDownCast::BuitlIn ? (BuiltInShaderMeta*)(this) : nullptr;
+		}
 	private:
+		EShaderMetaForDownCast ShaderMetaForDownCast;
+
 		std::string TypeName;
 		std::string SourceFileName;
 		std::string EntryPoint;
@@ -177,6 +193,7 @@ public:\
 
 #define IMPLEMENT_SHADER(ShaderClass,SourceFileName,FunctionName,Frequency) \
 	ShaderClass::ShaderMetaType ShaderClass::StaticType( \
+		ShaderClass::ShaderMetaType::EShaderMetaForDownCast::Reserve,\
 		#ShaderClass, \
 		SourceFileName, \
 		FunctionName, \

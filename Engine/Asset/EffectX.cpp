@@ -486,7 +486,7 @@ namespace platform {
 						default_parse(first_hash, second);
 					}
 				}
-				CatchIgnore(leo::bad_any_cast &)
+				CatchIgnore(std::bad_any_cast &)
 			}
 		}
 
@@ -565,7 +565,7 @@ namespace platform {
 					GetAsset()->EmplaceBlob(blob_hash, asset::ShaderBlobAsset(compile_type, std::move(blob),pInfo.release()));
 					pass.AssignOrInsertHash(compile_type, blob_hash);
 				}
-				CatchIgnore(leo::bad_any_cast &)
+				CatchIgnore(std::bad_any_cast &)
 			}
 		}
 	};

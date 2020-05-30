@@ -47,11 +47,15 @@ namespace platform::Render::Shader
 		return &GGlobalShaderMap;
 	}
 
-	ShaderMeta::ShaderMeta(const char* InName, const char* InSourceFileName, const char* InEntryPoint, platform::Render::ShaderType InFrequency,
+	ShaderMeta::ShaderMeta(EShaderMetaForDownCast InShaderMetaForDownCast, const char* InName, const char* InSourceFileName, const char* InEntryPoint, platform::Render::ShaderType InFrequency,
 		ConstructType InConstructRef)
-		:TypeName(InName), SourceFileName(InSourceFileName),
-		EntryPoint(InEntryPoint), Frequency(InFrequency)
-		, ConstructRef(InConstructRef)
+		:
+		ShaderMetaForDownCast(InShaderMetaForDownCast),
+		TypeName(InName), 
+		SourceFileName(InSourceFileName),
+		EntryPoint(InEntryPoint), 
+		Frequency(InFrequency), 
+		ConstructRef(InConstructRef)
 	{
 		GetTypeList().emplace_front(this);
 	}
@@ -107,14 +111,17 @@ namespace platform::Render::Shader
 
 				GGlobalShaderMap.AddShader(meta, pShader);
 			}
-			else {
+			else if(auto pBuiltInMeta = meta->GetBuiltInShaderType()){
 				platform::Render::ShaderInitializer initializer;
 				initializer.pBlob = &blob;
 				initializer.pInfo = &Info;
 
 				auto pShaderRHI = Device.CreateShader(initializer);
 
-				auto pShader = static_cast<RenderShader*>(meta->Construct());
+				RenderShader::CompiledShaderInitializer compileOuput;
+				compileOuput.Shader = pShaderRHI;
+
+				auto pShader = pBuiltInMeta->Construct(compileOuput);
 
 				GGlobalShaderMap.AddShader(meta, pShader);
 			}
