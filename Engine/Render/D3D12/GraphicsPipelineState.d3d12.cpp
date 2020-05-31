@@ -1,6 +1,5 @@
 #include <LBase/ldef.h>
 #include "GraphicsPipelineState.h"
-#include "ShaderPass.h"
 #include "Convert.h"
 #include "RootSignature.h"
 #include "ShaderCompose.h"

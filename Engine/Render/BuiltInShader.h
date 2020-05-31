@@ -51,14 +51,12 @@ public:\
 	static RenderShader* ConstructInstance() { return new ShaderClass();} \
 	static RenderShader* ConstructCompiledInstance(const ShaderMetaType::CompiledShaderInitializer& Initializer) { return new ShaderClass(Initializer);} \
 	static constexpr bool HasParameters =  platform::Render::ShaderParametersType<ShaderClass>::HasParameters;\
-	ShaderClass() \
-	{\
-		platform::Render::BindForLegacyShaderParameters<platform::Render::ShaderParametersType_t<ShaderClass>>(this,{});\
-	}\
 	ShaderClass(const ShaderMetaType::CompiledShaderInitializer& Initializer) \
-		:ShaderClass()\
 	{\
-	}
+		platform::Render::BindForLegacyShaderParameters<platform::Render::ShaderParametersType_t<ShaderClass>>(this,Initializer.ParameterMap);\
+	}\
+	ShaderClass() \
+	{ }
 
 #define IMPLEMENT_BUILTIN_SHADER(ShaderClass,SourceFileName,FunctionName,Frequency) \
 	ShaderClass::ShaderMetaType ShaderClass::StaticType( \

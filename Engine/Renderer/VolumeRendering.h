@@ -4,6 +4,7 @@
 #include <Engine/Render/IGraphicsBuffer.hpp>
 #include <Engine/Render/IDevice.h>
 #include <Engine/Render/ICommandList.h>
+#include <Engine/Render/ShaderParamterTraits.hpp>
 
 namespace platform
 {
@@ -41,7 +42,6 @@ namespace platform
 
 	class WriteToSliceVS : public Render::BuiltInShader
 	{
-
 		EXPORTED_BUILTIN_SHADER(WriteToSliceVS);
 	public:
 		BEGIN_SHADER_PARAMETER_STRUCT(Parameters)

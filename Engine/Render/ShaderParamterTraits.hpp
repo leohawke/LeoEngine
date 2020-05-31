@@ -75,7 +75,7 @@ namespace platform::Render
 }
 
 #define INTERNAL_LOCAL_SHADER_PARAMETER_GET_STRUCT_METADATA(StructTypeName) \
-	static ShaderParametersMetadata StaticStructMetadata(\
+	static platform::Render::ShaderParametersMetadata StaticStructMetadata(\
 		StructTypeName::zzGetMembers()); \
 	return &StaticStructMetadata;
 
@@ -84,14 +84,14 @@ namespace platform::Render
 	{ \
 	public: \
 		struct TypeInfo{\
-			static inline const ShaderParametersMetadata* GetStructMetadata() { GetStructMetadataScope } \
+			static inline const platform::Render::ShaderParametersMetadata* GetStructMetadata() { GetStructMetadataScope } \
 		};\
 	private: \
 		typedef StructTypeName zzThisStruct; \
 		struct zzFirstMemberId { enum { Boundary = 16 }; }; \
 		typedef void* zzFuncPtr; \
-		typedef zzFuncPtr(*zzMemberFunc)(zzFirstMemberId, std::vector<ShaderParametersMetadata::Member>*); \
-		static zzFuncPtr zzAppendMemberGetPrev(zzFirstMemberId, std::vector<ShaderParametersMetadata::Member>*) \
+		typedef zzFuncPtr(*zzMemberFunc)(zzFirstMemberId, std::vector<platform::Render::ShaderParametersMetadata::Member>*); \
+		static zzFuncPtr zzAppendMemberGetPrev(zzFirstMemberId, std::vector<platform::Render::ShaderParametersMetadata::Member>*) \
 		{ \
 			return nullptr; \
 		} \
@@ -107,14 +107,14 @@ namespace platform::Render
 				platform::Render::VariableBoundary:\
 				zzMemberId##MemberName::Boundary-sizeof(MemberName) }; \
 			}; \
-		static zzFuncPtr zzAppendMemberGetPrev(zzNextMemberId##MemberName, std::vector<ShaderParametersMetadata::Member>* Members) \
+		static zzFuncPtr zzAppendMemberGetPrev(zzNextMemberId##MemberName, std::vector<platform::Render::ShaderParametersMetadata::Member>* Members) \
 		{ \
 			Members->emplace_back(\
 				#MemberName,\
 				static_cast<leo::uint32>(loffsetof(zzThisStruct,MemberName)),\
 				BaseType \
 			);\
-			zzFuncPtr(*PrevFunc)(zzMemberId##MemberName, std::vector<ShaderParametersMetadata::Member>*); \
+			zzFuncPtr(*PrevFunc)(zzMemberId##MemberName, std::vector<platform::Render::ShaderParametersMetadata::Member>*); \
 			PrevFunc = zzAppendMemberGetPrev; \
 			return (zzFuncPtr)PrevFunc; \
 		}\
@@ -122,9 +122,9 @@ namespace platform::Render
 
 #define END_SHADER_PARAMETER_STRUCT() \
 	zzLastMemberId; \
-	static std::vector<ShaderParametersMetadata::Member> zzGetMembers() { \
-			std::vector<ShaderParametersMetadata::Member> Members; \
-			zzFuncPtr(*LastFunc)(zzLastMemberId, std::vector<ShaderParametersMetadata::Member>*); \
+	static std::vector<platform::Render::ShaderParametersMetadata::Member> zzGetMembers() { \
+			std::vector<platform::Render::ShaderParametersMetadata::Member> Members; \
+			zzFuncPtr(*LastFunc)(zzLastMemberId, std::vector<platform::Render::ShaderParametersMetadata::Member>*); \
 			LastFunc = zzAppendMemberGetPrev; \
 			zzFuncPtr Ptr = (zzFuncPtr)LastFunc; \
 			do \

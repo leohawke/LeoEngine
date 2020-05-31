@@ -81,6 +81,7 @@ inline namespace Shader
 		struct CompiledShaderInitializer
 		{
 			HardwareShader* Shader;
+			ShaderParameterMap ParameterMap;
 		};
 
 		RenderShader();
@@ -195,9 +196,7 @@ public:\
 	static RenderShader* ConstructInstance() { return new ShaderClass();} \
 	static constexpr bool HasParameters =  platform::Render::ShaderParametersType<ShaderClass>::HasParameters;\
 	ShaderClass() \
-	{\
-		platform::Render::BindForLegacyShaderParameters<platform::Render::ShaderParametersType_t<ShaderClass>>(this,{});\
-	}
+	{ }
 
 #define IMPLEMENT_SHADER(ShaderClass,SourceFileName,FunctionName,Frequency) \
 	ShaderClass::ShaderMetaType ShaderClass::StaticType( \
