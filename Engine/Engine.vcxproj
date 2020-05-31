@@ -89,6 +89,7 @@
     <ClCompile Include="Render\IRayTracingScene.cpp" />
     <ClCompile Include="Render\IRayTracingShader.cpp" />
     <ClCompile Include="Render\ITexture.cpp" />
+    <ClCompile Include="Render\PipelineStateUtility.cpp" />
     <ClCompile Include="Render\PipleState.cpp" />
     <ClCompile Include="Render\RenderObject.cpp" />
     <ClCompile Include="Render\ResourceView.cpp" />
@@ -184,12 +185,14 @@
     <ClInclude Include="Render\IRayTracingPipelineState.h" />
     <ClInclude Include="Render\IRayTracingScene.h" />
     <ClInclude Include="Render\IRayTracingShader.h" />
+    <ClInclude Include="Render\PipelineStateUtility.h" />
     <ClInclude Include="Render\Shader.h" />
     <ClInclude Include="Render\RayTracingDefinitions.h" />
     <ClInclude Include="Render\RenderObject.h" />
     <ClInclude Include="Render\IShaderCompose.h" />
     <ClInclude Include="Render\ShaderCore.h" />
     <ClInclude Include="Render\ShaderParametersMetadata.h" />
+    <ClInclude Include="Render\ShaderParameterStruct.h" />
     <ClInclude Include="Render\ShaderParamterTraits.hpp" />
     <ClInclude Include="Render\IContext.h" />
     <ClInclude Include="Render\IDevice.h" />

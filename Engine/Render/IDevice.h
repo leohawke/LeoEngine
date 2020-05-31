@@ -44,9 +44,13 @@ namespace platform::Render {
 	{};
 
 
-	class ShaderPass
+	struct ShaderPassInput
 	{
+		VertexDeclarationElements VertexDeclaration;
 
+		VertexHWShader* VertexShader = nullptr;
+		PixelHWShader* PixelShader = nullptr;
+		GeometryHWShader* GeometryShader = nullptr;
 	};
 
 	/** The number of render-targets that may be simultaneously written to. */
@@ -67,10 +71,9 @@ namespace platform::Render {
 		DepthStencilDesc DepthStencilState;
 		BlendDesc BlendState;
 
-		VertexDeclarationElements VertexDeclaration;
 		PrimtivteType Primitive;
 
-		ShaderPass* ShaderState;
+		ShaderPassInput ShaderPass;
 
 	public:
 		GraphicsPipelineStateInitializer()

@@ -248,6 +248,9 @@
     <ClCompile Include="Render\D3D12\HardwareShader.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
+    <ClCompile Include="Render\PipelineStateUtility.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -551,6 +554,12 @@
     </ClInclude>
     <ClInclude Include="Render\D3D12\HardwareShader.h">
       <Filter>Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShaderParameterStruct.h">
+      <Filter>Render\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\PipelineStateUtility.h">
+      <Filter>Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

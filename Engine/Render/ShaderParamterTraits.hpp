@@ -60,6 +60,17 @@ namespace platform::Render
 
 			using DeclType = leo::math::float4;
 		};
+
+		template<>
+		struct TShaderParameterTypeInfo<int>
+		{
+			static constexpr ShaderParamType ShaderType = SPT_int;
+
+			template<std::size_t Boundary = 0>
+			static constexpr std::size_t Alignement = 4;
+
+			using DeclType = leo::int32;
+		};
 	}
 }
 

@@ -73,6 +73,8 @@ namespace platform::Render::Shader
 		auto& Device = Context::Instance().GetDevice();
 		auto& RayDevice = Context::Instance().GetRayContext().GetDevice();
 
+		LFL_DEBUG_DECL_TIMER(Commpile, "CompileGlobalShaderMap");
+
 		for (auto meta : ShaderMeta::GetTypeList())
 		{
 			

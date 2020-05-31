@@ -2,6 +2,8 @@
 #include <Engine/Render/ShaderParamterTraits.hpp>
 #include <Engine/Render/BuiltInShader.h>
 #include <Engine/Render/IContext.h>
+#include <Engine/Render/PipelineStateUtility.h>
+#include <Engine/Render/ShaderParameterStruct.h>
 #include <LBase/smart_ptr.hpp>
 #include <Engine/Render/ICommandList.h>
 #include "../VolumeRendering.h"
@@ -73,10 +75,11 @@ END_SHADER_PARAMETER_STRUCT();
 class LUTBlenderPS : public LUTBlenderShader
 {
 public:
+	using Parameters = CombineLUTParameters;
 	EXPORTED_BUILTIN_SHADER(LUTBlenderPS);
 };
 
-IMPLEMENT_BUILTIN_SHADER(LUTBlenderPS, "PostProcessCombineLUTs.lsl", "MainPS", platform::Render::PixelShader);
+IMPLEMENT_BUILTIN_SHADER(LUTBlenderPS, "PostProcess/PostProcessCombineLUTs.lsl", "MainPS", platform::Render::PixelShader);
 
 void GetCombineLUTParameters(CombineLUTParameters& Parameters, const ColorCorrectParameters& args)
 {
@@ -113,7 +116,7 @@ std::shared_ptr<Render::Texture> platform::CombineLUTPass(const ColorCorrectPara
 	Render::Texture* OutputTexture = nullptr;
 
 	if(bUseVolumeTextureLUT)
-		OutputTexture = Render::Context::Instance().GetDevice().CreateTexture(GLUTSize, GLUTSize, GLUTSize, 1, 1, Render::EF_BGR32F, Render::EA_GPURead | Render::EA_GPUWrite, { 1,0 });
+		OutputTexture = Render::Context::Instance().GetDevice().CreateTexture(GLUTSize, GLUTSize, GLUTSize, 1, 1, Render::EF_ABGR16F, Render::EA_GPURead | Render::EA_GPUWrite, { 1,0 });
 
 	Render::RenderTargetView* pRT = nullptr; // Render::Context::Instance().GetDevice().CreateRenderTargetView(OutputTexture);
 
@@ -147,13 +150,16 @@ std::shared_ptr<Render::Texture> platform::CombineLUTPass(const ColorCorrectPara
 		auto PixelShader = Render::GetGlobalShaderMap()->GetShader<LUTBlenderPS>();
 
 		GraphicsPSOInit.Primitive = Render::PrimtivteType::TriangleStrip;
-		GraphicsPSOInit.ShaderState = nullptr;//CreateRenderPass(VertexShader,GeometryShader,PixelShader)
+		GraphicsPSOInit.ShaderPass.VertexDeclaration = GScreenVertexDeclaration();
+		GraphicsPSOInit.ShaderPass.VertexShader = VertexShader->GetVertexShader();
+		GraphicsPSOInit.ShaderPass.GeometryShader = GeometryShader->GetGeometryShader();
+		GraphicsPSOInit.ShaderPass.PixelShader = PixelShader->GetPixelShader();
 
-		//SetGraphicsPipelineState(CmdList, GraphicsPSOInit);
+		SetGraphicsPipelineState(CmdList, GraphicsPSOInit);
 
 		VertexShader->SetParameters(CmdList, Bounds, leo::math::int3(Bounds.MaxX - Bounds.MinX));
 
-		//SetShaderParameters(CmdList, *PixelShader, PixelShader->GetPixelShader(), *PassParameters);
+		SetShaderParameters(CmdList, PixelShader, PixelShader->GetPixelShader(), PassParameters);
 
 		RasterizeToVolumeTexture(CmdList, Bounds);
 	}

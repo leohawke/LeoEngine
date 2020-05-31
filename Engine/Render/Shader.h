@@ -93,6 +93,14 @@ inline namespace Shader
 		{
 			return GetHardwareShader<VertexHWShader>();
 		}
+		GeometryHWShader* GetGeometryShader() const
+		{
+			return GetHardwareShader<GeometryHWShader>();
+		}
+		PixelHWShader* GetPixelShader() const
+		{
+			return GetHardwareShader<PixelHWShader>();
+		}
 	private:
 		template<class THardwareShader>
 		THardwareShader* GetHardwareShader() const
