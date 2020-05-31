@@ -27,10 +27,8 @@ struct ShaderParameterStructBinding
 			auto ShaderType = Member.GetShaderType();
 
 			const bool bIsVariableNativeType = (
-				ShaderType == SPT_float ||
-				ShaderType == SPT_float2 ||
-				ShaderType == SPT_float3 ||
-				ShaderType == SPT_float4
+				ShaderType >= SPT_uint &&
+				ShaderType <= SPT_float4x4 
 				);
 
 			uint16 BufferIndex, BaseIndex, BoundSize;
@@ -41,8 +39,6 @@ struct ShaderParameterStructBinding
 
 			if (bIsVariableNativeType)
 			{
-				auto ByteSize = Member.GetMemberSize();
-
 				RenderShaderParameterBindings::Parameter Parameter;
 				Parameter.BufferIndex = BufferIndex;
 				Parameter.BaseIndex = BaseIndex;

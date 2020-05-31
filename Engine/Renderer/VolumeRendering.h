@@ -42,12 +42,14 @@ namespace platform
 
 	class WriteToSliceVS : public Render::BuiltInShader
 	{
-		EXPORTED_BUILTIN_SHADER(WriteToSliceVS);
 	public:
 		BEGIN_SHADER_PARAMETER_STRUCT(Parameters)
 			SHADER_PARAMETER(leo::math::float4, UVScaleBias)
 			SHADER_PARAMETER(int, MinZ)
 		END_SHADER_PARAMETER_STRUCT();
+
+		EXPORTED_BUILTIN_SHADER(WriteToSliceVS);
+	public:
 
 		//CompilerFlags.Add( CFLAG_VertexToGeometryShader );
 
@@ -56,6 +58,7 @@ namespace platform
 		{
 
 		}
+
 	};
 
 	class WriteToSliceGS : public Render::BuiltInShader

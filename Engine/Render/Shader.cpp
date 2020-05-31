@@ -68,6 +68,8 @@ namespace platform::Render::Shader
 		Shader = leo::unique_raw(initializer.Shader);
 	}
 
+	static void FillParameterMapByShaderInfo(ShaderParameterMap& target, const ShaderInfo& src);
+
 	void CompileGlobalShaderMap()
 	{
 		auto& Device = Context::Instance().GetDevice();
@@ -122,10 +124,29 @@ namespace platform::Render::Shader
 
 				RenderShader::CompiledShaderInitializer compileOuput;
 				compileOuput.Shader = pShaderRHI;
+				FillParameterMapByShaderInfo(compileOuput.ParameterMap, Info);
 
 				auto pShader = pBuiltInMeta->Construct(compileOuput);
 
 				GGlobalShaderMap.AddShader(meta, pShader);
+			}
+		}
+	}
+
+	void FillParameterMapByShaderInfo(ShaderParameterMap& target, const ShaderInfo& src)
+	{
+		for (auto& cb : src.ConstantBufferInfos)
+		{
+			auto& name = cb.name;
+
+			bool bGlobalCB = name == "$Globals";
+			if (bGlobalCB)
+			{
+				for (auto& var : cb.var_desc)
+				{
+					target.AddParameterAllocation(var.name, cb.bind_point,
+						var.start_offset, var.size, ShaderParamClass::LooseData);
+				}
 			}
 		}
 	}

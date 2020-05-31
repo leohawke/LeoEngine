@@ -162,7 +162,7 @@ inline namespace Shader
 	template <typename ParameterStruct>
 	inline void BindForLegacyShaderParameters(RenderShader* Shader, const ShaderParameterMap& ParameterMap)
 	{
-		Shader->Bindings.BindForLegacyShaderParameters(Shader, ParameterMap, *FParameterStruct::TypeInfo::GetStructMetadata());
+		Shader->Bindings.BindForLegacyShaderParameters(Shader, ParameterMap, *ParameterStruct::TypeInfo::GetStructMetadata());
 	}
 
 	template<>

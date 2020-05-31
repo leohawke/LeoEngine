@@ -120,12 +120,14 @@ namespace platform::Render {
 					uint8_t rows;
 					uint8_t columns;
 					uint16_t elements;
+					uint16_t size;
 				};
 				std::vector<VariableInfo> var_desc;
 
 				std::string name;
 				size_t name_hash;
-				uint32_t size = 0;
+				uint16_t size;
+				uint32_t bind_point;
 			};
 			std::vector<ConstantBufferInfo> ConstantBufferInfos;
 
@@ -169,6 +171,8 @@ namespace platform::Render {
 		class ShaderParameterMap
 		{
 		public:
+			void AddParameterAllocation(const std::string& ParameterName, uint16 BufferIndex, uint16 BaseIndex, uint16 Size, ShaderParamClass ParameterType);
+
 			bool FindParameterAllocation(const std::string& ParameterName, uint16& OutBufferIndex, uint16& OutBaseIndex, uint16& OutSize) const;
 
 		private:

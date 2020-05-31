@@ -16,9 +16,9 @@ KeyGraphicsPipelineStateDesc GetKeyGraphicsPipelineStateDesc(
 GraphicsPipelineState::GraphicsPipelineState(const platform::Render::GraphicsPipelineStateInitializer& initializer)
 {
 	//retrive RootSignature
-	auto graphicspass = static_cast<GraphicsShaderPass*>(initializer.ShaderState);
+	auto root_signature = static_cast<RootSignature*>(nullptr);
 
-	Key =  GetKeyGraphicsPipelineStateDesc(initializer,graphicspass->RootSignature());
+	Key =  GetKeyGraphicsPipelineStateDesc(initializer, root_signature);
 
 	Key.Desc.NodeMask = 0;
 
@@ -42,9 +42,6 @@ static void TranslateRenderTargetFormats(
 KeyGraphicsPipelineStateDesc GetKeyGraphicsPipelineStateDesc(
 	const platform::Render::GraphicsPipelineStateInitializer& initializer, RootSignature* RootSignature)
 {
-	auto graphicspass = static_cast<GraphicsShaderPass*>(initializer.ShaderState);
-
-
 	KeyGraphicsPipelineStateDesc Desc;
 	std::memset(&Desc, 0, sizeof(Desc));
 
@@ -55,7 +52,7 @@ KeyGraphicsPipelineStateDesc GetKeyGraphicsPipelineStateDesc(
 	Desc.Desc.RasterizerState = Convert(initializer.RasterizerState);
 	Desc.Desc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC1(Convert(initializer.DepthStencilState));
 
-	if (graphicspass->HullShader.has_value() && graphicspass->DomainShader.has_value())
+	if (false)
 	{
 		Desc.Desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
 	}
@@ -70,7 +67,7 @@ KeyGraphicsPipelineStateDesc GetKeyGraphicsPipelineStateDesc(
 	Desc.Desc.SampleDesc.Quality = initializer.NumSamples > DX_MAX_MSAA_COUNT ? 0XFFFFFFFF : 0;
 
 	//InputLayout
-	auto VertexDeclaration = CreateVertexDeclaration(initializer.VertexDeclaration);
+	auto VertexDeclaration = CreateVertexDeclaration(initializer.ShaderPass.VertexDeclaration);
 	if (VertexDeclaration)
 	{
 		Desc.Desc.InputLayout.NumElements = VertexDeclaration->VertexElements.size();
@@ -79,13 +76,13 @@ KeyGraphicsPipelineStateDesc GetKeyGraphicsPipelineStateDesc(
 
 	//CopyShader
 #define COPY_SHADER(L,R) \
-	Desc.Desc.L##S << graphicspass->R##Shader;
+	Desc.Desc.L##S << initializer.ShaderPass.R##Shader;
 
-	COPY_SHADER(V, Vertex);
-	COPY_SHADER(P, Pixel);
-	COPY_SHADER(D, Domain);
-	COPY_SHADER(H, Hull);
-	COPY_SHADER(G,Geometry)
+	//COPY_SHADER(V, Vertex);
+	//COPY_SHADER(P, Pixel);
+	//COPY_SHADER(D, Domain);
+	//COPY_SHADER(H, Hull);
+	//COPY_SHADER(G,Geometry)
 #undef COPY_SHADER
 
 	//don't support stream output

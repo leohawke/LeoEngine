@@ -104,6 +104,7 @@ void FillD3D12Reflect(ID3D1xShaderReflection* pReflection, ShaderInfo* pInfo,Sha
 			ConstantBufferInfo.name = buffer_desc.Name;
 			ConstantBufferInfo.name_hash = leo::constfn_hash(buffer_desc.Name);
 			ConstantBufferInfo.size = buffer_desc.Size;
+			ConstantBufferInfo.bind_point = i;
 
 			for (UINT v = 0; v != buffer_desc.Variables; ++v) {
 				auto pReflectionVar = pReflectionConstantBuffer->GetVariableByIndex(v);
@@ -120,6 +121,7 @@ void FillD3D12Reflect(ID3D1xShaderReflection* pReflection, ShaderInfo* pInfo,Sha
 				VariableInfo.rows = variable_desc.StartOffset;
 				VariableInfo.columns = variable_desc.StartOffset;
 				VariableInfo.elements = variable_desc.StartOffset;
+				VariableInfo.size = variable_desc.Size;
 
 				ConstantBufferInfo.var_desc.emplace_back(std::move(VariableInfo));
 			}
@@ -226,6 +228,7 @@ void FillD3D11Reflect(ID3D11ShaderReflection* pReflection, ShaderInfo* pInfo, Sh
 			ConstantBufferInfo.name = buffer_desc.Name;
 			ConstantBufferInfo.name_hash = leo::constfn_hash(buffer_desc.Name);
 			ConstantBufferInfo.size = buffer_desc.Size;
+			ConstantBufferInfo.bind_point = i;
 
 			for (UINT v = 0; v != buffer_desc.Variables; ++v) {
 				auto pReflectionVar = pReflectionConstantBuffer->GetVariableByIndex(v);
@@ -242,6 +245,7 @@ void FillD3D11Reflect(ID3D11ShaderReflection* pReflection, ShaderInfo* pInfo, Sh
 				VariableInfo.rows = variable_desc.StartOffset;
 				VariableInfo.columns = variable_desc.StartOffset;
 				VariableInfo.elements = variable_desc.StartOffset;
+				VariableInfo.size = variable_desc.Size;
 
 				ConstantBufferInfo.var_desc.emplace_back(std::move(VariableInfo));
 			}
