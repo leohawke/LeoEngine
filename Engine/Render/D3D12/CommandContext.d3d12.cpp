@@ -78,10 +78,34 @@ void CommandContext::SetRenderTargetsAndClear(const SetRenderTargetsInfo& Render
 
 void CommandContext::SetViewport(uint32 MinX, uint32 MinY, float MinZ, uint32 MaxX, uint32 MaxY, float MaxZ)
 {
+	// These are the maximum viewport extents for D3D12. Exceeding them leads to badness.
+	lconstraint(MinX <= (uint32)D3D12_VIEWPORT_BOUNDS_MAX);
+	lconstraint(MinY <= (uint32)D3D12_VIEWPORT_BOUNDS_MAX);
+	lconstraint(MaxX <= (uint32)D3D12_VIEWPORT_BOUNDS_MAX);
+	lconstraint(MaxY <= (uint32)D3D12_VIEWPORT_BOUNDS_MAX);
+
+	D3D12_VIEWPORT Viewport = { (float)MinX, (float)MinY, (float)(MaxX - MinX), (float)(MaxY - MinY), MinZ, MaxZ };
+
+	if (Viewport.Width > 0 && Viewport.Height > 0)
+	{
+		StateCache.SetViewport(Viewport);
+		SetScissorRect(true, MinX, MinY, MaxX, MaxY);
+	}
 }
 
 void CommandContext::SetScissorRect(bool bEnable, uint32 MinX, uint32 MinY, uint32 MaxX, uint32 MaxY)
 {
+	if (bEnable)
+	{
+		const CD3DX12_RECT ScissorRect(MinX, MinY, MaxX, MaxY);
+		StateCache.SetScissorRect(ScissorRect);
+	}
+	else
+	{
+		const D3D12_VIEWPORT& Viewport = StateCache.GetViewport();
+		const CD3DX12_RECT ScissorRect((LONG)Viewport.TopLeftX, (LONG)Viewport.TopLeftY, (LONG)Viewport.TopLeftX + (LONG)Viewport.Width, (LONG)Viewport.TopLeftY + (LONG)Viewport.Height);
+		StateCache.SetScissorRect(ScissorRect);
+	}
 }
 
 void CommandContext::SetVertexBuffer(uint32 slot, platform::Render::GraphicsBuffer* VertexBuffer)

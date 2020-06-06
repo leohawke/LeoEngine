@@ -7,7 +7,7 @@
 #include "GraphicsPipelineState.h"
 #include "ResourceHolder.h"
 #include "HardwareShader.h"
-#include "GraphicsBuffer.hpp"
+#include "ConstantBuffer.h"
 #include "Convert.h"
 #include <LBase/observer_ptr.hpp>
 
@@ -508,10 +508,10 @@ namespace platform_ex::Windows::D3D12 {
 		}
 
 		template <ShaderType ShaderFrequency>
-		void SetConstantBuffer(GraphicsBuffer& Buffer, bool bDiscardSharedConstants)
+		void SetConstantBuffer(ConstantBuffer& Buffer, bool bDiscardSharedConstants)
 		{
-			auto Location = Buffer.Resource();
-			//if (Buffer.Version(Location, bDiscardSharedConstants))
+			ID3D12Resource* Location = nullptr;
+			if (Buffer.Version(Location, bDiscardSharedConstants))
 			{
 				// Note: Code assumes the slot index is always 0.
 				const uint32 SlotIndex = 0;

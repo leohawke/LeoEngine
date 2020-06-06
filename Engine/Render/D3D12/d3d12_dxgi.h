@@ -98,6 +98,28 @@ namespace platform_ex {
 namespace platform_ex::Windows::D3D12 {
 	constexpr inline struct CD3DX12_DEFAULT {} D3D12_DEFAULT;
 
+	struct CD3DX12_RECT : public D3D12_RECT
+	{
+		CD3DX12_RECT()
+		{}
+		explicit CD3DX12_RECT(const D3D12_RECT& o) :
+			D3D12_RECT(o)
+		{}
+		explicit CD3DX12_RECT(
+			LONG Left,
+			LONG Top,
+			LONG Right,
+			LONG Bottom)
+		{
+			left = Left;
+			top = Top;
+			right = Right;
+			bottom = Bottom;
+		}
+		~CD3DX12_RECT() {}
+		operator const D3D12_RECT& () const { return *this; }
+	};
+
 	struct CD3DX12_DEPTH_STENCIL_DESC1 : public D3D12_DEPTH_STENCIL_DESC1
 	{
 		CD3DX12_DEPTH_STENCIL_DESC1()
