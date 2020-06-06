@@ -1,4 +1,5 @@
 #include "CommandContext.h"
+#include "Texture.h"
 
 using namespace platform_ex::Windows::D3D12;
 
@@ -108,23 +109,52 @@ void CommandContext::SetScissorRect(bool bEnable, uint32 MinX, uint32 MinY, uint
 	}
 }
 
-void CommandContext::SetVertexBuffer(uint32 slot, platform::Render::GraphicsBuffer* VertexBuffer)
+void CommandContext::SetVertexBuffer(uint32 slot, platform::Render::GraphicsBuffer* IVertexBuffer)
 {
+	auto VertexBuffer = static_cast<GraphicsBuffer*>(IVertexBuffer);
+
+	StateCache.SetStreamSource(VertexBuffer, slot, 0);
 }
 
 void CommandContext::SetGraphicsPipelineState(platform::Render::GraphicsPipelineState* pso)
 {
+	auto PipelineState = static_cast<GraphicsPipelineState*>(pso);
+
+	const bool bWasUsingTessellation = bUsingTessellation;
+	bUsingTessellation = PipelineState->GetHullShader() && PipelineState->GetDomainShader();
+
+	// Ensure the command buffers are reset to reduce the amount of data that needs to be versioned.
+	VSConstantBuffer.Reset();
+	PSConstantBuffer.Reset();
+	HSConstantBuffer.Reset();
+	DSConstantBuffer.Reset();
+	GSConstantBuffer.Reset();
+	// Should this be here or in RHISetComputeShader? Might need a new bDiscardSharedConstants for CS.
+	CSConstantBuffer.Reset();
+
+	//really should only discard the constants if the shader state has actually changed.
+	bDiscardSharedConstants = true;
+
+	if (!false)
+	{
+		StateCache.SetDepthBounds(0.0f, 1.0f);
+	}
+
+	StateCache.SetGraphicsPipelineState(PipelineState, bUsingTessellation != bWasUsingTessellation);
+	StateCache.SetStencilRef(0);
 }
 
 void CommandContext::SetShaderSampler(platform::Render::VertexHWShader* Shader, uint32 SamplerIndex, const platform::Render::TextureSampleDesc& Desc)
 {
+	StateCache.SetSamplerState<ShaderType::VertexShader>(Desc, SamplerIndex);
 }
 
 void CommandContext::SetShaderSampler(platform::Render::PixelHWShader* Shader, uint32 SamplerIndex, const platform::Render::TextureSampleDesc& Desc)
 {
+	StateCache.SetSamplerState<ShaderType::PixelShader>(Desc, SamplerIndex);
 }
 
-void CommandContext::SetShaderTexture(platform::Render::VertexHWShader* Shader, uint32 TextureIndex, platform::Render::Texture* Texture)
+void CommandContext::SetShaderTexture(platform::Render::VertexHWShader* Shader, uint32 TextureIndex, platform::Render::Texture* ITexture)
 {
 }
 
@@ -132,20 +162,36 @@ void CommandContext::SetShaderTexture(platform::Render::PixelHWShader* Shader, u
 {
 }
 
-void CommandContext::SetShaderConstantBuffer(platform::Render::VertexHWShader* Shader, uint32 BaseIndex, platform::Render::GraphicsBuffer* Buffer)
+void CommandContext::SetShaderConstantBuffer(platform::Render::VertexHWShader* Shader, uint32 BaseIndex, platform::Render::GraphicsBuffer* IBuffer)
 {
+	auto Buffer = static_cast<GraphicsBuffer*>(IBuffer);
+
+	StateCache.SetConstantsBuffer<ShaderType::VertexShader>(BaseIndex, Buffer);
+
+	BoundConstantBuffers[ShaderType::VertexShader][BaseIndex] = Buffer;
+	DirtyConstantBuffers[ShaderType::VertexShader] |= (1 << BaseIndex);
 }
 
-void CommandContext::SetShaderConstantBuffer(platform::Render::PixelHWShader* Shader, uint32 BaseIndex, platform::Render::GraphicsBuffer* Buffer)
+void CommandContext::SetShaderConstantBuffer(platform::Render::PixelHWShader* Shader, uint32 BaseIndex, platform::Render::GraphicsBuffer* IBuffer)
 {
+	auto Buffer = static_cast<GraphicsBuffer*>(IBuffer);
+
+	StateCache.SetConstantsBuffer<ShaderType::PixelShader>(BaseIndex, Buffer);
+
+	BoundConstantBuffers[ShaderType::PixelShader][BaseIndex] = Buffer;
+	DirtyConstantBuffers[ShaderType::PixelShader] |= (1 << BaseIndex);
 }
 
 void CommandContext::SetShaderParameter(platform::Render::VertexHWShader* Shader, uint32 BufferIndex, uint32 BaseIndex, uint32 NumBytes, const void* NewValue)
 {
+	lconstraint(BufferIndex == 0);
+	VSConstantBuffer.UpdateConstant(reinterpret_cast<const uint8*>(NewValue), BaseIndex, NumBytes);
 }
 
 void CommandContext::SetShaderParameter(platform::Render::PixelHWShader* Shader, uint32 BufferIndex, uint32 BaseIndex, uint32 NumBytes, const void* NewValue)
 {
+	lconstraint(BufferIndex == 0);
+	PSConstantBuffer.UpdateConstant(reinterpret_cast<const uint8*>(NewValue), BaseIndex, NumBytes);
 }
 
 void CommandContext::DrawIndexPrimitive(platform::Render::GraphicsBuffer* IndexBuffer, int32 BaseVertexIndex, uint32 FirstInstance, uint32 NumVertices, uint32 StartIndex, uint32 NumPrimitives, uint32 NumInstances)

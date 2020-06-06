@@ -66,5 +66,22 @@ namespace platform_ex::Windows::D3D12 {
 		uint16 DirtyUniformBuffers[ShaderType::NumStandardType];
 
 		ID3D12GraphicsCommandList* CommandListHandle;
+
+		/** Constant buffers for Set*ShaderParameter calls. */
+		ConstantBuffer VSConstantBuffer;
+		ConstantBuffer HSConstantBuffer;
+		ConstantBuffer DSConstantBuffer;
+		ConstantBuffer PSConstantBuffer;
+		ConstantBuffer GSConstantBuffer;
+		ConstantBuffer CSConstantBuffer;
+
+		/** Track the currently bound constant buffers. */
+		GraphicsBuffer* BoundConstantBuffers[ShaderType::NumStandardType][MAX_CBS];
+
+		/** Bit array to track which uniform buffers have changed since the last draw call. */
+		uint16 DirtyConstantBuffers[ShaderType::NumStandardType];
+	private:
+		bool bUsingTessellation = false;
+		bool bDiscardSharedConstants = false;
 	};
 }
