@@ -14,6 +14,7 @@ KeyGraphicsPipelineStateDesc GetKeyGraphicsPipelineStateDesc(
 	const platform::Render::GraphicsPipelineStateInitializer& initializer, RootSignature* RootSignature);
 
 GraphicsPipelineState::GraphicsPipelineState(const platform::Render::GraphicsPipelineStateInitializer& initializer)
+	:PipelineStateInitializer(initializer)
 {
 	//retrive RootSignature
 	auto root_signature = static_cast<RootSignature*>(nullptr);

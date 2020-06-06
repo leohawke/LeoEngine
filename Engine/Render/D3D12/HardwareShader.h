@@ -9,6 +9,7 @@ namespace platform_ex::Windows::D3D12 {
 		D3D12HardwareShader(const platform::Render::ShaderInitializer& initializer);
 
 		platform::Render::ShaderBlob ShaderByteCode;
+		platform::Render::ShaderCodeResourceCounts ResourceCounts;
 	};
 
 	class VertexHWShader :public platform::Render::VertexHWShader,public D3D12HardwareShader
@@ -24,6 +25,18 @@ namespace platform_ex::Windows::D3D12 {
 	};
 
 	class GeometryHWShader : public platform::Render::GeometryHWShader, public D3D12HardwareShader
+	{
+	public:
+		using D3D12HardwareShader::D3D12HardwareShader;
+	};
+
+	class DomainHWShader : public platform::Render::HardwareShader, public D3D12HardwareShader
+	{
+	public:
+		using D3D12HardwareShader::D3D12HardwareShader;
+	};
+
+	class HullHWShader : public platform::Render::HardwareShader, public D3D12HardwareShader
 	{
 	public:
 		using D3D12HardwareShader::D3D12HardwareShader;

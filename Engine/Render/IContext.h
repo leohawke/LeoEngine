@@ -13,6 +13,7 @@ namespace platform::Render {
 	class FrameBuffer;
 
 	class RayContext;
+	class CommandContext;
 
 	class Context {
 	public:
@@ -27,6 +28,8 @@ namespace platform::Render {
 
 		virtual void BeginFrame() = 0;
 		virtual void EndFrame() = 0;
+
+		virtual CommandContext* GetDefaultCommandContext() = 0;
 	public:
 		virtual void CreateDeviceAndDisplay() = 0;
 	private:

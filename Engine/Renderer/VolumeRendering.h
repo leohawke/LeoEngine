@@ -5,6 +5,7 @@
 #include <Engine/Render/IDevice.h>
 #include <Engine/Render/ICommandList.h>
 #include <Engine/Render/ShaderParamterTraits.hpp>
+#include <Engine/Render/ShaderParameterStruct.h>
 
 namespace platform
 {
@@ -54,9 +55,22 @@ namespace platform
 		//CompilerFlags.Add( CFLAG_VertexToGeometryShader );
 
 		template<class CommandList>
-		void SetParameters(CommandList&, const VolumeBounds& bounds, leo::math::int3 Resolution)
+		void SetParameters(CommandList& cmdlist, const VolumeBounds& bounds, leo::math::int3 Resolution)
 		{
+			Parameters parameters;
+			parameters.MinZ = bounds.MinZ;
 
+			const float InvVolumeResolutionX = 1.0f / Resolution.x;
+			const float InvVolumeResolutionY = 1.0f / Resolution.y;
+
+			parameters.UVScaleBias = leo::math::float4(
+				(bounds.MaxX - bounds.MinX) * InvVolumeResolutionX,
+				(bounds.MaxY - bounds.MinY) * InvVolumeResolutionY,
+				bounds.MinX * InvVolumeResolutionX,
+				bounds.MinY * InvVolumeResolutionY
+			);
+
+			platform::Render::SetShaderParameters(cmdlist, this, this->GetPixelShader(), parameters);
 		}
 
 	};
@@ -65,9 +79,7 @@ namespace platform
 	{
 		EXPORTED_BUILTIN_SHADER(WriteToSliceGS);
 
-		//SetParameters
 	private:
-		//ShaderParameter MinZ;
 	};
 
 	std::shared_ptr<Render::GraphicsBuffer> GVolumeRasterizeVertexBuffer();

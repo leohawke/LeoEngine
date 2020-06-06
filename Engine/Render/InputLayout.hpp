@@ -98,6 +98,8 @@ namespace platform::Render {
 
 	using VertexDeclarationElements = std::vector<VertexElement>;
 
+	constexpr unsigned MaxVertexElementCount = 16;
+
 	//fixme:error class name
 	class InputLayout :public leo::noncopyable {
 	public:

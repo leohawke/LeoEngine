@@ -8,6 +8,8 @@ namespace platform::Render {
 	class CommandListBase : leo::noncopyable
 	{
 	public:
+		CommandListBase();
+
 		void SetContext(CommandContext* InContext)
 		{
 			Context = InContext;
@@ -17,6 +19,8 @@ namespace platform::Render {
 		{
 			return *Context;
 		}
+
+		void Reset();
 	private:
 		CommandContext* Context;
 	};

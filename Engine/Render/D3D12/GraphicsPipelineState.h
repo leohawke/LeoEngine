@@ -59,8 +59,22 @@ namespace platform_ex::Windows::D3D12
 	public:
 		explicit GraphicsPipelineState(const platform::Render::GraphicsPipelineStateInitializer& initializer);
 
+		ID3D12PipelineState* GetPipelineState() const
+		{
+			return PipelineState.Get();
+		}
 	private:
 		void Create(const GraphicsPipelineStateCreateArgs& InCreationArgs);
+	public:
+		const platform::Render::GraphicsPipelineStateInitializer PipelineStateInitializer;
+		RootSignature* RootSignature;
+		uint16 StreamStrides[platform::Render:: MaxVertexElementCount];
+
+		class VertexHWShader* GetVertexShader() const { return (VertexHWShader*)PipelineStateInitializer.ShaderPass.VertexShader; }
+		class PixelHWShader* GetPixelShader() const { return (PixelHWShader*)PipelineStateInitializer.ShaderPass.PixelShader; }
+		class HullHWShader* GetHullShader() const { return (HullHWShader*)PipelineStateInitializer.ShaderPass.HullShader; }
+		class DomainHWShader* GetDomainShader() const { return (DomainHWShader*)PipelineStateInitializer.ShaderPass.DomainShader; }
+		class GeometryHWShader* GetGeometryShader() const { return (GeometryHWShader*)PipelineStateInitializer.ShaderPass.GeometryShader;; }
 	private:
 		KeyGraphicsPipelineStateDesc Key;
 

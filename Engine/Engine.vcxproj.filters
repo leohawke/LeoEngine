@@ -251,6 +251,9 @@
     <ClCompile Include="Render\PipelineStateUtility.cpp">
       <Filter>Render</Filter>
     </ClCompile>
+    <ClCompile Include="Render\D3D12\CommandContext.d3d12.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Adapter.h">
@@ -513,9 +516,6 @@
     <ClInclude Include="Render\D3D12\GraphicsPipelineState.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="Render\D3D12\ShaderPass.h">
-      <Filter>Render\D3D12</Filter>
-    </ClInclude>
     <ClInclude Include="Render\IShaderCompose.h">
       <Filter>Render\DeviceInterface</Filter>
     </ClInclude>
@@ -560,6 +560,15 @@
     </ClInclude>
     <ClInclude Include="Render\PipelineStateUtility.h">
       <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\CommandContext.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\ContextStateCache.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\Common.h">
+      <Filter>Render\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

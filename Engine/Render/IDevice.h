@@ -51,6 +51,9 @@ namespace platform::Render {
 		VertexHWShader* VertexShader = nullptr;
 		PixelHWShader* PixelShader = nullptr;
 		GeometryHWShader* GeometryShader = nullptr;
+
+		HardwareShader* HullShader = nullptr;
+		HardwareShader* DomainShader = nullptr;
 	};
 
 	/** The number of render-targets that may be simultaneously written to. */

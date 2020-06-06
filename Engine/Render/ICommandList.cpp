@@ -1,4 +1,6 @@
 #include "ICommandList.h"
+
+#include "IContext.h"
 #include <utility>
 #include <mutex>
 
@@ -10,9 +12,19 @@ CommandList& platform::Render::GetCommandList()
 	static CommandList Instance;
 	std::call_once(flag, [&]()
 		{
-			Instance.SetContext(nullptr);
 		}
 	);
 
 	return Instance;
+}
+
+platform::Render::CommandListBase::CommandListBase()
+	:Context(nullptr)
+{
+	Reset();
+}
+
+void platform::Render::CommandListBase::Reset()
+{
+	Context = platform::Render::Context::Instance().GetDefaultCommandContext();
 }
