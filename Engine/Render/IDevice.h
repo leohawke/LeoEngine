@@ -57,13 +57,10 @@ namespace platform::Render {
 	};
 
 	/** The number of render-targets that may be simultaneously written to. */
-	enum
-	{
-		MaxSimultaneousRenderTargets = 8,
-	};
+	constexpr unsigned MaxSimultaneousRenderTargets = 8;
 
 	/** The number of UAVs that may be simultaneously bound to a shader. */
-	enum { MaxSimultaneousUAVs = 8 };
+	constexpr unsigned MaxSimultaneousUAVs = 8;
 
 	class GraphicsPipelineStateInitializer
 	{

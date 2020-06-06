@@ -674,7 +674,7 @@ namespace platform_ex::Windows::D3D12 {
 		void DirtySamplerDescriptorTables();
 		bool AssertResourceStates(CachePipelineType PipelineType);
 
-		void SetRenderTargets(uint32 NumSimultaneousRenderTargets, RenderTargetView** RTArray, DepthStencilView* DSTarget);
+		void SetRenderTargets(uint32 NumSimultaneousRenderTargets,const RenderTargetView* const* RTArray,const DepthStencilView* DSTarget);
 		void GetRenderTargets(RenderTargetView** RTArray, uint32* NumSimultaneousRTs, DepthStencilView** DepthStencilTarget)
 		{
 			if (RTArray) //NULL is legal
@@ -690,7 +690,7 @@ namespace platform_ex::Windows::D3D12 {
 		}
 
 		template <ShaderType ShaderStage>
-		void SetUAVs(uint32 UAVStartSlot, uint32 NumSimultaneousUAVs, UnorderedAccessView** UAVArray, uint32* UAVInitialCountArray);
+		void SetUAVs(uint32 UAVStartSlot, uint32 NumSimultaneousUAVs, UnorderedAccessView* const* UAVArray, uint32* UAVInitialCountArray);
 
 		void SetDepthBounds(float MinDepth, float MaxDepth)
 		{

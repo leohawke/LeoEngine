@@ -4,6 +4,22 @@
 #include "ContextStateCache.h"
 
 namespace platform_ex::Windows::D3D12 {
+	struct SetRenderTargetsInfo
+	{
+		RenderTargetView* ColorRenderTargets[platform::Render::MaxSimultaneousRenderTargets];
+		int32 NumColorRenderTargets = 0;
+		bool bClearColor = false;
+
+		DepthStencilView* DepthStencilTarget = nullptr;
+		bool bClearDepth = false;
+		bool bClearStencil =false;
+
+		UnorderedAccessView* UAVs[platform::Render::MaxSimultaneousUAVs];
+		int32 NumUAVs = 0;
+
+		void ConvertFromPassInfo(const platform::Render::RenderPassInfo& Info);
+	};
+
 	class CommandContext :public platform::Render::CommandContext
 	{
 	public:
@@ -32,6 +48,18 @@ namespace platform_ex::Windows::D3D12 {
 		void DrawIndexPrimitive(platform::Render::GraphicsBuffer* IndexBuffer, int32 BaseVertexIndex, uint32 FirstInstance, uint32 NumVertices, uint32 StartIndex, uint32 NumPrimitives, uint32 NumInstances) override;
 
 		void DrawPrimitive(uint32 BaseVertexIndex, uint32 NumPrimitives, uint32 NumInstances) override;
+
+		void SetRenderTargets(
+			uint32 NewNumSimultaneousRenderTargets,
+			const RenderTargetView* const* NewRenderTargets,
+			const DepthStencilView* NewDepthStencilTarget,
+			uint32 NewNumUAVs,
+			UnorderedAccessView* const* UAVs
+		);
+
+		void ClearMRT(bool bClearColor, int32 NumClearColors, const leo::math::float4* ColorArray, bool bClearDepth, float Depth, bool bClearStencil, uint32 Stencil);
+
+		void SetRenderTargetsAndClear(const SetRenderTargetsInfo& RenderTargetsInfo);
 	public:
 		CommandContextStateCache StateCache;
 
