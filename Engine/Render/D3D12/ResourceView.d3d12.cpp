@@ -228,6 +228,16 @@ void DepthStencilView::ClearStencil(leo::int32 stencil){
 	cmd_list->ClearDepthStencilView(view->GetHandle(), D3D12_CLEAR_FLAG_STENCIL, 1, static_cast<UINT8>(stencil), 0, nullptr);
 }
 
+ShaderResourceView::ShaderResourceView(Texture1D& texture, uint8 first_array_index, uint8 array_size, uint8 level)
+	:GPUDataStructView(
+		&texture,
+		texture.RetriveShaderResourceView(first_array_index, array_size, 0, level),
+		first_array_index* texture.GetNumMipMaps() + level,
+		1)
+	, base(texture.GetWidth(level),1, texture.GetFormat())
+{
+}
+
 ShaderResourceView::ShaderResourceView(Texture2D& texture, uint8 first_array_index, uint8 array_size, uint8 level)
 	:GPUDataStructView(
 		&texture,
@@ -238,7 +248,8 @@ ShaderResourceView::ShaderResourceView(Texture2D& texture, uint8 first_array_ind
 {
 }
 
-ShaderResourceView::ShaderResourceView(Texture3D& texture, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level) :GPUDataStructView(
+ShaderResourceView::ShaderResourceView(Texture3D& texture, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level) 
+	:GPUDataStructView(
 	&texture,
 	texture.RetriveShaderResourceView(array_index, first_slice, num_slices, level),
 	(array_index* texture.GetDepth(level) + first_slice)* texture.GetNumMipMaps() + level,
@@ -265,17 +276,6 @@ ShaderResourceView::ShaderResourceView(GraphicsBuffer& gb, platform::Render::EFo
 		0,
 		1)
 	, base(width, height, pf)
-{
-}
-
-platform_ex::Windows::D3D12::ShaderResourceView::ShaderResourceView(Texture* Tex, platform::Render::Texture* ITex, uint16 width, uint16 height)
-	:GPUDataStructView(
-		Tex,
-		Tex->RetriveShaderResourceView(0,ITex->GetArraySize(),0,ITex->GetNumMipMaps()),
-		0,
-		ITex->GetArraySize()* ITex->GetNumMipMaps()
-	),
-	base(width,height,ITex->GetFormat())
 {
 }
 

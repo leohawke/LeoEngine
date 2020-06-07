@@ -145,7 +145,7 @@ void D12::RayContext::RayTraceShadow(R::RayTracingScene* InScene, R::FrameBuffer
 	auto ITex = dynamic_cast<R::Texture*>(Resource);
 	auto Tex = dynamic_cast<D12::Texture*>(Resource);
 
-	D12::ShaderResourceView DepthSRV{ Tex, ITex,DepthView->Width(),DepthView->Height()};
+	D12::ShaderResourceView* DepthSRV =Tex->RetriveShaderResourceView();
 
 	D3D12_RESOURCE_BARRIER barrier;
 	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
@@ -157,7 +157,7 @@ void D12::RayContext::RayTraceShadow(R::RayTracingScene* InScene, R::FrameBuffer
 	RayTracingShaderBindings Bindings;
 
 	Bindings.SRVs[0] =static_cast<D12::RayTracingScene*>(InScene)->GetShaderResourceView();
-	Bindings.SRVs[1] = &DepthSRV;
+	Bindings.SRVs[1] = DepthSRV;
 	Bindings.UniformBuffers[0] = InConstants;
 	Bindings.UAVs[0] = Output;
 

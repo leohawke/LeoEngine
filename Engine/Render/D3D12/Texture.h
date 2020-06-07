@@ -21,6 +21,7 @@ namespace platform_ex {
 			using namespace platform::Render::IFormat;
 
 			class ViewSimulation;
+			class ShaderResourceView;
 
 			class Texture:public ResourceHolder
 			{
@@ -47,6 +48,7 @@ namespace platform_ex {
 				virtual ViewSimulation* RetriveRenderTargetView(uint8 array_index, TextureCubeFaces face, uint8 level);
 				virtual ViewSimulation* RetriveDepthStencilView(uint8 array_index, TextureCubeFaces face, uint8 level);
 
+				virtual ShaderResourceView* RetriveShaderResourceView() = 0;
 			protected:
 				Texture(const COMPtr<ID3D12Resource>& pResource);
 
@@ -96,6 +98,8 @@ namespace platform_ex {
 				std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>> uav_maps;
 				std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>> rtv_maps;
 				std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>> dsv_maps;
+
+				std::unique_ptr<ShaderResourceView> default_srv;
 			};
 
 			class Texture1D :public Texture,public platform::Render::Texture1D{
@@ -124,6 +128,7 @@ namespace platform_ex {
 					const Box1D& src) override;
 
 				ViewSimulation* RetriveShaderResourceView(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) override;
+				ShaderResourceView* RetriveShaderResourceView() override;
 
 				ViewSimulation* RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level) override;
 				ViewSimulation* RetriveRenderTargetView(uint8 first_array_index, uint8 num_items, uint8 level) override;
@@ -173,6 +178,7 @@ namespace platform_ex {
 					const Box2D& src) override;
 
 				ViewSimulation* RetriveShaderResourceView(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) override;
+				ShaderResourceView* RetriveShaderResourceView() override;
 
 				ViewSimulation* RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level) override;
 
@@ -222,6 +228,7 @@ namespace platform_ex {
 					const Box3D& src) override;
 
 				ViewSimulation* RetriveShaderResourceView(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) override;
+				ShaderResourceView* RetriveShaderResourceView() override;
 
 				ViewSimulation* RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level) override;
 				ViewSimulation* RetriveUnorderedAccessView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) override;
@@ -274,6 +281,7 @@ namespace platform_ex {
 					const BoxCube& src) override;
 
 				ViewSimulation* RetriveShaderResourceView(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) override;
+				ShaderResourceView* RetriveShaderResourceView() override;
 
 				ViewSimulation* RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level) override;
 				ViewSimulation* RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, TextureCubeFaces first_face, uint8 num_faces, uint8 level) override;

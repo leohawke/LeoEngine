@@ -104,6 +104,15 @@ ViewSimulation*  Texture3D::RetriveShaderResourceView(uint8 first_array_index, u
 	return RetriveSRV(desc);
 }
 
+ShaderResourceView* platform_ex::Windows::D3D12::Texture3D::RetriveShaderResourceView()
+{
+	if (!default_srv)
+	{
+		default_srv.reset(new ShaderResourceView(*this, 0,0,depth,GetNumMipMaps()));
+	}
+	return default_srv.get();
+}
+
 ViewSimulation*  Texture3D::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level) {
 	return RetriveUnorderedAccessView(first_array_index, 0, depth, level);
 }

@@ -170,6 +170,15 @@ ViewSimulation * Texture2D::RetriveShaderResourceView(uint8 first_array_index, u
 	return RetriveSRV(desc);
 }
 
+ShaderResourceView* Texture2D::RetriveShaderResourceView()
+{
+	if (!default_srv)
+	{
+		default_srv.reset(new ShaderResourceView(*this, 0, GetArraySize(), GetNumMipMaps()));
+	}
+	return default_srv.get();
+}
+
 ViewSimulation * Texture2D::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level)
 {
 	LAssert(GetAccessMode() & EA_GPUUnordered, "Access mode must have EA_GPUUnordered flag");

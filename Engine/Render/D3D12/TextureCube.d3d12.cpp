@@ -105,6 +105,15 @@ ViewSimulation* TextureCube::RetriveShaderResourceView(uint8 first_array_index, 
 	return RetriveSRV(desc);
 }
 
+ShaderResourceView* TextureCube::RetriveShaderResourceView()
+{
+	if (!default_srv)
+	{
+		default_srv.reset(new ShaderResourceView(*this, 0,GetNumMipMaps()));
+	}
+	return default_srv.get();
+}
+
 ViewSimulation* TextureCube::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level){
 	return RetriveUnorderedAccessView(first_array_index, num_items, CubeFaces::Positive_X, 6, level);
 }

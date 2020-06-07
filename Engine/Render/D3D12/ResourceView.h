@@ -20,6 +20,7 @@ namespace platform_ex {
 			class Device;
 			class GraphicsBuffer;
 			class Texture;
+			class Texture1D;
 			class Texture2D;
 			class Texture3D;
 			class TextureCube;
@@ -102,12 +103,11 @@ namespace platform_ex {
 			public:
 				using base = platform::Render::ShaderResourceView;
 
-				ShaderResourceView(Texture2D& texture_1d_2d_cube, uint8 first_array_index, uint8 array_size, uint8 level);
+				ShaderResourceView(Texture1D& texture_1d, uint8 first_array_index, uint8 array_size, uint8 level);
+				ShaderResourceView(Texture2D& texture_2d, uint8 first_array_index, uint8 array_size, uint8 level);
 				ShaderResourceView(Texture3D& texture_3d, uint8 array_index, uint8 first_slice, uint8 num_slices, uint8 level);
 				ShaderResourceView(TextureCube& texture_cube, uint8 array_index,uint8 level);
 				ShaderResourceView(GraphicsBuffer& gb, platform::Render::EFormat pf);
-
-				ShaderResourceView(Texture* Tex, platform::Render::Texture* ITex, uint16 width, uint16 height);
 			};
 
 			class UnorderedAccessView : public GPUDataStructView,public platform::Render::UnorderedAccessView {
