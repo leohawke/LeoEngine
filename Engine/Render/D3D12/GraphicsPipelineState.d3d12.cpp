@@ -5,8 +5,8 @@
 #include "ShaderCompose.h"
 #include "VertexDeclaration.h"
 #include "Context.h"
-using namespace platform_ex::Windows::D3D12;
 
+using namespace platform_ex::Windows::D3D12;
 
 
 
@@ -17,7 +17,7 @@ GraphicsPipelineState::GraphicsPipelineState(const platform::Render::GraphicsPip
 	:PipelineStateInitializer(initializer)
 {
 	//retrive RootSignature
-	auto root_signature = static_cast<RootSignature*>(nullptr);
+	auto root_signature = static_cast<platform_ex::Windows::D3D12::RootSignature*>(nullptr);
 
 	Key =  GetKeyGraphicsPipelineStateDesc(initializer, root_signature);
 

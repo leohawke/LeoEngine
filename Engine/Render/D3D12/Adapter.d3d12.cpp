@@ -117,7 +117,7 @@ namespace platform_ex {
 						{
 							DXGI_OUTPUT_DESC1 OutputDesc;
 							Output6->GetDesc1(&OutputDesc);
-							const bool bDisplaySupportsHDROutput = (OutputDesc.ColorSpace == DXGI_HDR_ColorSpace);
+							const bool bDisplaySupportsHDROutput = (OutputDesc.ColorSpace == D3D12::DXGI_HDR_ColorSpace);
 
 							if (bDisplaySupportsHDROutput)
 							{

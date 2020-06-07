@@ -7,6 +7,8 @@
 #include "GraphicsBuffer.hpp"
 #include <LFramework/Core/LString.h>
 
+using namespace platform_ex::Windows::D3D12;
+
 using platform::Render::ShaderType;
 
 void RayTracingShaderTable::UploadToGPU(Windows::D3D12::Device* Device)

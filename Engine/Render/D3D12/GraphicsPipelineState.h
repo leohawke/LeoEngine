@@ -1,9 +1,10 @@
 #pragma once
 
+#include <LFramework/Win32/LCLib/COM.h>
 #include "../IGraphicsPipelineState.h"
 #include "../IDevice.h"
+#include "../ShaderCore.h"
 #include "d3d12_dxgi.h"
-#include <LFramework/Win32/LCLib/COM.h>
 
 namespace platform_ex::Windows::D3D12
 {
@@ -69,6 +70,9 @@ namespace platform_ex::Windows::D3D12
 		const platform::Render::GraphicsPipelineStateInitializer PipelineStateInitializer;
 		RootSignature* RootSignature;
 		uint16 StreamStrides[platform::Render:: MaxVertexElementCount];
+
+		bool bShaderNeedsGlobalConstantBuffer[platform::Render::ShaderType::NumStandardType];
+
 
 		class VertexHWShader* GetVertexShader() const { return (VertexHWShader*)PipelineStateInitializer.ShaderPass.VertexShader; }
 		class PixelHWShader* GetPixelShader() const { return (PixelHWShader*)PipelineStateInitializer.ShaderPass.PixelShader; }

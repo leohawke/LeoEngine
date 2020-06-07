@@ -202,10 +202,50 @@ void CommandContext::SetShaderParameter(platform::Render::PixelHWShader* Shader,
 
 void CommandContext::CommitGraphicsResourceTables()
 {
+	//don't support UE4 ShaderResourceTable
 }
 
 void CommandContext::CommitNonComputeShaderConstants()
 {
+	const auto* const  GraphicPSO = StateCache.GetGraphicsPipelineState();
+
+	lconstraint(GraphicPSO);
+
+	// Only set the constant buffer if this shader needs the global constant buffer bound
+	// Otherwise we will overwrite a different constant buffer
+	if (GraphicPSO->bShaderNeedsGlobalConstantBuffer[ShaderType::VertexShader])
+	{
+		StateCache.SetConstantBuffer<ShaderType::VertexShader>(VSConstantBuffer, bDiscardSharedConstants);
+	}
+
+	// Skip HS/DS CB updates in cases where tessellation isn't being used
+	// Note that this is *potentially* unsafe because bDiscardSharedConstants is cleared at the
+	// end of the function, however we're OK for now because bDiscardSharedConstants
+	// is always reset whenever bUsingTessellation changes in SetBoundShaderState()
+	if (bUsingTessellation)
+	{
+		if (GraphicPSO->bShaderNeedsGlobalConstantBuffer[ShaderType::HullShader])
+		{
+			StateCache.SetConstantBuffer<ShaderType::HullShader>(HSConstantBuffer, bDiscardSharedConstants);
+		}
+
+		if (GraphicPSO->bShaderNeedsGlobalConstantBuffer[ShaderType::DomainShader])
+		{
+			StateCache.SetConstantBuffer<ShaderType::DomainShader>(DSConstantBuffer, bDiscardSharedConstants);
+		}
+	}
+
+	if (GraphicPSO->bShaderNeedsGlobalConstantBuffer[ShaderType::GeometryShader])
+	{
+		StateCache.SetConstantBuffer<ShaderType::GeometryShader>(GSConstantBuffer, bDiscardSharedConstants);
+	}
+
+	if (GraphicPSO->bShaderNeedsGlobalConstantBuffer[ShaderType::PixelShader])
+	{
+		StateCache.SetConstantBuffer<ShaderType::PixelShader>(PSConstantBuffer, bDiscardSharedConstants);
+	}
+
+	bDiscardSharedConstants = false;
 }
 
 static uint32 GetIndexCount(platform::Render::PrimtivteType type,uint32 NumPrimitives)
