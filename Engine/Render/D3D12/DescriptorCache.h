@@ -4,10 +4,12 @@
 #include "Common.h"
 #include "d3d12_dxgi.h"
 #include <unordered_set>
+#include <Engine/Core/Hash/CityHash.h>
 #include "../ShaderCore.h"
 
 namespace platform_ex::Windows::D3D12 {
 	class CommandContext;
+	class DescriptorCache;
 
 	using platform::Render::ShaderType;
 
@@ -16,33 +18,180 @@ namespace platform_ex::Windows::D3D12 {
 	template<typename KeyType, typename ValueType>
 	class ConservativeMap
 	{
+	public:
+		FD3D12ConservativeMap(uint32 Size)
+		{
+			Table.resize(Size);
 
+			Reset();
+		}
+
+		void Add(const KeyType& Key, const ValueType& Value)
+		{
+			uint32 Index = GetIndex(Key);
+
+			Entry& Pair = Table[Index];
+
+			Pair.Valid = true;
+			Pair.Key = Key;
+			Pair.Value = Value;
+		}
+
+		ValueType* Find(const KeyType& Key)
+		{
+			uint32 Index = GetIndex(Key);
+
+			Entry& Pair = Table[Index];
+
+			if (Pair.Valid &&
+				(Pair.Key == Key))
+			{
+				return &Pair.Value;
+			}
+			else
+			{
+				return nullptr;
+			}
+		}
+
+		void Reset()
+		{
+			for (int32 i = 0; i < Table.size(); i++)
+			{
+				Table[i].Valid = false;
+			}
+		}
+	private:
+		uint32 GetIndex(const KeyType& Key)
+		{
+			uint32 Hash = GetTypeHash(Key);
+
+			return Hash % static_cast<uint32>(Table.size());
+		}
+
+		struct Entry
+		{
+			bool Valid = false;
+			KeyType Key;
+			ValueType Value;
+		};
+
+		std::vector<Entry> Table;
 	};
 
 	struct SamplerArrayDesc
 	{
+		uint32 Count;
+		uint16 SamplerID[16];
 
+		bool operator==(const SamplerArrayDesc& rhs) const = default;
 	};
+
+	uint32 GetTypeHash(const SamplerArrayDesc& Key);
 
 	using SamplerMap = ConservativeMap<SamplerArrayDesc, D3D12_GPU_DESCRIPTOR_HANDLE>;
 
 	template< uint32 CPUTableSize>
 	struct UniqueDescriptorTable
 	{
+		UniqueDescriptorTable() : GPUHandle({}) {};
+		UniqueDescriptorTable(FD3D12SamplerArrayDesc KeyIn, CD3DX12_CPU_DESCRIPTOR_HANDLE* Table) : GPUHandle({})
+		{
+			std::memcpy(&Key, &KeyIn, sizeof(Key));//Memcpy to avoid alignement issues
+			std::memcpy(CPUTable, Table, Key.Count * sizeof(CD3DX12_CPU_DESCRIPTOR_HANDLE));
+		}
 
+		uint32 GetTypeHash(const UniqueDescriptorTable& Table)
+		{
+			return CityHash64((void*)Table.Key.SamplerID, Table.Key.Count * sizeof(Table.Key.SamplerID[0]));
+		}
+
+		SamplerArrayDesc Key;
+		CD3DX12_CPU_DESCRIPTOR_HANDLE CPUTable[MAX_SAMPLERS];
+
+		// This will point to the table start in the global heap
+		D3D12_GPU_DESCRIPTOR_HANDLE GPUHandle;
+
+		bool operator=(const UniqueDescriptorTable& rhs) const
+		{
+			return Key == rhs.Key;
+		}
+	};
+
+	template<typename UniqueSamplerTable>
+	struct UniqueDescriptorTableHasher
+	{
+		size_t operator()(const UniqueSamplerTable& key) const noexcept {
+			return key.GetTypeHash();
+		}
 	};
 
 	using UniqueSamplerTable = UniqueDescriptorTable<MAX_SAMPLERS>;
 
-	using SamplerSet = std::unordered_set<UniqueSamplerTable>;
+	using SamplerSet = std::unordered_set<UniqueSamplerTable, UniqueDescriptorTableHasher<UniqueSamplerTable>>;
 
-	class OnlineHeap
+	class OnlineHeap : public DeviceChild,public SingleNodeGPUObject
 	{
 	public:
+		OnlineHeap(D3D12Device* Device, GPUMaskType Node, bool CanLoopAround, DescriptorCache* _Parent = nullptr);
+		virtual ~OnlineHeap() { }
+
+		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUSlotHandle(uint32 Slot) const { return{ CPUBase.ptr + Slot * DescriptorSize }; }
+		D3D12_GPU_DESCRIPTOR_HANDLE GetGPUSlotHandle(uint32 Slot) const { return{ GPUBase.ptr + Slot * DescriptorSize }; }
+
+		inline const uint32 GetDescriptorSize() const { return DescriptorSize; }
+
+		const D3D12_DESCRIPTOR_HEAP_DESC& GetDesc() const { return Desc; }
+
+		// Call this to reserve descriptor heap slots for use by the command list you are currently recording. This will wait if
+		// necessary until slots are free (if they are currently in use by another command list.) If the reservation can be
+		// fulfilled, the index of the first reserved slot is returned (all reserved slots are consecutive.) If not, it will 
+		// throw an exception.
+		bool CanReserveSlots(uint32 NumSlots);
+
+		uint32 ReserveSlots(uint32 NumSlotsRequested);
+
+		void SetNextSlot(uint32 NextSlot);
+
 		ID3D12DescriptorHeap* GetHeap()
 		{
-			return nullptr;
+			return Heap.Get();
 		}
+
+		void SetParent(DescriptorCache* InParent) { Parent = InParent; }
+
+		// Roll over behavior depends on the heap type
+		virtual bool RollOver() = 0;
+		virtual void NotifyCurrentCommandList(const ID3D12GraphicsCommandList& CommandListHandle);
+
+		virtual uint32 GetTotalSize()
+		{
+			return Desc.NumDescriptors;
+		}
+
+		static const uint32 HeapExhaustedValue = uint32(-1);
+	protected:
+		DescriptorCache* Parent;
+
+		ID3D12GraphicsCommandList* CurrentCommandList;
+
+
+		// Handles for manipulation of the heap
+		uint32 DescriptorSize;
+		D3D12_CPU_DESCRIPTOR_HANDLE CPUBase;
+		D3D12_GPU_DESCRIPTOR_HANDLE GPUBase;
+
+		// This index indicate where the next set of descriptors should be placed *if* there's room
+		uint32 NextSlotIndex;
+
+		// Indicates the last free slot marked by the command list being finished
+		uint32 FirstUsedSlot;
+
+		// Keeping this ptr around is basically just for lifetime management
+		COMPtr<ID3D12DescriptorHeap> Heap;
+
+		// Desc contains the number of slots and allows for easy recreation
+		D3D12_DESCRIPTOR_HEAP_DESC Desc;
 	};
 
 	class SubAllocatedOnlineHeap

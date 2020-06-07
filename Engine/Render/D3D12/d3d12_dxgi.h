@@ -611,6 +611,66 @@ namespace platform_ex::Windows::D3D12 {
 		}
 	};
 
+	struct CD3DX12_CPU_DESCRIPTOR_HANDLE : public D3D12_CPU_DESCRIPTOR_HANDLE
+	{
+		CD3DX12_CPU_DESCRIPTOR_HANDLE() {}
+		explicit CD3DX12_CPU_DESCRIPTOR_HANDLE(const D3D12_CPU_DESCRIPTOR_HANDLE& o) :
+			D3D12_CPU_DESCRIPTOR_HANDLE(o)
+		{}
+		CD3DX12_CPU_DESCRIPTOR_HANDLE(CD3DX12_DEFAULT) { ptr = 0; }
+		CD3DX12_CPU_DESCRIPTOR_HANDLE(_In_ const D3D12_CPU_DESCRIPTOR_HANDLE& other, INT offsetScaledByIncrementSize)
+		{
+			InitOffsetted(other, offsetScaledByIncrementSize);
+		}
+		CD3DX12_CPU_DESCRIPTOR_HANDLE(_In_ const D3D12_CPU_DESCRIPTOR_HANDLE& other, INT offsetInDescriptors, UINT descriptorIncrementSize)
+		{
+			InitOffsetted(other, offsetInDescriptors, descriptorIncrementSize);
+		}
+		CD3DX12_CPU_DESCRIPTOR_HANDLE& Offset(INT offsetInDescriptors, UINT descriptorIncrementSize)
+		{
+			ptr += offsetInDescriptors * descriptorIncrementSize;
+			return *this;
+		}
+		CD3DX12_CPU_DESCRIPTOR_HANDLE& Offset(INT offsetScaledByIncrementSize)
+		{
+			ptr += offsetScaledByIncrementSize;
+			return *this;
+		}
+		bool operator==(_In_ const D3D12_CPU_DESCRIPTOR_HANDLE& other) const
+		{
+			return (ptr == other.ptr);
+		}
+		bool operator!=(_In_ const D3D12_CPU_DESCRIPTOR_HANDLE& other) const
+		{
+			return (ptr != other.ptr);
+		}
+		CD3DX12_CPU_DESCRIPTOR_HANDLE& operator=(const D3D12_CPU_DESCRIPTOR_HANDLE& other)
+		{
+			ptr = other.ptr;
+			return *this;
+		}
+
+		inline void InitOffsetted(_In_ const D3D12_CPU_DESCRIPTOR_HANDLE& base, INT offsetScaledByIncrementSize)
+		{
+			InitOffsetted(*this, base, offsetScaledByIncrementSize);
+		}
+
+		inline void InitOffsetted(_In_ const D3D12_CPU_DESCRIPTOR_HANDLE& base, INT offsetInDescriptors, UINT descriptorIncrementSize)
+		{
+			InitOffsetted(*this, base, offsetInDescriptors, descriptorIncrementSize);
+		}
+
+		static inline void InitOffsetted(_Out_ D3D12_CPU_DESCRIPTOR_HANDLE& handle, _In_ const D3D12_CPU_DESCRIPTOR_HANDLE& base, INT offsetScaledByIncrementSize)
+		{
+			handle.ptr = base.ptr + offsetScaledByIncrementSize;
+		}
+
+		static inline void InitOffsetted(_Out_ D3D12_CPU_DESCRIPTOR_HANDLE& handle, _In_ const D3D12_CPU_DESCRIPTOR_HANDLE& base, INT offsetInDescriptors, UINT descriptorIncrementSize)
+		{
+			handle.ptr = base.ptr + offsetInDescriptors * descriptorIncrementSize;
+		}
+	};
+
 	//------------------------------------------------------------------------------------------------
 	// D3D12 exports a new method for serializing root signatures in the Windows 10 Anniversary Update.
 	// To help enable root signature 1.1 features when they are available and not require maintaining
