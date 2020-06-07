@@ -620,8 +620,6 @@ D3D12_PRIMITIVE_TOPOLOGY_TYPE platform_ex::Windows::D3D12::Convert<D3D12_PRIMITI
 		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
 	case platform::Render::PrimtivteType::LineList:
 		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-	case platform::Render::PrimtivteType::LineStrip:
-		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
 	case platform::Render::PrimtivteType::TriangleList:
 		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	case platform::Render::PrimtivteType::TriangleStrip:
@@ -640,9 +638,6 @@ D3D12_PRIMITIVE_TOPOLOGY  platform_ex::Windows::D3D12::Convert<D3D12_PRIMITIVE_T
 
 	case platform::Render::PrimtivteType::LineList:
 		return D3D_PRIMITIVE_TOPOLOGY_LINELIST;
-
-	case platform::Render::PrimtivteType::LineStrip:
-		return D3D_PRIMITIVE_TOPOLOGY_LINESTRIP;
 
 	case platform::Render::PrimtivteType::TriangleList:
 		return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;

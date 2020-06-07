@@ -58,7 +58,7 @@ void CommandContext::SetRenderTargetsAndClear(const SetRenderTargetsInfo& Render
 
 	if (RenderTargetsInfo.bClearColor)
 	{
-		for (uint32 Index = 0; Index < RenderTargetsInfo.NumColorRenderTargets; ++Index)
+		for (int Index = 0; Index < RenderTargetsInfo.NumColorRenderTargets; ++Index)
 		{
 			//TODO fast clear support
 
@@ -200,12 +200,56 @@ void CommandContext::SetShaderParameter(platform::Render::PixelHWShader* Shader,
 	PSConstantBuffer.UpdateConstant(reinterpret_cast<const uint8*>(NewValue), BaseIndex, NumBytes);
 }
 
-void CommandContext::DrawIndexPrimitive(platform::Render::GraphicsBuffer* IndexBuffer, int32 BaseVertexIndex, uint32 FirstInstance, uint32 NumVertices, uint32 StartIndex, uint32 NumPrimitives, uint32 NumInstances)
+void CommandContext::CommitGraphicsResourceTables()
 {
+}
+
+void CommandContext::CommitNonComputeShaderConstants()
+{
+}
+
+static uint32 GetIndexCount(platform::Render::PrimtivteType type,uint32 NumPrimitives)
+{
+	auto PrimitiveTypeFactor = platform::Render::GetPrimitiveTypeFactor(type);
+
+	auto PrimitiveTypeOffset = type == platform::Render::PrimtivteType::TriangleStrip ? 2 : 0;
+
+	return PrimitiveTypeFactor * NumPrimitives + PrimitiveTypeOffset;
+}
+
+void CommandContext::DrawIndexedPrimitive(platform::Render::GraphicsBuffer* IIndexBuffer, int32 BaseVertexIndex, uint32 FirstInstance, uint32 NumVertices, uint32 StartIndex, uint32 NumPrimitives, uint32 NumInstances)
+{
+	// called should make sure the input is valid, this avoid hidden bugs
+	lconstraint(NumPrimitives > 0);
+
+	NumInstances = std::max<uint32>(1, NumInstances);
+	numDraws++;
+
+	CommitGraphicsResourceTables();
+	CommitNonComputeShaderConstants();
+
+	uint32 IndexCount = GetIndexCount(StateCache.GetPrimtivteType(),NumPrimitives);
+	auto IndexBuffer = static_cast<GraphicsBuffer*>(IIndexBuffer);
+
+	const DXGI_FORMAT Format = Convert(IndexBuffer->GetFormat());
+	StateCache.SetIndexBuffer(IndexBuffer, Format, 0);
+	StateCache.ApplyState<CPT_Graphics>();
+
+	CommandListHandle->DrawIndexedInstanced(IndexCount, NumInstances, StartIndex, BaseVertexIndex, FirstInstance);
 }
 
 void CommandContext::DrawPrimitive(uint32 BaseVertexIndex, uint32 NumPrimitives, uint32 NumInstances)
 {
+	NumInstances = std::max<uint32>(1, NumInstances);
+	numDraws++;
+
+	CommitGraphicsResourceTables();
+	CommitNonComputeShaderConstants();
+
+	uint32 VertexCount = GetIndexCount(StateCache.GetPrimtivteType(), NumPrimitives);
+
+	StateCache.ApplyState<CPT_Graphics>();
+	CommandListHandle->DrawInstanced(VertexCount, NumInstances, BaseVertexIndex, 0);
 }
 
 void CommandContext::SetRenderTargets(uint32 NewNumSimultaneousRenderTargets, const RenderTargetView* const* NewRenderTargets, const DepthStencilView* NewDepthStencilTarget, uint32 NewNumUAVs, UnorderedAccessView* const* UAVs)
@@ -240,7 +284,7 @@ void CommandContext::ClearMRT(bool bClearColor, int32 NumClearColors, const leo:
 	{
 		if (ClearRTV)
 		{
-			for (int32 TargetIndex = 0; TargetIndex < NumSimultaneousRTs; ++TargetIndex)
+			for (uint32 TargetIndex = 0; TargetIndex < NumSimultaneousRTs; ++TargetIndex)
 			{
 				auto RTView = RenderTargetViews[TargetIndex];
 

@@ -78,13 +78,31 @@ namespace platform::Render {
 		TriangleList,
 		TriangleStrip,
 		LineList,
-		LineStrip,
 		PointList,
 
 		ControlPoint_0,
 		ControlPoint_1 = ControlPoint_0 + 1,
 		ControlPoint_32 = ControlPoint_0+32,
 	};
+
+	uint32 GetPrimitiveTypeFactor(PrimtivteType type)
+	{
+		switch (type)
+		{
+		case platform::Render::PrimtivteType::TriangleList:
+			return 3;
+		case platform::Render::PrimtivteType::TriangleStrip:
+			return 1;
+		case platform::Render::PrimtivteType::LineList:
+			return 2;
+		case platform::Render::PrimtivteType::PointList:
+			return 1;
+		default:
+			break;
+		}
+
+		return type >= PrimtivteType::ControlPoint_1 ? (uint32)type - (uint32)PrimtivteType::ControlPoint_0 : 1;
+	}
 
 	struct VertexElement
 	{

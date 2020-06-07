@@ -1,5 +1,7 @@
 #pragma once
 
+#include <LBase/observer_ptr.hpp>
+
 #include "../ShaderCore.h"
 #include "../PipleState.h"
 #include "ResourceView.h"
@@ -9,7 +11,6 @@
 #include "HardwareShader.h"
 #include "ConstantBuffer.h"
 #include "Convert.h"
-#include <LBase/observer_ptr.hpp>
 
 // Device Context State
 // improve draw thread performance by removing redundant device context calls.
@@ -18,6 +19,8 @@
 namespace platform_ex::Windows::D3D12 {
 
 	using platform::Render::Shader::ShaderType;
+
+	class GraphicsBuffer;
 
 	enum CachePipelineType
 	{
@@ -39,11 +42,13 @@ namespace platform_ex::Windows::D3D12 {
 
 		void Clear()
 		{
+			std::memset(CurrentVertexBufferResources, 0, sizeof(CurrentVertexBufferResources));
 			std::memset(CurrentVertexBufferViews, 0, sizeof(CurrentVertexBufferViews));
 			MaxBoundVertexBufferIndex = -1;
 			BoundVBMask = 0;
 		}
 
+		GraphicsBuffer* CurrentVertexBufferResources[max_vbs];
 		D3D12_VERTEX_BUFFER_VIEW CurrentVertexBufferViews[max_vbs];
 		int32 MaxBoundVertexBufferIndex;
 		VBSlotMask BoundVBMask;
@@ -201,6 +206,8 @@ namespace platform_ex::Windows::D3D12 {
 
 	class DescriptorCache
 	{
+	public:
+		void Clear();
 	};
 
 	using D3D12DescriptorCache = DescriptorCache;
@@ -461,9 +468,9 @@ namespace platform_ex::Windows::D3D12 {
 		template <ShaderType ShaderFrequency>
 		void SetSamplerState(const platform::Render::TextureSampleDesc& SamplerState, uint32 SamplerIndex)
 		{
-			check(SamplerIndex < MAX_SAMPLERS);
+			lconstraint(SamplerIndex < MAX_SAMPLERS);
 			auto& Samplers = PipelineState.Common.SamplerCache.States[ShaderFrequency];
-			if ((Samplers[SamplerIndex] != SamplerState) || GD3D12SkipStateCaching)
+			if ((Samplers[SamplerIndex] != SamplerState))
 			{
 				Samplers[SamplerIndex] = SamplerState;
 				SamplerStateCache::DirtySlot(PipelineState.Common.SamplerCache.DirtySlotMask[ShaderFrequency], SamplerIndex);
@@ -499,7 +506,6 @@ namespace platform_ex::Windows::D3D12 {
 			else if (CurrentGPUVirtualAddress != 0)
 			{
 				CurrentGPUVirtualAddress = 0;
-				CBVCache.ResidencyHandles[ShaderFrequency][SlotIndex] = nullptr;
 				ConstantBufferCache::DirtySlot(CBVCache.DirtySlotMask[ShaderFrequency], SlotIndex);
 			}
 			else
@@ -691,6 +697,8 @@ namespace platform_ex::Windows::D3D12 {
 
 		template <ShaderType ShaderStage>
 		void SetUAVs(uint32 UAVStartSlot, uint32 NumSimultaneousUAVs, UnorderedAccessView* const* UAVArray, uint32* UAVInitialCountArray);
+		template <ShaderType ShaderStage>
+		void ClearUAVs();
 
 		void SetDepthBounds(float MinDepth, float MaxDepth)
 		{

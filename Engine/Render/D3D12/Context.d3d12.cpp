@@ -422,9 +422,6 @@ namespace platform_ex::Windows::D3D12 {
 		case platform::Render::PrimtivteType::LineList:
 			prim_count /= 2;
 			break;
-		case platform::Render::PrimtivteType::LineStrip:
-			--prim_count;
-			break;
 		case platform::Render::PrimtivteType::TriangleList:
 			prim_count /= 3;
 			break;

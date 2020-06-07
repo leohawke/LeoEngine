@@ -52,6 +52,7 @@
     <ClCompile Include="Render\D3D12\CommandContext.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\ConstantBuffer.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Context.d3d12.cpp" />
+    <ClCompile Include="Render\D3D12\ContextStateCache.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Convert.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\D3D12RayTracing.cpp" />
     <ClCompile Include="Render\D3D12\d3d12_dxgi.cpp" />

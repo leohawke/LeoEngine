@@ -21,6 +21,10 @@ namespace platform_ex::Windows {
 				return resource.Get();
 			}
 
+			D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress() const {
+				return resource->GetGPUVirtualAddress();
+			}
+
 			void SetName(const char* name);
 		protected:
 			ResourceHolder();

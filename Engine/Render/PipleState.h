@@ -14,6 +14,7 @@
 
 #include <cctype>
 #include <algorithm>
+#include <compare>
 
 namespace platform::Render {
 	namespace details {
@@ -164,7 +165,8 @@ namespace platform::Render {
 		bool multisample_enable;
 
 		RasterizerDesc();
-		friend bool operator<(const RasterizerDesc& lhs, const RasterizerDesc& rhs);
+		friend auto operator<=>(const RasterizerDesc& lhs, const RasterizerDesc& rhs) = default;
+		friend bool operator==(const RasterizerDesc& lhs, const RasterizerDesc& rhs) = default;
 
 		template<typename T>
 		static T to_mode(const std::string & value);
@@ -232,7 +234,8 @@ namespace platform::Render {
 
 		DepthStencilDesc();
 
-		friend bool operator<(const DepthStencilDesc  & lhs, const DepthStencilDesc  & rhs);
+		friend auto operator<=>(const DepthStencilDesc& lhs, const DepthStencilDesc& rhs) = default;
+		friend bool operator==(const DepthStencilDesc& lhs, const DepthStencilDesc& rhs) = default;
 
 		template<typename T>
 		static T to_op(const std::string & value);
@@ -313,7 +316,9 @@ namespace platform::Render {
 
 		BlendDesc();
 
-		friend bool operator<(const BlendDesc  & lhs, const BlendDesc  & rhs);
+		friend auto operator<=>(const BlendDesc& lhs, const BlendDesc& rhs) = default;
+		friend bool operator==(const BlendDesc& lhs, const BlendDesc& rhs) = default;
+
 
 		static BlendFactor to_factor(const std::string& value)
 		{
@@ -411,7 +416,8 @@ namespace platform::Render {
 
 		TextureSampleDesc();
 
-		friend bool operator<(const TextureSampleDesc  & lhs, const TextureSampleDesc  & rhs);
+		friend auto operator<=>(const TextureSampleDesc& lhs, const TextureSampleDesc& rhs) = default;
+		friend bool operator==(const TextureSampleDesc& lhs, const TextureSampleDesc& rhs) = default;
 
 		template<typename T>
 		static T to_op(const std::string & value);

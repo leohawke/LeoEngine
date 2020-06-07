@@ -12,11 +12,6 @@ namespace platform::Render {
 	{
 	}
 
-	bool operator<(RasterizerDesc const & lhs, RasterizerDesc const & rhs)
-	{
-		return std::memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
-	}
-
 	DepthStencilDesc::DepthStencilDesc()
 		: depth_enable(true),
 		depth_write_mask(true),
@@ -40,11 +35,6 @@ namespace platform::Render {
 	{
 	}
 
-	bool operator<(DepthStencilDesc const & lhs, DepthStencilDesc const & rhs)
-	{
-		return std::memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
-	}
-
 	BlendDesc::BlendDesc()
 		: blend_factor(1, 1, 1, 1), sample_mask(0xFFFFFFFF),
 		alpha_to_coverage_enable(false), independent_blend_enable(false)
@@ -60,11 +50,6 @@ namespace platform::Render {
 		color_write_mask.fill((leo::uint8)ColorMask::All);
 	}
 
-	bool operator<(BlendDesc const & lhs, BlendDesc const & rhs)
-	{
-		return std::memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
-	}
-
 	TextureSampleDesc::TextureSampleDesc()
 		: border_clr(0, 0, 0, 0),
 		address_mode_u(TexAddressingMode::Wrap), address_mode_v(TexAddressingMode::Wrap), address_mode_w(TexAddressingMode::Wrap),
@@ -74,11 +59,6 @@ namespace platform::Render {
 		mip_map_lod_bias(0),
 		cmp_func(CompareOp::Fail)
 	{
-	}
-
-	bool operator<(TextureSampleDesc const & lhs, TextureSampleDesc const & rhs)
-	{
-		return std::memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
 	}
 
 	PipleState::~PipleState() = default;

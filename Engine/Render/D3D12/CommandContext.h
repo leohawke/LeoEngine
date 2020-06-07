@@ -45,7 +45,7 @@ namespace platform_ex::Windows::D3D12 {
 		void SetShaderParameter(platform::Render::VertexHWShader* Shader, uint32 BufferIndex, uint32 BaseIndex, uint32 NumBytes, const void* NewValue) override;
 		void SetShaderParameter(platform::Render::PixelHWShader* Shader, uint32 BufferIndex, uint32 BaseIndex, uint32 NumBytes, const void* NewValue) override;
 
-		void DrawIndexPrimitive(platform::Render::GraphicsBuffer* IndexBuffer, int32 BaseVertexIndex, uint32 FirstInstance, uint32 NumVertices, uint32 StartIndex, uint32 NumPrimitives, uint32 NumInstances) override;
+		void DrawIndexedPrimitive(platform::Render::GraphicsBuffer* IndexBuffer, int32 BaseVertexIndex, uint32 FirstInstance, uint32 NumVertices, uint32 StartIndex, uint32 NumPrimitives, uint32 NumInstances) override;
 
 		void DrawPrimitive(uint32 BaseVertexIndex, uint32 NumPrimitives, uint32 NumInstances) override;
 
@@ -60,12 +60,17 @@ namespace platform_ex::Windows::D3D12 {
 		void ClearMRT(bool bClearColor, int32 NumClearColors, const leo::math::float4* ColorArray, bool bClearDepth, float Depth, bool bClearStencil, uint32 Stencil);
 
 		void SetRenderTargetsAndClear(const SetRenderTargetsInfo& RenderTargetsInfo);
+	private:
+		void CommitGraphicsResourceTables();
+		void CommitNonComputeShaderConstants();
 	public:
 		CommandContextStateCache StateCache;
 
 		uint16 DirtyUniformBuffers[ShaderType::NumStandardType];
 
 		ID3D12GraphicsCommandList* CommandListHandle;
+
+		uint32 numDraws;
 
 		/** Constant buffers for Set*ShaderParameter calls. */
 		ConstantBuffer VSConstantBuffer;
