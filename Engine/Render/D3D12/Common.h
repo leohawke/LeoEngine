@@ -38,6 +38,8 @@ namespace platform_ex::Windows::D3D12 {
 
 	using D3D12Adapter = Device;
 
+	using GPUMaskType = leo::uint32;
+
 	class DeviceChild
 	{
 	protected:
@@ -54,17 +56,24 @@ namespace platform_ex::Windows::D3D12 {
 			, VisibilityMask(0)
 		{
 		}
+
+		GPUObject(GPUMaskType InGPUMask, GPUMaskType InVisibiltyMask)
+			: GPUMask(InGPUMask)
+			, VisibilityMask(InVisibiltyMask)
+		{
+			// Note that node mask can't be null.
+		}
 	protected:
-		leo::uint32 GPUMask;
+		GPUMaskType GPUMask;
 		// Which GPUs have direct access to this object
-		leo::uint32 VisibilityMask;
+		GPUMaskType VisibilityMask;
 	};
 
 	class SingleNodeGPUObject : GPUObject
 	{
 	public:
-		SingleNodeGPUObject()
-			:GPUObject()
+		SingleNodeGPUObject(GPUMaskType GPUMask = 0)
+			:GPUObject(GPUMask,GPUMask)
 			,GPUIndex(0)
 		{}
 

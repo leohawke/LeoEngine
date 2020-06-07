@@ -1,4 +1,5 @@
 #include "CommandContext.h"
+#include "DescriptorCache.h"
 #include <LBase/lmemory.hpp>
 using namespace platform_ex::Windows::D3D12;
 

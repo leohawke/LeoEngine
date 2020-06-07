@@ -156,6 +156,7 @@
     <ClInclude Include="Render\D3D12\ContextStateCache.h" />
     <ClInclude Include="Render\D3D12\Convert.h" />
     <ClInclude Include="Render\D3D12\D3D12RayTracing.h" />
+    <ClInclude Include="Render\D3D12\DescriptorCache.h" />
     <ClInclude Include="Render\D3D12\Fence.h" />
     <ClInclude Include="Render\D3D12\FrameBuffer.h" />
     <ClInclude Include="Render\D3D12\GraphicsBuffer.hpp" />

@@ -203,12 +203,7 @@ namespace platform_ex::Windows::D3D12 {
 	};
 
 	class CommandContext;
-
-	class DescriptorCache
-	{
-	public:
-		void Clear();
-	};
+	class DescriptorCache;
 
 	using D3D12DescriptorCache = DescriptorCache;
 
