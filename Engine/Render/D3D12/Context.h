@@ -88,7 +88,7 @@ namespace platform_ex {
 
 				leo::observer_ptr<ID3D12PipelineState> CreateRenderPSO(const D3D12_GRAPHICS_PIPELINE_STATE_DESC&);
 
-				const Fence& GetRenderFence() const;
+				Fence& GetRenderFence();
 
 				ID3D12Device* GetDevice() const
 				{

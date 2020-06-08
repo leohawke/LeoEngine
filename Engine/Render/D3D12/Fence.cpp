@@ -31,4 +31,9 @@ namespace platform_ex::Windows::D3D12 {
 		}
 		return id <= last_completed_val;
 	}
+
+	Fence& GetRenderFence()
+	{
+		return Context::Instance().GetDevice().GetRenderFence();
+	}
 }

@@ -4,8 +4,11 @@
 #include "Common.h"
 #include "d3d12_dxgi.h"
 #include <unordered_set>
+#include <mutex>
+#include <queue>
 #include <Engine/Core/Hash/CityHash.h>
 #include "../ShaderCore.h"
+#include "Fence.h"
 
 namespace platform_ex::Windows::D3D12 {
 	class CommandContext;
@@ -19,7 +22,7 @@ namespace platform_ex::Windows::D3D12 {
 	class ConservativeMap
 	{
 	public:
-		FD3D12ConservativeMap(uint32 Size)
+		ConservativeMap(uint32 Size)
 		{
 			Table.resize(Size);
 
@@ -95,7 +98,7 @@ namespace platform_ex::Windows::D3D12 {
 	struct UniqueDescriptorTable
 	{
 		UniqueDescriptorTable() : GPUHandle({}) {};
-		UniqueDescriptorTable(FD3D12SamplerArrayDesc KeyIn, CD3DX12_CPU_DESCRIPTOR_HANDLE* Table) : GPUHandle({})
+		UniqueDescriptorTable(SamplerArrayDesc KeyIn, CD3DX12_CPU_DESCRIPTOR_HANDLE* Table) : GPUHandle({})
 		{
 			std::memcpy(&Key, &KeyIn, sizeof(Key));//Memcpy to avoid alignement issues
 			std::memcpy(CPUTable, Table, Key.Count * sizeof(CD3DX12_CPU_DESCRIPTOR_HANDLE));
@@ -133,7 +136,7 @@ namespace platform_ex::Windows::D3D12 {
 	class OnlineHeap : public DeviceChild,public SingleNodeGPUObject
 	{
 	public:
-		OnlineHeap(D3D12Device* Device, GPUMaskType Node, bool CanLoopAround, DescriptorCache* _Parent = nullptr);
+		OnlineHeap(D3D12Device* Device, bool CanLoopAround, DescriptorCache* _Parent = nullptr, GPUMaskType Node = 0);
 		virtual ~OnlineHeap() { }
 
 		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUSlotHandle(uint32 Slot) const { return{ CPUBase.ptr + Slot * DescriptorSize }; }
@@ -194,14 +197,134 @@ namespace platform_ex::Windows::D3D12 {
 		D3D12_DESCRIPTOR_HEAP_DESC Desc;
 	};
 
-	class SubAllocatedOnlineHeap
+	class GlobalOnlineHeap : public OnlineHeap
 	{
+	public:
+		GlobalOnlineHeap(D3D12Device* Device, GPUMaskType Node =0)
+			: OnlineHeap(Device, false,nullptr,Node)
+			, bUniqueDescriptorTablesAreDirty(false)
+		{ }
 
+		void Init(uint32 TotalSize, D3D12_DESCRIPTOR_HEAP_TYPE Type);
+
+		void ToggleDescriptorTablesDirtyFlag(bool Value) { bUniqueDescriptorTablesAreDirty = Value; }
+		bool DescriptorTablesDirty() { return bUniqueDescriptorTablesAreDirty; }
+		SamplerSet& GetUniqueDescriptorTables() { return UniqueDescriptorTables; }
+		std::mutex& GetCriticalSection() { return CriticalSection; }
+
+		bool RollOver();
+	private:
+		SamplerSet UniqueDescriptorTables;
+		bool bUniqueDescriptorTablesAreDirty;
+
+		std::mutex CriticalSection;
 	};
 
-	class ThreadLocalOnlineHeap
+	struct OnlineHeapBlock
 	{
+	public:
+		OnlineHeapBlock(uint32 _BaseSlot, uint32 _Size) :
+			BaseSlot(_BaseSlot), Size(_Size), SizeUsed(0), bFresh(true) {};
+		OnlineHeapBlock() : BaseSlot(0), Size(0), SizeUsed(0), bFresh(true) {}
 
+		CLSyncPoint SyncPoint;
+		uint32 BaseSlot;
+		uint32 Size;
+		uint32 SizeUsed;
+		// Indicates that this has never been used in a Command List before
+		bool bFresh;
+	};
+
+	class SubAllocatedOnlineHeap : public OnlineHeap
+	{
+	public:
+		struct SubAllocationDesc
+		{
+			SubAllocationDesc() :ParentHeap(nullptr), BaseSlot(0), Size(0) {};
+			SubAllocationDesc(GlobalOnlineHeap* _ParentHeap, uint32 _BaseSlot, uint32 _Size) :
+				ParentHeap(_ParentHeap), BaseSlot(_BaseSlot), Size(_Size) {};
+
+			GlobalOnlineHeap* ParentHeap;
+			uint32 BaseSlot;
+			uint32 Size;
+		};
+
+		SubAllocatedOnlineHeap(D3D12Device* Device, DescriptorCache* Parent, GPUMaskType Node = 0) :
+			OnlineHeap(Device, false, Parent,Node) {};
+
+		void Init(SubAllocationDesc _Desc);
+
+		// Specializations
+		bool RollOver();
+		void NotifyCurrentCommandList(const ID3D12GraphicsCommandList& CommandListHandle);
+
+		virtual uint32 GetTotalSize() final override
+		{
+			return CurrentSubAllocation.Size;
+		}
+	private:
+
+		std::queue<OnlineHeapBlock> DescriptorBlockPool;
+		SubAllocationDesc SubDesc;
+
+		OnlineHeapBlock CurrentSubAllocation;
+	};
+
+	class ThreadLocalOnlineHeap :public OnlineHeap
+	{
+	public:
+		ThreadLocalOnlineHeap(D3D12Device* Device, DescriptorCache* _Parent, GPUMaskType Node=0)
+			: OnlineHeap(Device, true, _Parent,Node)
+		{ }
+
+		bool RollOver();
+
+		void NotifyCurrentCommandList(const ID3D12GraphicsCommandList& CommandListHandle);
+
+		void Init(uint32 NumDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE Type);
+
+	private:
+		struct SyncPointEntry
+		{
+			CLSyncPoint SyncPoint;
+			uint32 LastSlotInUse;
+
+			SyncPointEntry() : LastSlotInUse(0)
+			{}
+
+			SyncPointEntry(const SyncPointEntry& InSyncPoint) : SyncPoint(InSyncPoint.SyncPoint), LastSlotInUse(InSyncPoint.LastSlotInUse)
+			{}
+
+			SyncPointEntry& operator = (const SyncPointEntry& InSyncPoint)
+			{
+				SyncPoint = InSyncPoint.SyncPoint;
+				LastSlotInUse = InSyncPoint.LastSlotInUse;
+
+				return *this;
+			}
+		};
+		std::queue<SyncPointEntry> SyncPoints;
+
+		struct PoolEntry
+		{
+			COMPtr<ID3D12DescriptorHeap> Heap;
+			CLSyncPoint SyncPoint;
+
+			PoolEntry()
+			{}
+
+			PoolEntry(const PoolEntry& InPoolEntry) : Heap(InPoolEntry.Heap), SyncPoint(InPoolEntry.SyncPoint)
+			{}
+
+			PoolEntry& operator = (const PoolEntry& InPoolEntry)
+			{
+				Heap = InPoolEntry.Heap;
+				SyncPoint = InPoolEntry.SyncPoint;
+				return *this;
+			}
+		};
+		PoolEntry Entry;
+		std::queue<PoolEntry> ReclaimPool;
 	};
 
 	class DescriptorCache : public DeviceChild,public SingleNodeGPUObject

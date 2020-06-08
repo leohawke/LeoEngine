@@ -304,7 +304,7 @@ namespace platform_ex::Windows::D3D12 {
 		}
 	}
 
-	const Fence& platform_ex::Windows::D3D12::Device::GetRenderFence() const
+	Fence& platform_ex::Windows::D3D12::Device::GetRenderFence()
 	{
 		return *fences[Command_Render];
 	}
