@@ -7,11 +7,11 @@
 #include "GraphicsBuffer.hpp"
 #include <LFramework/Core/LString.h>
 
-using namespace platform_ex::Windows::D3D12;
+namespace D3D12 = platform_ex::Windows::D3D12;
 
 using platform::Render::ShaderType;
 
-void RayTracingShaderTable::UploadToGPU(Windows::D3D12::Device* Device)
+void RayTracingShaderTable::UploadToGPU(D3D12::Device* Device)
 {
 
 	if (!bIsDirty)
@@ -526,10 +526,10 @@ static void SetRayTracingShaderResources(
 
 	auto RootSignature = Shader->pRootSignature.get();
 
-	D3D12_GPU_VIRTUAL_ADDRESS   LocalCBVs[MAX_CBS];
-	D3D12_CPU_DESCRIPTOR_HANDLE LocalSRVs[MAX_SRVS];
-	D3D12_CPU_DESCRIPTOR_HANDLE LocalUAVs[MAX_UAVS];
-	D3D12_CPU_DESCRIPTOR_HANDLE LocalSamplers[MAX_SAMPLERS];
+	D3D12_GPU_VIRTUAL_ADDRESS   LocalCBVs[D3D12::MAX_CBS];
+	D3D12_CPU_DESCRIPTOR_HANDLE LocalSRVs[D3D12::MAX_SRVS];
+	D3D12_CPU_DESCRIPTOR_HANDLE LocalUAVs[D3D12::MAX_UAVS];
+	D3D12_CPU_DESCRIPTOR_HANDLE LocalSamplers[D3D12::MAX_SAMPLERS];
 
 	uint64 BoundSRVMask = 0;
 	uint64 BoundCBVMask = 0;
@@ -703,7 +703,7 @@ void DispatchRays(D3D12RayContext* CommandContext, const RayTracingShaderBinding
 	{
 		RayTracingDescriptorCache TransientDescriptorCache(&CommandContext->GetDevice());
 
-		TransientDescriptorCache.Init(MAX_SRVS + MAX_UAVS, MAX_SAMPLERS);
+		TransientDescriptorCache.Init(D3D12::MAX_SRVS + D3D12::MAX_UAVS, D3D12::MAX_SAMPLERS);
 		TransientDescriptorCache.SetDescriptorHeaps(*CommandContext);
 
 		FD3D12RayTracingGlobalResourceBinder ResourceBinder(*CommandContext);

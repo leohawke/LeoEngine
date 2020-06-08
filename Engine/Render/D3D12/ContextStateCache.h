@@ -11,6 +11,7 @@
 #include "HardwareShader.h"
 #include "ConstantBuffer.h"
 #include "Convert.h"
+#include "DescriptorCache.h"
 
 // Device Context State
 // improve draw thread performance by removing redundant device context calls.

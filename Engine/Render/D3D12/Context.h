@@ -16,6 +16,7 @@
 #include "Fence.h"
 #include "RayContext.h"
 #include "GraphicsPipelineState.h"
+#include "CommandContext.h"
 
 #include <LBase/concurrency.h>
 
@@ -217,6 +218,8 @@ namespace platform_ex {
 				Display& GetDisplay() override;
 
 				RayContext& GetRayContext() override;
+
+				CommandContext* GetDefaultCommandContext() override;
 			public:
 				void CreateDeviceAndDisplay() override;
 			private:
@@ -285,6 +288,8 @@ namespace platform_ex {
 
 				array<COMPtr<ID3D12GraphicsCommandList>,Device::CommandTypeCount> d3d_cmd_lists;
 				array<std::mutex, Device::CommandTypeCount> cmd_list_mutexs;
+
+				CommandContext* render_command_context;
 
 				array<COMPtr<ID3D12CommandQueue>, Device::CommandTypeCount-1> d3d_cmd_queues;
 

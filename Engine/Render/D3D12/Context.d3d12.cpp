@@ -16,7 +16,7 @@ extern HWND g_hwnd;
 
 namespace platform_ex::Windows::D3D12 {
 	Context::Context()
-		:adapter_list()
+		:adapter_list(), render_command_context(nullptr)
 	{
 #ifndef NDEBUG
 		{
@@ -494,6 +494,11 @@ namespace platform_ex::Windows::D3D12 {
 			return *ray_context;
 		else
 			throw leo::unsupported();
+	}
+
+	CommandContext* D3D12::Context::GetDefaultCommandContext()
+	{
+		return render_command_context;
 	}
 
 	Context & Context::Instance()

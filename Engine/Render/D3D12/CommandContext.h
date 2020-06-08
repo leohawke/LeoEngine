@@ -23,6 +23,8 @@ namespace platform_ex::Windows::D3D12 {
 	class CommandContext :public platform::Render::CommandContext
 	{
 	public:
+		CommandContext(D3D12Device* InParent, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc, bool InIsDefaultContext, bool InIsAsyncComputeContext = false);
+	public:
 		void BeginRenderPass(const platform::Render::RenderPassInfo& Info, const char* Name) override;
 
 		void SetViewport(uint32 MinX, uint32 MinY, float MinZ, uint32 MaxX, uint32 MaxY, float MaxZ) override;

@@ -1,18 +1,31 @@
 #pragma once
 
 #include <LBase/ldef.h>
-#include "Common.h"
+#include <Engine/Core/Hash/CityHash.h>
+
+#include "../ShaderCore.h"
+
 #include "d3d12_dxgi.h"
+#include "Common.h"
+#include "Fence.h"
 #include <unordered_set>
 #include <mutex>
 #include <queue>
-#include <Engine/Core/Hash/CityHash.h>
-#include "../ShaderCore.h"
-#include "Fence.h"
 
 namespace platform_ex::Windows::D3D12 {
 	class CommandContext;
 	class DescriptorCache;
+	class RenderTargetView;
+	class DepthStencilView;
+
+	struct VertexBufferCache;
+	struct UnorderedAccessViewCache;
+	struct ShaderResourceViewCache;
+	struct SamplerStateCache;
+	struct ConstantBufferCache;
+
+	class RootSignature;
+	class ResourceHolder;
 
 	using platform::Render::ShaderType;
 

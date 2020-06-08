@@ -2,7 +2,7 @@
 \ingroup Engine\Render
 \输入的布局信息 包括 顶点流布局信息 索引信息
 */
-
+#pragma once
 #ifndef LE_RENDER_INPUTLATOYT_HPP
 #define LE_RENDER_INPUTLATOYT_HPP 1
 
@@ -85,7 +85,7 @@ namespace platform::Render {
 		ControlPoint_32 = ControlPoint_0+32,
 	};
 
-	uint32 GetPrimitiveTypeFactor(PrimtivteType type)
+	inline uint32 GetPrimitiveTypeFactor(PrimtivteType type)
 	{
 		switch (type)
 		{
