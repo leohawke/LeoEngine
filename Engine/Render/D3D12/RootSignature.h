@@ -87,6 +87,27 @@ namespace platform_ex::Windows::D3D12 {
 
 	class RootSignature
 	{
+	private:
+		// Struct for all the useful info we want per shader stage.
+		struct ShaderStage
+		{
+			ShaderStage()
+				: MaxCBVCount(0u)
+				, MaxSRVCount(0u)
+				, MaxSamplerCount(0u)
+				, MaxUAVCount(0u)
+				, CBVRegisterMask(0u)
+				, bVisible(false)
+			{
+			}
+
+			uint8 MaxCBVCount;
+			uint8 MaxSRVCount;
+			uint8 MaxSamplerCount;
+			uint8 MaxUAVCount;
+			CBVSlotMask CBVRegisterMask;
+			bool bVisible;
+		};
 	public:
 		RootSignature()
 		{}
@@ -183,6 +204,12 @@ namespace platform_ex::Windows::D3D12 {
 			lconstraint(ShaderStage == ShaderType::PixelShader || ShaderStage == ShaderType::ComputeShader);
 			return BindSlotMap[ALL_UAVs];
 		}
+
+		inline uint32 MaxSamplerCount(uint32 ShaderStage) const { lconstraint(ShaderStage != ShaderType::NumStandardType); return Stage[ShaderStage].MaxSamplerCount; }
+		inline uint32 MaxSRVCount(uint32 ShaderStage) const { lconstraint(ShaderStage != ShaderType::NumStandardType); return Stage[ShaderStage].MaxSRVCount; }
+		inline uint32 MaxCBVCount(uint32 ShaderStage) const { lconstraint(ShaderStage != ShaderType::NumStandardType); return Stage[ShaderStage].MaxCBVCount; }
+		inline uint32 MaxUAVCount(uint32 ShaderStage) const { lconstraint(ShaderStage != ShaderType::NumStandardType); return Stage[ShaderStage].MaxUAVCount; }
+		inline CBVSlotMask CBVRegisterMask(uint32 ShaderStage) const { lconstraint(ShaderStage != ShaderType::NumStandardType); return Stage[ShaderStage].CBVRegisterMask; }
 
 		ID3D12RootSignature* GetSignature() const
 		{
@@ -309,6 +336,8 @@ namespace platform_ex::Windows::D3D12 {
 		uint8 TotalRootSignatureSizeInDWORDs = 0;
 
 		uint8 BindSlotMap[RPK_RootParameterKeyCount];	// This map uses an enum as a key to lookup the root parameter index
+		ShaderStage Stage[ShaderType::NumStandardType];
+
 
 		bool bHasUAVs;
 		bool bHasSRVs;

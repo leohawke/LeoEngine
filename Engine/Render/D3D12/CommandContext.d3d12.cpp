@@ -38,6 +38,17 @@ void SetRenderTargetsInfo::ConvertFromPassInfo(const platform::Render::RenderPas
 	}
 }
 
+CommandContext::CommandContext(D3D12Device* InParent, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc, bool InIsDefaultContext, bool InIsAsyncComputeContext)
+	:
+	VSConstantBuffer(InParent, ConstantsAllocator),
+	HSConstantBuffer(InParent, ConstantsAllocator),
+	DSConstantBuffer(InParent, ConstantsAllocator),
+	PSConstantBuffer(InParent, ConstantsAllocator),
+	GSConstantBuffer(InParent, ConstantsAllocator),
+	CSConstantBuffer(InParent, ConstantsAllocator)
+{
+}
+
 void CommandContext::BeginRenderPass(const platform::Render::RenderPassInfo& Info, const char* Name)
 {
 	SetRenderTargetsInfo RTInfo;

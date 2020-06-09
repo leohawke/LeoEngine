@@ -1,7 +1,11 @@
+#include <LBase/lmemory.hpp>
+#include <LBase/linttype_utility.hpp>
 #include "DescriptorCache.h"
 #include "CommandContext.h"
-#include <LBase/lmemory.hpp>
+#include "RootSignature.h"
+
 using namespace platform_ex::Windows::D3D12;
+using leo::BitMask;
 
 void CommandContextStateCache::SetBlendFactor(const float BlendFactor[4])
 {
@@ -362,6 +366,230 @@ void CommandContextStateCache::ClearUAVs()
 template<CachePipelineType PipelineType>
 void CommandContextStateCache::ApplyState()
 {
+	auto& CommandList = CmdContext->CommandListHandle;
+
+	const RootSignature* pRootSignature = nullptr;
+
+	if (PipelineType == CPT_Graphics)
+	{
+		pRootSignature = GetGraphicsRootSignature();
+
+		// See if we need to set a graphics root signature
+		if (PipelineState.Graphics.bNeedSetRootSignature)
+		{
+			CommandList->SetGraphicsRootSignature(pRootSignature->GetSignature());
+			PipelineState.Graphics.bNeedSetRootSignature = false;
+
+			// After setting a root signature, all root parameters are undefined and must be set again.
+			PipelineState.Common.SRVCache.DirtyGraphics();
+			PipelineState.Common.UAVCache.DirtyGraphics();
+			PipelineState.Common.SamplerCache.DirtyGraphics();
+			PipelineState.Common.CBVCache.DirtyGraphics();
+		}
+	}
+
+	// Ensure the correct graphics or compute PSO is set.
+	InternalSetPipelineState<PipelineType>();
+
+	if (PipelineType == D3D12PT_Graphics)
+	{
+		// Setup non-heap bindings
+		if (bNeedSetVB)
+		{
+			bNeedSetVB = false;
+			//SCOPE_CYCLE_COUNTER(STAT_D3D12ApplyStateSetVertexBufferTime);
+			DescriptorCache.SetVertexBuffers(PipelineState.Graphics.VBCache);
+		}
+		if (bNeedSetSOs)
+		{
+			bNeedSetSOs = false;
+			DescriptorCache.SetStreamOutTargets(PipelineState.Graphics.CurrentStreamOutTargets, PipelineState.Graphics.CurrentNumberOfStreamOutTargets, PipelineState.Graphics.CurrentSOOffsets);
+		}
+		if (bNeedSetViewports)
+		{
+			bNeedSetViewports = false;
+			CommandList->RSSetViewports(PipelineState.Graphics.CurrentNumberOfViewports, PipelineState.Graphics.CurrentViewport);
+		}
+		if (bNeedSetScissorRects)
+		{
+			bNeedSetScissorRects = false;
+			CommandList->RSSetScissorRects(PipelineState.Graphics.CurrentNumberOfScissorRects, PipelineState.Graphics.CurrentScissorRects);
+		}
+		if (bNeedSetPrimitiveTopology)
+		{
+			bNeedSetPrimitiveTopology = false;
+			CommandList->IASetPrimitiveTopology(PipelineState.Graphics.CurrentPrimitiveTopology);
+		}
+		if (bNeedSetBlendFactor)
+		{
+			bNeedSetBlendFactor = false;
+			CommandList->OMSetBlendFactor(PipelineState.Graphics.CurrentBlendFactor);
+		}
+		if (bNeedSetStencilRef)
+		{
+			bNeedSetStencilRef = false;
+			CommandList->OMSetStencilRef(PipelineState.Graphics.CurrentReferenceStencil);
+		}
+		if (bNeedSetRTs)
+		{
+			bNeedSetRTs = false;
+			DescriptorCache.SetRenderTargets(PipelineState.Graphics.RenderTargetArray, PipelineState.Graphics.CurrentNumberOfRenderTargets, PipelineState.Graphics.CurrentDepthStencilTarget);
+		}
+		if (bNeedSetDepthBounds)
+		{
+			bNeedSetDepthBounds = false;
+			CommandList->OMSetDepthBounds(PipelineState.Graphics.MinDepth, PipelineState.Graphics.MaxDepth);
+		}
+	}
+
+	// Note that ray tracing pipeline shares state with compute
+	const uint32 StartStage = PipelineType == CPT_Graphics ? 0 : ShaderType::ComputeShader;
+	const uint32 EndStage = PipelineType == CPT_Graphics ? ShaderType::ComputeShader : ShaderType::NumStandardType;
+
+	const ShaderType UAVStage = PipelineType == CPT_Graphics ? ShaderType::PixelShader : ShaderType::ComputeShader;
+
+	//
+	// Reserve space in descriptor heaps
+	// Since this can cause heap rollover (which causes old bindings to become invalid), the reserve must be done atomically
+	//
+
+	// Samplers
+	ApplySamplers(pRootSignature, StartStage, EndStage);
+
+	// Determine what resource bind slots are dirty for the current shaders and how many descriptor table slots we need.
+	// We only set dirty resources that can be used for the upcoming Draw/Dispatch.
+	SRVSlotMask CurrentShaderDirtySRVSlots[ShaderType::NumStandardType] = {};
+	CBVSlotMask CurrentShaderDirtyCBVSlots[ShaderType::NumStandardType] = {};
+	UAVSlotMask CurrentShaderDirtyUAVSlots = 0;
+	uint32 NumUAVs = 0;
+	uint32 NumSRVs[ShaderType::NumStandardType] = {};
+
+	uint32 NumViews = 0;
+	for (uint32 iTries = 0; iTries < 2; ++iTries)
+	{
+		const UAVSlotMask CurrentShaderUAVRegisterMask = ((UAVSlotMask)1 << PipelineState.Common.CurrentShaderUAVCounts[UAVStage]) - (UAVSlotMask)1;
+		CurrentShaderDirtyUAVSlots = CurrentShaderUAVRegisterMask & PipelineState.Common.UAVCache.DirtySlotMask[UAVStage];
+		if (CurrentShaderDirtyUAVSlots)
+		{
+			if (ResourceBindingTier <= D3D12_RESOURCE_BINDING_TIER_2)
+			{
+				// Tier 1 and 2 HW requires the full number of UAV descriptors defined in the root signature's descriptor table.
+				NumUAVs = pRootSignature->MaxUAVCount(UAVStage);
+			}
+			else
+			{
+				NumUAVs = PipelineState.Common.CurrentShaderUAVCounts[UAVStage];
+			}
+
+			lconstraint(NumUAVs > 0 && NumUAVs <= MAX_UAVS);
+			NumViews += NumUAVs;
+		}
+
+		for (uint32 Stage = StartStage; Stage < EndStage; ++Stage)
+		{
+			// Note this code assumes the starting register is index 0.
+			const SRVSlotMask CurrentShaderSRVRegisterMask = BitMask<SRVSlotMask>(PipelineState.Common.CurrentShaderSRVCounts[Stage]);
+			CurrentShaderDirtySRVSlots[Stage] = CurrentShaderSRVRegisterMask & PipelineState.Common.SRVCache.DirtySlotMask[Stage];
+			if (CurrentShaderDirtySRVSlots[Stage])
+			{
+				if (ResourceBindingTier == D3D12_RESOURCE_BINDING_TIER_1)
+				{
+					// Tier 1 HW requires the full number of SRV descriptors defined in the root signature's descriptor table.
+					NumSRVs[Stage] = pRootSignature->MaxSRVCount(Stage);
+				}
+				else
+				{
+					NumSRVs[Stage] = PipelineState.Common.CurrentShaderSRVCounts[Stage];
+				}
+
+				lconstraint(NumSRVs[Stage] > 0 && NumSRVs[Stage] <= MAX_SRVS);
+				NumViews += NumSRVs[Stage];
+			}
+
+			const CBVSlotMask CurrentShaderCBVRegisterMask = BitMask<CBVSlotMask>(PipelineState.Common.CurrentShaderCBCounts[Stage]);
+			CurrentShaderDirtyCBVSlots[Stage] = CurrentShaderCBVRegisterMask & PipelineState.Common.CBVCache.DirtySlotMask[Stage];
+
+			// Note: CBVs don't currently use descriptor tables but we still need to know what resource point slots are dirty.
+		}
+
+		// See if the descriptor slots will fit
+		if (!DescriptorCache.GetCurrentViewHeap()->CanReserveSlots(NumViews))
+		{
+			const bool bDescriptorHeapsChanged = DescriptorCache.GetCurrentViewHeap()->RollOver();
+			if (bDescriptorHeapsChanged)
+			{
+				// If descriptor heaps changed, then all our tables are dirty again and we need to recalculate the number of slots we need.
+				NumViews = 0;
+				continue;
+			}
+		}
+
+		// We can reserve slots in the descriptor heap, no need to loop again.
+		break;
+	}
+
+	uint32 ViewHeapSlot = DescriptorCache.GetCurrentViewHeap()->ReserveSlots(NumViews);
+
+	// Unordered access views
+	if (CurrentShaderDirtyUAVSlots)
+	{
+		DescriptorCache.SetUAVs<UAVStage>(pRootSignature, PipelineState.Common.UAVCache, CurrentShaderDirtyUAVSlots, NumUAVs, ViewHeapSlot);
+	}
+
+	// Shader resource views
+	{
+		auto& SRVCache = PipelineState.Common.SRVCache;
+
+#define CONDITIONAL_SET_SRVS(Shader) \
+		if (CurrentShaderDirtySRVSlots[ShaderType::##Shader]) \
+		{ \
+			DescriptorCache.SetSRVs<ShaderType::##Shader>(pRootSignature, SRVCache, CurrentShaderDirtySRVSlots[ShaderType::##Shader], NumSRVs[ShaderType::##Shader], ViewHeapSlot); \
+		}
+
+		if (PipelineType == CPT_Graphics)
+		{
+			CONDITIONAL_SET_SRVS(VertexShader);
+			CONDITIONAL_SET_SRVS(HullShader);
+			CONDITIONAL_SET_SRVS(DomainShader);
+			CONDITIONAL_SET_SRVS(GeometryShader);
+			CONDITIONAL_SET_SRVS(PixelShader);
+		}
+		else
+		{
+			// Note that ray tracing pipeline shares state with compute
+			CONDITIONAL_SET_SRVS(ComputeShader);
+		}
+#undef CONDITIONAL_SET_SRVS
+	}
+
+	// Constant buffers
+	{
+		auto& CBVCache = PipelineState.Common.CBVCache;
+
+#define CONDITIONAL_SET_CBVS(Shader) \
+		if (CurrentShaderDirtyCBVSlots[ShaderType::##Shader]) \
+		{ \
+			DescriptorCache.SetConstantBuffers<ShaderType::##Shader>(pRootSignature, CBVCache, CurrentShaderDirtyCBVSlots[ShaderType::##Shader]); \
+		}
+
+		if (PipelineType == CPT_Graphics)
+		{
+			CONDITIONAL_SET_CBVS(VertexShader);
+			CONDITIONAL_SET_CBVS(HullShader);
+			CONDITIONAL_SET_CBVS(DomainShader);
+			CONDITIONAL_SET_CBVS(GeometryShader);
+			CONDITIONAL_SET_CBVS(PixelShader);
+		}
+		else
+		{
+			// Note that ray tracing pipeline shares state with compute
+			CONDITIONAL_SET_CBVS(ComputeShader);
+		}
+#undef CONDITIONAL_SET_CBVS
+	}
+
+	//TODO Batch Resource barriers
+	// Flush any needed resource barriers
 }
 
 

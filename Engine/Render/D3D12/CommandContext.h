@@ -66,6 +66,8 @@ namespace platform_ex::Windows::D3D12 {
 		void CommitGraphicsResourceTables();
 		void CommitNonComputeShaderConstants();
 	public:
+		FastConstantAllocator ConstantsAllocator;
+
 		CommandContextStateCache StateCache;
 
 		uint16 DirtyUniformBuffers[ShaderType::NumStandardType];

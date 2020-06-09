@@ -123,4 +123,38 @@ namespace leo
 		leo::unpack_uint<_vWidth>(val, leo::make_reverse_iterator(buf
 			+ _vWidth / std::numeric_limits<byte>::digits));
 	}
+
+	/**
+	* Generates a bitmask with a given number of bits set.
+	*/
+	template <typename T>
+	inline T BitMask(uint32 Count);
+
+	template <>
+	inline uint64 BitMask<uint64>(uint32 Count)
+	{
+		lconstraint(Count <= 64);
+		return (uint64(Count < 64) << Count) - 1;
+	}
+
+	template <>
+	inline uint32 BitMask<uint32>(uint32 Count)
+	{
+		lconstraint(Count <= 32);
+		return uint32(uint64(1) << Count) - 1;
+	}
+
+	template <>
+	inline uint16 BitMask<uint16>(uint32 Count)
+	{
+		lconstraint(Count <= 16);
+		return uint16((uint32(1) << Count) - 1);
+	}
+
+	template <>
+	inline uint8 BitMask<uint8>(uint32 Count)
+	{
+		lconstraint(Count <= 8);
+		return uint8((uint32(1) << Count) - 1);
+	}
 }
