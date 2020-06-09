@@ -270,8 +270,6 @@ static uint32 GetIndexCount(platform::Render::PrimtivteType type,uint32 NumPrimi
 	return PrimitiveTypeFactor * NumPrimitives + PrimitiveTypeOffset;
 }
 
-extern template void CommandContextStateCache::ApplyState<CPT_Graphics>();
-
 void CommandContext::DrawIndexedPrimitive(platform::Render::GraphicsBuffer* IIndexBuffer, int32 BaseVertexIndex, uint32 FirstInstance, uint32 NumVertices, uint32 StartIndex, uint32 NumPrimitives, uint32 NumInstances)
 {
 	// called should make sure the input is valid, this avoid hidden bugs

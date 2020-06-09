@@ -263,7 +263,7 @@ void CommandContextStateCache::SetViewports(uint32 Count, const D3D12_VIEWPORT* 
 }
 
 template<ShaderType ShaderFrequency>
-inline void CommandContextStateCache::SetShaderResourceView(ShaderResourceView* SRV, uint32 ResourceIndex)
+void CommandContextStateCache::SetShaderResourceView(ShaderResourceView* SRV, uint32 ResourceIndex)
 {
 	lconstraint(ResourceIndex < MAX_SRVS);
 	auto& Cache = PipelineState.Common.SRVCache;
@@ -285,7 +285,7 @@ inline void CommandContextStateCache::SetShaderResourceView(ShaderResourceView* 
 
 		// Find the highest set SRV
 		(Cache.BoundMask[ShaderFrequency] == 0) ? Cache.MaxBoundIndex[ShaderFrequency] = -1 :
-			Cache.MaxBoundIndex[ShaderFrequency] = FMath::FloorLog2(Cache.BoundMask[ShaderFrequency]);
+			Cache.MaxBoundIndex[ShaderFrequency] = FloorLog2(Cache.BoundMask[ShaderFrequency]);
 
 		CurrentShaderResourceViews[ResourceIndex] = SRV;
 		ShaderResourceViewCache::DirtySlot(Cache.DirtySlotMask[ShaderFrequency], ResourceIndex);
@@ -639,8 +639,8 @@ void CommandContextStateCache::ApplyState()
 
 
 
-template<> void CommandContextStateCache::SetShaderResourceView<ShaderType::VertexShader>(ShaderResourceView* SRV, uint32 ResourceIndex);
-template<> void CommandContextStateCache::SetShaderResourceView<ShaderType::PixelShader>(ShaderResourceView* SRV, uint32 ResourceIndex);
+template void CommandContextStateCache::SetShaderResourceView<ShaderType::VertexShader>(ShaderResourceView* SRV, uint32 ResourceIndex);
+template void CommandContextStateCache::SetShaderResourceView<ShaderType::PixelShader>(ShaderResourceView* SRV, uint32 ResourceIndex);
 
 template void CommandContextStateCache::ApplyState<CPT_Graphics>();
 
