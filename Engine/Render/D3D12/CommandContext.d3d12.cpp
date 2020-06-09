@@ -45,8 +45,10 @@ CommandContext::CommandContext(D3D12Device* InParent, SubAllocatedOnlineHeap::Su
 	DSConstantBuffer(InParent, ConstantsAllocator),
 	PSConstantBuffer(InParent, ConstantsAllocator),
 	GSConstantBuffer(InParent, ConstantsAllocator),
-	CSConstantBuffer(InParent, ConstantsAllocator)
+	CSConstantBuffer(InParent, ConstantsAllocator),
+	StateCache(0)
 {
+	StateCache.Init(InParent, this, nullptr, SubHeapDesc);
 }
 
 void CommandContext::BeginRenderPass(const platform::Render::RenderPassInfo& Info, const char* Name)
@@ -267,6 +269,8 @@ static uint32 GetIndexCount(platform::Render::PrimtivteType type,uint32 NumPrimi
 
 	return PrimitiveTypeFactor * NumPrimitives + PrimitiveTypeOffset;
 }
+
+extern template void CommandContextStateCache::ApplyState<CPT_Graphics>();
 
 void CommandContext::DrawIndexedPrimitive(platform::Render::GraphicsBuffer* IIndexBuffer, int32 BaseVertexIndex, uint32 FirstInstance, uint32 NumVertices, uint32 StartIndex, uint32 NumPrimitives, uint32 NumInstances)
 {

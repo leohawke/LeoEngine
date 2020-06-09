@@ -3,9 +3,53 @@
 #include "DescriptorCache.h"
 #include "CommandContext.h"
 #include "RootSignature.h"
+#include "Context.h"
 
 using namespace platform_ex::Windows::D3D12;
 using leo::BitMask;
+
+// This value defines how many descriptors will be in the device local view heap which
+// This should be tweaked for each title as heaps require VRAM. The default value of 512k takes up ~16MB
+int32 GLocalViewHeapSize = 500 * 1000;
+
+// This value defines how many descriptors will be in the device global view heap which
+// is shared across contexts to allow the driver to eliminate redundant descriptor heap sets.
+// This should be tweaked for each title as heaps require VRAM. The default value of 512k takes up ~16MB
+int32 GGlobalViewHeapSize = 500 * 1000;
+
+CommandContextStateCache::CommandContextStateCache(GPUMaskType Node)
+	:SingleNodeGPUObject(Node),
+	DescriptorCache(Node)
+{
+}
+
+void CommandContextStateCache::Init(D3D12Device* InParent, CommandContext* InCmdContext, const CommandContextStateCache* AncestralState, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc)
+{
+	Parent = InParent;
+	CmdContext = InCmdContext;
+
+	// Cache the resource binding tier
+	ResourceBindingTier = Parent->GetResourceBindingTier();
+
+	// Init the descriptor heaps
+	const uint32 MaxDescriptorsForTier = (ResourceBindingTier == D3D12_RESOURCE_BINDING_TIER_1) ? NUM_VIEW_DESCRIPTORS_TIER_1 :
+		NUM_VIEW_DESCRIPTORS_TIER_2;
+
+	lconstraint(GLocalViewHeapSize <= (int32)MaxDescriptorsForTier);
+	lconstraint(GGlobalViewHeapSize <= (int32)MaxDescriptorsForTier);
+
+	const uint32 NumSamplerDescriptors = NUM_SAMPLER_DESCRIPTORS;
+	DescriptorCache.Init(InParent, InCmdContext, GLocalViewHeapSize, NumSamplerDescriptors, SubHeapDesc);
+
+	if (AncestralState)
+	{
+		InheritState(*AncestralState);
+	}
+	else
+	{
+		ClearState();
+	}
+}
 
 void CommandContextStateCache::SetBlendFactor(const float BlendFactor[4])
 {
@@ -337,7 +381,7 @@ void CommandContextStateCache::SetUAVs(uint32 UAVStartSlot, uint32 NumSimultaneo
 		if (UAV)
 		{
 			//TODO CounterResource
-			if (UAV->CounterResource && (!UAV->CounterResourceInitialized || UAVInitialCountArray[i] != -1))
+			if ((UAVInitialCountArray[i] != -1))
 			{
 			}
 		}
@@ -391,7 +435,7 @@ void CommandContextStateCache::ApplyState()
 	// Ensure the correct graphics or compute PSO is set.
 	InternalSetPipelineState<PipelineType>();
 
-	if (PipelineType == D3D12PT_Graphics)
+	if (PipelineType == CPT_Graphics)
 	{
 		// Setup non-heap bindings
 		if (bNeedSetVB)
@@ -438,7 +482,8 @@ void CommandContextStateCache::ApplyState()
 		if (bNeedSetDepthBounds)
 		{
 			bNeedSetDepthBounds = false;
-			CommandList->OMSetDepthBounds(PipelineState.Graphics.MinDepth, PipelineState.Graphics.MaxDepth);
+			ID3D12GraphicsCommandList1* CommandList1 = nullptr;
+			CommandList1->OMSetDepthBounds(PipelineState.Graphics.MinDepth, PipelineState.Graphics.MaxDepth);
 		}
 	}
 
@@ -597,10 +642,10 @@ void CommandContextStateCache::ApplyState()
 template<> void CommandContextStateCache::SetShaderResourceView<ShaderType::VertexShader>(ShaderResourceView* SRV, uint32 ResourceIndex);
 template<> void CommandContextStateCache::SetShaderResourceView<ShaderType::PixelShader>(ShaderResourceView* SRV, uint32 ResourceIndex);
 
-template<> void CommandContextStateCache::ApplyState<CPT_Graphics>();
+template void CommandContextStateCache::ApplyState<CPT_Graphics>();
 
-template<> void CommandContextStateCache::SetUAVs<ShaderType::VertexShader>(uint32 UAVStartSlot, uint32 NumSimultaneousUAVs, UnorderedAccessView* const* UAVArray, uint32* UAVInitialCountArray);
-template<> void CommandContextStateCache::SetUAVs<ShaderType::PixelShader>(uint32 UAVStartSlot, uint32 NumSimultaneousUAVs, UnorderedAccessView* const* UAVArray, uint32* UAVInitialCountArray);
+template void CommandContextStateCache::SetUAVs<ShaderType::VertexShader>(uint32 UAVStartSlot, uint32 NumSimultaneousUAVs, UnorderedAccessView* const* UAVArray, uint32* UAVInitialCountArray);
+template void CommandContextStateCache::SetUAVs<ShaderType::PixelShader>(uint32 UAVStartSlot, uint32 NumSimultaneousUAVs, UnorderedAccessView* const* UAVArray, uint32* UAVInitialCountArray);
 
-template<> void CommandContextStateCache::ClearUAVs<ShaderType::VertexShader>();
-template<> void CommandContextStateCache::ClearUAVs<ShaderType::PixelShader>();
+template void CommandContextStateCache::ClearUAVs<ShaderType::VertexShader>();
+template void CommandContextStateCache::ClearUAVs<ShaderType::PixelShader>();

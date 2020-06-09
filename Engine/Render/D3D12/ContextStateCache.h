@@ -21,6 +21,15 @@ namespace platform_ex::Windows::D3D12 {
 
 	using platform::Render::Shader::ShaderType;
 
+	constexpr auto NUM_SAMPLER_DESCRIPTORS = D3D12_MAX_SHADER_VISIBLE_SAMPLER_HEAP_SIZE;
+
+	constexpr auto NUM_VIEW_DESCRIPTORS_TIER_1 = D3D12_MAX_SHADER_VISIBLE_DESCRIPTOR_HEAP_SIZE_TIER_1;
+	constexpr auto NUM_VIEW_DESCRIPTORS_TIER_2 = D3D12_MAX_SHADER_VISIBLE_DESCRIPTOR_HEAP_SIZE_TIER_2;
+	// Only some tier 3 hardware can use > 1 million descriptors in a heap, the only way to tell if hardware can
+	// is to try and create a heap and check for failure. Unless we really want > 1 million Descriptors we'll cap
+	// out at 1M for now.
+	constexpr auto NUM_VIEW_DESCRIPTORS_TIER_3 = D3D12_MAX_SHADER_VISIBLE_DESCRIPTOR_HEAP_SIZE_TIER_2;
+
 	class GraphicsBuffer;
 
 	enum CachePipelineType
@@ -204,7 +213,6 @@ namespace platform_ex::Windows::D3D12 {
 	};
 
 	class CommandContext;
-	class DescriptorCache;
 
 	using D3D12DescriptorCache = DescriptorCache;
 
@@ -659,9 +667,9 @@ namespace platform_ex::Windows::D3D12 {
 			*PrimitiveTopology = PipelineState.Graphics.CurrentPrimitiveTopology;
 		}
 
-		CommandContextStateCache();
+		CommandContextStateCache(GPUMaskType Node);
 
-		void Init(D3D12Device* InParent, CommandContext* InCmdContext, const CommandContextStateCache* AncestralState);
+		void Init(D3D12Device* InParent, CommandContext* InCmdContext, const CommandContextStateCache* AncestralState,SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc);
 
 		virtual ~CommandContextStateCache()
 		{
