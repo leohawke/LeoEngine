@@ -178,7 +178,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		// Roll over behavior depends on the heap type
 		virtual bool RollOver() = 0;
-		virtual void NotifyCurrentCommandList(const ID3D12GraphicsCommandList& CommandListHandle);
+		virtual void NotifyCurrentCommandList(ID3D12GraphicsCommandList& CommandListHandle);
 
 		virtual uint32 GetTotalSize()
 		{
@@ -208,6 +208,8 @@ namespace platform_ex::Windows::D3D12 {
 
 		// Desc contains the number of slots and allows for easy recreation
 		D3D12_DESCRIPTOR_HEAP_DESC Desc;
+
+		const bool bCanLoopAround;
 	};
 
 	class GlobalOnlineHeap : public OnlineHeap
@@ -269,7 +271,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		// Specializations
 		bool RollOver();
-		void NotifyCurrentCommandList(const ID3D12GraphicsCommandList& CommandListHandle);
+		void NotifyCurrentCommandList(ID3D12GraphicsCommandList& CommandListHandle) override;
 
 		virtual uint32 GetTotalSize() final override
 		{
@@ -292,7 +294,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		bool RollOver();
 
-		void NotifyCurrentCommandList(const ID3D12GraphicsCommandList& CommandListHandle);
+		void NotifyCurrentCommandList(ID3D12GraphicsCommandList& CommandListHandle) override;
 
 		void Init(uint32 NumDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE Type);
 
@@ -374,7 +376,7 @@ namespace platform_ex::Windows::D3D12 {
 		// Notify the descriptor cache every time you start recording a command list.
 		// This sets descriptor heaps on the command list and indicates the current fence value which allows
 		// us to avoid querying DX12 for that value thousands of times per frame, which can be costly.
-		void NotifyCurrentCommandList(const ID3D12GraphicsCommandList& CommandListHandle);
+		void NotifyCurrentCommandList(ID3D12GraphicsCommandList& CommandListHandle);
 
 		// ------------------------------------------------------
 		// end Descriptor Slot Reservation stuff
@@ -412,7 +414,7 @@ namespace platform_ex::Windows::D3D12 {
 		void EndFrame();
 		void GatherUniqueSamplerTables();
 
-		bool SwitchToContextLocalViewHeap(const ID3D12GraphicsCommandList& CommandListHandle);
+		bool SwitchToContextLocalViewHeap(ID3D12GraphicsCommandList& CommandListHandle);
 		bool SwitchToContextLocalSamplerHeap();
 		bool SwitchToGlobalSamplerHeap();
 

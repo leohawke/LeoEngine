@@ -22,6 +22,7 @@ namespace platform_ex::Windows::D3D12 {
 	using platform::Render::Shader::ShaderType;
 
 	constexpr auto NUM_SAMPLER_DESCRIPTORS = D3D12_MAX_SHADER_VISIBLE_SAMPLER_HEAP_SIZE;
+	constexpr auto DESCRIPTOR_HEAP_BLOCK_SIZE = 10000;
 
 	constexpr auto NUM_VIEW_DESCRIPTORS_TIER_1 = D3D12_MAX_SHADER_VISIBLE_DESCRIPTOR_HEAP_SIZE_TIER_1;
 	constexpr auto NUM_VIEW_DESCRIPTORS_TIER_2 = D3D12_MAX_SHADER_VISIBLE_DESCRIPTOR_HEAP_SIZE_TIER_2;
@@ -87,6 +88,11 @@ namespace platform_ex::Windows::D3D12 {
 			SlotMask &= ~((SlotMaskType)1 << SlotIndex);
 		}
 
+		static inline void CleanSlots(SlotMaskType& SlotMask, uint32 NumSlots)
+		{
+			SlotMask &= ~(((SlotMaskType)1 << NumSlots) - 1);
+		}
+
 		static inline void DirtySlot(SlotMaskType& SlotMask, uint32 SlotIndex)
 		{
 			SlotMask |= ((SlotMaskType)1 << SlotIndex);
@@ -94,7 +100,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		static inline bool IsSlotDirty(const SlotMaskType& SlotMask, uint32 SlotIndex)
 		{
-			return (SlotMask & ((ResourceSlotMask)1 << SlotIndex)) != 0;
+			return (SlotMask & ((SlotMaskType)1 << SlotIndex)) != 0;
 		}
 
 		// Mark a specific shader stage as dirty.

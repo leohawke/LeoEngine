@@ -164,8 +164,7 @@ private:
 		Context::Instance().GetScreenFrame()->Clear(FrameBuffer::Color | FrameBuffer::Depth | FrameBuffer::Stencil, { 0,0,0,1 }, 1, 0);
 		auto& Device = Context::Instance().GetDevice();
 
-		platform::ColorCorrectParameters params;
-		auto pTex = platform::CombineLUTPass(params);
+		
 		//auto pRayScene = pEntities->BuildRayTracingScene();
 
 
@@ -261,6 +260,10 @@ private:
 		Context::Instance().CreateDeviceAndDisplay();
 
 		static auto pInitGuard = LeoEngine::System::InitGlobalEnvironment();
+
+		platform::ColorCorrectParameters params;
+		auto pTex = platform::CombineLUTPass(params);
+
 
 		pEntities = std::make_unique<Entities>("sponza_crytek.entities.lsl");
 

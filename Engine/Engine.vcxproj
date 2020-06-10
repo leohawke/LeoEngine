@@ -56,6 +56,7 @@
     <ClCompile Include="Render\D3D12\Convert.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\D3D12RayTracing.cpp" />
     <ClCompile Include="Render\D3D12\d3d12_dxgi.cpp" />
+    <ClCompile Include="Render\D3D12\DescriptorCache.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Device.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Display.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Fence.cpp" />

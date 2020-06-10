@@ -46,6 +46,8 @@ namespace platform_ex::Windows::D3D12 {
 		D3D12Device* Parent;
 	public:
 		DeviceChild(D3D12Device* InParent = nullptr) : Parent(InParent) {}
+
+		D3D12Device* GetParentDevice() { return Parent; }
 	};
 
 	class GPUObject

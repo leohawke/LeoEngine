@@ -672,6 +672,67 @@ namespace platform_ex::Windows::D3D12 {
 	};
 
 	//------------------------------------------------------------------------------------------------
+	struct CD3DX12_GPU_DESCRIPTOR_HANDLE : public D3D12_GPU_DESCRIPTOR_HANDLE
+	{
+		CD3DX12_GPU_DESCRIPTOR_HANDLE() {}
+		explicit CD3DX12_GPU_DESCRIPTOR_HANDLE(const D3D12_GPU_DESCRIPTOR_HANDLE& o) :
+			D3D12_GPU_DESCRIPTOR_HANDLE(o)
+		{}
+		CD3DX12_GPU_DESCRIPTOR_HANDLE(CD3DX12_DEFAULT) { ptr = 0; }
+		CD3DX12_GPU_DESCRIPTOR_HANDLE(_In_ const D3D12_GPU_DESCRIPTOR_HANDLE& other, INT offsetScaledByIncrementSize)
+		{
+			InitOffsetted(other, offsetScaledByIncrementSize);
+		}
+		CD3DX12_GPU_DESCRIPTOR_HANDLE(_In_ const D3D12_GPU_DESCRIPTOR_HANDLE& other, INT offsetInDescriptors, UINT descriptorIncrementSize)
+		{
+			InitOffsetted(other, offsetInDescriptors, descriptorIncrementSize);
+		}
+		CD3DX12_GPU_DESCRIPTOR_HANDLE& Offset(INT offsetInDescriptors, UINT descriptorIncrementSize)
+		{
+			ptr += offsetInDescriptors * descriptorIncrementSize;
+			return *this;
+		}
+		CD3DX12_GPU_DESCRIPTOR_HANDLE& Offset(INT offsetScaledByIncrementSize)
+		{
+			ptr += offsetScaledByIncrementSize;
+			return *this;
+		}
+		inline bool operator==(_In_ const D3D12_GPU_DESCRIPTOR_HANDLE& other) const
+		{
+			return (ptr == other.ptr);
+		}
+		inline bool operator!=(_In_ const D3D12_GPU_DESCRIPTOR_HANDLE& other) const
+		{
+			return (ptr != other.ptr);
+		}
+		CD3DX12_GPU_DESCRIPTOR_HANDLE& operator=(const D3D12_GPU_DESCRIPTOR_HANDLE& other)
+		{
+			ptr = other.ptr;
+			return *this;
+		}
+
+		inline void InitOffsetted(_In_ const D3D12_GPU_DESCRIPTOR_HANDLE& base, INT offsetScaledByIncrementSize)
+		{
+			InitOffsetted(*this, base, offsetScaledByIncrementSize);
+		}
+
+		inline void InitOffsetted(_In_ const D3D12_GPU_DESCRIPTOR_HANDLE& base, INT offsetInDescriptors, UINT descriptorIncrementSize)
+		{
+			InitOffsetted(*this, base, offsetInDescriptors, descriptorIncrementSize);
+		}
+
+		static inline void InitOffsetted(_Out_ D3D12_GPU_DESCRIPTOR_HANDLE& handle, _In_ const D3D12_GPU_DESCRIPTOR_HANDLE& base, INT offsetScaledByIncrementSize)
+		{
+			handle.ptr = base.ptr + offsetScaledByIncrementSize;
+		}
+
+		static inline void InitOffsetted(_Out_ D3D12_GPU_DESCRIPTOR_HANDLE& handle, _In_ const D3D12_GPU_DESCRIPTOR_HANDLE& base, INT offsetInDescriptors, UINT descriptorIncrementSize)
+		{
+			handle.ptr = base.ptr + offsetInDescriptors * descriptorIncrementSize;
+		}
+	};
+
+	//------------------------------------------------------------------------------------------------
 	// D3D12 exports a new method for serializing root signatures in the Windows 10 Anniversary Update.
 	// To help enable root signature 1.1 features when they are available and not require maintaining
 	// two code paths for building root signatures, this helper method reconstructs a 1.0 signature when
@@ -809,7 +870,11 @@ namespace platform_ex::Windows::D3D12 {
 
 	constexpr DXGI_COLOR_SPACE_TYPE DXGI_HDR_ColorSpace = DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020;
 
-	using CBVSlotMask = leo::make_width_int<MAX_CBS>::unsigned_fast_type;
+	using CBVSlotMask = leo::make_width_int<MAX_CBS>::unsigned_least_type;
+
+	constexpr CBVSlotMask GRootCBVSlotMask = (1 << MAX_ROOT_CBVS) - 1; // Mask for all slots that are used by root descriptors.
+	constexpr CBVSlotMask GDescriptorTableCBVSlotMask = static_cast<CBVSlotMask>(-1) & ~(GRootCBVSlotMask); // Mask for all slots that are used by a root descriptor table.
+
 	using SRVSlotMask = leo::make_width_int<MAX_SRVS>::unsigned_fast_type;
 
 	using SamplerSlotMask = leo::make_width_int<MAX_SAMPLERS>::unsigned_fast_type;
