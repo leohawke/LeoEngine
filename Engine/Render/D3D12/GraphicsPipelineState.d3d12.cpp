@@ -8,7 +8,15 @@
 
 using namespace platform_ex::Windows::D3D12;
 
+inline void operator<<(D3D12_SHADER_BYTECODE& desc, const platform::Render::HardwareShader* pShader)
+{
+	auto pD3DShader = dynamic_cast<const D3D12HardwareShader*>(pShader);
 
+	desc.BytecodeLength = pD3DShader->ShaderByteCode.second;
+	desc.pShaderBytecode = pD3DShader->ShaderByteCode.first.get();
+}
+
+void QuantizeBoundShaderState(QuantizedBoundShaderState& QBSS, const platform::Render::GraphicsPipelineStateInitializer& initializer);
 
 KeyGraphicsPipelineStateDesc GetKeyGraphicsPipelineStateDesc(
 	const platform::Render::GraphicsPipelineStateInitializer& initializer, RootSignature* RootSignature);
@@ -16,14 +24,31 @@ KeyGraphicsPipelineStateDesc GetKeyGraphicsPipelineStateDesc(
 GraphicsPipelineState::GraphicsPipelineState(const platform::Render::GraphicsPipelineStateInitializer& initializer)
 	:PipelineStateInitializer(initializer)
 {
+	QuantizedBoundShaderState QuantizedBoundShaderState;
+	QuantizeBoundShaderState(QuantizedBoundShaderState, initializer);
+	
+	QuantizedBoundShaderState.RootSignatureType = RootSignatureType::Raster;
 	//retrive RootSignature
-	auto root_signature = static_cast<platform_ex::Windows::D3D12::RootSignature*>(nullptr);
+	RootSignature = CreateRootSignature(QuantizedBoundShaderState);
 
-	Key =  GetKeyGraphicsPipelineStateDesc(initializer, root_signature);
+	Key =  GetKeyGraphicsPipelineStateDesc(initializer, RootSignature);
 
 	Key.Desc.NodeMask = 0;
 
 	Create(GraphicsPipelineStateCreateArgs(&Key, nullptr));
+
+	std::memset(StreamStrides, 0, sizeof(StreamStrides));
+	int index = 0;
+	for (auto& stream : initializer.ShaderPass.VertexDeclaration)
+	{
+		StreamStrides[index++] = stream.Stride;
+	}
+
+	bShaderNeedsGlobalConstantBuffer[ShaderType::VertexShader] = GetVertexShader() && GetVertexShader()->bGlobalUniformBufferUsed;
+	bShaderNeedsGlobalConstantBuffer[ShaderType::PixelShader] = GetPixelShader() && GetPixelShader()->bGlobalUniformBufferUsed;
+	bShaderNeedsGlobalConstantBuffer[ShaderType::HullShader] = GetHullShader() && GetHullShader()->bGlobalUniformBufferUsed;
+	bShaderNeedsGlobalConstantBuffer[ShaderType::DomainShader] = GetDomainShader() && GetDomainShader()->bGlobalUniformBufferUsed;
+	bShaderNeedsGlobalConstantBuffer[ShaderType::GeometryShader] = GetGeometryShader() && GetGeometryShader()->bGlobalUniformBufferUsed;
 }
 
 
@@ -79,11 +104,11 @@ KeyGraphicsPipelineStateDesc GetKeyGraphicsPipelineStateDesc(
 #define COPY_SHADER(L,R) \
 	Desc.Desc.L##S << initializer.ShaderPass.R##Shader;
 
-	//COPY_SHADER(V, Vertex);
-	//COPY_SHADER(P, Pixel);
-	//COPY_SHADER(D, Domain);
-	//COPY_SHADER(H, Hull);
-	//COPY_SHADER(G,Geometry)
+	COPY_SHADER(V, Vertex);
+	COPY_SHADER(P, Pixel);
+	COPY_SHADER(D, Domain);
+	COPY_SHADER(H, Hull);
+	COPY_SHADER(G,Geometry)
 #undef COPY_SHADER
 
 	//don't support stream output
@@ -109,4 +134,30 @@ static void TranslateRenderTargetFormats(
 	DXGI_FORMAT PlatformFormat = PsoInit.DepthStencilTargetFormat != platform::Render::EF_Unknown ? Convert(PsoInit.DepthStencilTargetFormat) : DXGI_FORMAT_UNKNOWN;
 
 	DSVFormat = PlatformFormat;
+}
+
+void QuantizeBoundShaderState(QuantizedBoundShaderState& QBSS, const platform::Render::GraphicsPipelineStateInitializer& initializer)
+{
+	std::memset(&QBSS, 0, sizeof(QBSS));
+
+	QBSS.AllowIAInputLayout = !initializer.ShaderPass.VertexDeclaration.empty();
+
+	auto Tier = GetDevice().GetResourceBindingTier();
+
+	auto VertexShader = static_cast<VertexHWShader*>(initializer.ShaderPass.VertexShader);
+	auto PixelShader = static_cast<PixelHWShader*>(initializer.ShaderPass.PixelShader);
+	auto HullShader = static_cast<HullHWShader*>(initializer.ShaderPass.HullShader);
+	auto DomainShader = static_cast<DomainHWShader*>(initializer.ShaderPass.DomainShader);
+	auto GeometryShader = static_cast<GeometryHWShader*>(initializer.ShaderPass.GeometryShader);
+
+	if (VertexShader)
+		QuantizedBoundShaderState::InitShaderRegisterCounts(Tier, VertexShader->ResourceCounts, QBSS.RegisterCounts[ShaderType::VertexShader]);
+	if (PixelShader)
+		QuantizedBoundShaderState::InitShaderRegisterCounts(Tier, PixelShader->ResourceCounts, QBSS.RegisterCounts[ShaderType::PixelShader]);
+	if (HullShader)
+		QuantizedBoundShaderState::InitShaderRegisterCounts(Tier, HullShader->ResourceCounts, QBSS.RegisterCounts[ShaderType::HullShader]);
+	if (DomainShader)
+		QuantizedBoundShaderState::InitShaderRegisterCounts(Tier, DomainShader->ResourceCounts, QBSS.RegisterCounts[ShaderType::DomainShader]);
+	if (GeometryShader)
+		QuantizedBoundShaderState::InitShaderRegisterCounts(Tier, GeometryShader->ResourceCounts, QBSS.RegisterCounts[ShaderType::GeometryShader]);
 }

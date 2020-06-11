@@ -10,6 +10,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		platform::Render::ShaderBlob ShaderByteCode;
 		platform::Render::ShaderCodeResourceCounts ResourceCounts;
+		bool bGlobalUniformBufferUsed;
 	};
 
 	class VertexHWShader :public platform::Render::VertexHWShader,public D3D12HardwareShader

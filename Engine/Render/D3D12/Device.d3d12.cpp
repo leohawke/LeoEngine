@@ -14,6 +14,11 @@ namespace Buffer = platform::Render::Buffer;
 using std::make_shared;
 
 namespace platform_ex::Windows::D3D12 {
+	Device& GetDevice()
+	{
+		return Context::Instance().GetDevice();
+	}
+
 	Device::Device(DXGI::Adapter & InAdapter)
 		:adapter(InAdapter)
 	{
@@ -223,7 +228,7 @@ namespace platform_ex::Windows::D3D12 {
 
 	GraphicsPipelineState* Device::CreateGraphicsPipelineState(const platform::Render::GraphicsPipelineStateInitializer& initializer)
 	{
-		return nullptr;
+		return new GraphicsPipelineState(initializer);
 	}
 
 	UnorderedAccessView* Device::CreateUnorderedAccessView(platform::Render::Texture2D* InTexture)

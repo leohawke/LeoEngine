@@ -36,6 +36,8 @@ namespace platform_ex::Windows::D3D12 {
 		}
 
 		uint32 GetHashCode() const;
+
+		static void InitShaderRegisterCounts(const D3D12_RESOURCE_BINDING_TIER& ResourceBindingTier, const ShaderCodeResourceCounts& Counts, ShaderCodeResourceCounts& Shader, bool bAllowUAVs = false);
 	};
 
 	class RootSignatureDesc
@@ -375,6 +377,8 @@ namespace platform_ex::Windows::D3D12 {
 
 		std::unordered_map< QuantizedBoundShaderState,std::unique_ptr<RootSignature>, KeyHash, std::equal_to<QuantizedBoundShaderState>> Map;
 	};
+
+	RootSignature* CreateRootSignature(const QuantizedBoundShaderState& QBSS);
 }
 
 #endif

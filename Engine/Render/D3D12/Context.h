@@ -297,6 +297,8 @@ namespace platform_ex {
 			public:
 				static Context& Instance();
 			};
+
+			Device& GetDevice();
 		}
 	}
 }

@@ -266,6 +266,10 @@ leo::uint32 QuantizedBoundShaderState::GetHashCode() const
 	return static_cast<leo::uint32>(CityHash64((const char*)this,sizeof(*this)));
 }
 
+void QuantizedBoundShaderState::InitShaderRegisterCounts(const D3D12_RESOURCE_BINDING_TIER& ResourceBindingTier, const ShaderCodeResourceCounts& Counts, ShaderCodeResourceCounts& Shader, bool bAllowUAVs)
+{
+}
+
 RootSignature* platform_ex::Windows::D3D12::RootSignatureMap::GetRootSignature(const QuantizedBoundShaderState& QBSS)
 {
 	std::lock_guard lock{ mutex };
@@ -476,4 +480,9 @@ platform_ex::Windows::D3D12::RootSignatureDesc::RootSignatureDesc(const Quantize
 	}
 
 	RootDesc.Init_1_1(RootParameterCount, TableSlots, 0, nullptr, Flags);
+}
+
+RootSignature* platform_ex::Windows::D3D12::CreateRootSignature(const QuantizedBoundShaderState& QBSS)
+{
+	return Context::Instance().GetDevice().CreateRootSignature(QBSS).get();
 }
