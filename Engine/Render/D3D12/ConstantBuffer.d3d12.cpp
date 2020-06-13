@@ -1,12 +1,12 @@
 #include "ConstantBuffer.h"
-#include "Context.h"
+#include "Adapter.h"
 #include "NodeDevice.h"
 using namespace  platform_ex::Windows::D3D12;
 
 ConstantBuffer::ConstantBuffer(NodeDevice* InParent, FastConstantAllocator& Allocator)
     :DeviceChild(InParent)
 {
-    Buffer.reset(InParent->GetParentAdpter()->CreateConstanBuffer(platform::Render::Buffer::Usage::Dynamic, 0, MAX_GLOBAL_CONSTANT_BUFFER_SIZE, EFormat::EF_Unknown));
+    Buffer.reset(InParent->GetParentAdapter()->CreateConstanBuffer(platform::Render::Buffer::Usage::Dynamic, 0, MAX_GLOBAL_CONSTANT_BUFFER_SIZE, EFormat::EF_Unknown));
 }
 
 bool ConstantBuffer::Version(ID3D12Resource*& BufferOut, bool bDiscardSharedConstants)

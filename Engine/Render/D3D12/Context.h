@@ -9,19 +9,16 @@
 #include "Adapter.h"
 #include "RayContext.h"
 #include "CommandContext.h"
-#include <LBase/concurrency.h>
 #include <unordered_map>
 
 namespace platform_ex {
 	namespace Windows {
 		namespace D3D12 {
-			namespace  Effect = platform::Render::Effect;
-			using namespace platform::Render::IFormat;
 
 			class RootSignature;
 			class RootSignatureMap;
 
-
+			class CommandContext;
 
 			class Context : public platform::Render::Context {
 			public:
@@ -107,8 +104,6 @@ namespace platform_ex {
 
 				array<COMPtr<ID3D12GraphicsCommandList>,Device::CommandTypeCount> d3d_cmd_lists;
 				array<std::mutex, Device::CommandTypeCount> cmd_list_mutexs;
-
-				CommandContext* render_command_context;
 
 				array<COMPtr<ID3D12CommandQueue>, Device::CommandTypeCount-1> d3d_cmd_queues;
 

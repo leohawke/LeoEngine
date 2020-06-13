@@ -31,7 +31,7 @@ void CommandContextStateCache::Init(NodeDevice* InParent, CommandContext* InCmdC
 	CmdContext = InCmdContext;
 
 	// Cache the resource binding tier
-	ResourceBindingTier = Parent->GetParentAdpter()->GetResourceBindingTier();
+	ResourceBindingTier = Parent->GetParentAdapter()->GetResourceBindingTier();
 
 	// Init the descriptor heaps
 	const uint32 MaxDescriptorsForTier = (ResourceBindingTier == D3D12_RESOURCE_BINDING_TIER_1) ? NUM_VIEW_DESCRIPTORS_TIER_1 :

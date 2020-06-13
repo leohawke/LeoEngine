@@ -1,11 +1,9 @@
 ﻿#include <LBase/pointer.hpp>
 #include "Context.h"
 #include "Convert.h"
-#include "Display.h"
 #include "FrameBuffer.h"
-#include "Texture.h"
 #include "RayContext.h"
-#include "RootSignature.h"
+#include "NodeDevice.h"
 #include "../Effect/CopyEffect.h"
 #include <LFramework/Core/LException.h>
 
@@ -21,7 +19,7 @@ namespace platform_ex::Windows::D3D12 {
 	}
 
 	Context::Context()
-		:adapter_list(), render_command_context(nullptr)
+		:adapter_list()
 	{
 #ifndef NDEBUG
 		{
@@ -285,9 +283,6 @@ namespace platform_ex::Windows::D3D12 {
 		FilterExceptions([&, this] {
 			ray_context = std::make_shared<RayContext>(device.get(), this);
 			},"ERROR: DirectX Raytracing is not supported by your OS, GPU and/or driver.");
-
-		SubAllocatedOnlineHeap::SubAllocationDesc desc;
-		render_command_context = new CommandContext(device.get(), desc, true);
 	}
 
 	COMPtr<ID3D12Resource> Context::InnerResourceAlloc(InnerReourceType type, leo::uint32 size_in_byte)
@@ -506,7 +501,7 @@ namespace platform_ex::Windows::D3D12 {
 
 	CommandContext* D3D12::Context::GetDefaultCommandContext()
 	{
-		return render_command_context;
+		return &(device->Devices[0]->GetDefaultCommandContext());
 	}
 
 	Context & Context::Instance()
