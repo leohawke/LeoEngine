@@ -20,6 +20,7 @@ D3D12_GRAPHICS_PIPELINE_STATE_DESC platform_ex::Windows::D3D12::D3DGraphicsPipel
 	D.RasterizerState = this->RasterizerState;
 	D.NumRenderTargets = this->RTFormatArray.NumRenderTargets;
 	std::memcpy(D.RTVFormats, this->RTFormatArray.RTFormats, sizeof(D.RTVFormats));
+	std::memset(&D.StreamOutput, 0, sizeof(D.StreamOutput));
 	D.SampleDesc = this->SampleDesc;
 	D.SampleMask = this->SampleMask;
 	D.CachedPSO = this->CachedPSO;

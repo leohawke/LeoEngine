@@ -191,6 +191,7 @@ inline namespace Shader
 
 #define EXPORTED_SHADER_TYPE(ShaderClass,ShaderMetaTypeShortcut) \
 public:\
+	using DerivedType = ShaderClass;\
 	using ShaderMetaType = platform::Render::##ShaderMetaTypeShortcut##ShaderMeta;\
 	static ShaderMetaType StaticType; \
 	static RenderShader* ConstructInstance() { return new ShaderClass();} \

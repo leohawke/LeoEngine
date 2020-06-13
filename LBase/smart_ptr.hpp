@@ -246,7 +246,7 @@ namespace leo
 		return std::unique_ptr<_type>(new _type);
 	}
 	template<typename _type, typename... _tParams>
-	lconstfn limpl(std::enable_if_t<std::is_array<_type>::value&& extent<_type>::value == 0,
+	lconstfn limpl(std::enable_if_t<std::is_array<_type>::value&& std::extent<_type>::value == 0,
 		std::unique_ptr<_type>>)
 		make_unique_default_init(size_t size)
 	{

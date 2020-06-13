@@ -1,7 +1,10 @@
 #include "RootSignature.h"
-#include "../../Core/Hash/CityHash.h"
 #include "Context.h"
 #include "D3D12RayTracing.h"
+
+#include <Engine/Win32/WindowsPlatformMath.h>
+#include <Engine/Core/Hash/CityHash.h>
+
 
 using namespace platform_ex::Windows::D3D12;
 using platform::Render::ShaderType;
@@ -129,7 +132,20 @@ template<typename RootSignatureDescType>
 void RootSignature::InternalAnalyzeSignature(const RootSignatureDescType& Desc, uint32 BindingSpace)
 {
 	std::memset(BindSlotMap, 0xFF, sizeof(BindSlotMap));
+	bHasUAVs = false;
+	bHasSRVs = false;
+	bHasCBVs = false;
+	bHasRDTCBVs = false;
+	bHasRDCBVs = false;
+	bHasSamplers = false;
+
 	TotalRootSignatureSizeInDWORDs = 0;
+
+	const bool bDenyVS = (Desc.Flags & D3D12_ROOT_SIGNATURE_FLAG_DENY_VERTEX_SHADER_ROOT_ACCESS) != 0;
+	const bool bDenyHS = (Desc.Flags & D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS) != 0;
+	const bool bDenyDS = (Desc.Flags & D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS) != 0;
+	const bool bDenyGS = (Desc.Flags & D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS) != 0;
+	const bool bDenyPS = (Desc.Flags & D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS) != 0;
 
 	const uint32 RootDescriptorTableCost = (Desc.Flags & D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE) ? RootDescriptorTableCostLocal : RootDescriptorTableCostGlobal;
 
@@ -196,6 +212,18 @@ void RootSignature::InternalAnalyzeSignature(const RootSignatureDescType& Desc, 
 			break;
 		}
 
+		// Determine shader stage visibility.
+		{
+			Stage[ShaderType::VertexShader].bVisible = Stage[ShaderType::VertexShader].bVisible || (!bDenyVS && HasVisibility(CurrentParameter.ShaderVisibility, D3D12_SHADER_VISIBILITY_VERTEX));
+			Stage[ShaderType::HullShader].bVisible = Stage[ShaderType::HullShader].bVisible || (!bDenyHS && HasVisibility(CurrentParameter.ShaderVisibility, D3D12_SHADER_VISIBILITY_HULL));
+			Stage[ShaderType::DomainShader].bVisible = Stage[ShaderType::DomainShader].bVisible || (!bDenyDS && HasVisibility(CurrentParameter.ShaderVisibility, D3D12_SHADER_VISIBILITY_DOMAIN));
+			Stage[ShaderType::GeometryShader].bVisible = Stage[ShaderType::GeometryShader].bVisible || (!bDenyGS && HasVisibility(CurrentParameter.ShaderVisibility, D3D12_SHADER_VISIBILITY_GEOMETRY));
+			Stage[ShaderType::PixelShader].bVisible = Stage[ShaderType::PixelShader].bVisible || (!bDenyPS && HasVisibility(CurrentParameter.ShaderVisibility, D3D12_SHADER_VISIBILITY_PIXEL));
+
+			// Compute is a special case, it must have visibility all.
+			Stage[ShaderType::ComputeShader].bVisible = Stage[ShaderType::ComputeShader].bVisible || (CurrentParameter.ShaderVisibility == D3D12_SHADER_VISIBILITY_ALL);
+		}
+
 		// Determine shader resource counts.
 		{
 			switch (CurrentParameter.ParameterType)
@@ -210,20 +238,20 @@ void RootSignature::InternalAnalyzeSignature(const RootSignatureDescType& Desc, 
 					switch (CurrentRange.RangeType)
 					{
 					case D3D12_DESCRIPTOR_RANGE_TYPE_SRV:
-						//SetMaxSRVCount(CurrentVisibleSF, CurrentRange.NumDescriptors);
+						SetMaxSRVCount(CurrentVisibleSF, CurrentRange.NumDescriptors);
 						SetSRVRDTBindSlot(CurrentVisibleSF, i);
 						break;
 					case D3D12_DESCRIPTOR_RANGE_TYPE_UAV:
-						//SetMaxUAVCount(CurrentVisibleSF, CurrentRange.NumDescriptors);
+						SetMaxUAVCount(CurrentVisibleSF, CurrentRange.NumDescriptors);
 						SetUAVRDTBindSlot(CurrentVisibleSF, i);
 						break;
 					case D3D12_DESCRIPTOR_RANGE_TYPE_CBV:
-						//IncrementMaxCBVCount(CurrentVisibleSF, CurrentRange.NumDescriptors);
+						IncrementMaxCBVCount(CurrentVisibleSF, CurrentRange.NumDescriptors);
 						SetCBVRDTBindSlot(CurrentVisibleSF, i);
-						//UpdateCBVRegisterMaskWithDescriptorRange(CurrentVisibleSF, CurrentRange);
+						UpdateCBVRegisterMaskWithDescriptorRange(CurrentVisibleSF, CurrentRange);
 						break;
 					case D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER:
-						//SetMaxSamplerCount(CurrentVisibleSF, CurrentRange.NumDescriptors);
+						SetMaxSamplerCount(CurrentVisibleSF, CurrentRange.NumDescriptors);
 						SetSamplersRDTBindSlot(CurrentVisibleSF, i);
 						break;
 
@@ -236,14 +264,14 @@ void RootSignature::InternalAnalyzeSignature(const RootSignatureDescType& Desc, 
 			{
 				lconstraint(CurrentParameter.Descriptor.RegisterSpace == BindingSpace); // Parameters in other binding spaces are expected to be filtered out at this point
 
-				//IncrementMaxCBVCount(CurrentVisibleSF, 1);
+				IncrementMaxCBVCount(CurrentVisibleSF, 1);
 				if (CurrentParameter.Descriptor.ShaderRegister == 0)
 				{
 					// This is the first CBV for this stage, save it's root parameter index (other CBVs will be indexed using this base root parameter index).
 					SetCBVRDBindSlot(CurrentVisibleSF, i);
 				}
 
-				//UpdateCBVRegisterMaskWithDescriptor(CurrentVisibleSF, CurrentParameter.Descriptor);
+				UpdateCBVRegisterMaskWithDescriptor(CurrentVisibleSF, CurrentParameter.Descriptor);
 
 				// The first CBV for this stage must come first in the root signature, and subsequent root CBVs for this stage must be contiguous.
 				lconstraint(0xFF != CBVRDBindSlot(CurrentVisibleSF, 0));
@@ -266,8 +294,43 @@ leo::uint32 QuantizedBoundShaderState::GetHashCode() const
 	return static_cast<leo::uint32>(CityHash64((const char*)this,sizeof(*this)));
 }
 
+
+
 void QuantizedBoundShaderState::InitShaderRegisterCounts(const D3D12_RESOURCE_BINDING_TIER& ResourceBindingTier, const ShaderCodeResourceCounts& Counts, ShaderCodeResourceCounts& Shader, bool bAllowUAVs)
 {
+	static const uint32 MaxSamplerCount = MAX_SAMPLERS;
+	static const uint32 MaxConstantBufferCount = MAX_CBS;
+	static const uint32 MaxShaderResourceCount = MAX_SRVS;
+	static const uint32 MaxUnorderedAccessCount = MAX_UAVS;
+
+	// Round up and clamp values to their max
+	// Note: Rounding and setting counts based on binding tier allows us to create fewer root signatures.
+
+	// To reduce the size of the root signature, we only allow UAVs for certain shaders. 
+	// This code makes the assumption that the engine only uses UAVs at the PS or CS shader stages.
+	lconstraint(bAllowUAVs || (!bAllowUAVs && Counts.NumUAVs == 0));
+
+	if (ResourceBindingTier <= D3D12_RESOURCE_BINDING_TIER_1)
+	{
+		Shader.NumSamplers = (Counts.NumSamplers > 0) ? std::min(MaxSamplerCount, RoundUpToPowerOfTwo(Counts.NumSamplers)) : Counts.NumSamplers;
+		Shader.NumSRVs = (Counts.NumSRVs > 0) ? std::min(MaxShaderResourceCount, RoundUpToPowerOfTwo(Counts.NumSRVs)) : Counts.NumSRVs;
+	}
+	else
+	{
+		Shader.NumSamplers = MaxSamplerCount;
+		Shader.NumSRVs = MaxShaderResourceCount;
+	}
+
+	if (ResourceBindingTier <= D3D12_RESOURCE_BINDING_TIER_2)
+	{
+		Shader.NumCBs = (Counts.NumCBs > MAX_ROOT_CBVS) ? std::min(MaxConstantBufferCount, RoundUpToPowerOfTwo(Counts.NumCBs)) : Counts.NumCBs;
+		Shader.NumUAVs = (Counts.NumUAVs > 0 && bAllowUAVs) ? std::min(MaxUnorderedAccessCount, RoundUpToPowerOfTwo(Counts.NumUAVs)) : 0;
+	}
+	else
+	{
+		Shader.NumCBs = (Counts.NumCBs > MAX_ROOT_CBVS) ? MaxConstantBufferCount : Counts.NumCBs;
+		Shader.NumUAVs = (bAllowUAVs) ? MaxUnorderedAccessCount : 0;
+	}
 }
 
 RootSignature* platform_ex::Windows::D3D12::RootSignatureMap::GetRootSignature(const QuantizedBoundShaderState& QBSS)

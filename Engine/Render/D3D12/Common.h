@@ -34,7 +34,7 @@ namespace platform_ex::Windows::D3D12 {
 
 	//TODO:different hardware setups
 	//CommonCase Map
-	using D3D12Device = Device;
+	class NodeDevice;
 
 	using D3D12Adapter = Device;
 
@@ -43,11 +43,28 @@ namespace platform_ex::Windows::D3D12 {
 	class DeviceChild
 	{
 	protected:
-		D3D12Device* Parent;
+		NodeDevice* Parent;
 	public:
-		DeviceChild(D3D12Device* InParent = nullptr) : Parent(InParent) {}
+		DeviceChild(NodeDevice* InParent = nullptr) : Parent(InParent) {}
 
-		D3D12Device* GetParentDevice() { return Parent; }
+		NodeDevice* GetParentDevice() { return Parent; }
+	};
+
+	class AdapterChild
+	{
+	protected:
+		D3D12Adapter* ParentAdapter;
+
+	public:
+		AdapterChild(D3D12Adapter* InParent = nullptr) : ParentAdapter(InParent) {}
+
+		D3D12Adapter* GetParentAdapter() { return ParentAdapter; }
+
+		// To be used with delayed setup
+		void SetParentAdapter(D3D12Adapter* InParent)
+		{
+			ParentAdapter = InParent;
+		}
 	};
 
 	class GPUObject

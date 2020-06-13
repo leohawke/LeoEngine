@@ -9,12 +9,17 @@ D3D12HardwareShader::D3D12HardwareShader(const platform::Render::ShaderInitializ
 	ShaderByteCode.second = blob.second;
 	std::memcpy(ShaderByteCode.first.get(), blob.first.get(), blob.second);
 
-	for (auto& cb : initializer.pInfo->ConstantBufferInfos)
-	{
-		if (cb.name == "$Globals")
+	lconstraint(initializer.pInfo);
+	if (initializer.pInfo) {
+		for (auto& cb : initializer.pInfo->ConstantBufferInfos)
 		{
-			bGlobalUniformBufferUsed = true;
-			break;
+			if (cb.name == "$Globals")
+			{
+				bGlobalUniformBufferUsed = true;
+				break;
+			}
 		}
+
+		ResourceCounts = initializer.pInfo->ResourceCounts;
 	}
 }

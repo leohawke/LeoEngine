@@ -20,7 +20,7 @@ namespace platform_ex::Windows::D3D12
 	class ConstantBuffer : public DeviceChild
 	{
 	public:
-		ConstantBuffer(D3D12Device* InParent, FastConstantAllocator& Allocator);
+		ConstantBuffer(NodeDevice* InParent, FastConstantAllocator& Allocator);
 
 		/**
 		* Updates a variable in the constant buffer.

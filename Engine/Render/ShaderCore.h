@@ -20,7 +20,7 @@ namespace platform::Render {
 			uint16 NumSamplers = 0;
 			uint16 NumSRVs = 0;
 			uint16 NumUAVs = 0;
-			uint16 NumCBs;
+			uint16 NumCBs = 0;
 		};
 
 		enum ShaderType : leo::uint8

@@ -11,6 +11,8 @@ using namespace platform_ex::Windows::D3D12;
 inline void operator<<(D3D12_SHADER_BYTECODE& desc, const platform::Render::HardwareShader* pShader)
 {
 	auto pD3DShader = dynamic_cast<const D3D12HardwareShader*>(pShader);
+	if (!pD3DShader)
+		return;
 
 	desc.BytecodeLength = pD3DShader->ShaderByteCode.second;
 	desc.pShaderBytecode = pD3DShader->ShaderByteCode.first.get();
@@ -56,7 +58,7 @@ void platform_ex::Windows::D3D12::GraphicsPipelineState::Create(const GraphicsPi
 {
 	auto Desc = InCreationArgs.Desc->Desc.GraphicsDesc();
 
-	Context::Instance().GetDevice().GetDevice()->CreateGraphicsPipelineState(&Desc, COMPtr_RefParam(PipelineState, IID_ID3D12PipelineState));
+	CheckHResult(GetDevice().GetDevice()->CreateGraphicsPipelineState(&Desc, COMPtr_RefParam(PipelineState, IID_ID3D12PipelineState)));
 }
 
 static void TranslateRenderTargetFormats(
@@ -72,6 +74,7 @@ KeyGraphicsPipelineStateDesc GetKeyGraphicsPipelineStateDesc(
 	std::memset(&Desc, 0, sizeof(Desc));
 
 	Desc.pRootSignature = RootSignature;
+	Desc.Desc.pRootSignature = RootSignature->GetSignature();
 
 	Desc.Desc.BlendState = Convert(initializer.BlendState);
 	Desc.Desc.SampleMask =initializer.BlendState.sample_mask;

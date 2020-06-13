@@ -41,6 +41,7 @@ platform::ColorCorrectParameters::ColorCorrectParameters()
 class LUTBlenderShader : public BuiltInShader
 {
 public:
+	using DerivedType = LUTBlenderShader;
 	using BuiltInShader::BuiltInShader;
 	//SetDefine("USE_VOLUME_LUT", true);
 };

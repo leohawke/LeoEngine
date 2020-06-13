@@ -1,9 +1,11 @@
 #include <LBase/lmemory.hpp>
 #include <LBase/linttype_utility.hpp>
+#include <Engine/Win32/WindowsPlatformMath.h>
 #include "DescriptorCache.h"
 #include "CommandContext.h"
 #include "RootSignature.h"
 #include "Context.h"
+#include "NodeDevice.h"
 
 using namespace platform_ex::Windows::D3D12;
 using leo::BitMask;
@@ -23,13 +25,13 @@ CommandContextStateCache::CommandContextStateCache(GPUMaskType Node)
 {
 }
 
-void CommandContextStateCache::Init(D3D12Device* InParent, CommandContext* InCmdContext, const CommandContextStateCache* AncestralState, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc)
+void CommandContextStateCache::Init(NodeDevice* InParent, CommandContext* InCmdContext, const CommandContextStateCache* AncestralState, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc)
 {
 	Parent = InParent;
 	CmdContext = InCmdContext;
 
 	// Cache the resource binding tier
-	ResourceBindingTier = Parent->GetResourceBindingTier();
+	ResourceBindingTier = Parent->GetParentAdpter()->GetResourceBindingTier();
 
 	// Init the descriptor heaps
 	const uint32 MaxDescriptorsForTier = (ResourceBindingTier == D3D12_RESOURCE_BINDING_TIER_1) ? NUM_VIEW_DESCRIPTORS_TIER_1 :
@@ -78,16 +80,7 @@ void CommandContextStateCache::InternalSetIndexBuffer(GraphicsBuffer* IndexBuffe
 	//ResourceBarrier
 }
 
-static uint32 FloorLog2(uint32 Value)
-{
-	unsigned long Log2;
-	if (_BitScanReverse(&Log2, Value) != 0)
-	{
-		return Log2;
-	}
 
-	return 0;
-}
 
 void CommandContextStateCache::InternalSetStreamSource(GraphicsBuffer* VertexBufferLocation, uint32 StreamIndex, uint32 Stride, uint32 Offset)
 {

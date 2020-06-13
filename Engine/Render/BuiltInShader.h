@@ -52,6 +52,7 @@ public:\
 	static RenderShader* ConstructCompiledInstance(const ShaderMetaType::CompiledShaderInitializer& Initializer) { return new ShaderClass(Initializer);} \
 	static constexpr bool HasParameters =  platform::Render::ShaderParametersType<ShaderClass>::HasParameters;\
 	ShaderClass(const ShaderMetaType::CompiledShaderInitializer& Initializer) \
+		:DerivedType(Initializer)\
 	{\
 		platform::Render::BindForLegacyShaderParameters<platform::Render::ShaderParametersType_t<ShaderClass>>(this,Initializer.ParameterMap);\
 	}\

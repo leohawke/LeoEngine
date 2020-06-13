@@ -4,19 +4,10 @@
 #include "ContextStateCache.h"
 #include "CommandContext.h"
 #include "Context.h"
+#include "NodeDevice.h"
+#include <Engine/Win32/WindowsPlatformMath.h>
 
 using namespace platform_ex::Windows::D3D12;
-
-static uint32 FloorLog2(uint32 Value)
-{
-	unsigned long Log2;
-	if (_BitScanReverse(&Log2, Value) != 0)
-	{
-		return Log2;
-	}
-
-	return 0;
-}
 
 DescriptorCache::DescriptorCache(GPUMaskType Node)
 	:DeviceChild(nullptr)
@@ -41,7 +32,7 @@ DescriptorCache::DescriptorCache(GPUMaskType Node)
 
 
 
-void DescriptorCache::Init(Device* InParent, CommandContext* InCmdContext, uint32 InNumLocalViewDescriptors, uint32 InNumSamplerDescriptors, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc)
+void DescriptorCache::Init(NodeDevice* InParent, CommandContext* InCmdContext, uint32 InNumLocalViewDescriptors, uint32 InNumSamplerDescriptors, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc)
 {
 }
 
@@ -568,7 +559,7 @@ void ThreadLocalOnlineHeap::NotifyCurrentCommandList(ID3D12GraphicsCommandList& 
 
 
 
-OnlineHeap::OnlineHeap(D3D12Device* Device, bool CanLoopAround, DescriptorCache* _Parent, GPUMaskType Node)
+OnlineHeap::OnlineHeap(NodeDevice* Device, bool CanLoopAround, DescriptorCache* _Parent, GPUMaskType Node)
 	:DeviceChild(Device)
 	,SingleNodeGPUObject(Node)
 	, Parent(_Parent)

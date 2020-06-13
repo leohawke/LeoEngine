@@ -47,7 +47,7 @@
     </ClCompile>
     <ClCompile Include="Render\BuiltInRayTracingShader.cpp" />
     <ClCompile Include="Render\Color_T.cpp" />
-    <ClCompile Include="Render\D3D12\Adapter.d3d12.cpp" />
+    <ClCompile Include="Render\D3D12\DXGIAdapter.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\BuiltInRayTracingShaders.cpp" />
     <ClCompile Include="Render\D3D12\CommandContext.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\ConstantBuffer.d3d12.cpp" />
@@ -57,7 +57,7 @@
     <ClCompile Include="Render\D3D12\D3D12RayTracing.cpp" />
     <ClCompile Include="Render\D3D12\d3d12_dxgi.cpp" />
     <ClCompile Include="Render\D3D12\DescriptorCache.d3d12.cpp" />
-    <ClCompile Include="Render\D3D12\Device.d3d12.cpp" />
+    <ClCompile Include="Render\D3D12\Adapter.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Display.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Fence.cpp" />
     <ClCompile Include="Render\D3D12\FrameBuffer.d3d12.cpp" />
@@ -66,6 +66,7 @@
     <ClCompile Include="Render\D3D12\GraphicsPipelineState.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\HardwareShader.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\InputLayout.d3d12.cpp" />
+    <ClCompile Include="Render\D3D12\NodeDevice.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\PipleState.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\RayContext.cpp" />
     <ClCompile Include="Render\D3D12\RayTracingGeometry.d3d12.cpp" />
@@ -149,6 +150,7 @@
     <ClInclude Include="Render\BuiltInShader.h" />
     <ClInclude Include="Render\Color_T.hpp" />
     <ClInclude Include="Render\D3D12\Adapter.h" />
+    <ClInclude Include="Render\D3D12\DXGIAdapter.h" />
     <ClInclude Include="Render\D3D12\BuiltInRayTracingShaders.h" />
     <ClInclude Include="Render\D3D12\CommandContext.h" />
     <ClInclude Include="Render\D3D12\Common.h" />
@@ -164,6 +166,7 @@
     <ClInclude Include="Render\D3D12\GraphicsPipelineState.h" />
     <ClInclude Include="Render\D3D12\HardwareShader.h" />
     <ClInclude Include="Render\D3D12\InputLayout.hpp" />
+    <ClInclude Include="Render\D3D12\NodeDevice.h" />
     <ClInclude Include="Render\D3D12\PipleState.h" />
     <ClInclude Include="Render\D3D12\RayContext.h" />
     <ClInclude Include="Render\D3D12\RayDevice.h" />
@@ -221,6 +224,7 @@
     <ClInclude Include="Win32\File.h" />
     <ClInclude Include="Win32\Handle.h" />
     <ClInclude Include="Win32\NTHandle.h" />
+    <ClInclude Include="Win32\WindowsPlatformMath.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Render\CommonTextureImpl.hcc" />

@@ -15,6 +15,11 @@ extern HWND g_hwnd;
 #endif
 
 namespace platform_ex::Windows::D3D12 {
+	Device& GetDevice()
+	{
+		return Context::Instance().GetDevice();
+	}
+
 	Context::Context()
 		:adapter_list(), render_command_context(nullptr)
 	{

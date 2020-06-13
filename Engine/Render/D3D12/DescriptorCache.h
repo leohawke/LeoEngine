@@ -149,7 +149,7 @@ namespace platform_ex::Windows::D3D12 {
 	class OnlineHeap : public DeviceChild,public SingleNodeGPUObject
 	{
 	public:
-		OnlineHeap(D3D12Device* Device, bool CanLoopAround, DescriptorCache* _Parent = nullptr, GPUMaskType Node = 0);
+		OnlineHeap(NodeDevice* Device, bool CanLoopAround, DescriptorCache* _Parent = nullptr, GPUMaskType Node = 0);
 		virtual ~OnlineHeap() { }
 
 		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUSlotHandle(uint32 Slot) const { return{ CPUBase.ptr + Slot * DescriptorSize }; }
@@ -215,7 +215,7 @@ namespace platform_ex::Windows::D3D12 {
 	class GlobalOnlineHeap : public OnlineHeap
 	{
 	public:
-		GlobalOnlineHeap(D3D12Device* Device, GPUMaskType Node =0)
+		GlobalOnlineHeap(NodeDevice* Device, GPUMaskType Node =0)
 			: OnlineHeap(Device, false,nullptr,Node)
 			, bUniqueDescriptorTablesAreDirty(false)
 		{ }
@@ -264,7 +264,7 @@ namespace platform_ex::Windows::D3D12 {
 			uint32 Size;
 		};
 
-		SubAllocatedOnlineHeap(D3D12Device* Device, DescriptorCache* Parent, GPUMaskType Node = 0) :
+		SubAllocatedOnlineHeap(NodeDevice* Device, DescriptorCache* Parent, GPUMaskType Node = 0) :
 			OnlineHeap(Device, false, Parent,Node) {};
 
 		void Init(SubAllocationDesc _Desc);
@@ -288,7 +288,7 @@ namespace platform_ex::Windows::D3D12 {
 	class ThreadLocalOnlineHeap :public OnlineHeap
 	{
 	public:
-		ThreadLocalOnlineHeap(D3D12Device* Device, DescriptorCache* _Parent, GPUMaskType Node=0)
+		ThreadLocalOnlineHeap(NodeDevice* Device, DescriptorCache* _Parent, GPUMaskType Node=0)
 			: OnlineHeap(Device, true, _Parent,Node)
 		{ }
 
@@ -408,7 +408,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		bool HeapRolledOver(D3D12_DESCRIPTOR_HEAP_TYPE Type);
 		void HeapLoopedAround(D3D12_DESCRIPTOR_HEAP_TYPE Type);
-		void Init(Device* InParent, CommandContext* InCmdContext, uint32 InNumLocalViewDescriptors, uint32 InNumSamplerDescriptors, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc);
+		void Init(NodeDevice* InParent, CommandContext* InCmdContext, uint32 InNumLocalViewDescriptors, uint32 InNumSamplerDescriptors, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc);
 		void Clear();
 		void BeginFrame();
 		void EndFrame();

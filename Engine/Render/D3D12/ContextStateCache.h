@@ -675,7 +675,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		CommandContextStateCache(GPUMaskType Node);
 
-		void Init(D3D12Device* InParent, CommandContext* InCmdContext, const CommandContextStateCache* AncestralState,SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc);
+		void Init(NodeDevice* InParent, CommandContext* InCmdContext, const CommandContextStateCache* AncestralState,SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc);
 
 		virtual ~CommandContextStateCache()
 		{

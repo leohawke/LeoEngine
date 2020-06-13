@@ -222,6 +222,11 @@ namespace platform_ex::Windows::D3D12 {
 		template<typename RootSignatureDescType>
 		void InternalAnalyzeSignature(const RootSignatureDescType& Desc, uint32 BindingSpace);
 
+		inline bool HasVisibility(const D3D12_SHADER_VISIBILITY& ParameterVisibility, const D3D12_SHADER_VISIBILITY& Visibility) const
+		{
+			return ParameterVisibility == D3D12_SHADER_VISIBILITY_ALL || ParameterVisibility == Visibility;
+		}
+
 		inline void SetSamplersRDTBindSlot(ShaderType SF, uint8 RootParameterIndex)
 		{
 			uint8* pBindSlot = nullptr;
@@ -329,6 +334,120 @@ namespace platform_ex::Windows::D3D12 {
 			*pBindSlot = RootParameterIndex;
 
 			bHasUAVs = true;
+		}
+
+		inline void SetMaxSamplerCount(ShaderType SF, uint8 Count)
+		{
+			if (SF == ShaderType::NumStandardType)
+			{
+				// Update all counts for all stages.
+				for (uint32 s = ShaderType::VertexShader; s <= ShaderType::ComputeShader; s++)
+				{
+					Stage[s].MaxSamplerCount = Count;
+				}
+			}
+			else
+			{
+				Stage[SF].MaxSamplerCount = Count;
+			}
+		}
+
+		inline void SetMaxSRVCount(ShaderType SF, uint8 Count)
+		{
+			if (SF == ShaderType::NumStandardType)
+			{
+				// Update all counts for all stages.
+				for (uint32 s = ShaderType::VertexShader; s <= ShaderType::ComputeShader; s++)
+				{
+					Stage[s].MaxSRVCount = Count;
+				}
+			}
+			else
+			{
+				Stage[SF].MaxSRVCount = Count;
+			}
+		}
+
+		// Update the mask that indicates what shader registers are used in the descriptor table.
+		template<typename DescriptorRangeType>
+		inline void UpdateCBVRegisterMaskWithDescriptorRange(ShaderType SF, const DescriptorRangeType& Range)
+		{
+			const uint32 StartRegister = Range.BaseShaderRegister;
+			const uint32 EndRegister = StartRegister + Range.NumDescriptors;
+			const uint32 StartStage = (SF == ShaderType::NumStandardType) ? ShaderType::VertexShader : SF;
+			const uint32 EndStage = (SF == ShaderType::NumStandardType) ? ShaderType::ComputeShader : SF;
+			for (uint32 CurrentStage = StartStage; CurrentStage <= EndStage; CurrentStage++)
+			{
+				for (uint32 Register = StartRegister; Register < EndRegister; Register++)
+				{
+					// The bit shouldn't already be set for the current register.
+					lconstraint((Stage[CurrentStage].CBVRegisterMask & (1 << Register)) == 0);
+					Stage[CurrentStage].CBVRegisterMask |= (1 << Register);
+				}
+			}
+		}
+
+		// Update the mask that indicates what shader registers are used in the root descriptor.
+		template<typename DescriptorType>
+		inline void UpdateCBVRegisterMaskWithDescriptor(ShaderType SF, const DescriptorType& Descriptor)
+		{
+			const uint32 StartStage = (SF == ShaderType::NumStandardType) ? ShaderType::VertexShader : SF;
+			const uint32 EndStage = (SF == ShaderType::NumStandardType) ? ShaderType::ComputeShader : SF;
+			const uint32& Register = Descriptor.ShaderRegister;
+			for (uint32 CurrentStage = StartStage; CurrentStage <= EndStage; CurrentStage++)
+			{
+				// The bit shouldn't already be set for the current register.
+				lconstraint((Stage[CurrentStage].CBVRegisterMask & (1 << Register)) == 0);
+				Stage[CurrentStage].CBVRegisterMask |= (1 << Register);
+			}
+		}
+
+		inline void SetMaxCBVCount(ShaderType SF, uint8 Count)
+		{
+			if (SF == ShaderType::NumStandardType)
+			{
+				// Update all counts for all stages.
+				for (uint32 s = ShaderType::VertexShader; s <= ShaderType::ComputeShader; s++)
+				{
+					Stage[s].MaxCBVCount = Count;
+				}
+			}
+			else
+			{
+				Stage[SF].MaxCBVCount = Count;
+			}
+		}
+
+		inline void IncrementMaxCBVCount(ShaderType SF, uint8 Count)
+		{
+			if (SF == ShaderType::NumStandardType)
+			{
+				// Update all counts for all stages.
+				for (uint32 s = ShaderType::VertexShader; s <= ShaderType::ComputeShader; s++)
+				{
+					Stage[s].MaxCBVCount += Count;
+				}
+			}
+			else
+			{
+				Stage[SF].MaxCBVCount += Count;
+			}
+		}
+
+		inline void SetMaxUAVCount(ShaderType SF, uint8 Count)
+		{
+			if (SF == ShaderType::NumStandardType)
+			{
+				// Update all counts for all stages.
+				for (uint32 s = ShaderType::VertexShader; s <= ShaderType::ComputeShader; s++)
+				{
+					Stage[s].MaxUAVCount = Count;
+				}
+			}
+			else
+			{
+				Stage[SF].MaxUAVCount = Count;
+			}
 		}
 	private:
 		COMPtr<ID3DBlob> SignatureBlob;

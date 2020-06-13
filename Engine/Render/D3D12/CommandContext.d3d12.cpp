@@ -38,7 +38,7 @@ void SetRenderTargetsInfo::ConvertFromPassInfo(const platform::Render::RenderPas
 	}
 }
 
-CommandContext::CommandContext(D3D12Device* InParent, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc, bool InIsDefaultContext, bool InIsAsyncComputeContext)
+CommandContext::CommandContext(NodeDevice* InParent, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc, bool InIsDefaultContext, bool InIsAsyncComputeContext)
 	:
 	VSConstantBuffer(InParent, ConstantsAllocator),
 	HSConstantBuffer(InParent, ConstantsAllocator),
@@ -259,6 +259,18 @@ void CommandContext::CommitNonComputeShaderConstants()
 	}
 
 	bDiscardSharedConstants = false;
+}
+
+void CommandContext::OpenCommandList()
+{
+	CommandListHandle = nullptr;
+
+	numDraws = 0;
+}
+
+void CommandContext::CloseCommandList()
+{
+	CommandListHandle->Close();
 }
 
 static uint32 GetIndexCount(platform::Render::PrimtivteType type,uint32 NumPrimitives)

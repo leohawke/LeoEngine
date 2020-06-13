@@ -23,7 +23,7 @@ namespace platform_ex::Windows::D3D12 {
 	class CommandContext :public platform::Render::CommandContext
 	{
 	public:
-		CommandContext(D3D12Device* InParent, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc, bool InIsDefaultContext, bool InIsAsyncComputeContext = false);
+		CommandContext(NodeDevice* InParent, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc, bool InIsDefaultContext, bool InIsAsyncComputeContext = false);
 	public:
 		void BeginRenderPass(const platform::Render::RenderPassInfo& Info, const char* Name) override;
 
@@ -62,6 +62,9 @@ namespace platform_ex::Windows::D3D12 {
 		void ClearMRT(bool bClearColor, int32 NumClearColors, const leo::math::float4* ColorArray, bool bClearDepth, float Depth, bool bClearStencil, uint32 Stencil);
 
 		void SetRenderTargetsAndClear(const SetRenderTargetsInfo& RenderTargetsInfo);
+
+		void OpenCommandList();
+		void CloseCommandList();
 	private:
 		void CommitGraphicsResourceTables();
 		void CommitNonComputeShaderConstants();
