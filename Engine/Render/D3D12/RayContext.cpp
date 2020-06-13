@@ -2,7 +2,7 @@
 #include "RayDevice.h"
 #include "Context.h"
 #include "GraphicsBuffer.hpp"
-#include "ResourceView.h"
+#include "View.h"
 #include "BuiltInRayTracingShaders.h"
 
 using std::make_unique;
@@ -140,7 +140,7 @@ void D12::RayContext::RayTraceShadow(R::RayTracingScene* InScene, R::FrameBuffer
 	auto Depth = static_cast<D12::FrameBuffer*>(InDepth);
 	auto DepthView = Depth->GetDepthStencilView();
 
-	auto Resource = DepthView->GetResourceHolder();
+	auto Resource = DepthView->GetResourceLocation();
 
 	auto ITex = dynamic_cast<R::Texture*>(Resource);
 	auto Tex = dynamic_cast<D12::Texture*>(Resource);
@@ -169,8 +169,9 @@ void D12::RayContext::RayTraceShadow(R::RayTracingScene* InScene, R::FrameBuffer
 	ShaderTable.UploadToGPU(&Context::Instance().GetDevice());
 
 	D3D12_DISPATCH_RAYS_DESC DispatchDesc = ShaderTable.GetDispatchRaysDesc(0, 0, 0);
-	DispatchDesc.Width = DepthView->Width();
-	DispatchDesc.Height = DepthView->Height();
+	auto desc = Resource->GetDesc();
+	DispatchDesc.Width = desc.Width;
+	DispatchDesc.Height =desc.Height;
 	DispatchDesc.Depth = 1;
 
 	DispatchRays(this, Bindings, Pipeline, 0, nullptr, DispatchDesc);

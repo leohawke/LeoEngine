@@ -4,7 +4,7 @@
 
 #include "../ShaderCore.h"
 #include "../PipleState.h"
-#include "ResourceView.h"
+#include "View.h"
 #include "Common.h"
 #include "GraphicsPipelineState.h"
 #include "ResourceHolder.h"
@@ -630,9 +630,9 @@ namespace platform_ex::Windows::D3D12 {
 
 				for (int32 j = 0; j < PipelineState.Common.SRVCache.MaxBoundIndex[i]; ++j)
 				{
-					if (PipelineState.Common.SRVCache.Views[i][j] && PipelineState.Common.SRVCache.Views[i][j]->GetResourceHolder())
+					if (PipelineState.Common.SRVCache.Views[i][j] && PipelineState.Common.SRVCache.Views[i][j]->GetResourceLocation())
 					{
-						if (PipelineState.Common.SRVCache.Views[i][j]->GetResourceHolder() == VertexBufferLocation)
+						if (PipelineState.Common.SRVCache.Views[i][j]->GetResourceLocation() == VertexBufferLocation)
 						{
 							return true;
 						}

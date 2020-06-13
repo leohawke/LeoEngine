@@ -1,11 +1,11 @@
 #include "Texture.h"
-#include "ResourceView.h"
+#include "View.h"
 #include "Convert.h"
 #include "Context.h"
 #include "ShaderCompose.h"
 #include "PipleState.h"
 
-#include <LBase/ALGORITHM.HPP>
+#include <LBase/algorithm.hpp>
 
 using namespace platform_ex::Windows::D3D12;
 using BTexture = platform::Render::Texture1D;
@@ -80,7 +80,7 @@ void Texture1D::UnMap(const Sub1D& box)
 	DoUnmap(subres);
 }
 
-ViewSimulation * Texture1D::RetriveShaderResourceView(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels)
+D3D12_SHADER_RESOURCE_VIEW_DESC Texture1D::CreateSRVDesc(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) const
 {
 	LAssert(GetAccessMode() & EA_GPURead, "Access mode must have EA_GPURead flag");
 	D3D12_SHADER_RESOURCE_VIEW_DESC desc;
@@ -117,19 +117,19 @@ ViewSimulation * Texture1D::RetriveShaderResourceView(uint8 first_array_index, u
 		desc.Texture1D.ResourceMinLODClamp = 0;
 	}
 
-	return RetriveSRV(desc);
+	return desc;
 }
 
 ShaderResourceView* Texture1D::RetriveShaderResourceView()
 {
 	if (!default_srv)
 	{
-		default_srv.reset(new ShaderResourceView(*this, 0, GetArraySize(), GetNumMipMaps()));
+		default_srv.reset(new ShaderResourceView(GetDefaultNodeDevice(),CreateSRVDesc(0, GetArraySize(),0,GetNumMipMaps()),*this));
 	}
 	return default_srv.get();
 }
 
-ViewSimulation * Texture1D::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level)
+D3D12_UNORDERED_ACCESS_VIEW_DESC Texture1D::CreateUAVDesc(uint8 first_array_index, uint8 num_items, uint8 level) const
 {
 	LAssert(GetAccessMode() & EA_GPUUnordered, "Access mode must have EA_GPUUnordered flag");
 
@@ -148,10 +148,10 @@ ViewSimulation * Texture1D::RetriveUnorderedAccessView(uint8 first_array_index, 
 		desc.Texture1D.MipSlice = level;
 	}
 
-	return RetriveUAV(desc);
+	return desc;
 }
 
-ViewSimulation * platform_ex::Windows::D3D12::Texture1D::RetriveRenderTargetView(uint8 first_array_index, uint8 num_items, uint8 level)
+D3D12_RENDER_TARGET_VIEW_DESC platform_ex::Windows::D3D12::Texture1D::CreateRTVDesc(uint8 first_array_index, uint8 num_items, uint8 level) const
 {
 	LAssert(GetAccessMode() & EA_GPUWrite, "Access mode must have EA_GPUWrite flag");
 
@@ -169,5 +169,5 @@ ViewSimulation * platform_ex::Windows::D3D12::Texture1D::RetriveRenderTargetView
 		desc.Texture1D.MipSlice = level;
 	}
 
-	return RetriveRTV(desc);
+	return desc;
 }

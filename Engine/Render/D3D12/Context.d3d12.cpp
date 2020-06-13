@@ -18,6 +18,11 @@ namespace platform_ex::Windows::D3D12 {
 		return Context::Instance().GetDevice();
 	}
 
+	NodeDevice* D3D12::GetDefaultNodeDevice()
+	{
+		return GetDevice().GetNodeDevice(0);
+	}
+
 	Context::Context()
 		:adapter_list()
 	{
@@ -197,7 +202,7 @@ namespace platform_ex::Windows::D3D12 {
 				if (!shader_compose.Srvs[i].empty()) {
 					render_cmd_list->SetGraphicsRootDescriptorTable(signature->SRVRDTBindSlot((ShaderType)i), gpu_handle);
 					for (auto& srv : shader_compose.Srvs[i]) {
-						 (*device)->CopyDescriptorsSimple(1, cpu_handle,srv!=nullptr? srv->GetHandle(): device->null_srv_handle,
+						 (*device)->CopyDescriptorsSimple(1, cpu_handle,srv!=nullptr? srv->GetView(): device->null_srv_handle,
 								D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 						cpu_handle.ptr += cbv_srv_uav_desc_size;
 						gpu_handle.ptr += cbv_srv_uav_desc_size;
@@ -209,7 +214,7 @@ namespace platform_ex::Windows::D3D12 {
 				if (!shader_compose.Uavs[i].empty()) {
 					render_cmd_list->SetGraphicsRootDescriptorTable(signature->UAVRDTBindSlot((ShaderType)i), gpu_handle);
 					for (auto& uav : shader_compose.Uavs[i]) {
-						(*device)->CopyDescriptorsSimple(1, cpu_handle,uav!=nullptr? uav->GetHandle():device->null_uav_handle,
+						(*device)->CopyDescriptorsSimple(1, cpu_handle,uav!=nullptr? uav->GetView():device->null_uav_handle,
 							D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 						cpu_handle.ptr += cbv_srv_uav_desc_size;
 						gpu_handle.ptr += cbv_srv_uav_desc_size;

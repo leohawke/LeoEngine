@@ -7,11 +7,13 @@
 #define LE_RENDER_D3D12_Display_h 1
 
 #include <LBase/linttype.hpp>
+
+#include "../IDisplay.h"
+
 #include "d3d12_dxgi.h"
 #include "FrameBuffer.h"
 #include "Texture.h"
-#include "../IDisplay.h"
-#include "ResourceView.h"
+#include "View.h"
 
 namespace platform_ex {
 	namespace Windows {

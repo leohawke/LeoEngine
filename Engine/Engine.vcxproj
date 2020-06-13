@@ -183,6 +183,7 @@
     <ClInclude Include="Render\D3D12\test.h" />
     <ClInclude Include="Render\D3D12\Texture.h" />
     <ClInclude Include="Render\D3D12\VertexDeclaration.h" />
+    <ClInclude Include="Render\D3D12\View.h" />
     <ClInclude Include="Render\DataStructures.h" />
     <ClInclude Include="Render\DeviceCaps.h" />
     <ClInclude Include="Render\Effect\BiltEffect.h" />

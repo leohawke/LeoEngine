@@ -12,7 +12,7 @@
 #include "../IRayDevice.h"
 #include "GraphicsBuffer.hpp"
 #include "RayTracingGeometry.h"
-#include "ResourceView.h"
+#include "View.h"
 
 namespace platform_ex::Windows::D3D12 {
 	class RayTracingScene :public platform::Render::RayTracingScene

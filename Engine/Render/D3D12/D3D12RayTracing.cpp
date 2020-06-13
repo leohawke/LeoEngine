@@ -542,7 +542,7 @@ static void SetRayTracingShaderResources(
 		if (Resource)
 		{
 			auto Texture =dynamic_cast<D3D12Texture*>(Resource);
-			LocalSRVs[SRVIndex] = Texture->RetriveShaderResourceView(0,Resource->GetArraySize(),0,Resource->GetNumMipMaps())->GetHandle();
+			LocalSRVs[SRVIndex] = Texture->RetriveShaderResourceView()->GetHandle();
 			BoundSRVMask |= 1ull << SRVIndex;
 		}
 	}

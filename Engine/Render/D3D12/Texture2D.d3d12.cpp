@@ -1,6 +1,5 @@
 #include "Texture.h"
 #include "Convert.h"
-#include "ResourceView.h"
 #include "Context.h"
 
 using namespace platform_ex::Windows::D3D12;
@@ -125,7 +124,7 @@ void Texture2D::UnMap(const Sub1D& sub)
 	DoUnmap(subres);
 }
 
-ViewSimulation * Texture2D::RetriveShaderResourceView(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels)
+D3D12_SHADER_RESOURCE_VIEW_DESC Texture2D::CreateSRVDesc(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) const
 {
 	LAssert(GetAccessMode() & EA_GPURead, "Access mode must have EA_GPURead flag");
 	D3D12_SHADER_RESOURCE_VIEW_DESC desc;
@@ -167,19 +166,19 @@ ViewSimulation * Texture2D::RetriveShaderResourceView(uint8 first_array_index, u
 		desc.Texture2D.PlaneSlice = 0;
 		desc.Texture2D.ResourceMinLODClamp = 0;
 	}
-	return RetriveSRV(desc);
+	return desc;
 }
 
 ShaderResourceView* Texture2D::RetriveShaderResourceView()
 {
 	if (!default_srv)
 	{
-		default_srv.reset(new ShaderResourceView(*this, 0, GetArraySize(), GetNumMipMaps()));
+		default_srv.reset(new ShaderResourceView(GetDefaultNodeDevice(), CreateSRVDesc(0, GetArraySize(), 0, GetNumMipMaps()), *this));
 	}
 	return default_srv.get();
 }
 
-ViewSimulation * Texture2D::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level)
+D3D12_UNORDERED_ACCESS_VIEW_DESC Texture2D::CreateUAVDesc(uint8 first_array_index, uint8 num_items, uint8 level) const
 {
 	LAssert(GetAccessMode() & EA_GPUUnordered, "Access mode must have EA_GPUUnordered flag");
 
@@ -197,10 +196,10 @@ ViewSimulation * Texture2D::RetriveUnorderedAccessView(uint8 first_array_index, 
 	else {
 		desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 	}
-	return RetriveUAV(desc);
+	return desc;
 }
 
-ViewSimulation * Texture2D::RetriveRenderTargetView(uint8 first_array_index, uint8 num_items, uint8 level)
+D3D12_RENDER_TARGET_VIEW_DESC Texture2D::CreateRTVDesc(uint8 first_array_index, uint8 num_items, uint8 level) const
 {
 	LAssert(GetAccessMode() & EA_GPUWrite, "Access mode must have EA_GPUWrite flag");
 
@@ -221,10 +220,10 @@ ViewSimulation * Texture2D::RetriveRenderTargetView(uint8 first_array_index, uin
 		desc.Texture2DMSArray.ArraySize = num_items;
 	}
 
-	return RetriveRTV(desc);
+	return desc;
 }
 
-ViewSimulation * Texture2D::RetriveDepthStencilView(uint8 first_array_index, uint8 num_items, uint8 level)
+D3D12_DEPTH_STENCIL_VIEW_DESC Texture2D::CreateDSVDesc(uint8 first_array_index, uint8 num_items, uint8 level) const
 {
 	LAssert(GetAccessMode() & EA_GPUWrite, "Access mode must have EA_GPUWrite flag");
 
@@ -245,5 +244,5 @@ ViewSimulation * Texture2D::RetriveDepthStencilView(uint8 first_array_index, uin
 		desc.Texture2DMSArray.FirstArraySlice = first_array_index;
 	}
 
-	return RetriveDSV(desc);
+	return desc;
 }

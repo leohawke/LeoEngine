@@ -1,5 +1,4 @@
 #include "Texture.h"
-#include "ResourceView.h"
 #include "Context.h"
 #include "Convert.h"
 
@@ -79,7 +78,7 @@ void TextureCube::UnMap(const Sub1D& box, TextureCubeFaces face){
 }
 
 
-ViewSimulation* TextureCube::RetriveShaderResourceView(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels){
+D3D12_SHADER_RESOURCE_VIEW_DESC TextureCube::CreateSRVDesc(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) const{
 	LAssert(GetAccessMode() & EA_GPURead, "Access mode must have EA_GPURead flag");
 	D3D12_SHADER_RESOURCE_VIEW_DESC desc;
 	switch (format) {
@@ -102,22 +101,22 @@ ViewSimulation* TextureCube::RetriveShaderResourceView(uint8 first_array_index, 
 	desc.TextureCube.MipLevels = num_levels;
 	desc.TextureCube.ResourceMinLODClamp = 0;
 
-	return RetriveSRV(desc);
+	return desc;
 }
 
 ShaderResourceView* TextureCube::RetriveShaderResourceView()
 {
 	if (!default_srv)
 	{
-		default_srv.reset(new ShaderResourceView(*this, 0,GetNumMipMaps()));
+		default_srv.reset(new ShaderResourceView(GetDefaultNodeDevice(), CreateSRVDesc(0, GetArraySize(), 0, GetNumMipMaps()), *this));
 	}
 	return default_srv.get();
 }
 
-ViewSimulation* TextureCube::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level){
-	return RetriveUnorderedAccessView(first_array_index, num_items, CubeFaces::Positive_X, 6, level);
+D3D12_UNORDERED_ACCESS_VIEW_DESC TextureCube::CreateUAVDesc(uint8 first_array_index, uint8 num_items, uint8 level) const{
+	return CreateUAVDesc(first_array_index, num_items, CubeFaces::Positive_X, 6, level);
 }
-ViewSimulation* TextureCube::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, TextureCubeFaces first_face, uint8 num_faces, uint8 level){
+D3D12_UNORDERED_ACCESS_VIEW_DESC TextureCube::CreateUAVDesc(uint8 first_array_index, uint8 num_items, TextureCubeFaces first_face, uint8 num_faces, uint8 level) const{
 	LAssert(GetAccessMode() & EA_GPUUnordered, "Access mode must have EA_GPUUnordered flag");
 
 	D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
@@ -129,10 +128,10 @@ ViewSimulation* TextureCube::RetriveUnorderedAccessView(uint8 first_array_index,
 	desc.Texture2DArray.FirstArraySlice = first_array_index * 6 + first_face;
 	desc.Texture2DArray.PlaneSlice = 0;
 
-	return RetriveUAV(desc);
+	return desc;
 }
 
-ViewSimulation* TextureCube::RetriveRenderTargetView(uint8 first_array_index, uint8 array_size, uint8 level){
+D3D12_RENDER_TARGET_VIEW_DESC TextureCube::CreateRTVDesc(uint8 first_array_index, uint8 array_size, uint8 level) const{
 	LAssert(GetAccessMode() & EA_GPUWrite, "Access mode must have EA_GPUWrite flag");
 
 	D3D12_RENDER_TARGET_VIEW_DESC desc;
@@ -141,30 +140,20 @@ ViewSimulation* TextureCube::RetriveRenderTargetView(uint8 first_array_index, ui
 	if (sample_info.Count > 1)
 	{
 		desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMSARRAY;
-		/*
-		desc.Texture2DMSArray.ArraySize = array_size * 6;;
-		desc.Texture2DMSArray.FirstArraySlice = first_array_index*6;
-		*/
 	}
 	else
 	{
 		desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
-		/*
-		desc.Texture2DArray.MipSlice = level;
-		desc.Texture2DArray.ArraySize = array_size * 6;
-		desc.Texture2DArray.FirstArraySlice = first_array_index * 6;
-		desc.Texture2DArray.PlaneSlice = 0;
-		*/
 	}
 	desc.Texture2DArray.MipSlice = level;
 	desc.Texture2DArray.ArraySize = array_size * 6;
 	desc.Texture2DArray.FirstArraySlice = first_array_index * 6;
 	desc.Texture2DArray.PlaneSlice = 0;
 	
-	return RetriveRTV(desc);
+	return desc;
 }
 
-ViewSimulation* TextureCube::RetriveDepthStencilView(uint8 first_array_index, uint8 array_size, uint8 level){
+D3D12_DEPTH_STENCIL_VIEW_DESC TextureCube::CreateDSVDesc(uint8 first_array_index, uint8 array_size, uint8 level) const{
 	LAssert(GetAccessMode() & EA_GPUWrite, "Access mode must have EA_GPUWrite flag");
 
 	D3D12_DEPTH_STENCIL_VIEW_DESC desc;
@@ -175,29 +164,19 @@ ViewSimulation* TextureCube::RetriveDepthStencilView(uint8 first_array_index, ui
 	if (sample_info.Count > 1)
 	{
 		desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY;
-		/*
-		desc.Texture2DMSArray.ArraySize = array_size * 6;;
-		desc.Texture2DMSArray.FirstArraySlice = first_array_index*6;
-		*/
 	}
 	else
 	{
 		desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
-		/*
-		desc.Texture2DArray.MipSlice = level;
-		desc.Texture2DArray.ArraySize = array_size * 6;
-		desc.Texture2DArray.FirstArraySlice = first_array_index * 6;
-		desc.Texture2DArray.PlaneSlice = 0;
-		*/
 	}
 	desc.Texture2DArray.MipSlice = level;
 	desc.Texture2DArray.ArraySize = array_size * 6;
 	desc.Texture2DArray.FirstArraySlice = first_array_index * 6;
 
-	return RetriveDSV(desc);
+	return desc;
 }
 
-ViewSimulation* TextureCube::RetriveRenderTargetView(uint8 array_index, TextureCubeFaces face, uint8 level){
+D3D12_RENDER_TARGET_VIEW_DESC TextureCube::CreateRTVDesc(uint8 array_index, TextureCubeFaces face, uint8 level) const{
 	LAssert(GetAccessMode() & EA_GPUWrite, "Access mode must have EA_GPUWrite flag");
 
 	D3D12_RENDER_TARGET_VIEW_DESC desc;
@@ -206,30 +185,20 @@ ViewSimulation* TextureCube::RetriveRenderTargetView(uint8 array_index, TextureC
 	if (sample_info.Count > 1)
 	{
 		desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMSARRAY;
-		/*
-		desc.Texture2DMSArray.ArraySize = 1;;
-		desc.Texture2DMSArray.FirstArraySlice = array_index*6 + face - CubeFaces::Positive_X;
-		*/
 	}
 	else
 	{
 		desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
-		/*
-		desc.Texture2DArray.MipSlice = level;
-		desc.Texture2DArray.ArraySize = 1;
-		desc.Texture2DArray.FirstArraySlice = array_index * 6 + face - CubeFaces::Positive_X;
-		desc.Texture2DArray.PlaneSlice = 0;
-		*/
 	}
 	desc.Texture2DArray.MipSlice = level;
 	desc.Texture2DArray.ArraySize = 1;
 	desc.Texture2DArray.FirstArraySlice = array_index * 6 + face - CubeFaces::Positive_X;
 	desc.Texture2DArray.PlaneSlice = 0;
 
-	return RetriveRTV(desc);
+	return desc;
 }
 
-ViewSimulation* TextureCube::RetriveDepthStencilView(uint8 array_index, TextureCubeFaces face, uint8 level){
+D3D12_DEPTH_STENCIL_VIEW_DESC TextureCube::CreateDSVDesc(uint8 array_index, TextureCubeFaces face, uint8 level) const{
 	LAssert(GetAccessMode() & EA_GPUWrite, "Access mode must have EA_GPUWrite flag");
 
 	D3D12_DEPTH_STENCIL_VIEW_DESC desc;
@@ -240,31 +209,15 @@ ViewSimulation* TextureCube::RetriveDepthStencilView(uint8 array_index, TextureC
 	if (sample_info.Count > 1)
 	{
 		desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY;
-		/*
-		desc.Texture2DMSArray.ArraySize = 1;;
-		desc.Texture2DMSArray.FirstArraySlice = array_index*6 + face - CubeFaces::Positive_X;
-		*/
 	}
 	else
 	{
 		desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
-		/*
-		desc.Texture2DArray.MipSlice = level;
-		desc.Texture2DArray.ArraySize = 1;
-		desc.Texture2DArray.FirstArraySlice = array_index * 6 + face - CubeFaces::Positive_X;
-		desc.Texture2DArray.PlaneSlice = 0;
-		*/
 	}
 	desc.Texture2DArray.MipSlice = level;
 	desc.Texture2DArray.ArraySize = 1;
 	desc.Texture2DArray.FirstArraySlice = array_index * 6 + face - CubeFaces::Positive_X;
 
-	return RetriveDSV(desc);
+	return desc;
 }
 
-ViewSimulation* TextureCube::RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) {
-	throw leo::unsupported("TextureCube::RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level)");
-}
-ViewSimulation* TextureCube::RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) {
-	throw leo::unsupported("TextureCube::RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level)");
-}

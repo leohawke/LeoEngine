@@ -84,6 +84,11 @@ namespace platform_ex::Windows::D3D12 {
 		{
 			return d3d_device.Get();
 		}
+
+		NodeDevice* GetNodeDevice(uint32 Index) const
+		{
+			return Devices[Index];
+		}
 	public:
 		friend class Context;
 		friend class RayContext;

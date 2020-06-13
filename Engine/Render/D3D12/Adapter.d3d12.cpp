@@ -110,7 +110,7 @@ namespace platform_ex::Windows::D3D12 {
 			}
 		}
 
-		Devices[0] = new NodeDevice(0);
+		Devices[0] = new NodeDevice(0,this);
 	}
 
 	D3D12_CPU_DESCRIPTOR_HANDLE Device::AllocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE Type)
@@ -376,6 +376,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		FillCaps();
 
+		Devices[0]->Initialize();
 	}
 
 	std::shared_ptr<Device::CmdAllocatorDependencies> Device::CmdAllocatorAlloc()

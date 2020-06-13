@@ -1,7 +1,7 @@
 ﻿#include "Texture.h"
 #include "Context.h"
 #include "Convert.h"
-#include "ResourceView.h"
+#include "View.h"
 #include "../Effect/CopyEffect.h"
 #include <LBase/id.hpp>
 #include <LFramework/LCLib/Debug.h>
@@ -25,44 +25,6 @@ static DXGI_FORMAT ConvertWrap(EFormat format) {
 platform_ex::Windows::D3D12::Texture::Texture(EFormat format)
 	:dxgi_format(ConvertWrap(format))
 {
-}
-
-ViewSimulation * platform_ex::Windows::D3D12::Texture::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level)
-{
-	throw leo::unsupported("Texture::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level)");
-}
-
-ViewSimulation* Texture::RetriveRenderTargetView(uint8 first_array_index, uint8 num_items, uint8 level) {
-	throw leo::unsupported("Texture::RetriveRenderTargetView(uint8 first_array_index, uint8 num_items, uint8 level)");
-}
-ViewSimulation* Texture::RetriveDepthStencilView(uint8 first_array_index, uint8 num_items, uint8 level) {
-	throw leo::unsupported("Texture::RetriveDepthStencilView(uint8 first_array_index, uint8 num_items, uint8 level)");
-}
-
-ViewSimulation* Texture::RetriveUnorderedAccessView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 num_levels) {
-	throw leo::unsupported("Texture::RetriveUnorderedAccessView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 num_levels)");
-}
-
-ViewSimulation * platform_ex::Windows::D3D12::Texture::RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level)
-{
-	throw leo::unsupported("Texture::RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level)");
-}
-
-ViewSimulation * platform_ex::Windows::D3D12::Texture::RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level)
-{
-	throw leo::unsupported("Texture::RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level)");
-}
-
-ViewSimulation* Texture::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, TextureCubeFaces first_face, uint8 num_faces, uint8 level){
-	throw leo::unsupported("Texture::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, TextureCubeFaces first_face, uint8 num_faces, uint8 level)");
-}
-
-ViewSimulation* Texture::RetriveRenderTargetView(uint8 array_index, TextureCubeFaces face, uint8 level) {
-	throw leo::unsupported("Texture::RetriveRenderTargetView(uint8 array_index, TextureCubeFaces face, uint8 level)");
-}
-
-ViewSimulation* Texture::RetriveDepthStencilView(uint8 array_index, TextureCubeFaces face, uint8 level) {
-	throw leo::unsupported("Texture::RetriveDepthStencilView(uint8 array_index, TextureCubeFaces face, uint8 level)");
 }
 
 platform_ex::Windows::D3D12::Texture::Texture(const COMPtr<ID3D12Resource>& pResource)
@@ -257,8 +219,10 @@ void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uin
 		cmd_list->ResourceBarrier(1, &barrier_after);
 		context.CommitCommandList(Device::Command_Resource);
 
-		resource_desc = tex_desc;
 	}
+
+	desc = tex_desc;
+
 }
 
 void Texture::DoMap(EFormat format, uint32 subres, TextureMapAccess tma,
@@ -518,43 +482,6 @@ void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_siz
 		}
 
 		pass.UnBind(effect);
-}
-
-
-template<typename _type>
-ViewSimulation * Texture::Retrive(_type & desc, std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>>& maps)
-{
-	if (ReadyHWResource()) {
-		auto p = reinterpret_cast<char const*>(&desc);
-		auto key = hash(p, p + sizeof(desc));
-		auto iter = maps.find(key);
-		if (iter != maps.end())
-			return iter->second.get();
-
-		return maps.emplace(key, std::make_unique<ViewSimulation>(resource, desc)).first->second.get();
-	}
-	return nullptr;
-}
-
-
-ViewSimulation *  Texture::RetriveSRV(D3D12_SHADER_RESOURCE_VIEW_DESC const & desc)
-{
-	return Retrive(desc, srv_maps);
-}
-
-ViewSimulation * platform_ex::Windows::D3D12::Texture::RetriveUAV(D3D12_UNORDERED_ACCESS_VIEW_DESC const & desc)
-{
-	return Retrive(desc, uav_maps);
-}
-
-ViewSimulation *platform_ex::Windows::D3D12::Texture::RetriveRTV(D3D12_RENDER_TARGET_VIEW_DESC const & desc)
-{
-	return Retrive(desc, rtv_maps);
-}
-
-ViewSimulation *  platform_ex::Windows::D3D12::Texture::RetriveDSV(D3D12_DEPTH_STENCIL_VIEW_DESC const & desc)
-{
-	return Retrive(desc, dsv_maps);
 }
 
 template<typename _type>
@@ -863,6 +790,172 @@ std::string  TextureCube::Description() const
 }
 
 //}
+
+using platform::Render::TextureType;
+using namespace platform_ex::Windows;
+
+D3D12_SHADER_RESOURCE_VIEW_DESC D3D12::CreateSRVDesc(const platform::Render::Texture& tex, uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels)
+{
+	D3D12_SHADER_RESOURCE_VIEW_DESC Desc;
+	switch (tex.GetType())	
+	{
+	case TextureType::T_1D:
+		Desc = static_cast<const Texture1D&>(tex).CreateSRVDesc(first_array_index, num_items, first_level, num_levels);
+		break;
+	case TextureType::T_2D:
+		Desc = static_cast<const Texture2D&>(tex).CreateSRVDesc(first_array_index, num_items, first_level, num_levels); break;
+	case TextureType::T_3D:
+		Desc = static_cast<const Texture3D&>(tex).CreateSRVDesc(first_array_index, num_items, first_level, num_levels); break;
+	case TextureType::T_Cube:
+		Desc = static_cast<const TextureCube&>(tex).CreateSRVDesc(first_array_index, num_items, first_level, num_levels); break;
+	}
+	return Desc;
+}
+
+D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12::CreateUAVDesc(const platform::Render::Texture& tex, uint8 first_array_index, uint8 num_items, uint8 level)
+{
+	D3D12_UNORDERED_ACCESS_VIEW_DESC Desc;
+	switch (tex.GetType())
+	{
+	case TextureType::T_1D:
+		Desc = static_cast<const Texture1D&>(tex).CreateUAVDesc(first_array_index, num_items, level);
+		break;
+	case TextureType::T_2D:
+		Desc = static_cast<const Texture2D&>(tex).CreateUAVDesc(first_array_index, num_items, level);
+		break;
+	case TextureType::T_3D:
+		Desc = static_cast<const Texture3D&>(tex).CreateUAVDesc(first_array_index, num_items, level); 
+		break;
+	case TextureType::T_Cube:
+		Desc = static_cast<const TextureCube&>(tex).CreateUAVDesc(first_array_index, num_items, level);
+		break;
+	}
+	return Desc;
+}
+
+D3D12_RENDER_TARGET_VIEW_DESC platform_ex::Windows::D3D12::CreateRTVDesc(const platform::Render::Texture& tex, uint8 first_array_index, uint8 num_items, uint8 level)
+{
+	D3D12_RENDER_TARGET_VIEW_DESC Desc;
+	switch (tex.GetType())
+	{
+	case TextureType::T_1D:
+		Desc = static_cast<const Texture1D&>(tex).CreateRTVDesc(first_array_index, num_items, level);
+		break;
+	case TextureType::T_2D:
+		Desc = static_cast<const Texture2D&>(tex).CreateRTVDesc(first_array_index, num_items, level); break;
+	case TextureType::T_3D:
+		lconstraint(false);
+		break;
+	case TextureType::T_Cube:
+		Desc = static_cast<const TextureCube&>(tex).CreateRTVDesc(first_array_index, num_items, level); break;
+	}
+	return Desc;
+}
+
+D3D12_DEPTH_STENCIL_VIEW_DESC D3D12::CreateDSVDesc(const platform::Render::Texture& tex, uint8 first_array_index, uint8 num_items, uint8 level)
+{
+	D3D12_DEPTH_STENCIL_VIEW_DESC Desc;
+	switch (tex.GetType())
+	{
+	case TextureType::T_1D:
+		lconstraint(false);
+		break;
+	case TextureType::T_2D:
+		Desc = static_cast<const Texture2D&>(tex).CreateDSVDesc(first_array_index, num_items, level); break;
+	case TextureType::T_3D:
+		lconstraint(false);
+		break;
+	case TextureType::T_Cube:
+		Desc = static_cast<const TextureCube&>(tex).CreateDSVDesc(first_array_index, num_items, level); break;
+	}
+	return Desc;
+}
+
+D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12::CreateUAVDesc(const platform::Render::Texture& tex, uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level)
+{
+	D3D12_UNORDERED_ACCESS_VIEW_DESC Desc;
+	switch (tex.GetType())
+	{
+	case TextureType::T_1D:
+	case TextureType::T_2D:
+	case TextureType::T_Cube:
+		lconstraint(false);
+		break;
+	case TextureType::T_3D:
+		Desc = static_cast<const Texture3D&>(tex).CreateUAVDesc(array_index, first_slice, num_slices, level);
+		break;
+	}
+	return Desc;
+}
+
+D3D12_RENDER_TARGET_VIEW_DESC D3D12::CreateRTVDesc(const platform::Render::Texture& tex, uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level)
+{
+	D3D12_RENDER_TARGET_VIEW_DESC Desc;
+	switch (tex.GetType())
+	{
+	case TextureType::T_1D:
+	case TextureType::T_2D:
+	case TextureType::T_Cube:
+		lconstraint(false);
+		break;
+	case TextureType::T_3D:
+		Desc = static_cast<const Texture3D&>(tex).CreateRTVDesc(array_index, first_slice, num_slices, level);
+		break;
+	}
+	return Desc;
+}
+
+D3D12_UNORDERED_ACCESS_VIEW_DESC platform_ex::Windows::D3D12::CreateUAVDesc(const platform::Render::Texture& tex, uint8 first_array_index, uint8 num_items, TextureCubeFaces first_face, uint8 num_faces, uint8 level)
+{
+	D3D12_UNORDERED_ACCESS_VIEW_DESC Desc;
+	switch (tex.GetType())
+	{
+	case TextureType::T_1D:
+	case TextureType::T_2D:
+	case TextureType::T_3D:
+		lconstraint(false);
+		break;
+	case TextureType::T_Cube:
+		Desc = static_cast<const TextureCube&>(tex).CreateUAVDesc(first_array_index, num_items, first_face, num_faces,level); 
+		break;
+	}
+	return Desc;
+}
+
+D3D12_RENDER_TARGET_VIEW_DESC platform_ex::Windows::D3D12::CreateRTVDesc(const platform::Render::Texture& tex, uint8 array_index, TextureCubeFaces face, uint8 level)
+{
+	D3D12_RENDER_TARGET_VIEW_DESC Desc;
+	switch (tex.GetType())
+	{
+	case TextureType::T_1D:
+	case TextureType::T_2D:
+	case TextureType::T_3D:
+		lconstraint(false);
+		break;
+	case TextureType::T_Cube:
+		Desc = static_cast<const TextureCube&>(tex).CreateRTVDesc(array_index, face, level);
+		break;
+	}
+	return Desc;
+}
+
+D3D12_DEPTH_STENCIL_VIEW_DESC platform_ex::Windows::D3D12::CreateDSVDesc(const platform::Render::Texture& tex, uint8 array_index, TextureCubeFaces face, uint8 level)
+{
+	D3D12_DEPTH_STENCIL_VIEW_DESC Desc;
+	switch (tex.GetType())
+	{
+	case TextureType::T_1D:
+	case TextureType::T_2D:
+	case TextureType::T_3D:
+		lconstraint(false);
+		break;
+	case TextureType::T_Cube:
+		Desc = static_cast<const TextureCube&>(tex).CreateDSVDesc(array_index, face, level);
+		break;
+	}
+	return Desc;
+}
+
 
 #include "../CommonTextureImpl.hcc"
 

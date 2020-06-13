@@ -41,11 +41,9 @@ namespace platform::Render {
 		virtual void OnBind();
 		virtual void OnUnBind();
 
-		leo::observer_ptr<GPUView> Attached(Attachment which) const;
-
-		std::shared_ptr<GPUView> Attach(Attachment which, const std::shared_ptr<RenderTargetView>& view);
-		std::shared_ptr<GPUView> Attach(Attachment which, const std::shared_ptr<DepthStencilView>& view);
-		std::shared_ptr<GPUView> Attach(Attachment which, const std::shared_ptr<UnorderedAccessView>& view);
+		void Attach(Attachment which, const std::shared_ptr<RenderTargetView>& view);
+		void Attach(Attachment which, const std::shared_ptr<DepthStencilView>& view);
+		void Attach(Attachment which, const std::shared_ptr<UnorderedAccessView>& view);
 
 		void Detach(Attachment which);
 		void DetachUAV(leo::uint8 which);

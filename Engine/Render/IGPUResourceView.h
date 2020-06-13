@@ -11,50 +11,28 @@ namespace platform {
 	namespace Render {
 		class FrameBuffer;
 
-		class GPUView {
+		class RenderTargetView {
 		public:
-			GPUView(uint16 width, uint16 height, EFormat format);
-
-			virtual ~GPUView();
-
-			uint16 Width() const;
-			uint16 Height() const;
-
-			EFormat Format() const;
-
-		protected:
-			uint16 width;
-			uint16 height;
-			EFormat format;
-		};
-
-		class RenderTargetView :public GPUView  {
-		public:
-			using GPUView::GPUView;
 
 			virtual uint16 GetNumSamples() const = 0;
 
 			virtual ~RenderTargetView();
 		};
 
-		class DepthStencilView :public GPUView {
+		class DepthStencilView {
 		public:
-			using GPUView::GPUView;
 
 			virtual ~DepthStencilView();
 		};
 
-		class ShaderResourceView :public GPUView {
+		class ShaderResourceView{
 		public:
-			using GPUView::GPUView;
 
 			virtual ~ShaderResourceView();
 		};
 
-		class UnorderedAccessView :public GPUView {
+		class UnorderedAccessView{
 		public:
-			using GPUView::GPUView;
-
 			virtual ~UnorderedAccessView();
 		};
 	}

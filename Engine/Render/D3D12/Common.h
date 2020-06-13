@@ -47,7 +47,13 @@ namespace platform_ex::Windows::D3D12 {
 	public:
 		DeviceChild(NodeDevice* InParent = nullptr) : Parent(InParent) {}
 
-		NodeDevice* GetParentDevice() { return Parent; }
+		NodeDevice* GetParentDevice() const{ return Parent; }
+
+		void SetParentDevice(NodeDevice* InParent)
+		{
+			lconstraint(Parent == nullptr);
+			Parent = InParent;
+		}
 	};
 
 	class AdapterChild
@@ -99,4 +105,6 @@ namespace platform_ex::Windows::D3D12 {
 	protected:
 		uint32 GPUIndex;
 	};
+
+	NodeDevice* GetDefaultNodeDevice();
 }

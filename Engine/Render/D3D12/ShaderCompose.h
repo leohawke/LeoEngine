@@ -7,7 +7,7 @@
 
 #include "../Effect/Effect.hpp"
 #include "d3d12_dxgi.h"
-#include "ResourceView.h"
+#include "View.h"
 #include <optional>
 
 
@@ -114,9 +114,9 @@ namespace platform_ex::Windows::D3D12 {
 	private:
 		parameter_bind_t GetBindFunc(ShaderParameterHandle const & p_handle,platform::Render::Effect::Parameter* param);
 	public:
-		using ShaderResourceViewSimulation = ViewSimulation;
+		using ShaderResourceViewSimulation = ShaderResourceView;
 		std::array<std::vector<ShaderResourceViewSimulation*>, NumTypes> Srvs;
-		using UnorderedAccessViewSimulation = ViewSimulation;
+		using UnorderedAccessViewSimulation = UnorderedAccessView;
 		std::array<std::vector<UnorderedAccessViewSimulation*>, NumTypes> Uavs;
 		std::array<std::vector<platform::Render::GraphicsBuffer*>, NumTypes> CBuffs;
 		std::array<std::vector<std::tuple<ResourceHolder*, uint32_t, uint32_t>>, NumTypes> SrvSrcs;

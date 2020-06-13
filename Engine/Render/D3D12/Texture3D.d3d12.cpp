@@ -1,5 +1,4 @@
 #include "Texture.h"
-#include "ResourceView.h"
 #include "Context.h"
 #include "Convert.h"
 
@@ -78,7 +77,7 @@ void Texture3D::UnMap(const Sub1D& box) {
 }
 
 
-ViewSimulation*  Texture3D::RetriveShaderResourceView(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) {
+D3D12_SHADER_RESOURCE_VIEW_DESC Texture3D::CreateSRVDesc(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) const{
 	LAssert(GetAccessMode() & EA_GPURead, "Access mode must have EA_GPURead flag");
 	D3D12_SHADER_RESOURCE_VIEW_DESC desc;
 	switch (format) {
@@ -101,22 +100,22 @@ ViewSimulation*  Texture3D::RetriveShaderResourceView(uint8 first_array_index, u
 	desc.Texture3D.MipLevels = num_levels;
 	desc.Texture3D.ResourceMinLODClamp = 0;
 
-	return RetriveSRV(desc);
+	return desc;
 }
 
-ShaderResourceView* platform_ex::Windows::D3D12::Texture3D::RetriveShaderResourceView()
+ShaderResourceView* Texture3D::RetriveShaderResourceView()
 {
 	if (!default_srv)
 	{
-		default_srv.reset(new ShaderResourceView(*this, 0,0,depth,GetNumMipMaps()));
+		default_srv.reset(new ShaderResourceView(GetDefaultNodeDevice(), CreateSRVDesc(0, GetArraySize(), 0, GetNumMipMaps()), *this));
 	}
 	return default_srv.get();
 }
 
-ViewSimulation*  Texture3D::RetriveUnorderedAccessView(uint8 first_array_index, uint8 num_items, uint8 level) {
-	return RetriveUnorderedAccessView(first_array_index, 0, depth, level);
+D3D12_UNORDERED_ACCESS_VIEW_DESC  Texture3D::CreateUAVDesc(uint8 first_array_index, uint8 num_items, uint8 level)  const{
+	return CreateUAVDesc(first_array_index, 0, depth, level);
 }
-ViewSimulation*  Texture3D::RetriveUnorderedAccessView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) {
+D3D12_UNORDERED_ACCESS_VIEW_DESC Texture3D::CreateUAVDesc(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) const{
 	LAssert(GetAccessMode() & EA_GPUUnordered, "Access mode must have EA_GPUUnordered flag");
 
 	D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
@@ -127,10 +126,10 @@ ViewSimulation*  Texture3D::RetriveUnorderedAccessView(uint8 array_index, uint16
 	desc.Texture3D.FirstWSlice = first_slice;
 	desc.Texture3D.WSize = num_slices;
 
-	return RetriveUAV(desc);
+	return desc;
 }
 
-ViewSimulation*  Texture3D::RetriveRenderTargetView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) {
+D3D12_RENDER_TARGET_VIEW_DESC  Texture3D::CreateRTVDesc(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) const{
 	D3D12_RENDER_TARGET_VIEW_DESC desc;
 
 	desc.Format = Convert(format);
@@ -139,9 +138,10 @@ ViewSimulation*  Texture3D::RetriveRenderTargetView(uint8 array_index, uint16 fi
 	desc.Texture3D.FirstWSlice = first_slice;
 	desc.Texture3D.WSize = num_slices;
 
-	return RetriveRTV(desc);
+	return desc;
 }
-ViewSimulation*  Texture3D::RetriveDepthStencilView(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) {
+
+D3D12_DEPTH_STENCIL_VIEW_DESC  Texture3D::CreateDSVDesc(uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level) const{
 
 	LAssert(GetAccessMode() & EA_GPUWrite, "Access mode must have EA_GPUWrite flag");
 
@@ -152,24 +152,15 @@ ViewSimulation*  Texture3D::RetriveDepthStencilView(uint8 array_index, uint16 fi
 
 	if (sample_info.Count == 1) {
 		desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
-		/*
-		desc.Texture2DArray.MipSlice = level;
-		desc.Texture2DArray.ArraySize = num_slices;
-		desc.Texture2DArray.FirstArraySlice = first_slice;
-		*/
 	}
 	else {
 		desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY;
-		/*
-		desc.Texture2DMSArray.ArraySize = num_slices;
-		desc.Texture2DMSArray.FirstArraySlice = first_slice;
-		*/
 	}
 	desc.Texture2DArray.MipSlice = level;
 	desc.Texture2DArray.ArraySize = num_slices;
 	desc.Texture2DArray.FirstArraySlice = first_slice;
 
-	return RetriveDSV(desc);
+	return desc;
 }
 
 

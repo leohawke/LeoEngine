@@ -26,13 +26,27 @@ namespace platform_ex::Windows {
 			}
 
 			void SetName(const char* name);
+
+			D3D12_RESOURCE_DESC GetDesc() const {
+				return desc;
+			}
+
+			bool IsDepthStencilResource() const { return bDepthStencil; }
+
+			//TODO
+			inline uint64 GetOffsetFromBaseOfResource() const { return 0; }
 		protected:
 			ResourceHolder();
-			ResourceHolder(const COMPtr<ID3D12Resource>& pResource);
+
+			ResourceHolder(const COMPtr<ID3D12Resource>& pResource, D3D12_RESOURCE_STATES in_state = D3D12_RESOURCE_STATE_COMMON);
 		protected:
 			D3D12_RESOURCE_STATES curr_state;
 
 			COMPtr<ID3D12Resource> resource;
+
+			D3D12_RESOURCE_DESC desc;
+
+			bool bDepthStencil;
 		};
 	}
 }

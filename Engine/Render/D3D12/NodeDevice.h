@@ -12,7 +12,7 @@ namespace platform_ex::Windows::D3D12
 	class NodeDevice : public SingleNodeGPUObject,public AdapterChild
 	{
 	public:
-		NodeDevice(GPUMaskType InGpuMask);
+		NodeDevice(GPUMaskType InGpuMask,D3D12Adapter* InAdapter);
 
 		void Initialize();
 
@@ -34,4 +34,5 @@ namespace platform_ex::Windows::D3D12
 		GlobalOnlineHeap GlobalSamplerHeap;
 		GlobalOnlineHeap GlobalViewHeap;
 	};
+
 }

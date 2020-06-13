@@ -26,13 +26,17 @@ namespace platform_ex::Windows {
 			D3D::Debug(resource, name);
 		}
 
-		ResourceHolder::ResourceHolder() 
-		: curr_state(D3D12_RESOURCE_STATE_COMMON){
+		ResourceHolder::ResourceHolder()
+			:curr_state(D3D12_RESOURCE_STATE_COMMON)
+		{
 		}
 
-		ResourceHolder::ResourceHolder(const COMPtr<ID3D12Resource>& pResource) 
-			: curr_state(D3D12_RESOURCE_STATE_COMMON), resource(pResource){
+		ResourceHolder::ResourceHolder(const COMPtr<ID3D12Resource>& pResource, D3D12_RESOURCE_STATES in_state)
+			: curr_state(in_state), resource(pResource){
+			lconstraint(resource);
+			desc = pResource->GetDesc();
 
+			bDepthStencil = (desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) != 0;
 		}
 	}
 }

@@ -5,8 +5,8 @@
 extern int GGlobalViewHeapSize;
 using namespace platform_ex::Windows::D3D12;
 
-NodeDevice::NodeDevice(GPUMaskType InGPUMask)
-	:SingleNodeGPUObject(InGPUMask)
+NodeDevice::NodeDevice(GPUMaskType InGPUMask, D3D12Adapter* InAdapter)
+	:SingleNodeGPUObject(InGPUMask),AdapterChild(InAdapter)
 	, GlobalSamplerHeap(this, InGPUMask)
 	,GlobalViewHeap(this, InGPUMask)
 {
@@ -24,8 +24,6 @@ ID3D12Device* NodeDevice::GetDevice()
 
 void NodeDevice::SetupAfterDeviceCreation()
 {
-	SetParentAdapter(&platform_ex::Windows::D3D12::GetDevice());
-
 	GlobalSamplerHeap.Init(NUM_SAMPLER_DESCRIPTORS, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 
 	// This value can be tuned on a per app basis. I.e. most apps will never run into descriptor heap pressure so
