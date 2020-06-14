@@ -2,11 +2,12 @@
 
 #include "d3d12_dxgi.h"
 #include "Common.h"
-#include "NodeDevice.h"
 #include "ResourceHolder.h"
 #include "../IGPUResourceView.h"
 
 namespace platform_ex::Windows::D3D12 {
+	class NodeDevice;
+
 	template<typename TDesc>
 	constexpr bool TIsD3D12SRVDescriptorHandleValue = false;
 
@@ -45,30 +46,15 @@ namespace platform_ex::Windows::D3D12 {
 			AllocateDescriptorSlot();
 		}
 
-		void CreateView(const TDesc& Desc, ID3D12Resource* Resource)
-		{
-			// NOTE (from D3D Debug runtime): When ViewDimension is D3D12_SRV_DIMENSION_RAYTRACING_ACCELLERATION_STRUCTURE, pResource must be NULL, since the resource location comes from a GPUVA in pDesc
-			if constexpr (std::is_same_v<TDesc, D3D12_SHADER_RESOURCE_VIEW_DESC>)
-			{
-				if (Desc.ViewDimension == D3D12_SRV_DIMENSION_RAYTRACING_ACCELERATION_STRUCTURE)
-				{
-					Resource = nullptr;
-				}
-			}
-			
-			(GetParentDevice()->GetDevice()->*TCreateViewMap<TDesc>::GetCreate()) (Resource, &Desc, Handle);
-		}
+		void CreateView(const TDesc& Desc, ID3D12Resource* Resource);
 
-		void CreateViewWithCounter(const TDesc& Desc, ID3D12Resource* Resource, ID3D12Resource* CounterResource)
-		{
-			(GetParentDevice()->GetDevice()->*TCreateViewMap<TDesc>::GetCreate()) (Resource, CounterResource, &Desc, Handle);
-		}
+		void CreateViewWithCounter(const TDesc& Desc, ID3D12Resource* Resource, ID3D12Resource* CounterResource);
 
 		inline const CD3DX12_CPU_DESCRIPTOR_HANDLE& GetHandle() const { return Handle; }
 		inline uint32 GetIndex() const { return Index; }
 
 	private:
-		// Implemented in D3D12Device.h due to dependencies on NodeDevice
+		// Implemented in NodeDevice.h due to dependencies on NodeDevice
 		inline void AllocateDescriptorSlot();
 		inline void FreeDescriptorSlot();
 	};

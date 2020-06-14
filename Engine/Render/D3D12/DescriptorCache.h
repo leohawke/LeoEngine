@@ -146,6 +146,155 @@ namespace platform_ex::Windows::D3D12 {
 
 	using SamplerSet = std::unordered_set<UniqueSamplerTable, UniqueDescriptorTableHasher<UniqueSamplerTable>>;
 
+	class OfflineDescriptorManager : public SingleNodeGPUObject
+	{
+	public: // Types
+		typedef D3D12_CPU_DESCRIPTOR_HANDLE HeapOffset;
+		typedef decltype(HeapOffset::ptr) HeapOffsetRaw;
+		typedef uint32 HeapIndex;
+
+	private: // Types
+		struct SFreeRange { HeapOffsetRaw Start; HeapOffsetRaw End; };
+		struct SHeapEntry
+		{
+			COMPtr<ID3D12DescriptorHeap> m_Heap;
+			std::list<SFreeRange> m_FreeList;
+
+			SHeapEntry() { }
+		};
+		typedef std::vector<SHeapEntry> THeapMap;
+
+		static D3D12_DESCRIPTOR_HEAP_DESC CreateDescriptor(GPUMaskType Node, D3D12_DESCRIPTOR_HEAP_TYPE Type, uint32 NumDescriptorsPerHeap)
+		{
+			D3D12_DESCRIPTOR_HEAP_DESC Desc = {};
+			Desc.Type = Type;
+			Desc.NumDescriptors = NumDescriptorsPerHeap;
+			Desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;// None as this heap is offline
+			Desc.NodeMask = Node;
+
+			return Desc;
+		}
+
+	public: // Methods
+		OfflineDescriptorManager(GPUMaskType Node, D3D12_DESCRIPTOR_HEAP_TYPE Type, uint32 NumDescriptorsPerHeap)
+			: SingleNodeGPUObject(Node)
+			, m_Desc(CreateDescriptor(Node, Type, NumDescriptorsPerHeap))
+			, m_DescriptorSize(0)
+			, m_pDevice(nullptr)
+		{}
+
+		void Init(ID3D12Device* pDevice)
+		{
+			m_pDevice = pDevice;
+			m_DescriptorSize = pDevice->GetDescriptorHandleIncrementSize(m_Desc.Type);
+		}
+
+		HeapOffset AllocateHeapSlot(HeapIndex& outIndex)
+		{
+			std::unique_lock Lock(CritSect);
+			if (0 == m_FreeHeaps.size())
+			{
+				AllocateHeap();
+			}
+			lconstraint(0 != m_FreeHeaps.size());
+			auto Head = m_FreeHeaps.begin();
+			outIndex = *Head;
+			SHeapEntry& HeapEntry = m_Heaps[outIndex];
+			lconstraint(0 != HeapEntry.m_FreeList.size());
+			SFreeRange& Range = HeapEntry.m_FreeList.front();
+			HeapOffset Ret = { Range.Start };
+			Range.Start += m_DescriptorSize;
+
+			if (Range.Start == Range.End)
+			{
+				HeapEntry.m_FreeList.erase(HeapEntry.m_FreeList.begin());
+				if (0 == HeapEntry.m_FreeList.size())
+				{
+					m_FreeHeaps.erase(Head);
+				}
+			}
+			return Ret;
+		}
+
+		void FreeHeapSlot(HeapOffset Offset, HeapIndex index)
+		{
+			std::unique_lock Lock(CritSect);
+			SHeapEntry& HeapEntry = m_Heaps[index];
+
+			SFreeRange NewRange =
+			{
+				Offset.ptr,
+				Offset.ptr + m_DescriptorSize
+			};
+
+			bool bFound = false;
+			for (auto Node = HeapEntry.m_FreeList.begin();
+				Node != HeapEntry.m_FreeList.end() && !bFound;
+				Node = ++Node)
+			{
+				SFreeRange& Range = *Node;
+				lconstraint(Range.Start < Range.End);
+				if (Range.Start == Offset.ptr + m_DescriptorSize)
+				{
+					Range.Start = Offset.ptr;
+					bFound = true;
+				}
+				else if (Range.End == Offset.ptr)
+				{
+					Range.End += m_DescriptorSize;
+					bFound = true;
+				}
+				else
+				{
+					lconstraint(Range.End < Offset.ptr || Range.Start > Offset.ptr);
+					if (Range.Start > Offset.ptr)
+					{
+						HeapEntry.m_FreeList.insert(Node,NewRange);
+						bFound = true;
+					}
+				}
+			}
+
+			if (!bFound)
+			{
+				if (0 == HeapEntry.m_FreeList.size())
+				{
+					m_FreeHeaps.push_back(index);
+				}
+				HeapEntry.m_FreeList.push_back(NewRange);
+			}
+		}
+
+	private: // Methods
+		void AllocateHeap()
+		{
+			COMPtr<ID3D12DescriptorHeap> Heap;
+			CheckHResult(m_pDevice->CreateDescriptorHeap(&m_Desc, IID_PPV_ARGS(&Heap.ReleaseAndGetRef())));
+			D3D::Debug(Heap,"FD3D12OfflineDescriptorManager Descriptor Heap");
+
+			HeapOffset HeapBase = Heap->GetCPUDescriptorHandleForHeapStart();
+			lconstraint(HeapBase.ptr != 0);
+
+			// Allocate and initialize a single new entry in the map
+			m_Heaps.resize(m_Heaps.size() + 1);
+			SHeapEntry& HeapEntry = m_Heaps.back();
+			HeapEntry.m_FreeList.push_back({ HeapBase.ptr,
+				HeapBase.ptr + m_Desc.NumDescriptors * m_DescriptorSize });
+			HeapEntry.m_Heap = Heap;
+			m_FreeHeaps.push_back(m_Heaps.size() - 1);
+		}
+
+	private: // Members
+		const D3D12_DESCRIPTOR_HEAP_DESC m_Desc;
+		uint32 m_DescriptorSize;
+		ID3D12Device* m_pDevice; // weak-ref
+
+		THeapMap m_Heaps;
+		std::list<HeapIndex> m_FreeHeaps;
+		std::mutex CritSect;
+	};
+
+
 	class OnlineHeap : public DeviceChild,public SingleNodeGPUObject
 	{
 	public:

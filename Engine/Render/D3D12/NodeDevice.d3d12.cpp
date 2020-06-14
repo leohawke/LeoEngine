@@ -6,7 +6,12 @@ extern int GGlobalViewHeapSize;
 using namespace platform_ex::Windows::D3D12;
 
 NodeDevice::NodeDevice(GPUMaskType InGPUMask, D3D12Adapter* InAdapter)
-	:SingleNodeGPUObject(InGPUMask),AdapterChild(InAdapter)
+	:SingleNodeGPUObject(InGPUMask),AdapterChild(InAdapter),
+	RTVAllocator(InGPUMask, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 256),
+	DSVAllocator(InGPUMask, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 256),
+	SRVAllocator(InGPUMask, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1024),
+	UAVAllocator(InGPUMask, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1024),
+	SamplerAllocator(InGPUMask, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, 128)
 	, GlobalSamplerHeap(this, InGPUMask)
 	,GlobalViewHeap(this, InGPUMask)
 {

@@ -3,6 +3,7 @@
 #include "Common.h"
 #include "d3d12_dxgi.h"
 #include "DescriptorCache.h"
+#include "View.h"
 #include <vector>
 
 namespace platform_ex::Windows::D3D12
@@ -20,6 +21,11 @@ namespace platform_ex::Windows::D3D12
 
 		ID3D12Device* GetDevice();
 
+		template <typename TViewDesc> OfflineDescriptorManager& GetViewDescriptorAllocator();
+		template<> OfflineDescriptorManager& GetViewDescriptorAllocator<D3D12_SHADER_RESOURCE_VIEW_DESC>() { return SRVAllocator; }
+		template<> OfflineDescriptorManager& GetViewDescriptorAllocator<D3D12_RENDER_TARGET_VIEW_DESC>() { return RTVAllocator; }
+		template<> OfflineDescriptorManager& GetViewDescriptorAllocator<D3D12_DEPTH_STENCIL_VIEW_DESC>() { return DSVAllocator; }
+		template<> OfflineDescriptorManager& GetViewDescriptorAllocator<D3D12_UNORDERED_ACCESS_VIEW_DESC>() { return UAVAllocator; }
 
 		CommandContext& GetDefaultCommandContext()
 		{
@@ -28,6 +34,12 @@ namespace platform_ex::Windows::D3D12
 	private:
 		void SetupAfterDeviceCreation();
 	private:
+		// Must be before the StateCache so that destructor ordering is valid
+		OfflineDescriptorManager RTVAllocator;
+		OfflineDescriptorManager DSVAllocator;
+		OfflineDescriptorManager SRVAllocator;
+		OfflineDescriptorManager UAVAllocator;
+		OfflineDescriptorManager SamplerAllocator;
 
 		std::vector<CommandContext*> CommandContextArray;
 
@@ -35,4 +47,50 @@ namespace platform_ex::Windows::D3D12
 		GlobalOnlineHeap GlobalViewHeap;
 	};
 
+
+	template<typename TDesc>
+	void TViewDescriptorHandle<TDesc>::AllocateDescriptorSlot()
+	{
+		if (Parent)
+		{
+			auto Device = GetParentDevice();
+			auto& DescriptorAllocator = Device->template GetViewDescriptorAllocator<TDesc>();
+			Handle = DescriptorAllocator.AllocateHeapSlot(Index);
+			lconstraint(Handle.ptr != 0);
+		}
+	}
+
+	template <typename TDesc>
+	void TViewDescriptorHandle<TDesc>::FreeDescriptorSlot()
+	{
+		if (Parent)
+		{
+			auto Device = GetParentDevice();
+			auto& DescriptorAllocator = Device->template GetViewDescriptorAllocator<TDesc>();
+			DescriptorAllocator.FreeHeapSlot(Handle, Index);
+			Handle.ptr = 0;
+		}
+		lconstraint(!Handle.ptr);
+	}
+
+	template<typename TDesc>
+	void TViewDescriptorHandle<TDesc>::CreateView(const TDesc& Desc, ID3D12Resource* Resource)
+	{
+		// NOTE (from D3D Debug runtime): When ViewDimension is D3D12_SRV_DIMENSION_RAYTRACING_ACCELLERATION_STRUCTURE, pResource must be NULL, since the resource location comes from a GPUVA in pDesc
+		if constexpr (std::is_same_v<TDesc, D3D12_SHADER_RESOURCE_VIEW_DESC>)
+		{
+			if (Desc.ViewDimension == D3D12_SRV_DIMENSION_RAYTRACING_ACCELERATION_STRUCTURE)
+			{
+				Resource = nullptr;
+			}
+		}
+
+		(GetParentDevice()->GetDevice()->*TCreateViewMap<TDesc>::GetCreate()) (Resource, &Desc, Handle);
+	}
+
+	template<typename TDesc>
+	void TViewDescriptorHandle<TDesc>::CreateViewWithCounter(const TDesc& Desc, ID3D12Resource* Resource, ID3D12Resource* CounterResource)
+	{
+		(GetParentDevice()->GetDevice()->*TCreateViewMap<TDesc>::GetCreate()) (Resource, CounterResource, &Desc, Handle);
+	}
 }
