@@ -15,16 +15,17 @@
 					 						|
 					 						|-[CommandContext]
 					 						|
-					 						|-[CommandContext]---
-					 											|
-Under this scheme an D3D12Device represents 1 node belonging to 1 physical adapter.
+					 						|-[CommandContext]--
+					 										  |-[StateCache]
+Under this scheme an NodeDevice represents 1 node belonging to 1 physical adapter.
 
 This structure allows a single Render::Context to control several different hardware setups. Some example arrangements:
 	- Single-GPU systems (the common case)
 	- Multi-GPU systems i.e. LDA (Crossfire/SLI)
-	- Asymmetric Multi-GPU systems i.e. Discrete/Integrated GPU cooperation												|-[StateCache]
+	- Asymmetric Multi-GPU systems i.e. Discrete/Integrated GPU cooperation												
 */
 
+#include <LBase/cassert.h>
 #include <LBase/linttype.hpp>
 
 namespace platform_ex::Windows::D3D12 {

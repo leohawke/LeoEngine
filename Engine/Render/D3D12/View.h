@@ -255,6 +255,10 @@ namespace platform_ex::Windows::D3D12 {
 		{
 			CreateViewWithCounter(InDesc, InResourceLocation, InCounterResource);
 		}
+
+		~UnorderedAccessView()
+		{
+		}
 	};
 
 }

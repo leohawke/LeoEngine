@@ -104,9 +104,6 @@
     <ClCompile Include="Core\CameraController.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Render\D3D12\ResourceView.d3d12.cpp">
-      <Filter>Render\D3D12</Filter>
-    </ClCompile>
     <ClCompile Include="Render\IContext.cpp">
       <Filter>Render\DeviceInterface</Filter>
     </ClCompile>
@@ -383,9 +380,6 @@
     </ClInclude>
     <ClInclude Include="Render\DataStructures.h">
       <Filter>Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\D3D12\ResourceView.h">
-      <Filter>Render\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="Render\ViewPort.h">
       <Filter>Render</Filter>

@@ -13,9 +13,6 @@ namespace platform {
 
 		class RenderTargetView {
 		public:
-
-			virtual uint16 GetNumSamples() const = 0;
-
 			virtual ~RenderTargetView();
 		};
 
@@ -27,7 +24,6 @@ namespace platform {
 
 		class ShaderResourceView{
 		public:
-
 			virtual ~ShaderResourceView();
 		};
 

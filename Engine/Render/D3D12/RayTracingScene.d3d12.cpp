@@ -45,7 +45,7 @@ void RayTracingScene::BuildAccelerationStructure()
 
 	Context::Instance().GetCommandList(Device::Command_Resource)->ResourceBarrier(1, &barrier);
 
-	AccelerationStructureView = std::make_unique<ShaderResourceView>(*AccelerationStructureBuffer,EF_Unknown);
+	AccelerationStructureView = leo::make_observer(AccelerationStructureBuffer->RetriveShaderResourceView());
 
 	// Create and fill instance buffer
 	const uint32 NumSceneInstances =static_cast<uint32>(Instances.size());

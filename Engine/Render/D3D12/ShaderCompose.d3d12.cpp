@@ -1,12 +1,15 @@
-#include "ShaderCompose.h"
-#include "Context.h"
+#include <LFramework/LCLib/Logger.h>
+
 #include "../Effect/Effect.hpp"
 #include "../../Asset/EffectAsset.h"
 #include "../ITexture.hpp"
+
+#include "View.h"
+#include "Context.h"
+#include "ShaderCompose.h"
 #include "Texture.h"
 #include "Convert.h"
 #include "RootSignature.h"
-#include <LFramework/LCLib/Logger.h>
 
 using namespace platform_ex::Windows;
 using platform::Render::ShaderType;
@@ -15,7 +18,7 @@ using platform::Render::ShaderBlob;
 namespace {
 	class SetTextureSRV {
 	public:
-		SetTextureSRV(std::tuple<D3D12::ResourceHolder*, leo::uint32, leo::uint32>&srvsrc_, D3D12::ViewSimulation*& srv_, platform::Render::Effect::Parameter * param_)
+		SetTextureSRV(std::tuple<D3D12::ResourceHolder*, leo::uint32, leo::uint32>&srvsrc_, D3D12::ShaderResourceView*& srv_, platform::Render::Effect::Parameter * param_)
 			:psrvsrc(&srvsrc_), ppsrv(&srv_), param(param_)
 		{}
 
@@ -34,10 +37,13 @@ namespace {
 
 					tex_subres.num_items * tex_subres.num_levels);
 
-				*ppsrv = pTexture->RetriveShaderResourceView(
-					tex_subres.first_array_index, tex_subres.num_items,
+				auto Desc = D3D12::CreateSRVDesc(*tex_subres.tex, tex_subres.first_array_index, tex_subres.num_items,
 
 					tex_subres.first_level, tex_subres.num_levels);
+
+				psrv.reset(new D3D12::ShaderResourceView(D3D12::GetDefaultNodeDevice(), Desc, *pTexture));
+
+				*ppsrv = psrv.get();
 			}
 			else {
 				std::get<0>(*psrvsrc) = nullptr;
@@ -45,13 +51,14 @@ namespace {
 		}
 	private:
 		std::tuple<D3D12::ResourceHolder*, leo::uint32, leo::uint32>* psrvsrc;
-		D3D12::ViewSimulation** ppsrv;
+		D3D12::ShaderResourceView** ppsrv;
+		std::shared_ptr<D3D12::ShaderResourceView> psrv;
 		platform::Render::Effect::Parameter * param;
 	};
 
 	class SetBufferSRV {
 	public:
-		SetBufferSRV(std::tuple<D3D12::ResourceHolder*, leo::uint32, leo::uint32>&srvsrc_, D3D12::ViewSimulation*& srv_, platform::Render::Effect::Parameter * param_)
+		SetBufferSRV(std::tuple<D3D12::ResourceHolder*, leo::uint32, leo::uint32>&srvsrc_, D3D12::ShaderResourceView*& srv_, platform::Render::Effect::Parameter * param_)
 			:psrvsrc(&srvsrc_), ppsrv(&srv_), param(param_)
 		{}
 		void operator()() {
@@ -73,13 +80,13 @@ namespace {
 		}
 	private:
 		std::tuple<D3D12::ResourceHolder*, leo::uint32, leo::uint32>* psrvsrc;
-		D3D12::ViewSimulation** ppsrv;
+		D3D12::ShaderResourceView** ppsrv;
 		platform::Render::Effect::Parameter * param;
 	};
 
 	class SetTextureUAV {
 	public:
-		SetTextureUAV(std::pair<D3D12::ResourceHolder*, ID3D12Resource*> uavsrc_, D3D12::ViewSimulation*& uav_, platform::Render::Effect::Parameter * param_)
+		SetTextureUAV(std::pair<D3D12::ResourceHolder*, ID3D12Resource*>& uavsrc_, D3D12::UnorderedAccessView*& uav_, platform::Render::Effect::Parameter * param_)
 			:puavsrc(&uavsrc_), ppuav(&uav_), param(param_)
 		{}
 
@@ -91,10 +98,13 @@ namespace {
 				puavsrc->first = pTexture;
 				puavsrc->second = nullptr;
 
-				*ppuav = pTexture->RetriveUnorderedAccessView(
-					tex_subres.first_array_index, tex_subres.num_items,
+				auto Desc = D3D12::CreateUAVDesc(*tex_subres.tex, tex_subres.first_array_index, tex_subres.num_items,
 
 					tex_subres.first_level, tex_subres.num_levels);
+
+				puav.reset(new D3D12::UnorderedAccessView(D3D12::GetDefaultNodeDevice(), Desc, *pTexture));
+
+				*ppuav = puav.get();
 			}
 			else {
 				puavsrc->first = nullptr;
@@ -103,13 +113,14 @@ namespace {
 		}
 	private:
 		std::pair<D3D12::ResourceHolder*, ID3D12Resource*>* puavsrc;
-		D3D12::ViewSimulation** ppuav;
+		D3D12::UnorderedAccessView** ppuav;
+		std::shared_ptr<D3D12::UnorderedAccessView> puav;
 		platform::Render::Effect::Parameter * param;
 	};
 
 	class SetBufferUAV {
 	public:
-		SetBufferUAV(std::pair<D3D12::ResourceHolder*, ID3D12Resource*> uavsrc_, D3D12::ViewSimulation*& uav_, platform::Render::Effect::Parameter * param_)
+		SetBufferUAV(std::pair<D3D12::ResourceHolder*, ID3D12Resource*>& uavsrc_, D3D12::UnorderedAccessView*& uav_, platform::Render::Effect::Parameter * param_)
 			:puavsrc(&uavsrc_), ppuav(&uav_), param(param_)
 		{}
 
@@ -130,7 +141,7 @@ namespace {
 		}
 	private:
 		std::pair<D3D12::ResourceHolder*, ID3D12Resource*>* puavsrc;
-		D3D12::ViewSimulation** ppuav;
+		D3D12::UnorderedAccessView** ppuav;
 		platform::Render::Effect::Parameter * param;
 	};
 }

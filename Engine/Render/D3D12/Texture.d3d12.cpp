@@ -28,9 +28,9 @@ platform_ex::Windows::D3D12::Texture::Texture(EFormat format)
 }
 
 platform_ex::Windows::D3D12::Texture::Texture(const COMPtr<ID3D12Resource>& pResource)
-	:ResourceHolder(pResource), resource_desc(pResource->GetDesc())
+	:ResourceHolder(pResource)
 {
-	dxgi_format = resource_desc.Format;
+	dxgi_format = desc.Format;
 }
 
 std::string  platform_ex::Windows::D3D12::Texture::HWDescription() const
@@ -337,6 +337,7 @@ void Texture::DoUnmap(uint32 subres)
 	}
 }
 
+//TODO use commandlist
 void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_size, uint8 mipmap_size, uint16 width, uint16 height, uint8 facecount)
 {
 		auto & device = D3D12::Context::Instance().GetDevice();
@@ -443,6 +444,8 @@ void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_siz
 		auto cpu_cbv_srv_uav_handle = dynamic_heap->GetCPUDescriptorHandleForHeapStart();
 		auto gpu_cbv_srv_uav_handle = dynamic_heap->GetGPUDescriptorHandleForHeapStart();
 		auto srv_desc_size = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+		auto& ITexture = dynamic_cast<platform::Render::Texture&>(*this);
 		for (uint8_t index = 0; index < array_size; ++index)
 		{
 			for (uint8 face = 0; face != facecount; ++face) {
@@ -454,9 +457,11 @@ void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_siz
 					barrier_before[1].Transition.Subresource = CalcSubresource(level, index*facecount + face, 0, mipmap_size, array_size);
 					cmd_list->ResourceBarrier(2, barrier_before);
 
-					auto const & rt_handle = RetriveRenderTargetView(index*facecount + face, 1, level)->GetHandle();
+					RenderTargetView rtv(GetDefaultNodeDevice(), CreateRTVDesc(ITexture, index* facecount + face, 1, level), *this);
+					auto const rt_handle = rtv.GetView();
 
-					auto const & sr_handle = RetriveShaderResourceView(index*facecount + face, 1, level - 1, 1)->GetHandle();
+					ShaderResourceView srv(GetDefaultNodeDevice(), CreateSRVDesc(ITexture, index* facecount + face, 1, level - 1, 1), *this);
+					auto const sr_handle = srv.GetView();
 					device->CopyDescriptorsSimple(1, cpu_cbv_srv_uav_handle, sr_handle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 					cmd_list->OMSetRenderTargets(1, &rt_handle, false, nullptr);

@@ -161,7 +161,7 @@ void Display::UpdateFramewBufferView()
 		COMPtr<ID3D12Resource> pResources = nullptr;
 		swap_chain->GetBuffer(rt_tex_index, COMPtr_RefParam(pResources, IID_ID3D12Resource));
 		rt_tex = make_shared<Texture2D>(pResources);
-		render_target_views[rt_tex_index] = make_shared<RenderTargetView>(*rt_tex, 0, 1, 0);
+		render_target_views[rt_tex_index] = make_shared<RenderTargetView>(GetDefaultNodeDevice(),rt_tex->CreateRTVDesc(0,1,0),*rt_tex);
 		++rt_tex_index;
 	}
 
@@ -181,8 +181,8 @@ void Display::UpdateFramewBufferView()
 
 	frame_buffer->Attach(FrameBuffer::Target0, render_target_views[0]);
 	if (depth_stencil_format != EF_Unknown) {
-		frame_buffer->Attach(FrameBuffer::DepthStencil, make_shared<DepthStencilView>(*depth_stencil,0,1,0));
+		frame_buffer->Attach(FrameBuffer::DepthStencil, make_shared<DepthStencilView>(GetDefaultNodeDevice(), depth_stencil->CreateDSVDesc(0, 1, 0), *depth_stencil, IsStencilFormat(depth_stencil_format)));
 		if(stereo)
-			frame_buffer->Attach(FrameBuffer::DepthStencil, make_shared<DepthStencilView>(*depth_stencil, 1, 1, 0));
+			frame_buffer->Attach(FrameBuffer::DepthStencil, make_shared<DepthStencilView>(GetDefaultNodeDevice(), depth_stencil->CreateDSVDesc(1, 1, 0), *depth_stencil,IsStencilFormat(depth_stencil_format)));
 	}
 }

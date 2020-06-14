@@ -104,12 +104,13 @@ namespace platform::Render {
 
 		void FillRenderTargetsInfo(GraphicsPipelineStateInitializer& GraphicsPSOInit)
 		{
+			throw leo::unsupported();
 			GraphicsPSOInit.RenderTargetsEnabled = PSOContext.CachedNumSimultanousRenderTargets;
 			for (uint32 i = 0; i < GraphicsPSOInit.RenderTargetsEnabled; ++i)
 			{
 				if (PSOContext.CachedRenderTargets[i])
 				{
-					GraphicsPSOInit.RenderTargetFormats[i] = PSOContext.CachedRenderTargets[i]->Format();
+					//GraphicsPSOInit.RenderTargetFormats[i] = PSOContext.CachedRenderTargets[i]->Format();
 				}
 				else
 				{
@@ -118,13 +119,13 @@ namespace platform::Render {
 
 				if (GraphicsPSOInit.RenderTargetFormats[i] != EF_Unknown)
 				{
-					GraphicsPSOInit.NumSamples = PSOContext.CachedRenderTargets[i]->GetNumSamples();
+					//GraphicsPSOInit.NumSamples = PSOContext.CachedRenderTargets[i]->GetNumSamples();
 				}
 			}
 
 			if (PSOContext.CachedDepthStencilTarget)
 			{
-				GraphicsPSOInit.DepthStencilTargetFormat = PSOContext.CachedDepthStencilTarget->Format();
+				//GraphicsPSOInit.DepthStencilTargetFormat = PSOContext.CachedDepthStencilTarget->Format();
 			}
 			else 
 			{

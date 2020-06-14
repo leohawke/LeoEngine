@@ -12,7 +12,9 @@
 
 namespace platform_ex::Windows::D3D12 {
 
-	class ViewSimulation;
+	class ShaderResourceView;
+	class UnorderedAccessView;
+	class RenderTargetView;
 
 	class GraphicsBuffer : public platform::Render::GraphicsBuffer,public ResourceHolder {
 	public:
@@ -29,9 +31,9 @@ namespace platform_ex::Windows::D3D12 {
 
 		ID3D12Resource* UploadResource() const;
 
-		ViewSimulation* RetriveRenderTargetView(uint16 width, uint16 height, platform::Render::EFormat pf);
-		ViewSimulation* RetriveShaderResourceView();
-		ViewSimulation* RetriveUnorderedAccessView();
+		RenderTargetView* RetriveRenderTargetView(uint16 width, uint16 height, platform::Render::EFormat pf);
+		ShaderResourceView* RetriveShaderResourceView();
+		UnorderedAccessView* RetriveUnorderedAccessView();
 
 		platform::Render::EFormat GetFormat() const { return format; }
 	private:
@@ -41,9 +43,9 @@ namespace platform_ex::Windows::D3D12 {
 		friend class Device;
 		friend class Context;
 
-		std::unique_ptr<ViewSimulation> srv;
-		std::unique_ptr<ViewSimulation> uav;
-		std::unique_ptr<std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>>> rtv_maps;
+		std::unique_ptr<ShaderResourceView> srv;
+		std::unique_ptr<UnorderedAccessView> uav;
+		std::unique_ptr<std::unordered_map<std::size_t, std::unique_ptr<RenderTargetView>>> rtv_maps;
 
 		COMPtr<ID3D12Resource> buffer_counter_upload;
 		leo::uint32 counter_offset;

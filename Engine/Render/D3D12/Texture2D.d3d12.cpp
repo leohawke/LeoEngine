@@ -54,13 +54,13 @@ static leo::uint32 ResloveEAccessHint(const D3D12_RESOURCE_DESC& desc) {
 platform_ex::Windows::D3D12::Texture2D::Texture2D(const COMPtr<ID3D12Resource>& pResource)
 	:Texture(pResource),
 	BTexture(
-		static_cast<leo::uint8>(resource_desc.MipLevels),
-		static_cast<leo::uint8>(resource_desc.DepthOrArraySize), 
+		static_cast<leo::uint8>(desc.MipLevels),
+		static_cast<leo::uint8>(desc.DepthOrArraySize), 
 		ConvertWrap(dxgi_format), 
-		ResloveEAccessHint(resource_desc),
-		{resource_desc.SampleDesc.Count,resource_desc.SampleDesc.Quality}
+		ResloveEAccessHint(desc),
+		{desc.SampleDesc.Count,desc.SampleDesc.Quality}
 	),
-	width(static_cast<leo::uint16>(resource_desc.Width)), height(static_cast<leo::uint16>(resource_desc.Height))
+	width(static_cast<leo::uint16>(desc.Width)), height(static_cast<leo::uint16>(desc.Height))
 {
 }
 

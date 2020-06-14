@@ -1,6 +1,7 @@
 #include "GraphicsBuffer.hpp"
 #include "Context.h"
 #include "Convert.h"
+#include "View.h"
 
 namespace platform_ex::Windows::D3D12 {
 	using namespace platform::Render::Buffer;
@@ -203,7 +204,7 @@ namespace platform_ex::Windows::D3D12 {
 			desc.Buffer.StructureByteStride = (access & EAccessHint::EA_GPUStructured) ? structure_byte_stride : 0;
 			desc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
-			srv = std::make_unique<ViewSimulation>(resource, desc);
+			srv = std::make_unique<ShaderResourceView>(GetDefaultNodeDevice(),desc,*this);
 		}
 
 		if (usage & Usage::AccelerationStructure)
@@ -214,7 +215,7 @@ namespace platform_ex::Windows::D3D12 {
 			desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 			desc.RaytracingAccelerationStructure.Location = Resource()->GetGPUVirtualAddress();
 
-			srv = std::make_unique<ViewSimulation>(resource, desc);
+			srv = std::make_unique<ShaderResourceView>(GetDefaultNodeDevice(),desc, *this);
 		}
 
 		if ((access & EAccessHint::EA_GPUWrite)
@@ -277,7 +278,7 @@ namespace platform_ex::Windows::D3D12 {
 				desc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
 			}
 
-			uav = std::make_unique<ViewSimulation>(resource, desc);
+			uav = std::make_unique<UnorderedAccessView>(GetDefaultNodeDevice(),desc,*this);
 		}
 	}
 
@@ -328,10 +329,10 @@ namespace platform_ex::Windows::D3D12 {
 	{
 		return buffer_counter_upload.Get();
 	}
-	ViewSimulation * GraphicsBuffer::RetriveRenderTargetView(uint16 width, uint16 height, platform::Render::EFormat pf)
+	RenderTargetView* GraphicsBuffer::RetriveRenderTargetView(uint16 width, uint16 height, platform::Render::EFormat pf)
 	{
 		if (!rtv_maps)
-			rtv_maps = std::make_unique<std::unordered_map<std::size_t, std::unique_ptr<ViewSimulation>>>();
+			rtv_maps = std::make_unique<std::unordered_map<std::size_t, std::unique_ptr<RenderTargetView>>>();
 
 		auto key = hash_combine_seq(0, width, height, pf);
 		auto iter = rtv_maps->find(key);
@@ -344,13 +345,13 @@ namespace platform_ex::Windows::D3D12 {
 		desc.Buffer.FirstElement = 0;
 		desc.Buffer.NumElements = std::min<UINT>(width * height, GetSize() / NumFormatBytes(pf));
 
-		return rtv_maps->emplace(key, std::make_unique<ViewSimulation>(resource, desc)).first->second.get();
+		return rtv_maps->emplace(key, std::make_unique<RenderTargetView>(GetDefaultNodeDevice(),desc,*this)).first->second.get();
 	}
-	ViewSimulation * GraphicsBuffer::RetriveShaderResourceView()
+	ShaderResourceView * GraphicsBuffer::RetriveShaderResourceView()
 	{
 		return srv.get();
 	}
-	ViewSimulation * GraphicsBuffer::RetriveUnorderedAccessView()
+	UnorderedAccessView * GraphicsBuffer::RetriveUnorderedAccessView()
 	{
 		return uav.get();
 	}

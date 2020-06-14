@@ -73,7 +73,6 @@
     <ClCompile Include="Render\D3D12\RayTracingPipelineState.cpp" />
     <ClCompile Include="Render\D3D12\RayTracingScene.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\RayTracingShader.cpp" />
-    <ClCompile Include="Render\D3D12\ResourceView.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\ResourceHolder.cpp" />
     <ClCompile Include="Render\D3D12\RootSignature.cpp" />
     <ClCompile Include="Render\D3D12\ShaderCompose.d3d12.cpp" />
@@ -179,7 +178,6 @@
     <ClInclude Include="Render\D3D12\ShaderCompose.h" />
     <ClInclude Include="Render\D3D12\d3d12_dxgi.h" />
     <ClInclude Include="Render\D3D12\Display.h" />
-    <ClInclude Include="Render\D3D12\ResourceView.h" />
     <ClInclude Include="Render\D3D12\test.h" />
     <ClInclude Include="Render\D3D12\Texture.h" />
     <ClInclude Include="Render\D3D12\VertexDeclaration.h" />

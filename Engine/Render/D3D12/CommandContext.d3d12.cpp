@@ -347,6 +347,7 @@ void CommandContext::ClearMRT(bool bClearColor, int32 NumClearColors, const leo:
 
 	if (ClearRTV || ClearDSV)
 	{
+		throw leo::unsupported();
 		if (ClearRTV)
 		{
 			for (uint32 TargetIndex = 0; TargetIndex < NumSimultaneousRTs; ++TargetIndex)
@@ -355,13 +356,11 @@ void CommandContext::ClearMRT(bool bClearColor, int32 NumClearColors, const leo:
 
 				if (RTView)
 				{
-					RTView->ClearColor(ColorArray[TargetIndex]);
 				}
 			}
 
 			if (ClearDSV)
 			{
-				DSView->ClearDepthStencil(Depth, Stencil);
 			}
 		}
 	}

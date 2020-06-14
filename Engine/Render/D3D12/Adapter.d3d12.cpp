@@ -232,7 +232,7 @@ namespace platform_ex::Windows::D3D12 {
 
 	UnorderedAccessView* Device::CreateUnorderedAccessView(platform::Render::Texture2D* InTexture)
 	{
-		return std::make_unique<UnorderedAccessView>(static_cast<Texture2D&>(*InTexture),0,InTexture->GetArraySize(),0).release();
+		return std::make_unique<UnorderedAccessView>(Devices[0],CreateUAVDesc(*InTexture, 0, InTexture->GetArraySize(), 0),static_cast<Texture2D&>(*InTexture)).release();
 	}
 
 

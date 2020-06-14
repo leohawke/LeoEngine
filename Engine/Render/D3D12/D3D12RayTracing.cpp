@@ -2,7 +2,6 @@
 #include "Context.h"
 #include "RayTracingPipelineState.h"
 #include "../../Core/Hash/CityHash.h"
-#include "ResourceView.h"
 #include "Texture.h"
 #include "GraphicsBuffer.hpp"
 #include <LFramework/Core/LString.h>
@@ -542,7 +541,7 @@ static void SetRayTracingShaderResources(
 		if (Resource)
 		{
 			auto Texture =dynamic_cast<D3D12Texture*>(Resource);
-			LocalSRVs[SRVIndex] = Texture->RetriveShaderResourceView()->GetHandle();
+			LocalSRVs[SRVIndex] = Texture->RetriveShaderResourceView()->GetView();
 			BoundSRVMask |= 1ull << SRVIndex;
 		}
 	}
@@ -553,7 +552,7 @@ static void SetRayTracingShaderResources(
 		if (Resource)
 		{
 			auto SRV = static_cast<D3D12ShaderResourceView*>(Resource);
-			LocalSRVs[SRVIndex] = SRV->GetHandle();
+			LocalSRVs[SRVIndex] = SRV->GetView();
 			BoundSRVMask |= 1ull << SRVIndex;
 		}
 	}
@@ -586,7 +585,7 @@ static void SetRayTracingShaderResources(
 		if (Resource)
 		{
 			auto UAV = static_cast<D3D12UnorderedAccessView*>(Resource);
-			LocalUAVs[UAVIndex] = UAV->GetHandle();
+			LocalUAVs[UAVIndex] = UAV->GetView();
 			BoundUAVMask |= 1ull << UAVIndex;
 		}
 	}

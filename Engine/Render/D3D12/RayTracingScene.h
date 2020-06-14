@@ -36,7 +36,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		ID3D12Device5* RayTracingDevice;
 
-		std::unique_ptr<ShaderResourceView> AccelerationStructureView;
+		leo::observer_ptr<ShaderResourceView> AccelerationStructureView;
 	};
 }
 

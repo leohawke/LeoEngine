@@ -150,7 +150,7 @@ void DescriptorCache::SetRenderTargets(RenderTargetView** RenderTargetViewArray,
 		{
 			// RTV should already be in the correct state. It is transitioned in RHISetRenderTargets.
 			TransitionResource(CommandList, RenderTargetViewArray[i], D3D12_RESOURCE_STATE_RENDER_TARGET);
-			RTVDescriptors[i] = RenderTargetViewArray[i]->GetHandle();
+			RTVDescriptors[i] = RenderTargetViewArray[i]->GetView();
 		}
 		else
 		{
@@ -162,7 +162,7 @@ void DescriptorCache::SetRenderTargets(RenderTargetView** RenderTargetViewArray,
 	{
 		TransitionResource(CommandList, DepthStencilTarget);
 
-		const D3D12_CPU_DESCRIPTOR_HANDLE DSVDescriptor = DepthStencilTarget->GetHandle();
+		const D3D12_CPU_DESCRIPTOR_HANDLE DSVDescriptor = DepthStencilTarget->GetView();
 		CommandList->OMSetRenderTargets(Count, RTVDescriptors, 0, &DSVDescriptor);
 	}
 	else
@@ -206,7 +206,7 @@ void DescriptorCache::SetUAVs(const RootSignature* RootSignature, UnorderedAcces
 		}
 		else
 		{
-			SrcDescriptors[SlotIndex] = UAVs[SlotIndex]->GetHandle();
+			SrcDescriptors[SlotIndex] = UAVs[SlotIndex]->GetView();
 
 			TransitionResource(CommandList, UAVs[SlotIndex], D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 		}
@@ -268,17 +268,17 @@ void DescriptorCache::SetSRVs(const RootSignature* RootSignature, ShaderResource
 	{
 		if (SRVs[SlotIndex] != nullptr)
 		{
-			SrcDescriptors[SlotIndex] = SRVs[SlotIndex]->GetHandle();
+			SrcDescriptors[SlotIndex] = SRVs[SlotIndex]->GetView();
 
-			/*if (SRVs[SlotIndex]->IsDepthStencilResource())
+			if (SRVs[SlotIndex]->IsDepthStencilResource())
 			{
 				TransitionResource(CommandList, SRVs[SlotIndex], D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_DEPTH_READ);
 			}
-			else if (SRVs[SlotIndex]->GetSkipFastClearFinalize())
+			/*else if (SRVs[SlotIndex]->GetSkipFastClearFinalize())
 			{
 				TransitionResource(CommandList, SRVs[SlotIndex], CmdContext->SkipFastClearEliminateState);
-			}
-			else*/
+			}*/
+			else
 			{
 				TransitionResource(CommandList, SRVs[SlotIndex], D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 			}
