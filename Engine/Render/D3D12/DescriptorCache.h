@@ -7,7 +7,7 @@
 
 #include "d3d12_dxgi.h"
 #include "Common.h"
-#include "Fence.h"
+#include "D3DCommandList.h"
 #include <unordered_set>
 #include <mutex>
 #include <queue>
@@ -281,7 +281,7 @@ namespace platform_ex::Windows::D3D12 {
 			HeapEntry.m_FreeList.push_back({ HeapBase.ptr,
 				HeapBase.ptr + m_Desc.NumDescriptors * m_DescriptorSize });
 			HeapEntry.m_Heap = Heap;
-			m_FreeHeaps.push_back(m_Heaps.size() - 1);
+			m_FreeHeaps.push_back(static_cast<HeapIndex>(m_Heaps.size() - 1));
 		}
 
 	private: // Members

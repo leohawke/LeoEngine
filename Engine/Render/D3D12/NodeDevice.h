@@ -31,6 +31,8 @@ namespace platform_ex::Windows::D3D12
 		{
 			return *CommandContextArray[0];
 		}
+
+		ID3D12CommandQueue* GetD3DCommandQueue(CommandQueueType InQueueType);
 	private:
 		void SetupAfterDeviceCreation();
 	private:

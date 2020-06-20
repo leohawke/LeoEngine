@@ -96,8 +96,6 @@ namespace platform_ex::Windows::D3D12 {
 
 		enum CommandType {
 			Command_Render = 0,
-			//Command_Compute,
-			//Command_Copy,
 			Command_Resource,
 			CommandTypeCount
 		};

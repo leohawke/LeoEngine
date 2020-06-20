@@ -9,97 +9,67 @@
 #include <LBase/linttype.hpp>
 #include <atomic>
 #include "d3d12_dxgi.h"
+#include "Common.h"
 #include "../../Win32/NTHandle.h"
 
 
 namespace platform_ex::Windows::D3D12 {
-	class Fence {
+	class FenceCore : public AdapterChild
+	{
 	public:
-		enum Type
-		{
-			Render,
-			Compute,
-			Copy
-		};
+		FenceCore(D3D12Adapter* InParent, uint64 InitialValue, uint32 GPUIndex);
+		~FenceCore();
 
-		Fence();
+		inline ID3D12Fence* GetFence() const { return Fence.Get(); }
+		inline HANDLE GetCompletionEvent() const { return hFenceCompleteEvent; }
+		inline bool IsAvailable() const { return FenceValueAvailableAt <= Fence->GetCompletedValue(); }
+		inline uint32 GetGPUIndex() const { return GPUIndex; }
+
+		uint64 FenceValueAvailableAt;
+	private:
+		uint32 GPUIndex;
+
+		COMPtr<ID3D12Fence> Fence;
+		HANDLE hFenceCompleteEvent;
+	};
+
+	class Fence : public AdapterChild,public MultiNodeGPUObject {
+	public:
+		Fence(D3D12Adapter* InParent,GPUMaskType InGpuMask,const std::string& InName="<unnamed fence>");
 		~Fence();
 
-		uint64 Signal(Type type);
-		void Wait(uint64 id);
-		bool Completed(uint64 id);
+		void CreateFence();
+
+		uint64 Signal(CommandQueueType type);
+		void GpuWait(uint32 DeviceIndex, CommandQueueType InQueueType, uint64 FenceValue, uint32 FenceGPUIndex);
+
+		void GpuWait(CommandQueueType InQueueType, uint64 FenceValue)
+		{
+			GpuWait(GetGPUMask(), InQueueType, FenceValue, GetGPUMask());
+		}
+
+		void WaitForFence(uint64 FenceValue);
+		bool IsFenceComplete(uint64 FenceValue);
+
+		bool IsFenceCompleteFast(uint64 FenceValue) const { return FenceValue <= last_completed_val; }
+
+		uint64 UpdateLastCompletedFence();
 
 		uint64 GetLastCompletedFenceFast() const { return last_completed_val; };
 
 		uint64 GetCurrentFence() const { return fence_val; }
+
+		void Destroy();
+	protected:
+		void InternalSignal(CommandQueueType InQueueType, uint64 FenceToSignal);
+
 	private:
-		COMPtr<ID3D12Fence> fence;
-		UniqueNtHandle fence_event;
 		uint64 last_completed_val;
 		std::atomic<uint64> fence_val;
+
+		FenceCore* FenceCores[MAX_NUM_GPUNODES];
 	};
 
-	Fence& GetRenderFence();
-
-	class CLSyncPoint
-	{
-	public:
-
-		CLSyncPoint() : Generation(0) {}
-
-		CLSyncPoint(Fence& CL) : RenderFence(&CL), Generation(CL.GetCurrentFence()) {}
-
-		CLSyncPoint(const CLSyncPoint& SyncPoint) : RenderFence(SyncPoint.RenderFence), Generation(SyncPoint.Generation) {}
-
-		CLSyncPoint& operator = (Fence& CL)
-		{
-			RenderFence = &CL;
-			Generation = CL.GetCurrentFence();
-
-			return *this;
-		}
-
-		CLSyncPoint& operator = (const CLSyncPoint& SyncPoint)
-		{
-			RenderFence = SyncPoint.RenderFence;
-			Generation = SyncPoint.Generation;
-
-			return *this;
-		}
-
-		bool operator!() const
-		{
-			return RenderFence == nullptr;
-		}
-
-		bool IsValid() const
-		{
-			return RenderFence != nullptr;
-		}
-
-		bool IsOpen() const
-		{
-			return Generation == RenderFence->GetCurrentFence();
-		}
-
-		bool IsComplete() const
-		{
-			return RenderFence->Completed(Generation);
-		}
-
-		void WaitForCompletion() const
-		{
-			RenderFence->Wait(Generation);
-		}
-
-		uint64 GetGeneration() const
-		{
-			return Generation;
-		}
-	private:
-		Fence* RenderFence = nullptr;
-		uint64                  Generation;
-	};
 }
 
 #endif

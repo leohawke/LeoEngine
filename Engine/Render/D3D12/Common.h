@@ -31,6 +31,8 @@ This structure allows a single Render::Context to control several different hard
 namespace platform_ex::Windows::D3D12 {
 	using namespace leo::inttype;
 
+	constexpr auto MAX_NUM_GPUNODES = 4;
+
 	class Device;
 
 	//TODO:different hardware setups
@@ -40,6 +42,13 @@ namespace platform_ex::Windows::D3D12 {
 	using D3D12Adapter = Device;
 
 	using GPUMaskType = leo::uint32;
+
+	enum class CommandQueueType
+	{
+		Default,
+		Copy,
+		Async
+	};
 
 	class DeviceChild
 	{
@@ -89,6 +98,8 @@ namespace platform_ex::Windows::D3D12 {
 		{
 			// Note that node mask can't be null.
 		}
+
+		const GPUMaskType GetGPUMask() const { return GPUMask; }
 	protected:
 		GPUMaskType GPUMask;
 		// Which GPUs have direct access to this object
@@ -105,6 +116,14 @@ namespace platform_ex::Windows::D3D12 {
 
 	protected:
 		uint32 GPUIndex;
+	};
+
+	class MultiNodeGPUObject :public GPUObject
+	{
+	public:
+		MultiNodeGPUObject(GPUMaskType NodeMask, GPUMaskType VisibiltyMask)
+			:GPUObject(NodeMask, VisibiltyMask)
+		{}
 	};
 
 	NodeDevice* GetDefaultNodeDevice();

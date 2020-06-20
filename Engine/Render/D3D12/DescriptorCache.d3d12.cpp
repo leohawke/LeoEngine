@@ -74,7 +74,7 @@ bool DescriptorCache::SetDescriptorHeaps()
 	if (bHeapChanged)
 	{
 		ID3D12DescriptorHeap* /*const*/ ppHeaps[] = { pCurrentViewHeap, pCurrentSamplerHeap };
-		CmdContext->CommandListHandle->SetDescriptorHeaps(std::size(ppHeaps), ppHeaps);
+		CmdContext->CommandListHandle->SetDescriptorHeaps(leo::size(ppHeaps), ppHeaps);
 
 		pPreviousViewHeap = pCurrentViewHeap;
 		pPreviousSamplerHeap = pCurrentSamplerHeap;

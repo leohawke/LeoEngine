@@ -170,8 +170,8 @@ void D12::RayContext::RayTraceShadow(R::RayTracingScene* InScene, R::FrameBuffer
 
 	D3D12_DISPATCH_RAYS_DESC DispatchDesc = ShaderTable.GetDispatchRaysDesc(0, 0, 0);
 	auto desc = Resource->GetDesc();
-	DispatchDesc.Width = desc.Width;
-	DispatchDesc.Height =desc.Height;
+	DispatchDesc.Width =static_cast<UINT>(desc.Width);
+	DispatchDesc.Height = static_cast<UINT>(desc.Height);
 	DispatchDesc.Depth = 1;
 
 	DispatchRays(this, Bindings, Pipeline, 0, nullptr, DispatchDesc);

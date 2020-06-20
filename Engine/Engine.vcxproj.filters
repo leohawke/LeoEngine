@@ -594,6 +594,9 @@
     <ClInclude Include="Render\D3D12\View.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="Render\D3D12\D3DCommandList.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

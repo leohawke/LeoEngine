@@ -30,10 +30,23 @@ namespace platform_ex::Windows
 		return 1 << CeilLogTwo(Arg);
 	}
 
-	inline uint32 FloorLog2(uint32 Value)
+	template<typename _type>
+	inline uint32 FloorLog2(_type Value)
 	{
 		unsigned long Log2;
 		if (_BitScanReverse(&Log2, Value) != 0)
+		{
+			return Log2;
+		}
+
+		return 0;
+	}
+
+	template<>
+	inline uint32 FloorLog2<uint64>(uint64 Value)
+	{
+		unsigned long Log2;
+		if (_BitScanReverse64(&Log2, Value) != 0)
 		{
 			return Log2;
 		}

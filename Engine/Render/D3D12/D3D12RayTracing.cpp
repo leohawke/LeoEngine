@@ -393,8 +393,8 @@ public:
 			Entry.ExportDescs.push_back(ExportDesc);
 		}
 
-		DXILLibrary Library(Shader->ShaderByteCode.first.get(),Shader->ShaderByteCode.second,
-			OriginalEntryPoints.data(),RenamedEntryPoints.data(),OriginalEntryPoints.size());
+		DXILLibrary Library(Shader->ShaderByteCode.first.get(), static_cast<uint32>(Shader->ShaderByteCode.second),
+			OriginalEntryPoints.data(),RenamedEntryPoints.data(),static_cast<uint32>(OriginalEntryPoints.size()));
 
 		const DXILLibrary* LibraryPtr = &Library;
 		Entry.StateObject = CreateRayTracingStateObject(

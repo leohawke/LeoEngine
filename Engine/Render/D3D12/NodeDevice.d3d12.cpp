@@ -29,6 +29,8 @@ ID3D12Device* NodeDevice::GetDevice()
 
 void NodeDevice::SetupAfterDeviceCreation()
 {
+	ID3D12Device* Direct3DDevice = GetParentAdapter()->GetDevice();
+
 	GlobalSamplerHeap.Init(NUM_SAMPLER_DESCRIPTORS, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 
 	// This value can be tuned on a per app basis. I.e. most apps will never run into descriptor heap pressure so
@@ -52,6 +54,13 @@ void NodeDevice::SetupAfterDeviceCreation()
 		break;
 	}
 	lconstraint(NumGlobalViewDesc <= MaximumSupportedHeapSize);
+
+	// Init offline descriptor allocators
+	RTVAllocator.Init(Direct3DDevice);
+	DSVAllocator.Init(Direct3DDevice);
+	SRVAllocator.Init(Direct3DDevice);
+	UAVAllocator.Init(Direct3DDevice);
+	SamplerAllocator.Init(Direct3DDevice);
 
 	GlobalViewHeap.Init(NumGlobalViewDesc, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 

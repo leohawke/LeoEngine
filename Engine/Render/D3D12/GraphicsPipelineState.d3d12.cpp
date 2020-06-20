@@ -99,7 +99,7 @@ KeyGraphicsPipelineStateDesc GetKeyGraphicsPipelineStateDesc(
 	auto VertexDeclaration = CreateVertexDeclaration(initializer.ShaderPass.VertexDeclaration);
 	if (VertexDeclaration)
 	{
-		Desc.Desc.InputLayout.NumElements = VertexDeclaration->VertexElements.size();
+		Desc.Desc.InputLayout.NumElements = static_cast<UINT>(VertexDeclaration->VertexElements.size());
 		Desc.Desc.InputLayout.pInputElementDescs = VertexDeclaration->VertexElements.data();
 	}
 

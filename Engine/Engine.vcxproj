@@ -149,6 +149,7 @@
     <ClInclude Include="Render\BuiltInShader.h" />
     <ClInclude Include="Render\Color_T.hpp" />
     <ClInclude Include="Render\D3D12\Adapter.h" />
+    <ClInclude Include="Render\D3D12\D3DCommandList.h" />
     <ClInclude Include="Render\D3D12\DXGIAdapter.h" />
     <ClInclude Include="Render\D3D12\BuiltInRayTracingShaders.h" />
     <ClInclude Include="Render\D3D12\CommandContext.h" />
