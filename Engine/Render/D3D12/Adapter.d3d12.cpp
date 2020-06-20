@@ -384,7 +384,7 @@ namespace platform_ex::Windows::D3D12 {
 		std::shared_ptr<CmdAllocatorDependencies> ret;
 		for (auto iter = d3d_render_cmd_allocators.begin(); iter != d3d_render_cmd_allocators.end(); ++iter)
 		{
-			if (fences[Command_Render]->Completed(iter->second))
+			if (fences[Command_Render]->IsFenceComplete(iter->second))
 			{
 				ret = iter->first;
 				d3d_render_cmd_allocators.erase(iter);

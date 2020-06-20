@@ -106,14 +106,18 @@ namespace platform_ex::Windows::D3D12 {
 		GPUMaskType VisibilityMask;
 	};
 
-	class SingleNodeGPUObject : GPUObject
+	class SingleNodeGPUObject :public GPUObject
 	{
 	public:
 		SingleNodeGPUObject(GPUMaskType GPUMask = 0)
 			:GPUObject(GPUMask,GPUMask)
-			,GPUIndex(0)
+			,GPUIndex(GPUMask)
 		{}
 
+		uint32 GetGPUIndex() const
+		{
+			return GPUIndex;
+		}
 	protected:
 		uint32 GPUIndex;
 	};

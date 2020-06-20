@@ -94,3 +94,19 @@ void NodeDevice::CreateCommandContexts()
 
 	CommandContextArray[0]->OpenCommandList();
 }
+
+template void TViewDescriptorHandle<D3D12_SHADER_RESOURCE_VIEW_DESC>::AllocateDescriptorSlot(); 
+template void TViewDescriptorHandle<D3D12_RENDER_TARGET_VIEW_DESC>::AllocateDescriptorSlot(); 
+template void TViewDescriptorHandle<D3D12_DEPTH_STENCIL_VIEW_DESC>::AllocateDescriptorSlot();
+template void TViewDescriptorHandle<D3D12_UNORDERED_ACCESS_VIEW_DESC>::AllocateDescriptorSlot(); 
+
+template void TViewDescriptorHandle<D3D12_SHADER_RESOURCE_VIEW_DESC>::FreeDescriptorSlot();
+template void TViewDescriptorHandle<D3D12_RENDER_TARGET_VIEW_DESC>::FreeDescriptorSlot();
+template void TViewDescriptorHandle<D3D12_DEPTH_STENCIL_VIEW_DESC>::FreeDescriptorSlot();
+template void TViewDescriptorHandle<D3D12_UNORDERED_ACCESS_VIEW_DESC>::FreeDescriptorSlot();
+
+template void TViewDescriptorHandle<D3D12_SHADER_RESOURCE_VIEW_DESC>::CreateView(const D3D12_SHADER_RESOURCE_VIEW_DESC& Desc, ID3D12Resource* Resource);
+template void TViewDescriptorHandle<D3D12_RENDER_TARGET_VIEW_DESC>::CreateView(const D3D12_RENDER_TARGET_VIEW_DESC& Desc, ID3D12Resource* Resource);
+template void TViewDescriptorHandle<D3D12_DEPTH_STENCIL_VIEW_DESC>::CreateView(const D3D12_DEPTH_STENCIL_VIEW_DESC& Desc, ID3D12Resource* Resource);
+
+template void TViewDescriptorHandle<D3D12_UNORDERED_ACCESS_VIEW_DESC>::CreateViewWithCounter(const D3D12_UNORDERED_ACCESS_VIEW_DESC& Desc, ID3D12Resource* Resource, ID3D12Resource* CounterResource);

@@ -280,6 +280,13 @@ namespace platform_ex {
 			return pInterface;
 		}
 
+		_iCOM**
+			ReleaseAndGetAddress() lnothrow
+		{
+			InternalRelease();
+			return &pInterface;
+		}
+
 		void
 			swap(COMPtr& ptr) lnothrow
 		{

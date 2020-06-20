@@ -64,8 +64,8 @@ namespace platform_ex::Windows::D3D12 {
 
 	void D3D12::Context::SyncCommand(Device::CommandType type)
 	{
-		auto val = GetFence(type).Signal((Fence::Type)type);
-		GetFence(type).Wait(val);
+		auto val = GetFence(type).Signal((CommandQueueType)type);
+		GetFence(type).WaitForFence(val);
 	}
 
 	void D3D12::Context::ResetCommand(Device::CommandType type)
@@ -94,8 +94,8 @@ namespace platform_ex::Windows::D3D12 {
 		device->d3d_cmd_queue->ExecuteCommandLists(1, cmd_lists);
 
 		if (type == Device::CommandType::Command_Resource) {
-			auto val = GetFence(type).Signal(Fence::Render);
-			GetFence(type).Wait(val);
+			auto val = GetFence(type).Signal(CommandQueueType::Default);
+			GetFence(type).WaitForFence(val);
 
 			GetDevice().d3d_cmd_allocators[type]->Reset();
 			ResetCommand(type);
@@ -283,7 +283,7 @@ namespace platform_ex::Windows::D3D12 {
 		D3D::Debug(d3d_cmd_lists[Device::Command_Resource], "Resource_Command");
 
 		for (auto& fence :device->fences)
-			fence.swap(std::make_unique<Fence>());
+			fence.swap(std::make_unique<Fence>(device.get(),0));
 
 		FilterExceptions([&, this] {
 			ray_context = std::make_shared<RayContext>(device.get(), this);
@@ -483,7 +483,7 @@ namespace platform_ex::Windows::D3D12 {
 	}
 	void Context::EndFrame()
 	{
-		auto val = GetFence(Device::Command_Render).Signal((Fence::Type)Device::Command_Render);
+		auto val = GetFence(Device::Command_Render).Signal(CommandQueueType::Default);
 		device->CmdAllocatorRecycle(device->curr_render_cmd_allocator, val);
 		device->curr_render_cmd_allocator =device->CmdAllocatorAlloc();
 		device->d3d_cmd_allocators[Device::Command_Render] = device->curr_render_cmd_allocator->cmd_allocator;
@@ -506,7 +506,12 @@ namespace platform_ex::Windows::D3D12 {
 
 	CommandContext* D3D12::Context::GetDefaultCommandContext()
 	{
-		return &(device->Devices[0]->GetDefaultCommandContext());
+		auto context = &(device->Devices[0]->GetDefaultCommandContext());
+
+		//for test
+		context->OpenCommandList();
+
+		return context;
 	}
 
 	Context & Context::Instance()

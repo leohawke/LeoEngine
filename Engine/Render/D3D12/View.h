@@ -55,8 +55,8 @@ namespace platform_ex::Windows::D3D12 {
 
 	private:
 		// Implemented in NodeDevice.h due to dependencies on NodeDevice
-		inline void AllocateDescriptorSlot();
-		inline void FreeDescriptorSlot();
+		void AllocateDescriptorSlot();
+		void FreeDescriptorSlot();
 	};
 
 	typedef TViewDescriptorHandle<D3D12_SHADER_RESOURCE_VIEW_DESC>		DescriptorHandleSRV;

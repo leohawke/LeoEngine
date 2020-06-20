@@ -341,7 +341,7 @@ bool CommandContextStateCache::AssertResourceStates(CachePipelineType PipelineTy
 #ifdef NDEBUG
 	return true;
 #else
-	ID3D12CommandList* pCommandList = CmdContext->CommandListHandle;
+	ID3D12CommandList* pCommandList = CmdContext->CommandListHandle.CommandList();
 	COMPtr<ID3D12DebugCommandList> pDebugCommandList;
 	CheckHResult(pCommandList->QueryInterface(&pDebugCommandList.ReleaseAndGetRef()));
 

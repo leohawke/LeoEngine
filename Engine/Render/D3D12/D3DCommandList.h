@@ -2,7 +2,10 @@
 
 #include "d3d12_dxgi.h"
 #include "Utility.h"
+#include "Common.h"
 #include <atomic>
+#include <queue>
+#include <mutex>
 
 namespace platform_ex::Windows::D3D12 {
 	class CommandContext;
@@ -59,6 +62,20 @@ namespace platform_ex::Windows::D3D12 {
 
 			bool IsComplete(uint64 Generation);
 
+			void WaitForCompletion(uint64 Generation);
+
+			void FlushResourceBarriers();
+
+			uint32 AddRef() const
+			{
+				return ++NumRefs;
+			}
+
+			uint32 Release() const
+			{
+				return --NumRefs;
+			}
+
 			mutable std::atomic<uint32>	NumRefs;
 
 			CommandListManager* CommandListManager;
@@ -74,23 +91,117 @@ namespace platform_ex::Windows::D3D12 {
 			uint64									LastCompleteGeneration;
 
 			bool									IsClosed;
+
+			using GenerationSyncPointPair = std::pair<uint64, SyncPoint>;
+			std::queue<GenerationSyncPointPair> ActiveGenerations;
+			std::mutex ActiveGenerationsCS;
+		private:
+			void CleanupActiveGenerations();
 		};
 	public:
-		uint64 CurrentGeneration() const;
+		CommandListHandle() : CommandListData(nullptr) {}
+
+		CommandListHandle(const CommandListHandle& CL)
+			: CommandListHandle(CL.CommandListData)
+		{}
+
+		CommandListHandle(CommandListData* InData)
+			: CommandListData(InData)
+		{
+			if (CommandListData)
+			{
+				CommandListData->AddRef();
+			}
+		}
+
+		CommandListHandle(CommandListHandle&& CL)
+			: CommandListData(CL.CommandListData)
+		{
+			CL.CommandListData = nullptr;
+		}
+
+		virtual ~CommandListHandle()
+		{
+			if (CommandListData && CommandListData->Release() == 0)
+			{
+				delete CommandListData;
+			}
+		}
+
+		CommandListHandle& operator = (const CommandListHandle& CL)
+		{
+			if (this != &CL)
+			{
+				if (CommandListData && CommandListData->Release() == 0)
+				{
+					delete CommandListData;
+				}
+
+				CommandListData = nullptr;
+
+				if (CL.CommandListData)
+				{
+					CommandListData = CL.CommandListData;
+					CommandListData->AddRef();
+				}
+			}
+
+			return *this;
+		}
+
+		CommandListHandle& operator=(CommandListHandle&& CL)
+		{
+			if (CommandListData != CL.CommandListData)
+			{
+				if (CommandListData && CommandListData->Release() == 0)
+				{
+					delete CommandListData;
+				}
+				CommandListData = CL.CommandListData;
+				CL.CommandListData = nullptr;
+			}
+			return *this;
+		}
+
+		uint64 CurrentGeneration() const
+		{
+			return CommandListData->CurrentGeneration;
+		}
 		
-		void WaitForCompletion(uint64 Generation) const;
+		void WaitForCompletion(uint64 Generation) const
+		{
+			return CommandListData->WaitForCompletion(Generation);
+		}
 
-		bool IsComplete(uint64 Generation) const;
+		bool IsComplete(uint64 Generation) const
+		{
+			return CommandListData->IsComplete(Generation);
+		}
 
-		ID3D12CommandList* CommandList() const;
+		ID3D12CommandList* CommandList() const
+		{
+			return CommandListData->CommandList.Get();
+		}
 
-		friend bool operator==(const CommandListHandle& lhs, std::nullptr_t);
+		friend bool operator==(const CommandListHandle& lhs, std::nullptr_t)
+		{
+			return lhs.CommandListData == nullptr;
+		}
 
-		friend bool operator!=(const CommandListHandle& lhs, std::nullptr_t);
+		friend bool operator!=(const CommandListHandle& lhs, std::nullptr_t)
+		{
+			return !(lhs == nullptr);
+		}
 
-		void SetCurrentOwningContext(CommandContext* context);
+		void SetCurrentOwningContext(CommandContext* context)
+		{
+			CommandListData->CurrentOwningContext = context;
+		}
 
-		void Close();
+		void Close()
+		{
+			CommandListData->Close();
+		}
 
 		ID3D12GraphicsCommandList* operator->() const
 		{
