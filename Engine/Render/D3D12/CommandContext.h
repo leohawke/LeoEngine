@@ -2,8 +2,11 @@
 
 #include "../ICommandContext.h"
 #include "ContextStateCache.h"
+#include "D3DCommandList.h"
 
 namespace platform_ex::Windows::D3D12 {
+	class CommandListManager;
+
 	struct SetRenderTargetsInfo
 	{
 		RenderTargetView* ColorRenderTargets[platform::Render::MaxSimultaneousRenderTargets];
@@ -20,7 +23,7 @@ namespace platform_ex::Windows::D3D12 {
 		void ConvertFromPassInfo(const platform::Render::RenderPassInfo& Info);
 	};
 
-	class CommandContext :public platform::Render::CommandContext
+	class CommandContext :public platform::Render::CommandContext,public DeviceChild
 	{
 	public:
 		CommandContext(NodeDevice* InParent, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc, bool InIsDefaultContext, bool InIsAsyncComputeContext = false);
@@ -68,14 +71,21 @@ namespace platform_ex::Windows::D3D12 {
 	private:
 		void CommitGraphicsResourceTables();
 		void CommitNonComputeShaderConstants();
+
+		CommandListManager& GetCommandListManager();
+
+		void ConditionalObtainCommandAllocator();
 	public:
 		FastConstantAllocator ConstantsAllocator;
+
+		// Handles to the command list and direct command allocator this context owns (granted by the command list manager/command allocator manager), and a direct pointer to the D3D command list/command allocator.
+		CommandListHandle CommandListHandle;
+		CommandAllocator* CommandAllocator;
 
 		CommandContextStateCache StateCache;
 
 		uint16 DirtyUniformBuffers[ShaderType::NumStandardType];
 
-		ID3D12GraphicsCommandList* CommandListHandle;
 
 		uint32 numDraws;
 

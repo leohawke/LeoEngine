@@ -85,7 +85,7 @@ bool DescriptorCache::SetDescriptorHeaps()
 	return bHeapChanged;
 }
 
-void DescriptorCache::NotifyCurrentCommandList(ID3D12GraphicsCommandList& CommandListHandle)
+void DescriptorCache::NotifyCurrentCommandList(CommandListHandle& CommandListHandle)
 {
 	// Clear the previous heap pointers (since it's a new command list) and then set the current descriptor heaps.
 	pPreviousViewHeap = nullptr;
@@ -109,27 +109,27 @@ void DescriptorCache::SetVertexBuffers(VertexBufferCache& Cache)
 	CmdContext->CommandListHandle->IASetVertexBuffers(0, Count, Cache.CurrentVertexBufferViews);
 }
 
-static void TransitionResource(ID3D12GraphicsCommandList* pCommandList, UnorderedAccessView* View, D3D12_RESOURCE_STATES after)
+static void TransitionResource(CommandListHandle& pCommandList, UnorderedAccessView* View, D3D12_RESOURCE_STATES after)
 {
 	//TODO
 }
 
-static void TransitionResource(ID3D12GraphicsCommandList* pCommandList, ShaderResourceView* View, D3D12_RESOURCE_STATES after)
+static void TransitionResource(CommandListHandle& pCommandList, ShaderResourceView* View, D3D12_RESOURCE_STATES after)
 {
 	//TODO
 }
 
-static void TransitionResource(ID3D12GraphicsCommandList* pCommandList, RenderTargetView* View, D3D12_RESOURCE_STATES after)
+static void TransitionResource(CommandListHandle& pCommandList, RenderTargetView* View, D3D12_RESOURCE_STATES after)
 {
 	//TODO
 }
 
-static void TransitionResource(ID3D12GraphicsCommandList* pCommandList, DepthStencilView* View)
+static void TransitionResource(CommandListHandle& pCommandList, DepthStencilView* View)
 {
 	//TODO
 }
 
-static void TransitionResource(ID3D12GraphicsCommandList* pCommandList, ResourceHolder* Resource, D3D12_RESOURCE_STATES after,UINT32 subRes)
+static void TransitionResource(CommandListHandle& pCommandList, ResourceHolder* Resource, D3D12_RESOURCE_STATES after,UINT32 subRes)
 {
 	//TODO
 }
@@ -438,7 +438,7 @@ void DescriptorCache::HeapLoopedAround(D3D12_DESCRIPTOR_HEAP_TYPE Type)
 	}
 }
 
-bool DescriptorCache::SwitchToContextLocalViewHeap(ID3D12GraphicsCommandList& CommandListHandle)
+bool DescriptorCache::SwitchToContextLocalViewHeap(CommandListHandle& CommandListHandle)
 {
 	if (LocalViewHeap == nullptr)
 	{
@@ -496,7 +496,7 @@ bool ThreadLocalOnlineHeap::RollOver()
 {
 	// Enqueue the current entry
 	LAssert(CurrentCommandList != nullptr, "Would have set up a sync point with a null commandlist.");
-	Entry.SyncPoint = GetRenderFence();
+	Entry.SyncPoint = CurrentCommandList;
 	ReclaimPool.push(Entry);
 
 	if (!ReclaimPool.empty() && !!(Entry = ReclaimPool.front()).SyncPoint && Entry.SyncPoint.IsComplete())
@@ -533,17 +533,17 @@ bool ThreadLocalOnlineHeap::RollOver()
 	return Parent->HeapRolledOver(Desc.Type);
 }
 
-void ThreadLocalOnlineHeap::NotifyCurrentCommandList(ID3D12GraphicsCommandList& CommandListHandle)
+void ThreadLocalOnlineHeap::NotifyCurrentCommandList(CommandListHandle& CommandListHandle)
 {
 	if (CurrentCommandList != nullptr && NextSlotIndex > 0)
 	{
 		// Track the previous command list
 		SyncPointEntry SyncPoint;
-		SyncPoint.SyncPoint = GetRenderFence();
+		SyncPoint.SyncPoint = CommandListHandle;
 		SyncPoint.LastSlotInUse = NextSlotIndex - 1;
 		SyncPoints.push(SyncPoint);
 
-		Entry.SyncPoint = GetRenderFence();
+		Entry.SyncPoint = CommandListHandle;
 
 		// Free up slots for finished command lists
 		while (!SyncPoints.empty() && !!(SyncPoint = SyncPoints.front()).SyncPoint && SyncPoint.SyncPoint.IsComplete())
@@ -554,7 +554,7 @@ void ThreadLocalOnlineHeap::NotifyCurrentCommandList(ID3D12GraphicsCommandList& 
 	}
 
 	// Update the current command list
-	CurrentCommandList = &CommandListHandle;
+	CurrentCommandList = CommandListHandle;
 }
 
 
@@ -563,7 +563,7 @@ OnlineHeap::OnlineHeap(NodeDevice* Device, bool CanLoopAround, DescriptorCache* 
 	:DeviceChild(Device)
 	,SingleNodeGPUObject(Node)
 	, Parent(_Parent)
-	, CurrentCommandList(nullptr)
+	, CurrentCommandList()
 	, DescriptorSize(0)
 	, NextSlotIndex(0)
 	, FirstUsedSlot(0)
@@ -662,7 +662,7 @@ void OnlineHeap::SetNextSlot(uint32 NextSlot)
 }
 
 
-void OnlineHeap::NotifyCurrentCommandList(ID3D12GraphicsCommandList& CommandListHandle)
+void OnlineHeap::NotifyCurrentCommandList(CommandListHandle& CommandListHandle)
 {
 	//Specialization should be called
 	lconstraint(false);
@@ -735,7 +735,7 @@ void SubAllocatedOnlineHeap::Init(SubAllocationDesc _Desc)
 bool SubAllocatedOnlineHeap::RollOver()
 {
 	// Enqueue the current entry
-	CurrentSubAllocation.SyncPoint = GetRenderFence();
+	CurrentSubAllocation.SyncPoint = CurrentCommandList;
 	CurrentSubAllocation.bFresh = false;
 	DescriptorBlockPool.push(CurrentSubAllocation);
 
@@ -749,7 +749,7 @@ bool SubAllocatedOnlineHeap::RollOver()
 		// Notify parent that we have run out of sub allocations
 		// This should *never* happen but we will handle it and revert to local heaps to be safe
 		LF_Trace(platform::Descriptions::Informative,"Descriptor cache ran out of sub allocated descriptor blocks! Moving to Context local View heap strategy");
-		return Parent->SwitchToContextLocalViewHeap(*CurrentCommandList);
+		return Parent->SwitchToContextLocalViewHeap(CurrentCommandList);
 	}
 
 	NextSlotIndex = 0;
@@ -761,8 +761,8 @@ bool SubAllocatedOnlineHeap::RollOver()
 	return false;	// Sub-allocated descriptor heaps don't change, so no need to set descriptor heaps.
 }
 
-void SubAllocatedOnlineHeap::NotifyCurrentCommandList(ID3D12GraphicsCommandList& CommandListHandle)
+void SubAllocatedOnlineHeap::NotifyCurrentCommandList(CommandListHandle& CommandListHandle)
 {
 	// Update the current command list
-	CurrentCommandList = &CommandListHandle;
+	CurrentCommandList = CommandListHandle;
 }

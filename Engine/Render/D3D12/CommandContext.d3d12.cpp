@@ -1,5 +1,7 @@
 #include "CommandContext.h"
 #include "Texture.h"
+#include "NodeDevice.h"
+#include "CommandListManager.h"
 
 using namespace platform_ex::Windows::D3D12;
 
@@ -263,14 +265,40 @@ void CommandContext::CommitNonComputeShaderConstants()
 
 void CommandContext::OpenCommandList()
 {
-	CommandListHandle = nullptr;
+	ConditionalObtainCommandAllocator();
+
+	CommandListHandle = GetCommandListManager().ObtainCommandList(*CommandAllocator);
+	CommandListHandle.SetCurrentOwningContext(this);
+
+	// Notify the descriptor cache about the new command list
+	// This will set the descriptor cache's current heaps on the new command list.
+	StateCache.GetDescriptorCache()->NotifyCurrentCommandList(CommandListHandle);
+
+	// Go through the state and find bits that differ from command list defaults.
+	// Mark state as dirty so next time ApplyState is called, it will set all state on this new command list
+	StateCache.DirtyStateForNewCommandList();
 
 	numDraws = 0;
 }
 
 void CommandContext::CloseCommandList()
 {
-	CommandListHandle->Close();
+	CommandListHandle.Close();
+}
+
+CommandListManager& CommandContext::GetCommandListManager()
+{
+	return GetParentDevice()->GetCommandListManager();
+}
+
+void CommandContext::ConditionalObtainCommandAllocator()
+{
+	if (CommandAllocator == nullptr)
+	{
+		// Obtain a command allocator if the context doesn't already have one.
+		// This will check necessary fence values to ensure the returned command allocator isn't being used by the GPU, then reset it.
+		CommandAllocator = new D3D12::CommandAllocator(GetParentDevice()->GetDevice(), D3D12_COMMAND_LIST_TYPE_DIRECT);
+	}
 }
 
 static uint32 GetIndexCount(platform::Render::PrimtivteType type,uint32 NumPrimitives)

@@ -327,7 +327,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		// Roll over behavior depends on the heap type
 		virtual bool RollOver() = 0;
-		virtual void NotifyCurrentCommandList(ID3D12GraphicsCommandList& CommandListHandle);
+		virtual void NotifyCurrentCommandList(CommandListHandle& CommandListHandle);
 
 		virtual uint32 GetTotalSize()
 		{
@@ -338,7 +338,7 @@ namespace platform_ex::Windows::D3D12 {
 	protected:
 		DescriptorCache* Parent;
 
-		ID3D12GraphicsCommandList* CurrentCommandList;
+		CommandListHandle CurrentCommandList;
 
 
 		// Handles for manipulation of the heap
@@ -420,7 +420,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		// Specializations
 		bool RollOver();
-		void NotifyCurrentCommandList(ID3D12GraphicsCommandList& CommandListHandle) override;
+		void NotifyCurrentCommandList(CommandListHandle& CommandListHandle) override;
 
 		virtual uint32 GetTotalSize() final override
 		{
@@ -443,7 +443,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		bool RollOver();
 
-		void NotifyCurrentCommandList(ID3D12GraphicsCommandList& CommandListHandle) override;
+		void NotifyCurrentCommandList(CommandListHandle& CommandListHandle) override;
 
 		void Init(uint32 NumDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE Type);
 
@@ -525,7 +525,7 @@ namespace platform_ex::Windows::D3D12 {
 		// Notify the descriptor cache every time you start recording a command list.
 		// This sets descriptor heaps on the command list and indicates the current fence value which allows
 		// us to avoid querying DX12 for that value thousands of times per frame, which can be costly.
-		void NotifyCurrentCommandList(ID3D12GraphicsCommandList& CommandListHandle);
+		void NotifyCurrentCommandList(CommandListHandle& CommandListHandle);
 
 		// ------------------------------------------------------
 		// end Descriptor Slot Reservation stuff
@@ -563,7 +563,7 @@ namespace platform_ex::Windows::D3D12 {
 		void EndFrame();
 		void GatherUniqueSamplerTables();
 
-		bool SwitchToContextLocalViewHeap(ID3D12GraphicsCommandList& CommandListHandle);
+		bool SwitchToContextLocalViewHeap(CommandListHandle& CommandListHandle);
 		bool SwitchToContextLocalSamplerHeap();
 		bool SwitchToGlobalSamplerHeap();
 
