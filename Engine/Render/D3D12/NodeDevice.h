@@ -1,19 +1,38 @@
 #pragma once
 
+#include <LBase/id.hpp>
 #include "Common.h"
 #include "d3d12_dxgi.h"
 #include "View.h"
 #include "DescriptorCache.h"
+
 #include <vector>
+#include <unordered_map>
+
+
+struct SamplerDescHash
+{
+	static_assert(sizeof(D3D12_SAMPLER_DESC) % 4 == 0);
+
+	std::size_t operator()(const D3D12_SAMPLER_DESC& desc) const noexcept {
+		auto ptr = reinterpret_cast<const leo::uint32*>(&desc);
+		return leo::hash(ptr, ptr + sizeof(desc));
+	}
+};
+
+inline bool operator==(const D3D12_SAMPLER_DESC& lhs, const D3D12_SAMPLER_DESC& rhs)
+{
+	return std::memcmp(&lhs, &rhs, sizeof(lhs)) == 0;
+}
 
 namespace platform_ex::Windows::D3D12
 {
 	class CommandContext;
 
-	class NodeDevice : public SingleNodeGPUObject,public AdapterChild
+	class NodeDevice : public SingleNodeGPUObject, public AdapterChild
 	{
 	public:
-		NodeDevice(GPUMaskType InGpuMask,D3D12Adapter* InAdapter);
+		NodeDevice(GPUMaskType InGpuMask, D3D12Adapter* InAdapter);
 
 		void Initialize();
 
@@ -38,7 +57,7 @@ namespace platform_ex::Windows::D3D12
 
 		CommandListManager* GetCommandListManager(CommandQueueType InQueueType);
 
-		CommandListManager& GetCommandListManager() const{ return *CommandListManager; }
+		CommandListManager& GetCommandListManager() const { return *CommandListManager; }
 
 		void CreateSamplerInternal(const D3D12_SAMPLER_DESC& Desc, D3D12_CPU_DESCRIPTOR_HANDLE Descriptor);
 
@@ -60,6 +79,9 @@ namespace platform_ex::Windows::D3D12
 		OfflineDescriptorManager SamplerAllocator;
 
 		std::vector<CommandContext*> CommandContextArray;
+
+		std::unordered_map<D3D12_SAMPLER_DESC, std::shared_ptr<SamplerState>, SamplerDescHash> SamplerMap;
+		uint32 SamplerID;
 
 		GlobalOnlineHeap GlobalSamplerHeap;
 		GlobalOnlineHeap GlobalViewHeap;

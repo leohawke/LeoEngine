@@ -510,9 +510,6 @@ namespace platform_ex::Windows::D3D12 {
 	{
 		auto context = &(device->Devices[0]->GetDefaultCommandContext());
 
-		//for test
-		context->OpenCommandList();
-
 		return context;
 	}
 

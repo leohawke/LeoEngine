@@ -34,6 +34,13 @@ ID3D12Device* NodeDevice::GetDevice()
 	return GetParentAdapter()->GetDevice();
 }
 
+void platform_ex::Windows::D3D12::NodeDevice::CreateSamplerInternal(const D3D12_SAMPLER_DESC& Desc, D3D12_CPU_DESCRIPTOR_HANDLE Descriptor)
+{
+	GetDevice()->CreateSampler(&Desc, Descriptor);
+}
+
+
+
 void NodeDevice::SetupAfterDeviceCreation()
 {
 	ID3D12Device* Direct3DDevice = GetParentAdapter()->GetDevice();
