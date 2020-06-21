@@ -113,7 +113,7 @@ namespace platform_ex::Windows::D3D12 {
 
 	public:
 		inline NodeDevice* GetParentDevice()			const { return Descriptor.GetParentDevice(); }
-		inline const TDesc& GetDesc()					const { creturn Desc; }
+		inline const TDesc& GetDesc()					const { return Desc; }
 		inline CD3DX12_CPU_DESCRIPTOR_HANDLE	GetView()					const { return Descriptor.GetHandle(); }
 		inline uint32							GetDescriptorHeapIndex()	const { return Descriptor.GetIndex(); }
 		inline ID3D12Resource* GetResource()				const { return ResourceLocation->Resource(); }
@@ -125,7 +125,7 @@ namespace platform_ex::Windows::D3D12 {
 		}
 	};
 
-	class RenderTargetView :public platform::Render::RenderTargetView, public TView<D3D12_RENDER_TARGET_VIEW_DESC>
+	class RenderTargetView : public TView<D3D12_RENDER_TARGET_VIEW_DESC>
 	{
 	public:
 		RenderTargetView(NodeDevice* InParent, const D3D12_RENDER_TARGET_VIEW_DESC& InRTVDesc, ResourceHolder& InResourceLocation)
@@ -135,7 +135,7 @@ namespace platform_ex::Windows::D3D12 {
 		}
 	};
 
-	class DepthStencilView : public platform::Render::DepthStencilView,public TView<D3D12_DEPTH_STENCIL_VIEW_DESC>
+	class DepthStencilView :public TView<D3D12_DEPTH_STENCIL_VIEW_DESC>
 	{
 		const bool bHasDepth;
 		const bool bHasStencil;

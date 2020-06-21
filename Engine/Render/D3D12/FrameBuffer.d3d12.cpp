@@ -18,13 +18,13 @@ namespace platform_ex::Windows::D3D12 {
 		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> rt_handles(clr_views.size());
 
 		for (auto i = 0; i != clr_views.size(); ++i) {
-			if (clr_views[i]) {
-				auto p = static_cast<RenderTargetView*>(clr_views[i].get());
-				rt_src.emplace_back(p->GetResource());
+			if (clr_views[i].Texture) {
+				//auto p = static_cast<RenderTargetView*>(clr_views[i].get());
+				//rt_src.emplace_back(p->GetResource());
 				//rt_first_subres.emplace_back(p->FirstSubResIndex());
 				//rt_num_subres.emplace_back(p->SubResNum());
 
-				rt_handles[i] = p->GetView();
+				//rt_handles[i] = p->GetView();
 			}
 			else
 			{
@@ -34,11 +34,11 @@ namespace platform_ex::Windows::D3D12 {
 
 		D3D12_CPU_DESCRIPTOR_HANDLE ds_handle;
 		D3D12_CPU_DESCRIPTOR_HANDLE* ds_handle_ptr;
-		if (ds_view)
+		if (ds_view.Texture)
 		{
-			auto p = static_cast<DepthStencilView*>(ds_view.get());
+			/*auto p = static_cast<DepthStencilView*>(ds_view.get());
 
-			ds_handle = p->GetView();
+			ds_handle = p->GetView();*/
 			ds_handle_ptr = &ds_handle;
 		}
 		else
@@ -64,21 +64,21 @@ namespace platform_ex::Windows::D3D12 {
 
 		std::vector<D3D12_RESOURCE_BARRIER> barriers;
 		for (auto i = 0; i != clr_views.size(); ++i) {
-			if (clr_views[i]) {
+			if (clr_views[i].Texture) {
 				D3D12_RESOURCE_BARRIER barrier;
 				barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-				auto p = static_cast<RenderTargetView*>(clr_views[i].get());
+				/*auto p = static_cast<RenderTargetView*>(clr_views[i].get());
 				if (p->GetResourceLocation()->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_RENDER_TARGET))
-					barriers.push_back(barrier);
+					barriers.push_back(barrier);*/
 			}
 		}
 
-		if (ds_view) {
-			auto p = static_cast<DepthStencilView*>(ds_view.get());
+		if (ds_view.Texture) {
 			D3D12_RESOURCE_BARRIER barrier;
 			barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+			/*auto p = static_cast<DepthStencilView*>(ds_view.get());
 			if (p->GetResourceLocation()->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_DEPTH_WRITE))
-				barriers.push_back(barrier);
+				barriers.push_back(barrier);*/
 		}
 		
 		if (!barriers.empty())
@@ -107,13 +107,13 @@ namespace platform_ex::Windows::D3D12 {
 	{
 		if (flags & Color) {
 			for (auto i = 0; i != clr_views.size(); ++i) {
-				if (clr_views[i]) {
+				if (clr_views[i].Texture) {
 					;//static_cast<RenderTargetView*>(clr_views[i].get())->ClearColor(clr);
 				}
 			}
 		}
 		if ((flags & Depth) && (flags & Stencil)) {
-			if (ds_view)
+			if (ds_view.Texture)
 				;//static_cast<DepthStencilView*>(ds_view.get())->ClearDepthStencil(depth, stencil);
 		}
 		else {
@@ -126,8 +126,8 @@ namespace platform_ex::Windows::D3D12 {
 
 	DepthStencilView* D3D12::FrameBuffer::GetDepthStencilView() const
 	{
-		if (ds_view)
-			return static_cast<DepthStencilView*>(ds_view.get());
+		if (ds_view.Texture)
+			return dynamic_cast<Texture*>(ds_view.Texture)->GetDepthStencilView({});
 		return nullptr;
 	}
 }

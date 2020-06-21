@@ -618,6 +618,9 @@
     <ClInclude Include="Render\D3D12\SamplerState.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="Render\RenderPassInfo.h">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

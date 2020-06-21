@@ -13,7 +13,7 @@ namespace platform::Render {
 	}
 
 
-	void FrameBuffer::Attach(Attachment which, const std::shared_ptr<RenderTargetView>& view)
+	void FrameBuffer::Attach(Attachment which, const RenderTarget& view)
 	{
 		switch (which) {
 		case DepthStencil:
@@ -21,7 +21,7 @@ namespace platform::Render {
 		default:
 			//TODO Check max_simultaneous_rts support
 			leo::uint32 clr_index = which - Target0;
-			if ((clr_index < clr_views.size()) && clr_views[clr_index])
+			if ((clr_index < clr_views.size()) && clr_views[clr_index].Texture)
 				this->Detach(which);
 			if (clr_views.size() < clr_index + 1)
 				clr_views.resize(clr_index + 1);
@@ -30,17 +30,17 @@ namespace platform::Render {
 			//find viewport
 			auto min_clr_index = clr_index;
 			for (auto i = 0; i != clr_index; ++i)
-				if (clr_views[i])
+				if (clr_views[i].Texture)
 					min_clr_index = i;
 			break;
 		}
 	}
 
-	void FrameBuffer::Attach(Attachment which, const std::shared_ptr<DepthStencilView>& view) {
+	void FrameBuffer::Attach(Attachment which, const DepthRenderTarget& view) {
 		switch (which)
 		{
 		case DepthStencil:
-			if (ds_view)
+			if (ds_view.Texture)
 				this->Detach(which);
 			ds_view = view;
 			break;
@@ -63,12 +63,12 @@ namespace platform::Render {
 	{
 		switch (which) {
 		case DepthStencil:
-			ds_view.reset();
+			ds_view.Texture = nullptr;
 			break;
 		default:
 			leo::uint32 clr_index = which - Target0;
-			if ((clr_index < clr_views.size()) && clr_views[clr_index])
-				clr_views[clr_index].reset();
+			if ((clr_index < clr_views.size()) && clr_views[clr_index].Texture)
+				clr_views[clr_index].Texture = nullptr;
 			break;
 		}
 	}

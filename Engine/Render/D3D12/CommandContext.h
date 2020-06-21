@@ -7,21 +7,7 @@
 namespace platform_ex::Windows::D3D12 {
 	class CommandListManager;
 
-	struct SetRenderTargetsInfo
-	{
-		RenderTargetView* ColorRenderTargets[platform::Render::MaxSimultaneousRenderTargets];
-		int32 NumColorRenderTargets = 0;
-		bool bClearColor = false;
-
-		DepthStencilView* DepthStencilTarget = nullptr;
-		bool bClearDepth = false;
-		bool bClearStencil =false;
-
-		UnorderedAccessView* UAVs[platform::Render::MaxSimultaneousUAVs];
-		int32 NumUAVs = 0;
-
-		void ConvertFromPassInfo(const platform::Render::RenderPassInfo& Info);
-	};
+	class Texture;
 
 	class CommandContext :public platform::Render::CommandContext,public DeviceChild
 	{
@@ -56,15 +42,12 @@ namespace platform_ex::Windows::D3D12 {
 
 		void SetRenderTargets(
 			uint32 NewNumSimultaneousRenderTargets,
-			const RenderTargetView* const* NewRenderTargets,
-			const DepthStencilView* NewDepthStencilTarget,
-			uint32 NewNumUAVs,
-			UnorderedAccessView* const* UAVs
+			const platform::Render::RenderTarget* NewRenderTargets, const platform::Render::DepthRenderTarget* NewDepthStencilTarget
 		);
 
 		void ClearMRT(bool bClearColor, int32 NumClearColors, const leo::math::float4* ColorArray, bool bClearDepth, float Depth, bool bClearStencil, uint32 Stencil);
 
-		void SetRenderTargetsAndClear(const SetRenderTargetsInfo& RenderTargetsInfo);
+		void SetRenderTargetsAndClear(const platform::Render::RenderTargetsInfo& RenderTargetsInfo);
 
 		void OpenCommandList();
 		void CloseCommandList();
@@ -83,6 +66,12 @@ namespace platform_ex::Windows::D3D12 {
 		CommandAllocator* CommandAllocator;
 
 		CommandContextStateCache StateCache;
+
+		// Tracks the currently set state blocks.
+		RenderTargetView* CurrentRenderTargets[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT];
+		DepthStencilView* CurrentDepthStencilTarget;
+		Texture* CurrentDepthTexture;
+		uint32 NumSimultaneousRenderTargets;
 
 		uint16 DirtyUniformBuffers[ShaderType::NumStandardType];
 

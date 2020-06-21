@@ -188,11 +188,30 @@ namespace platform_ex::Windows::D3D12 {
 		return texture.release();
 	}
 
-	Texture3D* Device::CreateTexture(uint16 width, uint16 height, uint16 depth, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const *>  init_data)
+	Texture3D* Device::CreateTexture(const platform::Render::Texture3DInitializer& Initializer, platform::Render::TextureCreateFlags Flags, std::optional<ElementInitData const *>  init_data)
 	{
-		auto texture = std::make_unique<Texture3D>(width, height, depth, num_mipmaps, array_size, format, access, sample_info);
+		auto texture = std::make_unique<Texture3D>(Initializer.Width, Initializer.Height, Initializer.Depth, Initializer.NumMipmaps, Initializer.ArraySize, Initializer.Format, Initializer.Access, Initializer.NumSamples);
 		if (init_data.has_value())
 			texture->HWResourceCreate(init_data.value());
+
+		if (Flags & platform::Render::TexCreate_RenderTargetable)
+		{
+			texture->SetNumRenderTargetViews(1);
+
+			uint32 RTVIndex = 0;
+
+			// Create a render-target-view for the texture.
+			D3D12_RENDER_TARGET_VIEW_DESC RTVDesc;
+			std::memset(&RTVDesc,0, sizeof(RTVDesc));
+			RTVDesc.Format = texture->GetDXGIFormat();
+			RTVDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE3D;
+			RTVDesc.Texture3D.MipSlice = 0;
+			RTVDesc.Texture3D.FirstWSlice = 0;
+			RTVDesc.Texture3D.WSize = Initializer.Depth;
+
+			texture->SetRenderTargetViewIndex(new RenderTargetView(GetDefaultNodeDevice(), RTVDesc, *texture),RTVIndex);
+		}
+
 		return texture.release();
 	}
 

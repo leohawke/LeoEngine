@@ -25,6 +25,7 @@ namespace platform::Render {
 		CommandContext* Context;
 	};
 
+
 	class CommandList :public CommandListBase
 	{
 	public:
@@ -32,19 +33,9 @@ namespace platform::Render {
 		{
 			GetContext().BeginRenderPass(Info, Name);
 
-			const RenderTargetView* ColorRenderTargets[MaxSimultaneousRenderTargets];
-			uint32 NumColorRenderTargets = 0;
-			for (int32 Index = 0; Index < MaxSimultaneousRenderTargets; ++Index)
-			{
-				if (!Info.ColorRenderTargets[Index])
-				{
-					break;
-				}
-				ColorRenderTargets[Index] = Info.ColorRenderTargets[Index];
-				++NumColorRenderTargets;
-			}
-
-			CacheActiveRenderTargets(NumColorRenderTargets, ColorRenderTargets, Info.DepthStencilTarget);
+			RenderTargetsInfo RTInfo(Info);
+			
+			CacheActiveRenderTargets(RTInfo.NumColorRenderTargets, RTInfo.ColorRenderTarget, &RTInfo.DepthStencilRenderTarget);
 		}
 
 		void SetViewport(uint32 MinX, uint32 MinY, float MinZ, uint32 MaxX, uint32 MaxY, float MaxZ)
@@ -104,13 +95,12 @@ namespace platform::Render {
 
 		void FillRenderTargetsInfo(GraphicsPipelineStateInitializer& GraphicsPSOInit)
 		{
-			throw leo::unsupported();
 			GraphicsPSOInit.RenderTargetsEnabled = PSOContext.CachedNumSimultanousRenderTargets;
 			for (uint32 i = 0; i < GraphicsPSOInit.RenderTargetsEnabled; ++i)
 			{
-				if (PSOContext.CachedRenderTargets[i])
+				if (PSOContext.CachedRenderTargets[i].Texture)
 				{
-					//GraphicsPSOInit.RenderTargetFormats[i] = PSOContext.CachedRenderTargets[i]->Format();
+					GraphicsPSOInit.RenderTargetFormats[i] = PSOContext.CachedRenderTargets[i].Texture->GetFormat();
 				}
 				else
 				{
@@ -119,13 +109,13 @@ namespace platform::Render {
 
 				if (GraphicsPSOInit.RenderTargetFormats[i] != EF_Unknown)
 				{
-					//GraphicsPSOInit.NumSamples = PSOContext.CachedRenderTargets[i]->GetNumSamples();
+					GraphicsPSOInit.NumSamples = PSOContext.CachedRenderTargets[i].Texture->GetSampleCount();
 				}
 			}
 
-			if (PSOContext.CachedDepthStencilTarget)
+			if (PSOContext.CachedDepthStencilTarget.Texture)
 			{
-				//GraphicsPSOInit.DepthStencilTargetFormat = PSOContext.CachedDepthStencilTarget->Format();
+				GraphicsPSOInit.DepthStencilTargetFormat = PSOContext.CachedDepthStencilTarget.Texture->GetFormat();
 			}
 			else 
 			{
@@ -136,15 +126,15 @@ namespace platform::Render {
 		struct PSOContext
 		{
 			uint32 CachedNumSimultanousRenderTargets = 0;
-			std::array<const RenderTargetView*, MaxSimultaneousRenderTargets> CachedRenderTargets;
-			const DepthStencilView* CachedDepthStencilTarget;
+			std::array<RenderTarget, MaxSimultaneousRenderTargets> CachedRenderTargets;
+			DepthRenderTarget CachedDepthStencilTarget;
 
 		} PSOContext;
 
 		void CacheActiveRenderTargets(
 			uint32 NewNumSimultaneousRenderTargets,
-			const RenderTargetView** RenderTargets,
-			const DepthStencilView* DepthStencilTarget
+			const RenderTarget* RenderTargets,
+			const DepthRenderTarget* DepthStencilTarget
 		)
 		{
 			PSOContext.CachedNumSimultanousRenderTargets = NewNumSimultaneousRenderTargets;
@@ -154,7 +144,7 @@ namespace platform::Render {
 				PSOContext.CachedRenderTargets[RTIdx] = RenderTargets[RTIdx];
 			}
 
-			PSOContext.CachedDepthStencilTarget = DepthStencilTarget ;
+			PSOContext.CachedDepthStencilTarget = DepthStencilTarget?*DepthStencilTarget: DepthRenderTarget();
 		}
 	};
 

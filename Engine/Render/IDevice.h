@@ -56,12 +56,6 @@ namespace platform::Render {
 		HardwareShader* DomainShader = nullptr;
 	};
 
-	/** The number of render-targets that may be simultaneously written to. */
-	constexpr unsigned MaxSimultaneousRenderTargets = 8;
-
-	/** The number of UAVs that may be simultaneously bound to a shader. */
-	constexpr unsigned MaxSimultaneousUAVs = 8;
-
 	class GraphicsPipelineStateInitializer
 	{
 	public:
@@ -108,16 +102,28 @@ namespace platform::Render {
 		uint16						NumSamples = 1;
 	};
 
-	struct RenderPassInfo
+	struct Texture3DInitializer
 	{
-		RenderTargetView* ColorRenderTargets[MaxSimultaneousRenderTargets];
+		uint16 Width; 
+		uint16 Height; 
+		uint16 Depth; 
+		uint8 NumMipmaps; 
+		uint8 ArraySize;
+		EFormat Format; 
+		uint32 Access; 
 
-		DepthStencilView* DepthStencilTarget;
+		uint32 NumSamples = 1;
+	};
 
-		int32 NumUAVs = 0;
-		UnorderedAccessView* UAVs[MaxSimultaneousUAVs];
+	enum TextureCreateFlags
+	{
+		TexCreate_None = 0,
 
-		bool bIsMSAA = false;
+		// Texture can be used as a render target
+		TexCreate_RenderTargetable = 1 << 0,
+
+		// Texture can be used as a shader resource.
+		TexCreate_ShaderResource = 1 << 3,
 	};
 
 	class Device {
@@ -130,8 +136,7 @@ namespace platform::Render {
 		virtual Texture2D* CreateTexture(uint16 width, uint16 height, uint8 num_mipmaps, uint8 array_size,
 			EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const *>  init_data = nullptr) = 0;
 
-		virtual Texture3D* CreateTexture(uint16 width, uint16 height, uint16 depth, uint8 num_mipmaps, uint8 array_size,
-			EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const *>  init_data = nullptr) = 0;
+		virtual Texture3D* CreateTexture(const Texture3DInitializer& Initializer, TextureCreateFlags Flags, std::optional<ElementInitData const *>  init_data = nullptr) = 0;
 
 		virtual TextureCube* CreateTextureCube(uint16 size, uint8 num_mipmaps, uint8 array_size,
 			EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const *>  init_data = nullptr) = 0;

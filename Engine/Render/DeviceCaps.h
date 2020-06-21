@@ -1,6 +1,6 @@
 /*! \file Engine\Render\DeviceCaps.h
 \ingroup Engine
-\brief 设备能力集。
+\brief 设备能力集以及常量定义。
 */
 #ifndef LE_RENDER_DeviceCaps_h
 #define LE_RENDER_DeviceCaps_h 1
@@ -26,6 +26,12 @@ namespace platform{
 			std::function<bool(EFormat)> VertexFormatSupport;
 			std::function<bool(EFormat, SampleDesc)>	RenderTargetMSAASupport;
 		};
+
+		/** The number of render-targets that may be simultaneously written to. */
+		constexpr unsigned MaxSimultaneousRenderTargets = 8;
+
+		/** The number of UAVs that may be simultaneously bound to a shader. */
+		constexpr unsigned MaxSimultaneousUAVs = 8;
 	}
 }
 

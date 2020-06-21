@@ -126,7 +126,7 @@ void platform_ex::Windows::D3D12::Display::SwapBuffers()
 		CheckHResult(swap_chain->Present(0, present_flags));
 
 		back_buffer_index = swap_chain->GetCurrentBackBufferIndex();
-		frame_buffer->Attach(FrameBuffer::Target0, render_target_views[back_buffer_index]);
+		//frame_buffer->Attach(FrameBuffer::Target0, render_target_views[back_buffer_index]);
 	}
 }
 
@@ -163,6 +163,11 @@ void Display::UpdateFramewBufferView()
 		rt_tex = make_shared<Texture2D>(pResources);
 		render_target_views[rt_tex_index] = make_shared<RenderTargetView>(GetDefaultNodeDevice(),rt_tex->CreateRTVDesc(0,1,0),*rt_tex);
 		++rt_tex_index;
+
+		platform::Render::RenderTarget view;
+		view.Texture = rt_tex.get();
+
+		frame_buffer->Attach(FrameBuffer::Target0, view);
 	}
 
 	auto stereo = (Stereo_LCDShutter == stereo_method) && stereo_feature;
@@ -179,10 +184,14 @@ void Display::UpdateFramewBufferView()
 		));
 	}
 
-	frame_buffer->Attach(FrameBuffer::Target0, render_target_views[0]);
 	if (depth_stencil_format != EF_Unknown) {
-		frame_buffer->Attach(FrameBuffer::DepthStencil, make_shared<DepthStencilView>(GetDefaultNodeDevice(), depth_stencil->CreateDSVDesc(0, 1, 0), *depth_stencil, IsStencilFormat(depth_stencil_format)));
-		if(stereo)
-			frame_buffer->Attach(FrameBuffer::DepthStencil, make_shared<DepthStencilView>(GetDefaultNodeDevice(), depth_stencil->CreateDSVDesc(1, 1, 0), *depth_stencil,IsStencilFormat(depth_stencil_format)));
+		platform::Render::DepthRenderTarget view;
+		view.Texture = depth_stencil.get();
+
+		frame_buffer->Attach(FrameBuffer::DepthStencil, view);
+		if (stereo)
+		{
+			throw leo::unsupported();
+		}
 	}
 }

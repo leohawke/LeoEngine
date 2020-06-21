@@ -54,6 +54,7 @@ void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uin
 {
 	auto & device = Context::Instance().GetDevice();
 	auto base_this = dynamic_cast<platform::Render::Texture*>(this);
+	lconstraint(base_this->GetSampleQuality() == 0);
 
 	D3D12_RESOURCE_DESC tex_desc;
 	tex_desc.Dimension = dim;
@@ -73,7 +74,7 @@ void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uin
 	}
 	tex_desc.MipLevels = base_this->GetNumMipMaps();
 	tex_desc.Format = dxgi_format;
-	tex_desc.SampleDesc.Count = 1;
+	tex_desc.SampleDesc.Count = base_this->GetSampleCount();
 	tex_desc.SampleDesc.Quality = 0;
 	tex_desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	tex_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
@@ -124,7 +125,7 @@ void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uin
 	buff_desc.DepthOrArraySize = 1;
 	buff_desc.MipLevels = 1;
 	buff_desc.Format = DXGI_FORMAT_UNKNOWN;
-	buff_desc.SampleDesc.Count = 1;
+	buff_desc.SampleDesc.Count = base_this->GetSampleCount();
 	buff_desc.SampleDesc.Quality = 0;
 	buff_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 	buff_desc.Flags = D3D12_RESOURCE_FLAG_NONE;

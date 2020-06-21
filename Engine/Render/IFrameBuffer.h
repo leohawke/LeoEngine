@@ -7,6 +7,7 @@
 
 #include "IGPUResourceView.h"
 #include "ViewPort.h"
+#include "RenderPassInfo.h"
 
 #include <LBase/lmathtype.hpp>
 #include <LBase/observer_ptr.hpp>
@@ -41,8 +42,8 @@ namespace platform::Render {
 		virtual void OnBind();
 		virtual void OnUnBind();
 
-		void Attach(Attachment which, const std::shared_ptr<RenderTargetView>& view);
-		void Attach(Attachment which, const std::shared_ptr<DepthStencilView>& view);
+		void Attach(Attachment which, const RenderTarget& view);
+		void Attach(Attachment which, const DepthRenderTarget& view);
 		void Attach(Attachment which, const std::shared_ptr<UnorderedAccessView>& view);
 
 		void Detach(Attachment which);
@@ -50,8 +51,8 @@ namespace platform::Render {
 
 		virtual void Clear(leo::uint32 flags, const leo::math::float4  & clr, float depth, leo::int32 stencil) = 0;
 	protected:
-		std::vector<std::shared_ptr<RenderTargetView>> clr_views;
-		std::shared_ptr<DepthStencilView> ds_view;
+		std::vector<RenderTarget> clr_views;
+		DepthRenderTarget ds_view;
 		std::vector<std::shared_ptr<UnorderedAccessView>> uav_views;
 
 		LeoEngine::Render::ViewPort viewport;

@@ -11,17 +11,6 @@ namespace platform {
 	namespace Render {
 		class FrameBuffer;
 
-		class RenderTargetView {
-		public:
-			virtual ~RenderTargetView();
-		};
-
-		class DepthStencilView {
-		public:
-
-			virtual ~DepthStencilView();
-		};
-
 		class ShaderResourceView{
 		public:
 			virtual ~ShaderResourceView();

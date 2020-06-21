@@ -206,6 +206,7 @@
     <ClInclude Include="Render\IRayTracingScene.h" />
     <ClInclude Include="Render\IRayTracingShader.h" />
     <ClInclude Include="Render\PipelineStateUtility.h" />
+    <ClInclude Include="Render\RenderPassInfo.h" />
     <ClInclude Include="Render\Shader.h" />
     <ClInclude Include="Render\RayTracingDefinitions.h" />
     <ClInclude Include="Render\RenderObject.h" />

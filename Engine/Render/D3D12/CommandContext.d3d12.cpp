@@ -7,39 +7,6 @@ using namespace platform_ex::Windows::D3D12;
 
 constexpr auto MaxSimultaneousRenderTargets = platform::Render::MaxSimultaneousRenderTargets;
 
-void SetRenderTargetsInfo::ConvertFromPassInfo(const platform::Render::RenderPassInfo& Info)
-{
-	//TODO RenderTargetActions
-	bClearColor = true;
-	for (uint32 Index = 0; Index < MaxSimultaneousRenderTargets; ++Index)
-	{
-		if (!Info.ColorRenderTargets[Index])
-			break;
-
-		ColorRenderTargets[Index] =static_cast<RenderTargetView*>(Info.ColorRenderTargets[Index]);
-		//TODO Subres
-
-		++NumColorRenderTargets;
-	}
-
-	//TODO DepthActions
-	DepthStencilTarget = static_cast<DepthStencilView*>(Info.DepthStencilTarget);
-
-	bClearDepth = true;
-	bClearStencil = true;
-
-	if (Info.NumUAVs > 0)
-	{
-		//TODO UAVIndex
-		for (uint32 Index = 0; Index != Info.NumUAVs; ++Index)
-		{
-			UAVs[Index] = static_cast<UnorderedAccessView*>(Info.UAVs[Index]);
-		}
-
-		NumUAVs = Info.NumUAVs;
-	}
-}
-
 CommandContext::CommandContext(NodeDevice* InParent, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc, bool InIsDefaultContext, bool InIsAsyncComputeContext)
 	:
 	DeviceChild(InParent),
@@ -56,19 +23,16 @@ CommandContext::CommandContext(NodeDevice* InParent, SubAllocatedOnlineHeap::Sub
 
 void CommandContext::BeginRenderPass(const platform::Render::RenderPassInfo& Info, const char* Name)
 {
-	SetRenderTargetsInfo RTInfo;
-	RTInfo.ConvertFromPassInfo(Info);
+	platform::Render::RenderTargetsInfo RTInfo(Info);
 
 	SetRenderTargetsAndClear(RTInfo);
 }
 
-void CommandContext::SetRenderTargetsAndClear(const SetRenderTargetsInfo& RenderTargetsInfo)
+void CommandContext::SetRenderTargetsAndClear(const platform::Render::RenderTargetsInfo& RenderTargetsInfo)
 {
 	SetRenderTargets(RenderTargetsInfo.NumColorRenderTargets,
-		RenderTargetsInfo.ColorRenderTargets,
-		RenderTargetsInfo.DepthStencilTarget,
-		RenderTargetsInfo.NumUAVs,
-		RenderTargetsInfo.UAVs);
+		RenderTargetsInfo.ColorRenderTarget,
+		&RenderTargetsInfo.DepthStencilRenderTarget);
 
 	leo::math::float4 ClearColors[MaxSimultaneousRenderTargets];
 
@@ -346,21 +310,134 @@ void CommandContext::DrawPrimitive(uint32 BaseVertexIndex, uint32 NumPrimitives,
 	CommandListHandle->DrawInstanced(VertexCount, NumInstances, BaseVertexIndex, 0);
 }
 
-void CommandContext::SetRenderTargets(uint32 NewNumSimultaneousRenderTargets, const RenderTargetView* const* NewRenderTargets, const DepthStencilView* NewDepthStencilTarget, uint32 NewNumUAVs, UnorderedAccessView* const* UAVs)
+struct FRTVDesc
 {
-	//TODO Cache Pre
-	StateCache.SetRenderTargets(NewNumSimultaneousRenderTargets, NewRenderTargets,NewDepthStencilTarget);
+	uint32 Width;
+	uint32 Height;
+	DXGI_SAMPLE_DESC SampleDesc;
+};
 
-	if (NewNumUAVs > 0)
+// Return an FRTVDesc structure whose
+// Width and height dimensions are adjusted for the RTV's miplevel.
+FRTVDesc GetRenderTargetViewDesc(RenderTargetView* RenderTargetView)
+{
+	const D3D12_RENDER_TARGET_VIEW_DESC& TargetDesc = RenderTargetView->GetDesc();
+
+	auto BaseResource = RenderTargetView->GetResource();
+	uint32 MipIndex = 0;
+	FRTVDesc ret;
+	memset(&ret, 0, sizeof(ret));
+
+	switch (TargetDesc.ViewDimension)
 	{
-		uint32 UAVInitialCountArray[MAX_UAVS];
-		for (uint32 UAVIndex = 0; UAVIndex < NewNumUAVs; ++UAVIndex)
+	case D3D12_RTV_DIMENSION_TEXTURE2D:
+	case D3D12_RTV_DIMENSION_TEXTURE2DMS:
+	case D3D12_RTV_DIMENSION_TEXTURE2DARRAY:
+	case D3D12_RTV_DIMENSION_TEXTURE2DMSARRAY:
+	{
+		D3D12_RESOURCE_DESC const& Desc = BaseResource->GetDesc();
+		ret.Width = (uint32)Desc.Width;
+		ret.Height = Desc.Height;
+		ret.SampleDesc = Desc.SampleDesc;
+		if (TargetDesc.ViewDimension == D3D12_RTV_DIMENSION_TEXTURE2D || TargetDesc.ViewDimension == D3D12_RTV_DIMENSION_TEXTURE2DARRAY)
 		{
-			// Using the value that indicates to keep the current UAV counter
-			UAVInitialCountArray[UAVIndex] = -1;
+			// All the non-multisampled texture types have their mip-slice in the same position.
+			MipIndex = TargetDesc.Texture2D.MipSlice;
+		}
+		break;
+	}
+	case D3D12_RTV_DIMENSION_TEXTURE3D:
+	{
+		D3D12_RESOURCE_DESC const& Desc = BaseResource->GetDesc();
+		ret.Width = (uint32)Desc.Width;
+		ret.Height = Desc.Height;
+		ret.SampleDesc.Count = 1;
+		ret.SampleDesc.Quality = 0;
+		MipIndex = TargetDesc.Texture3D.MipSlice;
+		break;
+	}
+	default:
+	{
+		// not expecting 1D targets.
+		lconstraint(false);
+	}
+	}
+	ret.Width >>= MipIndex;
+	ret.Height >>= MipIndex;
+	return ret;
+}
+
+
+void CommandContext::SetRenderTargets(uint32 NewNumSimultaneousRenderTargets, const platform::Render::RenderTarget* NewRenderTargets, const platform::Render::DepthRenderTarget* INewDepthStencilTarget)
+{
+	auto NewDepthStencilTarget = INewDepthStencilTarget ? dynamic_cast<Texture*>(INewDepthStencilTarget->Texture) : nullptr;
+
+	bool bTargetChanged = false;
+
+	DepthStencilView* DepthStencilView = nullptr;
+	if (NewDepthStencilTarget)
+	{
+		DepthStencilView = NewDepthStencilTarget->GetDepthStencilView({});
+	}
+
+	// Check if the depth stencil target is different from the old state.
+	if (CurrentDepthStencilTarget != DepthStencilView)
+	{
+		CurrentDepthTexture = NewDepthStencilTarget;
+		CurrentDepthStencilTarget = DepthStencilView;
+		bTargetChanged = true;
+	}
+
+	// Gather the render target views for the new render targets.
+	RenderTargetView* NewRenderTargetViews[MaxSimultaneousRenderTargets];
+	for (uint32 RenderTargetIndex = 0; RenderTargetIndex < MaxSimultaneousRenderTargets; ++RenderTargetIndex)
+	{
+		RenderTargetView* RenderTargetView = nullptr;
+
+		if (RenderTargetIndex < NewNumSimultaneousRenderTargets && NewRenderTargets[RenderTargetIndex].Texture != nullptr)
+		{
+			int32 RTMipIndex = NewRenderTargets[RenderTargetIndex].MipIndex;
+			int32 RTSliceIndex = NewRenderTargets[RenderTargetIndex].ArraySlice;
+
+			auto NewRenderTarget = dynamic_cast<Texture*>(NewRenderTargets[RenderTargetIndex].Texture);
+
+			LAssert(RenderTargetView, "Texture being set as render target has no RTV");
 		}
 
-		StateCache.SetUAVs<ShaderType::PixelShader>(NewNumSimultaneousRenderTargets, NewNumUAVs, UAVs, UAVInitialCountArray);
+		NewRenderTargetViews[RenderTargetIndex] = RenderTargetView;
+		// Check if the render target is different from the old state.
+		if (CurrentRenderTargets[RenderTargetIndex] != RenderTargetView)
+		{
+			CurrentRenderTargets[RenderTargetIndex] = RenderTargetView;
+			bTargetChanged = true;
+		}
+	}
+
+	if (NumSimultaneousRenderTargets != NewNumSimultaneousRenderTargets)
+	{
+		NumSimultaneousRenderTargets = NewNumSimultaneousRenderTargets;
+		bTargetChanged = true;
+	}
+
+	if (bTargetChanged)
+	{
+		StateCache.SetRenderTargets(NewNumSimultaneousRenderTargets, CurrentRenderTargets, CurrentDepthStencilTarget);
+		StateCache.ClearUAVs<ShaderType::PixelShader>();
+	}
+
+	// Set the viewport to the full size of render target 0.
+	if (NewRenderTargetViews[0])
+	{
+		// check target 0 is valid
+		lconstraint(0 < NewNumSimultaneousRenderTargets && NewRenderTargets[0].Texture != nullptr);
+		FRTVDesc RTTDesc = GetRenderTargetViewDesc(NewRenderTargetViews[0]);
+		SetViewport(0.0f, 0.0f, 0.0f, (float)RTTDesc.Width, (float)RTTDesc.Height, 1.0f);
+	}
+	else if (DepthStencilView)
+	{
+		auto DepthTargetTexture = DepthStencilView->GetResource();
+		D3D12_RESOURCE_DESC const& DTTDesc = DepthTargetTexture->GetDesc();
+		SetViewport(0.0f, 0.0f, 0.0f, (float)DTTDesc.Width, (float)DTTDesc.Height, 1.0f);
 	}
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IDevice.h"
+#include "RenderPassInfo.h"
 
 namespace platform::Render {
 	class ComputeContext

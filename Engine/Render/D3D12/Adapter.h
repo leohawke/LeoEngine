@@ -41,8 +41,7 @@ namespace platform_ex::Windows::D3D12 {
 		Texture2D* CreateTexture(uint16 width, uint16 height, uint8 num_mipmaps, uint8 array_size,
 			EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const*>  init_data = nullptr) override;
 
-		Texture3D* CreateTexture(uint16 width, uint16 height, uint16 depth, uint8 num_mipmaps, uint8 array_size,
-			EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const*>  init_data = nullptr) override;
+		Texture3D* CreateTexture(const platform::Render::Texture3DInitializer& Initializer, platform::Render::TextureCreateFlags Flags, std::optional<ElementInitData const*>  init_data = nullptr) override;
 
 		TextureCube* CreateTextureCube(uint16 size, uint8 num_mipmaps, uint8 array_size,
 			EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const*>  init_data = nullptr) override;

@@ -116,16 +116,19 @@ std::shared_ptr<Render::Texture> platform::CombineLUTPass(const ColorCorrectPara
 
 	Render::Texture* OutputTexture = nullptr;
 
+	Render::Texture3DInitializer initializer;
+	initializer.Width = initializer.Height = initializer.Depth = GLUTSize;
+	initializer.ArraySize = 1;
+	initializer.NumMipmaps = 1;
+	initializer.Format = Render::EF_ABGR16F;
+	initializer.Access = Render::EA_GPURead | Render::EA_GPUWrite;
+	initializer.NumSamples = 1;
 	if(bUseVolumeTextureLUT)
-		OutputTexture = Render::Context::Instance().GetDevice().CreateTexture(GLUTSize, GLUTSize, GLUTSize, 1, 1, Render::EF_ABGR16F, Render::EA_GPURead | Render::EA_GPUWrite, { 1,0 });
-
-	Render::RenderTargetView* pRT = nullptr; // Render::Context::Instance().GetDevice().CreateRenderTargetView(OutputTexture);
+		OutputTexture = Render::Context::Instance().GetDevice().CreateTexture(initializer,Render::TexCreate_RenderTargetable);
 
 	auto& CmdList = Render::GetCommandList();
 
-	Render::RenderPassInfo passInfo;
-	passInfo.ColorRenderTargets[0] = pRT;
-	passInfo.DepthStencilTarget = nullptr;
+	Render::RenderPassInfo passInfo(OutputTexture,nullptr);
 
 	CmdList.BeginRenderPass(passInfo,"CombineLUTPass");
 

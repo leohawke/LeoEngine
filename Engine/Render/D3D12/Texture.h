@@ -8,6 +8,7 @@
 
 
 #include "../ITexture.hpp"
+#include "../RenderPassInfo.h"
 #include "ResourceHolder.h"
 #include <unordered_map>
 
@@ -21,6 +22,8 @@ namespace platform_ex::Windows::D3D12 {
 
 	class ViewSimulation;
 	class ShaderResourceView;
+	class RenderTargetView;
+	class DepthStencilView;
 
 	class Texture :public ResourceHolder
 	{
@@ -60,6 +63,54 @@ namespace platform_ex::Windows::D3D12 {
 		void DoUnmap(uint32 subres);
 
 		void DoHWBuildMipSubLevels(uint8 array_size, uint8 mipmap_size, uint16 width, uint16 height = 0, uint8 facecount = 1);
+
+	public:
+		/**
+		* Get the render target view for the specified mip and array slice.
+		* An array slice of -1 is used to indicate that no array slice should be required.
+		*/
+		RenderTargetView* GetRenderTargetView(int32 MipIndex, int32 ArraySliceIndex) const
+		{
+			int32 ArrayIndex = MipIndex;
+
+			if (bCreatedRTVsPerSlice)
+			{
+				lconstraint(ArraySliceIndex >= 0);
+				ArrayIndex = MipIndex * RTVArraySize + ArraySliceIndex;
+				lconstraint(ArrayIndex < RenderTargetViews.size());
+			}
+			else
+			{
+				// Catch attempts to use a specific slice without having created the texture to support it
+				lconstraint(ArraySliceIndex == -1 || ArraySliceIndex == 0);
+			}
+
+			if (ArrayIndex < RenderTargetViews.size())
+			{
+				return RenderTargetViews[ArrayIndex].get();
+			}
+			return 0;
+		}
+		DepthStencilView* GetDepthStencilView(platform::Render::ExclusiveDepthStencil AccessType) const
+		{
+			return DepthStencilViews[AccessType.GetIndex()].get();
+		}
+
+		void SetNumRenderTargetViews(int32 InNumViews)
+		{
+			RenderTargetViews.resize(InNumViews);
+		}
+		void SetRenderTargetViewIndex(RenderTargetView* View, uint32 SubResourceIndex)
+		{
+			if (SubResourceIndex < (uint32)RenderTargetViews.size())
+			{
+				RenderTargetViews[SubResourceIndex].reset(View);
+			}
+			else
+			{
+				lconstraint(false);
+			}
+		}
 	protected:
 		DXGI_FORMAT dxgi_format;
 
@@ -69,6 +120,16 @@ namespace platform_ex::Windows::D3D12 {
 		platform::Render::TextureMapAccess last_tma;
 
 		std::unique_ptr<ShaderResourceView> default_srv;
+
+		/** A render targetable view of the texture. */
+		std::vector<std::shared_ptr<RenderTargetView>> RenderTargetViews;
+
+		/** A depth-stencil targetable view of the texture. */
+		std::shared_ptr<DepthStencilView> DepthStencilViews[4];
+
+		bool bCreatedRTVsPerSlice = false;
+
+		int32 RTVArraySize;
 	};
 
 	class Texture1D final :public Texture, public platform::Render::Texture1D {
@@ -174,7 +235,7 @@ namespace platform_ex::Windows::D3D12 {
 
 	class Texture3D final : public Texture, public platform::Render::Texture3D {
 	public:
-		explicit Texture3D(uint16 width, uint16 height, uint16 depth, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
+		explicit Texture3D(uint16 width, uint16 height, uint16 depth, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, uint32 NumSamples);
 	protected:
 		//\brief encode = UTF-8
 		std::string  Description() const override;
@@ -280,18 +341,18 @@ namespace platform_ex::Windows::D3D12 {
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC CreateSRVDesc(const platform::Render::Texture& tex, uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels);
 
-	D3D12_UNORDERED_ACCESS_VIEW_DESC CreateUAVDesc(const platform::Render::Texture& tex,uint8 first_array_index, uint8 num_items, uint8 level);
-	D3D12_RENDER_TARGET_VIEW_DESC CreateRTVDesc(const platform::Render::Texture& tex,uint8 first_array_index, uint8 num_items, uint8 level);
-	D3D12_DEPTH_STENCIL_VIEW_DESC CreateDSVDesc(const platform::Render::Texture& tex,uint8 first_array_index, uint8 num_items, uint8 level);
+	D3D12_UNORDERED_ACCESS_VIEW_DESC CreateUAVDesc(const platform::Render::Texture& tex, uint8 first_array_index, uint8 num_items, uint8 level);
+	D3D12_RENDER_TARGET_VIEW_DESC CreateRTVDesc(const platform::Render::Texture& tex, uint8 first_array_index, uint8 num_items, uint8 level);
+	D3D12_DEPTH_STENCIL_VIEW_DESC CreateDSVDesc(const platform::Render::Texture& tex, uint8 first_array_index, uint8 num_items, uint8 level);
 
-	D3D12_UNORDERED_ACCESS_VIEW_DESC CreateUAVDesc(const platform::Render::Texture& tex,uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level);
-	D3D12_RENDER_TARGET_VIEW_DESC CreateRTVDesc(const platform::Render::Texture& tex,uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level);
-	 ViewSimulation* CreateDSVDesc(const platform::Render::Texture& tex,uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level);
+	D3D12_UNORDERED_ACCESS_VIEW_DESC CreateUAVDesc(const platform::Render::Texture& tex, uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level);
+	D3D12_RENDER_TARGET_VIEW_DESC CreateRTVDesc(const platform::Render::Texture& tex, uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level);
+	ViewSimulation* CreateDSVDesc(const platform::Render::Texture& tex, uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level);
 
-	D3D12_UNORDERED_ACCESS_VIEW_DESC CreateUAVDesc(const platform::Render::Texture& tex,uint8 first_array_index, uint8 num_items, TextureCubeFaces first_face, uint8 num_faces, uint8 level);
+	D3D12_UNORDERED_ACCESS_VIEW_DESC CreateUAVDesc(const platform::Render::Texture& tex, uint8 first_array_index, uint8 num_items, TextureCubeFaces first_face, uint8 num_faces, uint8 level);
 
-	D3D12_RENDER_TARGET_VIEW_DESC CreateRTVDesc(const platform::Render::Texture& tex,uint8 array_index, TextureCubeFaces face, uint8 level);
-	D3D12_DEPTH_STENCIL_VIEW_DESC CreateDSVDesc(const platform::Render::Texture& tex,uint8 array_index, TextureCubeFaces face, uint8 level);
+	D3D12_RENDER_TARGET_VIEW_DESC CreateRTVDesc(const platform::Render::Texture& tex, uint8 array_index, TextureCubeFaces face, uint8 level);
+	D3D12_DEPTH_STENCIL_VIEW_DESC CreateDSVDesc(const platform::Render::Texture& tex, uint8 array_index, TextureCubeFaces face, uint8 level);
 
 }
 
