@@ -42,6 +42,7 @@ void SetRenderTargetsInfo::ConvertFromPassInfo(const platform::Render::RenderPas
 
 CommandContext::CommandContext(NodeDevice* InParent, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc, bool InIsDefaultContext, bool InIsAsyncComputeContext)
 	:
+	DeviceChild(InParent),
 	VSConstantBuffer(InParent, ConstantsAllocator),
 	HSConstantBuffer(InParent, ConstantsAllocator),
 	DSConstantBuffer(InParent, ConstantsAllocator),

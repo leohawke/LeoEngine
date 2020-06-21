@@ -77,12 +77,14 @@
     <ClCompile Include="Render\D3D12\RayTracingShader.cpp" />
     <ClCompile Include="Render\D3D12\ResourceHolder.cpp" />
     <ClCompile Include="Render\D3D12\RootSignature.cpp" />
+    <ClCompile Include="Render\D3D12\SamplerState.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\ShaderCompose.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Texture.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Texture1D.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Texture2D.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Texture3D.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\TextureCube.d3d12.cpp" />
+    <ClCompile Include="Render\D3D12\Utility.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\VertexDeclaration.d3d12.cpp" />
     <ClCompile Include="Render\Effect\BiltEffect.cpp" />
     <ClCompile Include="Render\Effect\CopyEffect.cpp" />
@@ -179,6 +181,7 @@
     <ClInclude Include="Render\D3D12\RayTracingShader.h" />
     <ClInclude Include="Render\D3D12\ResourceHolder.h" />
     <ClInclude Include="Render\D3D12\RootSignature.h" />
+    <ClInclude Include="Render\D3D12\SamplerState.h" />
     <ClInclude Include="Render\D3D12\ShaderCompose.h" />
     <ClInclude Include="Render\D3D12\d3d12_dxgi.h" />
     <ClInclude Include="Render\D3D12\Display.h" />

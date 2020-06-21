@@ -1,20 +1,27 @@
 #include "NodeDevice.h"
 #include "CommandContext.h"
-#include "Context.h"
+#include "CommandListManager.h"
+#include "Adapter.h"
 
 extern int GGlobalViewHeapSize;
 using namespace platform_ex::Windows::D3D12;
 
 NodeDevice::NodeDevice(GPUMaskType InGPUMask, D3D12Adapter* InAdapter)
-	:SingleNodeGPUObject(InGPUMask),AdapterChild(InAdapter),
+	:SingleNodeGPUObject(InGPUMask), AdapterChild(InAdapter),
+	CommandListManager(nullptr),
+	CopyCommandListManager(nullptr),
+	AsyncCommandListManager(nullptr),
 	RTVAllocator(InGPUMask, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 256),
 	DSVAllocator(InGPUMask, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 256),
 	SRVAllocator(InGPUMask, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1024),
 	UAVAllocator(InGPUMask, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1024),
 	SamplerAllocator(InGPUMask, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, 128)
 	, GlobalSamplerHeap(this, InGPUMask)
-	,GlobalViewHeap(this, InGPUMask)
+	, GlobalViewHeap(this, InGPUMask)
 {
+	CommandListManager = new D3D12CommandListManager(this, D3D12_COMMAND_LIST_TYPE_DIRECT, CommandQueueType::Default);
+	CopyCommandListManager = new D3D12CommandListManager(this, D3D12_COMMAND_LIST_TYPE_COPY, CommandQueueType::Copy);
+	AsyncCommandListManager = new D3D12CommandListManager(this, D3D12_COMMAND_LIST_TYPE_COMPUTE, CommandQueueType::Async);
 }
 
 void NodeDevice::Initialize()
@@ -64,6 +71,10 @@ void NodeDevice::SetupAfterDeviceCreation()
 
 	GlobalViewHeap.Init(NumGlobalViewDesc, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
+	CommandListManager->Create(leo::sfmt("3D Queue %d", GetGPUIndex()));
+	CopyCommandListManager->Create(leo::sfmt("Copy Queue %d", GetGPUIndex()));
+	AsyncCommandListManager->Create(leo::sfmt("Compute Queue %d", GetGPUIndex()));
+
 	CreateCommandContexts();
 }
 
@@ -95,10 +106,31 @@ void NodeDevice::CreateCommandContexts()
 	CommandContextArray[0]->OpenCommandList();
 }
 
-template void TViewDescriptorHandle<D3D12_SHADER_RESOURCE_VIEW_DESC>::AllocateDescriptorSlot(); 
-template void TViewDescriptorHandle<D3D12_RENDER_TARGET_VIEW_DESC>::AllocateDescriptorSlot(); 
+ID3D12CommandQueue* NodeDevice::GetD3DCommandQueue(CommandQueueType InQueueType)
+{
+	return GetCommandListManager(InQueueType)->GetD3DCommandQueue();
+}
+
+CommandListManager* NodeDevice::GetCommandListManager(CommandQueueType InQueueType)
+{
+	switch (InQueueType)
+	{
+	case CommandQueueType::Default:
+		return CommandListManager;
+	case CommandQueueType::Copy:
+		return CopyCommandListManager;
+	case CommandQueueType::Async:
+		return AsyncCommandListManager;
+	default:
+		lconstraint(false);
+		return nullptr;
+	}
+}
+
+template void TViewDescriptorHandle<D3D12_SHADER_RESOURCE_VIEW_DESC>::AllocateDescriptorSlot();
+template void TViewDescriptorHandle<D3D12_RENDER_TARGET_VIEW_DESC>::AllocateDescriptorSlot();
 template void TViewDescriptorHandle<D3D12_DEPTH_STENCIL_VIEW_DESC>::AllocateDescriptorSlot();
-template void TViewDescriptorHandle<D3D12_UNORDERED_ACCESS_VIEW_DESC>::AllocateDescriptorSlot(); 
+template void TViewDescriptorHandle<D3D12_UNORDERED_ACCESS_VIEW_DESC>::AllocateDescriptorSlot();
 
 template void TViewDescriptorHandle<D3D12_SHADER_RESOURCE_VIEW_DESC>::FreeDescriptorSlot();
 template void TViewDescriptorHandle<D3D12_RENDER_TARGET_VIEW_DESC>::FreeDescriptorSlot();

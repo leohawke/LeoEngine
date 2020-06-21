@@ -49,6 +49,19 @@ void CommandListHandle::CommandListData::FlushResourceBarriers()
 {
 }
 
+void CommandListHandle::CommandListData::Reset(CommandAllocator& Allocator, bool bTrackExecTime)
+{
+	CheckHResult(CommandList->Reset(Allocator, nullptr));
+
+	CurrentCommandAllocator = &Allocator;
+	IsClosed = false;
+
+	// Indicate this command allocator is being used.
+	CurrentCommandAllocator->IncrementPendingCommandLists();
+
+	CleanupActiveGenerations();
+}
+
 bool CommandListHandle::CommandListData::IsComplete(uint64 Generation)
 {
 	if (Generation >= CurrentGeneration)
@@ -134,6 +147,11 @@ void CommandListHandle::CommandListData::CleanupActiveGenerations()
 		lconstraint(GenerationSyncPoint.first > LastCompleteGeneration);
 		LastCompleteGeneration = GenerationSyncPoint.first;
 	}
+}
+
+void CommandListHandle::Create(NodeDevice* InParent, D3D12_COMMAND_LIST_TYPE InCommandType, CommandAllocator& InAllocator, CommandListManager* InManager)
+{
+	CommandListData = new D3D12CommandListData(InParent, InCommandType, InAllocator, InManager);
 }
 
 CommandAllocator::CommandAllocator(ID3D12Device* InDevice, const D3D12_COMMAND_LIST_TYPE& InType)

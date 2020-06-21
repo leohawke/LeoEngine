@@ -269,6 +269,12 @@
     <ClCompile Include="Render\D3D12\CommandListManager.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
+    <ClCompile Include="Render\D3D12\Utility.d3d12.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D12\SamplerState.d3d12.cpp">
+      <Filter>Render\D3D12</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Context.h">
@@ -607,6 +613,9 @@
       <Filter>Render\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="Render\D3D12\CommandListManager.h">
+      <Filter>Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D12\SamplerState.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
   </ItemGroup>

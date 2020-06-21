@@ -4,12 +4,12 @@
 
 #include "../Effect/CopyEffect.h"
 
+#include "NodeDevice.h"
 #include "Adapter.h"
 #include "Convert.h"
 #include "Texture.h"
 #include "RootSignature.h"
 #include "HardwareShader.h"
-#include "NodeDevice.h"
 
 namespace Vertex = platform::Render::Vertex;
 namespace Buffer = platform::Render::Buffer;
@@ -110,7 +110,6 @@ namespace platform_ex::Windows::D3D12 {
 			}
 		}
 
-		Devices[0] = new NodeDevice(0,this);
 	}
 
 	D3D12_CPU_DESCRIPTOR_HANDLE Device::AllocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE Type)
@@ -376,7 +375,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		FillCaps();
 
-		Devices[0]->Initialize();
+		Devices[0] = new NodeDevice(0, this);
 	}
 
 	std::shared_ptr<Device::CmdAllocatorDependencies> Device::CmdAllocatorAlloc()

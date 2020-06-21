@@ -2,8 +2,8 @@
 
 #include "Common.h"
 #include "d3d12_dxgi.h"
-#include "DescriptorCache.h"
 #include "View.h"
+#include "DescriptorCache.h"
 #include <vector>
 
 namespace platform_ex::Windows::D3D12
@@ -27,6 +27,8 @@ namespace platform_ex::Windows::D3D12
 		template<> OfflineDescriptorManager& GetViewDescriptorAllocator<D3D12_DEPTH_STENCIL_VIEW_DESC>() { return DSVAllocator; }
 		template<> OfflineDescriptorManager& GetViewDescriptorAllocator<D3D12_UNORDERED_ACCESS_VIEW_DESC>() { return UAVAllocator; }
 
+		OfflineDescriptorManager& GetSamplerDescriptorAllocator() { return SamplerAllocator; }
+
 		CommandContext& GetDefaultCommandContext()
 		{
 			return *CommandContextArray[0];
@@ -34,10 +36,22 @@ namespace platform_ex::Windows::D3D12
 
 		ID3D12CommandQueue* GetD3DCommandQueue(CommandQueueType InQueueType);
 
-		CommandListManager& GetCommandListManager();
+		CommandListManager* GetCommandListManager(CommandQueueType InQueueType);
+
+		CommandListManager& GetCommandListManager() const{ return *CommandListManager; }
+
+		void CreateSamplerInternal(const D3D12_SAMPLER_DESC& Desc, D3D12_CPU_DESCRIPTOR_HANDLE Descriptor);
+
+		std::shared_ptr<SamplerState> CreateSampler(const D3D12_SAMPLER_DESC& Desc);
 	private:
 		void SetupAfterDeviceCreation();
-	private:
+	protected:
+		using D3D12CommandListManager = CommandListManager;
+		/** A pool of command lists we can cycle through for the global D3D device */
+		D3D12CommandListManager* CommandListManager;
+		D3D12CommandListManager* CopyCommandListManager;
+		D3D12CommandListManager* AsyncCommandListManager;
+
 		// Must be before the StateCache so that destructor ordering is valid
 		OfflineDescriptorManager RTVAllocator;
 		OfflineDescriptorManager DSVAllocator;

@@ -1,6 +1,6 @@
 #include "Texture.h"
-#include "Context.h"
 #include "Convert.h"
+#include "View.h"
 
 using namespace platform_ex::Windows::D3D12;
 using BTexture = platform::Render::TextureCube;

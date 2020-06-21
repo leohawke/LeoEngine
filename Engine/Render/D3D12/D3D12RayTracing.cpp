@@ -1,5 +1,6 @@
 #include "D3D12RayTracing.h"
-#include "Context.h"
+#include "RayContext.h"
+#include "Adapter.h"
 #include "RayTracingPipelineState.h"
 #include "../../Core/Hash/CityHash.h"
 #include "Texture.h"

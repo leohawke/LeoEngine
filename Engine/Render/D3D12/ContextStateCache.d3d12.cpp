@@ -1,11 +1,11 @@
 #include <LBase/lmemory.hpp>
 #include <LBase/linttype_utility.hpp>
 #include <Engine/Win32/WindowsPlatformMath.h>
+#include "NodeDevice.h"
 #include "DescriptorCache.h"
 #include "CommandContext.h"
 #include "RootSignature.h"
-#include "Context.h"
-#include "NodeDevice.h"
+#include "Adapter.h"
 
 using namespace platform_ex::Windows::D3D12;
 using leo::BitMask;

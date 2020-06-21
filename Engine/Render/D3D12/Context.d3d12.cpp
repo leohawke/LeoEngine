@@ -288,6 +288,8 @@ namespace platform_ex::Windows::D3D12 {
 		FilterExceptions([&, this] {
 			ray_context = std::make_shared<RayContext>(device.get(), this);
 			},"ERROR: DirectX Raytracing is not supported by your OS, GPU and/or driver.");
+
+		device->GetNodeDevice(0)->Initialize();
 	}
 
 	COMPtr<ID3D12Resource> Context::InnerResourceAlloc(InnerReourceType type, leo::uint32 size_in_byte)

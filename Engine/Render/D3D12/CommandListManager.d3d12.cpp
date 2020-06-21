@@ -43,7 +43,7 @@ void CommandListManager::Destroy()
 	}
 }
 
-void CommandListManager::Create(const char* Name, uint32 NumCommandLists, uint32 Priority)
+void CommandListManager::Create(const std::string_view& Name, uint32 NumCommandLists, uint32 Priority)
 {
 	auto Device = GetParentDevice();
 	auto Adapter = Device->GetParentAdapter();
@@ -61,7 +61,7 @@ void CommandListManager::Create(const char* Name, uint32 NumCommandLists, uint32
 	CommandQueueDesc.Type = CommandListType;
 	CheckHResult(Adapter->GetDevice()->CreateCommandQueue(&CommandQueueDesc,IID_PPV_ARGS(D3DCommandQueue.ReleaseAndGetAddress())));
 
-	D3D::Debug(D3DCommandQueue, Name);
+	D3D::Debug(D3DCommandQueue, Name.data());
 
 	if (NumCommandLists > 0)
 	{
@@ -80,7 +80,7 @@ CommandListHandle CommandListManager::ObtainCommandList(CommandAllocator& Comman
 	std::unique_lock Lock(ReadyListsCS);
 
 	CommandListHandle List;
-	if (!ReadyLists.empty())
+	if (ReadyLists.empty())
 	{
 		List = CreateCommandListHandle(CommandAllocator);
 	}

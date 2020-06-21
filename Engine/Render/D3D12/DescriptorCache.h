@@ -27,6 +27,8 @@ namespace platform_ex::Windows::D3D12 {
 	class RootSignature;
 	class ResourceHolder;
 
+	class SamplerState;
+
 	using platform::Render::ShaderType;
 
 	// Like a std::unordered_map<KeyType, ValueType>
@@ -531,12 +533,11 @@ namespace platform_ex::Windows::D3D12 {
 		// end Descriptor Slot Reservation stuff
 
 		// null views
+		DescriptorHandleSRV* pNullSRV;
+		DescriptorHandleRTV* pNullRTV;
+		DescriptorHandleUAV* pNullUAV;
 
-		D3D12_CPU_DESCRIPTOR_HANDLE* pNullSRV;
-		D3D12_CPU_DESCRIPTOR_HANDLE* pNullRTV;
-		D3D12_CPU_DESCRIPTOR_HANDLE* pNullUAV;
-
-		D3D12_CPU_DESCRIPTOR_HANDLE* pDefaultSampler;
+		std::shared_ptr<SamplerState> pDefaultSampler;
 
 		void SetVertexBuffers(VertexBufferCache& Cache);
 		void SetRenderTargets(RenderTargetView** RenderTargetViewArray, uint32 Count, DepthStencilView* DepthStencilTarget);

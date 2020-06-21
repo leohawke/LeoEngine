@@ -1,10 +1,9 @@
 #include <LFramework/LCLib/Logger.h>
-
+#include "NodeDevice.h"
 #include "DescriptorCache.h"
 #include "ContextStateCache.h"
 #include "CommandContext.h"
-#include "Context.h"
-#include "NodeDevice.h"
+#include "RootSignature.h"
 #include <Engine/Win32/WindowsPlatformMath.h>
 
 using namespace platform_ex::Windows::D3D12;
@@ -34,10 +33,70 @@ DescriptorCache::DescriptorCache(GPUMaskType Node)
 
 void DescriptorCache::Init(NodeDevice* InParent, CommandContext* InCmdContext, uint32 InNumLocalViewDescriptors, uint32 InNumSamplerDescriptors, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc)
 {
+	Parent = InParent;
+	CmdContext = InCmdContext;
+
+	SubAllocatedViewHeap.SetParent(this);
+	LocalSamplerHeap.SetParent(this);
+
+	SubAllocatedViewHeap.SetParentDevice(InParent);
+	LocalSamplerHeap.SetParentDevice(InParent);
+
+	SubAllocatedViewHeap.Init(SubHeapDesc);
+	
+	// Always Init a local sampler heap as the high level cache will always miss initialy
+	// so we need something to fall back on (The view heap never rolls over so we init that one
+	// lazily as a backup to save memory)
+	LocalSamplerHeap.Init(InNumSamplerDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+
+	NumLocalViewDescriptors = InNumLocalViewDescriptors;
+
+	CurrentViewHeap = &SubAllocatedViewHeap; //Begin with the global heap
+	CurrentSamplerHeap = &LocalSamplerHeap;
+	bUsingGlobalSamplerHeap = false;
+
+	// Create default views
+	D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+	SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	SRVDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	SRVDesc.Texture2D.MipLevels = 1;
+	SRVDesc.Texture2D.MostDetailedMip = 0;
+	SRVDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+	pNullSRV = new DescriptorHandleSRV(GetParentDevice());
+	pNullSRV->CreateView(SRVDesc, nullptr);
+
+	D3D12_RENDER_TARGET_VIEW_DESC RTVDesc = {};
+	RTVDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+	RTVDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	RTVDesc.Texture2D.MipSlice = 0;
+	pNullRTV = new DescriptorHandleRTV(GetParentDevice());
+	pNullRTV->CreateView(RTVDesc, nullptr);
+
+	D3D12_UNORDERED_ACCESS_VIEW_DESC UAVDesc = {};
+	UAVDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+	UAVDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	UAVDesc.Texture2D.MipSlice = 0;
+	pNullUAV = new DescriptorHandleUAV(GetParentDevice());
+	pNullUAV->CreateViewWithCounter(UAVDesc, nullptr, nullptr);
+
+	platform::Render::TextureSampleDesc SamplerDesc;
+	SamplerDesc.address_mode_u = SamplerDesc.address_mode_v = SamplerDesc.address_mode_w = platform::Render::TexAddressingMode::Clamp;
+	SamplerDesc.filtering = platform::Render::TexFilterOp::Min_Mag_Mip_Linear;
+	SamplerDesc.max_anisotropy = 0;
+
+	pDefaultSampler = InParent->CreateSampler(Convert(SamplerDesc));
 }
 
 void DescriptorCache::Clear()
 {
+	delete pNullRTV;
+	delete pNullSRV;
+	delete pNullUAV;
+
+	pNullRTV = nullptr;
+	pNullSRV = nullptr;
+	pNullUAV = nullptr;
 }
 
 bool DescriptorCache::SetDescriptorHeaps()
@@ -154,7 +213,7 @@ void DescriptorCache::SetRenderTargets(RenderTargetView** RenderTargetViewArray,
 		}
 		else
 		{
-			RTVDescriptors[i] = *pNullRTV;
+			RTVDescriptors[i] = pNullRTV->GetHandle();
 		}
 	}
 
@@ -202,7 +261,7 @@ void DescriptorCache::SetUAVs(const RootSignature* RootSignature, UnorderedAcces
 	{
 		if ((SlotIndex < UAVStartSlot) || (UAVs[SlotIndex] == nullptr))
 		{
-			SrcDescriptors[SlotIndex] = *pNullUAV;
+			SrcDescriptors[SlotIndex] = pNullUAV->GetHandle();
 		}
 		else
 		{
@@ -285,7 +344,7 @@ void DescriptorCache::SetSRVs(const RootSignature* RootSignature, ShaderResource
 		}
 		else
 		{
-			SrcDescriptors[SlotIndex] = *pNullSRV;
+			SrcDescriptors[SlotIndex] = pNullSRV->GetHandle();
 		}
 		lconstraint(SrcDescriptors[SlotIndex].ptr != 0);
 	}

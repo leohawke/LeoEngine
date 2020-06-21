@@ -66,6 +66,9 @@ namespace platform_ex::Windows::D3D12 {
 
 			void FlushResourceBarriers();
 
+			void Reset(CommandAllocator& Allocator, bool bTrackExecTime = false);
+
+
 			uint32 AddRef() const
 			{
 				return ++NumRefs;
@@ -98,6 +101,9 @@ namespace platform_ex::Windows::D3D12 {
 		private:
 			void CleanupActiveGenerations();
 		};
+
+		using D3D12CommandListData = CommandListData;
+
 	public:
 		CommandListHandle() : CommandListData(nullptr) {}
 
@@ -193,13 +199,25 @@ namespace platform_ex::Windows::D3D12 {
 			CommandListData->Close();
 		}
 
-		bool IsClosed() const;
+		bool IsClosed() const
+		{
+			return CommandListData->IsClosed;
+		}
 
-		D3D12_COMMAND_LIST_TYPE GetCommandListType() const;
+		D3D12_COMMAND_LIST_TYPE GetCommandListType() const
+		{
+			return CommandListData->CommandListType;
+		}
 
-		void Reset(CommandAllocator& Allocator, bool bTrackExecTime = false);
+		void Reset(CommandAllocator& Allocator, bool bTrackExecTime = false)
+		{
+			CommandListData->Reset(Allocator, bTrackExecTime);
+		}
 
-		CommandAllocator* CurrentCommandAllocator() const;
+		CommandAllocator* CurrentCommandAllocator() const
+		{
+			return CommandListData->CurrentCommandAllocator;
+		}
 
 		void Create(NodeDevice* InParent, D3D12_COMMAND_LIST_TYPE InCommandType, CommandAllocator& InAllocator, CommandListManager* InManager);
 

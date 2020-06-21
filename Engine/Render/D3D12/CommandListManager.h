@@ -13,7 +13,7 @@ namespace platform_ex::Windows::D3D12
 		CommandListManager(NodeDevice* InParent, D3D12_COMMAND_LIST_TYPE InCommandListType, CommandQueueType InQueueType);
 		virtual ~CommandListManager();
 
-		void Create(const char* Name, uint32 NumCommandLists = 0, uint32 Priority = 0);
+		void Create(const std::string_view& Name, uint32 NumCommandLists = 0, uint32 Priority = 0);
 		void Destroy();
 
 		// This use to also take an optional PSO parameter so that we could pass this directly to Create/Reset command lists,
@@ -21,6 +21,11 @@ namespace platform_ex::Windows::D3D12
 		// state changes. We leave PSOs to always be resolved in ApplyState().
 		CommandListHandle ObtainCommandList(CommandAllocator& CommandAllocator);
 		void ReleaseCommandList(CommandListHandle& hList);
+
+		ID3D12CommandQueue* GetD3DCommandQueue() const
+		{
+			return D3DCommandQueue.Get();
+		}
 	protected:
 		void WaitForCommandQueueFlush();
 
