@@ -48,6 +48,7 @@
     <ClCompile Include="Render\BuiltInRayTracingShader.cpp" />
     <ClCompile Include="Render\Color_T.cpp" />
     <ClCompile Include="Render\D3D12\CommandList.d3d12.cpp" />
+    <ClCompile Include="Render\D3D12\CommandListManager.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\DXGIAdapter.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\BuiltInRayTracingShaders.cpp" />
     <ClCompile Include="Render\D3D12\CommandContext.d3d12.cpp" />

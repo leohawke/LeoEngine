@@ -183,16 +183,6 @@ namespace platform_ex::Windows::D3D12 {
 			return CommandListData->CommandList.Get();
 		}
 
-		friend bool operator==(const CommandListHandle& lhs, std::nullptr_t)
-		{
-			return lhs.CommandListData == nullptr;
-		}
-
-		friend bool operator!=(const CommandListHandle& lhs, std::nullptr_t)
-		{
-			return !(lhs == nullptr);
-		}
-
 		void SetCurrentOwningContext(CommandContext* context)
 		{
 			CommandListData->CurrentOwningContext = context;
@@ -201,6 +191,26 @@ namespace platform_ex::Windows::D3D12 {
 		void Close()
 		{
 			CommandListData->Close();
+		}
+
+		bool IsClosed() const;
+
+		D3D12_COMMAND_LIST_TYPE GetCommandListType() const;
+
+		void Reset(CommandAllocator& Allocator, bool bTrackExecTime = false);
+
+		CommandAllocator* CurrentCommandAllocator() const;
+
+		void Create(NodeDevice* InParent, D3D12_COMMAND_LIST_TYPE InCommandType, CommandAllocator& InAllocator, CommandListManager* InManager);
+
+		friend bool operator==(const CommandListHandle& lhs, std::nullptr_t)
+		{
+			return lhs.CommandListData == nullptr;
+		}
+
+		friend bool operator!=(const CommandListHandle& lhs, std::nullptr_t)
+		{
+			return !(lhs == nullptr);
 		}
 
 		ID3D12GraphicsCommandList* operator->() const
