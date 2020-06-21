@@ -111,6 +111,18 @@ namespace platform_ex::Windows::D3D12 {
 				lconstraint(false);
 			}
 		}
+
+		void SetDepthStencilView(DepthStencilView* View, uint32 SubResourceIndex)
+		{
+			if (SubResourceIndex < 4)
+			{
+				DepthStencilViews[SubResourceIndex].reset(View);
+			}
+			else
+			{
+				lconstraint(false);
+			}
+		}
 	protected:
 		DXGI_FORMAT dxgi_format;
 

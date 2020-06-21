@@ -401,6 +401,8 @@ void CommandContext::SetRenderTargets(uint32 NewNumSimultaneousRenderTargets, co
 
 			auto NewRenderTarget = dynamic_cast<Texture*>(NewRenderTargets[RenderTargetIndex].Texture);
 
+			RenderTargetView = NewRenderTarget->GetRenderTargetView(RTMipIndex, RTSliceIndex);
+
 			LAssert(RenderTargetView, "Texture being set as render target has no RTV");
 		}
 

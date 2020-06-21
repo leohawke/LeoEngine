@@ -13,18 +13,14 @@ namespace platform_ex::Windows::D3D12 {
 		auto& cmd_list = Context::Instance().GetCommandList(Device::Command_Render);
 
 		std::vector<ID3D12Resource*> rt_src;
-		std::vector<uint32> rt_first_subres;
-		std::vector<uint32> rt_num_subres;
 		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> rt_handles(clr_views.size());
 
 		for (auto i = 0; i != clr_views.size(); ++i) {
 			if (clr_views[i].Texture) {
-				//auto p = static_cast<RenderTargetView*>(clr_views[i].get());
-				//rt_src.emplace_back(p->GetResource());
-				//rt_first_subres.emplace_back(p->FirstSubResIndex());
-				//rt_num_subres.emplace_back(p->SubResNum());
-
-				//rt_handles[i] = p->GetView();
+				auto pD3DTexture = dynamic_cast<Texture*>(clr_views[i].Texture);
+				auto pRTV = pD3DTexture->GetRenderTargetView(0, -1);
+				
+				rt_handles[i] = pRTV->GetView();
 			}
 			else
 			{
@@ -36,9 +32,10 @@ namespace platform_ex::Windows::D3D12 {
 		D3D12_CPU_DESCRIPTOR_HANDLE* ds_handle_ptr;
 		if (ds_view.Texture)
 		{
-			/*auto p = static_cast<DepthStencilView*>(ds_view.get());
+			auto pD3DTexture = dynamic_cast<Texture*>(ds_view.Texture);
+			auto pDSV = pD3DTexture->GetDepthStencilView({});
 
-			ds_handle = p->GetView();*/
+			ds_handle = pDSV->GetView();
 			ds_handle_ptr = &ds_handle;
 		}
 		else

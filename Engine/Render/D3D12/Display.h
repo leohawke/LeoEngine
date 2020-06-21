@@ -81,7 +81,7 @@ namespace platform_ex {
 				COMPtr<IDXGISwapChain3> swap_chain;
 
 				std::array<std::shared_ptr<Texture2D>, NUM_BACK_BUFFERS> render_targets_texs;
-				std::array<std::shared_ptr<RenderTargetView>, NUM_BACK_BUFFERS> render_target_views;
+				std::array<RenderTargetView*, NUM_BACK_BUFFERS> render_target_views;
 				std::shared_ptr<Texture2D> depth_stencil;
 
 				UINT back_buffer_index;

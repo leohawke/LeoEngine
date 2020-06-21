@@ -161,14 +161,19 @@ void Display::UpdateFramewBufferView()
 		COMPtr<ID3D12Resource> pResources = nullptr;
 		swap_chain->GetBuffer(rt_tex_index, COMPtr_RefParam(pResources, IID_ID3D12Resource));
 		rt_tex = make_shared<Texture2D>(pResources);
-		render_target_views[rt_tex_index] = make_shared<RenderTargetView>(GetDefaultNodeDevice(),rt_tex->CreateRTVDesc(0,1,0),*rt_tex);
+		render_target_views[rt_tex_index] = new RenderTargetView(GetDefaultNodeDevice(),rt_tex->CreateRTVDesc(0,1,0),*rt_tex);
+
+		rt_tex->SetNumRenderTargetViews(1);
+		rt_tex->SetRenderTargetViewIndex(render_target_views[rt_tex_index], 0);
+
 		++rt_tex_index;
-
-		platform::Render::RenderTarget view;
-		view.Texture = rt_tex.get();
-
-		frame_buffer->Attach(FrameBuffer::Target0, view);
 	}
+
+	platform::Render::RenderTarget view;
+	view.Texture = render_targets_texs[0].get();
+
+	frame_buffer->Attach(FrameBuffer::Target0, view);
+
 
 	auto stereo = (Stereo_LCDShutter == stereo_method) && stereo_feature;
 
@@ -182,6 +187,8 @@ void Display::UpdateFramewBufferView()
 			EA_GPURead | EA_GPUWrite,
 			render_targets_texs[0]->GetSampleInfo()
 		));
+
+		depth_stencil->SetDepthStencilView(new DepthStencilView(GetDefaultNodeDevice(), depth_stencil->CreateDSVDesc(0, 1, 0), *depth_stencil, IsStencilFormat(depth_stencil_format)),0);
 	}
 
 	if (depth_stencil_format != EF_Unknown) {
