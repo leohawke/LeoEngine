@@ -5,6 +5,7 @@ namespace platform::Render {
 	template<typename TCommandList,typename TShaderClass,typename THardwareShader>
 	void SetShaderParameters(TCommandList& cmdlist, const TShaderClass* Shader, THardwareShader* ShaderRHI, const typename TShaderClass::Parameters& Parameters)
 	{
+		lconstraint(ShaderRHI != nullptr);
 		const auto& Bindings = Shader->Bindings;
 
 		auto ParametersPtr = &Parameters;

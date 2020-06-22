@@ -70,7 +70,7 @@ namespace platform
 				bounds.MinY * InvVolumeResolutionY
 			);
 
-			platform::Render::SetShaderParameters(cmdlist, this, this->GetPixelShader(), parameters);
+			platform::Render::SetShaderParameters(cmdlist, this, this->GetVertexShader(), parameters);
 		}
 
 	};
