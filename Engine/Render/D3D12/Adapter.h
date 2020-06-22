@@ -134,7 +134,6 @@ namespace platform_ex::Windows::D3D12 {
 		//@{
 		//\brief base object for swapchain
 		COMPtr<ID3D12Device> d3d_device;
-		COMPtr<ID3D12CommandQueue> d3d_cmd_queue;
 		//@}
 
 		D3D_FEATURE_LEVEL d3d_feature_level;

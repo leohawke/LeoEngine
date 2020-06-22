@@ -58,8 +58,6 @@ namespace platform_ex {
 
 				void ExecuteUAVBarrier();
 
-				const COMPtr<ID3D12CommandQueue>& GetCommandQueue(Device::CommandType) const;
-
 				void CommitCommandList(Device::CommandType);
 				friend class Device;
 
@@ -98,14 +96,13 @@ namespace platform_ex {
 				DXGI::AdapterList adapter_list;
 
 				std::shared_ptr<Device> device;
+				COMPtr<ID3D12CommandQueue> d3d_cmd_queue;
 				std::shared_ptr<Display> display;
 
 				std::shared_ptr<RayContext> ray_context;
 
 				array<COMPtr<ID3D12GraphicsCommandList>,Device::CommandTypeCount> d3d_cmd_lists;
 				array<std::mutex, Device::CommandTypeCount> cmd_list_mutexs;
-
-				array<COMPtr<ID3D12CommandQueue>, Device::CommandTypeCount-1> d3d_cmd_queues;
 
 				D3D12_VIEWPORT curr_viewport;
 			public:

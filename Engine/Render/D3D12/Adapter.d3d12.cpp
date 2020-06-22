@@ -57,25 +57,12 @@ namespace platform_ex::Windows::D3D12 {
 				}
 #endif
 
-				D3D12_COMMAND_QUEUE_DESC queue_desc =
-				{
-					D3D12_COMMAND_LIST_TYPE_DIRECT, //Type
-					0, //Priority
-					D3D12_COMMAND_QUEUE_FLAG_NONE, //Flags
-					0 //NodeMask
-				};
-
-				ID3D12CommandQueue* cmd_queue;
-				CheckHResult(device->CreateCommandQueue(&queue_desc,
-					IID_ID3D12CommandQueue, reinterpret_cast<void**>(&cmd_queue)));
-
-
 				D3D12_FEATURE_DATA_FEATURE_LEVELS req_feature_levels;
 				req_feature_levels.NumFeatureLevels = static_cast<UINT>(feature_levels.size());
 				req_feature_levels.pFeatureLevelsRequested = &feature_levels[0];
 				device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &req_feature_levels, sizeof(req_feature_levels));
 
-				DeviceEx(device, cmd_queue, req_feature_levels.MaxSupportedFeatureLevel);
+				DeviceEx(device, nullptr, req_feature_levels.MaxSupportedFeatureLevel);
 				CheckFeatureSupport(device);
 
 				auto desc = adapter.Description();
@@ -335,8 +322,6 @@ namespace platform_ex::Windows::D3D12 {
 	void Device::DeviceEx(ID3D12Device * device, ID3D12CommandQueue * cmd_queue, D3D_FEATURE_LEVEL feature_level)
 	{
 		d3d_device = device;
-		d3d_cmd_queue = cmd_queue;
-		D3D::Debug(d3d_cmd_queue, "Render_Command_Queue");
 		D3D::Debug(d3d_device, "Device");
 
 		d3d_feature_level = feature_level;

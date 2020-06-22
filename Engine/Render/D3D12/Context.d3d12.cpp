@@ -82,16 +82,11 @@ namespace platform_ex::Windows::D3D12 {
 		d3d_cmd_lists[Device::Command_Render]->ResourceBarrier(1, &Barrier);
 	}
 
-	const COMPtr<ID3D12CommandQueue>& D3D12::Context::GetCommandQueue(Device::CommandType type) const
-	{
-		return d3d_cmd_queues[type];
-	}
-
 	void D3D12::Context::CommitCommandList(Device::CommandType type)
 	{
 		CheckHResult(d3d_cmd_lists[type]->Close());
 		ID3D12CommandList* cmd_lists[] = { d3d_cmd_lists[type].Get() };
-		device->d3d_cmd_queue->ExecuteCommandLists(1, cmd_lists);
+		device->GetNodeDevice(0)->GetD3DCommandQueue(CommandQueueType::Default)->ExecuteCommandLists(1, cmd_lists);
 
 		if (type == Device::CommandType::Command_Resource) {
 			auto val = GetFence(type).Signal(CommandQueueType::Default);
@@ -270,8 +265,6 @@ namespace platform_ex::Windows::D3D12 {
 
 	void Context::ContextEx(ID3D12Device * d3d_device, ID3D12CommandQueue * cmd_queue)
 	{
-		d3d_cmd_queues[Device::Command_Render] = cmd_queue;
-		d3d_cmd_queues[Device::Command_Render]->AddRef();
 		CheckHResult(d3d_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT,
 			device->d3d_cmd_allocators[Device::Command_Render].Get(), nullptr,
 			COMPtr_RefParam(d3d_cmd_lists[Device::Command_Render], IID_ID3D12GraphicsCommandList)));
@@ -282,8 +275,21 @@ namespace platform_ex::Windows::D3D12 {
 			COMPtr_RefParam(d3d_cmd_lists[Device::Command_Resource], IID_ID3D12GraphicsCommandList)));
 		D3D::Debug(d3d_cmd_lists[Device::Command_Resource], "Resource_Command");
 
-		for (auto& fence :device->fences)
-			fence.swap(std::make_unique<Fence>(device.get(),0));
+		D3D12_COMMAND_QUEUE_DESC queue_desc =
+		{
+			D3D12_COMMAND_LIST_TYPE_DIRECT, //Type
+			0, //Priority
+			D3D12_COMMAND_QUEUE_FLAG_NONE, //Flags
+			0 //NodeMask
+		};
+
+		CheckHResult(d3d_device->CreateCommandQueue(&queue_desc,
+			IID_PPV_ARGS(d3d_cmd_queue.ReleaseAndGetAddress())));
+
+		for (auto& fence : device->fences) {
+			fence.swap(std::make_unique<Fence>(device.get(), 0));
+			fence->CreateFence();
+		}
 
 		FilterExceptions([&, this] {
 			ray_context = std::make_shared<RayContext>(device.get(), this);
@@ -365,9 +371,10 @@ namespace platform_ex::Windows::D3D12 {
 
 	void Context::CreateDeviceAndDisplay() {
 		device = std::make_shared<Device>(DefaultAdapter());
-		ContextEx(device->d3d_device.Get(), device->d3d_cmd_queue.Get());
+		ContextEx(device->d3d_device.Get(), nullptr);
 		DisplaySetting setting;
-		display = std::make_shared<Display>(GetDXGIFactory4(), device->d3d_cmd_queue.Get(), setting, g_hwnd);//test code
+
+		display = std::make_shared<Display>(GetDXGIFactory4(),d3d_cmd_queue.Get(), setting, g_hwnd);//test code
 		screen_frame_buffer = display->GetFrameBuffer();
 		SetFrame(display->GetFrameBuffer());
 	}

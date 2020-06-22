@@ -192,7 +192,7 @@ namespace platform_ex::Windows::D3D12 {
 		uint16 width;
 	};
 
-	class Texture2D final :public Texture, public platform::Render::Texture2D {
+	class Texture2D final :public Texture,public FastClearResource,public platform::Render::Texture2D {
 	public:
 		explicit Texture2D(uint16 width, uint16 height, uint8 numMipMaps, uint8 array_size, EFormat format, uint32 access_hint, platform::Render::SampleDesc sample_info);
 

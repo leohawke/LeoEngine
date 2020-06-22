@@ -48,6 +48,16 @@ namespace platform_ex::Windows {
 
 			bool bDepthStencil;
 		};
+
+		class FastClearResource
+		{
+		public:
+			inline void GetWriteMaskProperties(void*& OutData, uint32& OutSize)
+			{
+				OutData = nullptr;
+				OutSize = 0;
+			}
+		};
 	}
 }
 

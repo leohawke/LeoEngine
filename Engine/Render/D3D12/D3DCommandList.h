@@ -8,6 +8,12 @@
 #include <mutex>
 
 namespace platform_ex::Windows::D3D12 {
+	class UnorderedAccessView;
+	class ShaderResourceView;
+	class RenderTargetView;
+	class DepthStencilView;
+	class ResourceHolder;
+
 	class CommandContext;
 	class CommandListManager;
 
@@ -219,6 +225,11 @@ namespace platform_ex::Windows::D3D12 {
 			return CommandListData->CurrentCommandAllocator;
 		}
 
+		void FlushResourceBarriers()
+		{
+			CommandListData->FlushResourceBarriers();
+		}
+
 		void Create(NodeDevice* InParent, D3D12_COMMAND_LIST_TYPE InCommandType, CommandAllocator& InAllocator, CommandListManager* InManager);
 
 		friend bool operator==(const CommandListHandle& lhs, std::nullptr_t)
@@ -307,4 +318,34 @@ namespace platform_ex::Windows::D3D12 {
 		uint64                  Generation;
 	};
 
+	//TODO SubresourceSubset
+	inline void TransitionResource(CommandListHandle& pCommandList, UnorderedAccessView* View, D3D12_RESOURCE_STATES after)
+	{
+		//TODO
+	}
+
+	inline void TransitionResource(CommandListHandle& pCommandList, ShaderResourceView* View, D3D12_RESOURCE_STATES after)
+	{
+		//TODO
+	}
+
+	inline void TransitionResource(CommandListHandle& pCommandList, RenderTargetView* View, D3D12_RESOURCE_STATES after)
+	{
+		//TODO
+	}
+
+	inline void TransitionResource(CommandListHandle& pCommandList, DepthStencilView* View)
+	{
+		//TODO
+	}
+
+	inline void TransitionResource(CommandListHandle& pCommandList, DepthStencilView* View, D3D12_RESOURCE_STATES after)
+	{
+		//TODO
+	}
+
+	inline void TransitionResource(CommandListHandle& pCommandList, ResourceHolder* Resource, D3D12_RESOURCE_STATES after, UINT32 subRes)
+	{
+		//TODO
+	}
 }

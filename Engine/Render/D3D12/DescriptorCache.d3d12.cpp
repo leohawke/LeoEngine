@@ -168,30 +168,7 @@ void DescriptorCache::SetVertexBuffers(VertexBufferCache& Cache)
 	CmdContext->CommandListHandle->IASetVertexBuffers(0, Count, Cache.CurrentVertexBufferViews);
 }
 
-static void TransitionResource(CommandListHandle& pCommandList, UnorderedAccessView* View, D3D12_RESOURCE_STATES after)
-{
-	//TODO
-}
 
-static void TransitionResource(CommandListHandle& pCommandList, ShaderResourceView* View, D3D12_RESOURCE_STATES after)
-{
-	//TODO
-}
-
-static void TransitionResource(CommandListHandle& pCommandList, RenderTargetView* View, D3D12_RESOURCE_STATES after)
-{
-	//TODO
-}
-
-static void TransitionResource(CommandListHandle& pCommandList, DepthStencilView* View)
-{
-	//TODO
-}
-
-static void TransitionResource(CommandListHandle& pCommandList, ResourceHolder* Resource, D3D12_RESOURCE_STATES after,UINT32 subRes)
-{
-	//TODO
-}
 
 void DescriptorCache::SetRenderTargets(RenderTargetView** RenderTargetViewArray, uint32 Count, DepthStencilView* DepthStencilTarget)
 {

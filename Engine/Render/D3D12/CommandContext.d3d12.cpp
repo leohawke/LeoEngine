@@ -40,7 +40,7 @@ void CommandContext::SetRenderTargetsAndClear(const platform::Render::RenderTarg
 	{
 		for (int Index = 0; Index < RenderTargetsInfo.NumColorRenderTargets; ++Index)
 		{
-			//TODO fast clear support
+			//TODO clear value binding
 
 			ClearColors[Index] = leo::math::float4();
 		}
@@ -51,7 +51,7 @@ void CommandContext::SetRenderTargetsAndClear(const platform::Render::RenderTarg
 
 	if (RenderTargetsInfo.bClearDepth || RenderTargetsInfo.bClearStencil)
 	{
-		//TODO fast clear support
+		//TODO clear value binding
 	}
 
 	ClearMRT(RenderTargetsInfo.bClearColor, RenderTargetsInfo.NumColorRenderTargets, ClearColors, RenderTargetsInfo.bClearDepth, DepthClear, RenderTargetsInfo.bClearStencil, StencilClear);
@@ -433,42 +433,128 @@ void CommandContext::SetRenderTargets(uint32 NewNumSimultaneousRenderTargets, co
 		// check target 0 is valid
 		lconstraint(0 < NewNumSimultaneousRenderTargets && NewRenderTargets[0].Texture != nullptr);
 		FRTVDesc RTTDesc = GetRenderTargetViewDesc(NewRenderTargetViews[0]);
-		SetViewport(0.0f, 0.0f, 0.0f, (float)RTTDesc.Width, (float)RTTDesc.Height, 1.0f);
+		SetViewport(0, 0, 0.0f, RTTDesc.Width, RTTDesc.Height, 1.0f);
 	}
 	else if (DepthStencilView)
 	{
 		auto DepthTargetTexture = DepthStencilView->GetResource();
 		D3D12_RESOURCE_DESC const& DTTDesc = DepthTargetTexture->GetDesc();
-		SetViewport(0.0f, 0.0f, 0.0f, (float)DTTDesc.Width, (float)DTTDesc.Height, 1.0f);
+		SetViewport(0, 0, 0.0f, DTTDesc.Width, DTTDesc.Height, 1.0f);
 	}
 }
 
 void CommandContext::ClearMRT(bool bClearColor, int32 NumClearColors, const leo::math::float4* ColorArray, bool bClearDepth, float Depth, bool bClearStencil, uint32 Stencil)
 {
+	const D3D12_VIEWPORT& Viewport = StateCache.GetViewport();
+	const D3D12_RECT& ScissorRect = StateCache.GetScissorRect();
+
+	if (ScissorRect.left >= ScissorRect.right || ScissorRect.top >= ScissorRect.bottom)
+	{
+		return;
+	}
+
 	RenderTargetView* RenderTargetViews[MaxSimultaneousRenderTargets];
 	DepthStencilView* DSView = nullptr;
 	uint32 NumSimultaneousRTs = 0;
 	StateCache.GetRenderTargets(RenderTargetViews, &NumSimultaneousRTs, &DSView);
 
+	const LONG Width = static_cast<LONG>(Viewport.Width);
+	const LONG Height = static_cast<LONG>(Viewport.Height);
+
+	bool bClearCoversEntireSurface = false;
+	if (ScissorRect.left <= 0 && ScissorRect.top <= 0 &&
+		ScissorRect.right >= Width && ScissorRect.bottom >= Height)
+	{
+		bClearCoversEntireSurface = true;
+	}
+
+	const bool bSupportsFastClear = true;
+	uint32 ClearRectCount = 0;
+	D3D12_RECT* pClearRects = nullptr;
+	D3D12_RECT ClearRects[4];
+
+	// Only pass a rect down to the driver if we specifically want to clear a sub-rect
+	if (!bSupportsFastClear || !bClearCoversEntireSurface)
+	{
+		{
+			ClearRects[ClearRectCount] = ScissorRect;
+			ClearRectCount++;
+		}
+
+		pClearRects = ClearRects;
+	}
+
 	const bool ClearRTV = bClearColor && NumSimultaneousRTs > 0;
 	const bool ClearDSV = (bClearDepth || bClearStencil) && DSView;
 
+	if (ClearRTV)
+	{
+		for (uint32 TargetIndex = 0; TargetIndex < NumSimultaneousRTs; TargetIndex++)
+		{
+			auto View = RenderTargetViews[TargetIndex];
+
+			if (View != nullptr)
+			{
+				TransitionResource(CommandListHandle, View, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			}
+		}
+
+	}
+
+	uint32 ClearFlags = 0;
+
+	if (ClearDSV)
+	{
+		if (bClearDepth && DSView->HasDepth())
+		{
+			ClearFlags |= D3D12_CLEAR_FLAG_DEPTH;
+		}
+
+		if (bClearStencil && DSView->HasStencil())
+		{
+			ClearFlags |= D3D12_CLEAR_FLAG_STENCIL;
+		}
+
+		if (bClearDepth && (!DSView->HasStencil() || bClearStencil))
+		{
+			// Transition the entire view (Both depth and stencil planes if applicable)
+			// Some DSVs don't have stencil bits.
+			TransitionResource(CommandListHandle, DSView, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		}
+		else
+		{
+			if (bClearDepth)
+			{
+				// Transition just the depth plane
+				TransitionResource(CommandListHandle, DSView->GetResourceLocation(), D3D12_RESOURCE_STATE_DEPTH_WRITE,1);
+			}
+			else
+			{
+				// Transition just the stencil plane
+				TransitionResource(CommandListHandle, DSView->GetResourceLocation(), D3D12_RESOURCE_STATE_DEPTH_WRITE,1);
+			}
+		}
+	}
+
 	if (ClearRTV || ClearDSV)
 	{
-		throw leo::unsupported();
+		CommandListHandle.FlushResourceBarriers();
+
 		if (ClearRTV)
 		{
 			for (uint32 TargetIndex = 0; TargetIndex < NumSimultaneousRTs; ++TargetIndex)
 			{
 				auto RTView = RenderTargetViews[TargetIndex];
 
-				if (RTView)
+				if (RTView != nullptr)
 				{
+					CommandListHandle->ClearRenderTargetView(RTView->GetView(), (float*)&ColorArray[TargetIndex], ClearRectCount, pClearRects);
 				}
 			}
 
 			if (ClearDSV)
 			{
+				CommandListHandle->ClearDepthStencilView(DSView->GetView(), (D3D12_CLEAR_FLAGS)ClearFlags, Depth, Stencil, ClearRectCount, pClearRects);
 			}
 		}
 	}
