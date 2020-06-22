@@ -335,8 +335,18 @@ namespace platform {
 			return leo::share_raw(device.CreateTexture(pAsset->GetWidth(), pAsset->GetHeight(), pAsset->GetMipmapSize(), pAsset->GetArraySize(),
 				pAsset->GetFormat(), access, { 1,0 }, pAsset->GetElementInitDatas().data()));
 		case TextureType::T_3D:
-			return leo::share_raw(device.CreateTexture(pAsset->GetWidth(), pAsset->GetHeight(), pAsset->GetDepth(), pAsset->GetMipmapSize(), pAsset->GetArraySize(),
-				pAsset->GetFormat(), access, { 1,0 }, pAsset->GetElementInitDatas().data()));
+		{
+			Render::Texture3DInitializer Initializer;
+			Initializer.Width = pAsset->GetWidth();
+			Initializer.Height = pAsset->GetHeight();
+			Initializer.Depth = pAsset->GetDepth();
+			Initializer.NumMipmaps = pAsset->GetMipmapSize();
+			Initializer.ArraySize = pAsset->GetArraySize();
+			Initializer.Format = pAsset->GetFormat();
+			Initializer.Access = access;
+
+			return leo::share_raw(device.CreateTexture(Initializer,Render::TexCreate_ShaderResource ,pAsset->GetElementInitDatas().data()));
+		}
 		case TextureType::T_Cube:
 			return leo::share_raw(device.CreateTextureCube(pAsset->GetWidth(), pAsset->GetMipmapSize(), pAsset->GetArraySize(),
 				pAsset->GetFormat(), access, { 1,0 }, pAsset->GetElementInitDatas().data()));
