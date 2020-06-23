@@ -84,6 +84,23 @@ namespace platform_ex::Windows::D3D12 {
 
 	void D3D12::Context::CommitCommandList(Device::CommandType type)
 	{
+		if(type == Device::CommandType::Command_Render)
+		{
+			auto nodedvice = device->GetNodeDevice(0);
+			auto& commandcontext = nodedvice->GetDefaultCommandContext();
+
+			commandcontext.CommandListHandle.Close();
+			ID3D12CommandList* cmd_lists[] = { commandcontext.CommandListHandle.CommandList() };
+			nodedvice->GetD3DCommandQueue(CommandQueueType::Default)->ExecuteCommandLists(1, cmd_lists);
+
+			auto val = GetFence(type).Signal(CommandQueueType::Default);
+			GetFence(type).WaitForFence(val);
+
+			((ID3D12CommandAllocator*)(*commandcontext.CommandAllocator))->Reset();
+			commandcontext.CommandListHandle.Reset(*commandcontext.CommandAllocator);
+		}
+
+
 		CheckHResult(d3d_cmd_lists[type]->Close());
 		ID3D12CommandList* cmd_lists[] = { d3d_cmd_lists[type].Get() };
 		device->GetNodeDevice(0)->GetD3DCommandQueue(CommandQueueType::Default)->ExecuteCommandLists(1, cmd_lists);
@@ -283,9 +300,6 @@ namespace platform_ex::Windows::D3D12 {
 			0 //NodeMask
 		};
 
-		CheckHResult(d3d_device->CreateCommandQueue(&queue_desc,
-			IID_PPV_ARGS(d3d_cmd_queue.ReleaseAndGetAddress())));
-
 		for (auto& fence : device->fences) {
 			fence.swap(std::make_unique<Fence>(device.get(), 0));
 			fence->CreateFence();
@@ -374,7 +388,7 @@ namespace platform_ex::Windows::D3D12 {
 		ContextEx(device->d3d_device.Get(), nullptr);
 		DisplaySetting setting;
 
-		display = std::make_shared<Display>(GetDXGIFactory4(),d3d_cmd_queue.Get(), setting, g_hwnd);//test code
+		display = std::make_shared<Display>(GetDXGIFactory4(), device->GetNodeDevice(0)->GetD3DCommandQueue(CommandQueueType::Default), setting, g_hwnd);//test code
 		screen_frame_buffer = display->GetFrameBuffer();
 		SetFrame(display->GetFrameBuffer());
 	}

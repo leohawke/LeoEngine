@@ -264,7 +264,6 @@ private:
 		platform::ColorCorrectParameters params;
 		auto pTex = platform::CombineLUTPass(params);
 
-
 		pEntities = std::make_unique<Entities>("sponza_crytek.entities.lsl");
 
 		float modelRaidus = leo::math::length(pEntities->max - pEntities->min) * .5f;

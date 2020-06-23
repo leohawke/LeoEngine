@@ -350,6 +350,7 @@ namespace platform_ex::Windows::D3D12 {
 			if (Resource->IsTransitionNeeded(after))
 			{
 				hCommandList.AddTransitionBarrier(Resource, Resource->GetResourceState(), after, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES);
+				Resource->SetResourceState(after);
 			}
 		}
 	}
@@ -359,6 +360,7 @@ namespace platform_ex::Windows::D3D12 {
 		if (Resource->IsTransitionNeeded(after))
 		{
 			hCommandList.AddTransitionBarrier(Resource, Resource->GetResourceState(), after, subresource);
+			Resource->SetResourceState(after);
 		}
 	}
 

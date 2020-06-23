@@ -64,18 +64,18 @@ namespace platform_ex::Windows::D3D12 {
 			if (clr_views[i].Texture) {
 				D3D12_RESOURCE_BARRIER barrier;
 				barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-				/*auto p = static_cast<RenderTargetView*>(clr_views[i].get());
-				if (p->GetResourceLocation()->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_RENDER_TARGET))
-					barriers.push_back(barrier);*/
+				auto p = dynamic_cast<Texture*>(clr_views[i].Texture);
+				if (p->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_RENDER_TARGET))
+					barriers.push_back(barrier);
 			}
 		}
 
 		if (ds_view.Texture) {
 			D3D12_RESOURCE_BARRIER barrier;
 			barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-			/*auto p = static_cast<DepthStencilView*>(ds_view.get());
-			if (p->GetResourceLocation()->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_DEPTH_WRITE))
-				barriers.push_back(barrier);*/
+			auto p = dynamic_cast<Texture*>(ds_view.Texture);
+			if (p->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_DEPTH_WRITE))
+				barriers.push_back(barrier);
 		}
 		
 		if (!barriers.empty())

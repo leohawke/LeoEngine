@@ -45,6 +45,11 @@ namespace platform_ex::Windows {
 			{
 				return curr_state;
 			}
+
+			void SetResourceState(D3D12_RESOURCE_STATES state)
+			{
+				curr_state = state;
+			}
 		protected:
 			ResourceHolder();
 

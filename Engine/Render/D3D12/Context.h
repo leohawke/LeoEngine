@@ -96,7 +96,7 @@ namespace platform_ex {
 				DXGI::AdapterList adapter_list;
 
 				std::shared_ptr<Device> device;
-				COMPtr<ID3D12CommandQueue> d3d_cmd_queue;
+				
 				std::shared_ptr<Display> display;
 
 				std::shared_ptr<RayContext> ray_context;
