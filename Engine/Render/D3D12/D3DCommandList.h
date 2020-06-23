@@ -1,8 +1,8 @@
 #pragma once
 
-#include "d3d12_dxgi.h"
 #include "Utility.h"
 #include "Common.h"
+#include "ResourceHolder.h"
 #include <atomic>
 #include <queue>
 #include <mutex>
@@ -57,7 +57,7 @@ namespace platform_ex::Windows::D3D12 {
 	class CommandListHandle
 	{
 	private:
-		class CommandListData :public DeviceChild,public SingleNodeGPUObject
+		class CommandListData :public DeviceChild, public SingleNodeGPUObject
 		{
 		public:
 			CommandListData(NodeDevice* ParentDevice, D3D12_COMMAND_LIST_TYPE InCommandListType, CommandAllocator& CommandAllocator, CommandListManager* InCommandListManager);
@@ -104,6 +104,8 @@ namespace platform_ex::Windows::D3D12 {
 			using GenerationSyncPointPair = std::pair<uint64, SyncPoint>;
 			std::queue<GenerationSyncPointPair> ActiveGenerations;
 			std::mutex ActiveGenerationsCS;
+
+			ResourceBarrierBatcher ResourceBarrierBatcher;
 		private:
 			void CleanupActiveGenerations();
 		};
@@ -179,7 +181,7 @@ namespace platform_ex::Windows::D3D12 {
 		{
 			return CommandListData->CurrentGeneration;
 		}
-		
+
 		void WaitForCompletion(uint64 Generation) const
 		{
 			return CommandListData->WaitForCompletion(Generation);
@@ -229,6 +231,8 @@ namespace platform_ex::Windows::D3D12 {
 		{
 			CommandListData->FlushResourceBarriers();
 		}
+
+		void AddTransitionBarrier(ResourceHolder* pResource, D3D12_RESOURCE_STATES Before, D3D12_RESOURCE_STATES After, uint32 Subresource);
 
 		void Create(NodeDevice* InParent, D3D12_COMMAND_LIST_TYPE InCommandType, CommandAllocator& InAllocator, CommandListManager* InManager);
 
@@ -329,23 +333,36 @@ namespace platform_ex::Windows::D3D12 {
 		//TODO
 	}
 
-	inline void TransitionResource(CommandListHandle& pCommandList, RenderTargetView* View, D3D12_RESOURCE_STATES after)
-	{
-		//TODO
-	}
+	
 
 	inline void TransitionResource(CommandListHandle& pCommandList, DepthStencilView* View)
 	{
 		//TODO
 	}
 
-	inline void TransitionResource(CommandListHandle& pCommandList, DepthStencilView* View, D3D12_RESOURCE_STATES after)
+	inline void TransitionResource(CommandListHandle& hCommandList, ResourceHolder* Resource, D3D12_RESOURCE_STATES after, const CViewSubresourceSubset& subresourceSubset)
 	{
-		//TODO
+		const bool bIsWholeResource = subresourceSubset.IsWholeResource();
+
+		lconstraint(bIsWholeResource);
+
+		if (bIsWholeResource) {
+			if (Resource->IsTransitionNeeded(after))
+			{
+				hCommandList.AddTransitionBarrier(Resource, Resource->GetResourceState(), after, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES);
+			}
+		}
 	}
 
-	inline void TransitionResource(CommandListHandle& pCommandList, ResourceHolder* Resource, D3D12_RESOURCE_STATES after, UINT32 subRes)
+	inline void TransitionResource(CommandListHandle& hCommandList, ResourceHolder* Resource, D3D12_RESOURCE_STATES after, uint32 subresource)
 	{
-		//TODO
+		if (Resource->IsTransitionNeeded(after))
+		{
+			hCommandList.AddTransitionBarrier(Resource, Resource->GetResourceState(), after, subresource);
+		}
 	}
+
+	void TransitionResource(CommandListHandle& hCommandList, DepthStencilView* pView, D3D12_RESOURCE_STATES after);
+
+	void TransitionResource(CommandListHandle& hCommandList, RenderTargetView* pView, D3D12_RESOURCE_STATES after);
 }

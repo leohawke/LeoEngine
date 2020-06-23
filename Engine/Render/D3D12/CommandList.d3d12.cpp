@@ -1,6 +1,6 @@
+#include "NodeDevice.h"
 #include "D3DCommandList.h"
 #include "CommandListManager.h"
-#include "NodeDevice.h"
 
 using namespace platform_ex::Windows::D3D12;
 
@@ -47,6 +47,7 @@ void CommandListHandle::CommandListData::Close()
 
 void CommandListHandle::CommandListData::FlushResourceBarriers()
 {
+	ResourceBarrierBatcher.Flush(CommandList.Get());
 }
 
 void CommandListHandle::CommandListData::Reset(CommandAllocator& Allocator, bool bTrackExecTime)
@@ -149,6 +150,14 @@ void CommandListHandle::CommandListData::CleanupActiveGenerations()
 	}
 }
 
+void CommandListHandle::AddTransitionBarrier(ResourceHolder* pResource, D3D12_RESOURCE_STATES Before, D3D12_RESOURCE_STATES After, uint32 Subresource)
+{
+	if (Before != After)
+	{
+		CommandListData->ResourceBarrierBatcher.AddTransition(pResource->Resource(), Before, After, Subresource);
+	}
+}
+
 void CommandListHandle::Create(NodeDevice* InParent, D3D12_COMMAND_LIST_TYPE InCommandType, CommandAllocator& InAllocator, CommandListManager* InManager)
 {
 	CommandListData = new D3D12CommandListData(InParent, InCommandType, InAllocator, InManager);
@@ -168,4 +177,71 @@ CommandAllocator::~CommandAllocator()
 void CommandAllocator::Init(ID3D12Device* InDevice, const D3D12_COMMAND_LIST_TYPE& InType)
 {
 	CheckHResult(InDevice->CreateCommandAllocator(InType, IID_PPV_ARGS(D3DCommandAllocator.ReleaseAndGetAddress())));
+}
+
+void platform_ex::Windows::D3D12::TransitionResource(CommandListHandle& hCommandList, DepthStencilView* pView, D3D12_RESOURCE_STATES after)
+{
+	auto pResource = pView->GetResourceLocation();
+	auto ResourceDesc = pResource->GetDesc();
+
+	const D3D12_DEPTH_STENCIL_VIEW_DESC& desc = pView->GetDesc();
+	switch (desc.ViewDimension)
+	{
+	case D3D12_DSV_DIMENSION_TEXTURE2D:
+	case D3D12_DSV_DIMENSION_TEXTURE2DMS:
+		if (GetPlaneCount(ResourceDesc.Format) > 1)
+		{
+			// Multiple subresources to transtion
+			TransitionResource(hCommandList, pResource, after, pView->GetViewSubresourceSubset());
+			break;
+		}
+		else
+		{
+			// Only one subresource to transition
+			lconstraint(GetPlaneCount(ResourceDesc.Format) == 1);
+			TransitionResource(hCommandList, pResource, after, desc.Texture2D.MipSlice);
+		}
+		break;
+
+	case D3D12_DSV_DIMENSION_TEXTURE2DARRAY:
+	case D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY:
+	{
+		// Multiple subresources to transtion
+		TransitionResource(hCommandList, pResource, after, pView->GetViewSubresourceSubset());
+		break;
+	}
+
+	default:
+		lconstraint(false);	// Need to update this code to include the view type
+		break;
+	}
+}
+
+void platform_ex::Windows::D3D12::TransitionResource(CommandListHandle& hCommandList, RenderTargetView* pView, D3D12_RESOURCE_STATES after)
+{
+	auto pResource = pView->GetResourceLocation();
+
+	const D3D12_RENDER_TARGET_VIEW_DESC& desc = pView->GetDesc();
+	switch (desc.ViewDimension)
+	{
+	case D3D12_RTV_DIMENSION_TEXTURE3D:
+		// Note: For volume (3D) textures, all slices for a given mipmap level are a single subresource index.
+		// Fall-through
+	case D3D12_RTV_DIMENSION_TEXTURE2D:
+	case D3D12_RTV_DIMENSION_TEXTURE2DMS:
+		// Only one subresource to transition
+		TransitionResource(hCommandList, pResource, after, desc.Texture2D.MipSlice);
+		break;
+
+	case D3D12_RTV_DIMENSION_TEXTURE2DARRAY:
+	{
+		// Multiple subresources to transition
+		TransitionResource(hCommandList, pResource, after, pView->GetViewSubresourceSubset());
+		break;
+	}
+
+	default:
+		lconstraint(false);	// Need to update this code to include the view type
+		break;
+	}
 }

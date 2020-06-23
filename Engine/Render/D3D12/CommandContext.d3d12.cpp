@@ -526,12 +526,12 @@ void CommandContext::ClearMRT(bool bClearColor, int32 NumClearColors, const leo:
 			if (bClearDepth)
 			{
 				// Transition just the depth plane
-				TransitionResource(CommandListHandle, DSView->GetResourceLocation(), D3D12_RESOURCE_STATE_DEPTH_WRITE,1);
+				TransitionResource(CommandListHandle, DSView->GetResourceLocation(), D3D12_RESOURCE_STATE_DEPTH_WRITE, DSView->GetDepthOnlyViewSubresourceSubset());
 			}
 			else
 			{
 				// Transition just the stencil plane
-				TransitionResource(CommandListHandle, DSView->GetResourceLocation(), D3D12_RESOURCE_STATE_DEPTH_WRITE,1);
+				TransitionResource(CommandListHandle, DSView->GetResourceLocation(), D3D12_RESOURCE_STATE_DEPTH_WRITE, DSView->GetStencilOnlyViewSubresourceSubset());
 			}
 		}
 	}
