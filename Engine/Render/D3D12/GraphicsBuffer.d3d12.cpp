@@ -280,6 +280,8 @@ namespace platform_ex::Windows::D3D12 {
 
 			uav = std::make_unique<UnorderedAccessView>(GetDefaultNodeDevice(),desc,*this);
 		}
+
+		desc = res_desc;
 	}
 
 	void GraphicsBuffer::HWResourceDelete()

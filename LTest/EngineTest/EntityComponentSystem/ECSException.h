@@ -1,7 +1,7 @@
 #ifndef FrameWork_ECS_Exception_h
 #define FrameWork_ECS_Exception_h 1
 
-#include <LFramework/Core/LException.h>
+#include <stdexcept>
 
 namespace ecs {
 	class ECSException : public std::runtime_error {

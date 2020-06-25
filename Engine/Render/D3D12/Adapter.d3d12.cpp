@@ -261,6 +261,7 @@ namespace platform_ex::Windows::D3D12 {
 
 	GraphicsBuffer * Device::CreateIndexBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const*> init_data)
 	{
+		lconstraint(format == platform::Render::EFormat::EF_R16UI || format == platform::Render::EFormat::EF_R32UI);
 		return CreateBuffer(usage, access, size_in_byte, format, init_data);
 	}
 

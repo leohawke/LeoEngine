@@ -275,6 +275,9 @@
     <ClCompile Include="Render\D3D12\SamplerState.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\imgui\imgui_context.cpp">
+      <Filter>Renderer\imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Context.h">
@@ -621,6 +624,9 @@
     <ClInclude Include="Render\RenderPassInfo.h">
       <Filter>Render\DeviceInterface</Filter>
     </ClInclude>
+    <ClInclude Include="Renderer\imgui\imgui_context.h">
+      <Filter>Renderer\imgui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
@@ -697,6 +703,12 @@
     </Filter>
     <Filter Include="Shaders\PostProcess">
       <UniqueIdentifier>{12c18834-075b-4cc8-9dc6-689f35954d1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\imgui">
+      <UniqueIdentifier>{0a6189e7-13dd-46ee-8ac9-a35a64ee13a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\imgui">
+      <UniqueIdentifier>{a6aa923e-d059-4ce1-b801-e3785e526cd7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

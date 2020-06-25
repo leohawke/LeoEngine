@@ -51,7 +51,7 @@ namespace platform_ex::Windows::D3D12 {
 		LeoEngine::Render::ViewPort viewport{0,0,1,1};
 		if (min_rtv)
 		{
-			viewport.width = min_rtv->GetResource()->GetDesc().Width;
+			viewport.width = static_cast<uint32>(min_rtv->GetResource()->GetDesc().Width);
 			viewport.height = min_rtv->GetResource()->GetDesc().Height;
 		}
 
@@ -114,7 +114,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		uint32 ClearRectCount = 0;
 		D3D12_RECT* pClearRects = nullptr;
-		D3D12_RECT ClearRects[4];
+		//D3D12_RECT ClearRects[4];
 
 		if (flags & Color) {
 			for (auto i = 0; i != clr_views.size(); ++i) {
@@ -162,12 +162,5 @@ namespace platform_ex::Windows::D3D12 {
 			return dynamic_cast<Texture*>(ds_view.Texture)->GetDepthStencilView({});
 		return nullptr;
 	}
-	platform::Render::Texture* FrameBuffer::Attached(FrameBuffer::Attachment which) const
-	{
-		if (which == DepthStencil)
-			return ds_view.Texture;
-		if(which < clr_views.size())
-			return clr_views[which].Texture;
-		return nullptr;
-	}
+	
 }

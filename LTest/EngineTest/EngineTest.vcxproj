@@ -166,6 +166,7 @@
     <ClCompile Include="EntityComponentSystem\Entity.cpp" />
     <ClCompile Include="EntityComponentSystem\EntitySystem.cpp" />
     <ClCompile Include="EntityComponentSystem\System.cpp" />
+    <ClCompile Include="imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="Scene\SceneComponent.cpp" />
     <ClCompile Include="Scene\SceneSystem.cpp" />
     <ClCompile Include="TestFramework.cpp" />
@@ -184,6 +185,9 @@
     <ProjectReference Include="..\..\LScheme\LScheme.vcxproj">
       <Project>{596f0cdd-56fd-406e-a5e4-2d3d5ec7ca78}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\SDKs\imgui\imgui.vcxproj">
+      <Project>{0c2a4c4d-d4e4-4b3d-bd9d-2a9cbca235d8}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EntityComponentSystem\Component.h" />
@@ -193,6 +197,7 @@
     <ClInclude Include="EntityComponentSystem\Entity.h" />
     <ClInclude Include="EntityComponentSystem\EntitySystem.h" />
     <ClInclude Include="EntityComponentSystem\System.h" />
+    <ClInclude Include="imgui\imgui_impl_win32.h" />
     <ClInclude Include="Scene\CameraComponent.h" />
     <ClInclude Include="Scene\MeshRendererComponent.h" />
     <ClInclude Include="Scene\SceneComponent.h" />

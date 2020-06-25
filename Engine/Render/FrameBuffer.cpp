@@ -12,6 +12,15 @@ namespace platform::Render {
 	{
 	}
 
+	Texture* FrameBuffer::Attached(FrameBuffer::Attachment which) const
+	{
+		if (which == DepthStencil)
+			return ds_view.Texture;
+		if (which < clr_views.size())
+			return clr_views[which].Texture;
+		return nullptr;
+	}
+
 
 	void FrameBuffer::Attach(Attachment which, const RenderTarget& view)
 	{

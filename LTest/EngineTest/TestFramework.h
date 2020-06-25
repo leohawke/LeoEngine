@@ -2,11 +2,7 @@
 
 #include "LBase/sutility.h"
 #include "LBase/linttype.hpp"
-#ifdef LB_IMPL_MSCPP
 #include <string_view>
-#else
-#include <experimental/string_view> //TODO:replace it
-#endif
 #include <LFramework/LCLib/NativeAPI.h>
 #include <LFramework/Helper/WindowThread.h>
 

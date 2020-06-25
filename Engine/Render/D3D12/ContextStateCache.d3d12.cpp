@@ -71,7 +71,7 @@ void CommandContextStateCache::SetStencilRef(uint32 StencilRef)
 	}
 }
 
-void CommandContextStateCache::InternalSetIndexBuffer(GraphicsBuffer* IndexBufferLocation, DXGI_FORMAT Format, uint32 Offset)
+void CommandContextStateCache::InternalSetIndexBuffer(ResourceHolder* IndexBufferLocation, DXGI_FORMAT Format, uint32 Offset)
 {
 	auto& CommandList = CmdContext->CommandListHandle;
 
@@ -318,7 +318,45 @@ void CommandContextStateCache::ApplySamplers(const RootSignature* const pRootSig
 
 void CommandContextStateCache::DirtyStateForNewCommandList()
 {
+	// Dirty state that doesn't align with command list defaults.
 
+	// Always need to set PSOs and root signatures
+	PipelineState.Common.bNeedSetPSO = true;
+	PipelineState.Graphics.bNeedSetRootSignature = true;
+	bNeedSetPrimitiveTopology = true;
+
+
+	if (PipelineState.Graphics.VBCache.BoundVBMask) { bNeedSetVB = true; }
+
+	// IndexBuffers are set in DrawIndexed*() calls, so there's no way to depend on previously set IndexBuffers without making a new DrawIndexed*() call.
+	PipelineState.Graphics.IBCache.Clear();
+
+	if (PipelineState.Graphics.CurrentNumberOfStreamOutTargets) { bNeedSetSOs = true; }
+	if (PipelineState.Graphics.CurrentNumberOfRenderTargets || PipelineState.Graphics.CurrentDepthStencilTarget) { bNeedSetRTs = true; }
+	if (PipelineState.Graphics.CurrentNumberOfViewports) { bNeedSetViewports = true; }
+	if (PipelineState.Graphics.CurrentNumberOfScissorRects) { bNeedSetScissorRects = true; }
+
+	if (PipelineState.Graphics.CurrentBlendFactor[0] != D3D12_DEFAULT_BLEND_FACTOR_RED ||
+		PipelineState.Graphics.CurrentBlendFactor[1] != D3D12_DEFAULT_BLEND_FACTOR_GREEN ||
+		PipelineState.Graphics.CurrentBlendFactor[2] != D3D12_DEFAULT_BLEND_FACTOR_BLUE ||
+		PipelineState.Graphics.CurrentBlendFactor[3] != D3D12_DEFAULT_BLEND_FACTOR_ALPHA)
+	{
+		bNeedSetBlendFactor = true;
+	}
+
+	if (PipelineState.Graphics.CurrentReferenceStencil != D3D12_DEFAULT_STENCIL_REFERENCE) { bNeedSetStencilRef = true; }
+
+	if (PipelineState.Graphics.MinDepth != 0.0 ||
+		PipelineState.Graphics.MaxDepth != 1.0)
+	{
+		bNeedSetDepthBounds = false;
+	}
+
+	// Always dirty View and Sampler bindings. We detect the slots that are actually used at Draw/Dispatch time.
+	PipelineState.Common.SRVCache.DirtyAll();
+	PipelineState.Common.UAVCache.DirtyAll();
+	PipelineState.Common.CBVCache.DirtyAll();
+	PipelineState.Common.SamplerCache.DirtyAll();
 }
 
 void CommandContextStateCache::DirtyState()

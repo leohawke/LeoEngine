@@ -59,21 +59,21 @@ namespace platform::Render {
 		}
 
 		template<typename THardwareShader>
-		void SetShaderSampler(THardwareShader* Shader, Shader::ShaderType Type, uint32 SamplerIndex, const TextureSampleDesc& Desc)
+		void SetShaderSampler(THardwareShader* Shader, uint32 SamplerIndex, const TextureSampleDesc& Desc)
 		{
-			GetContext().SetShaderSampler(Shader, Type, SamplerIndex, Desc);
+			GetContext().SetShaderSampler(Shader, SamplerIndex, Desc);
 		}
 
 		template<typename THardwareShader>
-		void SetShaderTexture(THardwareShader* Shader, Shader::ShaderType Type, uint32 TextureIndex, Texture* Texture)
+		void SetShaderTexture(THardwareShader* Shader, uint32 TextureIndex, Texture* Texture)
 		{
-			GetContext().SetShaderTexture(Shader, Type, TextureIndex, Texture);
+			GetContext().SetShaderTexture(Shader, TextureIndex, Texture);
 		}
 
 		template<typename THardwareShader>
-		void SetShaderConstantBuffer(THardwareShader* Shader, Shader::ShaderType Type, uint32 BaseIndex, GraphicsBuffer* Buffer)
+		void SetShaderConstantBuffer(THardwareShader* Shader, uint32 BaseIndex, GraphicsBuffer* Buffer)
 		{
-			GetContext().SetShaderConstantBuffer(Shader, Type, BaseIndex, Buffer);
+			GetContext().SetShaderConstantBuffer(Shader, BaseIndex, Buffer);
 		}
 
 		void DrawIndexedPrimitive(GraphicsBuffer* IndexBuffer, int32 BaseVertexIndex, uint32 FirstInstance, uint32 NumVertices, uint32 StartIndex, uint32 NumPrimitives, uint32 NumInstances)
@@ -81,9 +81,9 @@ namespace platform::Render {
 			GetContext().DrawIndexedPrimitive(IndexBuffer, BaseVertexIndex, FirstInstance, NumVertices, StartIndex, NumPrimitives, NumInstances);
 		}
 
-		void DrawPrimitive(uint32 BaseVertexIndex, uint32 NumPrimitives, uint32 NumInstances)
+		void DrawPrimitive(uint32 BaseVertexIndex, uint32 FirstInstance, uint32 NumPrimitives, uint32 NumInstances)
 		{
-			GetContext().DrawPrimitive(BaseVertexIndex, NumPrimitives, NumInstances);
+			GetContext().DrawPrimitive(BaseVertexIndex, FirstInstance, NumPrimitives, NumInstances);
 		}
 
 		template<typename THardwareShader>

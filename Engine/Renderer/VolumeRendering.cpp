@@ -67,5 +67,5 @@ void platform::RasterizeToVolumeTexture(Render::CommandList& CmdList, VolumeBoun
 
 	const auto NumInstances = VolumeBounds.MaxZ - VolumeBounds.MinZ;
 
-	CmdList.DrawPrimitive(0, 2, NumInstances);
+	CmdList.DrawPrimitive(0, 0,2, NumInstances);
 }

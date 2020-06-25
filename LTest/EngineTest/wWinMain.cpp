@@ -1,31 +1,30 @@
-#include "../../Engine/test.h"
-#include "../../Engine/Asset/MeshX.h"
-#include "../../Engine/Render/IContext.h"
-#include "../../Engine/Core/Mesh.h"
-#include "../../Engine/Render/IFrameBuffer.h"
-#include "../../Engine/Render/DataStructures.h"
-#include "../../Engine/Renderer/PostProcess/PostProcessCombineLUTs.h"
-#include "../../Engine/Asset/EffectX.h"
-#include "../../Engine/Asset/MaterialX.h"
-#include "../../Engine/Asset/LSLAssetX.h"
-#include "../../Engine/Asset/RayTracingX.h"
-#include "../../Engine/System/NinthTimer.h"
-#include "../../Engine/Core/CameraController.h"
-#include "../../Engine/System/SystemEnvironment.h"
-#include "TestFramework.h"
-#include "EntityComponentSystem/EntitySystem.h"
-#include "LSchemEngineUnitTest.h"
-#include "../../Engine/Core/Camera.h"
-#include "../../Engine/Render/IRayTracingScene.h"
-#include "../../Engine/Render/IRayDevice.h"
-#include "../../Engine/Render/IRayContext.h"
-#include <LFramework/LCLib/Logger.h>
-#include <LFramework/LCLib/Debug.h>
-
-#include <LScheme/LScheme.h>
-#include <windowsx.h>
-
+#include "Engine/test.h"
+#include "Engine/Asset/MeshX.h"
+#include "Engine/Asset/EffectX.h"
 #define TEST_CODE 1
+
+#include "Engine/Asset/MaterialX.h"
+#include "Engine/Asset/LSLAssetX.h"
+#include "Engine/System/NinthTimer.h"
+#include "Engine/Core/CameraController.h"
+#include "Engine/Core/Mesh.h"
+#include "Engine/Core/Camera.h"
+#include "Engine/System/SystemEnvironment.h"
+#include "EntityComponentSystem/EntitySystem.h"
+#include "Engine/Renderer/imgui/imgui_context.h"
+#include "Engine/Render/ICommandList.h"
+#include "Engine/Render/IRayTracingScene.h"
+#include "Engine/Render/IRayDevice.h"
+#include "Engine/Render/IRayContext.h"
+#include "Engine/Render/DataStructures.h"
+#include "Engine/Renderer/PostProcess/PostProcessCombineLUTs.h"
+#include "Engine/Render/IContext.h"
+
+#include "TestFramework.h"
+#include "LSchemEngineUnitTest.h"
+#include "imgui/imgui_impl_win32.h"
+
+#include <windowsx.h>
 
 #include <filesystem>
 
@@ -34,6 +33,29 @@ using namespace LeoEngine::Render;
 namespace fs = std::filesystem;
 
 namespace lm = leo::math;
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+LRESULT CALLBACK ImGuiCallWndProc(
+	_In_ int    nCode,
+	_In_ WPARAM wParam,
+	_In_ LPARAM lParam
+)
+{
+	if (nCode < 0)
+	{
+		return CallNextHookEx(nullptr, nCode, wParam, lParam);
+	}
+	else {
+		auto pMessage = reinterpret_cast<CWPSTRUCT*>(lParam);
+
+		ImGui_ImplWin32_WndProcHandler(pMessage->hwnd, pMessage->message, pMessage->wParam, pMessage->lParam);
+
+		auto ret = CallNextHookEx(nullptr, nCode, wParam, lParam);
+
+		return ret;
+	}
+}
 
 class Entity {
 public:
@@ -152,7 +174,33 @@ public:
 
 	std::shared_ptr<Texture2D> ShadowMap;
 	std::shared_ptr<UnorderedAccessView> ShadowMapUAV;
+
+	leo::math::float4 clear_color = { 0,0,0,1 };
 private:
+	void OnGUI()
+	{
+		// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
+		{
+			static float f = 0.0f;
+			static int counter = 0;
+
+			ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+
+			ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+
+			ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+			if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+				counter++;
+			ImGui::SameLine();
+			ImGui::Text("counter = %d", counter);
+
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::End();
+		}
+	}
+
 	leo::uint32 DoUpdate(leo::uint32 pass) override {
 		auto& timer = platform::chrono::FetchGlobalTimer();
 		timer.UpdateOnFrameStart();
@@ -161,8 +209,15 @@ private:
 		auto entityId = ecs::EntitySystem::Instance().AddEntity<ecs::Entity>();
 
 		Context::Instance().BeginFrame();
-		Context::Instance().GetScreenFrame()->Clear(FrameBuffer::Color | FrameBuffer::Depth | FrameBuffer::Stencil, { 0,0,0,1 }, 1, 0);
+		Context::Instance().GetScreenFrame()->Clear(FrameBuffer::Color | FrameBuffer::Depth | FrameBuffer::Stencil, clear_color, 1, 0);
 		auto& Device = Context::Instance().GetDevice();
+
+		platform::imgui::Context_NewFrame();
+		ImGui_ImplWin32_NewFrame();
+		ImGui::NewFrame();
+
+		OnGUI();
+		ImGui::Render();
 
 		ecs::EntitySystem::Instance().RemoveEntity(entityId);
 
@@ -210,7 +265,7 @@ private:
 		//pre-z
 		for (auto& entity : pEntities->GetRenderables())
 		{
-			Context::Instance().Render(*pPreZEffect, pPreZEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
+			//Context::Instance().Render(*pPreZEffect, pPreZEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
 		}
 
 		//ray-shadow
@@ -235,13 +290,22 @@ private:
 		pEffect->GetParameter("shadow_tex") = TextureSubresource(ShadowMap, 0, ShadowMap->GetArraySize(), 0, ShadowMap->GetNumMipMaps());
 
 		//re-bind
-		Context::Instance().SetFrame(Context::Instance().GetScreenFrame());
+		auto& screen_frame = Context::Instance().GetScreenFrame();
+		Context::Instance().SetFrame(screen_frame);
 		for (auto& entity : pEntities->GetRenderables())
 		{
 			entity.GetMaterial().UpdateParams(reinterpret_cast<const platform::Renderable*>(&entity));
-			Context::Instance().Render(*pEffect, pEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
+			//Context::Instance().Render(*pEffect, pEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
 
 		}
+
+		auto& CmdList = platform::Render::GetCommandList();
+
+		platform::Render::RenderPassInfo passInfo(screen_frame->Attached(platform::Render::FrameBuffer::Target0), screen_frame->Attached(platform::Render::FrameBuffer::DepthStencil));
+
+		CmdList.BeginRenderPass(passInfo, "imguiPass");
+
+		platform::imgui::Context_RenderDrawData(ImGui::GetDrawData());
 
 		Context::Instance().GetDisplay().SwapBuffers();
 		//what can i do in this duration?
@@ -251,11 +315,27 @@ private:
 
 		return Nothing;
 	}
+
 	void OnCreate() override {
 		auto swap_chain = ::Create(GetNativeHandle());
 		Context::Instance().CreateDeviceAndDisplay();
 
 		static auto pInitGuard = LeoEngine::System::InitGlobalEnvironment();
+
+		// Setup Dear ImGui context
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+		// Setup Dear ImGui style
+		ImGui::StyleColorsDark();
+
+		SetWindowsHookExW(WH_CALLWNDPROC, ImGuiCallWndProc, ::GetModuleHandleW({}), 0);
+		ImGui_ImplWin32_Init(GetNativeHandle());
+
+		platform::imgui::Context_Init(Context::Instance());
 
 		platform::ColorCorrectParameters params;
 		auto pTex = platform::CombineLUTPass(params);

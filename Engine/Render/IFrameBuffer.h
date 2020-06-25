@@ -50,6 +50,8 @@ namespace platform::Render {
 		void DetachUAV(leo::uint8 which);
 
 		virtual void Clear(leo::uint32 flags, const leo::math::float4  & clr, float depth, leo::int32 stencil) = 0;
+
+		Texture* Attached(FrameBuffer::Attachment) const;
 	protected:
 		std::vector<RenderTarget> clr_views;
 		DepthRenderTarget ds_view;

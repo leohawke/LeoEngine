@@ -296,7 +296,7 @@ void CommandContext::DrawIndexedPrimitive(platform::Render::GraphicsBuffer* IInd
 	CommandListHandle->DrawIndexedInstanced(IndexCount, NumInstances, StartIndex, BaseVertexIndex, FirstInstance);
 }
 
-void CommandContext::DrawPrimitive(uint32 BaseVertexIndex, uint32 NumPrimitives, uint32 NumInstances)
+void CommandContext::DrawPrimitive(uint32 BaseVertexIndex, uint32 FirstInstance, uint32 NumPrimitives, uint32 NumInstances)
 {
 	NumInstances = std::max<uint32>(1, NumInstances);
 	numDraws++;
@@ -307,7 +307,7 @@ void CommandContext::DrawPrimitive(uint32 BaseVertexIndex, uint32 NumPrimitives,
 	uint32 VertexCount = GetIndexCount(StateCache.GetPrimtivteType(), NumPrimitives);
 
 	StateCache.ApplyState<CPT_Graphics>();
-	CommandListHandle->DrawInstanced(VertexCount, NumInstances, BaseVertexIndex, 0);
+	CommandListHandle->DrawInstanced(VertexCount, NumInstances, BaseVertexIndex, FirstInstance);
 }
 
 struct FRTVDesc
@@ -439,7 +439,7 @@ void CommandContext::SetRenderTargets(uint32 NewNumSimultaneousRenderTargets, co
 	{
 		auto DepthTargetTexture = DepthStencilView->GetResource();
 		D3D12_RESOURCE_DESC const& DTTDesc = DepthTargetTexture->GetDesc();
-		SetViewport(0, 0, 0.0f, DTTDesc.Width, DTTDesc.Height, 1.0f);
+		SetViewport(0, 0, 0.0f, static_cast<uint32>(DTTDesc.Width), DTTDesc.Height, 1.0f);
 	}
 }
 

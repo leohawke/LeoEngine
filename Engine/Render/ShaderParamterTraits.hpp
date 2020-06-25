@@ -62,6 +62,17 @@ namespace platform::Render
 		};
 
 		template<>
+		struct TShaderParameterTypeInfo<leo::math::float4x4>
+		{
+			static constexpr ShaderParamType ShaderType = SPT_float4x4;
+
+			template<std::size_t Boundary = 0>
+			static constexpr std::size_t Alignement = 16;
+
+			using DeclType = leo::math::float4x4;
+		};
+
+		template<>
 		struct TShaderParameterTypeInfo<int>
 		{
 			static constexpr ShaderParamType ShaderType = SPT_int;

@@ -21,6 +21,9 @@
       <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="wWinMain.cpp" />
+    <ClCompile Include="imgui\imgui_impl_win32.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TestFramework.h" />
@@ -57,6 +60,9 @@
     <ClInclude Include="Scene\MeshRendererComponent.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_win32.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="EntityComponentSystem">
@@ -64,6 +70,9 @@
     </Filter>
     <Filter Include="Scene">
       <UniqueIdentifier>{b2099af2-f6e3-4d80-97ab-09a046886c9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imgui">
+      <UniqueIdentifier>{a389932c-3be9-4b9e-b9d5-ab1bdd4a9888}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
