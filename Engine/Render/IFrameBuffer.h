@@ -54,8 +54,6 @@ namespace platform::Render {
 		std::vector<RenderTarget> clr_views;
 		DepthRenderTarget ds_view;
 		std::vector<std::shared_ptr<UnorderedAccessView>> uav_views;
-
-		LeoEngine::Render::ViewPort viewport;
 	};
 }
 

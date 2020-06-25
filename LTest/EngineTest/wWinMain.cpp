@@ -164,10 +164,6 @@ private:
 		Context::Instance().GetScreenFrame()->Clear(FrameBuffer::Color | FrameBuffer::Depth | FrameBuffer::Stencil, { 0,0,0,1 }, 1, 0);
 		auto& Device = Context::Instance().GetDevice();
 
-		
-		//auto pRayScene = pEntities->BuildRayTracingScene();
-
-
 		ecs::EntitySystem::Instance().RemoveEntity(entityId);
 
 		lm::float4x4 worldmatrix = {
@@ -322,10 +318,6 @@ private:
 				pCameraMainpulator->Zoom(offset);
 			}
 		};
-
-		platform::X::LoadRayTracingShader(Context::Instance().GetRayContext().GetDevice(), "RayTracingDefaultHitShaders.lsl");
-		platform::X::LoadRayTracingShader(Context::Instance().GetRayContext().GetDevice(), "RayTracingScreenSpaceShadow.lsl");
-		
 	}
 };
 

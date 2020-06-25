@@ -15,11 +15,15 @@ namespace platform_ex::Windows::D3D12 {
 		std::vector<ID3D12Resource*> rt_src;
 		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> rt_handles(clr_views.size());
 
+		RenderTargetView* min_rtv = nullptr;
 		for (auto i = 0; i != clr_views.size(); ++i) {
 			if (clr_views[i].Texture) {
 				auto pD3DTexture = dynamic_cast<Texture*>(clr_views[i].Texture);
-				auto pRTV = pD3DTexture->GetRenderTargetView(0, -1);
+				auto pRTV = pD3DTexture->GetRenderTargetView(clr_views[i].MipIndex, clr_views[i].ArraySlice);
 				
+				if (min_rtv == nullptr)
+					min_rtv = pRTV;
+
 				rt_handles[i] = pRTV->GetView();
 			}
 			else
@@ -44,6 +48,12 @@ namespace platform_ex::Windows::D3D12 {
 		cmd_list->OMSetRenderTargets(static_cast<UINT>(rt_handles.size()),
 			rt_handles.empty() ? nullptr : &rt_handles[0], false, ds_handle_ptr);
 
+		LeoEngine::Render::ViewPort viewport{0,0,1,1};
+		if (min_rtv)
+		{
+			viewport.width = min_rtv->GetResource()->GetDesc().Width;
+			viewport.height = min_rtv->GetResource()->GetDesc().Height;
+		}
 
 		d3d12_viewport.TopLeftX = static_cast<float>(viewport.x);
 		d3d12_viewport.TopLeftY = static_cast<float>(viewport.y);

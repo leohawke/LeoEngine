@@ -27,11 +27,6 @@ namespace platform::Render {
 				clr_views.resize(clr_index + 1);
 			clr_views[clr_index] = view;
 
-			//find viewport
-			auto min_clr_index = clr_index;
-			for (auto i = 0; i != clr_index; ++i)
-				if (clr_views[i].Texture)
-					min_clr_index = i;
 			break;
 		}
 	}
