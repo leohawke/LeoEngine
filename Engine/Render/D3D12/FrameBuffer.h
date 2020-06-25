@@ -22,6 +22,8 @@ namespace platform_ex::Windows::D3D12 {
 		void Clear(leo::uint32 flags, const leo::math::float4  & clr, float depth, leo::int32 stencil) override;
 
 		DepthStencilView* GetDepthStencilView() const;
+
+		platform::Render::Texture* Attached(FrameBuffer::Attachment) const;
 	public:
 		void SetRenderTargets();
 		void BindBarrier();

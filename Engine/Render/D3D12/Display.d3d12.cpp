@@ -126,7 +126,11 @@ void platform_ex::Windows::D3D12::Display::SwapBuffers()
 		CheckHResult(swap_chain->Present(0, present_flags));
 
 		back_buffer_index = swap_chain->GetCurrentBackBufferIndex();
-		//frame_buffer->Attach(FrameBuffer::Target0, render_target_views[back_buffer_index]);
+
+		platform::Render::RenderTarget view;
+		view.Texture = render_targets_texs[back_buffer_index].get();
+
+		frame_buffer->Attach(FrameBuffer::Target0, view);
 	}
 }
 

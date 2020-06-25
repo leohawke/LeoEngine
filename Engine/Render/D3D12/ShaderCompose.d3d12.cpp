@@ -27,7 +27,7 @@ namespace {
 			try {
 				param->Value(tex_subres);
 			}
-			catch (leo::bad_any_cast&) {
+			catch (std::bad_any_cast&) {
 				LF_Trace(platform::Descriptions::RecordLevel::Warning, "SetTextureSRV(%s) Value Null!", param->Name.c_str());
 			}
 			if (tex_subres.tex) {
@@ -41,9 +41,32 @@ namespace {
 
 					tex_subres.first_level, tex_subres.num_levels);
 
-				psrv.reset(new D3D12::ShaderResourceView(D3D12::GetDefaultNodeDevice(), Desc, *pTexture));
+				auto pDefaultSRV = pTexture->RetriveShaderResourceView();
 
-				*ppsrv = psrv.get();
+				if (memcmp(&pDefaultSRV->GetDesc(), &Desc, sizeof(Desc)) == 0)
+				{
+					*ppsrv = pDefaultSRV;
+					return;
+				}
+
+				bool bReset = psrv == nullptr;
+
+				if (!bReset)
+				{
+					auto PrevDesc = psrv->GetDesc();
+
+					if (memcmp(&PrevDesc, &Desc, sizeof(Desc)) != 0 || pTexture != psrv->GetResourceLocation())
+					{
+						bReset = true;
+					}
+				}
+
+				if (bReset)
+				{
+					psrv.reset(new D3D12::ShaderResourceView(D3D12::GetDefaultNodeDevice(), Desc, *pTexture));
+
+					*ppsrv = psrv.get();
+				}
 			}
 			else {
 				std::get<0>(*psrvsrc) = nullptr;

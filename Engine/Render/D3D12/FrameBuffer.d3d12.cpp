@@ -30,11 +30,9 @@ namespace platform_ex::Windows::D3D12 {
 
 		D3D12_CPU_DESCRIPTOR_HANDLE ds_handle;
 		D3D12_CPU_DESCRIPTOR_HANDLE* ds_handle_ptr;
-		if (ds_view.Texture)
+		auto pDSV = GetDepthStencilView();
+		if (pDSV)
 		{
-			auto pD3DTexture = dynamic_cast<Texture*>(ds_view.Texture);
-			auto pDSV = pD3DTexture->GetDepthStencilView({});
-
 			ds_handle = pDSV->GetView();
 			ds_handle_ptr = &ds_handle;
 		}
@@ -102,22 +100,49 @@ namespace platform_ex::Windows::D3D12 {
 
 	void FrameBuffer::Clear(leo::uint32 flags, const leo::math::float4 & clr, float depth, leo::int32 stencil)
 	{
+		auto& cmd_list = Context::Instance().GetCommandList(Device::Command_Render);
+
+		uint32 ClearRectCount = 0;
+		D3D12_RECT* pClearRects = nullptr;
+		D3D12_RECT ClearRects[4];
+
 		if (flags & Color) {
 			for (auto i = 0; i != clr_views.size(); ++i) {
 				if (clr_views[i].Texture) {
-					;//static_cast<RenderTargetView*>(clr_views[i].get())->ClearColor(clr);
+					auto RTTexture = dynamic_cast<Texture*>(clr_views[i].Texture);
+
+					int32 RTMipIndex = clr_views[i].MipIndex;
+					int32 RTSliceIndex = clr_views[i].ArraySlice;
+
+					auto RenderTargetView = RTTexture->GetRenderTargetView(RTMipIndex, RTSliceIndex);
+					
+					cmd_list->ClearRenderTargetView(RenderTargetView->GetView(), reinterpret_cast<const float*>(&clr), ClearRectCount, pClearRects);
 				}
 			}
 		}
-		if ((flags & Depth) && (flags & Stencil)) {
-			if (ds_view.Texture)
-				;//static_cast<DepthStencilView*>(ds_view.get())->ClearDepthStencil(depth, stencil);
-		}
-		else {
-			if (flags & Depth)
-				;//static_cast<DepthStencilView*>(ds_view.get())->ClearDepth(depth);
-			if (flags & Stencil)
-				;//static_cast<DepthStencilView*>(ds_view.get())->ClearStencil(stencil);
+
+		DepthStencilView* DSView = GetDepthStencilView();
+
+		const bool bClearDepth = (flags & Depth) == Depth;
+		const bool bClearStencil = (flags & Stencil) == Stencil;
+
+		const bool ClearDSV = (bClearDepth || bClearStencil) && DSView;
+
+		uint32 ClearFlags = 0;
+
+		if (ClearDSV)
+		{
+			if (bClearDepth && DSView->HasDepth())
+			{
+				ClearFlags |= D3D12_CLEAR_FLAG_DEPTH;
+			}
+
+			if (bClearStencil && DSView->HasStencil())
+			{
+				ClearFlags |= D3D12_CLEAR_FLAG_STENCIL;
+			}
+
+			cmd_list->ClearDepthStencilView(DSView->GetView(), (D3D12_CLEAR_FLAGS)ClearFlags, depth, stencil, ClearRectCount, pClearRects);
 		}
 	}
 
@@ -125,6 +150,14 @@ namespace platform_ex::Windows::D3D12 {
 	{
 		if (ds_view.Texture)
 			return dynamic_cast<Texture*>(ds_view.Texture)->GetDepthStencilView({});
+		return nullptr;
+	}
+	platform::Render::Texture* FrameBuffer::Attached(FrameBuffer::Attachment which) const
+	{
+		if (which == DepthStencil)
+			return ds_view.Texture;
+		if(which < clr_views.size())
+			return clr_views[which].Texture;
 		return nullptr;
 	}
 }

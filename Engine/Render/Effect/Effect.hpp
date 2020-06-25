@@ -7,6 +7,7 @@
 
 #include <LBase/linttype.hpp>
 #include <LBase/observer_ptr.hpp>
+#include <LBase/any.h>
 #include <any>
 #include <LBase/examiner.hpp>
 #include <LBase/pointer.hpp>
@@ -208,6 +209,10 @@ namespace platform::Render::Effect {
 			var = val;
 			return *this;
 		}
+
+		Parameter& operator=(const leo::any& val) =delete;
+
+		static std::any any_cast(const leo::any& value);
 
 		friend class Effect;
 		friend class Material;

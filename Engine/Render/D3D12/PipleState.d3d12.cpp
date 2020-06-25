@@ -32,12 +32,12 @@ namespace platform_ex::Windows::D3D12 {
 		hash_combine(hash_val, layout.GetIndexFormat());
 		hash_combine(hash_val, layout.GetTopoType());
 
-		/*for (auto i = FrameBuffer::Target0; i != FrameBuffer::DepthStencil; i =static_cast<FrameBuffer::Attachment>(i+1)) {
+		for (auto i = FrameBuffer::Target0; i != FrameBuffer::DepthStencil; i =static_cast<FrameBuffer::Attachment>(i+1)) {
 			if (auto view = frame->Attached(i))
-				hash_combine(hash_val, view->Format());
+				hash_combine(hash_val, view->GetFormat());
 		}
 		if (auto view = frame->Attached(FrameBuffer::DepthStencil))
-			hash_combine(hash_val, view->Format());*/
+			hash_combine(hash_val, view->GetFormat());
 		
 		auto iter = psos.find(hash_val);
 		if (iter == psos.end()) {
@@ -66,20 +66,20 @@ namespace platform_ex::Windows::D3D12 {
 
 
 			for (auto i = std::size(pso_desc.RTVFormats) - 1; i >= 0; --i) {
-				/*if (frame->Attached((FrameBuffer::Attachment)(FrameBuffer::Target0 + i))) {
+				if (frame->Attached((FrameBuffer::Attachment)(FrameBuffer::Target0 + i))) {
 					pso_desc.NumRenderTargets =static_cast<UINT>(i + 1);
 					break;
-				}*/
+				}
 			}
-			/*for (auto i = 0; i != pso_desc.NumRenderTargets; ++i) {
-				pso_desc.RTVFormats[i] = Convert(frame->Attached((FrameBuffer::Attachment)(FrameBuffer::Target0+i))->Format());
+			for (auto i = 0; i != pso_desc.NumRenderTargets; ++i) {
+				pso_desc.RTVFormats[i] = Convert(frame->Attached((FrameBuffer::Attachment)(FrameBuffer::Target0+i))->GetFormat());
 			}
 			for (auto i = pso_desc.NumRenderTargets; i != std::size(pso_desc.RTVFormats); ++i)
 				pso_desc.RTVFormats[i] = DXGI_FORMAT_UNKNOWN;
 			if (auto view = frame->Attached(FrameBuffer::DepthStencil))
-				pso_desc.DSVFormat = Convert(view->Format());
+				pso_desc.DSVFormat = Convert(view->GetFormat());
 			else
-				pso_desc.DSVFormat = DXGI_FORMAT_UNKNOWN;*/
+				pso_desc.DSVFormat = DXGI_FORMAT_UNKNOWN;
 			pso_desc.SampleDesc.Count = 1;
 			pso_desc.SampleDesc.Quality = 0;
 

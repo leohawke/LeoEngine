@@ -14,6 +14,7 @@
 #include "../../Core/AssetResourceScheduler.h"
 #include <LFramework/LCLib/Logger.h>
 #include <LBase/smart_ptr.hpp>
+#include <typeindex>
 
 namespace platform::Render {
 	ShaderInfo::ShaderInfo(ShaderType t)
@@ -24,6 +25,55 @@ namespace platform::Render {
 }
 
 namespace platform::Render::Effect {
+	std::any Parameter::any_cast(const leo::any& value)
+	{
+		static std::unordered_map<std::type_index, std::function<std::any(const leo::any&)>> map_fuctors;
+
+		struct InitBlock final
+		{
+			InitBlock() {
+#define REGISTER_MAP_FUNCTOR(enum_type,value_type) map_fuctors[std::type_index(typeid(value_type))] = [](const leo::any & val)->std::any { \
+				return leo::any_cast<value_type>(val); \
+			}
+				REGISTER_MAP_FUNCTOR(SPT_bool, bool);
+				REGISTER_MAP_FUNCTOR(SPT_string, std::string);
+				REGISTER_MAP_FUNCTOR(SPT_uint, leo::uint32);
+				//REGISTER_MAP_FUNCTOR(SPT_uint2, leo::math::uint2);
+				//REGISTER_MAP_FUNCTOR(SPT_uint3,
+				//REGISTER_MAP_FUNCTOR(SPT_uint4,
+				REGISTER_MAP_FUNCTOR(SPT_int, leo::int32);
+				//REGISTER_MAP_FUNCTOR(SPT_int2,
+				//REGISTER_MAP_FUNCTOR(SPT_int3,
+				//REGISTER_MAP_FUNCTOR(SPT_int4,
+				REGISTER_MAP_FUNCTOR(SPT_float, float);
+				REGISTER_MAP_FUNCTOR(SPT_float2, leo::math::float2);
+				//REGISTER_MAP_FUNCTOR(SPT_float2x2
+				//REGISTER_MAP_FUNCTOR(SPT_float2x3
+				//REGISTER_MAP_FUNCTOR(SPT_float2x4
+				REGISTER_MAP_FUNCTOR(SPT_float3, leo::math::float3);
+				//REGISTER_MAP_FUNCTOR(SPT_float3x2
+				REGISTER_MAP_FUNCTOR(SPT_float3x3, leo::math::float3x3);
+				//REGISTER_MAP_FUNCTOR(SPT_float3x4
+				REGISTER_MAP_FUNCTOR(SPT_float4, leo::math::float4);
+				//REGISTER_MAP_FUNCTOR(SPT_float4x2
+				//REGISTER_MAP_FUNCTOR(SPT_float4x3
+				REGISTER_MAP_FUNCTOR(SPT_float4x4, leo::math::float4x4);
+#undef  REGISTER_MAP_FUNCTOR
+			}
+		};
+
+		static leo::call_once_init<InitBlock, std::once_flag> init{};
+
+		auto search = map_fuctors.find(std::type_index(value.type()));
+
+		if (search != map_fuctors.end())
+			return std::invoke(search->second, value);
+		else
+			throw leo::unsupported("the type is not a value class");
+
+		return value;
+	}
+
 	Parameter & Parameter::operator=(const std::any & val)
 	{
 		static std::unordered_map<ShaderParamType, std::function<void(Parameter &, const std::any &)>> map_fuctors;

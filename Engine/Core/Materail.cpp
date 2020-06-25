@@ -28,7 +28,7 @@ platform::Material::Material(const asset::MaterailAsset & asset, const std::stri
 				scheme::TermNode(bind_value.second.Access<MaterialEvaluator::RenderDelayedTerm>()));
 		}
 		else{
-			bind_values.emplace_back(bind_value.first,bind_value.second.GetContent());
+			bind_values.emplace_back(bind_value.first,Render::Effect::Parameter::any_cast(bind_value.second.GetContent()));
 		}
 	}
 
@@ -37,7 +37,7 @@ platform::Material::Material(const asset::MaterailAsset & asset, const std::stri
 	for (auto& bind_value : bind_values) {
 		if (bind_effects->GetParameter(bind_value.first).GetType() < SPT_textureCUBEArray) {
 			if (LB_LIKELY(bind_value.second.type() == leo::type_id<std::string>())) {
-				auto pTexture = X::LoadTexture(leo::any_cast<std::string>(bind_value.second), Render::EA_GPURead | Render::EA_Immutable);
+				auto pTexture = X::LoadTexture(std::any_cast<std::string>(bind_value.second), Render::EA_GPURead | Render::EA_Immutable);
 
 				bind_value.second =Render::TextureSubresource(pTexture, 0, pTexture->GetArraySize(),0, pTexture->GetNumMipMaps());
 			}
@@ -52,7 +52,7 @@ void platform::Material::UpdateParams(const Renderable* pRenderable) const{
 	for (auto & delay_value : delay_values) {
 		auto ret = GetInstanceEvaluator().Reduce(delay_value.second);
 		if (ret.second == ReductionStatus::Clean)
-			bind_effects->GetParameter(delay_value.first) = ret.first.Value.GetContent();
+			bind_effects->GetParameter(delay_value.first) = Render::Effect::Parameter::any_cast(ret.first.Value.GetContent());
 		else
 			LF_TraceRaw(Descriptions::Warning, "Material::UpdateParams(pRenderable=%p) 求值%s 规约失败,放弃设置该值", pRenderable, bind_effects->GetParameter(delay_value.first).Name.c_str());
 	}
