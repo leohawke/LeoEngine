@@ -119,9 +119,9 @@ namespace platform_ex::Windows::D3D12 {
 			std::memcpy(CPUTable, Table, Key.Count * sizeof(CD3DX12_CPU_DESCRIPTOR_HANDLE));
 		}
 
-		uint32 GetTypeHash(const UniqueDescriptorTable& Table)
+		static uint64 GetTypeHash(const UniqueDescriptorTable& Table)
 		{
-			return CityHash64((void*)Table.Key.SamplerID, Table.Key.Count * sizeof(Table.Key.SamplerID[0]));
+			return CityHash64((char*)Table.Key.SamplerID, Table.Key.Count * sizeof(Table.Key.SamplerID[0]));
 		}
 
 		SamplerArrayDesc Key;
@@ -130,7 +130,7 @@ namespace platform_ex::Windows::D3D12 {
 		// This will point to the table start in the global heap
 		D3D12_GPU_DESCRIPTOR_HANDLE GPUHandle;
 
-		bool operator=(const UniqueDescriptorTable& rhs) const
+		bool operator==(const UniqueDescriptorTable& rhs) const
 		{
 			return Key == rhs.Key;
 		}
@@ -140,7 +140,7 @@ namespace platform_ex::Windows::D3D12 {
 	struct UniqueDescriptorTableHasher
 	{
 		size_t operator()(const UniqueSamplerTable& key) const noexcept {
-			return key.GetTypeHash();
+			return UniqueSamplerTable::GetTypeHash(key);
 		}
 	};
 

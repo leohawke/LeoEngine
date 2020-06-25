@@ -36,6 +36,12 @@ namespace Test {
 		void Run();
 
 		platform_ex::NativeWindowHandle GetNativeHandle();
+
+		std::thread::native_handle_type GetThreadNativeHandle()
+		{
+			return p_wnd_thrd->GetNativeHandle();
+		}
+
 		platform_ex::MessageMap& GetMessageMap();
 	protected:
 		leo::uint32 Update(leo::uint32 pass);

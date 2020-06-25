@@ -99,6 +99,8 @@ namespace platform_ex::Windows::D3D12 {
 			((ID3D12CommandAllocator*)(*commandcontext.CommandAllocator))->Reset();
 			commandcontext.CommandListHandle.Reset(*commandcontext.CommandAllocator);
 
+			commandcontext.StateCache.GetDescriptorCache()->EndFrame();
+
 			commandcontext.StateCache.GetDescriptorCache()->NotifyCurrentCommandList(commandcontext.CommandListHandle);
 			commandcontext.StateCache.DirtyStateForNewCommandList();
 		}

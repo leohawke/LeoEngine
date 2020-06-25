@@ -215,7 +215,7 @@ namespace platform_ex::Windows::D3D12 {
 			std::memset(States, 0, sizeof(States));
 		}
 
-		platform::Render::TextureSampleDesc States[ShaderType::NumStandardType][MAX_SAMPLERS];
+		SamplerState* States[ShaderType::NumStandardType][MAX_SAMPLERS];
 	};
 
 	class CommandContext;
@@ -476,7 +476,7 @@ namespace platform_ex::Windows::D3D12 {
 		}
 
 		template <ShaderType ShaderFrequency>
-		void SetSamplerState(const platform::Render::TextureSampleDesc& SamplerState, uint32 SamplerIndex)
+		void SetSamplerState(SamplerState* SamplerState, uint32 SamplerIndex)
 		{
 			lconstraint(SamplerIndex < MAX_SAMPLERS);
 			auto& Samplers = PipelineState.Common.SamplerCache.States[ShaderFrequency];

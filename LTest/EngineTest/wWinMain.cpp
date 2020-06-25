@@ -332,7 +332,13 @@ private:
 		// Setup Dear ImGui style
 		ImGui::StyleColorsDark();
 
-		SetWindowsHookExW(WH_CALLWNDPROC, ImGuiCallWndProc, ::GetModuleHandleW({}), 0);
+		auto hookprocedure = SetWindowsHookExW(WH_CALLWNDPROC, ImGuiCallWndProc, NULL,GetThreadId(GetThreadNativeHandle()));
+		if (hookprocedure == nullptr)
+		{
+			auto errorcode = GetLastError();
+
+			lconstraint(errorcode == 0);
+		}
 		ImGui_ImplWin32_Init(GetNativeHandle());
 
 		platform::imgui::Context_Init(Context::Instance());

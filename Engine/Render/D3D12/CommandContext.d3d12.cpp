@@ -126,12 +126,16 @@ void CommandContext::SetGraphicsPipelineState(platform::Render::GraphicsPipeline
 
 void CommandContext::SetShaderSampler(platform::Render::VertexHWShader* Shader, uint32 SamplerIndex, const platform::Render::TextureSampleDesc& Desc)
 {
-	StateCache.SetSamplerState<ShaderType::VertexShader>(Desc, SamplerIndex);
+	auto pSampler = GetParentDevice()->CreateSampler(Convert(Desc));
+
+	StateCache.SetSamplerState<ShaderType::VertexShader>(pSampler.get(), SamplerIndex);
 }
 
 void CommandContext::SetShaderSampler(platform::Render::PixelHWShader* Shader, uint32 SamplerIndex, const platform::Render::TextureSampleDesc& Desc)
 {
-	StateCache.SetSamplerState<ShaderType::PixelShader>(Desc, SamplerIndex);
+	auto pSampler = GetParentDevice()->CreateSampler(Convert(Desc));
+
+	StateCache.SetSamplerState<ShaderType::PixelShader>(pSampler.get(), SamplerIndex);
 }
 
 void CommandContext::SetShaderTexture(platform::Render::VertexHWShader* Shader, uint32 TextureIndex, platform::Render::Texture* ITexture)

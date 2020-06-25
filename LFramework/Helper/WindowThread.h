@@ -68,6 +68,10 @@ namespace leo {
 				static Guard
 				DefaultGenerateGuard(Window&);
 
+			std::thread::native_handle_type GetNativeHandle() {
+				return thrd.native_handle();
+			}
+
 		private:
 			//! \since build 623
 			template<typename _func, typename... _tParams>

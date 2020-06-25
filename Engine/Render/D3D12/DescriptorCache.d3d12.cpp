@@ -4,6 +4,7 @@
 #include "ContextStateCache.h"
 #include "CommandContext.h"
 #include "RootSignature.h"
+#include "SamplerState.h"
 #include <Engine/Win32/WindowsPlatformMath.h>
 
 using namespace platform_ex::Windows::D3D12;
@@ -97,6 +98,67 @@ void DescriptorCache::Clear()
 	pNullRTV = nullptr;
 	pNullSRV = nullptr;
 	pNullUAV = nullptr;
+}
+
+void DescriptorCache::BeginFrame()
+{
+	auto& DeviceSamplerHeap = GetParentDevice()->GetGlobalSamplerHeap();
+
+	{
+		std::unique_lock Lock(DeviceSamplerHeap.GetCriticalSection());
+		if (DeviceSamplerHeap.DescriptorTablesDirty())
+		{
+			LocalSamplerSet = DeviceSamplerHeap.GetUniqueDescriptorTables();
+		}
+	}
+
+	SwitchToGlobalSamplerHeap();
+}
+
+void DescriptorCache::EndFrame()
+{
+	if (!UniqueTables.empty())
+	{
+		GatherUniqueSamplerTables();
+	}
+}
+
+void DescriptorCache::GatherUniqueSamplerTables()
+{
+	auto& DeviceSamplerHeap = GetParentDevice()->GetGlobalSamplerHeap();
+
+	std::unique_lock Lock(DeviceSamplerHeap.GetCriticalSection());
+
+	auto& TableSet = DeviceSamplerHeap.GetUniqueDescriptorTables();
+
+	for (auto& Table : UniqueTables)
+	{
+		if (TableSet.count(Table) == 0)
+		{
+			if (DeviceSamplerHeap.CanReserveSlots(Table.Key.Count))
+			{
+				uint32 HeapSlot = DeviceSamplerHeap.ReserveSlots(Table.Key.Count);
+
+				if (HeapSlot != GlobalOnlineHeap::HeapExhaustedValue)
+				{
+					D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor = DeviceSamplerHeap.GetCPUSlotHandle(HeapSlot);
+
+					GetParentDevice()->GetDevice()->CopyDescriptors(
+						1, &DestDescriptor, &Table.Key.Count,
+						Table.Key.Count, Table.CPUTable, nullptr /* sizes */,
+						D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+
+					Table.GPUHandle = DeviceSamplerHeap.GetGPUSlotHandle(HeapSlot);
+					TableSet.emplace(Table);
+
+					DeviceSamplerHeap.ToggleDescriptorTablesDirtyFlag(true);
+				}
+			}
+		}
+	}
+
+	// Reset the tables as the next frame should inherit them from the global heap
+	UniqueTables.clear();
 }
 
 bool DescriptorCache::SetDescriptorHeaps()
@@ -414,6 +476,119 @@ template void DescriptorCache::SetConstantBuffers<ShaderType::GeometryShader>(co
 template void DescriptorCache::SetConstantBuffers<ShaderType::PixelShader>(const RootSignature* RootSignature, ConstantBufferCache& Cache, const CBVSlotMask& SlotsNeededMask);
 template void DescriptorCache::SetConstantBuffers<ShaderType::ComputeShader>(const RootSignature* RootSignature, ConstantBufferCache& Cache, const CBVSlotMask& SlotsNeededMask);
 
+template <ShaderType ShaderStage>
+void DescriptorCache::SetSamplers(const RootSignature* RootSignature, SamplerStateCache& Cache, const SamplerSlotMask& SlotsNeededMask, uint32 SlotsNeeded, uint32& HeapSlot)
+{
+	static_assert(ShaderStage < ShaderType::NumStandardType, "Unexpected shader frequency.");
+
+	lconstraint(CurrentSamplerHeap != &GetParentDevice()->GetGlobalSamplerHeap());
+	lconstraint(bUsingGlobalSamplerHeap == false);
+
+	SamplerSlotMask& CurrentDirtySlotMask = Cache.DirtySlotMask[ShaderStage];
+	lconstraint(CurrentDirtySlotMask != 0);	// All dirty slots for the current shader stage.
+	lconstraint(SlotsNeededMask != 0);		// All dirty slots for the current shader stage AND used by the current shader stage.
+	lconstraint(SlotsNeeded != 0);
+
+	auto& Samplers = Cache.States[ShaderStage];
+
+	D3D12_GPU_DESCRIPTOR_HANDLE BindDescriptor = { 0 };
+	bool CacheHit = false;
+
+	// Check to see if the sampler configuration is already in the sampler heap
+	SamplerArrayDesc Desc = {};
+	if (SlotsNeeded <= leo::size(Desc.SamplerID))
+	{
+		Desc.Count = SlotsNeeded;
+
+		SamplerSlotMask CacheDirtySlotMask = CurrentDirtySlotMask;	// Temp mask
+		for (uint32 SlotIndex = 0; SlotIndex < SlotsNeeded; SlotIndex++)
+		{
+			Desc.SamplerID[SlotIndex] = Samplers[SlotIndex] ? Samplers[SlotIndex]->ID : 0;
+		}
+		SamplerStateCache::CleanSlots(CacheDirtySlotMask, SlotsNeeded);
+
+		// The hash uses all of the bits
+		for (uint32 SlotIndex = SlotsNeeded; SlotIndex <leo::size(Desc.SamplerID); SlotIndex++)
+		{
+			Desc.SamplerID[SlotIndex] = 0;
+		}
+
+		D3D12_GPU_DESCRIPTOR_HANDLE* FoundDescriptor = SamplerMap.Find(Desc);
+		if (FoundDescriptor)
+		{
+			lconstraint(IsHeapSet(LocalSamplerHeap.GetHeap()));
+			BindDescriptor = *FoundDescriptor;
+			CacheHit = true;
+			CurrentDirtySlotMask = CacheDirtySlotMask;
+		}
+	}
+
+	if (!CacheHit)
+	{
+		// Reserve heap slots
+		const uint32 FirstSlotIndex = HeapSlot;
+		HeapSlot += SlotsNeeded;
+		D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor = CurrentSamplerHeap->GetCPUSlotHandle(FirstSlotIndex);
+		BindDescriptor = CurrentSamplerHeap->GetGPUSlotHandle(FirstSlotIndex);
+
+		lconstraint(SlotsNeeded <= MAX_SAMPLERS);
+
+		// Fill heap slots
+		CD3DX12_CPU_DESCRIPTOR_HANDLE SrcDescriptors[MAX_SAMPLERS];
+		for (uint32 SlotIndex = 0; SlotIndex < SlotsNeeded; SlotIndex++)
+		{
+			if (Samplers[SlotIndex] != nullptr)
+			{
+				SrcDescriptors[SlotIndex] = Samplers[SlotIndex]->Descriptor;
+			}
+			else
+			{
+				SrcDescriptors[SlotIndex] = pDefaultSampler->Descriptor;
+			}
+		}
+		SamplerStateCache::CleanSlots(CurrentDirtySlotMask, SlotsNeeded);
+
+		GetParentDevice()->GetDevice()->CopyDescriptors(
+			1, &DestDescriptor, &SlotsNeeded,
+			SlotsNeeded, SrcDescriptors, nullptr /* sizes */,
+			D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+
+		// Remember the locations of the samplers in the sampler map
+		if (SlotsNeeded <= leo::size(Desc.SamplerID))
+		{
+			UniqueTables.emplace_back(Desc, SrcDescriptors);
+
+			SamplerMap.Add(Desc, BindDescriptor);
+		}
+	}
+
+	auto& CommandList = CmdContext->CommandListHandle;
+
+	if (ShaderStage == ShaderType::ComputeShader)
+	{
+		const uint32 RDTIndex = RootSignature->SamplerRDTBindSlot(ShaderStage);
+		CommandList->SetComputeRootDescriptorTable(RDTIndex, BindDescriptor);
+	}
+	else
+	{
+		const uint32 RDTIndex = RootSignature->SamplerRDTBindSlot(ShaderStage);
+		CommandList->SetGraphicsRootDescriptorTable(RDTIndex, BindDescriptor);
+	}
+
+	// We changed the descriptor table, so all resources bound to slots outside of the table's range are now dirty.
+	// If a shader needs to use resources bound to these slots later, we need to set the descriptor table again to ensure those
+	// descriptors are valid.
+	const SamplerSlotMask OutsideCurrentTableRegisterMask = ~(((SamplerSlotMask)1 << SlotsNeeded) - (SamplerSlotMask)1);
+	Cache.Dirty(ShaderStage, OutsideCurrentTableRegisterMask);
+}
+
+template void DescriptorCache::SetSamplers<ShaderType::VertexShader>(const RootSignature* RootSignature, SamplerStateCache& Cache, const SamplerSlotMask& SlotsNeededMask, uint32 Count, uint32& HeapSlot);
+template void DescriptorCache::SetSamplers<ShaderType::HullShader>(const RootSignature* RootSignature, SamplerStateCache& Cache, const SamplerSlotMask& SlotsNeededMask, uint32 Count, uint32& HeapSlot);
+template void DescriptorCache::SetSamplers<ShaderType::DomainShader>(const RootSignature* RootSignature, SamplerStateCache& Cache, const SamplerSlotMask& SlotsNeededMask, uint32 Count, uint32& HeapSlot);
+template void DescriptorCache::SetSamplers<ShaderType::GeometryShader>(const RootSignature* RootSignature, SamplerStateCache& Cache, const SamplerSlotMask& SlotsNeededMask, uint32 Count, uint32& HeapSlot);
+template void DescriptorCache::SetSamplers<ShaderType::PixelShader>(const RootSignature* RootSignature, SamplerStateCache& Cache, const SamplerSlotMask& SlotsNeededMask, uint32 Count, uint32& HeapSlot);
+template void DescriptorCache::SetSamplers<ShaderType::ComputeShader>(const RootSignature* RootSignature, SamplerStateCache& Cache, const SamplerSlotMask& SlotsNeededMask, uint32 Count, uint32& HeapSlot);
+
 void DescriptorCache::SetStreamOutTargets(ResourceHolder** Buffers, uint32 Count, const uint32* Offsets)
 {
 	// Determine how many slots are really needed, since the Count passed in is a pre-defined maximum
@@ -499,6 +674,36 @@ bool DescriptorCache::SwitchToContextLocalViewHeap(CommandListHandle& CommandLis
 	const bool bDescriptorHeapsChanged = SetDescriptorHeaps();
 
 	lconstraint(IsHeapSet(LocalViewHeap->GetHeap()));
+	return bDescriptorHeapsChanged;
+}
+
+bool DescriptorCache::SwitchToContextLocalSamplerHeap()
+{
+	bool bDescriptorHeapsChanged = false;
+	if (UsingGlobalSamplerHeap())
+	{
+		bUsingGlobalSamplerHeap = false;
+		CurrentSamplerHeap = &LocalSamplerHeap;
+		bDescriptorHeapsChanged = SetDescriptorHeaps();
+	}
+
+	lconstraint(IsHeapSet(LocalSamplerHeap.GetHeap()));
+	return bDescriptorHeapsChanged;
+}
+
+bool DescriptorCache::SwitchToGlobalSamplerHeap()
+{
+	bool bDescriptorHeapsChanged = false;
+	if (!UsingGlobalSamplerHeap())
+	{
+		bUsingGlobalSamplerHeap = true;
+		CurrentSamplerHeap = &GetParentDevice()->GetGlobalSamplerHeap();
+		bDescriptorHeapsChanged = SetDescriptorHeaps();
+	}
+
+	// Sometimes this is called when there is no underlying command list.
+	// This is OK, as the desriptor heaps will be set when a command list is opened.
+	lconstraint((CmdContext->CommandListHandle == nullptr) || IsHeapSet(GetParentDevice()->GetGlobalSamplerHeap().GetHeap()));
 	return bDescriptorHeapsChanged;
 }
 
@@ -801,4 +1006,9 @@ void SubAllocatedOnlineHeap::NotifyCurrentCommandList(CommandListHandle& Command
 {
 	// Update the current command list
 	CurrentCommandList = CommandListHandle;
+}
+
+uint32  platform_ex::Windows::D3D12::GetTypeHash(const SamplerArrayDesc& Key)
+{
+	return CityHash64((char*)Key.SamplerID, Key.Count * sizeof(Key.SamplerID[0]));
 }

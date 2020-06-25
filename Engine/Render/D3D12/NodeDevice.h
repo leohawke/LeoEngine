@@ -62,6 +62,8 @@ namespace platform_ex::Windows::D3D12
 		void CreateSamplerInternal(const D3D12_SAMPLER_DESC& Desc, D3D12_CPU_DESCRIPTOR_HANDLE Descriptor);
 
 		std::shared_ptr<SamplerState> CreateSampler(const D3D12_SAMPLER_DESC& Desc);
+
+		inline GlobalOnlineHeap& GetGlobalSamplerHeap() { return GlobalSamplerHeap; }
 	private:
 		void SetupAfterDeviceCreation();
 	protected:
