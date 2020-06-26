@@ -162,6 +162,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Entities.cpp" />
     <ClCompile Include="EntityComponentSystem\Component.cpp" />
     <ClCompile Include="EntityComponentSystem\Entity.cpp" />
     <ClCompile Include="EntityComponentSystem\EntitySystem.cpp" />
@@ -190,6 +191,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Entities.h" />
     <ClInclude Include="EntityComponentSystem\Component.h" />
     <ClInclude Include="EntityComponentSystem\ECSCommon.h" />
     <ClInclude Include="EntityComponentSystem\ECSException.h" />

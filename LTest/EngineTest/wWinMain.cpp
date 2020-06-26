@@ -1,141 +1,37 @@
 #include "Engine/test.h"
-#include "Engine/Asset/MeshX.h"
 #include "Engine/Asset/EffectX.h"
 #define TEST_CODE 1
 
-#include "Engine/Asset/MaterialX.h"
-#include "Engine/Asset/LSLAssetX.h"
 #include "Engine/System/NinthTimer.h"
 #include "Engine/Core/CameraController.h"
-#include "Engine/Core/Mesh.h"
 #include "Engine/Core/Camera.h"
 #include "Engine/System/SystemEnvironment.h"
 #include "EntityComponentSystem/EntitySystem.h"
 #include "Engine/Renderer/imgui/imgui_context.h"
 #include "Engine/Render/ICommandList.h"
-#include "Engine/Render/IRayTracingScene.h"
-#include "Engine/Render/IRayDevice.h"
-#include "Engine/Render/IRayContext.h"
 #include "Engine/Render/DataStructures.h"
+#include "Engine/Render/IFrameBuffer.h"
 #include "Engine/Renderer/PostProcess/PostProcessCombineLUTs.h"
-#include "Engine/Render/IContext.h"
 
 #include "LFramework/Win32/LCLib/Mingw32.h"
 
 #include "TestFramework.h"
+#include "Entities.h"
 #include "LSchemEngineUnitTest.h"
 #include "imgui/imgui_impl_win32.h"
 
 #include <windowsx.h>
 
-#include <filesystem>
 
 using namespace platform::Render;
 using namespace LeoEngine::Render;
 using namespace platform_ex::Windows;
-namespace fs = std::filesystem;
 
 namespace lm = leo::math;
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-class Entity {
-public:
-	Entity(const scheme::TermNode& node) {
-		auto mesh_name = Access("mesh", node);
-		auto material_name = Access("material", node);
 
-		pMesh = platform::X::LoadMesh(mesh_name + ".asset", mesh_name);
-		pMaterial = platform::X::LoadMaterial(material_name + ".mat.lsl", material_name);
-	}
-
-	const platform::Material& GetMaterial() const {
-		return *pMaterial;
-	}
-
-	platform::Mesh& GetMesh()  {
-		return *pMesh;
-	}
-
-	const platform::Mesh& GetMesh() const{
-		return *pMesh;
-	}
-private:
-	std::string Access(const char* name, const scheme::TermNode& node) {
-		auto it = std::find_if(node.begin(), node.end(), [&](const scheme::TermNode& child) {
-			if (!child.empty())
-				return leo::Access<std::string>(*child.begin()) == name;
-			return false;
-			});
-		return leo::Access<std::string>(*(it->rbegin()));
-	}
-
-	std::shared_ptr<platform::Material> pMaterial;
-	std::shared_ptr<platform::Mesh> pMesh;
-};
-
-class Entities {
-public:
-	Entities(const fs::path& file) {
-		auto term_node = *LoadNode(file).begin();
-
-		for (auto& entity_node : platform::X::SelectNodes("entity", term_node))
-			entities.emplace_back(entity_node);
-
-		min = leo::math::float3(FLT_MAX, FLT_MAX, FLT_MAX);
-		max = leo::math::float3(FLT_MIN, FLT_MIN, FLT_MIN);
-		for (auto& entity : entities)
-		{
-			min = leo::math::min(min, entity.GetMesh().GetBoundingMin());
-			max = leo::math::max(max, entity.GetMesh().GetBoundingMax());
-		}
-	}
-
-	const std::vector<Entity>& GetRenderables() const {
-		return entities;
-	}
-
-	leo::unique_ptr<RayTracingScene> BuildRayTracingScene()
-	{
-		RayTracingSceneInitializer initializer;
-
-		std::vector<RayTracingGeometryInstance> Instances;
-
-		for (auto& entity : entities)
-		{
-			RayTracingGeometryInstance Instance;
-			Instance.Geometry = entity.GetMesh().GetRayTracingGeometry();
-
-			Instance.Transform = leo::math::float4x4::identity;
-
-			Instances.push_back(Instance);
-		}
-
-		initializer.Instances = leo::make_span(Instances);
-
-		return leo::unique_raw(Context::Instance().GetRayContext().GetDevice().CreateRayTracingScene(initializer));
-	}
-
-	leo::math::float3 min;
-	leo::math::float3 max;
-private:
-	template<typename path_type>
-	scheme::TermNode LoadNode(const path_type& path) {
-		std::ifstream fin(path);
-		fin >> std::noskipws;
-		using sb_it_t = std::istream_iterator<char>;
-
-		scheme::Session session(sb_it_t(fin), sb_it_t{});
-
-		try {
-			return scheme::SContext::Analyze(std::move(session));
-		}
-
-		CatchExpr(..., leo::rethrow_badstate(fin, std::ios_base::failbit))
-	}
-
-	std::vector<Entity> entities;
-};
 
 class EngineTest : public Test::TestFrameWork {
 public:
@@ -157,7 +53,12 @@ public:
 	std::shared_ptr<Texture2D> ShadowMap;
 	std::shared_ptr<UnorderedAccessView> ShadowMapUAV;
 
+
 	leo::math::float4 clear_color = { 0,0,0,1 };
+
+	platform::CombineLUTSettings lut_params;
+	bool lut_dirty = false;
+	TexturePtr lut_texture = nullptr;
 private:
 	bool SubWndProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam) override
 	{
@@ -174,26 +75,10 @@ private:
 
 	void OnGUI()
 	{
-		// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-		{
-			static float f = 0.0f;
-			static int counter = 0;
-
-			ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-			ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-
-			ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-			if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-				counter++;
-			ImGui::SameLine();
-			ImGui::Text("counter = %d", counter);
-
-			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-			ImGui::End();
-		}
+		ImGui::Begin("Settings");
+		OnCombineLUTUI();
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::End();
 	}
 
 	leo::uint32 DoUpdate(leo::uint32 pass) override {
@@ -216,6 +101,11 @@ private:
 		ImGui::Render();
 
 		ecs::EntitySystem::Instance().RemoveEntity(entityId);
+
+		if (true || lut_dirty || !lut_texture)
+		{
+			lut_texture = platform::CombineLUTPass(lut_params);
+		}
 
 		lm::float4x4 worldmatrix = {
 			{1,0,0,0},
@@ -330,8 +220,7 @@ private:
 
 		platform::imgui::Context_Init(Context::Instance());
 
-		platform::ColorCorrectParameters params;
-		auto pTex = platform::CombineLUTPass(params);
+		
 
 		pEntities = std::make_unique<Entities>("sponza_crytek.entities.lsl");
 
@@ -391,6 +280,59 @@ private:
 				pCameraMainpulator->Zoom(offset);
 			}
 		};
+	}
+
+	void OnCombineLUTUI()
+	{
+#define FLOAT4_FIELD(Field) lut_dirty|=ImGui::ColorEdit4(#Field, lut_params.Field.data)
+#define FLOAT_FIELD(Field) lut_dirty|=ImGui::SliderFloat(#Field, &lut_params.Field,0,1)
+
+		if (ImGui::CollapsingHeader("ColorCorrect"))
+		{
+			FLOAT4_FIELD(ColorSaturation);
+			FLOAT4_FIELD(ColorContrast);
+			FLOAT4_FIELD(ColorGamma);
+			FLOAT4_FIELD(ColorGain);
+			FLOAT4_FIELD(ColorOffset);
+			FLOAT4_FIELD(ColorSaturationShadows);
+			FLOAT4_FIELD(ColorContrastShadows);
+			FLOAT4_FIELD(ColorGammaShadows);
+			FLOAT4_FIELD(ColorGainShadows);
+			FLOAT4_FIELD(ColorOffsetShadows);
+			FLOAT4_FIELD(ColorSaturationMidtones);
+			FLOAT4_FIELD(ColorContrastMidtones);
+			FLOAT4_FIELD(ColorGammaMidtones);
+			FLOAT4_FIELD(ColorGainMidtones);
+			FLOAT4_FIELD(ColorOffsetMidtones);
+			FLOAT4_FIELD(ColorSaturationHighlights);
+			FLOAT4_FIELD(ColorContrastHighlights);
+			FLOAT4_FIELD(ColorGammaHighlights);
+			FLOAT4_FIELD(ColorGainHighlights);
+			FLOAT4_FIELD(ColorOffsetHighlights);
+			FLOAT_FIELD(ColorCorrectionShadowsMax);
+			FLOAT_FIELD(ColorCorrectionHighlightsMin);
+		}
+
+		if (ImGui::CollapsingHeader("WhiteBlance"))
+		{
+			lut_dirty |= ImGui::SliderFloat("WhiteTemp", &lut_params.WhiteTemp, 2000, 15000);
+			lut_dirty |= ImGui::SliderFloat("WhiteTint", &lut_params.WhiteTint, -1, 1);
+		}
+
+		if (ImGui::CollapsingHeader("ACES"))
+		{
+			FLOAT_FIELD(FilmSlope);
+			FLOAT_FIELD(FilmToe);
+			FLOAT_FIELD(FilmShoulder);
+			FLOAT_FIELD(FilmBlackClip);
+			FLOAT_FIELD(FilmWhiteClip);
+		}
+
+		lut_dirty |= ImGui::SliderFloat("Gamma", &Environment->Gamma, 1, 2.5f);
+		FLOAT_FIELD(BlueCorrection);
+		FLOAT_FIELD(ExpandGamut);
+#undef FLOAT4_FIELD
+#undef FLOAT_FIELD
 	}
 };
 

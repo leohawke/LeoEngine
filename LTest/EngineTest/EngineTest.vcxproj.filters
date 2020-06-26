@@ -24,6 +24,7 @@
     <ClCompile Include="imgui\imgui_impl_win32.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
+    <ClCompile Include="Entities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TestFramework.h" />
@@ -63,6 +64,7 @@
     <ClInclude Include="imgui\imgui_impl_win32.h">
       <Filter>imgui</Filter>
     </ClInclude>
+    <ClInclude Include="Entities.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="EntityComponentSystem">

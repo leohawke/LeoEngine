@@ -12,9 +12,9 @@
 namespace LeoEngine::System {
 	struct GlobalEnvironment {
 		platform::chrono::NinthTimer* Timer;
-	};
 
-	GlobalEnvironment& FetchGlobalEnvironment();
+		float Gamma;
+	};
 
 	[[nodiscard]]
 	std::shared_ptr<void> InitGlobalEnvironment();

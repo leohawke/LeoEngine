@@ -4,6 +4,7 @@
 #include <Engine/Render/IContext.h>
 #include <Engine/Render/PipelineStateUtility.h>
 #include <Engine/Render/ShaderParameterStruct.h>
+#include <Engine/System/SystemEnvironment.h>
 #include <LBase/smart_ptr.hpp>
 #include <Engine/Render/ICommandList.h>
 #include "../VolumeRendering.h"
@@ -11,7 +12,7 @@
 using namespace platform;
 using namespace platform::Render::Shader;
 
-platform::ColorCorrectParameters::ColorCorrectParameters()
+platform::CombineLUTSettings::CombineLUTSettings()
 {
 	ColorSaturation = leo::math::float4(1.0f, 1.0f, 1.0f, 1.0f);
 	ColorContrast = leo::math::float4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -80,7 +81,6 @@ SHADER_PARAMETER(leo::math::float4, ColorContrastHighlights)
 SHADER_PARAMETER(leo::math::float4, ColorGammaHighlights)
 SHADER_PARAMETER(leo::math::float4, ColorGainHighlights)
 SHADER_PARAMETER(leo::math::float4, ColorOffsetHighlights)
-
 SHADER_PARAMETER(float,ColorCorrectionShadowsMax)
 SHADER_PARAMETER(float,ColorCorrectionHighlightsMin)
 SHADER_PARAMETER(float, WhiteTemp)
@@ -92,6 +92,7 @@ SHADER_PARAMETER(float, FilmToe)
 SHADER_PARAMETER(float, FilmShoulder)
 SHADER_PARAMETER(float, FilmBlackClip)
 SHADER_PARAMETER(float, FilmWhiteClip)
+SHADER_PARAMETER(leo::math::float3, InverseGamma)
 END_SHADER_PARAMETER_STRUCT();
 
 
@@ -104,14 +105,20 @@ public:
 
 IMPLEMENT_BUILTIN_SHADER(LUTBlenderPS, "PostProcess/PostProcessCombineLUTs.lsl", "MainPS", platform::Render::PixelShader);
 
-void GetCombineLUTParameters(CombineLUTParameters& Parameters, const ColorCorrectParameters& args)
+void GetCombineLUTParameters(CombineLUTParameters& Parameters, const CombineLUTSettings& args)
 {
-	std::memcpy(&Parameters.ColorSaturation, &args.ColorSaturation, loffsetof(ColorCorrectParameters, FilmWhiteClip) - loffsetof(ColorCorrectParameters, ColorSaturation));
+	std::memcpy(&Parameters.ColorSaturation, &args.ColorSaturation, loffsetof(CombineLUTSettings, FilmWhiteClip) - loffsetof(CombineLUTSettings, ColorSaturation));
+
+	auto DisplayGamma = Environment->Gamma;
+
+	Parameters.InverseGamma.x = 1.0f / DisplayGamma;
+	Parameters.InverseGamma.y = 2.2f / DisplayGamma;
+	Parameters.InverseGamma.z = 1.0f / std::max(DisplayGamma, 1.0f);
 }
 
 constexpr int32 GLUTSize = 32;
 
-std::shared_ptr<Render::Texture> platform::CombineLUTPass(const ColorCorrectParameters& args)
+std::shared_ptr<Render::Texture> platform::CombineLUTPass(const CombineLUTSettings& args)
 {
 	const bool bUseVolumeTextureLUT = true;
 

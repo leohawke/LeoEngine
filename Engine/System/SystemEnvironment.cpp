@@ -16,6 +16,8 @@ struct GlobalEnvironmentGurad {
 		static platform::chrono::NinthTimer Timer;
 		pEnvironment->Timer = &Timer;
 
+		pEnvironment->Gamma = 2.2f;
+
 		//±‡“ÎShader
 		platform::Render::CompileGlobalShaderMap();
 	}

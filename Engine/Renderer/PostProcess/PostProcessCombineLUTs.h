@@ -5,9 +5,9 @@
 
 namespace platform
 {
-	struct ColorCorrectParameters
+	struct CombineLUTSettings
 	{
-		ColorCorrectParameters();
+		CombineLUTSettings();
 
 		leo::math::float4 ColorSaturation;
 		leo::math::float4 ColorContrast;
@@ -48,5 +48,5 @@ namespace platform
 		float FilmWhiteClip;
 	};
 
-	std::shared_ptr<Render::Texture> CombineLUTPass(const ColorCorrectParameters& args);
+	std::shared_ptr<Render::Texture> CombineLUTPass(const CombineLUTSettings& args);
 }
