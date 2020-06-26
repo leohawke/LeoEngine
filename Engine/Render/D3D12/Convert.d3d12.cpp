@@ -774,7 +774,7 @@ D3D12_BLEND platform_ex::Windows::D3D12::Convert(platform::Render::BlendFactor f
 	case platform::Render::BlendFactor::Dst_Alpha:
 		return D3D12_BLEND_DEST_ALPHA;
 	case platform::Render::BlendFactor::Inv_Src_Alpha:
-		return D3D12_BLEND_SRC_ALPHA;
+		return D3D12_BLEND_INV_SRC_ALPHA;
 	case platform::Render::BlendFactor::Inv_Dst_Alpha:
 		return D3D12_BLEND_INV_DEST_ALPHA;
 	case platform::Render::BlendFactor::Src_Color:
@@ -794,7 +794,7 @@ D3D12_BLEND platform_ex::Windows::D3D12::Convert(platform::Render::BlendFactor f
 	case platform::Render::BlendFactor::Src1_Alpha:
 		return D3D12_BLEND_SRC1_ALPHA;
 	case platform::Render::BlendFactor::Inv_Src1_Alpha:
-		return D3D12_BLEND_INV_SRC_ALPHA;
+		return D3D12_BLEND_INV_SRC1_ALPHA;
 	case platform::Render::BlendFactor::Src1_Color:
 		return D3D12_BLEND_SRC1_COLOR;
 	case platform::Render::BlendFactor::Inv_Src1_Color:

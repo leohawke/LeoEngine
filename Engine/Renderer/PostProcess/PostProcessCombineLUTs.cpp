@@ -36,6 +36,19 @@ platform::ColorCorrectParameters::ColorCorrectParameters()
 	ColorGammaHighlights = leo::math::float4(1.0f, 1.0f, 1.0f, 1.0f);
 	ColorGainHighlights = leo::math::float4(1.0f, 1.0f, 1.0f, 1.0f);
 	ColorOffsetHighlights = leo::math::float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+	WhiteTemp = 6500;
+	WhiteTint = 0;
+
+	// ACES settings
+	FilmSlope = 0.88f;
+	FilmToe = 0.55f;
+	FilmShoulder = 0.26f;
+	FilmBlackClip = 0.0f;
+	FilmWhiteClip = 0.04f;
+
+	BlueCorrection = 0.6f;
+	ExpandGamut = 1.0f;
 }
 
 class LUTBlenderShader : public BuiltInShader
@@ -70,6 +83,15 @@ SHADER_PARAMETER(leo::math::float4, ColorOffsetHighlights)
 
 SHADER_PARAMETER(float,ColorCorrectionShadowsMax)
 SHADER_PARAMETER(float,ColorCorrectionHighlightsMin)
+SHADER_PARAMETER(float, WhiteTemp)
+SHADER_PARAMETER(float, WhiteTint)
+SHADER_PARAMETER(float, BlueCorrection)
+SHADER_PARAMETER(float, ExpandGamut)
+SHADER_PARAMETER(float, FilmSlope)
+SHADER_PARAMETER(float, FilmToe)
+SHADER_PARAMETER(float, FilmShoulder)
+SHADER_PARAMETER(float, FilmBlackClip)
+SHADER_PARAMETER(float, FilmWhiteClip)
 END_SHADER_PARAMETER_STRUCT();
 
 
@@ -84,28 +106,7 @@ IMPLEMENT_BUILTIN_SHADER(LUTBlenderPS, "PostProcess/PostProcessCombineLUTs.lsl",
 
 void GetCombineLUTParameters(CombineLUTParameters& Parameters, const ColorCorrectParameters& args)
 {
-#define COPY(Member) Parameters.Member = args.Member
-	COPY(ColorSaturation);
-	COPY(ColorContrast);
-	COPY(ColorGamma);
-	COPY(ColorGain);
-	COPY(ColorOffset);
-	COPY(ColorSaturationShadows);
-	COPY(ColorContrastShadows);
-	COPY(ColorGammaShadows);
-	COPY(ColorGainShadows);
-	COPY(ColorOffsetShadows);
-	COPY(ColorSaturationMidtones);
-	COPY(ColorContrastMidtones);
-	COPY(ColorGammaMidtones);
-	COPY(ColorGainMidtones);
-	COPY(ColorOffsetMidtones);
-	COPY(ColorSaturationHighlights);
-	COPY(ColorContrastHighlights);
-	COPY(ColorGammaHighlights);
-	COPY(ColorGainHighlights);
-	COPY(ColorOffsetHighlights);
-#undef COPY
+	std::memcpy(&Parameters.ColorSaturation, &args.ColorSaturation, loffsetof(ColorCorrectParameters, FilmWhiteClip) - loffsetof(ColorCorrectParameters, ColorSaturation));
 }
 
 constexpr int32 GLUTSize = 32;
@@ -128,7 +129,7 @@ std::shared_ptr<Render::Texture> platform::CombineLUTPass(const ColorCorrectPara
 
 	auto& CmdList = Render::GetCommandList();
 
-	Render::RenderPassInfo passInfo(OutputTexture,nullptr);
+	Render::RenderPassInfo passInfo(OutputTexture,Render::RenderTargetActions::Clear_Store);
 
 	CmdList.BeginRenderPass(passInfo,"CombineLUTPass");
 

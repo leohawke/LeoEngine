@@ -84,7 +84,19 @@ namespace platform_ex::Windows::D3D12 {
 
 	void D3D12::Context::CommitCommandList(Device::CommandType type)
 	{
-		if(type == Device::CommandType::Command_Render)
+		CheckHResult(d3d_cmd_lists[type]->Close());
+		ID3D12CommandList* cmd_lists[] = { d3d_cmd_lists[type].Get() };
+		device->GetNodeDevice(0)->GetD3DCommandQueue(CommandQueueType::Default)->ExecuteCommandLists(1, cmd_lists);
+
+		if (type == Device::CommandType::Command_Resource) {
+			auto val = GetFence(type).Signal(CommandQueueType::Default);
+			GetFence(type).WaitForFence(val);
+
+			GetDevice().d3d_cmd_allocators[type]->Reset();
+			ResetCommand(type);
+		}
+
+		if (type == Device::CommandType::Command_Render)
 		{
 			auto nodedvice = device->GetNodeDevice(0);
 			auto& commandcontext = nodedvice->GetDefaultCommandContext();
@@ -104,19 +116,6 @@ namespace platform_ex::Windows::D3D12 {
 
 			commandcontext.StateCache.GetDescriptorCache()->NotifyCurrentCommandList(commandcontext.CommandListHandle);
 			commandcontext.StateCache.DirtyStateForNewCommandList();
-		}
-
-
-		CheckHResult(d3d_cmd_lists[type]->Close());
-		ID3D12CommandList* cmd_lists[] = { d3d_cmd_lists[type].Get() };
-		device->GetNodeDevice(0)->GetD3DCommandQueue(CommandQueueType::Default)->ExecuteCommandLists(1, cmd_lists);
-
-		if (type == Device::CommandType::Command_Resource) {
-			auto val = GetFence(type).Signal(CommandQueueType::Default);
-			GetFence(type).WaitForFence(val);
-
-			GetDevice().d3d_cmd_allocators[type]->Reset();
-			ResetCommand(type);
 		}
 	}
 

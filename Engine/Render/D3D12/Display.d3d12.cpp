@@ -109,13 +109,9 @@ bool platform_ex::Windows::D3D12::Display::CheckHDRSupport()
 void platform_ex::Windows::D3D12::Display::SwapBuffers()
 {
 	if (swap_chain) {
-		D3D12_RESOURCE_BARRIER barrier;
-		barrier.Transition.Subresource = 0;
 		auto rt_tex = render_targets_texs[back_buffer_index].get();
-		if (rt_tex->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_PRESENT))
-		{
-			Context::Instance().GetCommandList(Device::Command_Render)->ResourceBarrier(1, &barrier);
-		}
+
+		TransitionResource(Context::Instance().GetDefaultCommandContext()->CommandListHandle, rt_tex, D3D12_RESOURCE_STATE_PRESENT, 0);
 
 		Context::Instance().CommitCommandList(Device::Command_Render);
 

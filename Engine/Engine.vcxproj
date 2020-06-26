@@ -103,6 +103,7 @@
     <ClCompile Include="Render\PipelineStateUtility.cpp" />
     <ClCompile Include="Render\PipleState.cpp" />
     <ClCompile Include="Render\RenderObject.cpp" />
+    <ClCompile Include="Render\RenderPassInfo.cpp" />
     <ClCompile Include="Render\ResourceView.cpp" />
     <ClCompile Include="Render\Shader.cpp" />
     <ClCompile Include="Render\ShaderCore.cpp" />
@@ -251,8 +252,11 @@
     <None Include="Render\Effect\PreZ.lsl" />
     <None Include="Render\Effect\Util.lsl" />
     <None Include="Render\Material\FPDS.mat.lsl" />
+    <None Include="Shaders\ACES.lsl" />
     <None Include="Shaders\Common.lsl" />
+    <None Include="Shaders\GammaCorrectionCommon.lsl" />
     <None Include="Shaders\PostProcess\PostProcessCombineLUTs.lsl" />
+    <None Include="Shaders\PostProcess\TonemapCommon.lsl" />
     <None Include="Shaders\PostProcess\VolumeRendering.lsl" />
     <None Include="Shaders\RayTracing\RayTracingBuiltInShaders.lsl" />
     <None Include="Shaders\RayTracing\RayTracingCommon.lsl" />

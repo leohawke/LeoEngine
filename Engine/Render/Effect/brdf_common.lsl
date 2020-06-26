@@ -1,11 +1,12 @@
 (effect
 	(refer material.lsl)
+	(refer Common.lsl)
 	(shader 
 			"
 			float D_GGX(float nh,float roughness){
 				float a = nh * roughness;
 				float k = roughness / (1-nh*nh+a*a);
-				return k*k*(1/3.141516926f);
+				return k*k*(1/PI);
 			}
 
 			float V_SmithGGXCorrelated(float nv,float nl,float roughness){

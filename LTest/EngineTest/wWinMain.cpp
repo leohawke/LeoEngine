@@ -261,7 +261,7 @@ private:
 		//pre-z
 		for (auto& entity : pEntities->GetRenderables())
 		{
-			//Context::Instance().Render(*pPreZEffect, pPreZEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
+			Context::Instance().Render(*pPreZEffect, pPreZEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
 		}
 
 		//ray-shadow
@@ -291,13 +291,12 @@ private:
 		for (auto& entity : pEntities->GetRenderables())
 		{
 			entity.GetMaterial().UpdateParams(reinterpret_cast<const platform::Renderable*>(&entity));
-			//Context::Instance().Render(*pEffect, pEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
-
+			Context::Instance().Render(*pEffect, pEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
 		}
 
 		auto& CmdList = platform::Render::GetCommandList();
 
-		platform::Render::RenderPassInfo passInfo(screen_frame->Attached(platform::Render::FrameBuffer::Target0), screen_frame->Attached(platform::Render::FrameBuffer::DepthStencil));
+		platform::Render::RenderPassInfo passInfo(screen_frame->Attached(platform::Render::FrameBuffer::Target0), RenderTargetActions::Load_Store);
 
 		CmdList.BeginRenderPass(passInfo, "imguiPass");
 

@@ -278,6 +278,9 @@
     <ClCompile Include="Renderer\imgui\imgui_context.cpp">
       <Filter>Renderer\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="Render\RenderPassInfo.cpp">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Context.h">
@@ -710,28 +713,13 @@
     <Filter Include="Shaders\imgui">
       <UniqueIdentifier>{a6aa923e-d059-4ce1-b801-e3785e526cd7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Legacy">
+      <UniqueIdentifier>{439bc9dd-f311-48e1-8f4d-e393f3e1bb6d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Render\Effect\PostProcess.lsl">
-      <Filter>Render\Effect</Filter>
-    </None>
-    <None Include="Render\Effect\Util.lsl">
-      <Filter>Render\Effect</Filter>
-    </None>
-    <None Include="Render\Effect\Copy.lsl">
-      <Filter>Render\Effect</Filter>
-    </None>
-    <None Include="Render\Effect\brdf_common.lsl">
-      <Filter>Render\Effect</Filter>
-    </None>
-    <None Include="Render\Effect\material.lsl">
-      <Filter>Render\Effect</Filter>
-    </None>
     <None Include="Render\Material\FPDS.mat.lsl">
       <Filter>Render\Material</Filter>
-    </None>
-    <None Include="Render\Effect\ForwardDirectLightShading.lsl">
-      <Filter>Render\Effect</Filter>
     </None>
     <None Include="Render\Effect\DirectLight.lsl">
       <Filter>Render\Effect</Filter>
@@ -757,9 +745,6 @@
     <None Include="Shaders\RayTracing\RayTracingBuiltInShaders.lsl">
       <Filter>Shaders\RayTracing</Filter>
     </None>
-    <None Include="Render\Effect\PreZ.lsl">
-      <Filter>Render\Effect</Filter>
-    </None>
     <None Include="Shaders\Common.lsl">
       <Filter>Shaders</Filter>
     </None>
@@ -768,6 +753,36 @@
     </None>
     <None Include="Shaders\PostProcess\VolumeRendering.lsl">
       <Filter>Shaders\PostProcess</Filter>
+    </None>
+    <None Include="Shaders\ACES.lsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\GammaCorrectionCommon.lsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\PostProcess\TonemapCommon.lsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </None>
+    <None Include="Render\Effect\material.lsl">
+      <Filter>Shaders\Legacy</Filter>
+    </None>
+    <None Include="Render\Effect\PostProcess.lsl">
+      <Filter>Shaders\Legacy</Filter>
+    </None>
+    <None Include="Render\Effect\PreZ.lsl">
+      <Filter>Shaders\Legacy</Filter>
+    </None>
+    <None Include="Render\Effect\Util.lsl">
+      <Filter>Shaders\Legacy</Filter>
+    </None>
+    <None Include="Render\Effect\ForwardDirectLightShading.lsl">
+      <Filter>Shaders\Legacy</Filter>
+    </None>
+    <None Include="Render\Effect\brdf_common.lsl">
+      <Filter>Shaders\Legacy</Filter>
+    </None>
+    <None Include="Render\Effect\Copy.lsl">
+      <Filter>Shaders\Legacy</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -21,6 +21,9 @@ namespace asset::X::Shader {
 		using namespace  platform::Render;
 
 		auto append_macros = macros;
+
+		append_macros.emplace_back("SM4", "40");
+
 		auto caps = Context::Instance().GetDevice().GetCaps();
 		switch (caps.type) {
 		case Caps::Type::D3D12:
