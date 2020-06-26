@@ -101,8 +101,24 @@ void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uin
 		curr_state = init_state;
 	}
 
+	D3D12_CLEAR_VALUE* ClearValuePtr = nullptr;
+	D3D12_CLEAR_VALUE ClearValue;
+	if (init_data && init_data->clear_value) {
+		auto& clear_value = *init_data->clear_value;
+		if (tex_desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET && clear_value.ColorBinding == platform::Render::ClearBinding::ColorBound)
+		{
+			ClearValue = CD3DX12_CLEAR_VALUE(tex_desc.Format, clear_value.Value.Color);
+			ClearValuePtr = &ClearValue;
+		}
+		else if (tex_desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL && clear_value.ColorBinding == platform::Render::ClearBinding::DepthStencilBound)
+		{
+			ClearValue = CD3DX12_CLEAR_VALUE(tex_desc.Format, clear_value.Value.DSValue.Depth, (uint8)clear_value.Value.DSValue.Stencil);
+			ClearValuePtr = &ClearValue;
+		}
+	}
+
 	CheckHResult(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
-		&tex_desc, init_state, nullptr,
+		&tex_desc, init_state, ClearValuePtr,
 		COMPtr_RefParam(resource, IID_ID3D12Resource)));
 
 	auto num_subres = array_size * base_this->GetNumMipMaps();
@@ -145,7 +161,7 @@ void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uin
 		&buff_desc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
 		COMPtr_RefParam(texture_readback_heaps, IID_ID3D12Resource)));
 
-	if (init_data != nullptr) {
+	if (init_data != nullptr && init_data->data != nullptr) {
 		auto& context = Context::Instance();
 		auto & cmd_list = context.GetCommandList(Device::Command_Resource);
 

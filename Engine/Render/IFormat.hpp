@@ -481,24 +481,71 @@ namespace platform::Render {
 			EA_Raw = 1U <<8,
 		};
 
-		struct ElementInitData
+		enum class ClearBinding
 		{
-			void const * data = nullptr;
-			uint32_t row_pitch = 0;
-			uint32_t slice_pitch = 0;
+			NoneBound, //no clear color associated with this target.  Target will not do hardware clears on most platforms
+			ColorBound, //target has a clear color bound.  Clears will use the bound color, and do hardware clears.
+			DepthStencilBound, //target has a depthstencil value bound.  Clears will use the bound values and do hardware clears.
 		};
 
-		struct SampleDesc {
-			uint32 Count = 1;
-			uint32 Quality = 0;
-
-			SampleDesc() = default;
-
-			SampleDesc(uint32 count, uint32 quality)
-				:Count(count), Quality(quality)
-			{}
-		};
+		
 	}
+
+	struct ClearValueBinding
+	{
+		struct DSVAlue
+		{
+			float Depth;
+			uint32 Stencil;
+		};
+
+		union ClearValueType
+		{
+			float Color[4];
+			DSVAlue DSValue;
+		} Value;
+
+		ClearBinding ColorBinding;
+
+		ClearValueBinding()
+			: ColorBinding(ClearBinding::ColorBound)
+		{
+			Value.Color[0] = 0.0f;
+			Value.Color[1] = 0.0f;
+			Value.Color[2] = 0.0f;
+			Value.Color[3] = 0.0f;
+		}
+
+		explicit ClearValueBinding(float DepthClearValue, uint32 StencilClearValue = 0)
+			: ColorBinding(ClearBinding::DepthStencilBound)
+		{
+			Value.DSValue.Depth = DepthClearValue;
+			Value.DSValue.Stencil = StencilClearValue;
+		}
+
+
+		static const ClearValueBinding Black;
+		static const ClearValueBinding DepthOne;
+	};
+
+	struct ElementInitData
+	{
+		void const* data = nullptr;
+		uint32_t row_pitch = 0;
+		uint32_t slice_pitch = 0;
+		const ClearValueBinding* clear_value = nullptr;
+	};
+
+	struct SampleDesc {
+		uint32 Count = 1;
+		uint32 Quality = 0;
+
+		SampleDesc() = default;
+
+		SampleDesc(uint32 count, uint32 quality)
+			:Count(count), Quality(quality)
+		{}
+	};
 }
 
 

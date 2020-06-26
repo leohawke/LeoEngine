@@ -121,6 +121,33 @@ namespace platform_ex::Windows::D3D12 {
 		operator const D3D12_RECT& () const { return *this; }
 	};
 
+	struct CD3DX12_CLEAR_VALUE : public D3D12_CLEAR_VALUE
+	{
+		CD3DX12_CLEAR_VALUE()
+		{}
+		explicit CD3DX12_CLEAR_VALUE(const D3D12_CLEAR_VALUE& o) :
+			D3D12_CLEAR_VALUE(o)
+		{}
+		CD3DX12_CLEAR_VALUE(
+			DXGI_FORMAT format,
+			const FLOAT color[4])
+		{
+			Format = format;
+			memcpy(Color, color, sizeof(Color));
+		}
+		CD3DX12_CLEAR_VALUE(
+			DXGI_FORMAT format,
+			FLOAT depth,
+			UINT8 stencil)
+		{
+			Format = format;
+			/* Use memcpy to preserve NAN values */
+			memcpy(&DepthStencil.Depth, &depth, sizeof(depth));
+			DepthStencil.Stencil = stencil;
+		}
+		operator const D3D12_CLEAR_VALUE& () const { return *this; }
+	};
+
 	struct CD3DX12_DEPTH_STENCIL_DESC1 : public D3D12_DEPTH_STENCIL_DESC1
 	{
 		CD3DX12_DEPTH_STENCIL_DESC1()

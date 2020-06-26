@@ -289,6 +289,7 @@ private:
 
 		if (ImGui::CollapsingHeader("ColorCorrect"))
 		{
+			ImGui::Indent(16);
 			FLOAT4_FIELD(ColorSaturation);
 			FLOAT4_FIELD(ColorContrast);
 			FLOAT4_FIELD(ColorGamma);
@@ -311,21 +312,26 @@ private:
 			FLOAT4_FIELD(ColorOffsetHighlights);
 			FLOAT_FIELD(ColorCorrectionShadowsMax);
 			FLOAT_FIELD(ColorCorrectionHighlightsMin);
+			ImGui::Unindent(16);
 		}
 
 		if (ImGui::CollapsingHeader("WhiteBlance"))
 		{
+			ImGui::Indent(16);
 			lut_dirty |= ImGui::SliderFloat("WhiteTemp", &lut_params.WhiteTemp, 2000, 15000);
 			lut_dirty |= ImGui::SliderFloat("WhiteTint", &lut_params.WhiteTint, -1, 1);
+			ImGui::Unindent(16);
 		}
 
 		if (ImGui::CollapsingHeader("ACES"))
 		{
+			ImGui::Indent(16);
 			FLOAT_FIELD(FilmSlope);
 			FLOAT_FIELD(FilmToe);
 			FLOAT_FIELD(FilmShoulder);
 			FLOAT_FIELD(FilmBlackClip);
 			FLOAT_FIELD(FilmWhiteClip);
+			ImGui::Unindent(16);
 		}
 
 		lut_dirty |= ImGui::SliderFloat("Gamma", &Environment->Gamma, 1, 2.5f);

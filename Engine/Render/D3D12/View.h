@@ -7,6 +7,8 @@
 #include "../IGPUResourceView.h"
 
 namespace platform_ex::Windows::D3D12 {
+	using platform::Render::SampleDesc;
+
 	class NodeDevice;
 
 	enum ViewSubresourceSubsetFlags

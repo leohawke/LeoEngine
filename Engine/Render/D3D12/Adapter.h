@@ -22,6 +22,8 @@ namespace platform_ex::Windows::D3D12 {
 
 	namespace  Effect = platform::Render::Effect;
 	using namespace platform::Render::IFormat;
+	using platform::Render::SampleDesc;
+	using platform::Render::ElementInitData;
 
 	// Represents a set of linked D3D12 device nodes (LDA i.e 1 or more identical GPUs). In most cases there will be only 1 node, however if the system supports
 	// SLI/Crossfire and the app enables it an Adapter will have 2 or more nodes. This class will own anything that can be shared

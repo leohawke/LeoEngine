@@ -131,8 +131,11 @@ std::shared_ptr<Render::Texture> platform::CombineLUTPass(const CombineLUTSettin
 	initializer.Format = Render::EF_ABGR16F;
 	initializer.Access = Render::EA_GPURead | Render::EA_GPUWrite;
 	initializer.NumSamples = 1;
+
+	Render::ElementInitData data;
+	data.clear_value = &Render::ClearValueBinding::Black;
 	if(bUseVolumeTextureLUT)
-		OutputTexture = Render::Context::Instance().GetDevice().CreateTexture(initializer,Render::TexCreate_RenderTargetable);
+		OutputTexture = Render::Context::Instance().GetDevice().CreateTexture(initializer,Render::TexCreate_RenderTargetable,&data);
 
 	auto& CmdList = Render::GetCommandList();
 
