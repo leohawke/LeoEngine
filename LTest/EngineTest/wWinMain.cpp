@@ -20,6 +20,8 @@
 #include "Engine/Renderer/PostProcess/PostProcessCombineLUTs.h"
 #include "Engine/Render/IContext.h"
 
+#include "LFramework/Win32/LCLib/Mingw32.h"
+
 #include "TestFramework.h"
 #include "LSchemEngineUnitTest.h"
 #include "imgui/imgui_impl_win32.h"
@@ -30,32 +32,12 @@
 
 using namespace platform::Render;
 using namespace LeoEngine::Render;
+using namespace platform_ex::Windows;
 namespace fs = std::filesystem;
 
 namespace lm = leo::math;
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
-LRESULT CALLBACK ImGuiCallWndProc(
-	_In_ int    nCode,
-	_In_ WPARAM wParam,
-	_In_ LPARAM lParam
-)
-{
-	if (nCode < 0)
-	{
-		return CallNextHookEx(nullptr, nCode, wParam, lParam);
-	}
-	else {
-		auto pMessage = reinterpret_cast<CWPSTRUCT*>(lParam);
-
-		ImGui_ImplWin32_WndProcHandler(pMessage->hwnd, pMessage->message, pMessage->wParam, pMessage->lParam);
-
-		auto ret = CallNextHookEx(nullptr, nCode, wParam, lParam);
-
-		return ret;
-	}
-}
 
 class Entity {
 public:
@@ -113,9 +95,9 @@ public:
 		return entities;
 	}
 
-	leo::unique_ptr<platform::Render::RayTracingScene> BuildRayTracingScene()
+	leo::unique_ptr<RayTracingScene> BuildRayTracingScene()
 	{
-		platform::Render::RayTracingSceneInitializer initializer;
+		RayTracingSceneInitializer initializer;
 
 		std::vector<RayTracingGeometryInstance> Instances;
 
@@ -177,6 +159,19 @@ public:
 
 	leo::math::float4 clear_color = { 0,0,0,1 };
 private:
+	bool SubWndProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam) override
+	{
+		if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
+			return true;
+
+		ImGuiIO& io = ImGui::GetIO();
+
+		if (io.WantCaptureMouse || io.WantCaptureKeyboard)
+			return true;
+
+		return false;
+	}
+
 	void OnGUI()
 	{
 		// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
@@ -213,6 +208,7 @@ private:
 		auto& Device = Context::Instance().GetDevice();
 
 		platform::imgui::Context_NewFrame();
+		
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
@@ -272,7 +268,7 @@ private:
 		//unbind
 		Context::Instance().SetFrame(nullptr);
 
-		platform::Render::GenShadowConstants shadowconstant;
+		GenShadowConstants shadowconstant;
 		{
 			shadowconstant.LightDirection = lights[0].direction;
 			shadowconstant.CameraToWorld = lm::transpose(lm::inverse(viewproj));
@@ -322,9 +318,7 @@ private:
 
 		static auto pInitGuard = LeoEngine::System::InitGlobalEnvironment();
 
-		// Setup Dear ImGui context
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
+		
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -332,13 +326,7 @@ private:
 		// Setup Dear ImGui style
 		ImGui::StyleColorsDark();
 
-		auto hookprocedure = SetWindowsHookExW(WH_CALLWNDPROC, ImGuiCallWndProc, NULL,GetThreadId(GetThreadNativeHandle()));
-		if (hookprocedure == nullptr)
-		{
-			auto errorcode = GetLastError();
-
-			lconstraint(errorcode == 0);
-		}
+		
 		ImGui_ImplWin32_Init(GetNativeHandle());
 
 		platform::imgui::Context_Init(Context::Instance());
@@ -380,7 +368,7 @@ private:
 		auto& Device = Context::Instance().GetDevice();
 		pLightConstatnBuffer = leo::share_raw(Device.CreateConstanBuffer(Buffer::Usage::Dynamic, EAccessHint::EA_GPURead | EAccessHint::EA_GPUStructured, sizeof(DirectLight)*lights.size(), static_cast<EFormat>(sizeof(DirectLight)),lights.data()));
 
-		pGenShaderConstants = leo::share_raw(Device.CreateConstanBuffer(platform::Render::Buffer::Usage::Dynamic, 0, sizeof(platform::Render::GenShadowConstants), EFormat::EF_Unknown));
+		pGenShaderConstants = leo::share_raw(Device.CreateConstanBuffer(Buffer::Usage::Dynamic, 0, sizeof(GenShadowConstants), EFormat::EF_Unknown));
 
 		ShadowMap = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_R32F,EA_GPURead | EA_GPUWrite | EA_GPUUnordered, {}));
 
@@ -412,6 +400,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR cmdLine, int nCmdShow)
 {
 	leo::FetchCommonLogger().SetSender([](platform::Descriptions::RecordLevel lv, platform::Logger& logger, const char* str) {return
 		platform_ex::SendDebugString(lv,str); });
+
+	// Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
 
 	EngineTest Test(L"EnginetTest");
 	Test.Create();

@@ -879,9 +879,9 @@ namespace platform_ex::Windows::D3D12 {
 
 	using SRVSlotMask = leo::make_width_int<MAX_SRVS>::unsigned_fast_type;
 
-	using SamplerSlotMask = leo::make_width_int<MAX_SAMPLERS>::unsigned_fast_type;
+	using SamplerSlotMask = leo::make_width_int<MAX_SAMPLERS>::unsigned_type;
 
-	using UAVSlotMask = leo::make_width_int<MAX_UAVS>::unsigned_fast_type;
+	using UAVSlotMask = leo::make_width_int<MAX_UAVS>::unsigned_type;
 }
 
 #define USE_PIX 1

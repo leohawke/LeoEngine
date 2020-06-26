@@ -505,17 +505,40 @@ void CommandContextStateCache::DirtyStateForNewCommandList()
 
 void CommandContextStateCache::DirtyState()
 {
-
+	// Mark bits dirty so the next call to ApplyState will set all this state again
+	PipelineState.Common.bNeedSetPSO = true;
+	PipelineState.Graphics.bNeedSetRootSignature = true;
+	bNeedSetVB = true;
+	bNeedSetSOs = true;
+	bNeedSetRTs = true;
+	bNeedSetViewports = true;
+	bNeedSetScissorRects = true;
+	bNeedSetPrimitiveTopology = true;
+	bNeedSetBlendFactor = true;
+	bNeedSetStencilRef = true;
+	bNeedSetDepthBounds = false;
+	PipelineState.Common.SRVCache.DirtyAll();
+	PipelineState.Common.UAVCache.DirtyAll();
+	PipelineState.Common.CBVCache.DirtyAll();
+	PipelineState.Common.SamplerCache.DirtyAll();
 }
 
 void CommandContextStateCache::DirtyViewDescriptorTables()
 {
-
+	// Mark the CBV/SRV/UAV descriptor tables dirty for the current root signature.
+	// Note: Descriptor table state is undefined at the beginning of a command list and after descriptor heaps are changed on a command list.
+	// This will cause the next call to ApplyState to copy and set these descriptors again.
+	PipelineState.Common.SRVCache.DirtyAll();
+	PipelineState.Common.UAVCache.DirtyAll();
+	PipelineState.Common.CBVCache.DirtyAll(GDescriptorTableCBVSlotMask);	// Only mark descriptor table slots as dirty.
 }
 
 void CommandContextStateCache::DirtySamplerDescriptorTables()
 {
-
+	// Mark the sampler descriptor tables dirty for the current root signature.
+	// Note: Descriptor table state is undefined at the beginning of a command list and after descriptor heaps are changed on a command list.
+	// This will cause the next call to ApplyState to copy and set these descriptors again.
+	PipelineState.Common.SamplerCache.DirtyAll();
 }
 
 bool CommandContextStateCache::AssertResourceStates(CachePipelineType PipelineType)

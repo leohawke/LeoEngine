@@ -43,6 +43,9 @@ namespace Test {
 		}
 
 		platform_ex::MessageMap& GetMessageMap();
+
+		virtual bool SubWndProc(HWND hWnd,
+			UINT uMsg, ::WPARAM wParam, ::LPARAM lParam);
 	protected:
 		leo::uint32 Update(leo::uint32 pass);
 

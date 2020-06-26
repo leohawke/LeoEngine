@@ -2,6 +2,7 @@
 #include "LFramework/Helper/Initialization.H"
 #include <LFramework/Win32/LCLib/Mingw32.h>
 #include <LFramework/Helper/GUIApplication.h>
+#include <commctrl.h>
 
 using namespace Test;
 using namespace Drawing;
@@ -9,6 +10,23 @@ using namespace Drawing;
 lconstexpr const double g_max_free_fps(1000);
 std::chrono::nanoseconds host_sleep(std::uint64_t(1000000000 / g_max_free_fps));
 #endif
+
+LRESULT TestFrameWorkSubclassproc(
+	HWND hWnd,
+	UINT uMsg,
+	WPARAM wParam,
+	LPARAM lParam,
+	UINT_PTR uIdSubclass,
+	DWORD_PTR dwRefData
+)
+{
+	auto pFrameWork = reinterpret_cast<TestFrameWork*>(dwRefData);
+
+	if (pFrameWork->SubWndProc(hWnd, uMsg, wParam, lParam))
+		return true;
+
+	return DefSubclassProc(hWnd, uMsg, wParam, lParam);
+}
 
 TestFrameWork::TestFrameWork(const std::wstring_view & name)
 {
@@ -20,10 +38,17 @@ TestFrameWork::TestFrameWork(const std::wstring_view & name)
 
 #if LFL_Win32
 	p_wnd_thrd.reset(new WindowThread([this] {
-		return unique_ptr<Window>(new Window(CreateNativeWindow(
+		auto ret = unique_ptr<Window>(new Window(CreateNativeWindow(
 			WindowClassName, { 1280, 720 }, L"TestFrame", WS_TILED | WS_CAPTION
 			| WS_SYSMENU | WS_MINIMIZEBOX),
 			app.GetGUIHostRef()));
+
+		if (!SetWindowSubclass(ret->GetNativeHandle(), TestFrameWorkSubclassproc, 0, (DWORD_PTR)this))
+		{
+			throw platform_ex::Windows::Win32Exception(GetLastError());
+		}
+
+		return ret;
 	}));
 
 
@@ -42,6 +67,12 @@ TestFrameWork::TestFrameWork(const std::wstring_view & name)
 		return app.GetGUIHostRef().MapTopLevelWindowPoint(pt);
 	};
 #endif
+}
+
+bool TestFrameWork::SubWndProc(HWND hWnd,
+	UINT uMsg,::WPARAM wParam, ::LPARAM lParam)
+{
+	return false;
 }
 
 platform_ex::MessageMap& TestFrameWork::GetMessageMap() {

@@ -139,7 +139,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>Imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Comctl32.lib;Imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
