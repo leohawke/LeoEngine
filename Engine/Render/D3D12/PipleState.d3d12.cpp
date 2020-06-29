@@ -4,6 +4,7 @@
 #include "InputLayout.hpp"
 #include "ShaderCompose.h"
 #include "Context.h"
+#include "Engine/Core/Hash/CityHash.h"
 
 namespace platform_ex::Windows::D3D12 {
 	PipleState::PipleState(const base & state)
@@ -25,10 +26,9 @@ namespace platform_ex::Windows::D3D12 {
 
 		size_t hash_val = 0;
 		hash_combine(hash_val, shader_compose.sc_template);
-		for (auto & input_elem_desc : layout.GetInputDesc()) {
-			auto p = reinterpret_cast<char const*>(&input_elem_desc);
-			hash_val = hash(hash_val, p, p + sizeof(input_elem_desc));
-		}
+		hash_combine(hash_val, CityHash32(
+			reinterpret_cast<char const*>(layout.GetInputDesc().data()), 
+			static_cast<uint32>(sizeof(D3D12_INPUT_ELEMENT_DESC)* layout.GetInputDesc().size())));
 		hash_combine(hash_val, layout.GetIndexFormat());
 		hash_combine(hash_val, layout.GetTopoType());
 
@@ -64,8 +64,8 @@ namespace platform_ex::Windows::D3D12 {
 			//TODO tessellation support
 			pso_desc.PrimitiveTopologyType = Convert<D3D12_PRIMITIVE_TOPOLOGY_TYPE>(tt);
 
-
-			for (auto i = std::size(pso_desc.RTVFormats) - 1; i >= 0; --i) {
+			pso_desc.NumRenderTargets = 0;
+			for (int i = leo::size(pso_desc.RTVFormats) - 1; i >= 0; --i) {
 				if (frame->Attached((FrameBuffer::Attachment)(FrameBuffer::Target0 + i))) {
 					pso_desc.NumRenderTargets =static_cast<UINT>(i + 1);
 					break;

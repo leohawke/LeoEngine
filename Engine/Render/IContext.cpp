@@ -30,9 +30,10 @@ namespace platform {
 
 			if (framebuffer) {
 				curr_frame_buffer = framebuffer;
-				curr_frame_buffer->OnBind();
 
 				DoBindFrameBuffer(curr_frame_buffer);
+
+				curr_frame_buffer->OnBind();
 			}
 		}
 		const std::shared_ptr<FrameBuffer>& Context::GetCurrFrame() const

@@ -281,6 +281,9 @@
     <ClCompile Include="Render\RenderPassInfo.cpp">
       <Filter>Render\DeviceInterface</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\PostProcess\PostProcessToneMap.cpp">
+      <Filter>Renderer\PostProcess</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Context.h">
@@ -630,6 +633,12 @@
     <ClInclude Include="Renderer\imgui\imgui_context.h">
       <Filter>Renderer\imgui</Filter>
     </ClInclude>
+    <ClInclude Include="Renderer\PostProcess\PostProcessToneMap.h">
+      <Filter>Renderer\PostProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShaderTextureTraits.hpp">
+      <Filter>Render\Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
@@ -783,6 +792,12 @@
     </None>
     <None Include="Render\Effect\Copy.lsl">
       <Filter>Shaders\Legacy</Filter>
+    </None>
+    <None Include="Shaders\PostProcess\PostProcessToneMap.lsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </None>
+    <None Include="Shaders\imgui\imgui.lsl">
+      <Filter>Shaders\imgui</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

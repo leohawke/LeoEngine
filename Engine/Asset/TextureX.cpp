@@ -345,7 +345,7 @@ namespace platform {
 			Initializer.Format = pAsset->GetFormat();
 			Initializer.Access = access;
 
-			return leo::share_raw(device.CreateTexture(Initializer,Render::TexCreate_ShaderResource ,pAsset->GetElementInitDatas().data()));
+			return leo::share_raw(device.CreateTexture(Initializer,pAsset->GetElementInitDatas().data()));
 		}
 		case TextureType::T_Cube:
 			return leo::share_raw(device.CreateTextureCube(pAsset->GetWidth(), pAsset->GetMipmapSize(), pAsset->GetArraySize(),

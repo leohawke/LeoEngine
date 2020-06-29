@@ -13,7 +13,7 @@ namespace platform_ex::Windows::D3D12 {
 		auto& cmd_list = Context::Instance().GetCommandList(Device::Command_Render);
 
 		std::vector<ID3D12Resource*> rt_src;
-		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> rt_handles(clr_views.size());
+		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> rt_handles;
 
 		RenderTargetView* min_rtv = nullptr;
 		for (auto i = 0; i != clr_views.size(); ++i) {
@@ -24,13 +24,16 @@ namespace platform_ex::Windows::D3D12 {
 				if (min_rtv == nullptr)
 					min_rtv = pRTV;
 
-				rt_handles[i] = pRTV->GetView();
+				rt_handles.emplace_back(pRTV->GetView());
 			}
 			else
 			{
-				rt_handles[i].ptr = ~decltype(rt_handles[i].ptr)();
+				rt_handles.emplace_back(D3D12_CPU_DESCRIPTOR_HANDLE());
 			}
 		}
+
+		if (rt_handles.size() == 1, rt_handles[0].ptr == 0)
+			rt_handles.resize(0);
 
 		D3D12_CPU_DESCRIPTOR_HANDLE ds_handle;
 		D3D12_CPU_DESCRIPTOR_HANDLE* ds_handle_ptr;

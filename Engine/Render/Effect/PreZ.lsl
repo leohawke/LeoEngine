@@ -19,11 +19,9 @@
 			ClipPos = mul(float4(WorldPos,1.0f),viewproj);
 		}
 
-		void ForwardPS(in float4 ClipPos:SV_POSITION,
-			out float4 color :SV_Target
+		void ForwardPS(in float4 ClipPos:SV_POSITION
 		)
 		{
-			color = 1.0f;
 		}
 		"
 	)

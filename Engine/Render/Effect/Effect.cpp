@@ -200,7 +200,7 @@ namespace platform::Render::Effect {
 	//effect will be discard
 	Parameter & Effect::GetParameter(const std::string_view & name)
 	{
-#ifndef NDEBUG
+#if 1
 		auto hash = leo::constfn_hash(name);
 		auto itr = parameters.find(hash);
 		if (itr != parameters.end())

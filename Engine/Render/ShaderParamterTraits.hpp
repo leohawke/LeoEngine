@@ -82,6 +82,11 @@ namespace platform::Render
 
 			using DeclType = leo::int32;
 		};
+
+		
+
+		template<typename TypeParameter>
+		struct TShaderTextureTypeInfo;
 	}
 }
 
@@ -111,7 +116,7 @@ namespace platform::Render
 #define INTERNAL_SHADER_PARAMETER_EXPLICIT(BaseType,TypeInfo,MemberType,MemberName) \
 	zzMemberId##MemberName; \
 	public: \
-		alignas(TypeInfo::Alignement<zzMemberId##MemberName::Boundary>) TypeInfo::DeclType MemberName; \
+		alignas(TypeInfo::Alignement<zzMemberId##MemberName::Boundary>) TypeInfo::DeclType MemberName {}; \
 	private: \
 		struct zzNextMemberId##MemberName \
 			{enum { Boundary =zzMemberId##MemberName::Boundary <sizeof(MemberName) ? \
@@ -144,13 +149,34 @@ namespace platform::Render
 			} while (Ptr); \
 			return Members; \
 		} \
-	}
+	};
 
 #define BEGIN_SHADER_PARAMETER_STRUCT(StructTypeName) \
 		INTERNAL_SHADER_PARAMETER_STRUCT_BEGIN(StructTypeName,INTERNAL_LOCAL_SHADER_PARAMETER_GET_STRUCT_METADATA(StructTypeName))
 
+/** Adds a constant-buffer stored value.
+ *
+ * Example:
+ *	SHADER_PARAMETER(float, MyScalar)
+ *	SHADER_PARAMETER(float4x4, MyMatrix)
+ */
 #define SHADER_PARAMETER(MemberType,MemberName) \
 		SHADER_PARAMETER_EX(MemberType,MemberName)
 
 #define SHADER_PARAMETER_EX(MemberType,MemberName) \
 		INTERNAL_SHADER_PARAMETER_EXPLICIT(platform::Render::TShaderParameterTypeInfo<MemberType>::ShaderType, platform::Render::TShaderParameterTypeInfo<MemberType>,MemberType,MemberName)
+
+ /** Adds a texture.
+  *
+  * Example:
+  *	SHADER_PARAMETER_TEXTURE(Texture2D, MyTexture)
+  */
+#define SHADER_PARAMETER_TEXTURE(MemberType,MemberName) \
+	INTERNAL_SHADER_PARAMETER_EXPLICIT(platform::Render::TShaderTextureTypeInfo<MemberType>::ShaderType, platform::Render::TShaderTextureTypeInfo<MemberType>, ShaderType*,MemberName)
+
+  /** Adds a sampler.
+   *
+   * Example:
+   *	SHADER_PARAMETER_SAMPLER(SamplerState, MySampler)
+   */
+#define SHADER_PARAMETER_SAMPLER(MemberType,MemberName) SHADER_PARAMETER(MemberType,MemberName)

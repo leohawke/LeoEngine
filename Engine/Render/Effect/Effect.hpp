@@ -178,6 +178,14 @@ namespace platform::Render::Effect {
 			else
 				return Deref(*std::any_cast<T*>(&value));
 		}
+
+		template<typename T>
+		T* Pointer() {
+			if (bind.target)
+				return &bind.target->template VariableInBuff<T>(bind.offset);
+			else
+				return std::any_cast<T>(&value);
+		}
 	private:
 		std::any value;
 		struct CBufferBind {
@@ -202,6 +210,11 @@ namespace platform::Render::Effect {
 		template<typename T>
 		void Value(T& value) {
 			value = var.Get<T>();
+		}
+
+		template<typename T>
+		T* TryGetValue() {
+			return var.Pointer<T>();
 		}
 
 		template<typename T>

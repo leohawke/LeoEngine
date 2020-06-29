@@ -107,7 +107,7 @@ IMPLEMENT_BUILTIN_SHADER(LUTBlenderPS, "PostProcess/PostProcessCombineLUTs.lsl",
 
 void GetCombineLUTParameters(CombineLUTParameters& Parameters, const CombineLUTSettings& args)
 {
-	std::memcpy(&Parameters.ColorSaturation, &args.ColorSaturation, loffsetof(CombineLUTSettings, FilmWhiteClip) - loffsetof(CombineLUTSettings, ColorSaturation));
+	std::memcpy(&Parameters.ColorSaturation, &args.ColorSaturation, loffsetof(CombineLUTParameters, InverseGamma) - loffsetof(CombineLUTParameters, ColorSaturation));
 
 	auto DisplayGamma = Environment->Gamma;
 
@@ -129,13 +129,13 @@ std::shared_ptr<Render::Texture> platform::CombineLUTPass(const CombineLUTSettin
 	initializer.ArraySize = 1;
 	initializer.NumMipmaps = 1;
 	initializer.Format = Render::EF_ABGR16F;
-	initializer.Access = Render::EA_GPURead | Render::EA_GPUWrite;
+	initializer.Access = Render::EA_GPURead | Render::EA_RTV;
 	initializer.NumSamples = 1;
 
 	Render::ElementInitData data;
 	data.clear_value = &Render::ClearValueBinding::Black;
 	if(bUseVolumeTextureLUT)
-		OutputTexture = Render::Context::Instance().GetDevice().CreateTexture(initializer,Render::TexCreate_RenderTargetable,&data);
+		OutputTexture = Render::Context::Instance().GetDevice().CreateTexture(initializer,&data);
 
 	auto& CmdList = Render::GetCommandList();
 
@@ -147,7 +147,7 @@ std::shared_ptr<Render::Texture> platform::CombineLUTPass(const CombineLUTSettin
 	CmdList.FillRenderTargetsInfo(GraphicsPSOInit);
 
 	GraphicsPSOInit.BlendState = {};
-	GraphicsPSOInit.RasterizerState = {};
+	GraphicsPSOInit.RasterizerState.cull = Render::CullMode::None;
 	GraphicsPSOInit.DepthStencilState.depth_enable = false;
 	GraphicsPSOInit.DepthStencilState.depth_func = Render::CompareOp::Pass;
 

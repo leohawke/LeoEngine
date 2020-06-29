@@ -29,8 +29,7 @@ namespace platform_ex::Windows::D3D12 {
 	{
 		auto num_vertex_streams = static_cast<UINT>(vertex_streams.size());
 
-		std::vector<D3D12_VERTEX_BUFFER_VIEW> vbvs;
-		vbvs.resize(num_vertex_streams);
+		std::array<D3D12_VERTEX_BUFFER_VIEW, 16> vbvs;
 
 		for (auto i = 0; i != num_vertex_streams; ++i) {
 			auto& vb = *static_cast<GraphicsBuffer*>(vertex_streams[i].stream.get());

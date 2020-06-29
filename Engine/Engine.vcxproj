@@ -43,6 +43,7 @@
     <ClCompile Include="Core\ResourcesHolder.cpp" />
     <ClCompile Include="Renderer\imgui\imgui_context.cpp" />
     <ClCompile Include="Renderer\PostProcess\PostProcessCombineLUTs.cpp" />
+    <ClCompile Include="Renderer\PostProcess\PostProcessToneMap.cpp" />
     <ClCompile Include="Renderer\VolumeRendering.cpp">
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
     </ClCompile>
@@ -151,6 +152,7 @@
     <ClInclude Include="emacro.h" />
     <ClInclude Include="Renderer\imgui\imgui_context.h" />
     <ClInclude Include="Renderer\PostProcess\PostProcessCombineLUTs.h" />
+    <ClInclude Include="Renderer\PostProcess\PostProcessToneMap.h" />
     <ClInclude Include="Renderer\VolumeRendering.h" />
     <ClInclude Include="Render\BuiltInRayTracingShader.h" />
     <ClInclude Include="Render\BuiltInShader.h" />
@@ -228,6 +230,7 @@
     <ClInclude Include="Render\ITexture.hpp" />
     <ClInclude Include="Render\PipleState.h" />
     <ClInclude Include="Render\InputLayout.hpp" />
+    <ClInclude Include="Render\ShaderTextureTraits.hpp" />
     <ClInclude Include="Render\ViewPort.h" />
     <ClInclude Include="System\NinthTimer.h" />
     <ClInclude Include="System\SystemEnvironment.h" />
@@ -255,7 +258,9 @@
     <None Include="Shaders\ACES.lsl" />
     <None Include="Shaders\Common.lsl" />
     <None Include="Shaders\GammaCorrectionCommon.lsl" />
+    <None Include="Shaders\imgui\imgui.lsl" />
     <None Include="Shaders\PostProcess\PostProcessCombineLUTs.lsl" />
+    <None Include="Shaders\PostProcess\PostProcessToneMap.lsl" />
     <None Include="Shaders\PostProcess\TonemapCommon.lsl" />
     <None Include="Shaders\PostProcess\VolumeRendering.lsl" />
     <None Include="Shaders\RayTracing\RayTracingBuiltInShaders.lsl" />

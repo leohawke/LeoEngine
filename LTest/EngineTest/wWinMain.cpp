@@ -12,6 +12,7 @@
 #include "Engine/Render/DataStructures.h"
 #include "Engine/Render/IFrameBuffer.h"
 #include "Engine/Renderer/PostProcess/PostProcessCombineLUTs.h"
+#include "Engine/Renderer/PostProcess/PostProcessToneMap.h"
 
 #include "LFramework/Win32/LCLib/Mingw32.h"
 
@@ -53,8 +54,10 @@ public:
 	std::shared_ptr<Texture2D> ShadowMap;
 	std::shared_ptr<UnorderedAccessView> ShadowMapUAV;
 
+	std::shared_ptr<Texture2D> HDROutput;
 
-	leo::math::float4 clear_color = { 0,0,0,1 };
+
+	leo::math::float4 clear_color = { 0,0,0,0 };
 
 	platform::CombineLUTSettings lut_params;
 	bool lut_dirty = false;
@@ -89,7 +92,9 @@ private:
 		auto entityId = ecs::EntitySystem::Instance().AddEntity<ecs::Entity>();
 
 		Context::Instance().BeginFrame();
-		Context::Instance().GetScreenFrame()->Clear(FrameBuffer::Color | FrameBuffer::Depth | FrameBuffer::Stencil, clear_color, 1, 0);
+		auto& screen_frame = Context::Instance().GetScreenFrame();
+		auto screen_tex = screen_frame->Attached(FrameBuffer::Target0);
+
 		auto& Device = Context::Instance().GetDevice();
 
 		platform::imgui::Context_NewFrame();
@@ -102,10 +107,7 @@ private:
 
 		ecs::EntitySystem::Instance().RemoveEntity(entityId);
 
-		if (true || lut_dirty || !lut_texture)
-		{
-			lut_texture = platform::CombineLUTPass(lut_params);
-		}
+		
 
 		lm::float4x4 worldmatrix = {
 			{1,0,0,0},
@@ -148,6 +150,11 @@ private:
 			pPreZEffect->GetParameter("viewproj"sv) = lm::transpose(viewproj);
 		}
 
+		Context::Instance().SetFrame(nullptr);
+
+		screen_frame->Detach(FrameBuffer::Target0);
+		screen_frame->Clear(FrameBuffer::Depth | FrameBuffer::Stencil, clear_color, 1, 0);
+		Context::Instance().SetFrame(screen_frame);
 		//pre-z
 		for (auto& entity : pEntities->GetRenderables())
 		{
@@ -175,23 +182,27 @@ private:
 
 		pEffect->GetParameter("shadow_tex") = TextureSubresource(ShadowMap, 0, ShadowMap->GetArraySize(), 0, ShadowMap->GetNumMipMaps());
 
+		RenderTarget hdrTarget;
+		hdrTarget.Texture = HDROutput.get();
+		screen_frame->Attach(FrameBuffer::Target0, hdrTarget);
+
 		//re-bind
-		auto& screen_frame = Context::Instance().GetScreenFrame();
 		Context::Instance().SetFrame(screen_frame);
+		screen_frame->Clear(FrameBuffer::Color, clear_color, 1, 0);
+
 		for (auto& entity : pEntities->GetRenderables())
 		{
 			entity.GetMaterial().UpdateParams(reinterpret_cast<const platform::Renderable*>(&entity));
 			Context::Instance().Render(*pEffect, pEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
 		}
 
-		auto& CmdList = platform::Render::GetCommandList();
+		RenderTarget prevTarget;
+		prevTarget.Texture = screen_tex;
+		screen_frame->Attach(FrameBuffer::Target0, prevTarget);
 
-		platform::Render::RenderPassInfo passInfo(screen_frame->Attached(platform::Render::FrameBuffer::Target0), RenderTargetActions::Load_Store);
-
-		CmdList.BeginRenderPass(passInfo, "imguiPass");
-
-		platform::imgui::Context_RenderDrawData(ImGui::GetDrawData());
-
+		OnPostProcess();
+		OnDrawUI();
+		
 		Context::Instance().GetDisplay().SwapBuffers();
 		//what can i do in this duration?
 		Context::Instance().GetDisplay().WaitOnSwapBuffers();
@@ -199,6 +210,40 @@ private:
 		Context::Instance().EndFrame();
 
 		return Nothing;
+	}
+
+	Texture* GetScreenTex()
+	{
+		return Context::Instance().GetScreenFrame()->Attached(FrameBuffer::Target0);
+	}
+
+	void OnPostProcess()
+	{
+		//PostProcess
+		if (true || lut_dirty || !lut_texture)
+		{
+			lut_texture = platform::CombineLUTPass(lut_params);
+		}
+
+		platform::TonemapInputs tonemap_inputs;
+		tonemap_inputs.OverrideOutput.Texture = GetScreenTex();
+		tonemap_inputs.OverrideOutput.LoadAction = RenderTargetLoadAction::NoAction;
+		tonemap_inputs.OverrideOutput.StoreAction = RenderTargetStoreAction::Store;
+		tonemap_inputs.ColorGradingTexture = lut_texture;
+		tonemap_inputs.SceneColor = HDROutput;
+
+		platform::TonemapPass(tonemap_inputs);
+	}
+
+	void OnDrawUI()
+	{
+		auto& CmdList = platform::Render::GetCommandList();
+
+		platform::Render::RenderPassInfo passInfo(GetScreenTex(), RenderTargetActions::Load_Store);
+
+		CmdList.BeginRenderPass(passInfo, "imguiPass");
+
+		platform::imgui::Context_RenderDrawData(ImGui::GetDrawData());
 	}
 
 	void OnCreate() override {
@@ -220,7 +265,12 @@ private:
 
 		platform::imgui::Context_Init(Context::Instance());
 
-		
+		auto& Device = Context::Instance().GetDevice();
+
+		ElementInitData data;
+		data.clear_value = &ClearValueBinding::Black;
+
+		HDROutput = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_ABGR16F, EA_GPURead | EA_RTV, {}, &data));
 
 		pEntities = std::make_unique<Entities>("sponza_crytek.entities.lsl");
 
@@ -253,7 +303,6 @@ private:
 		directioal_light.color = lm::float3(4.0f, 4.0f, 4.0f);
 		lights.push_back(directioal_light);
 
-		auto& Device = Context::Instance().GetDevice();
 		pLightConstatnBuffer = leo::share_raw(Device.CreateConstanBuffer(Buffer::Usage::Dynamic, EAccessHint::EA_GPURead | EAccessHint::EA_GPUStructured, sizeof(DirectLight)*lights.size(), static_cast<EFormat>(sizeof(DirectLight)),lights.data()));
 
 		pGenShaderConstants = leo::share_raw(Device.CreateConstanBuffer(Buffer::Usage::Dynamic, 0, sizeof(GenShadowConstants), EFormat::EF_Unknown));
@@ -280,6 +329,8 @@ private:
 				pCameraMainpulator->Zoom(offset);
 			}
 		};
+
+		
 	}
 
 	void OnCombineLUTUI()

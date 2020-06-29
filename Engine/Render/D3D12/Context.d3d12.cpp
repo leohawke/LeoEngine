@@ -185,11 +185,17 @@ namespace platform_ex::Windows::D3D12 {
 			size_t hash_val = 0;
 			for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
 				hash_val = hash_combine_seq(hash_val, i, shader_compose.Srvs[i].size());
-				hash_val = hash(hash_val, shader_compose.Srvs[i].begin(), shader_compose.Srvs[i].end());
+				if(!shader_compose.Srvs[i].empty())
+					hash_combine(hash_val,
+						CityHash32(reinterpret_cast<const char*>(shader_compose.Srvs[i].data()),
+									static_cast<uint32>(shader_compose.Srvs[i].size()*sizeof(decltype(shader_compose.Srvs)::value_type))));
 			}
 			for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
 				hash_val = hash_combine_seq(hash_val, i, shader_compose.Uavs[i].size());
-				hash_val = hash(hash_val, shader_compose.Uavs[i].begin(), shader_compose.Uavs[i].end());
+				if (!shader_compose.Uavs[i].empty())
+					hash_combine(hash_val,
+						CityHash32(reinterpret_cast<const char*>(shader_compose.Uavs[i].data()),
+							static_cast<uint32>(shader_compose.Uavs[i].size()* sizeof(decltype(shader_compose.Uavs)::value_type))));
 			}
 			auto iter = device->cbv_srv_uav_heaps.find(hash_val);
 			if (iter == device->cbv_srv_uav_heaps.end()) {

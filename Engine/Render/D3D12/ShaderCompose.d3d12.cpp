@@ -18,19 +18,19 @@ using platform::Render::ShaderBlob;
 namespace {
 	class SetTextureSRV {
 	public:
-		SetTextureSRV(std::tuple<D3D12::ResourceHolder*, leo::uint32, leo::uint32>&srvsrc_, D3D12::ShaderResourceView*& srv_, platform::Render::Effect::Parameter * param_)
+		SetTextureSRV(std::tuple<D3D12::ResourceHolder*, leo::uint32, leo::uint32>& srvsrc_, D3D12::ShaderResourceView*& srv_, platform::Render::Effect::Parameter* param_)
 			:psrvsrc(&srvsrc_), ppsrv(&srv_), param(param_)
 		{}
 
 		void operator()() {
-			platform::Render::TextureSubresource tex_subres;
-			try {
-				param->Value(tex_subres);
-			}
-			catch (std::bad_any_cast&) {
+			auto pTexSubRes = param->TryGetValue<platform::Render::TextureSubresource>();
+			if (!pTexSubRes)
+			{
 				LF_Trace(platform::Descriptions::RecordLevel::Warning, "SetTextureSRV(%s) Value Null!", param->Name.c_str());
 			}
-			if (tex_subres.tex) {
+			else if (pTexSubRes->tex) {
+				auto& tex_subres = *pTexSubRes;
+
 				auto pTexture = dynamic_cast<D3D12::Texture*>(tex_subres.tex.get());
 				*psrvsrc = std::make_tuple(static_cast<D3D12::ResourceHolder*>(pTexture),
 					tex_subres.first_array_index * tex_subres.tex->GetNumMipMaps() + tex_subres.first_level,
@@ -76,12 +76,12 @@ namespace {
 		std::tuple<D3D12::ResourceHolder*, leo::uint32, leo::uint32>* psrvsrc;
 		D3D12::ShaderResourceView** ppsrv;
 		std::shared_ptr<D3D12::ShaderResourceView> psrv;
-		platform::Render::Effect::Parameter * param;
+		platform::Render::Effect::Parameter* param;
 	};
 
 	class SetBufferSRV {
 	public:
-		SetBufferSRV(std::tuple<D3D12::ResourceHolder*, leo::uint32, leo::uint32>&srvsrc_, D3D12::ShaderResourceView*& srv_, platform::Render::Effect::Parameter * param_)
+		SetBufferSRV(std::tuple<D3D12::ResourceHolder*, leo::uint32, leo::uint32>& srvsrc_, D3D12::ShaderResourceView*& srv_, platform::Render::Effect::Parameter* param_)
 			:psrvsrc(&srvsrc_), ppsrv(&srv_), param(param_)
 		{}
 		void operator()() {
@@ -104,12 +104,12 @@ namespace {
 	private:
 		std::tuple<D3D12::ResourceHolder*, leo::uint32, leo::uint32>* psrvsrc;
 		D3D12::ShaderResourceView** ppsrv;
-		platform::Render::Effect::Parameter * param;
+		platform::Render::Effect::Parameter* param;
 	};
 
 	class SetTextureUAV {
 	public:
-		SetTextureUAV(std::pair<D3D12::ResourceHolder*, ID3D12Resource*>& uavsrc_, D3D12::UnorderedAccessView*& uav_, platform::Render::Effect::Parameter * param_)
+		SetTextureUAV(std::pair<D3D12::ResourceHolder*, ID3D12Resource*>& uavsrc_, D3D12::UnorderedAccessView*& uav_, platform::Render::Effect::Parameter* param_)
 			:puavsrc(&uavsrc_), ppuav(&uav_), param(param_)
 		{}
 
@@ -138,12 +138,12 @@ namespace {
 		std::pair<D3D12::ResourceHolder*, ID3D12Resource*>* puavsrc;
 		D3D12::UnorderedAccessView** ppuav;
 		std::shared_ptr<D3D12::UnorderedAccessView> puav;
-		platform::Render::Effect::Parameter * param;
+		platform::Render::Effect::Parameter* param;
 	};
 
 	class SetBufferUAV {
 	public:
-		SetBufferUAV(std::pair<D3D12::ResourceHolder*, ID3D12Resource*>& uavsrc_, D3D12::UnorderedAccessView*& uav_, platform::Render::Effect::Parameter * param_)
+		SetBufferUAV(std::pair<D3D12::ResourceHolder*, ID3D12Resource*>& uavsrc_, D3D12::UnorderedAccessView*& uav_, platform::Render::Effect::Parameter* param_)
 			:puavsrc(&uavsrc_), ppuav(&uav_), param(param_)
 		{}
 
@@ -165,7 +165,7 @@ namespace {
 	private:
 		std::pair<D3D12::ResourceHolder*, ID3D12Resource*>* puavsrc;
 		D3D12::UnorderedAccessView** ppuav;
-		platform::Render::Effect::Parameter * param;
+		platform::Render::Effect::Parameter* param;
 	};
 }
 
@@ -177,7 +177,7 @@ platform_ex::Windows::D3D12::ShaderCompose::Template::Template()
 	//uname union uname struct init
 }
 
-platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<platform::Render::ShaderType, const asset::ShaderBlobAsset*> pShaderBlob, platform::Render::Effect::Effect* pEffect) :
+platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<platform::Render::ShaderType, const asset::ShaderBlobAsset*> pShaderBlob, platform::Render::Effect::Effect * pEffect) :
 	sc_template(std::make_unique<Template>())
 {
 	auto CopyShader = [&](auto& shader, auto type) {
@@ -257,7 +257,7 @@ void platform_ex::Windows::D3D12::ShaderCompose::Bind()
 {
 	for (leo::uint8 st = 0; st != NumTypes; ++st) {
 		//param bind
-		for (auto const & pb : ParamBinds[st]) {
+		for (auto const& pb : ParamBinds[st]) {
 			pb.func();
 		}
 	}
@@ -287,7 +287,7 @@ platform_ex::Windows::D3D12::ShaderCompose::SignatureType* platform_ex::Windows:
 	return sc_template->root_signature.get();
 }
 
-ID3D12DescriptorHeap * platform_ex::Windows::D3D12::ShaderCompose::SamplerHeap() const
+ID3D12DescriptorHeap* platform_ex::Windows::D3D12::ShaderCompose::SamplerHeap() const
 {
 	return sc_template->sampler_heap.Get();
 }
@@ -367,7 +367,7 @@ void platform_ex::Windows::D3D12::ShaderCompose::CreateBarriers()
 	}
 }
 
-platform_ex::Windows::D3D12::ShaderCompose::parameter_bind_t platform_ex::Windows::D3D12::ShaderCompose::GetBindFunc(ShaderParameterHandle const & p_handle, platform::Render::Effect::Parameter * param)
+platform_ex::Windows::D3D12::ShaderCompose::parameter_bind_t platform_ex::Windows::D3D12::ShaderCompose::GetBindFunc(ShaderParameterHandle const& p_handle, platform::Render::Effect::Parameter * param)
 {
 	using platform::Render::ShaderParamType;
 
