@@ -105,6 +105,20 @@ namespace platform_ex {
 				array<std::mutex, Device::CommandTypeCount> cmd_list_mutexs;
 
 				D3D12_VIEWPORT curr_viewport;
+
+				struct
+				{
+					ID3D12PipelineState* CurrentPipelineStateObject;
+					ID3D12RootSignature* CurrentRootSignature;
+
+
+					ID3D12DescriptorHeap* CurrentSamplerHeap;
+
+					struct
+					{
+						D3D12_GPU_VIRTUAL_ADDRESS CurrentGPUVirtualAddress[ShaderType::NumStandardType][MAX_CBS];
+					} CBVCache;
+				} RenderPSO;
 			public:
 				static Context& Instance();
 			};

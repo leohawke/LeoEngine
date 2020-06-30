@@ -149,8 +149,24 @@ namespace platform_ex::Windows::D3D12 {
 
 		auto pso = piple_state.RetrieveGraphicsPSO(layout, shader_compose, GetCurrFrame(), tech.HasTessellation());
 
-		render_cmd_list->SetPipelineState(pso.get());
-		render_cmd_list->SetGraphicsRootSignature(shader_compose.RootSignature()->Signature.Get());
+		bool bNeedSetRootSignature = false;
+		if (pso.get() != RenderPSO.CurrentPipelineStateObject || shader_compose.RootSignature()->Signature.Get() != RenderPSO.CurrentRootSignature)
+		{
+			bNeedSetRootSignature = true;
+
+			RenderPSO.CurrentPipelineStateObject = pso.get();
+			RenderPSO.CurrentRootSignature = shader_compose.RootSignature()->Signature.Get();
+
+			std::memset(RenderPSO.CBVCache.CurrentGPUVirtualAddress, 0, sizeof(RenderPSO.CBVCache));
+		}
+
+		if (bNeedSetRootSignature)
+		{
+			render_cmd_list->SetPipelineState(RenderPSO.CurrentPipelineStateObject);
+			render_cmd_list->SetGraphicsRootSignature(RenderPSO.CurrentRootSignature);
+
+			RenderPSO.CurrentSamplerHeap = nullptr;
+		}
 
 		D3D12_RECT scissor_rc;
 		if (pass.GetState().RasterizerState.scissor_enable) {
@@ -247,7 +263,7 @@ namespace platform_ex::Windows::D3D12 {
 		}
 
 		//Sampler Bind
-		if (sampler_heap) {
+		if (sampler_heap && RenderPSO.CurrentSamplerHeap != sampler_heap) {
 			auto sampler_desc_size = (*device)->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 
 			auto gpu_sampler_handle = sampler_heap->GetGPUDescriptorHandleForHeapStart();
@@ -258,6 +274,8 @@ namespace platform_ex::Windows::D3D12 {
 					gpu_sampler_handle.ptr += sampler_desc_size * shader_compose.Samplers[i].size();
 				}
 			}
+
+			RenderPSO.CurrentSamplerHeap = sampler_heap;
 		}
 
 		//CBuffer Bind
@@ -265,11 +283,21 @@ namespace platform_ex::Windows::D3D12 {
 			int BufferIndex = 0;
 			for (auto& cbuffer : shader_compose.CBuffs[i]) {
 				auto& resource = static_cast<GraphicsBuffer*>(cbuffer)->resource;
-				auto root_param_index = signature->CBVRDBindSlot((ShaderType)i, BufferIndex++);
+				auto root_param_index = signature->CBVRDBindSlot((ShaderType)i, BufferIndex);
 				if (resource)
-					render_cmd_list->SetGraphicsRootConstantBufferView(root_param_index, resource->GetGPUVirtualAddress());
+				{
+					auto& CurrentGPUVirtualAddress = RenderPSO.CBVCache.CurrentGPUVirtualAddress[i][BufferIndex];
+					auto NextGPUVirtualAddress = resource->GetGPUVirtualAddress();
+					if (NextGPUVirtualAddress != CurrentGPUVirtualAddress)
+					{
+						render_cmd_list->SetGraphicsRootConstantBufferView(root_param_index, NextGPUVirtualAddress);
+						CurrentGPUVirtualAddress = NextGPUVirtualAddress;
+					}
+				}
 				else
 					render_cmd_list->SetGraphicsRootConstantBufferView(root_param_index, 0);
+
+				++BufferIndex;
 			}
 		}
 	}

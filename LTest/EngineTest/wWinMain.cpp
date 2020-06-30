@@ -267,6 +267,8 @@ private:
 
 		auto& Device = Context::Instance().GetDevice();
 
+		Context::Instance().BeginFrame();
+
 		ElementInitData data;
 		data.clear_value = &ClearValueBinding::Black;
 
@@ -330,7 +332,11 @@ private:
 			}
 		};
 
-		
+		Context::Instance().GetDisplay().SwapBuffers();
+		//what can i do in this duration?
+		Context::Instance().GetDisplay().WaitOnSwapBuffers();
+
+		Context::Instance().EndFrame();
 	}
 
 	void OnCombineLUTUI()

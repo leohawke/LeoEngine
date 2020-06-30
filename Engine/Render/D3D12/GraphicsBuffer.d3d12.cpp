@@ -13,7 +13,6 @@ namespace platform_ex::Windows::D3D12 {
 	}
 
 	GraphicsBuffer::~GraphicsBuffer() {
-		Context::Instance().SyncCPUGPU();
 	}
 
 	void GraphicsBuffer::CopyToBuffer(platform::Render::GraphicsBuffer & rhs_)
