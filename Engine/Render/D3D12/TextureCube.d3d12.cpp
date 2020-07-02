@@ -80,7 +80,7 @@ void TextureCube::UnMap(const Sub1D& box, TextureCubeFaces face){
 
 D3D12_SHADER_RESOURCE_VIEW_DESC TextureCube::CreateSRVDesc(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) const{
 	LAssert(GetAccessMode() & EA_GPURead, "Access mode must have EA_GPURead flag");
-	D3D12_SHADER_RESOURCE_VIEW_DESC desc;
+	D3D12_SHADER_RESOURCE_VIEW_DESC desc{};
 	switch (format) {
 	case EF_D16:
 		desc.Format = DXGI_FORMAT_R16_UNORM;
@@ -119,7 +119,7 @@ D3D12_UNORDERED_ACCESS_VIEW_DESC TextureCube::CreateUAVDesc(uint8 first_array_in
 D3D12_UNORDERED_ACCESS_VIEW_DESC TextureCube::CreateUAVDesc(uint8 first_array_index, uint8 num_items, TextureCubeFaces first_face, uint8 num_faces, uint8 level) const{
 	LAssert(GetAccessMode() & EA_GPUUnordered, "Access mode must have EA_GPUUnordered flag");
 
-	D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
+	D3D12_UNORDERED_ACCESS_VIEW_DESC desc{};
 
 	desc.Format = dxgi_format;
 	desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
@@ -134,7 +134,7 @@ D3D12_UNORDERED_ACCESS_VIEW_DESC TextureCube::CreateUAVDesc(uint8 first_array_in
 D3D12_RENDER_TARGET_VIEW_DESC TextureCube::CreateRTVDesc(uint8 first_array_index, uint8 array_size, uint8 level) const{
 	LAssert(GetAccessMode() & EA_GPUWrite, "Access mode must have EA_GPUWrite flag");
 
-	D3D12_RENDER_TARGET_VIEW_DESC desc;
+	D3D12_RENDER_TARGET_VIEW_DESC desc{};
 
 	desc.Format = Convert(format);
 	if (sample_info.Count > 1)
@@ -156,7 +156,7 @@ D3D12_RENDER_TARGET_VIEW_DESC TextureCube::CreateRTVDesc(uint8 first_array_index
 D3D12_DEPTH_STENCIL_VIEW_DESC TextureCube::CreateDSVDesc(uint8 first_array_index, uint8 array_size, uint8 level) const{
 	LAssert(GetAccessMode() & EA_GPUWrite, "Access mode must have EA_GPUWrite flag");
 
-	D3D12_DEPTH_STENCIL_VIEW_DESC desc;
+	D3D12_DEPTH_STENCIL_VIEW_DESC desc{};
 
 	desc.Format = Convert(format);
 	desc.Flags = D3D12_DSV_FLAG_NONE;
@@ -179,7 +179,7 @@ D3D12_DEPTH_STENCIL_VIEW_DESC TextureCube::CreateDSVDesc(uint8 first_array_index
 D3D12_RENDER_TARGET_VIEW_DESC TextureCube::CreateRTVDesc(uint8 array_index, TextureCubeFaces face, uint8 level) const{
 	LAssert(GetAccessMode() & EA_GPUWrite, "Access mode must have EA_GPUWrite flag");
 
-	D3D12_RENDER_TARGET_VIEW_DESC desc;
+	D3D12_RENDER_TARGET_VIEW_DESC desc{};
 
 	desc.Format = Convert(format);
 	if (sample_info.Count > 1)
@@ -201,7 +201,7 @@ D3D12_RENDER_TARGET_VIEW_DESC TextureCube::CreateRTVDesc(uint8 array_index, Text
 D3D12_DEPTH_STENCIL_VIEW_DESC TextureCube::CreateDSVDesc(uint8 array_index, TextureCubeFaces face, uint8 level) const{
 	LAssert(GetAccessMode() & EA_GPUWrite, "Access mode must have EA_GPUWrite flag");
 
-	D3D12_DEPTH_STENCIL_VIEW_DESC desc;
+	D3D12_DEPTH_STENCIL_VIEW_DESC desc{};
 
 	desc.Format = Convert(format);
 	desc.Flags = D3D12_DSV_FLAG_NONE;

@@ -127,7 +127,7 @@ void Texture2D::UnMap(const Sub1D& sub)
 D3D12_SHADER_RESOURCE_VIEW_DESC Texture2D::CreateSRVDesc(uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels) const
 {
 	LAssert(GetAccessMode() & EA_GPURead, "Access mode must have EA_GPURead flag");
-	D3D12_SHADER_RESOURCE_VIEW_DESC desc;
+	D3D12_SHADER_RESOURCE_VIEW_DESC desc{};
 	switch (format) {
 	case EF_D16:
 		desc.Format = DXGI_FORMAT_R16_UNORM;
@@ -182,19 +182,21 @@ D3D12_UNORDERED_ACCESS_VIEW_DESC Texture2D::CreateUAVDesc(uint8 first_array_inde
 {
 	LAssert(GetAccessMode() & EA_GPUUnordered, "Access mode must have EA_GPUUnordered flag");
 
-	D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
+	D3D12_UNORDERED_ACCESS_VIEW_DESC desc{};
 
 	desc.Format = dxgi_format;
-	desc.Texture2DArray.MipSlice = level;
-	desc.Texture2DArray.PlaneSlice = 0;
-
+	
 	if (array_size) {
 		desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
 		desc.Texture2DArray.ArraySize = num_items;
 		desc.Texture2DArray.FirstArraySlice = first_array_index;
+		desc.Texture2DArray.MipSlice = level;
+		desc.Texture2DArray.PlaneSlice = 0;
 	}
 	else {
 		desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+		desc.Texture2D.MipSlice = level;
+		desc.Texture2D.PlaneSlice = 0;
 	}
 	return desc;
 }
@@ -203,21 +205,32 @@ D3D12_RENDER_TARGET_VIEW_DESC Texture2D::CreateRTVDesc(uint8 first_array_index, 
 {
 	LAssert(GetAccessMode() & EA_GPUWrite, "Access mode must have EA_GPUWrite flag");
 
-	D3D12_RENDER_TARGET_VIEW_DESC desc;
+	D3D12_RENDER_TARGET_VIEW_DESC desc{};
 
 	desc.Format = Convert(format);
-
-	if (sample_info.Count == 1) {
-		desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
-		desc.Texture2DArray.ArraySize = num_items;
-		desc.Texture2DArray.FirstArraySlice = first_array_index;
-		desc.Texture2DArray.MipSlice = level;
-		desc.Texture2DArray.PlaneSlice = 0;
+	if (array_size) {
+		if (sample_info.Count == 1) {
+			desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
+			desc.Texture2DArray.ArraySize = num_items;
+			desc.Texture2DArray.FirstArraySlice = first_array_index;
+			desc.Texture2DArray.MipSlice = level;
+			desc.Texture2DArray.PlaneSlice = 0;
+		}
+		else {
+			desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMSARRAY;
+			desc.Texture2DMSArray.FirstArraySlice = first_array_index;
+			desc.Texture2DMSArray.ArraySize = num_items;
+		}
 	}
 	else {
-		desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMSARRAY;
-		desc.Texture2DMSArray.FirstArraySlice = first_array_index;
-		desc.Texture2DMSArray.ArraySize = num_items;
+		if (sample_info.Count == 1) {
+			desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+			desc.Texture2D.MipSlice = level;
+			desc.Texture2D.PlaneSlice = 0;
+		}
+		else {
+			desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMS;
+		}
 	}
 
 	return desc;
@@ -227,21 +240,32 @@ D3D12_DEPTH_STENCIL_VIEW_DESC Texture2D::CreateDSVDesc(uint8 first_array_index, 
 {
 	LAssert(GetAccessMode() & EA_GPUWrite, "Access mode must have EA_GPUWrite flag");
 
-	D3D12_DEPTH_STENCIL_VIEW_DESC desc;
+	D3D12_DEPTH_STENCIL_VIEW_DESC desc{};
 
 	desc.Format = Convert(format);
 	desc.Flags = D3D12_DSV_FLAG_NONE;
 
-	if (sample_info.Count == 1) {
-		desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
-		desc.Texture2DArray.MipSlice = level;
-		desc.Texture2DArray.ArraySize = num_items;
-		desc.Texture2DArray.FirstArraySlice = first_array_index;
+	if (array_size) {
+		if (sample_info.Count == 1) {
+			desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
+			desc.Texture2DArray.MipSlice = level;
+			desc.Texture2DArray.ArraySize = num_items;
+			desc.Texture2DArray.FirstArraySlice = first_array_index;
+		}
+		else {
+			desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY;
+			desc.Texture2DMSArray.ArraySize = num_items;
+			desc.Texture2DMSArray.FirstArraySlice = first_array_index;
+		}
 	}
 	else {
-		desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY;
-		desc.Texture2DMSArray.ArraySize = num_items;
-		desc.Texture2DMSArray.FirstArraySlice = first_array_index;
+		if (sample_info.Count == 1) {
+			desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+			desc.Texture2D.MipSlice = level;
+		}
+		else {
+			desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY;
+		}
 	}
 
 	return desc;

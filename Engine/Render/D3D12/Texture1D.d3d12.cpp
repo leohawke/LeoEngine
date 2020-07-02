@@ -132,7 +132,7 @@ D3D12_UNORDERED_ACCESS_VIEW_DESC Texture1D::CreateUAVDesc(uint8 first_array_inde
 {
 	LAssert(GetAccessMode() & EA_GPUUnordered, "Access mode must have EA_GPUUnordered flag");
 
-	D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
+	D3D12_UNORDERED_ACCESS_VIEW_DESC desc{};
 
 	desc.Format = dxgi_format;
 
@@ -154,7 +154,7 @@ D3D12_RENDER_TARGET_VIEW_DESC platform_ex::Windows::D3D12::Texture1D::CreateRTVD
 {
 	LAssert(GetAccessMode() & EA_GPUWrite, "Access mode must have EA_GPUWrite flag");
 
-	D3D12_RENDER_TARGET_VIEW_DESC desc;
+	D3D12_RENDER_TARGET_VIEW_DESC desc{};
 
 	desc.Format = Convert(format);
 	if (GetArraySize() > 1) {

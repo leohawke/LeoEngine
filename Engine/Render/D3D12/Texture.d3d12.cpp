@@ -818,7 +818,7 @@ using namespace platform_ex::Windows;
 
 D3D12_SHADER_RESOURCE_VIEW_DESC D3D12::CreateSRVDesc(const platform::Render::Texture& tex, uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels)
 {
-	D3D12_SHADER_RESOURCE_VIEW_DESC Desc;
+	D3D12_SHADER_RESOURCE_VIEW_DESC Desc{};
 	switch (tex.GetType())	
 	{
 	case TextureType::T_1D:
@@ -836,7 +836,7 @@ D3D12_SHADER_RESOURCE_VIEW_DESC D3D12::CreateSRVDesc(const platform::Render::Tex
 
 D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12::CreateUAVDesc(const platform::Render::Texture& tex, uint8 first_array_index, uint8 num_items, uint8 level)
 {
-	D3D12_UNORDERED_ACCESS_VIEW_DESC Desc;
+	D3D12_UNORDERED_ACCESS_VIEW_DESC Desc{};
 	switch (tex.GetType())
 	{
 	case TextureType::T_1D:
@@ -857,7 +857,7 @@ D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12::CreateUAVDesc(const platform::Render::Te
 
 D3D12_RENDER_TARGET_VIEW_DESC platform_ex::Windows::D3D12::CreateRTVDesc(const platform::Render::Texture& tex, uint8 first_array_index, uint8 num_items, uint8 level)
 {
-	D3D12_RENDER_TARGET_VIEW_DESC Desc;
+	D3D12_RENDER_TARGET_VIEW_DESC Desc{};
 	switch (tex.GetType())
 	{
 	case TextureType::T_1D:
@@ -876,7 +876,7 @@ D3D12_RENDER_TARGET_VIEW_DESC platform_ex::Windows::D3D12::CreateRTVDesc(const p
 
 D3D12_DEPTH_STENCIL_VIEW_DESC D3D12::CreateDSVDesc(const platform::Render::Texture& tex, uint8 first_array_index, uint8 num_items, uint8 level)
 {
-	D3D12_DEPTH_STENCIL_VIEW_DESC Desc;
+	D3D12_DEPTH_STENCIL_VIEW_DESC Desc{};
 	switch (tex.GetType())
 	{
 	case TextureType::T_1D:
@@ -895,7 +895,7 @@ D3D12_DEPTH_STENCIL_VIEW_DESC D3D12::CreateDSVDesc(const platform::Render::Textu
 
 D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12::CreateUAVDesc(const platform::Render::Texture& tex, uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level)
 {
-	D3D12_UNORDERED_ACCESS_VIEW_DESC Desc;
+	D3D12_UNORDERED_ACCESS_VIEW_DESC Desc{};
 	switch (tex.GetType())
 	{
 	case TextureType::T_1D:
@@ -912,7 +912,7 @@ D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12::CreateUAVDesc(const platform::Render::Te
 
 D3D12_RENDER_TARGET_VIEW_DESC D3D12::CreateRTVDesc(const platform::Render::Texture& tex, uint8 array_index, uint16 first_slice, uint16 num_slices, uint8 level)
 {
-	D3D12_RENDER_TARGET_VIEW_DESC Desc;
+	D3D12_RENDER_TARGET_VIEW_DESC Desc{};
 	switch (tex.GetType())
 	{
 	case TextureType::T_1D:
@@ -929,7 +929,7 @@ D3D12_RENDER_TARGET_VIEW_DESC D3D12::CreateRTVDesc(const platform::Render::Textu
 
 D3D12_UNORDERED_ACCESS_VIEW_DESC platform_ex::Windows::D3D12::CreateUAVDesc(const platform::Render::Texture& tex, uint8 first_array_index, uint8 num_items, TextureCubeFaces first_face, uint8 num_faces, uint8 level)
 {
-	D3D12_UNORDERED_ACCESS_VIEW_DESC Desc;
+	D3D12_UNORDERED_ACCESS_VIEW_DESC Desc{};
 	switch (tex.GetType())
 	{
 	case TextureType::T_1D:
@@ -946,7 +946,7 @@ D3D12_UNORDERED_ACCESS_VIEW_DESC platform_ex::Windows::D3D12::CreateUAVDesc(cons
 
 D3D12_RENDER_TARGET_VIEW_DESC platform_ex::Windows::D3D12::CreateRTVDesc(const platform::Render::Texture& tex, uint8 array_index, TextureCubeFaces face, uint8 level)
 {
-	D3D12_RENDER_TARGET_VIEW_DESC Desc;
+	D3D12_RENDER_TARGET_VIEW_DESC Desc{};
 	switch (tex.GetType())
 	{
 	case TextureType::T_1D:
@@ -963,7 +963,7 @@ D3D12_RENDER_TARGET_VIEW_DESC platform_ex::Windows::D3D12::CreateRTVDesc(const p
 
 D3D12_DEPTH_STENCIL_VIEW_DESC platform_ex::Windows::D3D12::CreateDSVDesc(const platform::Render::Texture& tex, uint8 array_index, TextureCubeFaces face, uint8 level)
 {
-	D3D12_DEPTH_STENCIL_VIEW_DESC Desc;
+	D3D12_DEPTH_STENCIL_VIEW_DESC Desc{};
 	switch (tex.GetType())
 	{
 	case TextureType::T_1D:
