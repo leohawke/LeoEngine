@@ -40,7 +40,7 @@ void platform::TonemapPass(const TonemapInputs& Inputs)
 
 	CmdList.BeginRenderPass(passInfo, "TonemapPass");
 
-	Render::GraphicsPipelineStateInitializer GraphicsPSOInit;
+	Render::GraphicsPipelineStateInitializer GraphicsPSOInit {};
 	CmdList.FillRenderTargetsInfo(GraphicsPSOInit);
 
 	GraphicsPSOInit.BlendState = {};

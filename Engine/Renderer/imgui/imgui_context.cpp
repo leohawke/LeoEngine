@@ -11,7 +11,7 @@ using namespace platform::imgui;
 using namespace platform::Render;
 
 Texture2D* GFontTexture = nullptr;
-TextureSampleDesc GFontSampler = {};
+TextureSampleDesc GFontSampler {};
 
 GraphicsBuffer* GIndexBuffer = nullptr;
 GraphicsBuffer* GVertexBuffer = nullptr;

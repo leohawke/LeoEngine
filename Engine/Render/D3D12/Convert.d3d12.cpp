@@ -424,7 +424,7 @@ platform::Render::EFormat platform_ex::Windows::D3D12::Convert(DXGI_FORMAT forma
 
 D3D12_SAMPLER_DESC platform_ex::Windows::D3D12::Convert(platform::Render::TextureSampleDesc desc)
 {
-	D3D12_SAMPLER_DESC sampler_desc;
+	D3D12_SAMPLER_DESC sampler_desc {};
 	sampler_desc.Filter = Convert(desc.filtering);
 	sampler_desc.AddressU = Convert(desc.address_mode_u);
 	sampler_desc.AddressV = Convert(desc.address_mode_v);
@@ -565,7 +565,7 @@ std::vector<D3D12_INPUT_ELEMENT_DESC> platform_ex::Windows::D3D12::Convert(const
 
 	uint16 elem_offset = 0;
 	for (auto& element : stream.elements) {
-		D3D12_INPUT_ELEMENT_DESC d3d12_element;
+		D3D12_INPUT_ELEMENT_DESC d3d12_element {};
 		d3d12_element.SemanticIndex = element.usage_index;
 		d3d12_element.Format = Convert(element.format);
 		d3d12_element.AlignedByteOffset = elem_offset;
@@ -652,7 +652,7 @@ D3D12_PRIMITIVE_TOPOLOGY  platform_ex::Windows::D3D12::Convert<D3D12_PRIMITIVE_T
 
 D3D12_BLEND_DESC platform_ex::Windows::D3D12::Convert(const platform::Render::BlendDesc & desc)
 {
-	D3D12_BLEND_DESC result;
+	D3D12_BLEND_DESC result {};
 	result.AlphaToCoverageEnable = desc.alpha_to_coverage_enable;
 	result.IndependentBlendEnable = desc.independent_blend_enable;
 	for (auto i = 0; i != std::size(result.RenderTarget); ++i) {
@@ -674,7 +674,7 @@ D3D12_BLEND_DESC platform_ex::Windows::D3D12::Convert(const platform::Render::Bl
 
 D3D12_RASTERIZER_DESC platform_ex::Windows::D3D12::Convert(const platform::Render::RasterizerDesc & desc)
 {
-	D3D12_RASTERIZER_DESC result;
+	D3D12_RASTERIZER_DESC result {};
 	result.CullMode = Convert(desc.cull);
 	result.FillMode = Convert(desc.mode);
 	result.FrontCounterClockwise = desc.ccw;
@@ -721,7 +721,7 @@ D3D12_STENCIL_OP platform_ex::Windows::D3D12::Convert(platform::Render::StencilO
 
 D3D12_DEPTH_STENCIL_DESC platform_ex::Windows::D3D12::Convert(const platform::Render::DepthStencilDesc & desc)
 {
-	D3D12_DEPTH_STENCIL_DESC result;
+	D3D12_DEPTH_STENCIL_DESC result {};
 
 	result.DepthEnable = desc.depth_enable;
 	result.DepthWriteMask = (D3D12_DEPTH_WRITE_MASK)desc.depth_write_mask;

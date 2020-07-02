@@ -143,7 +143,7 @@ std::shared_ptr<Render::Texture> platform::CombineLUTPass(const CombineLUTSettin
 
 	CmdList.BeginRenderPass(passInfo,"CombineLUTPass");
 
-	Render::GraphicsPipelineStateInitializer GraphicsPSOInit;
+	Render::GraphicsPipelineStateInitializer GraphicsPSOInit{};
 	CmdList.FillRenderTargetsInfo(GraphicsPSOInit);
 
 	GraphicsPSOInit.BlendState = {};

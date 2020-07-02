@@ -15,8 +15,8 @@ struct SamplerDescHash
 	static_assert(sizeof(D3D12_SAMPLER_DESC) % 4 == 0);
 
 	std::size_t operator()(const D3D12_SAMPLER_DESC& desc) const noexcept {
-		auto ptr = reinterpret_cast<const leo::uint32*>(&desc);
-		return leo::hash(ptr, ptr + sizeof(desc));
+		auto ptr = reinterpret_cast<const char*>(&desc);
+		return CityHash32(ptr,sizeof(desc));
 	}
 };
 
