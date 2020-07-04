@@ -816,6 +816,22 @@ std::string  TextureCube::Description() const
 using platform::Render::TextureType;
 using namespace platform_ex::Windows;
 
+Texture* platform_ex::Windows::D3D12::dynamic_cast_texture(platform::Render::Texture* pTex)
+{
+	switch (pTex->GetType())
+	{
+	case TextureType::T_1D:
+		return  static_cast<Texture1D*>(pTex);
+	case TextureType::T_2D:
+		return  static_cast<Texture2D*>(pTex);
+	case TextureType::T_3D:
+		return  static_cast<Texture3D*>(pTex);
+	case TextureType::T_Cube:
+		return  static_cast<TextureCube*>(pTex);
+	}
+	return dynamic_cast<Texture*>(pTex);
+}
+
 D3D12_SHADER_RESOURCE_VIEW_DESC D3D12::CreateSRVDesc(const platform::Render::Texture& tex, uint8 first_array_index, uint8 num_items, uint8 first_level, uint8 num_levels)
 {
 	D3D12_SHADER_RESOURCE_VIEW_DESC Desc{};

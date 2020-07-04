@@ -57,6 +57,13 @@ namespace platform_ex::Windows::D3D12 {
 			viewport.width = static_cast<uint32>(min_rtv->GetResource()->GetDesc().Width);
 			viewport.height = min_rtv->GetResource()->GetDesc().Height;
 		}
+		else if (pDSV)
+		{
+			auto desc = pDSV->GetResource()->GetDesc();
+
+			viewport.width = static_cast<uint32>(desc.Width);
+			viewport.height = desc.Height;
+		}
 
 		d3d12_viewport.TopLeftX = static_cast<float>(viewport.x);
 		d3d12_viewport.TopLeftY = static_cast<float>(viewport.y);

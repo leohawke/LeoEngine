@@ -121,7 +121,7 @@ public:
 
 	static ResourceType to_type(ShaderParamType type)
 	{
-		if (type == SPT_ConstatnBuffer)
+		if (type == SPT_ConstantBuffer)
 			return b;
 		if (type == SPT_sampler)
 			return s;
@@ -177,7 +177,7 @@ bool asset::RequireStructElemType(ShaderParamType type)
 	case SPT_ConsumeStructuredBuffer:
 	case SPT_StructuredBuffer:
 	case SPT_rwstructured_buffer:
-	case SPT_ConstatnBuffer:
+	case SPT_ConstantBuffer:
 		return true;
 	}
 
@@ -216,7 +216,7 @@ std::string asset::ShadersAsset::GenHLSLShader() const
 			case	CBUFFER:
 			{
 				auto& cbuffer = cbuffers[local_index];
-				allocator.PreAllocator(cbuffer, SPT_ConstatnBuffer);
+				allocator.PreAllocator(cbuffer, SPT_ConstantBuffer);
 			}
 			case	PARAM:
 			{
@@ -250,7 +250,7 @@ std::string asset::ShadersAsset::GenHLSLShader() const
 			else
 				ss << leo::sfmt("ConstantBuffer<%s> %s", cbuffer.GetElemInfo().c_str(), cbuffer.GetName().c_str()) << endl;
 
-			ss << FormatBindDesc(allocator, cbuffer, SPT_ConstatnBuffer);
+			ss << FormatBindDesc(allocator, cbuffer, SPT_ConstantBuffer);
 
 			if (!template_synatx)
 			{

@@ -140,14 +140,14 @@ void CommandContext::SetShaderSampler(platform::Render::PixelHWShader* Shader, u
 
 void CommandContext::SetShaderTexture(platform::Render::VertexHWShader* Shader, uint32 TextureIndex, platform::Render::Texture* ITexture)
 {
-	auto SRV = dynamic_cast<Texture*>(ITexture)->RetriveShaderResourceView();
+	auto SRV = dynamic_cast_texture(ITexture)->RetriveShaderResourceView();
 
 	StateCache.SetShaderResourceView<ShaderType::VertexShader>(SRV, TextureIndex);
 }
 
 void CommandContext::SetShaderTexture(platform::Render::PixelHWShader* Shader, uint32 TextureIndex, platform::Render::Texture* ITexture)
 {
-	auto SRV = dynamic_cast<Texture*>(ITexture)->RetriveShaderResourceView();
+	auto SRV = dynamic_cast_texture(ITexture)->RetriveShaderResourceView();
 
 	StateCache.SetShaderResourceView<ShaderType::PixelShader>(SRV, TextureIndex);
 }

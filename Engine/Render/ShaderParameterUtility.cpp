@@ -47,6 +47,29 @@ struct ShaderParameterStructBinding
 
 				Bindings->Paramters.emplace_back(Parameter);
 			}
+
+			const bool bIsTextureType = (
+				ShaderType >= SPT_texture1D &&
+				ShaderType <= SPT_textureCUBEArray
+				);
+
+			if (bIsTextureType)
+			{
+				RenderShaderParameterBindings::ResourceParameter Parameter;
+				Parameter.BaseIndex = BaseIndex;
+				Parameter.ByteOffset = ByteOffset;
+
+				Bindings->Textures.emplace_back(Parameter);
+			}
+
+			if (ShaderType == SPT_sampler)
+			{
+				RenderShaderParameterBindings::ResourceParameter Parameter;
+				Parameter.BaseIndex = BaseIndex;
+				Parameter.ByteOffset = ByteOffset;
+
+				Bindings->Samplers.emplace_back(Parameter);
+			}
 		}
 	}
 };

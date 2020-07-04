@@ -51,8 +51,7 @@ void MainVS(
 	out 				float4 OutPosition 				: SV_POSITION
 	)
 {
-	OutPosition = InPosition;
-	OutTexCoord = InTexCoord;
+	DrawRectangle(InPosition,InTexCoord,OutPosition,OutTexCoord);
 }
 
 float4 SampleSceneColor(float2 SceneUV)

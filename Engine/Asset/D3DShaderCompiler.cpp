@@ -263,15 +263,19 @@ void FillD3D11Reflect(ID3D11ShaderReflection* pReflection, ShaderInfo* pInfo, Sh
 		pReflection->GetResourceBindingDesc(i, &input_bind_desc);
 
 		auto BindPoint = static_cast<leo::uint16>(input_bind_desc.BindPoint + 1);
+
+		ShaderParamClass Class = ShaderParamClass::Num;
 		switch (input_bind_desc.Type)
 		{
 		case D3D_SIT_SAMPLER:
 			pInfo->ResourceCounts.NumSamplers = std::max(pInfo->ResourceCounts.NumSamplers, BindPoint);
+			Class = ShaderParamClass::Sampler;
 			break;
 
 		case D3D_SIT_TEXTURE:
 		case D3D_SIT_STRUCTURED:
 		case D3D_SIT_BYTEADDRESS:
+			Class = ShaderParamClass::SRV;
 			pInfo->ResourceCounts.NumSRVs = std::max(pInfo->ResourceCounts.NumSRVs, BindPoint);
 			break;
 
@@ -303,7 +307,7 @@ void FillD3D11Reflect(ID3D11ShaderReflection* pReflection, ShaderInfo* pInfo, Sh
 		{
 			ShaderInfo::BoundResourceInfo BoundResourceInfo;
 			BoundResourceInfo.name = input_bind_desc.Name;
-			BoundResourceInfo.type = static_cast<uint8_t>(input_bind_desc.Type);
+			BoundResourceInfo.type = static_cast<uint8_t>(Class);
 			BoundResourceInfo.bind_point = static_cast<uint16_t>(input_bind_desc.BindPoint);
 			pInfo->BoundResourceInfos.emplace_back(std::move(BoundResourceInfo));
 		}

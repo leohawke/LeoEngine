@@ -31,7 +31,7 @@ namespace {
 			else if (pTexSubRes->tex) {
 				auto& tex_subres = *pTexSubRes;
 
-				auto pTexture = dynamic_cast<D3D12::Texture*>(tex_subres.tex.get());
+				auto pTexture = D3D12::dynamic_cast_texture(tex_subres.tex.get());
 				*psrvsrc = std::make_tuple(static_cast<D3D12::ResourceHolder*>(pTexture),
 					tex_subres.first_array_index * tex_subres.tex->GetNumMipMaps() + tex_subres.first_level,
 

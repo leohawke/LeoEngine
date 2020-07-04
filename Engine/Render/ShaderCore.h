@@ -54,7 +54,7 @@ namespace platform::Render {
 			SPT_texture2DArray,
 			SPT_texture3DArray,
 			SPT_textureCUBEArray,
-			SPT_ConstatnBuffer,
+			SPT_ConstantBuffer,
 			SPT_buffer,
 			SPT_StructuredBuffer,
 			SPT_rwbuffer,
@@ -105,6 +105,16 @@ namespace platform::Render {
 			std::string IntersectionEntryPoint;
 		};
 
+		enum class ShaderParamClass :uint8_t
+		{
+			LooseData,
+			UniformBuffer,
+			Sampler,
+			SRV,
+
+			Num
+		};
+
 		struct ShaderInfo {
 			ShaderType Type;
 
@@ -149,16 +159,6 @@ namespace platform::Render {
 		};
 
 		using ShaderMacro = std::pair<std::string, std::string>;
-
-		enum class ShaderParamClass
-		{
-			LooseData,
-			UniformBuffer,
-			Sampler,
-			SRV,
-
-			Num
-		};
 		
 		struct ParameterAllocation
 		{

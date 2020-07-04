@@ -2,6 +2,7 @@
 #include "Engine/Render/BuiltinShader.h"
 #include "Engine/Render/ICommandList.h"
 #include "Engine/Render/PipelineStateUtility.h"
+#include "Engine/Render/PixelShaderUtils.h"
 #include "Engine/Renderer/VolumeRendering.h"
 #include "Engine/Render/PipleState.h"
 #include "Engine/Render/ShaderTextureTraits.hpp"
@@ -36,32 +37,32 @@ void platform::TonemapPass(const TonemapInputs& Inputs)
 {
 	auto& CmdList = Render::GetCommandList();
 
+	auto PixelShader = Render::GetGlobalShaderMap()->GetShader<TonemapPS>();
+
 	Render::RenderPassInfo passInfo(Inputs.OverrideOutput.Texture, Render::RenderTargetActions::Clear_Store);
 
 	CmdList.BeginRenderPass(passInfo, "TonemapPass");
 
 	Render::GraphicsPipelineStateInitializer GraphicsPSOInit {};
-	CmdList.FillRenderTargetsInfo(GraphicsPSOInit);
-
-	GraphicsPSOInit.BlendState = {};
-	GraphicsPSOInit.RasterizerState.cull = Render::CullMode::None;
-	GraphicsPSOInit.DepthStencilState.depth_enable = false;
-	GraphicsPSOInit.DepthStencilState.depth_func = Render::CompareOp::Pass;
+	PixelShaderUtils::InitFullscreenPipelineState(CmdList,*PixelShader,GraphicsPSOInit);
 
 	auto VertexShader = Render::GetGlobalShaderMap()->GetShader<TonemapVS>();
-
-	auto PixelShader = Render::GetGlobalShaderMap()->GetShader<TonemapPS>();
-
-	GraphicsPSOInit.Primitive = Render::PrimtivteType::TriangleStrip;
-	GraphicsPSOInit.ShaderPass.VertexDeclaration = GScreenVertexDeclaration();
 	GraphicsPSOInit.ShaderPass.VertexShader = VertexShader->GetVertexShader();
-	GraphicsPSOInit.ShaderPass.PixelShader = PixelShader->GetPixelShader();
 
 	SetGraphicsPipelineState(CmdList, GraphicsPSOInit);
 
 	TonemapParameters CommonParameters;
+	CommonParameters.ColorGradingLUT =static_cast<Texture3D*>(Inputs.ColorGradingTexture.get());
+	CommonParameters.ColorTexture = static_cast<Texture2D*>(Inputs.SceneColor.get());
+
+	Render::TextureSampleDesc BilinearClampSampler{};
+	BilinearClampSampler.address_mode_u = BilinearClampSampler.address_mode_v = BilinearClampSampler.address_mode_w = Render::TexAddressingMode::Clamp;
+	BilinearClampSampler.filtering = Render::TexFilterOp::Min_Mag_Linear_Mip_Point;
+
+	CommonParameters.ColorGradingLUTSampler = BilinearClampSampler;
+	CommonParameters.ColorSampler = BilinearClampSampler;
 
 	SetShaderParameters(CmdList, PixelShader, PixelShader->GetPixelShader(), CommonParameters);
 
-	//DrawFullscreenTriangle
+	PixelShaderUtils::DrawFullscreenTriangle(CmdList);
 }

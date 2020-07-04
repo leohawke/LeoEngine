@@ -366,6 +366,7 @@ namespace platform_ex::Windows::D3D12 {
 	D3D12_RENDER_TARGET_VIEW_DESC CreateRTVDesc(const platform::Render::Texture& tex, uint8 array_index, TextureCubeFaces face, uint8 level);
 	D3D12_DEPTH_STENCIL_VIEW_DESC CreateDSVDesc(const platform::Render::Texture& tex, uint8 array_index, TextureCubeFaces face, uint8 level);
 
+	Texture* dynamic_cast_texture(platform::Render::Texture* pTex);
 }
 
 #endif

@@ -3,8 +3,10 @@
 
 namespace platform::Render {
 	template<typename TCommandList,typename TShaderClass,typename THardwareShader>
-	void SetShaderParameters(TCommandList& cmdlist, const TShaderClass* Shader, THardwareShader* ShaderRHI, const typename TShaderClass::Parameters& Parameters)
+	inline void SetShaderParameters(TCommandList& cmdlist, const TShaderClass* Shader, THardwareShader* ShaderRHI, const typename TShaderClass::Parameters& Parameters)
 	{
+		//ValidateShaderParameters
+
 		lconstraint(ShaderRHI != nullptr);
 		const auto& Bindings = Shader->Bindings;
 
@@ -14,8 +16,24 @@ namespace platform::Render {
 		// Parameters
 		for (auto& ParameterBinding : Bindings.Paramters)
 		{
-			const void* DataPtr = reinterpret_cast<const char*>(&Parameters) + ParameterBinding.ByteOffset;
+			const void* DataPtr = Base + ParameterBinding.ByteOffset;
 			cmdlist.SetShaderParameter(ShaderRHI, ParameterBinding.BufferIndex, ParameterBinding.BaseIndex, ParameterBinding.ByteSize,DataPtr);
+		}
+
+		// Textures
+		for (auto& TextureBinding : Bindings.Textures)
+		{
+			auto ShaderParameterRef = *(Texture**)(Base + TextureBinding.ByteOffset);
+
+			cmdlist.SetShaderTexture(ShaderRHI, TextureBinding.BaseIndex, ShaderParameterRef);
+		}
+
+		//Samplers
+		for (auto& SamplerBinding : Bindings.Samplers)
+		{
+			auto ShaderParameterRef = *(TextureSampleDesc*)(Base + SamplerBinding.ByteOffset);
+
+			cmdlist.SetShaderSampler(ShaderRHI, SamplerBinding.BaseIndex, ShaderParameterRef);
 		}
 	}
 }

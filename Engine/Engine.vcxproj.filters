@@ -284,6 +284,12 @@
     <ClCompile Include="Renderer\PostProcess\PostProcessToneMap.cpp">
       <Filter>Renderer\PostProcess</Filter>
     </ClCompile>
+    <ClCompile Include="Render\CommonRenderResources.cpp">
+      <Filter>Render\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\PixelShaderUtils.cpp">
+      <Filter>Render\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Context.h">
@@ -639,6 +645,12 @@
     <ClInclude Include="Render\ShaderTextureTraits.hpp">
       <Filter>Render\Shader</Filter>
     </ClInclude>
+    <ClInclude Include="Render\CommonRenderResources.h">
+      <Filter>Render\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\PixelShaderUtils.h">
+      <Filter>Render\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
@@ -724,6 +736,9 @@
     </Filter>
     <Filter Include="Shaders\Legacy">
       <UniqueIdentifier>{439bc9dd-f311-48e1-8f4d-e393f3e1bb6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render\Core">
+      <UniqueIdentifier>{5946ba9f-6d8d-4651-ad75-c68d4c6d7e43}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

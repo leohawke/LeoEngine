@@ -148,6 +148,18 @@ namespace platform::Render::Shader
 						var.start_offset, var.size, ShaderParamClass::LooseData);
 				}
 			}
+			else
+			{
+				target.AddParameterAllocation(name, 0,cb.bind_point,
+					 cb.size, ShaderParamClass::UniformBuffer);
+			}
+		}
+		for (auto& br : src.BoundResourceInfos)
+		{
+			ShaderParamClass Class = static_cast<ShaderParamClass>(br.type);
+
+			target.AddParameterAllocation(br.name, 0, br.bind_point,
+				 1, Class);
 		}
 	}
 }

@@ -53,7 +53,7 @@ Render::VertexDeclarationElements platform::GScreenVertexDeclaration()
 {
 	constexpr std::array<Render::VertexElement, 2> Elements =
 	{ {
-		{0,loffsetof(ScreenVertex,Position),Render::Vertex::Usage::Position,0,Render::EF_BGR32F,sizeof(ScreenVertex)},
+		{0,loffsetof(ScreenVertex,Position),Render::Vertex::Usage::Position,0,Render::EF_GR32F,sizeof(ScreenVertex)},
 		{0,loffsetof(ScreenVertex,UV),Render::Vertex::Usage::TextureCoord,0,Render::EF_GR32F,sizeof(ScreenVertex)},
 	} };
 
