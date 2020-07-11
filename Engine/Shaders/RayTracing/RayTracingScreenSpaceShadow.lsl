@@ -84,7 +84,7 @@ RAY_TRACING_ENTRY_RAYGEN(RayGen)
 		TraceRay(TLAS, RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH, ~0,0,1,0, rayDesc, payload);
 
 		RayCount += 1.0;
-		Visibility = payload.IsMiss() ? 1.0:0.0;
+		Visibility += payload.IsMiss() ? 1.0:0.0;
 	}
 	Output[DispatchRaysIndex().xy] = Visibility/RayCount;
 }
