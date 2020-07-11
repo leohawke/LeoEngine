@@ -1,16 +1,26 @@
 (RayTracing
 	(refer RayTracingCommon.lsl)
+	(refer RayTracingDirectionalLight.lsl)
+	(refer RandomSequence.lsl)
 	(RaytracingAccelerationStructure (space RAY_TRACING_REGISTER_SPACE_GLOBAL) TLAS)
 	(RWTexture2D  (elemtype float) (space RAY_TRACING_REGISTER_SPACE_GLOBAL) Output)
 	(texture2D (space RAY_TRACING_REGISTER_SPACE_GLOBAL) Depth)
 	(cbuffer GenShaderConstants (space RAY_TRACING_REGISTER_SPACE_GLOBAL)
 		(float3 LightDirection)
+		(float SourceRadius)
+		(uint SamplesPerPixel)
+		(uint StateFrameIndex)
 		(float4x4 CameraToWorld)
 		(float2 Resolution)
 	)
 	(shader 
 "
 static const float FLT_MAX = asfloat(0x7F7FFFFF);
+
+uint CalcLinearIndex(uint2 PixelCoord)
+{
+	return PixelCoord.y * uint(Resolution.x) + PixelCoord.x;
+}
 
 RAY_TRACING_ENTRY_RAYGEN(RayGen)
 {
@@ -33,23 +43,50 @@ RAY_TRACING_ENTRY_RAYGEN(RayGen)
 	float4 unprojected = mul(float4(screenPos, sceneDepth, 1),CameraToWorld);
 	float3 world = unprojected.xyz / unprojected.w;
 
-	// R
-    float3 direction = LightDirection;
-    float3 origin = world;
+	uint2 PixelCoord = DispatchRaysIndex().xy;
 
-	RayDesc rayDesc = { origin,
-        0.1f,
-        direction,
-        FLT_MAX };
+	RandomSequence RandSequence;
+	uint LinearIndex = CalcLinearIndex(PixelCoord);
+	RandomSequence_Initialize(RandSequence, LinearIndex, StateFrameIndex);
 
-	FMinimalPayload payload = {-1};
+	float RayCount = 0;
+	float Visibility =0;
+	for(uint SampleIndex =0;SampleIndex <SamplesPerPixel;++SamplerIndex)
+	{
+		uint DummyVariable;
+		float2 RandSample = RandomSequence_GenerateSample2D(RandSequence, DummyVariable);
 
-	TraceRay(TLAS, RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH, ~0,0,1,0, rayDesc, payload);
+		float3 RayOrigin;
+		float3 RayDirection;
+		float RayTMin;
+		float RayTMax;
 
-	if(payload.IsHit() && payload.HitT < FLT_MAX)
-		Output[DispatchRaysIndex().xy] = 0;
-	else
-		Output[DispatchRaysIndex().xy] = 1;
+		LightShaderParameters LightParameters = {LightDirection,SourceRadius};
+
+		GenerateDirectionalLightOcclusionRay(
+			LightParameters,
+			world,
+			float3(0,1,0),
+			RandSample,
+			RayOrigin,
+			RayDirection,
+			RayTMin,
+			RayTMax
+		);
+
+		RayDesc rayDesc = { RayOrigin,
+			RayTMin,
+			RayDirection,
+			RayTMax };
+
+		FMinimalPayload payload = {-1};
+
+		TraceRay(TLAS, RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH, ~0,0,1,0, rayDesc, payload);
+
+		RayCount += 1.0;
+		Visibility = payload.IsMiss() ? 1.0:0.0;
+	}
+	Output[DispatchRaysIndex().xy] = Visibility/RayCount;
 }
 "
 	)

@@ -263,13 +263,16 @@
     <None Include="Shaders\Common.lsl" />
     <None Include="Shaders\GammaCorrectionCommon.lsl" />
     <None Include="Shaders\imgui\imgui.lsl" />
+    <None Include="Shaders\MonteCarlo.lsl" />
     <None Include="Shaders\PostProcess\PostProcessCombineLUTs.lsl" />
     <None Include="Shaders\PostProcess\PostProcessToneMap.lsl" />
     <None Include="Shaders\PostProcess\TonemapCommon.lsl" />
     <None Include="Shaders\PostProcess\VolumeRendering.lsl" />
+    <None Include="Shaders\RandomSequence.lsl" />
     <None Include="Shaders\RayTracing\RayTracingBuiltInShaders.lsl" />
     <None Include="Shaders\RayTracing\RayTracingCommon.lsl" />
     <None Include="Shaders\RayTracing\RayTracingDefaultHitShaders.lsl" />
+    <None Include="Shaders\RayTracing\RayTracingDirectionalLight.lsl" />
     <None Include="Shaders\RayTracing\RayTracingScreenSpaceShadow.lsl" />
     <None Include="Shaders\RayTracing\RayTracingBuiltInResources.lsl" />
     <None Include="Shaders\RayTracing\RayTracingHitGroupCommon.lsl" />

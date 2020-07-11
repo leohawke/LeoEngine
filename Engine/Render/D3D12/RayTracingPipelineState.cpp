@@ -5,22 +5,29 @@
 
 using namespace platform_ex::Windows::D3D12;
 
+using IRayTracingShader = platform::Render::RayTracingShader;
+
 RayTracingPipelineState::RayTracingPipelineState(const platform::Render::RayTracingPipelineStateInitializer& initializer)
 {
 	auto& RayDevice = Context::Instance().GetRayContext().GetDevice();
 	auto RayTracingDevice = RayDevice.GetRayTracingDevice();
 
-	platform::Render::RayTracingShader* DefaultHitShader = GetBuildInRayTracingShader<DefaultCHS>();
-	platform::Render::RayTracingShader* DefaultHitGroupTable[] = { DefaultHitShader };
+	IRayTracingShader* DefaultHitShader = GetBuildInRayTracingShader<DefaultCHS>();
+	IRayTracingShader* DefaultHitGroupTable[] = { DefaultHitShader };
 
-	//TODO:facll back to default ones if none were provided
+	IRayTracingShader* DefaultMissShader = GetBuildInRayTracingShader<DefaultMS>();
+	IRayTracingShader* DefaultMissTable[] = { DefaultMissShader };
+
+	//TODO:fallback to default ones if none were provided
 	leo::span<platform::Render::RayTracingShader*> InitializerHitGroups = initializer.HitGroupTable.empty()?
 		leo::make_span(DefaultHitGroupTable):
 		initializer.HitGroupTable;
-	leo::span<platform::Render::RayTracingShader*> InitializerMissShaders = initializer.MissTable;
+	leo::span<IRayTracingShader*> InitializerMissShaders = initializer.MissTable.empty()?
+		leo::make_span(DefaultMissTable):
+		initializer.MissTable;
 
-	leo::span<platform::Render::RayTracingShader*> InitializerRayGenShaders = initializer.RayGenTable;
-	leo::span<platform::Render::RayTracingShader*> InitializerCallableShaders = initializer.CallableTable;
+	leo::span<IRayTracingShader*> InitializerRayGenShaders = initializer.RayGenTable;
+	leo::span<IRayTracingShader*> InitializerCallableShaders = initializer.CallableTable;
 
 	const uint32 MaxTotalShaders =static_cast<uint32>(InitializerRayGenShaders.size() + InitializerMissShaders.size() + InitializerHitGroups.size() + InitializerCallableShaders.size());
 

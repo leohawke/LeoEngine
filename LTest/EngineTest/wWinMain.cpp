@@ -62,6 +62,10 @@ public:
 	platform::CombineLUTSettings lut_params;
 	bool lut_dirty = false;
 	TexturePtr lut_texture = nullptr;
+
+	float LightHalfAngle = 0.5f;
+	int SamplesPerPixel = 1;
+	int StateFrameIndex = 0;
 private:
 	bool SubWndProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam) override
 	{
@@ -79,6 +83,7 @@ private:
 	void OnGUI()
 	{
 		ImGui::Begin("Settings");
+		OnRaytracingUI();
 		OnCombineLUTUI();
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::End();
@@ -168,6 +173,9 @@ private:
 		GenShadowConstants shadowconstant;
 		{
 			shadowconstant.LightDirection = lights[0].direction;
+			shadowconstant.SourceRadius = tanf(LightHalfAngle* 3.14159265f / 180);
+			shadowconstant.SamplesPerPixel = SamplesPerPixel;
+			shadowconstant.StateFrameIndex = StateFrameIndex;
 			shadowconstant.CameraToWorld = lm::transpose(lm::inverse(viewproj));
 			shadowconstant.Resolution = lm::float2(1280, 720);
 			pGenShaderConstants->UpdateSubresource(0, static_cast<leo::uint32>(sizeof(shadowconstant)), &shadowconstant);
@@ -208,6 +216,8 @@ private:
 		Context::Instance().GetDisplay().WaitOnSwapBuffers();
 
 		Context::Instance().EndFrame();
+
+		++StateFrameIndex;
 
 		return Nothing;
 	}
@@ -302,7 +312,7 @@ private:
 		DirectLight directioal_light;
 		directioal_light.type = DIRECTIONAL_LIGHT;
 		directioal_light.direction = lm::float3(0.335837096f,0.923879147f,-0.183468640f);
-		directioal_light.color = lm::float3(4.0f, 4.0f, 4.0f);
+		directioal_light.color = lm::float3(1.0f, 1.0f, 1.0f);
 		lights.push_back(directioal_light);
 
 		pLightConstatnBuffer = leo::share_raw(Device.CreateConstanBuffer(Buffer::Usage::Dynamic, EAccessHint::EA_GPURead | EAccessHint::EA_GPUStructured, sizeof(DirectLight)*lights.size(), static_cast<EFormat>(sizeof(DirectLight)),lights.data()));
@@ -337,6 +347,7 @@ private:
 		Context::Instance().GetDisplay().WaitOnSwapBuffers();
 
 		Context::Instance().EndFrame();
+
 	}
 
 	void OnCombineLUTUI()
@@ -396,6 +407,16 @@ private:
 		FLOAT_FIELD(ExpandGamut);
 #undef FLOAT4_FIELD
 #undef FLOAT_FIELD
+	}
+
+	void OnRaytracingUI()
+	{
+		ImGui::BeginChild("RayTracing");
+
+		ImGui::SliderFloat("SoftShadowAngle", &LightHalfAngle, 0.1, 10);
+		ImGui::SliderInt("RayPerPixel", &SamplesPerPixel,1, 8);
+
+		ImGui::EndChild();
 	}
 };
 

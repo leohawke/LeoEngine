@@ -745,9 +745,6 @@
     <None Include="Render\Material\FPDS.mat.lsl">
       <Filter>Render\Material</Filter>
     </None>
-    <None Include="Render\Effect\DirectLight.lsl">
-      <Filter>Render\Effect</Filter>
-    </None>
     <None Include="Render\CommonTextureImpl.hcc">
       <Filter>Render\DeviceInterface</Filter>
     </None>
@@ -813,6 +810,18 @@
     </None>
     <None Include="Shaders\imgui\imgui.lsl">
       <Filter>Shaders\imgui</Filter>
+    </None>
+    <None Include="Shaders\MonteCarlo.lsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\RayTracing\RayTracingDirectionalLight.lsl">
+      <Filter>Shaders\RayTracing</Filter>
+    </None>
+    <None Include="Render\Effect\DirectLight.lsl">
+      <Filter>Shaders\Legacy</Filter>
+    </None>
+    <None Include="Shaders\RandomSequence.lsl">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
