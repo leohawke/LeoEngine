@@ -1,4 +1,5 @@
 (effect
+(refer Common.lsl)
 (shader
 "
 float2 UniformSampleDiskConcentric( float2 E )

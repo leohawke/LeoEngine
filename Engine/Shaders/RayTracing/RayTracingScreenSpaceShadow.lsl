@@ -1,6 +1,6 @@
 (RayTracing
-	(refer RayTracingCommon.lsl)
-	(refer RayTracingDirectionalLight.lsl)
+	(refer RayTracing/RayTracingCommon.lsl)
+	(refer RayTracing/RayTracingDirectionalLight.lsl)
 	(refer RandomSequence.lsl)
 	(RaytracingAccelerationStructure (space RAY_TRACING_REGISTER_SPACE_GLOBAL) TLAS)
 	(RWTexture2D  (elemtype float) (space RAY_TRACING_REGISTER_SPACE_GLOBAL) Output)
@@ -51,7 +51,7 @@ RAY_TRACING_ENTRY_RAYGEN(RayGen)
 
 	float RayCount = 0;
 	float Visibility =0;
-	for(uint SampleIndex =0;SampleIndex <SamplesPerPixel;++SamplerIndex)
+	for(uint SampleIndex =0;SampleIndex <SamplesPerPixel;++SampleIndex)
 	{
 		uint DummyVariable;
 		float2 RandSample = RandomSequence_GenerateSample2D(RandSequence, DummyVariable);

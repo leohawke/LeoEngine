@@ -411,12 +411,11 @@ private:
 
 	void OnRaytracingUI()
 	{
-		ImGui::BeginChild("RayTracing");
-
-		ImGui::SliderFloat("SoftShadowAngle", &LightHalfAngle, 0.1, 10);
-		ImGui::SliderInt("RayPerPixel", &SamplesPerPixel,1, 8);
-
-		ImGui::EndChild();
+		if (ImGui::CollapsingHeader("Raytracing"))
+		{
+			ImGui::SliderFloat("SoftShadowAngle", &LightHalfAngle, 0.1, 10);
+			ImGui::SliderInt("RayPerPixel", &SamplesPerPixel, 1, 8);
+		}
 	}
 };
 

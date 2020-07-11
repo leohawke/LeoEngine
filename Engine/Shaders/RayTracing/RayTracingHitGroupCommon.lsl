@@ -1,5 +1,5 @@
 (RayTracing
-	(ref RayTracingBuiltInResources.lsl)
+	(ref RayTracing/RayTracingBuiltInResources.lsl)
 	(shader 
 "
 uint3 LoadIndices16Bit(ByteAddressBuffer SourceBuffer, uint OffsetInBytes)

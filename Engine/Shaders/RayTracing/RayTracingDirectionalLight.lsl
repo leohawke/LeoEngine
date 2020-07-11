@@ -3,14 +3,15 @@
 (refer MonteCarlo.lsl)
 (shader
 "
+
 struct LightShaderParameters
 {
 	float3 Direction;
 	float  SourceRadius;
 };
 
-// Adapted from "A Low Distortion Map Between Disk and Square." Improved based
-// on comments from Peter Shirley's blog post: "Improved code for concentric map."
+// Adapted from \"A Low Distortion Map Between Disk and Square.\" Improved based
+// on comments from Peter Shirley's blog post: \"Improved code for concentric map.\"
 float2 ToConcentricMap(float2 RectangularCoords)
 {
 	float R;
@@ -44,8 +45,6 @@ void GenerateDirectionalLightOcclusionRay(
 	out float RayTMax)
 {
 	// Draw random variable and choose a point on a unit disk
-	float2 BufferSize = View.BufferSizeAndInvSize.xy;
-
 	float2 DiskUV = UniformSampleDiskConcentric(RandSample) * LightParameters.SourceRadius;
 
 	// Permute light direction by user-defined radius on unit sphere
@@ -68,7 +67,6 @@ void GenerateDirectionalLightOcclusionRay(
 	RayTMin = 0.0;
 	RayTMax = 1.0e27;
 }
-
 "
 )
 )

@@ -30,7 +30,7 @@ struct RandomSequence
 // TEA-based pseudo-random number generator
 uint RandInit(uint Seed0, uint Seed1)
 {
-	// Constants cited from "GPU Random Numbers via the Tiny Encryption Algorithm"
+	// Constants cited from \"GPU Random Numbers via the Tiny Encryption Algorithm\"
 	const uint Delta = 0x9e3779b9;
 	const uint4 Key = uint4(0xa341316c, 0xc8013ea4, 0xad90777d, 0x7e95761e);
 	uint Rounds = 8;
@@ -248,4 +248,4 @@ float4 RandomSequence_GenerateSample4D(inout RandomSequence RandSequence, inout 
 	return Sample;
 }
 "
-)
+))
