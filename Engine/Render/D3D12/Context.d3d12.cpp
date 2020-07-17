@@ -435,7 +435,7 @@ namespace platform_ex::Windows::D3D12 {
 	{
 		static_cast<FrameBuffer*>(framebuffer.get())->BindBarrier();
 	}
-	void Context::Render(const Effect::Effect & effect, const Effect::Technique & tech, const platform::Render::InputLayout & layout)
+	void Context::Render(platform::Render::CommandList& CmdList,const Effect::Effect & effect, const Effect::Technique & tech, const platform::Render::InputLayout & layout)
 	{
 		//TODO Compute/Copy State -> SyncCPUGPU(true)
 

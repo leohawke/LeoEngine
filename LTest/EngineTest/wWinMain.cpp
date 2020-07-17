@@ -96,9 +96,12 @@ private:
 
 		auto entityId = ecs::EntitySystem::Instance().AddEntity<ecs::Entity>();
 
+		auto& CmdList = platform::Render::GetCommandList();
+
 		Context::Instance().BeginFrame();
 		auto& screen_frame = Context::Instance().GetScreenFrame();
 		auto screen_tex = screen_frame->Attached(FrameBuffer::Target0);
+		auto depth_tex = screen_frame->Attached(FrameBuffer::DepthStencil);
 
 		auto& Device = Context::Instance().GetDevice();
 
@@ -112,7 +115,8 @@ private:
 
 		ecs::EntitySystem::Instance().RemoveEntity(entityId);
 
-		
+		platform::Render::RenderPassInfo prezPass(depth_tex, platform::Render::DepthStencilTargetActions::ClearDepthStencil_StoreDepthStencil);
+		CmdList.BeginRenderPass(prezPass, "PreZ");
 
 		lm::float4x4 worldmatrix = {
 			{1,0,0,0},
@@ -126,49 +130,44 @@ private:
 		auto viewproj = viewmatrix * projmatrix;
 
 		auto pEffect = platform::X::LoadEffect("ForwardDirectLightShading");
+		auto pPreZEffect = platform::X::LoadEffect("PreZ");
 
 		using namespace std::literals;
-		//obj
-		pEffect->GetParameter("world"sv) = lm::transpose(worldmatrix);
-		//camera
-		pEffect->GetParameter("camera_pos"sv) = camera.GetEyePos();
-		pEffect->GetParameter("viewproj"sv) = lm::transpose(viewproj);
 
-		//light
-		pEffect->GetParameter("light_count"sv) = static_cast<leo::uint32>(lights.size());
-		pEffect->GetParameter("inv_sscreen"sv) = lm::float2(1 / 1280.f, 1 / 720.f);
-
-		pEffect->GetParameter("lights") = pLightConstatnBuffer;
-
-		//mat
-		pEffect->GetParameter("alpha"sv) = 1.0f;
-
-		//light_ext
-		pEffect->GetParameter("ambient_color") = leo::math::float3(0.1f, 0.1f, 0.1f);
-		
-		auto pPreZEffect = platform::X::LoadEffect("PreZ");
+		//viewinfo materialinfo
 		{
 			//obj
-			pPreZEffect->GetParameter("world"sv) = lm::transpose(worldmatrix);
+			pEffect->GetParameter("world"sv) = lm::transpose(worldmatrix);
 			//camera
-			pPreZEffect->GetParameter("camera_pos"sv) = camera.GetEyePos();
-			pPreZEffect->GetParameter("viewproj"sv) = lm::transpose(viewproj);
+			pEffect->GetParameter("camera_pos"sv) = camera.GetEyePos();
+			pEffect->GetParameter("viewproj"sv) = lm::transpose(viewproj);
+
+			//light
+			pEffect->GetParameter("light_count"sv) = static_cast<leo::uint32>(lights.size());
+			pEffect->GetParameter("inv_sscreen"sv) = lm::float2(1 / 1280.f, 1 / 720.f);
+
+			pEffect->GetParameter("lights") = pLightConstatnBuffer;
+
+			//mat
+			pEffect->GetParameter("alpha"sv) = 1.0f;
+
+			//light_ext
+			pEffect->GetParameter("ambient_color") = leo::math::float3(0.1f, 0.1f, 0.1f);
+
+			{
+				//obj
+				pPreZEffect->GetParameter("world"sv) = lm::transpose(worldmatrix);
+				//camera
+				pPreZEffect->GetParameter("camera_pos"sv) = camera.GetEyePos();
+				pPreZEffect->GetParameter("viewproj"sv) = lm::transpose(viewproj);
+			}
 		}
 
-		Context::Instance().SetFrame(nullptr);
-
-		screen_frame->Detach(FrameBuffer::Target0);
-		screen_frame->Clear(FrameBuffer::Depth | FrameBuffer::Stencil, clear_color, 1, 0);
-		Context::Instance().SetFrame(screen_frame);
 		//pre-z
 		for (auto& entity : pEntities->GetRenderables())
 		{
-			Context::Instance().Render(*pPreZEffect, pPreZEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
+			Context::Instance().Render(CmdList,*pPreZEffect, pPreZEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
 		}
-
-		//ray-shadow
-		//unbind
-		Context::Instance().SetFrame(nullptr);
 
 		GenShadowConstants shadowconstant;
 		{
@@ -183,6 +182,7 @@ private:
 		auto Scene = pEntities->BuildRayTracingScene();
 		Context::Instance().GetRayContext().GetDevice().BuildAccelerationStructure(Scene.get());
 
+		//clear rt?
 		Context::Instance().GetRayContext().RayTraceShadow(Scene.get(),
 			Context::Instance().GetScreenFrame().get(),
 			ShadowMapUAV.get(),
@@ -190,23 +190,16 @@ private:
 
 		pEffect->GetParameter("shadow_tex") = TextureSubresource(ShadowMap, 0, ShadowMap->GetArraySize(), 0, ShadowMap->GetNumMipMaps());
 
-		RenderTarget hdrTarget;
-		hdrTarget.Texture = HDROutput.get();
-		screen_frame->Attach(FrameBuffer::Target0, hdrTarget);
-
-		//re-bind
-		Context::Instance().SetFrame(screen_frame);
-		screen_frame->Clear(FrameBuffer::Color, clear_color, 1, 0);
-
+		platform::Render::RenderPassInfo GeometryPass(
+			HDROutput.get(),platform::Render::RenderTargetActions::Clear_Store,
+			depth_tex, platform::Render::DepthStencilTargetActions::LoadDepthStencil_StoreDepthStencil);
+		CmdList.BeginRenderPass(GeometryPass, "Geometry");
+		
 		for (auto& entity : pEntities->GetRenderables())
 		{
 			entity.GetMaterial().UpdateParams(reinterpret_cast<const platform::Renderable*>(&entity));
-			Context::Instance().Render(*pEffect, pEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
+			Context::Instance().Render(CmdList ,*pEffect, pEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
 		}
-
-		RenderTarget prevTarget;
-		prevTarget.Texture = screen_tex;
-		screen_frame->Attach(FrameBuffer::Target0, prevTarget);
 
 		OnPostProcess();
 		OnDrawUI();

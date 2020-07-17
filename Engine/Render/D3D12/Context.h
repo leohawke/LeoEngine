@@ -1,6 +1,5 @@
 /*! \file Engine\Render\D3D12\Context.h
 \ingroup Engine
-\brief 绘制创建封装。
 */
 #ifndef LE_RENDER_D3D12_Context_h
 #define LE_RENDER_D3D12_Context_h 1
@@ -26,7 +25,7 @@ namespace platform_ex {
 
 				void Push(const platform::Render::PipleState&) override;
 
-				void Render(const Effect::Effect& effect, const Effect::Technique& tech, const platform::Render::InputLayout& layout) override;
+				void Render(platform::Render::CommandList& CmdList, const Effect::Effect& effect, const Effect::Technique& tech, const platform::Render::InputLayout& layout) override;
 
 				void BeginFrame() override;
 				void EndFrame() override;

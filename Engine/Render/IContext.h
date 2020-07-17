@@ -1,6 +1,5 @@
 /*! \file Engine\Render\IContext.h
 \ingroup Engine
-\brief 绘制执行接口类。
 */
 #ifndef LE_RENDER_IContext_h
 #define LE_RENDER_IContext_h 1
@@ -14,6 +13,7 @@ namespace platform::Render {
 
 	class RayContext;
 	class CommandContext;
+	class CommandList;
 
 	class Context {
 	public:
@@ -23,7 +23,7 @@ namespace platform::Render {
 		virtual RayContext& GetRayContext() = 0;
 
 		virtual void Push(const PipleState&) = 0;
-		virtual void Render(const Effect::Effect&, const Effect::Technique&, const InputLayout&) = 0;
+		virtual void Render(CommandList& CmdList,const Effect::Effect&, const Effect::Technique&, const InputLayout&) = 0;
 
 
 		virtual void BeginFrame() = 0;
