@@ -135,123 +135,6 @@ namespace platform_ex::Windows::D3D12 {
 		device->curr_render_cmd_allocator->recycle_after_sync_residency_buffs.clear();
 	}
 
-	void Context::UpdateCbvSrvUavSamplerHeaps(const ShaderCompose & shader_compose)
-	{
-		auto& render_cmd_list = d3d_cmd_lists[Device::Command_Render];
-		std::size_t num_handle = 0;
-		for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
-			num_handle += shader_compose.Srvs[i].size() + shader_compose.Uavs[i].size();
-		}
-
-		ID3D12DescriptorHeap* heaps[2];
-		uint32 num_heaps = 0;
-		leo::observer_ptr<ID3D12DescriptorHeap> cbv_srv_uav_heap;
-		auto sampler_heap = shader_compose.SamplerHeap();
-		if (num_handle > 0) {
-			size_t hash_val = 0;
-			for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
-				hash_val = hash_combine_seq(hash_val, i, shader_compose.Srvs[i].size());
-				if(!shader_compose.Srvs[i].empty())
-					hash_combine(hash_val,
-						CityHash32(reinterpret_cast<const char*>(shader_compose.Srvs[i].data()),
-									static_cast<uint32>(shader_compose.Srvs[i].size()*sizeof(decltype(shader_compose.Srvs)::value_type))));
-			}
-			for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
-				hash_val = hash_combine_seq(hash_val, i, shader_compose.Uavs[i].size());
-				if (!shader_compose.Uavs[i].empty())
-					hash_combine(hash_val,
-						CityHash32(reinterpret_cast<const char*>(shader_compose.Uavs[i].data()),
-							static_cast<uint32>(shader_compose.Uavs[i].size()* sizeof(decltype(shader_compose.Uavs)::value_type))));
-			}
-			auto iter = device->cbv_srv_uav_heaps.find(hash_val);
-			if (iter == device->cbv_srv_uav_heaps.end()) {
-				cbv_srv_uav_heap = device->CreateDynamicCBVSRVUAVDescriptorHeap(static_cast<UINT>(num_handle));
-				device->cbv_srv_uav_heaps.emplace(hash_val, *cbv_srv_uav_heap.get());
-			}
-			else {
-				cbv_srv_uav_heap = leo::make_observer(iter->second.Get());
-			}
-			heaps[num_heaps++] = cbv_srv_uav_heap.get();
-		}
-		if (sampler_heap)
-			heaps[num_heaps++] = sampler_heap;
-
-		if (num_heaps > 0)
-			render_cmd_list->SetDescriptorHeaps(num_heaps, heaps);
-
-		auto signature = shader_compose.RootSignature();
-		
-		//SRV/UAV  Bind
-		if (cbv_srv_uav_heap) {
-			auto cbv_srv_uav_desc_size = (*device)->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-			auto cpu_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
-			auto gpu_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
-			for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
-				if (!shader_compose.Srvs[i].empty()) {
-					render_cmd_list->SetGraphicsRootDescriptorTable(signature->SRVRDTBindSlot((ShaderType)i), gpu_handle);
-					for (auto& srv : shader_compose.Srvs[i]) {
-						 (*device)->CopyDescriptorsSimple(1, cpu_handle,srv!=nullptr? srv->GetView(): device->null_srv_handle,
-								D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-						cpu_handle.ptr += cbv_srv_uav_desc_size;
-						gpu_handle.ptr += cbv_srv_uav_desc_size;
-					}
-				}
-			}
-
-			for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
-				if (!shader_compose.Uavs[i].empty()) {
-					render_cmd_list->SetGraphicsRootDescriptorTable(signature->UAVRDTBindSlot((ShaderType)i), gpu_handle);
-					for (auto& uav : shader_compose.Uavs[i]) {
-						(*device)->CopyDescriptorsSimple(1, cpu_handle,uav!=nullptr? uav->GetView():device->null_uav_handle,
-							D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-						cpu_handle.ptr += cbv_srv_uav_desc_size;
-						gpu_handle.ptr += cbv_srv_uav_desc_size;
-					}
-				}
-			}
-		}
-
-		//Sampler Bind
-		if (sampler_heap && RenderPSO.CurrentSamplerHeap != sampler_heap) {
-			auto sampler_desc_size = (*device)->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-
-			auto gpu_sampler_handle = sampler_heap->GetGPUDescriptorHandleForHeapStart();
-
-			for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
-				if (!shader_compose.Srvs[i].empty()) {
-					render_cmd_list->SetGraphicsRootDescriptorTable(signature->SamplerRDTBindSlot((ShaderType)i), gpu_sampler_handle);
-					gpu_sampler_handle.ptr += sampler_desc_size * shader_compose.Samplers[i].size();
-				}
-			}
-
-			RenderPSO.CurrentSamplerHeap = sampler_heap;
-		}
-
-		//CBuffer Bind
-		for (auto i = 0; i != ShaderCompose::NumTypes; ++i) {
-			int BufferIndex = 0;
-			for (auto& cbuffer : shader_compose.CBuffs[i]) {
-				auto& resource = static_cast<GraphicsBuffer*>(cbuffer)->resource;
-				auto root_param_index = signature->CBVRDBindSlot((ShaderType)i, BufferIndex);
-				if (resource)
-				{
-					auto& CurrentGPUVirtualAddress = RenderPSO.CBVCache.CurrentGPUVirtualAddress[i][BufferIndex];
-					auto NextGPUVirtualAddress = resource->GetGPUVirtualAddress();
-					if (NextGPUVirtualAddress != CurrentGPUVirtualAddress)
-					{
-						render_cmd_list->SetGraphicsRootConstantBufferView(root_param_index, NextGPUVirtualAddress);
-						CurrentGPUVirtualAddress = NextGPUVirtualAddress;
-					}
-				}
-				else
-					render_cmd_list->SetGraphicsRootConstantBufferView(root_param_index, 0);
-
-				++BufferIndex;
-			}
-		}
-	}
-
 	void Context::RSSetViewports(UINT NumViewports, D3D12_VIEWPORT const * pViewports)
 	{
 		if (NumViewports == 1)
@@ -440,7 +323,33 @@ namespace platform_ex::Windows::D3D12 {
 
 			platform::Render::SetGraphicsPipelineState(CmdList, GraphicsPSOInit);
 
-			//
+			auto SetShaderParamters = [&](ShaderType type,auto Shader)
+			{
+				if (!Shader)
+					return;
+				int BufferIndex = 0;
+				for (auto& cbuffer : compose.CBuffs[type]) {
+					CmdList.SetShaderConstantBuffer(Shader, BufferIndex, cbuffer);
+					++BufferIndex;
+				}
+
+				int SRVIndex = 0;
+				for (auto& srv : compose.Srvs[type])
+				{
+					CmdList.SetShaderResourceView(Shader, SRVIndex, srv);
+					++SRVIndex;
+				}
+
+				int SamplerIndex = 0;
+				for (auto& sampler : compose.Samplers[type])
+				{
+					CmdList.SetShaderSampler(Shader, SamplerIndex, sampler);
+					++SamplerIndex;
+				}
+			};
+			
+			SetShaderParamters(ShaderType::VertexShader, compose.GetVertexShader());
+			SetShaderParamters(ShaderType::PixelShader, compose.GetPixelShader());
 		};
 
 		if (index_stream) {

@@ -152,6 +152,16 @@ void CommandContext::SetShaderTexture(platform::Render::PixelHWShader* Shader, u
 	StateCache.SetShaderResourceView<ShaderType::PixelShader>(SRV, TextureIndex);
 }
 
+void CommandContext::SetShaderResourceView(platform::Render::VertexHWShader* Shader, uint32 TextureIndex, platform::Render::ShaderResourceView* SRV)
+{
+	StateCache.SetShaderResourceView<ShaderType::VertexShader>(static_cast<ShaderResourceView*>(SRV), TextureIndex);
+}
+
+void CommandContext::SetShaderResourceView(platform::Render::PixelHWShader* Shader, uint32 TextureIndex, platform::Render::ShaderResourceView* SRV)
+{
+	StateCache.SetShaderResourceView<ShaderType::PixelShader>(static_cast<ShaderResourceView*>(SRV), TextureIndex);
+}
+
 void CommandContext::SetShaderConstantBuffer(platform::Render::VertexHWShader* Shader, uint32 BaseIndex, platform::Render::GraphicsBuffer* IBuffer)
 {
 	auto Buffer = static_cast<GraphicsBuffer*>(IBuffer);

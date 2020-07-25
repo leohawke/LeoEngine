@@ -231,7 +231,7 @@ platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<pla
 				p_handle.param_type = D3D_SVT_SAMPLER;
 				platform::Render::TextureSampleDesc sampler_desc;
 				Parameter.Value(sampler_desc);
-				Samplers[p_handle.shader_type][p_handle.offset] = Convert(sampler_desc);
+				Samplers[p_handle.shader_type][p_handle.offset] = sampler_desc;
 			}
 			else
 			{
@@ -309,11 +309,6 @@ platform_ex::Windows::D3D12::ShaderCompose::SignatureType* platform_ex::Windows:
 	return sc_template->root_signature.get();
 }
 
-ID3D12DescriptorHeap* platform_ex::Windows::D3D12::ShaderCompose::SamplerHeap() const
-{
-	return sc_template->sampler_heap.Get();
-}
-
 void platform_ex::Windows::D3D12::ShaderCompose::CreateRootSignature()
 {
 	QuantizedBoundShaderState QBSS;
@@ -333,24 +328,6 @@ void platform_ex::Windows::D3D12::ShaderCompose::CreateRootSignature()
 
 	auto& Device = Context::Instance().GetDevice();
 	sc_template->root_signature = Device.CreateRootSignature(QBSS);
-
-	if (num_sampler > 0) {
-		D3D12_DESCRIPTOR_HEAP_DESC sampler_heap_desc;
-		sampler_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
-		sampler_heap_desc.NumDescriptors = static_cast<UINT>(num_sampler);
-		sampler_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		sampler_heap_desc.NodeMask = 0;
-		CheckHResult(Device->CreateDescriptorHeap(&sampler_heap_desc, COMPtr_RefParam(sc_template->sampler_heap, IID_ID3D12DescriptorHeap)));
-
-		auto sampler_desc_size = Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-		auto cpu_sampler_handle = sc_template->sampler_heap->GetCPUDescriptorHandleForHeapStart();
-		for (auto i = 0; i != NumTypes; ++i) {
-			for (auto j = 0; j != Samplers[i].size(); ++j) {
-				Device->CreateSampler(&Samplers[i][j], cpu_sampler_handle);
-				cpu_sampler_handle.ptr += sampler_desc_size;
-			}
-		}
-	}
 }
 
 void platform_ex::Windows::D3D12::ShaderCompose::CreateBarriers()

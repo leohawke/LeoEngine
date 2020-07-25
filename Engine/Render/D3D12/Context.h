@@ -60,8 +60,6 @@ namespace platform_ex {
 
 				void ClearPSOCache();
 
-				void UpdateCbvSrvUavSamplerHeaps(const ShaderCompose&);
-
 				void RSSetViewports(UINT NumViewports, D3D12_VIEWPORT const *pViewports);
 
 				enum  InnerReourceType{

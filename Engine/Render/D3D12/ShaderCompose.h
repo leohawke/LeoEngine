@@ -81,8 +81,6 @@ namespace platform_ex::Windows::D3D12 {
 	public:
 		using SignatureType = RootSignature;
 		SignatureType* RootSignature() const;
-
-		ID3D12DescriptorHeap* SamplerHeap() const;
 	public:
 	private:
 		void CreateRootSignature();
@@ -119,7 +117,7 @@ namespace platform_ex::Windows::D3D12 {
 		std::array<std::vector<UnorderedAccessViewSimulation*>, NumTypes> Uavs;
 		std::array<std::vector<platform::Render::GraphicsBuffer*>, NumTypes> CBuffs;
 		std::array<std::vector<std::tuple<ResourceHolder*, uint32_t, uint32_t>>, NumTypes> SrvSrcs;
-		std::array<std::vector<D3D12_SAMPLER_DESC>, NumTypes> Samplers;
+		std::array<std::vector<platform::Render::TextureSampleDesc>, NumTypes> Samplers;
 
 	private:
 		std::unique_ptr<Template> sc_template;

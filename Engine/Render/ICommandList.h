@@ -71,6 +71,12 @@ namespace platform::Render {
 		}
 
 		template<typename THardwareShader>
+		void SetShaderResourceView(THardwareShader* Shader, uint32 TextureIndex, ShaderResourceView* SRV)
+		{
+			GetContext().SetShaderResourceView(Shader, TextureIndex, SRV);
+		}
+
+		template<typename THardwareShader>
 		void SetShaderConstantBuffer(THardwareShader* Shader, uint32 BaseIndex, GraphicsBuffer* Buffer)
 		{
 			GetContext().SetShaderConstantBuffer(Shader, BaseIndex, Buffer);

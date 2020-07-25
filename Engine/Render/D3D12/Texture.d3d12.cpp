@@ -411,7 +411,7 @@ void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_siz
 		cmd_list->SetGraphicsRootSignature(gps_desc.pRootSignature);
 
 		auto dynamic_heap = device.CreateDynamicCBVSRVUAVDescriptorHeap(array_size*(mipmap_size - 1));
-		auto  sampler_heap = sc.SamplerHeap();
+		ID3D12DescriptorHeap*  sampler_heap = nullptr;
 
 		ID3D12DescriptorHeap* heaps[] = { dynamic_heap.get(),sampler_heap };
 		cmd_list->SetDescriptorHeaps(static_cast<UINT>(leo::arrlen(heaps)), heaps);
