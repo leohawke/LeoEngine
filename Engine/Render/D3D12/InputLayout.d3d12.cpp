@@ -42,6 +42,8 @@ namespace platform_ex::Windows::D3D12 {
 				ve.Usage = element.usage;
 				ve.UsageIndex = element.usage_index;
 				elem_offset += element.GetElementSize();
+
+				elems.emplace_back(ve);
 			}
 			++input_slot;
 		}

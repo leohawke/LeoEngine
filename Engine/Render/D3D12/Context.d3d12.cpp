@@ -6,6 +6,7 @@
 #include "NodeDevice.h"
 #include "../ICommandList.h"
 #include "../Effect/CopyEffect.h"
+#include "../PipelineStateUtility.h"
 #include <LFramework/Core/LException.h>
 
 #define TEST_CODE 1
@@ -430,7 +431,16 @@ namespace platform_ex::Windows::D3D12 {
 
 		auto BindLegacyPass = [&](ShaderCompose& compose,const platform::Render::PipleState& state)
 		{
+			GraphicsPSOInit.BlendState = state.BlendState;
+			GraphicsPSOInit.DepthStencilState = state.DepthStencilState;
+			GraphicsPSOInit.RasterizerState = state.RasterizerState;
 
+			GraphicsPSOInit.ShaderPass.VertexShader = compose.GetVertexShader();
+			GraphicsPSOInit.ShaderPass.PixelShader = compose.GetPixelShader();
+
+			platform::Render::SetGraphicsPipelineState(CmdList, GraphicsPSOInit);
+
+			//
 		};
 
 		if (index_stream) {

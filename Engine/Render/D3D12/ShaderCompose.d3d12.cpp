@@ -172,7 +172,7 @@ namespace {
 platform_ex::Windows::D3D12::ShaderCompose::Template::~Template() = default;
 
 platform_ex::Windows::D3D12::ShaderCompose::Template::Template()
-	:VertexShader(std::nullopt), PixelShader(std::nullopt), VertexInfo(std::nullopt),
+	:VertexShader(nullptr), PixelShader(nullptr), VertexInfo(std::nullopt),
 	PixelInfo(std::nullopt), VertexIndices(std::nullopt), PixelIndices(std::nullopt) {
 	//uname union uname struct init
 }
@@ -180,19 +180,20 @@ platform_ex::Windows::D3D12::ShaderCompose::Template::Template()
 platform_ex::Windows::D3D12::ShaderCompose::ShaderCompose(std::unordered_map<platform::Render::ShaderType, const asset::ShaderBlobAsset*> pShaderBlob, platform::Render::Effect::Effect * pEffect) :
 	sc_template(std::make_unique<Template>())
 {
-	auto CopyShader = [&](auto& shader, auto type) {
+	auto InitShader = [&](auto& shader, auto type) {
 		if (pShaderBlob.count(type)) {
 			auto pBlobAsset = pShaderBlob[type];
-			shader = std::make_pair(std::make_unique<byte[]>(pBlobAsset->GetBlob().second), pBlobAsset->GetBlob().second);
-			std::memcpy(shader.value().first.get(), pBlobAsset->GetBlob().first.get(), pBlobAsset->GetBlob().second);
+
+			platform::Render::ShaderInitializer initializer;
+			initializer.pBlob = &pBlobAsset->GetBlob();
+			initializer.pInfo = &pBlobAsset->GetInfo();
+
+			shader = new std::remove_reference_t<decltype(*shader)> (initializer);
 		}
 	};
 
-	CopyShader(sc_template->VertexShader, ShaderType::VertexShader);
-	CopyShader(sc_template->PixelShader, ShaderType::PixelShader);
-
-	if (sc_template->VertexShader.has_value())
-		sc_template->vs_signature = pShaderBlob[ShaderType::VertexShader]->GetInfo().InputSignature.value();
+	InitShader(sc_template->VertexShader, ShaderType::VertexShader);
+	InitShader(sc_template->PixelShader, ShaderType::PixelShader);
 
 	for (auto& pair : pShaderBlob) {
 		auto index = static_cast<leo::uint8>(pair.first);
@@ -277,9 +278,30 @@ void platform_ex::Windows::D3D12::ShaderCompose::UnBind()
 {
 }
 
-const std::optional<platform_ex::Windows::D3D12::ShaderCompose::Template::ShaderBlobEx>& platform_ex::Windows::D3D12::ShaderCompose::GetShaderBlob(ShaderType shader_type) const
+const platform::Render::ShaderBlob* platform_ex::Windows::D3D12::ShaderCompose::GetShaderBlob(ShaderType shader_type) const
 {
-	return sc_template->Shaders[static_cast<uint8>(shader_type)];
+	switch (shader_type)
+	{
+	case platform::Render::Shader::VertexShader:
+		if (sc_template->VertexShader)
+			return &sc_template->VertexShader->ShaderByteCode;
+		break;
+	case platform::Render::Shader::PixelShader:
+		if(sc_template->PixelShader)
+			return &sc_template->PixelShader->ShaderByteCode;
+		break;
+	}
+	return nullptr;
+}
+
+D3D12::VertexHWShader* D3D12::ShaderCompose::GetVertexShader() const
+{
+	return sc_template->VertexShader;
+}
+
+D3D12::PixelHWShader* D3D12::ShaderCompose::GetPixelShader() const
+{
+	return sc_template->PixelShader;
 }
 
 platform_ex::Windows::D3D12::ShaderCompose::SignatureType* platform_ex::Windows::D3D12::ShaderCompose::RootSignature() const
@@ -296,7 +318,7 @@ void platform_ex::Windows::D3D12::ShaderCompose::CreateRootSignature()
 {
 	QuantizedBoundShaderState QBSS;
 
-	QBSS.AllowIAInputLayout = sc_template->VertexShader.has_value();
+	QBSS.AllowIAInputLayout = !!sc_template->VertexShader;
 	QBSS.AllowStreamOuput = false;
 
 	size_t num_sampler = 0;

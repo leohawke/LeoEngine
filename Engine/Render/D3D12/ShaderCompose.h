@@ -8,6 +8,7 @@
 #include "../Effect/Effect.hpp"
 #include "d3d12_dxgi.h"
 #include "View.h"
+#include "HardwareShader.h"
 #include <optional>
 
 
@@ -36,13 +37,8 @@ namespace platform_ex::Windows::D3D12 {
 
 			using ShaderBlobEx = platform::Render::ShaderBlob;
 
-			union {
-				struct {
-					std::optional<ShaderBlobEx> VertexShader;
-					std::optional<ShaderBlobEx> PixelShader;
-				};
-				std::array<std::optional<ShaderBlobEx>, NumTypes> Shaders;
-			};
+			VertexHWShader* VertexShader;
+			PixelHWShader* PixelShader;
 
 			union {
 				struct {
@@ -77,8 +73,11 @@ namespace platform_ex::Windows::D3D12 {
 		 void Bind() override;
 		 void UnBind() override;
 
-		 const std::optional<Template::ShaderBlobEx>& GetShaderBlob(platform::Render::ShaderType shader_type) const;
+		 const platform::Render::ShaderBlob* GetShaderBlob(platform::Render::ShaderType shader_type) const;
 
+
+		 VertexHWShader* GetVertexShader() const;
+		 PixelHWShader* GetPixelShader() const;
 	public:
 		using SignatureType = RootSignature;
 		SignatureType* RootSignature() const;
@@ -152,22 +151,20 @@ namespace platform_ex::Windows::D3D12 {
 		desc.RasterizedStream = 0;
 	}
 
-	inline void operator<<(D3D12_SHADER_BYTECODE& desc, const std::optional<platform::Render::ShaderBlob>& blob)
-	{
-		if (!blob)
-			desc << nullptr;
-		else {
-			desc.BytecodeLength = blob->second;
-			desc.pShaderBytecode = blob->first.get();
-		}
-	}
-
 	inline void operator<<(D3D12_SHADER_BYTECODE& desc, const platform::Render::ShaderBlob& blob)
 	{
 		desc.BytecodeLength = blob.second;
 		desc.pShaderBytecode = blob.first.get();
 	}
 
+	inline void operator<<(D3D12_SHADER_BYTECODE& desc, const D3D12HardwareShader* shader)
+	{
+		if (!shader)
+			desc << nullptr;
+		else {
+			desc << shader->ShaderByteCode;
+		}
+	}
 }
 
 #endif
