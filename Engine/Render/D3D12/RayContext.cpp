@@ -175,6 +175,11 @@ void D12::RayContext::RayTraceShadow(R::RayTracingScene* InScene, R::FrameBuffer
 	DispatchDesc.Depth = 1;
 
 	DispatchRays(this, Bindings, Pipeline, 0, nullptr, DispatchDesc);
+
+	if (Resource->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_DEPTH_WRITE))
+	{
+		raytracing_command_list->ResourceBarrier(1, &barrier);
+	}
 }
 
 

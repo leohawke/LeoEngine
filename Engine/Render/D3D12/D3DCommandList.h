@@ -333,13 +333,6 @@ namespace platform_ex::Windows::D3D12 {
 		//TODO
 	}
 
-	
-
-	inline void TransitionResource(CommandListHandle& pCommandList, DepthStencilView* View)
-	{
-		//TODO
-	}
-
 	inline void TransitionResource(CommandListHandle& hCommandList, ResourceHolder* Resource, D3D12_RESOURCE_STATES after, const CViewSubresourceSubset& subresourceSubset)
 	{
 		const bool bIsWholeResource = subresourceSubset.IsWholeResource();
@@ -354,6 +347,35 @@ namespace platform_ex::Windows::D3D12 {
 			}
 		}
 	}
+
+	inline void TransitionResource(CommandListHandle& pCommandList, DepthStencilView* View)
+	{
+		// Determine the required subresource states from the view desc
+		const D3D12_DEPTH_STENCIL_VIEW_DESC& DSVDesc = View->GetDesc();
+		const bool bDSVDepthIsWritable = (DSVDesc.Flags & D3D12_DSV_FLAG_READ_ONLY_DEPTH) == 0;
+		const bool bDSVStencilIsWritable = (DSVDesc.Flags & D3D12_DSV_FLAG_READ_ONLY_STENCIL) == 0;
+		// TODO: Check if the PSO depth stencil is writable. When this is done, we need to transition in SetDepthStencilState too.
+
+		// This code assumes that the DSV always contains the depth plane
+		const bool bHasDepth = true;
+		const bool bHasStencil = View->HasStencil();
+		const bool bDepthIsWritable = bHasDepth && bDSVDepthIsWritable;
+		const bool bStencilIsWritable = bHasStencil && bDSVStencilIsWritable;
+
+		// DEPTH_WRITE is suitable for read operations when used as a normal depth/stencil buffer.
+		auto pResource = View->GetResourceLocation();
+		if (bDepthIsWritable)
+		{
+			TransitionResource(pCommandList, pResource, D3D12_RESOURCE_STATE_DEPTH_WRITE, View->GetDepthOnlyViewSubresourceSubset());
+		}
+
+		if (bStencilIsWritable)
+		{
+			TransitionResource(pCommandList, pResource, D3D12_RESOURCE_STATE_DEPTH_WRITE, View->GetStencilOnlyViewSubresourceSubset());
+		}
+	}
+
+	
 
 	inline void TransitionResource(CommandListHandle& hCommandList, ResourceHolder* Resource, D3D12_RESOURCE_STATES after, uint32 subresource)
 	{
