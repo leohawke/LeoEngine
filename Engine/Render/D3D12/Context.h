@@ -23,8 +23,6 @@ namespace platform_ex {
 			public:
 				DefGetter(override, Device&, Device, *device);
 
-				void Push(const platform::Render::PipleState&) override;
-
 				void Render(platform::Render::CommandList& CmdList, const Effect::Effect& effect, const Effect::Technique& tech, const platform::Render::InputLayout& layout) override;
 
 				void BeginFrame() override;
@@ -61,8 +59,6 @@ namespace platform_ex {
 				friend class Device;
 
 				void ClearPSOCache();
-
-				void UpdateRenderPSO(const Effect::Effect& effect, const Effect::Technique& tech,const Effect::Pass& pass, const platform::Render::InputLayout& layout);
 
 				void UpdateCbvSrvUavSamplerHeaps(const ShaderCompose&);
 

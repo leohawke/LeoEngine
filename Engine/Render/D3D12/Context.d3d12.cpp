@@ -4,6 +4,7 @@
 #include "FrameBuffer.h"
 #include "RayContext.h"
 #include "NodeDevice.h"
+#include "../ICommandList.h"
 #include "../Effect/CopyEffect.h"
 #include <LFramework/Core/LException.h>
 
@@ -119,12 +120,6 @@ namespace platform_ex::Windows::D3D12 {
 		}
 	}
 
-	void D3D12::Context::Push(const platform::Render::PipleState & ps)
-	{
-		d3d_cmd_lists[Device::Command_Render]->OMSetStencilRef(ps.DepthStencilState.front_stencil_ref);
-		d3d_cmd_lists[Device::Command_Render]->OMSetBlendFactor(ps.BlendState.blend_factor.begin());
-	}
-
 	void D3D12::Context::ClearPSOCache()
 	{
 		device->curr_render_cmd_allocator->cbv_srv_uav_heap_cache.clear();
@@ -137,52 +132,6 @@ namespace platform_ex::Windows::D3D12 {
 		device->curr_render_cmd_allocator->recycle_after_sync_readback_buffs.clear();
 
 		device->curr_render_cmd_allocator->recycle_after_sync_residency_buffs.clear();
-	}
-
-	
-	void D3D12::Context::UpdateRenderPSO(const Effect::Effect & effect, const Effect::Technique & tech, const Effect::Pass & pass, const platform::Render::InputLayout & layout)
-	{
-		auto& shader_compose = static_cast<ShaderCompose&>(pass.GetShader(effect));
-		auto& piple_state = static_cast<const PipleState&>(pass.GetState());
-
-		auto& render_cmd_list = d3d_cmd_lists[Device::Command_Render];
-
-		auto pso = piple_state.RetrieveGraphicsPSO(layout, shader_compose, GetCurrFrame(), tech.HasTessellation());
-
-		bool bNeedSetRootSignature = false;
-		if (pso.get() != RenderPSO.CurrentPipelineStateObject || shader_compose.RootSignature()->Signature.Get() != RenderPSO.CurrentRootSignature)
-		{
-			bNeedSetRootSignature = true;
-
-			RenderPSO.CurrentPipelineStateObject = pso.get();
-			RenderPSO.CurrentRootSignature = shader_compose.RootSignature()->Signature.Get();
-
-			std::memset(RenderPSO.CBVCache.CurrentGPUVirtualAddress, 0, sizeof(RenderPSO.CBVCache));
-		}
-
-		if (bNeedSetRootSignature)
-		{
-			render_cmd_list->SetPipelineState(RenderPSO.CurrentPipelineStateObject);
-			render_cmd_list->SetGraphicsRootSignature(RenderPSO.CurrentRootSignature);
-
-			RenderPSO.CurrentSamplerHeap = nullptr;
-		}
-
-		D3D12_RECT scissor_rc;
-		if (pass.GetState().RasterizerState.scissor_enable) {
-			throw leo::unsupported();
-		}
-		else {
-			scissor_rc  =
-			{
-				static_cast<LONG>(curr_viewport.TopLeftX),
-				static_cast<LONG>(curr_viewport.TopLeftY),
-				static_cast<LONG>(curr_viewport.TopLeftX + curr_viewport.Width),
-				static_cast<LONG>(curr_viewport.TopLeftY + curr_viewport.Height)
-			};
-		}
-		render_cmd_list->RSSetScissorRects(1,&scissor_rc);
-		UpdateCbvSrvUavSamplerHeaps(shader_compose);
 	}
 
 	void Context::UpdateCbvSrvUavSamplerHeaps(const ShaderCompose & shader_compose)
@@ -437,54 +386,26 @@ namespace platform_ex::Windows::D3D12 {
 	}
 	void Context::Render(platform::Render::CommandList& CmdList,const Effect::Effect & effect, const Effect::Technique & tech, const platform::Render::InputLayout & layout)
 	{
-		//TODO Compute/Copy State -> SyncCPUGPU(true)
+		platform::Render::GraphicsPipelineStateInitializer GraphicsPSOInit{};
 
-		auto& framebuffer = static_pointer_cast<FrameBuffer>(GetCurrFrame());
+		CmdList.FillRenderTargetsInfo(GraphicsPSOInit);
 
-		std::vector<D3D12_RESOURCE_BARRIER> barriers;
+		GraphicsPSOInit.ShaderPass.VertexDeclaration = static_cast<const InputLayout&>(layout).GetVertexDeclaration();
 
-		//TODO StreamOuput
-
-		//Vertex Stream Barrier
+		//Vertex Stream
 		auto num_vertex_streams = layout.GetVertexStreamsSize();
 		for (auto i = 0; i != num_vertex_streams; ++i) {
 			auto& stream = layout.GetVertexStream(i);
 			auto& vb = static_cast<GraphicsBuffer&>(*stream.stream);
-			if (!(vb.GetAccess() & (EAccessHint::EA_CPURead | EAccessHint::EA_CPUWrite))) {
-				D3D12_RESOURCE_BARRIER barrier;
-				barrier.Transition.Subresource = 0;
-				if (vb.UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER)) {
-					barriers.emplace_back(barrier);
-				}
-			}
+			CmdList.SetVertexBuffer(i, &vb);
 		}
 
-		//TODO Instance Stream Barrier
+		auto index_stream = layout.GetIndexStream();
 
-		//optional Index Stream
-		if (layout.GetIndexStream()) {
-			auto& ib = static_cast<GraphicsBuffer&>(*layout.GetIndexStream());
-			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Transition.Subresource = 0;
-			if (ib.UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_INDEX_BUFFER)) {
-				barriers.push_back(barrier);
-			}
-		}
-
-		if (!barriers.empty())
-			d3d_cmd_lists[Device::Command_Render]->ResourceBarrier(static_cast<UINT>(barriers.size()), barriers.data());
-
-		static_cast<const InputLayout&>(layout).Active();
-
-		auto vertex_count = layout.GetIndexStream() ? layout.GetNumIndices() : layout.GetNumVertices();
-
+		auto vertex_count = index_stream ? layout.GetNumIndices() : layout.GetNumVertices();
 
 		auto tt = layout.GetTopoType();
-		//TODO Tessllation
-
-		//State Cache?
-		D3D12_PRIMITIVE_TOPOLOGY curr_topology = Convert<D3D12_PRIMITIVE_TOPOLOGY>(tt);
-		d3d_cmd_lists[Device::Command_Render]->IASetPrimitiveTopology(curr_topology);
+		GraphicsPSOInit.Primitive = tt;
 
 		auto prim_count = vertex_count;
 		switch (tt)
@@ -507,37 +428,36 @@ namespace platform_ex::Windows::D3D12 {
 
 		auto num_passes = tech.NumPasses();
 
-	
+		auto BindLegacyPass = [&](ShaderCompose& compose,const platform::Render::PipleState& state)
+		{
 
-		//TODO Indirect Args
-		if (layout.GetIndexStream()) {
+		};
+
+		if (index_stream) {
 			auto num_indices = layout.GetNumIndices();
 			for (auto i = 0; i != num_passes; ++i) {
 				auto& pass = tech.GetPass(i);
-				pass.Bind(effect);
 
-				UpdateRenderPSO(effect, tech, pass, layout);
-				d3d_cmd_lists[Device::Command_Render]->DrawIndexedInstanced(num_indices,
-					num_instances,
-					layout.GetIndexStart(), layout.GetVertexStart(), 0);
-				pass.UnBind(effect);
+				auto& shader_compose = pass.GetShader(effect);
+				auto& pipe_state = pass.GetState();
+				BindLegacyPass(static_cast<ShaderCompose&>(shader_compose), pipe_state);
+				CmdList.DrawIndexedPrimitive(index_stream.get(),
+					layout.GetVertexStart(), 0, layout.GetNumVertices(),
+					layout.GetIndexStart(), prim_count, num_instances
+				);
 			}
 		}
 		else {
 			auto num_vertices = layout.GetNumVertices();
 			for (auto i = 0; i != num_passes; ++i) {
 				auto& pass = tech.GetPass(i);
-				pass.Bind(effect);
+				auto& shader_compose = pass.GetShader(effect);
+				auto& pipe_state = pass.GetState();
+				BindLegacyPass(static_cast<ShaderCompose&>(shader_compose), pipe_state);
 
-				UpdateRenderPSO(effect, tech, pass, layout);
-				d3d_cmd_lists[Device::Command_Render]->DrawInstanced(num_vertices,
-					num_instances,
-					layout.GetVertexStart(), 0);
-				pass.UnBind(effect);
+				CmdList.DrawPrimitive(layout.GetVertexStart(), 0, prim_count, num_instances);
 			}
 		}
-
-		//Statistics Render Infomation
 	}
 	void Context::BeginFrame()
 	{

@@ -134,15 +134,7 @@ namespace platform::Render::Effect {
 	{
 		return passes[index];
 	}
-	void Pass::Bind(const Effect & effect) const
-	{
-		Context::Instance().Push(Deref(state));
-		effect.GetShader(bind_index).Bind();
-	}
-	void Pass::UnBind(const Effect & effect) const
-	{
-		effect.GetShader(bind_index).UnBind();
-	}
+	
 	ShaderCompose& Pass::GetShader(const Effect & effect) const
 	{
 		return effect.GetShader(bind_index);

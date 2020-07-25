@@ -22,7 +22,6 @@ namespace platform::Render {
 
 		virtual RayContext& GetRayContext() = 0;
 
-		virtual void Push(const PipleState&) = 0;
 		virtual void Render(CommandList& CmdList,const Effect::Effect&, const Effect::Technique&, const InputLayout&) = 0;
 
 

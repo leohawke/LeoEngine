@@ -354,14 +354,13 @@ void Texture::DoUnmap(uint32 subres)
 	}
 }
 
-//TODO use commandlist
+//TODO use platform::Render::CommandList
 void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_size, uint8 mipmap_size, uint16 width, uint16 height, uint8 facecount)
 {
 		auto & device = D3D12::Context::Instance().GetDevice();
 		auto & effect = device.BiltEffect();
 		auto & tech = effect.BilinearCopy;
 		auto & pass = tech.get().GetPass(0);
-		pass.Bind(effect);
 
 		auto& sc = static_cast<ShaderCompose&>(pass.GetShader(effect));
 
@@ -502,8 +501,6 @@ void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_siz
 				}
 			}
 		}
-
-		pass.UnBind(effect);
 }
 
 template<typename _type>

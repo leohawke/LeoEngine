@@ -241,8 +241,6 @@ namespace platform::Render::Effect {
 	public:
 		Pass() = default;
 		Pass(Pass&&) = default;
-		void Bind(const Effect &) const;
-		void UnBind(const Effect &) const;
 		ShaderCompose& GetShader(const Effect&) const;
 		const PipleState& GetState() const;
 

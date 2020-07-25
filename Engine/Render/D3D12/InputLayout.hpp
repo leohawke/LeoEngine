@@ -7,6 +7,7 @@
 
 #include "d3d12_dxgi.h"
 #include "../InputLayout.hpp"
+#include "../IDevice.h"
 
 #include <vector>
 
@@ -17,6 +18,8 @@ namespace platform_ex::Windows::D3D12 {
 		~InputLayout() override = default;
 
 		const std::vector<D3D12_INPUT_ELEMENT_DESC>& GetInputDesc() const;
+
+		platform::Render::VertexDeclarationElements GetVertexDeclaration() const;
 
 		void Active() const;
 	private:
