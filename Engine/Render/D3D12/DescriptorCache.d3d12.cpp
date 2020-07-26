@@ -980,8 +980,8 @@ bool SubAllocatedOnlineHeap::RollOver()
 	CurrentSubAllocation.bFresh = false;
 	DescriptorBlockPool.push(CurrentSubAllocation);
 
-	if (!DescriptorBlockPool.empty() && !!(CurrentSubAllocation = DescriptorBlockPool.front()).SyncPoint &&
-		(CurrentSubAllocation.bFresh || CurrentSubAllocation.SyncPoint.IsComplete()))
+	if (!DescriptorBlockPool.empty() && (CurrentSubAllocation = DescriptorBlockPool.front(),
+		(CurrentSubAllocation.bFresh || CurrentSubAllocation.SyncPoint.IsComplete())))
 	{
 		DescriptorBlockPool.pop();
 	}
