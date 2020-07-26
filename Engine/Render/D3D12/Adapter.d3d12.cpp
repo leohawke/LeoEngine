@@ -18,7 +18,8 @@ using std::make_shared;
 
 namespace platform_ex::Windows::D3D12 {
 	Device::Device(DXGI::Adapter & InAdapter)
-		:adapter(InAdapter)
+		:adapter(InAdapter),
+		PipelineStateCache(this)
 	{
 		std::vector<D3D_FEATURE_LEVEL> feature_levels = {
 			D3D_FEATURE_LEVEL_12_1 ,
@@ -250,7 +251,23 @@ namespace platform_ex::Windows::D3D12 {
 
 	GraphicsPipelineState* Device::CreateGraphicsPipelineState(const platform::Render::GraphicsPipelineStateInitializer& initializer)
 	{
-		return new GraphicsPipelineState(initializer);
+		auto& PSOCache = PipelineStateCache;
+
+		QuantizedBoundShaderState QBSS;
+		QuantizeBoundShaderState(QBSS, initializer);
+
+		auto RootSignature = CreateRootSignature(QBSS).get();
+
+		KeyGraphicsPipelineStateDesc LowLevelDesc;
+
+		auto Found = PSOCache.FindInLoadedCache(initializer, RootSignature, LowLevelDesc);
+
+		if (Found)
+		{
+			return Found;
+		}
+
+		return PSOCache.CreateAndAdd(initializer, RootSignature, LowLevelDesc);
 	}
 
 	UnorderedAccessView* Device::CreateUnorderedAccessView(platform::Render::Texture2D* InTexture)
@@ -391,6 +408,8 @@ namespace platform_ex::Windows::D3D12 {
 		FillCaps();
 
 		Devices[0] = new NodeDevice(0, this);
+
+		PipelineStateCache.Init("", "", "");
 	}
 
 	std::shared_ptr<Device::CmdAllocatorDependencies> Device::CmdAllocatorAlloc()

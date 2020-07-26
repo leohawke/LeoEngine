@@ -206,9 +206,6 @@
     <ClCompile Include="Render\D3D12\VertexDeclaration.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="Render\D3D12\GraphicsPipelineState.cpp">
-      <Filter>Render\D3D12</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer\PostProcess\PostProcessCombineLUTs.cpp">
       <Filter>Renderer\PostProcess</Filter>
     </ClCompile>

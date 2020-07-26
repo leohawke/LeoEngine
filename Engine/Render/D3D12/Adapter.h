@@ -184,6 +184,8 @@ namespace platform_ex::Windows::D3D12 {
 		D3D_ROOT_SIGNATURE_VERSION RootSignatureVersion;
 
 		NodeDevice* Devices[1];
+
+		D3DPipelineStateCache PipelineStateCache;
 	public:
 		D3D12_RESOURCE_BINDING_TIER GetResourceBindingTier() const
 		{

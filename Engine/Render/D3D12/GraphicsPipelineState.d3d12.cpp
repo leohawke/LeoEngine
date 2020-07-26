@@ -5,40 +5,56 @@
 #include "ShaderCompose.h"
 #include "VertexDeclaration.h"
 #include "Context.h"
+#include <mutex>
 
+using namespace platform_ex::Windows;
 using namespace platform_ex::Windows::D3D12;
 
-inline void operator<<(D3D12_SHADER_BYTECODE& desc, const platform::Render::HardwareShader* pShader)
-{
-	auto pD3DShader = dynamic_cast<const D3D12HardwareShader*>(pShader);
-	if (!pD3DShader)
-		return;
+using platform::Render::GraphicsPipelineStateInitializer;
 
-	desc.BytecodeLength = pD3DShader->ShaderByteCode.second;
-	desc.pShaderBytecode = pD3DShader->ShaderByteCode.first.get();
+D3D12_GRAPHICS_PIPELINE_STATE_DESC D3D12::D3DGraphicsPipelineStateDesc::GraphicsDesc() const
+{
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC D;
+	D.Flags = this->Flags;
+	D.NodeMask = this->NodeMask;
+	D.pRootSignature = this->pRootSignature;
+	D.InputLayout = this->InputLayout;
+	D.IBStripCutValue = this->IBStripCutValue;
+	D.PrimitiveTopologyType = this->PrimitiveTopologyType;
+	D.VS = this->VS;
+	D.GS = this->GS;
+	D.HS = this->HS;
+	D.DS = this->DS;
+	D.PS = this->PS;
+	D.BlendState = this->BlendState;
+	D.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC1(this->DepthStencilState);
+	D.DSVFormat = this->DSVFormat;
+	D.RasterizerState = this->RasterizerState;
+	D.NumRenderTargets = this->RTFormatArray.NumRenderTargets;
+	std::memcpy(D.RTVFormats, this->RTFormatArray.RTFormats, sizeof(D.RTVFormats));
+	std::memset(&D.StreamOutput, 0, sizeof(D.StreamOutput));
+	D.SampleDesc = this->SampleDesc;
+	D.SampleMask = this->SampleMask;
+	D.CachedPSO = this->CachedPSO;
+	return D;
 }
 
-void QuantizeBoundShaderState(QuantizedBoundShaderState& QBSS, const platform::Render::GraphicsPipelineStateInitializer& initializer);
-
-KeyGraphicsPipelineStateDesc GetKeyGraphicsPipelineStateDesc(
-	const platform::Render::GraphicsPipelineStateInitializer& initializer, RootSignature* RootSignature);
-
-GraphicsPipelineState::GraphicsPipelineState(const platform::Render::GraphicsPipelineStateInitializer& initializer)
-	:PipelineStateInitializer(initializer)
+D3D12::D3DPipelineState::D3DPipelineState(D3D12Adapter* Parent)
+	:AdapterChild(Parent), MultiNodeGPUObject(0, 0)
 {
-	QuantizedBoundShaderState QuantizedBoundShaderState;
-	QuantizeBoundShaderState(QuantizedBoundShaderState, initializer);
-	
-	QuantizedBoundShaderState.RootSignatureType = RootSignatureType::Raster;
-	//retrive RootSignature
-	RootSignature = CreateRootSignature(QuantizedBoundShaderState);
+}
 
-	Key =  GetKeyGraphicsPipelineStateDesc(initializer, RootSignature);
+D3D12::D3DPipelineState::~D3DPipelineState()
+{
+}
 
-	Key.Desc.NodeMask = 0;
 
-	Create(GraphicsPipelineStateCreateArgs(&Key, nullptr));
 
+GraphicsPipelineState::GraphicsPipelineState(const platform::Render::GraphicsPipelineStateInitializer& initializer, const D3D12::RootSignature* InRootSignature, D3DPipelineState* InPipelineState)
+	:PipelineStateInitializer(initializer),
+	RootSignature(InRootSignature),
+	PipelineState(InPipelineState)
+{
 	std::memset(StreamStrides, 0, sizeof(StreamStrides));
 	int index = 0;
 	for (auto& stream : initializer.ShaderPass.VertexDeclaration)
@@ -53,22 +69,14 @@ GraphicsPipelineState::GraphicsPipelineState(const platform::Render::GraphicsPip
 	bShaderNeedsGlobalConstantBuffer[ShaderType::GeometryShader] = GetGeometryShader() && GetGeometryShader()->bGlobalUniformBufferUsed;
 }
 
-
-void platform_ex::Windows::D3D12::GraphicsPipelineState::Create(const GraphicsPipelineStateCreateArgs& InCreationArgs)
-{
-	auto Desc = InCreationArgs.Desc->Desc.GraphicsDesc();
-
-	CheckHResult(GetDevice().GetDevice()->CreateGraphicsPipelineState(&Desc, COMPtr_RefParam(PipelineState, IID_ID3D12PipelineState)));
-}
-
 static void TranslateRenderTargetFormats(
 	const platform::Render::GraphicsPipelineStateInitializer& PsoInit,
 	D3D12_RT_FORMAT_ARRAY& RTFormatArray,
 	DXGI_FORMAT& DSVFormat
 );
 
-KeyGraphicsPipelineStateDesc GetKeyGraphicsPipelineStateDesc(
-	const platform::Render::GraphicsPipelineStateInitializer& initializer, RootSignature* RootSignature)
+KeyGraphicsPipelineStateDesc D3D12::GetKeyGraphicsPipelineStateDesc(
+	const platform::Render::GraphicsPipelineStateInitializer& initializer,const RootSignature* RootSignature)
 {
 	KeyGraphicsPipelineStateDesc Desc;
 	std::memset(&Desc, 0, sizeof(Desc));
@@ -105,7 +113,11 @@ KeyGraphicsPipelineStateDesc GetKeyGraphicsPipelineStateDesc(
 
 	//CopyShader
 #define COPY_SHADER(L,R) \
-	Desc.Desc.L##S << initializer.ShaderPass.R##Shader;
+	if (D3D12HardwareShader* Shader = static_cast<R##HWShader*>(initializer.ShaderPass.R##Shader))\
+	{\
+		Desc.Desc.L##S << Shader;\
+		Desc.L##SHash = Shader->GetHash();\
+	}
 
 	COPY_SHADER(V, Vertex);
 	COPY_SHADER(P, Pixel);
@@ -113,6 +125,7 @@ KeyGraphicsPipelineStateDesc GetKeyGraphicsPipelineStateDesc(
 	COPY_SHADER(H, Hull);
 	COPY_SHADER(G,Geometry)
 #undef COPY_SHADER
+	
 
 	//don't support stream output
 
@@ -139,7 +152,7 @@ static void TranslateRenderTargetFormats(
 	DSVFormat = PlatformFormat;
 }
 
-void QuantizeBoundShaderState(QuantizedBoundShaderState& QBSS, const platform::Render::GraphicsPipelineStateInitializer& initializer)
+void D3D12::QuantizeBoundShaderState(QuantizedBoundShaderState& QBSS, const platform::Render::GraphicsPipelineStateInitializer& initializer)
 {
 	std::memset(&QBSS, 0, sizeof(QBSS));
 
@@ -163,4 +176,296 @@ void QuantizeBoundShaderState(QuantizedBoundShaderState& QBSS, const platform::R
 		QuantizedBoundShaderState::InitShaderRegisterCounts(Tier, DomainShader->ResourceCounts, QBSS.RegisterCounts[ShaderType::DomainShader]);
 	if (GeometryShader)
 		QuantizedBoundShaderState::InitShaderRegisterCounts(Tier, GeometryShader->ResourceCounts, QBSS.RegisterCounts[ShaderType::GeometryShader]);
+}
+
+uint64 D3DPipelineStateCacheBase::HashData(const void* Data, int32 NumBytes)
+{
+	return CityHash64((const char*)Data, NumBytes);
+}
+
+uint64 D3DPipelineStateCacheBase::HashPSODesc(const KeyGraphicsPipelineStateDesc& Desc)
+{
+	struct GraphicsPSOData
+	{
+		ShaderBytecodeHash VSHash;
+		ShaderBytecodeHash HSHash;
+		ShaderBytecodeHash DSHash;
+		ShaderBytecodeHash GSHash;
+		ShaderBytecodeHash PSHash;
+		uint32 InputLayoutHash;
+
+		uint8 AlphaToCoverageEnable;
+		uint8 IndependentBlendEnable;
+
+		uint32 SampleMask;
+		D3D12_RASTERIZER_DESC RasterizerState;
+		D3D12_DEPTH_STENCIL_DESC1 DepthStencilState;
+
+		D3D12_INDEX_BUFFER_STRIP_CUT_VALUE IBStripCutValue;
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE PrimitiveTopologyType;
+		DXGI_FORMAT DSVFormat;
+		DXGI_SAMPLE_DESC SampleDesc;
+		uint32 NodeMask;
+
+		D3D12_PIPELINE_STATE_FLAGS Flags;
+	};
+
+	struct RenderTargetData
+	{
+		DXGI_FORMAT Format;
+		D3D12_RENDER_TARGET_BLEND_DESC BlendDesc;
+	};
+
+
+	const int32 NumRenderTargets = Desc.Desc.RTFormatArray.NumRenderTargets;
+
+	const size_t GraphicsPSODataSize = sizeof(GraphicsPSOData);
+	const size_t RenderTargetDataSize = NumRenderTargets * sizeof(RenderTargetData);
+	const size_t TotalDataSize = GraphicsPSODataSize + RenderTargetDataSize;
+
+	char Data[GraphicsPSODataSize + 8 * sizeof(RenderTargetData)];
+	std::memset(Data,0,TotalDataSize);
+
+	GraphicsPSOData* PSOData = (GraphicsPSOData*)Data;
+	RenderTargetData* RTData = (RenderTargetData*)(Data + GraphicsPSODataSize);
+
+	PSOData->VSHash = Desc.VSHash;
+	PSOData->HSHash = Desc.HSHash;
+	PSOData->DSHash = Desc.DSHash;
+	PSOData->GSHash = Desc.GSHash;
+	PSOData->PSHash = Desc.PSHash;
+	PSOData->InputLayoutHash = Desc.InputLayoutHash;
+
+	PSOData->AlphaToCoverageEnable = Desc.Desc.BlendState.AlphaToCoverageEnable;
+	PSOData->IndependentBlendEnable = Desc.Desc.BlendState.IndependentBlendEnable;
+	PSOData->SampleMask = Desc.Desc.SampleMask;
+	PSOData->RasterizerState = Desc.Desc.RasterizerState;
+	PSOData->DepthStencilState = Desc.Desc.DepthStencilState;
+	PSOData->IBStripCutValue = Desc.Desc.IBStripCutValue;
+	PSOData->PrimitiveTopologyType = Desc.Desc.PrimitiveTopologyType;
+	PSOData->DSVFormat = Desc.Desc.DSVFormat;
+	PSOData->SampleDesc = Desc.Desc.SampleDesc;
+	PSOData->NodeMask = Desc.Desc.NodeMask;
+	PSOData->Flags = Desc.Desc.Flags;
+
+	for (int32 RT = 0; RT < NumRenderTargets; RT++)
+	{
+		RTData[RT].Format = Desc.Desc.RTFormatArray.RTFormats[RT];
+		RTData[RT].BlendDesc = Desc.Desc.BlendState.RenderTarget[RT];
+	}
+
+	return HashData(Data, TotalDataSize);
+}
+
+D3DPipelineStateCacheBase::D3DPipelineStateCacheBase(D3D12Adapter* InParent)
+	: AdapterChild(InParent)
+{
+}
+
+D3DPipelineStateCacheBase::~D3DPipelineStateCacheBase()
+{
+	CleanupPipelineStateCaches();
+}
+
+void D3DPipelineStateCacheBase::CleanupPipelineStateCaches()
+{
+	{
+		std::unique_lock Lock{ LowLevelGraphicsPipelineStateCacheMutex };
+		for (auto& Pair : LowLevelGraphicsPipelineStateCache)
+		{
+			delete Pair.second;
+		}
+		LowLevelGraphicsPipelineStateCache.clear();
+	}
+}
+
+D3DPipelineState* D3DPipelineStateCacheBase::FindInLowLevelCache(const KeyGraphicsPipelineStateDesc& Desc)
+{
+	lconstraint(Desc.CombinedHash != 0);
+
+	{
+		std::shared_lock Lock(LowLevelGraphicsPipelineStateCacheMutex);
+		auto Found = LowLevelGraphicsPipelineStateCache.find(Desc);
+		if (Found != LowLevelGraphicsPipelineStateCache.end())
+		{
+			return Found->second;
+		}
+	}
+
+	return nullptr;
+}
+
+D3DPipelineState* D3DPipelineStateCacheBase::CreateAndAddToLowLevelCache(const KeyGraphicsPipelineStateDesc& Desc)
+{
+	// Add PSO to low level cache.
+	D3DPipelineState* PipelineState = nullptr;
+	AddToLowLevelCache(Desc, &PipelineState, [this](D3DPipelineState** PipelineState, const KeyGraphicsPipelineStateDesc& Desc)
+		{
+			OnPSOCreated(*PipelineState, Desc);
+		});
+
+	return PipelineState;
+}
+
+void D3DPipelineStateCacheBase::AddToLowLevelCache(const KeyGraphicsPipelineStateDesc& Desc, D3DPipelineState** OutPipelineState, const FPostCreateGraphicCallback& PostCreateCallback)
+{
+	lconstraint(Desc.CombinedHash != 0);
+
+	// Double check the desc doesn't already exist while the lock is taken.
+	// This avoids having multiple threads try to create the same PSO.
+	{
+		std::unique_lock Lock(LowLevelGraphicsPipelineStateCacheMutex);
+		auto PipelineState = LowLevelGraphicsPipelineStateCache.find(Desc);
+		if (PipelineState != LowLevelGraphicsPipelineStateCache.end())
+		{
+			// This desc already exists.
+			*OutPipelineState = PipelineState->second;
+			return;
+		}
+
+		// Add the FD3D12PipelineState object to the cache, but don't actually create the underlying PSO yet while the lock is taken.
+		// This allows multiple threads to create different PSOs at the same time.
+		D3DPipelineState* NewPipelineState = new D3DPipelineState(GetParentAdapter());
+		LowLevelGraphicsPipelineStateCache.emplace(Desc, NewPipelineState);
+
+		*OutPipelineState = NewPipelineState;
+	}
+
+	// Create the underlying PSO and then perform any other additional tasks like cleaning up/adding to caches, etc.
+	PostCreateCallback(OutPipelineState, Desc);
+}
+
+GraphicsPipelineState* D3DPipelineStateCacheBase::FindInLoadedCache(
+	const GraphicsPipelineStateInitializer& Initializer,
+	const RootSignature* RootSignature,
+	KeyGraphicsPipelineStateDesc& OutLowLevelDesc)
+{
+	// TODO: For now PSOs will be created on every node of the LDA chain.
+	OutLowLevelDesc = GetKeyGraphicsPipelineStateDesc(Initializer, RootSignature);
+	OutLowLevelDesc.Desc.NodeMask = 0;
+
+	OutLowLevelDesc.CombinedHash = D3DPipelineStateCacheBase::HashPSODesc(OutLowLevelDesc);
+
+	// First try to find the PSO in the low level cache that can be populated from disk.
+	auto PipelineState = FindInLowLevelCache(OutLowLevelDesc);
+
+	if (PipelineState && PipelineState->IsValid())
+	{
+		return new GraphicsPipelineState(Initializer, RootSignature, PipelineState);
+	}
+
+	return nullptr;
+}
+
+GraphicsPipelineState* D3DPipelineStateCacheBase::CreateAndAdd(
+	const GraphicsPipelineStateInitializer& Initializer,
+	const RootSignature* RootSignature,
+	const KeyGraphicsPipelineStateDesc& LowLevelDesc)
+{
+	auto const PipelineState = CreateAndAddToLowLevelCache(LowLevelDesc);
+
+	if (PipelineState && PipelineState->IsValid())
+	{
+		return new GraphicsPipelineState(Initializer, RootSignature, PipelineState);
+	}
+
+	return nullptr;
+}
+
+//Windows Only
+
+void D3DPipelineStateCache::OnPSOCreated(D3DPipelineState* PipelineState, const KeyGraphicsPipelineStateDesc& Desc)
+{
+	const bool bAsync = /*!Desc.bFromPSOFileCache*/ false; // FORT-243931 - For now we need conclusive results of PSO creation succeess/failure synchronously to avoid PSO crashes
+
+	// Actually create the PSO.
+	GraphicsPipelineStateCreateArgs Args(&Desc, PipelineLibrary.Get());
+	if (bAsync)
+	{
+		PipelineState->CreateAsync(Args);
+	}
+	else
+	{
+		PipelineState->Create(Args);
+	}
+}
+
+void D3DPipelineStateCache::Close()
+{
+	CleanupPipelineStateCaches();
+
+	PipelineLibrary = nullptr;
+}
+
+void D3D12::D3DPipelineStateCache::Init(
+	const std::string& GraphicsCacheFilename, 
+	const std::string& ComputeCacheFilename, 
+	const std::string& DriverBlobFilename)
+{
+	//Not using driver-optimized pipeline state disk cache
+	bUseAPILibaries = false;
+}
+
+bool D3DPipelineStateCache::IsInErrorState() const
+{
+	return false;
+}
+
+D3DPipelineStateCache::D3DPipelineStateCache(D3D12Adapter* InParent)
+	: D3DPipelineStateCacheBase(InParent)
+	, bUseAPILibaries(true)
+{
+}
+
+D3DPipelineStateCache::~D3DPipelineStateCache()
+{
+}
+
+// Thread-safe create graphics/compute pipeline state. Conditionally load/store the PSO using a Pipeline Library.
+static HRESULT CreatePipelineState(ID3D12PipelineState*& PSO, ID3D12Device* Device, const D3D12_GRAPHICS_PIPELINE_STATE_DESC* Desc, ID3D12PipelineLibrary* Library, const TCHAR* Name)
+{
+	HRESULT hr = S_OK;
+	if (Library == nullptr || Library->LoadGraphicsPipeline(Name, Desc, IID_PPV_ARGS(&PSO)) == E_INVALIDARG)
+	{
+		hr = Device->CreateGraphicsPipelineState(Desc, IID_PPV_ARGS(&PSO));
+	}
+
+	if (Library && SUCCEEDED(hr))
+	{
+		HRESULT r = Library->StorePipeline(Name, PSO);
+		lconstraint(r != E_INVALIDARG);
+	}
+
+	return hr;
+}
+
+static inline void FastHashName(wchar_t Name[17], uint64 Hash)
+{
+	for (int32 i = 0; i < 16; i++)
+	{
+		Name[i] = (Hash & 0xF) + 'A';
+		Hash >>= 4;
+	}
+	Name[16] = 0;
+}
+
+static void CreateGraphicsPipelineState(ID3D12PipelineState** PSO, D3D12Adapter* Adapter, const GraphicsPipelineStateCreateArgs* CreationArgs)
+{
+	// Get the pipeline state name, currently based on the hash.
+	wchar_t Name[17];
+	FastHashName(Name, CreationArgs->Desc->CombinedHash);
+
+	const D3D12_GRAPHICS_PIPELINE_STATE_DESC Desc = CreationArgs->Desc->Desc.GraphicsDesc();
+	HRESULT hr = CreatePipelineState(*PSO, Adapter->GetDevice(), &Desc, CreationArgs->Library, Name);
+}
+
+
+void D3D12::D3DPipelineState::Create(const GraphicsPipelineStateCreateArgs& InCreationArgs)
+{
+	CreateGraphicsPipelineState(PipelineState.ReleaseAndGetAddress(), GetParentAdapter(), &InCreationArgs);
+}
+
+void D3D12::D3DPipelineState::CreateAsync(const GraphicsPipelineStateCreateArgs& InCreationArgs)
+{
+	return Create(InCreationArgs);
 }

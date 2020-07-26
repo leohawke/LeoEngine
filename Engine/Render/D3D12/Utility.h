@@ -92,4 +92,19 @@ namespace platform_ex::Windows::D3D12 {
 			return 1;
 		}
 	}
+
+	struct ShaderBytecodeHash
+	{
+		uint64 Hash[2];
+
+		bool operator ==(const ShaderBytecodeHash& b) const
+		{
+			return (Hash[0] == b.Hash[0] && Hash[1] == b.Hash[1]);
+		}
+
+		bool operator !=(const ShaderBytecodeHash& b) const
+		{
+			return (Hash[0] != b.Hash[0] || Hash[1] != b.Hash[1]);
+		}
+	};
 }
