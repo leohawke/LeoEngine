@@ -4,6 +4,7 @@
 #include "FrameBuffer.h"
 #include "RayContext.h"
 #include "NodeDevice.h"
+#include "CommandListManager.h"
 #include "../ICommandList.h"
 #include "../Effect/CopyEffect.h"
 #include "../PipelineStateUtility.h"
@@ -46,10 +47,7 @@ namespace platform_ex::Windows::D3D12 {
 
 	void D3D12::Context::SyncCPUGPU(bool force)
 	{
-		CommitCommandList(Device::Command_Render);
-		ResetCommand(Device::Command_Render);
-
-		SyncCommand(Device::Command_Render);
+		CommitCommandContext();
 
 		ClearPSOCache();
 	}
@@ -77,11 +75,9 @@ namespace platform_ex::Windows::D3D12 {
 
 	void Context::ExecuteUAVBarrier()
 	{
-		D3D12_RESOURCE_BARRIER Barrier = {};
-		Barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
-		Barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		Barrier.UAV.pResource = nullptr;
-		d3d_cmd_lists[Device::Command_Render]->ResourceBarrier(1, &Barrier);
+		auto nodedvice = device->GetNodeDevice(0);
+		auto& commandcontext = nodedvice->GetDefaultCommandContext();
+		commandcontext.CommandListHandle.AddUAVBarrier();
 	}
 
 	void D3D12::Context::CommitCommandList(Device::CommandType type)
@@ -97,28 +93,29 @@ namespace platform_ex::Windows::D3D12 {
 			GetDevice().d3d_cmd_allocators[type]->Reset();
 			ResetCommand(type);
 		}
+	}
 
-		if (type == Device::CommandType::Command_Render)
-		{
-			auto nodedvice = device->GetNodeDevice(0);
-			auto& commandcontext = nodedvice->GetDefaultCommandContext();
+	void D3D12::Context::CommitCommandContext()
+	{
+		auto nodedvice = device->GetNodeDevice(0);
+		auto& commandcontext = nodedvice->GetDefaultCommandContext();
 
-			commandcontext.CommandListHandle.Close();
-			ID3D12CommandList* cmd_lists[] = { commandcontext.CommandListHandle.CommandList() };
-			nodedvice->GetD3DCommandQueue(CommandQueueType::Default)->ExecuteCommandLists(1, cmd_lists);
+		commandcontext.CommandListHandle.Close();
+		ID3D12CommandList* cmd_lists[] = { commandcontext.CommandListHandle.CommandList() };
+		nodedvice->GetD3DCommandQueue(CommandQueueType::Default)->ExecuteCommandLists(1, cmd_lists);
 
-			auto val = GetFence(type).Signal(CommandQueueType::Default);
-			GetFence(type).WaitForFence(val);
+		auto& fence = nodedvice->GetCommandListManager(CommandQueueType::Default)->GetFence();
+		auto signal =  fence.Signal(CommandQueueType::Default);
+		fence.WaitForFence(signal);
 
-			((ID3D12CommandAllocator*)(*commandcontext.CommandAllocator))->Reset();
-			commandcontext.CommandListHandle.Reset(*commandcontext.CommandAllocator);
+		((ID3D12CommandAllocator*)(*commandcontext.CommandAllocator))->Reset();
+		commandcontext.CommandListHandle.Reset(*commandcontext.CommandAllocator);
 
-			commandcontext.StateCache.GetDescriptorCache()->EndFrame();
-			commandcontext.StateCache.GetDescriptorCache()->BeginFrame();
+		commandcontext.StateCache.GetDescriptorCache()->EndFrame();
+		commandcontext.StateCache.GetDescriptorCache()->BeginFrame();
 
-			commandcontext.StateCache.GetDescriptorCache()->NotifyCurrentCommandList(commandcontext.CommandListHandle);
-			commandcontext.StateCache.DirtyStateForNewCommandList();
-		}
+		commandcontext.StateCache.GetDescriptorCache()->NotifyCurrentCommandList(commandcontext.CommandListHandle);
+		commandcontext.StateCache.DirtyStateForNewCommandList();
 	}
 
 	void D3D12::Context::ClearPSOCache()
@@ -135,30 +132,8 @@ namespace platform_ex::Windows::D3D12 {
 		device->curr_render_cmd_allocator->recycle_after_sync_residency_buffs.clear();
 	}
 
-	void Context::RSSetViewports(UINT NumViewports, D3D12_VIEWPORT const * pViewports)
-	{
-		if (NumViewports == 1)
-		{
-			//if (memcmp(&curr_viewport, pViewports, sizeof(pViewports[0])) != 0)
-			{
-				d3d_cmd_lists[Device::Command_Render]->RSSetViewports(NumViewports, pViewports);
-				curr_viewport = pViewports[0];
-			}
-		}
-		else
-		{
-			d3d_cmd_lists[Device::Command_Render]->RSSetViewports(NumViewports, pViewports);
-			curr_viewport = pViewports[0];
-		}
-	}
-
 	void Context::ContextEx(ID3D12Device * d3d_device, ID3D12CommandQueue * cmd_queue)
 	{
-		CheckHResult(d3d_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT,
-			device->d3d_cmd_allocators[Device::Command_Render].Get(), nullptr,
-			COMPtr_RefParam(d3d_cmd_lists[Device::Command_Render], IID_ID3D12GraphicsCommandList)));
-		D3D::Debug(d3d_cmd_lists[Device::Command_Render], "Render_Command");
-
 		CheckHResult(d3d_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT,
 			device->d3d_cmd_allocators[Device::Command_Resource].Get(), nullptr,
 			COMPtr_RefParam(d3d_cmd_lists[Device::Command_Resource], IID_ID3D12GraphicsCommandList)));
@@ -177,11 +152,11 @@ namespace platform_ex::Windows::D3D12 {
 			fence->CreateFence();
 		}
 
+		device->GetNodeDevice(0)->Initialize();
+
 		FilterExceptions([&, this] {
 			ray_context = std::make_shared<RayContext>(device.get(), this);
-			},"ERROR: DirectX Raytracing is not supported by your OS, GPU and/or driver.");
-
-		device->GetNodeDevice(0)->Initialize();
+			}, "ERROR: DirectX Raytracing is not supported by your OS, GPU and/or driver.");
 	}
 
 	COMPtr<ID3D12Resource> Context::InnerResourceAlloc(InnerReourceType type, leo::uint32 size_in_byte)
@@ -266,7 +241,6 @@ namespace platform_ex::Windows::D3D12 {
 	}
 	void Context::DoBindFrameBuffer(const std::shared_ptr<platform::Render::FrameBuffer>& framebuffer)
 	{
-		static_cast<FrameBuffer*>(framebuffer.get())->BindBarrier();
 	}
 	void Context::Render(platform::Render::CommandList& CmdList,const Effect::Effect & effect, const Effect::Technique & tech, const platform::Render::InputLayout & layout)
 	{
@@ -323,6 +297,8 @@ namespace platform_ex::Windows::D3D12 {
 
 			platform::Render::SetGraphicsPipelineState(CmdList, GraphicsPSOInit);
 
+			compose.Bind();
+
 			auto SetShaderParamters = [&](ShaderType type,auto Shader)
 			{
 				if (!Shader)
@@ -350,6 +326,8 @@ namespace platform_ex::Windows::D3D12 {
 			
 			SetShaderParamters(ShaderType::VertexShader, compose.GetVertexShader());
 			SetShaderParamters(ShaderType::PixelShader, compose.GetPixelShader());
+
+			compose.UnBind();
 		};
 
 		if (index_stream) {
@@ -384,12 +362,6 @@ namespace platform_ex::Windows::D3D12 {
 	}
 	void Context::EndFrame()
 	{
-		auto val = GetFence(Device::Command_Render).Signal(CommandQueueType::Default);
-		device->CmdAllocatorRecycle(device->curr_render_cmd_allocator, val);
-		device->curr_render_cmd_allocator =device->CmdAllocatorAlloc();
-		device->d3d_cmd_allocators[Device::Command_Render] = device->curr_render_cmd_allocator->cmd_allocator;
-
-		ResetCommand(Device::Command_Render);
 		ClearPSOCache();
 	}
 	Display & Context::GetDisplay()

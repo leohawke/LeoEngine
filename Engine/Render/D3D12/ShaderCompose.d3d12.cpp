@@ -262,11 +262,6 @@ void platform_ex::Windows::D3D12::ShaderCompose::Bind()
 			pb.func();
 		}
 	}
-	CreateBarriers();
-	if (!barriers.empty()) {
-		D3D12::Context::Instance().GetCommandList(D3D12::Device::Command_Render)
-			->ResourceBarrier(static_cast<UINT>(barriers.size()), barriers.data());
-	}
 
 	//update cbuffer
 	for (auto i = 0; i != AllCBuffs.size(); ++i) {

@@ -58,9 +58,9 @@ namespace platform_ex {
 				void CommitCommandList(Device::CommandType);
 				friend class Device;
 
-				void ClearPSOCache();
+				void CommitCommandContext();
 
-				void RSSetViewports(UINT NumViewports, D3D12_VIEWPORT const *pViewports);
+				void ClearPSOCache();
 
 				enum  InnerReourceType{
 					Upload,

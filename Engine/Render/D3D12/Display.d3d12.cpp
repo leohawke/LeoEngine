@@ -113,7 +113,7 @@ void platform_ex::Windows::D3D12::Display::SwapBuffers()
 
 		TransitionResource(Context::Instance().GetDefaultCommandContext()->CommandListHandle, rt_tex, D3D12_RESOURCE_STATE_PRESENT, 0);
 
-		Context::Instance().CommitCommandList(Device::Command_Render);
+		Context::Instance().CommitCommandContext();
 
 		bool allow_tearing = tearing_allow;
 #ifdef LF_Hosted
@@ -178,6 +178,8 @@ void Display::UpdateFramewBufferView()
 	auto stereo = (Stereo_LCDShutter == stereo_method) && stereo_feature;
 
 	if (depth_stencil_format != EF_Unknown) {
+		platform::Render::ElementInitData initData;
+		initData.clear_value = &platform::Render::ClearValueBinding::DepthOne;
 		depth_stencil = leo::share_raw(Context::Instance().GetDevice().CreateTexture(
 			static_cast<leo::uint16>(GetWidth()),
 			static_cast<leo::uint16>(GetHeight()),
@@ -185,7 +187,8 @@ void Display::UpdateFramewBufferView()
 			stereo ? 2u : 1u,
 			depth_stencil_format,
 			EA_GPURead | EA_GPUWrite,
-			render_targets_texs[0]->GetSampleInfo()
+			render_targets_texs[0]->GetSampleInfo(),
+			&initData
 		));
 
 		depth_stencil->SetDepthStencilView(new DepthStencilView(GetDefaultNodeDevice(), depth_stencil->CreateDSVDesc(0, 1, 0), *depth_stencil, IsStencilFormat(depth_stencil_format)),0);

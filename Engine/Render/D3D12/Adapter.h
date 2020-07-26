@@ -79,7 +79,6 @@ namespace platform_ex::Windows::D3D12 {
 
 		leo::observer_ptr<ID3D12PipelineState> CreateRenderPSO(const D3D12_GRAPHICS_PIPELINE_STATE_DESC&);
 
-		Fence& GetRenderFence();
 
 		ID3D12Device* GetDevice() const
 		{
@@ -96,8 +95,7 @@ namespace platform_ex::Windows::D3D12 {
 		friend class RayDevice;
 
 		enum CommandType {
-			Command_Render = 0,
-			Command_Resource,
+			Command_Resource = 1,
 			CommandTypeCount
 		};
 

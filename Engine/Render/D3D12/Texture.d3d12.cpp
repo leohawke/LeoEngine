@@ -22,6 +22,21 @@ static DXGI_FORMAT ConvertWrap(EFormat format) {
 	return Convert(format);
 }
 
+static DXGI_FORMAT ClearValueWrap(DXGI_FORMAT format)
+{
+	switch (format)
+	{
+	case DXGI_FORMAT_R16_TYPELESS:
+		return DXGI_FORMAT_D16_UNORM;
+	case DXGI_FORMAT_R24G8_TYPELESS:
+		return DXGI_FORMAT_D24_UNORM_S8_UINT;
+	case DXGI_FORMAT_R32_TYPELESS:
+		return DXGI_FORMAT_D32_FLOAT;
+	};
+
+	return format;
+}
+
 platform_ex::Windows::D3D12::Texture::Texture(EFormat format)
 	:dxgi_format(ConvertWrap(format))
 {
@@ -112,7 +127,7 @@ void Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim, uint16 width, uin
 		}
 		else if (tex_desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL && clear_value.ColorBinding == platform::Render::ClearBinding::DepthStencilBound)
 		{
-			ClearValue = CD3DX12_CLEAR_VALUE(tex_desc.Format, clear_value.Value.DSValue.Depth, (uint8)clear_value.Value.DSValue.Stencil);
+			ClearValue = CD3DX12_CLEAR_VALUE(ClearValueWrap(tex_desc.Format), clear_value.Value.DSValue.Depth, (uint8)clear_value.Value.DSValue.Stencil);
 			ClearValuePtr = &ClearValue;
 		}
 	}
@@ -260,7 +275,7 @@ void Texture::DoMap(EFormat format, uint32 subres, TextureMapAccess tma,
 	device->GetCopyableFootprints(&tex_desc, subres, 1, 0, &layout, &num_rows, &row_sizes_in_bytes, &required_size);
 
 	if ((TextureMapAccess::ReadOnly == tma) || (TextureMapAccess::ReadWrite == tma)) {
-		auto & cmd_list = context.GetCommandList(Device::Command_Render);
+		auto & cmd_list = context.GetCommandList(Device::Command_Resource);
 
 		TransitionBarrier barrier = {
 			{D3D12_RESOURCE_STATE_COMMON,D3D12_RESOURCE_STATE_COPY_SOURCE},
@@ -324,7 +339,7 @@ void Texture::DoUnmap(uint32 subres)
 	uint64 required_size = 0;
 	device->GetCopyableFootprints(&tex_desc, subres, 1, 0, &layout, &num_rows, &row_sizes_in_bytes, &required_size);
 	if ((TextureMapAccess::WriteOnly == last_tma) || (TextureMapAccess::ReadWrite == last_tma)) {
-		auto cmd_list = context.GetCommandList(Device::Command_Render);
+		auto cmd_list = context.GetCommandList(Device::Command_Resource);
 		context.SyncCPUGPU();
 
 		TransitionBarrier barrier{
@@ -406,7 +421,7 @@ void platform_ex::Windows::D3D12::Texture::DoHWBuildMipSubLevels(uint8 array_siz
 
 		auto pso = device.CreateRenderPSO(gps_desc);
 
-		auto& cmd_list = D3D12::Context::Instance().GetCommandList(Device::Command_Render);
+		auto& cmd_list = D3D12::Context::Instance().GetCommandList(Device::Command_Resource);
 		cmd_list->SetPipelineState(pso.get());
 		cmd_list->SetGraphicsRootSignature(gps_desc.pRootSignature);
 
@@ -507,7 +522,7 @@ template<typename _type>
 void Texture::DoHWCopyToTexture(_type& src, _type & dst, ResourceStateTransition src_st, ResourceStateTransition dst_st)
 {
 	auto& context = Context::Instance();
-	auto& cmd_list = context.GetCommandList(Device::Command_Render);
+	auto& cmd_list = context.GetCommandList(Device::Command_Resource);
 
 	if ((src.GetAccessMode() & EA_CPUWrite) && (dst.GetAccessMode() & EA_GPURead))
 		context.SyncCPUGPU();
@@ -552,7 +567,7 @@ void Texture::DoHWCopyToSubTexture(_type & src, _type & target,
 	ResourceStateTransition src_st, ResourceStateTransition dst_st)
 {
 	auto& context = Context::Instance();
-	auto& cmd_list = context.GetCommandList(Device::Command_Render);
+	auto& cmd_list = context.GetCommandList(Device::Command_Resource);
 
 	if ((src.GetAccessMode() & EA_CPUWrite) && (target.GetAccessMode() & EA_GPURead))
 		context.SyncCPUGPU();

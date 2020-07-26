@@ -24,8 +24,6 @@ namespace platform_ex::Windows::D3D12 {
 		DepthStencilView* GetDepthStencilView() const;
 
 	public:
-		void SetRenderTargets();
-		void BindBarrier();
 
 		friend class Display;
 	private:

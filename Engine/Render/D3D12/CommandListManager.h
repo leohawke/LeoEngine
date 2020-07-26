@@ -26,6 +26,9 @@ namespace platform_ex::Windows::D3D12
 		{
 			return D3DCommandQueue.Get();
 		}
+
+		Fence& GetFence() { return *CommandListFence; }
+
 	protected:
 		void WaitForCommandQueueFlush();
 

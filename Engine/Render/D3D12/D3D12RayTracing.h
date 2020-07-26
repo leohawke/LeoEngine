@@ -176,6 +176,7 @@ protected:
 };
 
 
+//TODO :fix parent type->DeviceChild
 // ad-hoc heaps
 // This would allow ray tracing code to sub-allocate heap blocks from the same global heap.
 class RayTracingDescriptorHeapCache : public RayDeviceChild

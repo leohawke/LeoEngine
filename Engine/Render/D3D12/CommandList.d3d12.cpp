@@ -158,6 +158,11 @@ void CommandListHandle::AddTransitionBarrier(ResourceHolder* pResource, D3D12_RE
 	}
 }
 
+void platform_ex::Windows::D3D12::CommandListHandle::AddUAVBarrier()
+{
+	CommandListData->ResourceBarrierBatcher.AddUAV();
+}
+
 void CommandListHandle::Create(NodeDevice* InParent, D3D12_COMMAND_LIST_TYPE InCommandType, CommandAllocator& InAllocator, CommandListManager* InManager)
 {
 	CommandListData = new D3D12CommandListData(InParent, InCommandType, InAllocator, InManager);

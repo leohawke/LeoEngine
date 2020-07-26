@@ -234,6 +234,8 @@ namespace platform_ex::Windows::D3D12 {
 
 		void AddTransitionBarrier(ResourceHolder* pResource, D3D12_RESOURCE_STATES Before, D3D12_RESOURCE_STATES After, uint32 Subresource);
 
+		void AddUAVBarrier();
+
 		void Create(NodeDevice* InParent, D3D12_COMMAND_LIST_TYPE InCommandType, CommandAllocator& InAllocator, CommandListManager* InManager);
 
 		friend bool operator==(const CommandListHandle& lhs, std::nullptr_t)

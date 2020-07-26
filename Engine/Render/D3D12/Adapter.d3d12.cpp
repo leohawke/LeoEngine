@@ -332,12 +332,6 @@ namespace platform_ex::Windows::D3D12 {
 		}
 	}
 
-	Fence& platform_ex::Windows::D3D12::Device::GetRenderFence()
-	{
-		return *fences[Command_Render];
-	}
-
-
 	void Device::DeviceEx(ID3D12Device * device, ID3D12CommandQueue * cmd_queue, D3D_FEATURE_LEVEL feature_level)
 	{
 		d3d_device = device;
@@ -346,8 +340,6 @@ namespace platform_ex::Windows::D3D12 {
 		d3d_feature_level = feature_level;
 
 		curr_render_cmd_allocator = CmdAllocatorAlloc();
-		d3d_cmd_allocators[Command_Render] = curr_render_cmd_allocator->cmd_allocator;
-		D3D::Debug(d3d_cmd_allocators[Command_Render], "Render_Command_Allocator");
 
 		CheckHResult(d3d_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
 			COMPtr_RefParam(d3d_cmd_allocators[Command_Resource], IID_ID3D12CommandAllocator)));
@@ -404,16 +396,6 @@ namespace platform_ex::Windows::D3D12 {
 	std::shared_ptr<Device::CmdAllocatorDependencies> Device::CmdAllocatorAlloc()
 	{
 		std::shared_ptr<CmdAllocatorDependencies> ret;
-		for (auto iter = d3d_render_cmd_allocators.begin(); iter != d3d_render_cmd_allocators.end(); ++iter)
-		{
-			if (fences[Command_Render]->IsFenceComplete(iter->second))
-			{
-				ret = iter->first;
-				d3d_render_cmd_allocators.erase(iter);
-				ret->cmd_allocator->Reset();
-				break;
-			}
-		}
 
 		if (!ret)
 		{

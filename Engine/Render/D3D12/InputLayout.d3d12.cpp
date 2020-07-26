@@ -53,27 +53,5 @@ namespace platform_ex::Windows::D3D12 {
 
 	void InputLayout::Active() const
 	{
-		auto num_vertex_streams = static_cast<UINT>(vertex_streams.size());
-
-		std::array<D3D12_VERTEX_BUFFER_VIEW, 16> vbvs;
-
-		for (auto i = 0; i != num_vertex_streams; ++i) {
-			auto& vb = *static_cast<GraphicsBuffer*>(vertex_streams[i].stream.get());
-			vbvs[i].BufferLocation = vb.Resource()->GetGPUVirtualAddress();
-			vbvs[i].SizeInBytes = vb.GetSize();
-			vbvs[i].StrideInBytes = vertex_streams[i].vertex_size;
-		}
-
-		auto & cmd_list = Context::Instance().GetCommandList(Device::Command_Render);
-		if (num_vertex_streams)
-			cmd_list->IASetVertexBuffers(0, num_vertex_streams, vbvs.data());
-		if (GetNumIndices()) {
-			D3D12_INDEX_BUFFER_VIEW ibv;
-			auto& ib = *static_cast<GraphicsBuffer*>(index_stream.get());
-			ibv.BufferLocation = ib.Resource()->GetGPUVirtualAddress();
-			ibv.SizeInBytes = ib.GetSize();
-			ibv.Format = Convert(index_format);
-			cmd_list->IASetIndexBuffer(&ibv);
-		}
 	}
 }

@@ -301,7 +301,6 @@ namespace platform_ex::Windows::D3D12 {
 		}
 		else {
 			auto& context = Context::Instance();
-			auto& cmd_list = context.GetCommandList(Device::Command_Render);
 
 			auto upload_buff = context.InnerResourceAlloc<Context::Upload>(size);
 
@@ -314,15 +313,8 @@ namespace platform_ex::Windows::D3D12 {
 			memcpy(p, data, size);
 			upload_buff->Unmap(0, nullptr);
 
-			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-			if (UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_COPY_DEST)) {
-				cmd_list->ResourceBarrier(1, &barrier);
-			}
-
-			cmd_list->CopyBufferRegion(Resource(), offset, upload_buff.Get(), 0, size);
-
-			context.InnerResourceRecycle<Context::Upload>(upload_buff, size);
+			context.InnerResourceRecycle<Context::Upload> (resource, size);
+			resource = upload_buff;
 		}
 	}
 	

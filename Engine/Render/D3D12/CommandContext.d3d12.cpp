@@ -46,7 +46,7 @@ void CommandContext::SetRenderTargetsAndClear(const platform::Render::RenderTarg
 		}
 	}
 
-	float DepthClear = 0.0;
+	float DepthClear = 1.0;
 	uint32 StencilClear = 0;
 
 	if (RenderTargetsInfo.bClearDepth || RenderTargetsInfo.bClearStencil)
@@ -565,11 +565,11 @@ void CommandContext::ClearMRT(bool bClearColor, int32 NumClearColors, const leo:
 					CommandListHandle->ClearRenderTargetView(RTView->GetView(), (float*)&ColorArray[TargetIndex], ClearRectCount, pClearRects);
 				}
 			}
+		}
 
-			if (ClearDSV)
-			{
-				CommandListHandle->ClearDepthStencilView(DSView->GetView(), (D3D12_CLEAR_FLAGS)ClearFlags, Depth, Stencil, ClearRectCount, pClearRects);
-			}
+		if (ClearDSV)
+		{
+			CommandListHandle->ClearDepthStencilView(DSView->GetView(), (D3D12_CLEAR_FLAGS)ClearFlags, Depth, Stencil, ClearRectCount, pClearRects);
 		}
 	}
 }

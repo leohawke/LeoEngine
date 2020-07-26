@@ -3,6 +3,8 @@
 #include "Context.h"
 #include "GraphicsBuffer.hpp"
 #include "View.h"
+#include "NodeDevice.h"
+#include "CommandListManager.h"
 #include "BuiltInRayTracingShaders.h"
 
 using std::make_unique;
@@ -84,9 +86,9 @@ void D12::RayDevice::BuildAccelerationStructure(R::RayTracingScene* scene)
 	pScene->BuildAccelerationStructure();
 }
 
-const D12::Fence& platform_ex::Windows::D3D12::RayDevice::GetFence() const
+const Fence& platform_ex::Windows::D3D12::RayDevice::GetFence() const
 {
-	return device->GetRenderFence();
+	return Context::Instance().GetDefaultCommandContext()->GetParentDevice()->GetCommandListManager(CommandQueueType::Default)->GetFence();
 }
 
 RayTracingDescriptorHeapCache* platform_ex::Windows::D3D12::RayDevice::GetRayTracingDescriptorHeapCache() const
@@ -104,9 +106,9 @@ D12::RayContext::RayContext(Device* pDevice, Context* pContext)
 {
 	ray_device = std::make_shared<RayDevice>(pDevice,pContext);
 
-	context->GetCommandList(Device::Command_Render)->QueryInterface(COMPtr_RefParam(raytracing_command_list, IID_ID3D12GraphicsCommandList4));
+	context->GetDefaultCommandContext()->CommandListHandle->QueryInterface(COMPtr_RefParam(raytracing_command_list, IID_ID3D12GraphicsCommandList4));
 
-	if(!IsDirectXRaytracingSupported(pDevice->d3d_device.Get()))
+	if(!IsDirectXRaytracingSupported(pDevice->d3d_device.Get()))\
 		throw leo::unsupported();
 }
 
