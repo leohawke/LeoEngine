@@ -70,6 +70,8 @@ namespace platform_ex::Windows::D3D12 {
 
 			void WaitForCompletion(uint64 Generation);
 
+			void SetSyncPoint(const SyncPoint& InSyncPoint);
+
 			void FlushResourceBarriers();
 
 			void Reset(CommandAllocator& Allocator, bool bTrackExecTime = false);
@@ -190,6 +192,11 @@ namespace platform_ex::Windows::D3D12 {
 		bool IsComplete(uint64 Generation) const
 		{
 			return CommandListData->IsComplete(Generation);
+		}
+
+		void SetSyncPoint(const SyncPoint& InSyncPoint)
+		{
+			return CommandListData->SetSyncPoint(InSyncPoint);
 		}
 
 		ID3D12CommandList* CommandList() const

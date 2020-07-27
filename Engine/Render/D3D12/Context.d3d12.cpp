@@ -106,6 +106,10 @@ namespace platform_ex::Windows::D3D12 {
 
 		auto& fence = nodedvice->GetCommandListManager(CommandQueueType::Default)->GetFence();
 		auto signal =  fence.Signal(CommandQueueType::Default);
+
+		SyncPoint SyncPoint(&fence, signal);
+		commandcontext.CommandListHandle.SetSyncPoint(SyncPoint);
+
 		fence.WaitForFence(signal);
 
 		((ID3D12CommandAllocator*)(*commandcontext.CommandAllocator))->Reset();

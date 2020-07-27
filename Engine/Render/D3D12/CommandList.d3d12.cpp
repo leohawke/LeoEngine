@@ -133,6 +133,28 @@ void CommandListHandle::CommandListData::WaitForCompletion(uint64 Generation)
 	}
 }
 
+void CommandListHandle::CommandListData::SetSyncPoint(const SyncPoint& InSyncPoint)
+{
+	{
+		std::unique_lock Lock(ActiveGenerationsCS);
+
+		// Only valid sync points should be set otherwise we might not wait on the GPU correctly.
+		lconstraint(InSyncPoint.IsValid());
+
+		// Track when this command list generation is completed on the GPU.
+		GenerationSyncPointPair CurrentGenerationSyncPoint;
+		CurrentGenerationSyncPoint.first = CurrentGeneration;
+		CurrentGenerationSyncPoint.second = InSyncPoint;
+		ActiveGenerations.push(CurrentGenerationSyncPoint);
+
+		// Move to the next generation of the command list.
+		CurrentGeneration++;
+	}
+
+	// Update the associated command allocator's sync point so it's not reset until the GPU is done with all command lists using it.
+	CurrentCommandAllocator->SetSyncPoint(InSyncPoint);
+}
+
 void CommandListHandle::CommandListData::CleanupActiveGenerations()
 {
 	std::unique_lock Lock(ActiveGenerationsCS);
