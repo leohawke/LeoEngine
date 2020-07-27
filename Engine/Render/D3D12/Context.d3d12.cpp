@@ -250,14 +250,6 @@ namespace platform_ex::Windows::D3D12 {
 
 		GraphicsPSOInit.ShaderPass.VertexDeclaration = static_cast<const InputLayout&>(layout).GetVertexDeclaration();
 
-		//Vertex Stream
-		auto num_vertex_streams = layout.GetVertexStreamsSize();
-		for (auto i = 0; i != num_vertex_streams; ++i) {
-			auto& stream = layout.GetVertexStream(i);
-			auto& vb = static_cast<GraphicsBuffer&>(*stream.stream);
-			CmdList.SetVertexBuffer(i, &vb);
-		}
-
 		auto index_stream = layout.GetIndexStream();
 
 		auto vertex_count = index_stream ? layout.GetNumIndices() : layout.GetNumVertices();
@@ -296,6 +288,14 @@ namespace platform_ex::Windows::D3D12 {
 			GraphicsPSOInit.ShaderPass.PixelShader = compose.GetPixelShader();
 
 			platform::Render::SetGraphicsPipelineState(CmdList, GraphicsPSOInit);
+
+			//Vertex Stream
+			auto num_vertex_streams = layout.GetVertexStreamsSize();
+			for (auto i = 0; i != num_vertex_streams; ++i) {
+				auto& stream = layout.GetVertexStream(i);
+				auto& vb = static_cast<GraphicsBuffer&>(*stream.stream);
+				CmdList.SetVertexBuffer(i, &vb);
+			}
 
 			compose.Bind();
 

@@ -172,7 +172,7 @@ private:
 		GenShadowConstants shadowconstant;
 		{
 			shadowconstant.LightDirection = lights[0].direction;
-			shadowconstant.SourceRadius = tanf(LightHalfAngle* 3.14159265f / 180);
+			shadowconstant.SourceRadius = sinf(LightHalfAngle* 3.14159265f / 180);
 			shadowconstant.SamplesPerPixel = SamplesPerPixel;
 			shadowconstant.StateFrameIndex = StateFrameIndex;
 			shadowconstant.CameraToWorld = lm::transpose(lm::inverse(viewproj));
