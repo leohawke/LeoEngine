@@ -36,7 +36,7 @@ namespace platform_ex {
 
 				StereoMethod stereo_method = Stereo_None;
 
-				EFormat depth_stencil_format = EF_D16;
+				EFormat depth_stencil_format = EF_D24S8;
 				EFormat color_format = EF_ARGB8;
 			};
 

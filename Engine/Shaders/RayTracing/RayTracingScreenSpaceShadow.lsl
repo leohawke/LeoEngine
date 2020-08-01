@@ -3,7 +3,7 @@
 	(refer RayTracing/RayTracingDirectionalLight.lsl)
 	(refer RandomSequence.lsl)
 	(RaytracingAccelerationStructure (space RAY_TRACING_REGISTER_SPACE_GLOBAL) TLAS)
-	(RWTexture2D  (elemtype float) (space RAY_TRACING_REGISTER_SPACE_GLOBAL) Output)
+	(RWTexture2D  (elemtype float4) (space RAY_TRACING_REGISTER_SPACE_GLOBAL) Output)
 	(texture2D (space RAY_TRACING_REGISTER_SPACE_GLOBAL) Depth)
 	(cbuffer GenShaderConstants (space RAY_TRACING_REGISTER_SPACE_GLOBAL)
 		(float3 LightDirection)
@@ -86,7 +86,7 @@ RAY_TRACING_ENTRY_RAYGEN(RayGen)
 		RayCount += 1.0;
 		Visibility += payload.IsMiss() ? 1.0:0.0;
 	}
-	Output[DispatchRaysIndex().xy] = Visibility/RayCount;
+	Output[DispatchRaysIndex().xy].x = Visibility/RayCount;
 }
 "
 	)
