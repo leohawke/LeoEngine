@@ -1,6 +1,7 @@
 #include "NodeDevice.h"
 #include "D3DCommandList.h"
 #include "CommandListManager.h"
+#include "CommandContext.h"
 
 using namespace platform_ex::Windows::D3D12;
 
@@ -178,13 +179,15 @@ void CommandListHandle::AddTransitionBarrier(ResourceHolder* pResource, D3D12_RE
 {
 	if (Before != After)
 	{
-		CommandListData->ResourceBarrierBatcher.AddTransition(pResource->Resource(), Before, After, Subresource);
+		int32 NumAdded = CommandListData->ResourceBarrierBatcher.AddTransition(pResource->Resource(), Before, After, Subresource);
+		CommandListData->CurrentOwningContext->numBarriers += NumAdded;
 	}
 }
 
 void platform_ex::Windows::D3D12::CommandListHandle::AddUAVBarrier()
 {
 	CommandListData->ResourceBarrierBatcher.AddUAV();
+	++CommandListData->CurrentOwningContext->numBarriers;
 }
 
 void CommandListHandle::Create(NodeDevice* InParent, D3D12_COMMAND_LIST_TYPE InCommandType, CommandAllocator& InAllocator, CommandListManager* InManager)

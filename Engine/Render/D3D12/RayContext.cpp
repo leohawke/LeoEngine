@@ -32,7 +32,7 @@ D12::CommandContext* D12::RayContext::GetCommandContext() const
 	return command_context;
 }
 
-D12::RayDevice::RayDevice(Device* pDevice, Context* pContext)
+D12::RayDevice::RayDevice(Device* pDevice, RayContext* pContext)
 	:device(pDevice), context(pContext)
 {
 	if (!SUCCEEDED(device->d3d_device->QueryInterface(COMPtr_RefParam(d3d_ray_device, IID_ID3D12Device5))))
@@ -73,15 +73,14 @@ void D12::RayDevice::BuildAccelerationStructure(R::RayTracingGeometry* geometry)
 {
 	RayTracingGeometry* pGeometry = static_cast<RayTracingGeometry*>(geometry);
 
-	pGeometry->BuildAccelerationStructure();
+	pGeometry->BuildAccelerationStructure(*context->GetCommandContext());
 }
 
 void D12::RayDevice::BuildAccelerationStructure(R::RayTracingScene* scene)
 {
 	RayTracingScene* pScene = static_cast<RayTracingScene*>(scene);
 
-
-	pScene->BuildAccelerationStructure();
+	pScene->BuildAccelerationStructure(*context->GetCommandContext());
 }
 
 const Fence& platform_ex::Windows::D3D12::RayDevice::GetFence() const
@@ -97,7 +96,7 @@ RayTracingPipelineCache* platform_ex::Windows::D3D12::RayDevice::GetRayTracingPi
 D12::RayContext::RayContext(Device* pDevice, Context* pContext)
 	:device(pDevice),context(pContext)
 {
-	ray_device = std::make_shared<RayDevice>(pDevice,pContext);
+	ray_device = std::make_shared<RayDevice>(pDevice,this);
 
 	command_context = context->GetDefaultCommandContext();
 }

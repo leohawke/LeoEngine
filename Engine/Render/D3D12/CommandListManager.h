@@ -11,6 +11,7 @@ namespace platform_ex::Windows::D3D12
 	{
 		CommandListPayload()
 		{
+			NumCommandLists = 0;
 			std::fill_n(CommandLists, MaxCommandListsPerPayload, nullptr);
 		}
 

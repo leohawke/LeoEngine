@@ -15,12 +15,14 @@
 #include "View.h"
 
 namespace platform_ex::Windows::D3D12 {
+	class CommandContext;
+
 	class RayTracingScene :public platform::Render::RayTracingScene
 	{
 	public:
 		RayTracingScene(const platform::Render::RayTracingSceneInitializer& initializer);
 
-		void BuildAccelerationStructure();
+		void BuildAccelerationStructure(CommandContext& CommandContext);
 
 		ShaderResourceView* GetShaderResourceView() const
 		{
@@ -33,8 +35,6 @@ namespace platform_ex::Windows::D3D12 {
 		leo::uint32 NumCallableShaderSlots;
 
 		std::shared_ptr<GraphicsBuffer> AccelerationStructureBuffer;
-
-		ID3D12Device5* RayTracingDevice;
 
 		leo::observer_ptr<ShaderResourceView> AccelerationStructureView;
 	};

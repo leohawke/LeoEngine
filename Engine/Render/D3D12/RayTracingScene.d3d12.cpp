@@ -1,6 +1,9 @@
 #include "RayTracingScene.h"
-#include "Context.h"
 #include "RayTracingGeometry.h"
+#include "CommandContext.h"
+#include "NodeDevice.h"
+#include "Adapter.h"
+#include "Context.h"
 
 using namespace platform_ex::Windows::D3D12;
 using namespace platform::Render::Buffer;
@@ -13,13 +16,10 @@ RayTracingScene::RayTracingScene(const platform::Render::RayTracingSceneInitiali
 	ShaderSlotsPerGeometrySegment(initializer.ShaderSlotsPerGeometrySegment),
 	NumCallableShaderSlots(initializer.NumCallableShaderSlots)
 {
-	RayTracingDevice = Context::Instance().GetRayContext().GetDevice().GetRayTracingDevice();
 }
 
-void RayTracingScene::BuildAccelerationStructure()
+void RayTracingScene::BuildAccelerationStructure(CommandContext& CommandContext)
 {
-	auto& device = Context::Instance().GetDevice();
-
 	auto BuildFlags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE;
 
 	uint32 NumDxrInstances =static_cast<uint32>(Instances.size());
@@ -32,18 +32,16 @@ void RayTracingScene::BuildAccelerationStructure()
 	PrebuildDescInputs.NumDescs = NumDxrInstances;
 	PrebuildDescInputs.Flags = BuildFlags;
 
+	auto RayTracingDevice = CommandContext.GetParentDevice()->GetRayTracingDevice();
 	RayTracingDevice->GetRaytracingAccelerationStructurePrebuildInfo(&PrebuildDescInputs, &PrebuildInfo);
 
-	//TODO keep reference in commandlist
+	auto Adapter = CommandContext.GetParentAdapter();
+
 	shared_ptr<GraphicsBuffer> ScratchBuffer;
-	CreateAccelerationStructureBuffers(AccelerationStructureBuffer, ScratchBuffer, device, PrebuildInfo, PrebuildDescInputs.Type);
+	CreateAccelerationStructureBuffers(AccelerationStructureBuffer, ScratchBuffer, Adapter, PrebuildInfo, PrebuildDescInputs.Type);
 
 	//scratch buffers should be created in UAV state from the start
-	D3D12_RESOURCE_BARRIER barrier;
-	barrier.Transition.Subresource = 0;
-	ScratchBuffer->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
-	Context::Instance().GetCommandList(Device::Command_Resource)->ResourceBarrier(1, &barrier);
+	TransitionResource(CommandContext.CommandListHandle, ScratchBuffer.get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, 0);
 
 	AccelerationStructureView = leo::make_observer(AccelerationStructureBuffer->RetriveShaderResourceView());
 
@@ -54,9 +52,10 @@ void RayTracingScene::BuildAccelerationStructure()
 
 	if (NumSceneInstances)
 	{
-		InstanceBuffer =leo::unique_raw(device.CreateVertexBuffer(Usage::Static, EAccessHint::EA_CPUWrite,
+		InstanceBuffer =leo::unique_raw(Adapter->CreateVertexBuffer(Usage::Static, EAccessHint::EA_CPUWrite,
 			sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * PrebuildDescInputs.NumDescs,
 			EFormat::EF_Unknown));
+		InstanceBuffer->SetName("Acceleration structure [Instance]");
 
 		Mapper mapper(*InstanceBuffer, Access::Write_Only);
 
@@ -101,13 +100,14 @@ void RayTracingScene::BuildAccelerationStructure()
 		}
 
 		Context::Instance().ResidencyResource(*InstanceBuffer->Resource());
+
 	}
 
 	const bool IsUpdateMode = false;
 
 	Context::Instance().ResidencyResource(*ScratchBuffer->Resource());
-
-	Context::Instance().CommitCommandList(Device::Command_Resource);
+	//AccelerationStructureBuffer build per frame
+	Context::Instance().ResidencyResource(*AccelerationStructureBuffer->Resource());
 
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC BuildDesc = {};
 	BuildDesc.Inputs = PrebuildDescInputs;
@@ -116,11 +116,12 @@ void RayTracingScene::BuildAccelerationStructure()
 	BuildDesc.ScratchAccelerationStructureData = ScratchBuffer->Resource()->GetGPUVirtualAddress();
 	BuildDesc.SourceAccelerationStructureData = D3D12_GPU_VIRTUAL_ADDRESS(0);
 
-	auto RayTracingCommandList = Context::Instance().GetDefaultCommandContext()->CommandListHandle.RayTracingCommandList();
+	CommandContext.CommandListHandle.AddUAVBarrier();
+	CommandContext.CommandListHandle.FlushResourceBarriers();
 
-	Context::Instance().ExecuteUAVBarrier();
+	auto RayTracingCommandList = CommandContext.CommandListHandle.RayTracingCommandList();
 
 	RayTracingCommandList->BuildRaytracingAccelerationStructure(&BuildDesc, 0, nullptr);
 
-	Context::Instance().ExecuteUAVBarrier();
+	CommandContext.CommandListHandle.AddUAVBarrier();
 }

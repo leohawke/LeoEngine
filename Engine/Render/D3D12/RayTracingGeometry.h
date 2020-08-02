@@ -9,9 +9,11 @@
 #include "../IRayDevice.h"
 #include "d3d12_dxgi.h"
 #include "GraphicsBuffer.hpp"
+#include "Common.h"
 
 namespace platform_ex::Windows::D3D12 {
 	class Device;
+	class CommandContext;
 
 	struct RayTracingGeometrySegement
 	{
@@ -62,10 +64,10 @@ namespace platform_ex::Windows::D3D12 {
 		std::shared_ptr<GraphicsBuffer> AccelerationStructureBuffer;
 		std::shared_ptr<GraphicsBuffer> ScratchBuffer;
 
-		void BuildAccelerationStructure();
+		void BuildAccelerationStructure(CommandContext& CommandContext);
 	};
 
-	void CreateAccelerationStructureBuffers(std::shared_ptr<GraphicsBuffer>& AccelerationStructureBuffer, std::shared_ptr<GraphicsBuffer>& ScratchBuffer, Device& Deivce, const D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO& PrebuildInfo, D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE Type);
+	void CreateAccelerationStructureBuffers(std::shared_ptr<GraphicsBuffer>& AccelerationStructureBuffer, std::shared_ptr<GraphicsBuffer>& ScratchBuffer, D3D12Adapter* Deivce, const D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO& PrebuildInfo, D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE Type);
 }
 
 #endif

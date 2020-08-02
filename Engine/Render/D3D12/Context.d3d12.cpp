@@ -107,7 +107,14 @@ namespace platform_ex::Windows::D3D12 {
 			device->readback_resources.emplace(item.second, item.first);
 		device->curr_render_cmd_allocator->recycle_after_sync_readback_buffs.clear();
 
-		device->curr_render_cmd_allocator->recycle_after_sync_residency_buffs.clear();
+		//TODO:support CLSyncPoint move;
+		device->ReclaimPool.push(device->ResidencyPool);
+		device->ResidencyPool.recycle_after_sync_residency_buffs.clear();
+
+		while (!device->ReclaimPool.empty() && device->ReclaimPool.front().SyncPoint.IsComplete())
+		{
+			device->ReclaimPool.pop();
+		}
 	}
 
 	void Context::ContextEx(ID3D12Device * d3d_device, ID3D12CommandQueue * cmd_queue)
@@ -190,7 +197,9 @@ namespace platform_ex::Windows::D3D12 {
 
 	void Context::ResidencyResource(COMPtr<ID3D12Resource> resource)
 	{
-		auto& resources = device->curr_render_cmd_allocator->recycle_after_sync_residency_buffs;
+		device->ResidencyPool.SyncPoint = GetDefaultCommandContext()->CommandListHandle;
+
+		auto& resources = device->ResidencyPool.recycle_after_sync_residency_buffs;
 
 		resources.emplace_back(resource);
 	}
@@ -337,6 +346,7 @@ namespace platform_ex::Windows::D3D12 {
 	}
 	void Context::BeginFrame()
 	{
+		
 		SetFrame(GetScreenFrame());
 	}
 	void Context::EndFrame()

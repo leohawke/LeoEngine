@@ -36,8 +36,8 @@ namespace platform_ex::Windows::D3D12 {
 			{
 				platform::Render::VertexElement ve;
 				ve.Format = element.format;
-				ve.Offset = elem_offset;
-				ve.StreamIndex = input_slot;
+				ve.Offset =static_cast<uint8>(elem_offset);
+				ve.StreamIndex = static_cast<uint8>(input_slot);
 				ve.Stride = vertex_stream.vertex_size;
 				ve.Usage = element.usage;
 				ve.UsageIndex = element.usage_index;

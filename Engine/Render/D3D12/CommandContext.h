@@ -9,7 +9,7 @@ namespace platform_ex::Windows::D3D12 {
 
 	class Texture;
 
-	class CommandContext :public platform::Render::CommandContext,public DeviceChild
+	class CommandContext :public platform::Render::CommandContext,public DeviceChild,public AdapterChild
 	{
 	public:
 		CommandContext(NodeDevice* InParent, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc, bool InIsDefaultContext, bool InIsAsyncComputeContext = false);
@@ -82,10 +82,11 @@ namespace platform_ex::Windows::D3D12 {
 
 
 		uint32 numDraws;
+		uint32 numBarriers;
 
 		bool HasDoneWork() const
 		{
-			return numDraws > 0;
+			return (numDraws+ numBarriers) > 0;
 		}
 
 		/** Constant buffers for Set*ShaderParameter calls. */

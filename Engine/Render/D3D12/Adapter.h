@@ -11,6 +11,7 @@
 #include "PipleState.h"
 #include "Fence.h"
 #include "RootSignature.h"
+#include "D3DCommandList.h"
 
 namespace platform::Render::Effect {
 	class Effect;
@@ -132,8 +133,17 @@ namespace platform_ex::Windows::D3D12 {
 			std::vector<COMPtr<ID3D12DescriptorHeap>> cbv_srv_uav_heap_cache;
 			std::vector<std::pair<COMPtr<ID3D12Resource>, uint32_t>> recycle_after_sync_upload_buffs;
 			std::vector<std::pair<COMPtr<ID3D12Resource>, uint32_t>> recycle_after_sync_readback_buffs;
+		};
+
+		struct ResidencyPoolEntry
+		{
+			CLSyncPoint SyncPoint;
 			std::vector<COMPtr<ID3D12Resource>> recycle_after_sync_residency_buffs;
 		};
+
+		ResidencyPoolEntry ResidencyPool;
+		std::queue< ResidencyPoolEntry> ReclaimPool;
+
 		std::shared_ptr<CmdAllocatorDependencies> CmdAllocatorAlloc();
 		void CmdAllocatorRecycle(std::shared_ptr<CmdAllocatorDependencies> const& cmd_allocator, uint64_t fence_val);
 	private:

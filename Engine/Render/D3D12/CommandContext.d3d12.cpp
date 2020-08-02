@@ -10,6 +10,7 @@ constexpr auto MaxSimultaneousRenderTargets = platform::Render::MaxSimultaneousR
 CommandContext::CommandContext(NodeDevice* InParent, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc, bool InIsDefaultContext, bool InIsAsyncComputeContext)
 	:
 	DeviceChild(InParent),
+	AdapterChild(InParent->GetParentAdapter()),
 	VSConstantBuffer(InParent, ConstantsAllocator),
 	HSConstantBuffer(InParent, ConstantsAllocator),
 	DSConstantBuffer(InParent, ConstantsAllocator),
@@ -258,6 +259,7 @@ void CommandContext::OpenCommandList()
 	StateCache.DirtyStateForNewCommandList();
 
 	numDraws = 0;
+	numBarriers = 0;
 }
 
 void CommandContext::CloseCommandList()

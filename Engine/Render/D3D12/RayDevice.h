@@ -13,12 +13,12 @@ class RayTracingDescriptorHeapCache;
 
 namespace platform_ex::Windows::D3D12 {
 	class Device;
-	class Context;
+	class RayContext;
 
 	class RayDevice:public platform::Render::RayDevice
 	{
 	public:
-		RayDevice(Device* pDevice, Context* pContext);
+		RayDevice(Device* pDevice, RayContext* pContext);
 
 		RayTracingGeometry* CreateRayTracingGeometry(const platform::Render::RayTracingGeometryInitializer& initializer) final override;
 
@@ -43,7 +43,7 @@ namespace platform_ex::Windows::D3D12 {
 		RayTracingPipelineCache* GetRayTracingPipelineCache() const;
 	private:
 		Device* device;
-		Context* context;
+		RayContext* context;
 
 		COMPtr<ID3D12Device5> d3d_ray_device;
 

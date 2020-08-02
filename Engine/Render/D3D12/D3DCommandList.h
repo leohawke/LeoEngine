@@ -106,7 +106,7 @@ namespace platform_ex::Windows::D3D12 {
 
 			using GenerationSyncPointPair = std::pair<uint64, SyncPoint>;
 			std::queue<GenerationSyncPointPair> ActiveGenerations;
-			std::mutex ActiveGenerationsCS;
+			std::recursive_mutex ActiveGenerationsCS;
 
 			ResourceBarrierBatcher ResourceBarrierBatcher;
 		private:

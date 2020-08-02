@@ -254,7 +254,7 @@ uint64 D3DPipelineStateCacheBase::HashPSODesc(const KeyGraphicsPipelineStateDesc
 		RTData[RT].BlendDesc = Desc.Desc.BlendState.RenderTarget[RT];
 	}
 
-	return HashData(Data, TotalDataSize);
+	return HashData(Data, static_cast<int32>(TotalDataSize));
 }
 
 D3DPipelineStateCacheBase::D3DPipelineStateCacheBase(D3D12Adapter* InParent)

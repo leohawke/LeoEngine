@@ -1,6 +1,7 @@
 #include "RayTracingGeometry.h"
 #include "Context.h"
 #include "Convert.h"
+#include "NodeDevice.h"
 
 namespace D12 = platform_ex::Windows::D3D12;
 namespace R = platform::Render;
@@ -49,10 +50,8 @@ D12::RayTracingGeometry::RayTracingGeometry(const platform::Render::RayTracingGe
 	this->Segement = initializer.Segement;
 }
 
-void D12::RayTracingGeometry::BuildAccelerationStructure()
+void D12::RayTracingGeometry::BuildAccelerationStructure(CommandContext& CommandContext)
 {
-	auto& raydevice = Context::Instance().GetRayContext().GetDevice();
-
 	lconstexpr leo::uint32 IndicesPerPrimitive = 3; // Only triangle meshes are supported
 
 	D3D12_RAYTRACING_GEOMETRY_DESC Desc;
@@ -108,7 +107,7 @@ void D12::RayTracingGeometry::BuildAccelerationStructure()
 
 	bool isUpdate = false;
 
-	auto RayTracingDevice = raydevice.GetRayTracingDevice();
+	auto RayTracingDevice = CommandContext.GetParentDevice()->GetRayTracingDevice();
 	
 	auto LocalBuildFlags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS(BuildFlags);
 
@@ -128,16 +127,13 @@ void D12::RayTracingGeometry::BuildAccelerationStructure()
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO PrebuildInfo = {};
 	RayTracingDevice->GetRaytracingAccelerationStructurePrebuildInfo(&PrebuildDescInputs, &PrebuildInfo);
 
-	CreateAccelerationStructureBuffers(AccelerationStructureBuffer,ScratchBuffer, Context::Instance().GetDevice(), PrebuildInfo, PrebuildDescInputs.Type);
+	auto Adapter = CommandContext.GetParentAdapter();
+	CreateAccelerationStructureBuffers(AccelerationStructureBuffer,ScratchBuffer, Adapter, PrebuildInfo, PrebuildDescInputs.Type);
 
 	//scratch buffers should be created in UAV state from the start
-	D3D12_RESOURCE_BARRIER barrier;
-	barrier.Transition.Subresource = 0;
-	ScratchBuffer->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
-	Context::Instance().GetCommandList(Device::Command_Resource)->ResourceBarrier(1, &barrier);
-
-	Context::Instance().CommitCommandList(Device::Command_Resource);
+	TransitionResource(CommandContext.CommandListHandle, ScratchBuffer.get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, 0);
+	//BuildRaytracingAccelerationStructure auto change resource state to UAV(is document?)
+	CommandContext.CommandListHandle.FlushResourceBarriers();
 
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC BuildDesc = {};
 	BuildDesc.Inputs = PrebuildDescInputs;
@@ -147,7 +143,7 @@ void D12::RayTracingGeometry::BuildAccelerationStructure()
 		? AccelerationStructureBuffer->Resource()->GetGPUVirtualAddress()
 		: D3D12_GPU_VIRTUAL_ADDRESS(0);
 
-	ID3D12GraphicsCommandList4* RayTracingCommandList = Context::Instance().GetDefaultCommandContext()->CommandListHandle.RayTracingCommandList();
+	auto RayTracingCommandList = CommandContext.CommandListHandle.RayTracingCommandList();
 	RayTracingCommandList->BuildRaytracingAccelerationStructure(&BuildDesc, 0, nullptr);
 
 	Context::Instance().ResidencyResource(*ScratchBuffer->Resource());
@@ -161,11 +157,11 @@ void D12::RayTracingGeometry::BuildAccelerationStructure()
 using namespace R::Buffer;
 namespace D3D = platform_ex::Windows::D3D;
 
-void D12::CreateAccelerationStructureBuffers(shared_ptr<GraphicsBuffer>& AccelerationStructureBuffer, shared_ptr<GraphicsBuffer>& ScratchBuffer, Device& Creator, const D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO& PrebuildInfo, D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE Type)
+void D12::CreateAccelerationStructureBuffers(shared_ptr<GraphicsBuffer>& AccelerationStructureBuffer, shared_ptr<GraphicsBuffer>& ScratchBuffer, D3D12Adapter* Creator, const D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO& PrebuildInfo, D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE Type)
 {
 	lconstraint(PrebuildInfo.ResultDataMaxSizeInBytes <= std::numeric_limits<uint32>::max());
 
-	AccelerationStructureBuffer =leo::share_raw(Creator.CreateVertexBuffer(
+	AccelerationStructureBuffer =leo::share_raw(Creator->CreateVertexBuffer(
 		Usage::AccelerationStructure,
 		EAccessHint::EA_GPUUnordered,
 		static_cast<uint32>(PrebuildInfo.ResultDataMaxSizeInBytes),
@@ -180,7 +176,7 @@ void D12::CreateAccelerationStructureBuffers(shared_ptr<GraphicsBuffer>& Acceler
 
 	lconstraint(ScratchBufferWidth <= std::numeric_limits<uint32>::max());
 
-	ScratchBuffer = leo::share_raw(Creator.CreateVertexBuffer(
+	ScratchBuffer = leo::share_raw(Creator->CreateVertexBuffer(
 		Usage::Static,
 		EAccessHint::EA_GPUUnordered | EAccessHint::EA_Raw,
 		static_cast<uint32>(ScratchBufferWidth),
