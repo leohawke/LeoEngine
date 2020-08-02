@@ -27,9 +27,9 @@ D12::RayDevice& D12::RayContext::GetDevice()
 	return *ray_device;
 }
 
-ID3D12GraphicsCommandList4* D12::RayContext::RayTracingCommandList() const
+D12::CommandContext* D12::RayContext::GetCommandContext() const
 {
-	return raytracing_command_list.Get();
+	return command_context;
 }
 
 D12::RayDevice::RayDevice(Device* pDevice, Context* pContext)
@@ -37,8 +37,6 @@ D12::RayDevice::RayDevice(Device* pDevice, Context* pContext)
 {
 	if (!SUCCEEDED(device->d3d_device->QueryInterface(COMPtr_RefParam(d3d_ray_device, IID_ID3D12Device5))))
 		throw leo::unsupported();
-
-	ray_tracing_descriptor_heap_cache = make_unique<RayTracingDescriptorHeapCache>(this);
 
 	ray_tracing_pipeline_cache = make_unique<RayTracingPipelineCache>(d3d_ray_device.Get());
 }
@@ -91,11 +89,6 @@ const Fence& platform_ex::Windows::D3D12::RayDevice::GetFence() const
 	return Context::Instance().GetDefaultCommandContext()->GetParentDevice()->GetCommandListManager(CommandQueueType::Default)->GetFence();
 }
 
-RayTracingDescriptorHeapCache* platform_ex::Windows::D3D12::RayDevice::GetRayTracingDescriptorHeapCache() const
-{
-	return ray_tracing_descriptor_heap_cache.get();
-}
-
 RayTracingPipelineCache* platform_ex::Windows::D3D12::RayDevice::GetRayTracingPipelineCache() const
 {
 	return ray_tracing_pipeline_cache.get();
@@ -106,10 +99,7 @@ D12::RayContext::RayContext(Device* pDevice, Context* pContext)
 {
 	ray_device = std::make_shared<RayDevice>(pDevice,pContext);
 
-	context->GetDefaultCommandContext()->CommandListHandle->QueryInterface(COMPtr_RefParam(raytracing_command_list, IID_ID3D12GraphicsCommandList4));
-
-	if(!IsDirectXRaytracingSupported(pDevice->d3d_device.Get()))\
-		throw leo::unsupported();
+	command_context = context->GetDefaultCommandContext();
 }
 
 namespace platform_ex::Windows::D3D12 {
@@ -153,7 +143,7 @@ void D12::RayContext::RayTraceShadow(R::RayTracingScene* InScene, R::FrameBuffer
 	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	if (Resource->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_DEPTH_READ))
 	{
-		raytracing_command_list->ResourceBarrier(1,&barrier);
+		command_context->CommandListHandle.AddTransitionBarrier(Resource,barrier.Transition.StateBefore, D3D12_RESOURCE_STATE_DEPTH_READ, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES);
 	}
 
 	RayTracingShaderBindings Bindings;
@@ -176,11 +166,11 @@ void D12::RayContext::RayTraceShadow(R::RayTracingScene* InScene, R::FrameBuffer
 	DispatchDesc.Height = static_cast<UINT>(desc.Height);
 	DispatchDesc.Depth = 1;
 
-	DispatchRays(this, Bindings, Pipeline, 0, nullptr, DispatchDesc);
+	DispatchRays(command_context, Bindings, Pipeline, 0, nullptr, DispatchDesc);
 
 	if (Resource->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_DEPTH_WRITE))
 	{
-		raytracing_command_list->ResourceBarrier(1, &barrier);
+		command_context->CommandListHandle.AddTransitionBarrier(Resource, barrier.Transition.StateBefore, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES);
 	}
 }
 

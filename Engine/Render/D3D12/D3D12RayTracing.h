@@ -6,6 +6,7 @@
 #include "GraphicsBuffer.hpp"
 #include "RayTracingShader.h"
 #include "RootSignature.h"
+#include "Common.h"
 #include "../RayTracingDefinitions.h"
 #include "../IGPUResourceView.h"
 #include <LBase/type_traits.hpp>
@@ -18,6 +19,8 @@ namespace platform_ex::Windows::D3D12 {
 	class Context;
 	class RayDevice;
 	class RayContext;
+	class CommandContext;
+	class NodeDevice;
 }
 
 using namespace leo::inttype;
@@ -160,21 +163,12 @@ COMPtr<ID3D12StateObject> CreateRayTracingStateObject(
 
 using D3D12Context = Windows::D3D12::Context;
 using D3D12Device = Windows::D3D12::Device;
-using D3D12RayDevice = Windows::D3D12::RayDevice;
+using D3D12RayDevice = Windows::D3D12::NodeDevice;
 using D3D12RayContext = Windows::D3D12::RayContext;
 using D3D12RayTracingPipelineState = platform_ex::Windows::D3D12::RayTracingPipelineState;
 using D3D12RayTracingShader = Windows::D3D12::RayTracingShader;
 
-class RayDeviceChild
-{
-public:
-	RayDeviceChild(D3D12RayDevice* InDevice)
-		:Device(InDevice)
-	{}
-protected:
-	D3D12RayDevice* Device;
-};
-
+using RayDeviceChild = Windows::D3D12::DeviceChild;
 
 //TODO :fix parent type->DeviceChild
 // ad-hoc heaps
@@ -267,7 +261,7 @@ public:
 		SamplerHeap.UpdateSyncPoint();
 	}
 
-	void SetDescriptorHeaps(D3D12RayContext& Context);
+	void SetDescriptorHeaps(Windows::D3D12::CommandContext& Context);
 
 	uint32 GetDescriptorTableBaseIndex(const D3D12_CPU_DESCRIPTOR_HANDLE* Descriptors, uint32 NumDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE Type);
 public:
@@ -607,6 +601,6 @@ struct RayTracingShaderBindings
 	platform::Render::UnorderedAccessView* UAVs[8] = {};
 };
 
-void DispatchRays(D3D12RayContext* CommandContext,const RayTracingShaderBindings& GlobalBindings, const D3D12RayTracingPipelineState* Pipeline,
+void DispatchRays(Windows::D3D12::CommandContext* CommandContext,const RayTracingShaderBindings& GlobalBindings, const D3D12RayTracingPipelineState* Pipeline,
 	uint32 RayGenShaderIndex, RayTracingShaderTable* OptShaderTable, const D3D12_DISPATCH_RAYS_DESC& DispatchDesc);
 

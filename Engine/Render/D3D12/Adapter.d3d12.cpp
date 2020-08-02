@@ -410,6 +410,38 @@ namespace platform_ex::Windows::D3D12 {
 		Devices[0] = new NodeDevice(0, this);
 
 		PipelineStateCache.Init("", "", "");
+
+		bool bRayTracingSupported = false;
+		{
+			D3D12_FEATURE_DATA_D3D12_OPTIONS5 Features = {};
+			if (SUCCEEDED(d3d_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &Features, sizeof(Features)))
+				&& Features.RaytracingTier >= D3D12_RAYTRACING_TIER_1_0)
+			{
+				bRayTracingSupported = true;
+			}
+		}
+
+		if (bRayTracingSupported)
+		{
+			d3d_device->QueryInterface(IID_PPV_ARGS(raytracing_device.ReleaseAndGetAddress()));
+		}
+		else
+		{
+			LE_LogError("ERROR: DirectX Raytracing is not supported by your OS, GPU and/or driver.");
+		}
+
+		InitializeRayTracing();
+	}
+
+	void platform_ex::Windows::D3D12::Device::InitializeRayTracing()
+	{
+		for (auto Device : Devices)
+		{
+			if (Device->GetRayTracingDevice())
+			{
+				Device->InitRayTracing();
+			}
+		}
 	}
 
 	std::shared_ptr<Device::CmdAllocatorDependencies> Device::CmdAllocatorAlloc()

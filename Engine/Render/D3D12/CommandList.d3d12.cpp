@@ -21,6 +21,8 @@ CommandListHandle::CommandListData::CommandListData(NodeDevice* ParentDevice, D3
 	CommandList->QueryInterface(IID_PPV_ARGS(CommandList1.ReleaseAndGetAddress()));
 	CommandList->QueryInterface(IID_PPV_ARGS(CommandList2.ReleaseAndGetAddress()));
 
+	CommandList->QueryInterface(IID_PPV_ARGS(RayTracingCommandList.ReleaseAndGetAddress()));
+
 	auto name = leo::sfmt("CommandListHandle (GPU %u)",ParentDevice->GetGPUIndex());
 
 	D3D::Debug(CommandList, name.c_str());
@@ -188,6 +190,11 @@ void platform_ex::Windows::D3D12::CommandListHandle::AddUAVBarrier()
 void CommandListHandle::Create(NodeDevice* InParent, D3D12_COMMAND_LIST_TYPE InCommandType, CommandAllocator& InAllocator, CommandListManager* InManager)
 {
 	CommandListData = new D3D12CommandListData(InParent, InCommandType, InAllocator, InManager);
+}
+
+void CommandListHandle::Execute(bool WaitForCompletion)
+{
+	CommandListData->CommandListManager->ExecuteCommandList(*this, WaitForCompletion);
 }
 
 CommandAllocator::CommandAllocator(ID3D12Device* InDevice, const D3D12_COMMAND_LIST_TYPE& InType)

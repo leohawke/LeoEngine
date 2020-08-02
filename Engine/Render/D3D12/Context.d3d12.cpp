@@ -47,7 +47,8 @@ namespace platform_ex::Windows::D3D12 {
 
 	void D3D12::Context::SyncCPUGPU(bool force)
 	{
-		CommitCommandContext();
+		GetDefaultCommandContext()->CommandListHandle.FlushResourceBarriers();
+		GetDefaultCommandContext()->FlushCommands();
 
 		ClearPSOCache();
 	}
@@ -95,33 +96,6 @@ namespace platform_ex::Windows::D3D12 {
 		}
 	}
 
-	void D3D12::Context::CommitCommandContext()
-	{
-		auto nodedvice = device->GetNodeDevice(0);
-		auto& commandcontext = nodedvice->GetDefaultCommandContext();
-
-		commandcontext.CommandListHandle.Close();
-		ID3D12CommandList* cmd_lists[] = { commandcontext.CommandListHandle.CommandList() };
-		nodedvice->GetD3DCommandQueue(CommandQueueType::Default)->ExecuteCommandLists(1, cmd_lists);
-
-		auto& fence = nodedvice->GetCommandListManager(CommandQueueType::Default)->GetFence();
-		auto signal =  fence.Signal(CommandQueueType::Default);
-
-		SyncPoint SyncPoint(&fence, signal);
-		commandcontext.CommandListHandle.SetSyncPoint(SyncPoint);
-
-		fence.WaitForFence(signal);
-
-		((ID3D12CommandAllocator*)(*commandcontext.CommandAllocator))->Reset();
-		commandcontext.CommandListHandle.Reset(*commandcontext.CommandAllocator);
-
-		commandcontext.StateCache.GetDescriptorCache()->EndFrame();
-		commandcontext.StateCache.GetDescriptorCache()->BeginFrame();
-
-		commandcontext.StateCache.GetDescriptorCache()->NotifyCurrentCommandList(commandcontext.CommandListHandle);
-		commandcontext.StateCache.DirtyStateForNewCommandList();
-	}
-
 	void D3D12::Context::ClearPSOCache()
 	{
 		device->curr_render_cmd_allocator->cbv_srv_uav_heap_cache.clear();
@@ -158,9 +132,10 @@ namespace platform_ex::Windows::D3D12 {
 
 		device->GetNodeDevice(0)->Initialize();
 
-		FilterExceptions([&, this] {
+		if (device->GetRayTracingDevice())
+		{
 			ray_context = std::make_shared<RayContext>(device.get(), this);
-			}, "ERROR: DirectX Raytracing is not supported by your OS, GPU and/or driver.");
+		}
 	}
 
 	COMPtr<ID3D12Resource> Context::InnerResourceAlloc(InnerReourceType type, leo::uint32 size_in_byte)

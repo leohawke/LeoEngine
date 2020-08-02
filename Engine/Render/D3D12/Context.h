@@ -58,8 +58,6 @@ namespace platform_ex {
 				void CommitCommandList(Device::CommandType);
 				friend class Device;
 
-				void CommitCommandContext();
-
 				void ClearPSOCache();
 
 				enum  InnerReourceType{

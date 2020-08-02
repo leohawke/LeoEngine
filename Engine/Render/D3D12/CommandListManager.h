@@ -7,6 +7,21 @@
 
 namespace platform_ex::Windows::D3D12
 {
+	struct CommandListPayload
+	{
+		CommandListPayload()
+		{
+			std::fill_n(CommandLists, MaxCommandListsPerPayload, nullptr);
+		}
+
+		void Reset();
+		void Append(ID3D12CommandList* CL);
+
+		static constexpr uint32 MaxCommandListsPerPayload = 256;
+		ID3D12CommandList* CommandLists[MaxCommandListsPerPayload];
+		uint32 NumCommandLists;
+	};
+
 	class CommandListManager : public DeviceChild, public SingleNodeGPUObject
 	{
 	public:
@@ -29,6 +44,11 @@ namespace platform_ex::Windows::D3D12
 
 		Fence& GetFence() { return *CommandListFence; }
 
+		void ExecuteCommandList(CommandListHandle& hList, bool WaitForCompletion);
+
+		uint64 ExecuteAndIncrementFence(CommandListPayload& Payload, Fence& Fence);
+
+		void ExecuteCommandLists(std::vector<CommandListHandle>& Lists, bool WaitForCompletion);
 	protected:
 		void WaitForCommandQueueFlush();
 

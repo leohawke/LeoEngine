@@ -1,5 +1,7 @@
 #include "Display.h"
 #include "Convert.h"
+#include "NodeDevice.h"
+#include "CommandContext.h"
 #include "Context.h"
 #include <LFramework/LCLib/Platform.h>
 
@@ -9,6 +11,11 @@ using namespace platform_ex::Windows::D3D12;
 using namespace platform_ex;
 
 using std::make_shared;
+
+DisplaySetting::DisplaySetting()
+	:depth_stencil_format(EF_D24S8)
+{
+}
 
 Display::Display(IDXGIFactory4 * factory_4, ID3D12CommandQueue* cmd_queue, const DisplaySetting& setting, HWND hWnd)
 	:hwnd(hWnd), frame_buffer(std::make_shared<FrameBuffer>()), frame_waitable_object(nullptr)
@@ -111,9 +118,16 @@ void platform_ex::Windows::D3D12::Display::SwapBuffers()
 	if (swap_chain) {
 		auto rt_tex = render_targets_texs[back_buffer_index].get();
 
-		TransitionResource(Context::Instance().GetDefaultCommandContext()->CommandListHandle, rt_tex, D3D12_RESOURCE_STATE_PRESENT, 0);
+		uint32 GPUIndex = 0;
 
-		Context::Instance().CommitCommandContext();
+		auto Device = GetDefaultNodeDevice();
+
+		auto& DefaultContext = Device->GetDefaultCommandContext();
+
+		TransitionResource(DefaultContext.CommandListHandle, rt_tex, D3D12_RESOURCE_STATE_PRESENT, 0);
+
+		DefaultContext.CommandListHandle.FlushResourceBarriers();
+		DefaultContext.FlushCommands();
 
 		bool allow_tearing = tearing_allow;
 #ifdef LF_Hosted

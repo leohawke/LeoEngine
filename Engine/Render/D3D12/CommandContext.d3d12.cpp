@@ -265,6 +265,40 @@ void CommandContext::CloseCommandList()
 	CommandListHandle.Close();
 }
 
+CommandListHandle CommandContext::FlushCommands(bool WaitForCompletion)
+{
+	auto Device = GetParentDevice();
+	const bool bHasPendingWork = Device->PendingCommandLists.size() > 0;
+	const bool bHasDoneWork = HasDoneWork() || bHasPendingWork;
+	const bool bOpenNewCmdList = WaitForCompletion || bHasDoneWork;
+
+	// Only submit a command list if it does meaningful work or the flush is expected to wait for completion.
+	if (bOpenNewCmdList)
+	{
+		// Close the current command list
+		CloseCommandList();
+
+		if (bHasPendingWork)
+		{
+			// Submit all pending command lists and the current command list
+			Device->PendingCommandLists.emplace_back(CommandListHandle);
+			GetCommandListManager().ExecuteCommandLists(Device->PendingCommandLists, WaitForCompletion);
+			Device->PendingCommandLists.clear();
+		}
+		else
+		{
+			// Just submit the current command list
+			CommandListHandle.Execute(WaitForCompletion);
+		}
+
+		// Get a new command list to replace the one we submitted for execution. 
+		// Restore the state from the previous command list.
+		OpenCommandList();
+	}
+
+	return CommandListHandle;
+}
+
 CommandListManager& CommandContext::GetCommandListManager()
 {
 	return GetParentDevice()->GetCommandListManager();

@@ -38,6 +38,8 @@ namespace platform_ex::Windows::D3D12 {
 		CPT_Graphics,
 		//TODO
 		CPT_Compute,
+
+		CPT_RayTracing,
 	};
 
 	constexpr unsigned int max_vbs = D3D12_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT;
@@ -694,6 +696,17 @@ namespace platform_ex::Windows::D3D12 {
 		virtual ~CommandContextStateCache()
 		{
 		}
+
+
+		void TransitionComputeState(CachePipelineType PipelineType)
+		{
+			if (LastComputePipelineType != PipelineType)
+			{
+				LastComputePipelineType = PipelineType;
+			}
+		}
+
+		CachePipelineType LastComputePipelineType = CachePipelineType::CPT_Compute;
 
 		template <CachePipelineType PipelineType>
 		void ApplyState();

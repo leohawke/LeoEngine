@@ -36,8 +36,10 @@ namespace platform_ex {
 
 				StereoMethod stereo_method = Stereo_None;
 
-				EFormat depth_stencil_format = EF_D24S8;
+				EFormat depth_stencil_format;
 				EFormat color_format = EF_ARGB8;
+
+				DisplaySetting();
 			};
 
 			class Display :public platform::Render::Display {

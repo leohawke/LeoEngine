@@ -34,6 +34,11 @@ ID3D12Device* NodeDevice::GetDevice()
 	return GetParentAdapter()->GetDevice();
 }
 
+ID3D12Device5* NodeDevice::GetRayTracingDevice()
+{
+	return GetParentAdapter()->GetRayTracingDevice();
+}
+
 void platform_ex::Windows::D3D12::NodeDevice::CreateSamplerInternal(const D3D12_SAMPLER_DESC& Desc, D3D12_CPU_DESCRIPTOR_HANDLE Descriptor)
 {
 	GetDevice()->CreateSampler(&Desc, Descriptor);

@@ -5,6 +5,18 @@
 
 using namespace platform_ex::Windows::D3D12;
 
+void CommandListPayload::Reset()
+{
+	NumCommandLists = 0;
+	std::fill_n(CommandLists, MaxCommandListsPerPayload, nullptr);
+}
+
+void CommandListPayload::Append(ID3D12CommandList* CommandList)
+{
+	CommandLists[NumCommandLists] = CommandList;
+	++NumCommandLists;
+}
+
 CommandListManager::CommandListManager(NodeDevice* InParent, D3D12_COMMAND_LIST_TYPE InCommandListType, CommandQueueType InQueueType)
 	:DeviceChild(InParent)
 	,SingleNodeGPUObject(InParent->GetGPUMask())
@@ -113,6 +125,102 @@ CommandListHandle CommandListManager::CreateCommandListHandle(CommandAllocator& 
 	CommandListHandle List;
 	List.Create(GetParentDevice(), CommandListType, CommandAllocator, this);
 	return List;
+}
+
+void CommandListManager::ExecuteCommandList(CommandListHandle& hList, bool WaitForCompletion)
+{
+	std::vector<CommandListHandle> Lists;
+	Lists.emplace_back(hList);
+
+	ExecuteCommandLists(Lists, WaitForCompletion);
+}
+
+uint64 CommandListManager::ExecuteAndIncrementFence(CommandListPayload& Payload, Fence& Fence)
+{
+	std::unique_lock Lock{ FenceCS };
+
+	D3DCommandQueue->ExecuteCommandLists(Payload.NumCommandLists, Payload.CommandLists);
+
+	LAssert(Fence.GetGPUMask() == GetGPUMask(), "Fence GPU masks does not fit with the command list mask!");
+
+	return Fence.Signal(QueueType);
+}
+
+void CommandListManager::ExecuteCommandLists(std::vector<CommandListHandle>& Lists, bool WaitForCompletion)
+{
+	bool NeedsResourceBarriers = false;
+	for (int32 i = 0; i < Lists.size(); i++)
+	{
+		auto& commandList = Lists[i];
+		//if (commandList.PendingResourceBarriers().Num() > 0)
+		{
+			//NeedsResourceBarriers = true;
+			break;
+		}
+	}
+
+	uint64 SignaledFenceValue = -1;
+	uint64 BarrierFenceValue = -1;
+	D3D12::SyncPoint SyncPoint;
+	D3D12::SyncPoint BarrierSyncPoint;
+
+	auto& DirectCommandListManager = GetParentDevice()->GetCommandListManager();
+	auto& DirectFence = DirectCommandListManager.GetFence();
+
+	LAssert(DirectFence.GetGPUMask() == GetGPUMask(), "Fence GPU masks does not fit with the command list mask!");
+
+	int32 commandListIndex = 0;
+	int32 barrierCommandListIndex = 0;
+
+	// Close the resource barrier lists, get the raw command list pointers, and enqueue the command list handles
+	// Note: All command lists will share the same fence
+	CommandListPayload CurrentCommandListPayload;
+	CommandListPayload ComputeBarrierPayload;
+
+	lconstraint(Lists.size() <= CommandListPayload::MaxCommandListsPerPayload);
+
+	CommandListHandle BarrierCommandList[128];
+	if (NeedsResourceBarriers)
+	{
+
+	}
+	else
+	{
+		for (int32 i = 0; i < Lists.size(); i++)
+		{
+			CurrentCommandListPayload.Append(Lists[i].CommandList());
+		}
+		SignaledFenceValue = ExecuteAndIncrementFence(CurrentCommandListPayload, *CommandListFence);
+		//check(CommandListType != D3D12_COMMAND_LIST_TYPE_COMPUTE);
+		SyncPoint = D3D12::SyncPoint(CommandListFence.get(), SignaledFenceValue);
+		BarrierSyncPoint = SyncPoint;
+	}
+
+	for (int32 i = 0; i < Lists.size(); i++)
+	{
+		auto& commandList = Lists[i];
+
+		// Set a sync point on the command list so we know when it's current generation is complete on the GPU, then release it so it can be reused later.
+		// Note this also updates the command list's command allocator
+		commandList.SetSyncPoint(SyncPoint);
+		ReleaseCommandList(commandList);
+	}
+
+	for (int32 i = 0; i < barrierCommandListIndex; i++)
+	{
+		auto& commandList = BarrierCommandList[i];
+
+		// Set a sync point on the command list so we know when it's current generation is complete on the GPU, then release it so it can be reused later.
+		// Note this also updates the command list's command allocator
+		commandList.SetSyncPoint(BarrierSyncPoint);
+		DirectCommandListManager.ReleaseCommandList(commandList);
+	}
+
+	if (WaitForCompletion)
+	{
+		CommandListFence->WaitForFence(SignaledFenceValue);
+		lconstraint(SyncPoint.IsComplete());
+	}
 }
 
 void CommandListManager::WaitForCommandQueueFlush()

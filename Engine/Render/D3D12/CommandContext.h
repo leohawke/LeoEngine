@@ -54,6 +54,8 @@ namespace platform_ex::Windows::D3D12 {
 
 		void OpenCommandList();
 		void CloseCommandList();
+
+		CommandListHandle FlushCommands(bool WaitForCompletion = false);
 	private:
 		void CommitGraphicsResourceTables();
 		void CommitNonComputeShaderConstants();
@@ -80,6 +82,11 @@ namespace platform_ex::Windows::D3D12 {
 
 
 		uint32 numDraws;
+
+		bool HasDoneWork() const
+		{
+			return numDraws > 0;
+		}
 
 		/** Constant buffers for Set*ShaderParameter calls. */
 		ConstantBuffer VSConstantBuffer;

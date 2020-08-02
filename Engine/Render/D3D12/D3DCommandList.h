@@ -95,6 +95,7 @@ namespace platform_ex::Windows::D3D12 {
 			COMPtr<ID3D12GraphicsCommandList>	CommandList;		// Raw D3D command list pointer
 			COMPtr<ID3D12GraphicsCommandList1>	CommandList1;
 			COMPtr<ID3D12GraphicsCommandList2>	CommandList2;
+			COMPtr<ID3D12GraphicsCommandList4>	RayTracingCommandList;
 
 			CommandAllocator* CurrentCommandAllocator;	// Command allocator currently being used for recording the command list
 
@@ -204,6 +205,19 @@ namespace platform_ex::Windows::D3D12 {
 			return CommandListData->CommandList.Get();
 		}
 
+		ID3D12GraphicsCommandList* GraphicsCommandList() const
+		{
+			lconstraint(CommandListData->CommandListType == D3D12_COMMAND_LIST_TYPE_DIRECT || CommandListData->CommandListType == D3D12_COMMAND_LIST_TYPE_COMPUTE);
+
+			return static_cast<ID3D12GraphicsCommandList*>(CommandList());
+		}
+
+		ID3D12GraphicsCommandList4* RayTracingCommandList() const
+		{
+			lconstraint(CommandListData && (CommandListData->CommandListType == D3D12_COMMAND_LIST_TYPE_DIRECT || CommandListData->CommandListType == D3D12_COMMAND_LIST_TYPE_COMPUTE));
+			return CommandListData->RayTracingCommandList.Get();
+		}
+
 		void SetCurrentOwningContext(CommandContext* context)
 		{
 			CommandListData->CurrentOwningContext = context;
@@ -244,6 +258,8 @@ namespace platform_ex::Windows::D3D12 {
 		void AddUAVBarrier();
 
 		void Create(NodeDevice* InParent, D3D12_COMMAND_LIST_TYPE InCommandType, CommandAllocator& InAllocator, CommandListManager* InManager);
+
+		void Execute(bool WaitForCompletion = false);
 
 		friend bool operator==(const CommandListHandle& lhs, std::nullptr_t)
 		{
@@ -346,12 +362,32 @@ namespace platform_ex::Windows::D3D12 {
 	{
 		const bool bIsWholeResource = subresourceSubset.IsWholeResource();
 
-		lconstraint(bIsWholeResource);
-
 		if (bIsWholeResource) {
 			if (Resource->IsTransitionNeeded(after))
 			{
 				hCommandList.AddTransitionBarrier(Resource, Resource->GetResourceState(), after, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES);
+				Resource->SetResourceState(after);
+			}
+		}
+		else
+		{
+			bool bWholeResourceWasTransitionedToSameState = true;
+
+			for (CViewSubresourceSubset::CViewSubresourceIterator it = subresourceSubset.begin(); it != subresourceSubset.end(); ++it)
+			{
+				for (uint32 SubresourceIndex = it.StartSubresource(); SubresourceIndex < it.EndSubresource(); SubresourceIndex++)
+				{
+					if (Resource->IsTransitionNeeded(after))
+					{
+						hCommandList.AddTransitionBarrier(Resource, Resource->GetResourceState(), after, SubresourceIndex);
+						Resource->SetResourceState(after);
+					}
+				}
+			}
+
+			// If we just transtioned every subresource to the same state, lets update it's tracking so it's on a per-resource level
+			if (bWholeResourceWasTransitionedToSameState)
+			{
 				Resource->SetResourceState(after);
 			}
 		}

@@ -147,7 +147,7 @@ void D12::RayTracingGeometry::BuildAccelerationStructure()
 		? AccelerationStructureBuffer->Resource()->GetGPUVirtualAddress()
 		: D3D12_GPU_VIRTUAL_ADDRESS(0);
 
-	ID3D12GraphicsCommandList4* RayTracingCommandList = Context::Instance().GetRayContext().RayTracingCommandList();
+	ID3D12GraphicsCommandList4* RayTracingCommandList = Context::Instance().GetDefaultCommandContext()->CommandListHandle.RayTracingCommandList();
 	RayTracingCommandList->BuildRaytracingAccelerationStructure(&BuildDesc, 0, nullptr);
 
 	Context::Instance().ResidencyResource(*ScratchBuffer->Resource());

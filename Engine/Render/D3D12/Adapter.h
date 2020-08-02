@@ -85,10 +85,17 @@ namespace platform_ex::Windows::D3D12 {
 			return d3d_device.Get();
 		}
 
+		ID3D12Device5* GetRayTracingDevice()
+		{
+			return raytracing_device.Get();
+		}
+
 		NodeDevice* GetNodeDevice(uint32 Index) const
 		{
 			return Devices[Index];
 		}
+
+		void InitializeRayTracing();
 	public:
 		friend class Context;
 		friend class RayContext;
@@ -116,6 +123,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		void DeviceEx(ID3D12Device* device, ID3D12CommandQueue* cmd_queue, D3D_FEATURE_LEVEL feature_level);
 
+
 		void CheckFeatureSupport(ID3D12Device* device);
 
 		struct CmdAllocatorDependencies
@@ -134,6 +142,7 @@ namespace platform_ex::Windows::D3D12 {
 		//@{
 		//\brief base object for swapchain
 		COMPtr<ID3D12Device> d3d_device;
+		COMPtr<ID3D12Device5> raytracing_device;
 		//@}
 
 		D3D_FEATURE_LEVEL d3d_feature_level;

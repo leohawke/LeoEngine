@@ -9,6 +9,7 @@
 #include <vector>
 #include <unordered_map>
 
+class RayTracingDescriptorHeapCache;
 
 struct SamplerDescHash
 {
@@ -40,6 +41,11 @@ namespace platform_ex::Windows::D3D12
 
 		ID3D12Device* GetDevice();
 
+		ID3D12Device5* GetRayTracingDevice();
+
+		void InitRayTracing();
+		RayTracingDescriptorHeapCache* GetRayTracingDescriptorHeapCache() { return RayTracingDescriptorHeapCache; }
+
 		template <typename TViewDesc> OfflineDescriptorManager& GetViewDescriptorAllocator();
 		template<> OfflineDescriptorManager& GetViewDescriptorAllocator<D3D12_SHADER_RESOURCE_VIEW_DESC>() { return SRVAllocator; }
 		template<> OfflineDescriptorManager& GetViewDescriptorAllocator<D3D12_RENDER_TARGET_VIEW_DESC>() { return RTVAllocator; }
@@ -58,6 +64,8 @@ namespace platform_ex::Windows::D3D12
 		CommandListManager* GetCommandListManager(CommandQueueType InQueueType);
 
 		CommandListManager& GetCommandListManager() const { return *CommandListManager; }
+
+		std::vector<CommandListHandle> PendingCommandLists;
 
 		void CreateSamplerInternal(const D3D12_SAMPLER_DESC& Desc, D3D12_CPU_DESCRIPTOR_HANDLE Descriptor);
 
@@ -87,6 +95,9 @@ namespace platform_ex::Windows::D3D12
 
 		GlobalOnlineHeap GlobalSamplerHeap;
 		GlobalOnlineHeap GlobalViewHeap;
+
+		RayTracingDescriptorHeapCache* RayTracingDescriptorHeapCache = nullptr;
+		void DestroyRayTracingDescriptorCache();
 	};
 
 
