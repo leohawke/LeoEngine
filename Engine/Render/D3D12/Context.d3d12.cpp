@@ -98,21 +98,21 @@ namespace platform_ex::Windows::D3D12 {
 
 	void D3D12::Context::ClearPSOCache()
 	{
-		device->curr_render_cmd_allocator->cbv_srv_uav_heap_cache.clear();
-
-		for (auto const & item : device->curr_render_cmd_allocator->recycle_after_sync_upload_buffs)
-			device->upload_resources.emplace(item.second, item.first);
-		device->curr_render_cmd_allocator->recycle_after_sync_upload_buffs.clear();
-		for (auto const & item : device->curr_render_cmd_allocator->recycle_after_sync_readback_buffs)
-			device->readback_resources.emplace(item.second, item.first);
-		device->curr_render_cmd_allocator->recycle_after_sync_readback_buffs.clear();
-
 		//TODO:support CLSyncPoint move;
 		device->ReclaimPool.push(device->ResidencyPool);
 		device->ResidencyPool.recycle_after_sync_residency_buffs.clear();
+		device->ResidencyPool.recycle_after_sync_upload_buffs.clear();
+		device->ResidencyPool.recycle_after_sync_upload_buffs.clear();
 
 		while (!device->ReclaimPool.empty() && device->ReclaimPool.front().SyncPoint.IsComplete())
 		{
+			auto& Residency = device->ReclaimPool.front();
+
+			for (auto const& item : Residency.recycle_after_sync_upload_buffs)
+				device->upload_resources.emplace(item.second, item.first);
+			for (auto const& item : Residency.recycle_after_sync_readback_buffs)
+				device->readback_resources.emplace(item.second, item.first);
+
 			device->ReclaimPool.pop();
 		}
 	}
@@ -208,7 +208,7 @@ namespace platform_ex::Windows::D3D12 {
 	{
 		if (resource) {
 			bool is_upload = type == Upload;
-			auto& resources =is_upload?device->curr_render_cmd_allocator->recycle_after_sync_upload_buffs:device->curr_render_cmd_allocator->recycle_after_sync_readback_buffs;
+			auto& resources =is_upload?device->ResidencyPool.recycle_after_sync_upload_buffs:device->ResidencyPool.recycle_after_sync_readback_buffs;
 			resources.emplace_back(resource, size);
 		}
 	}

@@ -127,25 +127,16 @@ namespace platform_ex::Windows::D3D12 {
 
 		void CheckFeatureSupport(ID3D12Device* device);
 
-		struct CmdAllocatorDependencies
-		{
-			COMPtr<ID3D12CommandAllocator> cmd_allocator;
-			std::vector<COMPtr<ID3D12DescriptorHeap>> cbv_srv_uav_heap_cache;
-			std::vector<std::pair<COMPtr<ID3D12Resource>, uint32_t>> recycle_after_sync_upload_buffs;
-			std::vector<std::pair<COMPtr<ID3D12Resource>, uint32_t>> recycle_after_sync_readback_buffs;
-		};
-
 		struct ResidencyPoolEntry
 		{
 			CLSyncPoint SyncPoint;
 			std::vector<COMPtr<ID3D12Resource>> recycle_after_sync_residency_buffs;
+			std::vector<std::pair<COMPtr<ID3D12Resource>, uint32_t>> recycle_after_sync_upload_buffs;
+			std::vector<std::pair<COMPtr<ID3D12Resource>, uint32_t>> recycle_after_sync_readback_buffs;
 		};
 
 		ResidencyPoolEntry ResidencyPool;
 		std::queue< ResidencyPoolEntry> ReclaimPool;
-
-		std::shared_ptr<CmdAllocatorDependencies> CmdAllocatorAlloc();
-		void CmdAllocatorRecycle(std::shared_ptr<CmdAllocatorDependencies> const& cmd_allocator, uint64_t fence_val);
 	private:
 		DXGI::Adapter& adapter;
 
@@ -159,9 +150,6 @@ namespace platform_ex::Windows::D3D12 {
 
 		//@{
 		//\brief object for create object
-
-		std::list<std::pair<std::shared_ptr<CmdAllocatorDependencies>, uint64_t>> d3d_render_cmd_allocators;
-		std::shared_ptr<CmdAllocatorDependencies> curr_render_cmd_allocator;
 		array<COMPtr<ID3D12CommandAllocator>, CommandTypeCount> d3d_cmd_allocators;
 		//COMPtr<ID3D12CommandQueue> d3d_cmd_compute_quque;
 		//COMPtr<ID3D12CommandQueue> d3d_cmd_copy_quque;

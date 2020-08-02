@@ -81,7 +81,6 @@ bool CommandListHandle::CommandListData::IsComplete(uint64 Generation)
 		if (!ActiveGenerations.empty())
 		{
 			GenerationSyncPointPair GenerationSyncPoint = ActiveGenerations.front();
-			ActiveGenerations.pop();
 
 			if (Generation < GenerationSyncPoint.first)
 			{

@@ -55,52 +55,53 @@ void RayTracingScene::BuildAccelerationStructure(CommandContext& CommandContext)
 		InstanceBuffer =leo::unique_raw(Adapter->CreateVertexBuffer(Usage::Static, EAccessHint::EA_CPUWrite,
 			sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * PrebuildDescInputs.NumDescs,
 			EFormat::EF_Unknown));
-		InstanceBuffer->SetName("Acceleration structure [Instance]");
-
-		Mapper mapper(*InstanceBuffer, Access::Write_Only);
-
-		auto MappedData = mapper.Pointer< D3D12_RAYTRACING_INSTANCE_DESC>();
-
-		LAssertNonnull(MappedData);
-
-		for (uint32 InstanceIndex = 0; InstanceIndex < NumSceneInstances; ++InstanceIndex)
+		InstanceBuffer->SetName("Acceleration structure [Instance] Init");
 		{
-			auto& Instance = Instances[InstanceIndex];
+			Mapper mapper(*InstanceBuffer, Access::Write_Only);
 
-			auto Geometry = static_cast<RayTracingGeometry*>(Instance.Geometry);
+			auto MappedData = mapper.Pointer< D3D12_RAYTRACING_INSTANCE_DESC>();
 
-			D3D12_RAYTRACING_INSTANCE_DESC InstanceDesc = {};
+			LAssertNonnull(MappedData);
 
-			InstanceDesc.InstanceMask = Instance.Mask;
-			InstanceDesc.InstanceContributionToHitGroupIndex = InstanceIndex * ShaderSlotsPerGeometrySegment;
-
-			InstanceDesc.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_TRIANGLE_FRONT_COUNTERCLOCKWISE;
-
-			bool bForceOpaque = false;
-			if (bForceOpaque)
+			for (uint32 InstanceIndex = 0; InstanceIndex < NumSceneInstances; ++InstanceIndex)
 			{
-				InstanceDesc.Flags |= D3D12_RAYTRACING_INSTANCE_FLAG_FORCE_OPAQUE;
+				auto& Instance = Instances[InstanceIndex];
+
+				auto Geometry = static_cast<RayTracingGeometry*>(Instance.Geometry);
+
+				D3D12_RAYTRACING_INSTANCE_DESC InstanceDesc = {};
+
+				InstanceDesc.InstanceMask = Instance.Mask;
+				InstanceDesc.InstanceContributionToHitGroupIndex = InstanceIndex * ShaderSlotsPerGeometrySegment;
+
+				InstanceDesc.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_TRIANGLE_FRONT_COUNTERCLOCKWISE;
+
+				bool bForceOpaque = false;
+				if (bForceOpaque)
+				{
+					InstanceDesc.Flags |= D3D12_RAYTRACING_INSTANCE_FLAG_FORCE_OPAQUE;
+				}
+
+				bool bDoubleSided = false;
+				if (bDoubleSided)
+				{
+					InstanceDesc.Flags |= D3D12_RAYTRACING_INSTANCE_FLAG_TRIANGLE_CULL_DISABLE;
+				}
+
+				InstanceDesc.AccelerationStructure = Geometry->AccelerationStructureBuffer->Resource()->GetGPUVirtualAddress();
+
+				InstanceDesc.InstanceID = 0;
+
+				auto TransformTransposed = leo::math::transpose(Instance.Transform);
+
+				memcpy(InstanceDesc.Transform, TransformTransposed);
+
+				MappedData[InstanceIndex] = InstanceDesc;
 			}
-
-			bool bDoubleSided = false;
-			if (bDoubleSided)
-			{
-				InstanceDesc.Flags |= D3D12_RAYTRACING_INSTANCE_FLAG_TRIANGLE_CULL_DISABLE;
-			}
-
-			InstanceDesc.AccelerationStructure = Geometry->AccelerationStructureBuffer->Resource()->GetGPUVirtualAddress();
-			
-			InstanceDesc.InstanceID = 0;
-
-			auto TransformTransposed = leo::math::transpose(Instance.Transform);
-
-			memcpy(InstanceDesc.Transform, TransformTransposed);
-
-			MappedData[InstanceIndex] = InstanceDesc;
 		}
 
+		InstanceBuffer->SetName("Acceleration structure [Instance] Fill");
 		Context::Instance().ResidencyResource(*InstanceBuffer->Resource());
-
 	}
 
 	const bool IsUpdateMode = false;
