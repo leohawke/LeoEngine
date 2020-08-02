@@ -601,6 +601,6 @@ struct RayTracingShaderBindings
 	platform::Render::UnorderedAccessView* UAVs[8] = {};
 };
 
-void DispatchRays(Windows::D3D12::CommandContext* CommandContext,const RayTracingShaderBindings& GlobalBindings, const D3D12RayTracingPipelineState* Pipeline,
+void DispatchRays(Windows::D3D12::CommandContext& CommandContext,const RayTracingShaderBindings& GlobalBindings, const D3D12RayTracingPipelineState* Pipeline,
 	uint32 RayGenShaderIndex, RayTracingShaderTable* OptShaderTable, const D3D12_DISPATCH_RAYS_DESC& DispatchDesc);
 
