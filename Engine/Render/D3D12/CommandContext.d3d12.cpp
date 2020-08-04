@@ -1,16 +1,24 @@
 #include "CommandContext.h"
 #include "Texture.h"
 #include "NodeDevice.h"
+#include "Adapter.h"
 #include "CommandListManager.h"
 
 using namespace platform_ex::Windows::D3D12;
 
 constexpr auto MaxSimultaneousRenderTargets = platform::Render::MaxSimultaneousRenderTargets;
 
+CommandContextBase::CommandContextBase(D3D12Adapter* InParent, GPUMaskType InGPUMask, bool InIsDefaultContext, bool InIsAsyncComputeContext)
+	:AdapterChild(InParent)
+	,bIsDefaultContext(InIsDefaultContext)
+	,bIsAsyncComputeContext(InIsAsyncComputeContext)
+{
+}
+
 CommandContext::CommandContext(NodeDevice* InParent, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc, bool InIsDefaultContext, bool InIsAsyncComputeContext)
 	:
+	CommandContextBase(InParent->GetParentAdapter(), InParent->GetGPUMask(),InIsDefaultContext, InIsAsyncComputeContext),
 	DeviceChild(InParent),
-	AdapterChild(InParent->GetParentAdapter()),
 	VSConstantBuffer(InParent, ConstantsAllocator),
 	HSConstantBuffer(InParent, ConstantsAllocator),
 	DSConstantBuffer(InParent, ConstantsAllocator),
@@ -301,6 +309,71 @@ CommandListHandle CommandContext::FlushCommands(bool WaitForCompletion)
 	return CommandListHandle;
 }
 
+void CommandContext::BeginFrame()
+{
+	auto GPUIndex = 0;
+
+	auto Device = ParentAdapter->GetNodeDevice(GPUIndex);
+
+	auto& SamplerHeap = Device->GetGlobalSamplerHeap();
+
+	if (SamplerHeap.DescriptorTablesDirty())
+	{
+		SamplerHeap.GetUniqueDescriptorTables().rehash(0);
+	}
+
+	const uint32 NumContexts = Device->GetNumContexts();
+	for (uint32 i = 0; i < NumContexts; ++i)
+	{
+		Device->GetCommandContext(i).StateCache.GetDescriptorCache()->BeginFrame();
+	}
+
+	Device->GetGlobalSamplerHeap().ToggleDescriptorTablesDirtyFlag(false);
+
+	//TODO GPUProfiler
+}
+
+void CommandContext::EndFrame()
+{
+	//CleraPSOCache
+	auto GPUIndex = 0;
+
+	auto Device = ParentAdapter->GetNodeDevice(GPUIndex);
+	auto& DefaultContext = Device->GetDefaultCommandContext();
+	DefaultContext.CommandListHandle.FlushResourceBarriers();
+
+	DefaultContext.ReleaseCommandAllocator();
+	DefaultContext.ClearState();
+	DefaultContext.FlushCommands();
+
+	const uint32 NumContexts = Device->GetNumContexts();
+	for (uint32 i = 0; i < NumContexts; ++i)
+	{
+		auto& CommandContext = Device->GetCommandContext(i);
+		CommandContext.StateCache.GetDescriptorCache()->EndFrame();
+
+		if (!CommandContext.IsDefaultContext())
+		{
+			CommandContext.ReleaseCommandAllocator();
+		}
+	}
+}
+
+void CommandContext::ClearState()
+{
+	StateCache.ClearState();
+
+	bDiscardSharedConstants = false;
+
+	std::memset(BoundConstantBuffers, 0, sizeof(BoundConstantBuffers));
+	std::memset(DirtyConstantBuffers, 0, sizeof(DirtyConstantBuffers));
+
+	if (!bIsAsyncComputeContext)
+	{
+
+	}
+}
+
 CommandListManager& CommandContext::GetCommandListManager()
 {
 	return GetParentDevice()->GetCommandListManager();
@@ -313,6 +386,14 @@ void CommandContext::ConditionalObtainCommandAllocator()
 		// Obtain a command allocator if the context doesn't already have one.
 		// This will check necessary fence values to ensure the returned command allocator isn't being used by the GPU, then reset it.
 		CommandAllocator = new D3D12::CommandAllocator(GetParentDevice()->GetDevice(), D3D12_COMMAND_LIST_TYPE_DIRECT);
+	}
+}
+
+void CommandContext::ReleaseCommandAllocator()
+{
+	if (CommandAllocator != nullptr)
+	{
+		// Release the command allocator so it can be reused.
 	}
 }
 

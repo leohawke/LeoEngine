@@ -128,6 +128,9 @@ namespace platform::Render {
 				GraphicsPSOInit.DepthStencilTargetFormat = EF_Unknown;
 			}
 		}
+
+		void BeginFrame();
+		void EndFrame();
 	protected:
 		struct PSOContext
 		{

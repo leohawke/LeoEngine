@@ -9,7 +9,18 @@ namespace platform_ex::Windows::D3D12 {
 
 	class Texture;
 
-	class CommandContext :public platform::Render::CommandContext,public DeviceChild,public AdapterChild
+	class CommandContextBase :public platform::Render::CommandContext, public AdapterChild
+	{
+	public:
+		CommandContextBase(D3D12Adapter* InParent, GPUMaskType InGPUMask, bool InIsDefaultContext, bool InIsAsyncComputeContext);
+
+		bool IsDefaultContext() const { return bIsDefaultContext; }
+	protected:
+		const bool bIsDefaultContext;
+		const bool  bIsAsyncComputeContext;
+	};
+
+	class CommandContext final :public CommandContextBase,public DeviceChild
 	{
 	public:
 		CommandContext(NodeDevice* InParent, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc, bool InIsDefaultContext, bool InIsAsyncComputeContext = false);
@@ -56,13 +67,22 @@ namespace platform_ex::Windows::D3D12 {
 		void CloseCommandList();
 
 		CommandListHandle FlushCommands(bool WaitForCompletion = false);
+
+		void BeginFrame();
+
+		void EndFrame();
 	private:
+		void ClearState();
+
 		void CommitGraphicsResourceTables();
 		void CommitNonComputeShaderConstants();
 
 		CommandListManager& GetCommandListManager();
 
 		void ConditionalObtainCommandAllocator();
+
+		void ReleaseCommandAllocator();
+
 	public:
 		FastConstantAllocator ConstantsAllocator;
 
@@ -77,9 +97,6 @@ namespace platform_ex::Windows::D3D12 {
 		DepthStencilView* CurrentDepthStencilTarget;
 		Texture* CurrentDepthTexture;
 		uint32 NumSimultaneousRenderTargets;
-
-		uint16 DirtyUniformBuffers[ShaderType::NumStandardType];
-
 
 		uint32 numDraws;
 		uint32 numBarriers;

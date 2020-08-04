@@ -59,6 +59,16 @@ namespace platform_ex::Windows::D3D12
 			return *CommandContextArray[0];
 		}
 
+		uint32 GetNumContexts() const
+		{
+			return static_cast<uint32>(CommandContextArray.size());
+		}
+
+		CommandContext& GetCommandContext(int index)
+		{
+			return *CommandContextArray[index];
+		}
+
 		ID3D12CommandQueue* GetD3DCommandQueue(CommandQueueType InQueueType);
 
 		CommandListManager* GetCommandListManager(CommandQueueType InQueueType);

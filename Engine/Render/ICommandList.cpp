@@ -28,3 +28,13 @@ void platform::Render::CommandListBase::Reset()
 {
 	Context = platform::Render::Context::Instance().GetDefaultCommandContext();
 }
+
+void platform::Render::CommandList::BeginFrame()
+{
+	GetContext().BeginFrame();
+}
+
+void platform::Render::CommandList::EndFrame()
+{
+	GetContext().EndFrame();
+}

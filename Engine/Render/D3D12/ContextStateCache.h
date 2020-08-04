@@ -344,7 +344,7 @@ namespace platform_ex::Windows::D3D12 {
 				PipelineState.Common.CurrentShaderUAVCounts[Traits::Frequency] = (Shader) ? Shader->ResourceCounts.NumUAVs : 0;
 
 				// Shader changed so its resource table is dirty
-				this->CmdContext->DirtyUniformBuffers[Traits::Frequency] = 0xffff;
+				this->CmdContext->DirtyConstantBuffers[Traits::Frequency] = 0xffff;
 			}
 		}
 

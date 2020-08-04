@@ -98,6 +98,7 @@ private:
 
 		auto& CmdList = platform::Render::GetCommandList();
 
+		CmdList.BeginFrame();
 		Context::Instance().BeginFrame();
 		auto& screen_frame = Context::Instance().GetScreenFrame();
 		auto screen_tex = screen_frame->Attached(FrameBuffer::Target0);
@@ -203,12 +204,13 @@ private:
 
 		OnPostProcess();
 		OnDrawUI();
+
+		Context::Instance().EndFrame();
+		CmdList.EndFrame();
 		
 		Context::Instance().GetDisplay().SwapBuffers();
 		//what can i do in this duration?
 		Context::Instance().GetDisplay().WaitOnSwapBuffers();
-
-		Context::Instance().EndFrame();
 
 		++StateFrameIndex;
 
