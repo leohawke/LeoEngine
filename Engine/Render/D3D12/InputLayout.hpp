@@ -19,12 +19,10 @@ namespace platform_ex::Windows::D3D12 {
 
 		const std::vector<D3D12_INPUT_ELEMENT_DESC>& GetInputDesc() const;
 
-		platform::Render::VertexDeclarationElements GetVertexDeclaration() const;
-
 		void Active() const;
 	private:
 		 mutable std::vector<D3D12_INPUT_ELEMENT_DESC> vertex_elems;
 	};
 }
 
-#endif
+#endif 

@@ -236,9 +236,6 @@
     <ClCompile Include="Render\D3D12\HardwareShader.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="Render\PipelineStateUtility.cpp">
-      <Filter>Render</Filter>
-    </ClCompile>
     <ClCompile Include="Render\D3D12\CommandContext.d3d12.cpp">
       <Filter>Render\D3D12</Filter>
     </ClCompile>
@@ -286,6 +283,9 @@
     </ClCompile>
     <ClCompile Include="Render\PixelShaderUtils.cpp">
       <Filter>Render\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\PipelineStateUtility.cpp">
+      <Filter>Render\DeviceInterface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -528,9 +528,6 @@
     <ClInclude Include="Asset\D3DShaderCompiler.h">
       <Filter>Asset</Filter>
     </ClInclude>
-    <ClInclude Include="Render\RayTracingDefinitions.h">
-      <Filter>Render</Filter>
-    </ClInclude>
     <ClInclude Include="Asset\RayTracingX.h">
       <Filter>Asset</Filter>
     </ClInclude>
@@ -584,9 +581,6 @@
     </ClInclude>
     <ClInclude Include="Render\ShaderParameterStruct.h">
       <Filter>Render\Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\PipelineStateUtility.h">
-      <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="Render\D3D12\CommandContext.h">
       <Filter>Render\D3D12</Filter>
@@ -647,6 +641,12 @@
     </ClInclude>
     <ClInclude Include="Render\PixelShaderUtils.h">
       <Filter>Render\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\PipelineStateUtility.h">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\RayTracingDefinitions.h">
+      <Filter>Render\DeviceInterface</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

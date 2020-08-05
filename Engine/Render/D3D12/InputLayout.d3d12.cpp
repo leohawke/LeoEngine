@@ -25,31 +25,7 @@ namespace platform_ex::Windows::D3D12 {
 		return vertex_elems;
 	}
 
-	platform::Render::VertexDeclarationElements InputLayout::GetVertexDeclaration() const
-	{
-		platform::Render::VertexDeclarationElements elems;
-		WORD input_slot = 0;
-
-		for (auto& vertex_stream : vertex_streams) {
-			uint16 elem_offset = 0;
-			for (auto& element : vertex_stream.elements)
-			{
-				platform::Render::VertexElement ve;
-				ve.Format = element.format;
-				ve.Offset =static_cast<uint8>(elem_offset);
-				ve.StreamIndex = static_cast<uint8>(input_slot);
-				ve.Stride = vertex_stream.vertex_size;
-				ve.Usage = element.usage;
-				ve.UsageIndex = element.usage_index;
-				elem_offset += element.GetElementSize();
-
-				elems.emplace_back(ve);
-			}
-			++input_slot;
-		}
-
-		return elems;
-	}
+	
 
 	void InputLayout::Active() const
 	{

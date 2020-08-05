@@ -15,6 +15,7 @@
 #include "Engine/Renderer/PostProcess/PostProcessToneMap.h"
 
 #include "LFramework/Win32/LCLib/Mingw32.h"
+#include "LFramework/Helper/ShellHelper.h"
 
 #include "TestFramework.h"
 #include "Entities.h"
@@ -252,6 +253,8 @@ private:
 	}
 
 	void OnCreate() override {
+		LFL_DEBUG_DECL_TIMER(creater_timer,__FUNCTION__);
+
 		auto swap_chain = ::Create(GetNativeHandle());
 		Context::Instance().CreateDeviceAndDisplay();
 

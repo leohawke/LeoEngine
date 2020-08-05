@@ -40,7 +40,7 @@ namespace leo {
 		seed ^= std::hash<_type>()(val) + 0x9E3779B9 + (seed << 6) + (seed >> 2);
 	}
 
-	inline void hash_combine(size_t& seed,unsigned int val)
+	inline void hash_combine(size_t& seed,size_t val)
 	{
 		seed ^= val + 0x9E3779B9 + (seed << 6) + (seed >> 2);
 	}

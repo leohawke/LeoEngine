@@ -27,6 +27,7 @@ struct VertexDeclarationKey
 
 	explicit VertexDeclarationKey(const platform::Render::VertexDeclarationElements& InElements)
 	{
+		VertexElements.reserve(InElements.size());
 		for (unsigned ElementIndex = 0; ElementIndex != InElements.size(); ++ElementIndex)
 		{
 			auto& Element = InElements[ElementIndex];
@@ -54,7 +55,9 @@ struct VertexDeclarationKey
 				return (A.AlignedByteOffset + A.InputSlot * StreamLimitSize) < (B.AlignedByteOffset + B.InputSlot * StreamLimitSize);
 			});
 
-		Hash = leo::hash(VertexElements.begin(), VertexElements.end()) & 0XFFFFFFFF;
+		auto pData = reinterpret_cast<const unsigned int*>(VertexElements.data());
+		auto DataSize = VertexElements.size() * sizeof(VertexElementsType::value_type) / sizeof(unsigned int);
+		Hash = leo::hash(pData, pData+ DataSize) & 0XFFFFFFFF;
 	}
 
 	friend bool operator==(const VertexDeclarationKey& lhs,const VertexDeclarationKey& rhs)

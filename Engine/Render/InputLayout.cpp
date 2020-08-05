@@ -41,6 +41,37 @@ namespace platform::Render {
 		}
 	}
 
+	VertexDeclarationElements InputLayout::GetVertexDeclaration() const
+	{
+		if (!vertex_decl.empty() && vertex_decl.back().StreamIndex == static_cast<uint8> (vertex_streams.size() - 1))
+			return vertex_decl;
+		else
+		{
+			auto& elems = vertex_decl;
+			uint8 input_slot = 0;
+
+			for (auto& vertex_stream : vertex_streams) {
+				uint16 elem_offset = 0;
+				for (auto& element : vertex_stream.elements)
+				{
+					platform::Render::VertexElement ve;
+					ve.Format = element.format;
+					ve.Offset = static_cast<uint8>(elem_offset);
+					ve.StreamIndex = input_slot;
+					ve.Stride = vertex_stream.vertex_size;
+					ve.Usage = element.usage;
+					ve.UsageIndex = element.usage_index;
+					elem_offset += element.GetElementSize();
+
+					elems.emplace_back(ve);
+				}
+				++input_slot;
+			}
+
+			return vertex_decl;
+		}
+	}
+
 	const Vertex::Stream & InputLayout::GetVertexStream(uint32 index) const
 	{
 		return vertex_streams.at(index);

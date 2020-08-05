@@ -112,6 +112,8 @@ namespace platform::Render {
 		leo::uint8 UsageIndex;
 		EFormat Format;
 		uint16 Stride;
+
+		friend bool operator==(const VertexElement&, const VertexElement&) = default;
 	};
 
 	using VertexDeclarationElements = std::vector<VertexElement>;
@@ -151,6 +153,9 @@ namespace platform::Render {
 
 		DefGetter(const lnothrow, uint32, IndexStart, start_index_location)
 		DefGetter(lnothrow, uint32&, IndexStartRef, start_index_location)
+
+		VertexDeclarationElements GetVertexDeclaration() const;
+
 	protected:
 		void Dirty();
 
@@ -159,6 +164,8 @@ namespace platform::Render {
 
 		std::vector<Vertex::Stream> vertex_streams;
 		//Vertex::Stream instance_stream;
+
+		mutable VertexDeclarationElements vertex_decl;
 
 		std::shared_ptr<GraphicsBuffer> index_stream;
 		EFormat index_format;

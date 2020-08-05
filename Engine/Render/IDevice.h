@@ -61,14 +61,13 @@ namespace platform::Render {
 	public:
 		using RenderTargetFormatsType = std::array<EFormat, MaxSimultaneousRenderTargets>;
 
+		ShaderPassInput ShaderPass;
+
 		RasterizerDesc RasterizerState;
 		DepthStencilDesc DepthStencilState;
 		BlendDesc BlendState;
 
 		PrimtivteType Primitive;
-
-		ShaderPassInput ShaderPass;
-
 	public:
 		GraphicsPipelineStateInitializer()
 		{
