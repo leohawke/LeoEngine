@@ -675,6 +675,27 @@
     <ClInclude Include="Core\Threading\TaskScheduler.h">
       <Filter>Core\Threading</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Coroutine\is_awaiter.h">
+      <Filter>Core\Coroutine\details</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\get_awaiter.h">
+      <Filter>Core\Coroutine\details</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\when_all_counter.h">
+      <Filter>Core\Coroutine\details</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\when_all_ready_awaitable.h">
+      <Filter>Core\Coroutine\details</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\when_all_task.h">
+      <Filter>Core\Coroutine\details</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\AwaitableTraits.h">
+      <Filter>Core\Coroutine</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\WhenAllReady.h">
+      <Filter>Core\Coroutine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

@@ -7,7 +7,9 @@
 #include "../Core/Coroutine/Task.h"
 #include "../Core/Coroutine/ThreadScheduler.h"
 #include "../Core/Coroutine/SyncWait.h"
+#include "../Core/Coroutine/WhenAllReady.h"
 #include "../System/SystemEnvironment.h"
+
 
 
 using namespace platform::Render;
@@ -144,18 +146,7 @@ namespace platform::Render::Shader
 			tasks.emplace_back(std::move(task));
 		}
 
-
-		while (true)
-		{
-			bool all_ready = true;
-			for (auto& task : tasks)
-			{
-				leo::coroutine::SyncWait(task);
-			}
-			if (all_ready)
-				break;
-		}
-		
+		leo::coroutine::SyncWait(leo::coroutine::WhenAllReady(std::move(tasks)));
 	}
 
 	void FillParameterMapByShaderInfo(ShaderParameterMap& target, const ShaderInfo& src)

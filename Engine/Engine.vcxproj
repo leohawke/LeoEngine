@@ -145,10 +145,17 @@
     <ClInclude Include="Core\AssetResourceScheduler.h" />
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core\CameraController.h" />
+    <ClInclude Include="Core\Coroutine\AwaitableTraits.h" />
+    <ClInclude Include="Core\Coroutine\get_awaiter.h" />
+    <ClInclude Include="Core\Coroutine\is_awaiter.h" />
     <ClInclude Include="Core\Coroutine\SyncWait.h" />
     <ClInclude Include="Core\Coroutine\sync_wait_task.h" />
     <ClInclude Include="Core\Coroutine\Task.h" />
     <ClInclude Include="Core\Coroutine\ThreadScheduler.h" />
+    <ClInclude Include="Core\Coroutine\WhenAllReady.h" />
+    <ClInclude Include="Core\Coroutine\when_all_counter.h" />
+    <ClInclude Include="Core\Coroutine\when_all_ready_awaitable.h" />
+    <ClInclude Include="Core\Coroutine\when_all_task.h" />
     <ClInclude Include="Core\Hash\CityHash.h" />
     <ClInclude Include="Core\LFile.h" />
     <ClInclude Include="Core\LSLEvaluator.h" />
