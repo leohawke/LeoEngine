@@ -9,7 +9,7 @@
 #include "pointer.hpp" // for "iterator_op.hpp", iterator_operators_t,
 //	std::iterator_traits, _t, pointer_classify, cond_t, and_,
 //	exclude_self_t, true_type, enable_if_inconvertible_t, *_tag,
-//	yassume, is_undereferenceable, yconstraint, random_access_iteratable;
+//	lassume, is_undereferenceable, lconstraint, random_access_iteratable;
 #include "type_op.hpp" // for first_tag, second_tag, std::tuple,
 //	make_index_sequence, index_sequence, std::get;
 #include "ref.hpp" // for lref;
@@ -156,7 +156,7 @@ namespace leo
 		using transformer_type = _fTrans;
 		//@{
 		using iterator_category = typename impl_traits::iterator_category;
-		using value_type = typename impl_traits::transformed_type;
+		using value_type =std::remove_cvref_t<typename impl_traits::transformed_type>;
 		//@}
 		using transformed_type = typename impl_traits::transformed_type;
 		using difference_type = typename impl_traits::difference_type;
@@ -436,7 +436,7 @@ namespace leo
 		struct second<void>
 		{
 			template<typename _tIter>
-			lconstfn auto
+			lconstfn  auto
 				operator()(const _tIter& i) const -> decltype((i->second))
 			{
 				return i->second;
