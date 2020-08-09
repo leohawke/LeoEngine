@@ -35,12 +35,15 @@
     <ClCompile Include="Core\AssetResourceScheduler.cpp" />
     <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Core\CameraController.cpp" />
+    <ClCompile Include="Core\Coroutine\ThreadScheduler.cpp" />
     <ClCompile Include="Core\Hash\CityHash.cpp" />
     <ClCompile Include="Core\LSLBuilder.cpp" />
     <ClCompile Include="Core\LSLEvaluator.cpp" />
     <ClCompile Include="Core\Materail.cpp" />
     <ClCompile Include="Core\Mesh.cpp" />
     <ClCompile Include="Core\ResourcesHolder.cpp" />
+    <ClCompile Include="Core\Threading\ManualResetEvent.cpp" />
+    <ClCompile Include="Core\Threading\TaskScheduler.cpp" />
     <ClCompile Include="Renderer\imgui\imgui_context.cpp" />
     <ClCompile Include="Renderer\PostProcess\PostProcessCombineLUTs.cpp" />
     <ClCompile Include="Renderer\PostProcess\PostProcessToneMap.cpp" />
@@ -142,6 +145,10 @@
     <ClInclude Include="Core\AssetResourceScheduler.h" />
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core\CameraController.h" />
+    <ClInclude Include="Core\Coroutine\SyncWait.h" />
+    <ClInclude Include="Core\Coroutine\sync_wait_task.h" />
+    <ClInclude Include="Core\Coroutine\Task.h" />
+    <ClInclude Include="Core\Coroutine\ThreadScheduler.h" />
     <ClInclude Include="Core\Hash\CityHash.h" />
     <ClInclude Include="Core\LFile.h" />
     <ClInclude Include="Core\LSLEvaluator.h" />
@@ -150,6 +157,8 @@
     <ClInclude Include="Core\Mesh.h" />
     <ClInclude Include="Core\Resource.h" />
     <ClInclude Include="Core\ResourcesHolder.h" />
+    <ClInclude Include="Core\Threading\ManualResetEvent.h" />
+    <ClInclude Include="Core\Threading\TaskScheduler.h" />
     <ClInclude Include="emacro.h" />
     <ClInclude Include="Renderer\imgui\imgui_context.h" />
     <ClInclude Include="Renderer\PostProcess\PostProcessCombineLUTs.h" />

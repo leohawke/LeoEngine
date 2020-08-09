@@ -4,6 +4,10 @@
 #include "IRayContext.h"
 #include "../Asset/D3DShaderCompiler.h"
 #include "LFramework/Helper/ShellHelper.h"
+#include "../Core/Coroutine/Task.h"
+#include "../Core/Coroutine/ThreadScheduler.h"
+#include "../Core/Coroutine/SyncWait.h"
+#include "../System/SystemEnvironment.h"
 
 
 using namespace platform::Render;
@@ -70,67 +74,88 @@ namespace platform::Render::Shader
 
 	static void FillParameterMapByShaderInfo(ShaderParameterMap& target, const ShaderInfo& src);
 
-	void CompileGlobalShaderMap()
+	leo::coroutine::Task<void> CompileShader(ShaderMeta* meta)
 	{
 		auto& Device = Context::Instance().GetDevice();
 		auto& RayDevice = Context::Instance().GetRayContext().GetDevice();
 
+		asset::X::Shader::ShaderCompilerInput input;
+
+		auto ShaderCode = platform::X::GenHlslShader(meta->GetSourceFileName());
+		input.Code = ShaderCode;
+		input.EntryPoint = meta->GetEntryPoint();
+		input.Type = meta->GetShaderType();
+
+		auto final_macros = asset::X::Shader::AppendCompileMacros({}, input.Type);
+
+		ShaderInfo Info{ input.Type };
+
+		LFL_DEBUG_DECL_TIMER(Commpile, sfmt("CompileGlobalShaderMap EntryPoint:%s ", input.EntryPoint.data()));
+		auto blob = asset::X::Shader::CompileAndReflect(input, final_macros,
+#ifndef NDEBUG
+			D3DFlags::D3DCOMPILE_DEBUG
+#else
+			D3DFlags::D3DCOMPILE_OPTIMIZATION_LEVEL3
+#endif
+			, &Info
+		);
+
+		if (IsRayTracingShader(meta->GetShaderType()))
+		{
+			platform::Render::RayTracingShaderInitializer initializer;
+			initializer.pBlob = &blob;
+			initializer.pInfo = &Info;
+
+			auto pRayTracingShaderRHI = RayDevice.CreateRayTracingSahder(initializer);
+
+			auto pShader = static_cast<BuiltInRayTracingShader*>(meta->Construct());
+
+			pShader->SetRayTracingShader(pRayTracingShaderRHI);
+
+			GGlobalShaderMap.AddShader(meta, pShader);
+		}
+		else if (auto pBuiltInMeta = meta->GetBuiltInShaderType()) {
+			platform::Render::ShaderInitializer initializer;
+			initializer.pBlob = &blob;
+			initializer.pInfo = &Info;
+
+			auto pShaderRHI = Device.CreateShader(initializer);
+
+			RenderShader::CompiledShaderInitializer compileOuput;
+			compileOuput.Shader = pShaderRHI;
+			FillParameterMapByShaderInfo(compileOuput.ParameterMap, Info);
+
+			auto pShader = pBuiltInMeta->Construct(compileOuput);
+
+			GGlobalShaderMap.AddShader(meta, pShader);
+		}
+
+		co_return;
+	}
+
+	void CompileGlobalShaderMap()
+	{
 		LFL_DEBUG_DECL_TIMER(Commpile, "CompileGlobalShaderMap");
 
+		std::vector< leo::coroutine::Task<void>> tasks;
 		for (auto meta : ShaderMeta::GetTypeList())
 		{
-			
-			asset::X::Shader::ShaderCompilerInput input;
-
-			auto ShaderCode = platform::X::GenHlslShader(meta->GetSourceFileName());
-			input.Code = ShaderCode;
-			input.EntryPoint = meta->GetEntryPoint();
-			input.Type = meta->GetShaderType();
-
-			auto final_macros = asset::X::Shader::AppendCompileMacros({}, input.Type);
-
-			ShaderInfo Info{ input.Type };
-
-			LFL_DEBUG_DECL_TIMER(Commpile, sfmt("CompileGlobalShaderMap EntryPoint:%s ", input.EntryPoint.data()));
-			auto blob = asset::X::Shader::CompileAndReflect(input, final_macros,
-#ifndef NDEBUG
-				D3DFlags::D3DCOMPILE_DEBUG
-#else
-				D3DFlags::D3DCOMPILE_OPTIMIZATION_LEVEL3
-#endif
-				, &Info
-			);
-
-			if (IsRayTracingShader(meta->GetShaderType()))
-			{
-				platform::Render::RayTracingShaderInitializer initializer;
-				initializer.pBlob = &blob;
-				initializer.pInfo = &Info;
-
-				auto pRayTracingShaderRHI = RayDevice.CreateRayTracingSahder(initializer);
-
-				auto pShader = static_cast<BuiltInRayTracingShader*>(meta->Construct());
-
-				pShader->SetRayTracingShader(pRayTracingShaderRHI);
-
-				GGlobalShaderMap.AddShader(meta, pShader);
-			}
-			else if(auto pBuiltInMeta = meta->GetBuiltInShaderType()){
-				platform::Render::ShaderInitializer initializer;
-				initializer.pBlob = &blob;
-				initializer.pInfo = &Info;
-
-				auto pShaderRHI = Device.CreateShader(initializer);
-
-				RenderShader::CompiledShaderInitializer compileOuput;
-				compileOuput.Shader = pShaderRHI;
-				FillParameterMapByShaderInfo(compileOuput.ParameterMap, Info);
-
-				auto pShader = pBuiltInMeta->Construct(compileOuput);
-
-				GGlobalShaderMap.AddShader(meta, pShader);
-			}
+			auto task = Environment->Scheduler->Schedule(CompileShader(meta));
+			tasks.emplace_back(std::move(task));
 		}
+
+
+		while (true)
+		{
+			bool all_ready = true;
+			for (auto& task : tasks)
+			{
+				leo::coroutine::SyncWait(task);
+			}
+			if (all_ready)
+				break;
+		}
+		
 	}
 
 	void FillParameterMapByShaderInfo(ShaderParameterMap& target, const ShaderInfo& src)

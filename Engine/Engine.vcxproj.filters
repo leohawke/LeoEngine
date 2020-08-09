@@ -287,6 +287,15 @@
     <ClCompile Include="Render\PipelineStateUtility.cpp">
       <Filter>Render\DeviceInterface</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Coroutine\ThreadScheduler.cpp">
+      <Filter>Core\Coroutine</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Threading\ManualResetEvent.cpp">
+      <Filter>Core\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Threading\TaskScheduler.cpp">
+      <Filter>Core\Threading</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Context.h">
@@ -648,6 +657,24 @@
     <ClInclude Include="Render\RayTracingDefinitions.h">
       <Filter>Render\DeviceInterface</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Coroutine\Task.h">
+      <Filter>Core\Coroutine</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\ThreadScheduler.h">
+      <Filter>Core\Coroutine</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Threading\ManualResetEvent.h">
+      <Filter>Core\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\sync_wait_task.h">
+      <Filter>Core\Coroutine\details</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\SyncWait.h">
+      <Filter>Core\Coroutine</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Threading\TaskScheduler.h">
+      <Filter>Core\Threading</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
@@ -736,6 +763,12 @@
     </Filter>
     <Filter Include="Render\Core">
       <UniqueIdentifier>{5946ba9f-6d8d-4651-ad75-c68d4c6d7e43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Coroutine">
+      <UniqueIdentifier>{ed04117b-5f27-42a1-8c75-d5f552ae646e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Coroutine\details">
+      <UniqueIdentifier>{4729c41f-8d7d-4ed8-b252-8956f69e7282}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

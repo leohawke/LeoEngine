@@ -7,11 +7,14 @@
 #define LE_System_Environment_H 1
 
 #include "NinthTimer.h"
+#include "../Core/Threading/TaskScheduler.h"
 #include <LBase/lmemory.hpp>
 
 namespace LeoEngine::System {
 	struct GlobalEnvironment {
 		platform::chrono::NinthTimer* Timer;
+
+		leo::threading::TaskScheduler* Scheduler;
 
 		float Gamma;
 	};

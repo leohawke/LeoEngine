@@ -16,6 +16,10 @@ struct GlobalEnvironmentGurad {
 		static platform::chrono::NinthTimer Timer;
 		pEnvironment->Timer = &Timer;
 
+		//Taskµ˜∂»∆˜
+		static leo::threading::TaskScheduler Scheduler;
+		pEnvironment->Scheduler = &Scheduler;
+
 		pEnvironment->Gamma = 2.2f;
 
 		//±‡“ÎShader
