@@ -11,6 +11,14 @@
 
 using namespace leo;
 
+namespace std
+{
+	constexpr bool operator!=(const std::move_iterator<ValueNode::const_iterator>& l, const std::move_iterator<ValueNode::const_iterator>& r)
+	{
+		return l.base() != r.base();
+	}
+}
+
 namespace scheme
 {
 #define LS_Impl_LSLA1_Enable_TCO true

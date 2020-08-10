@@ -134,9 +134,7 @@ namespace leo
 	template<typename _tIter, typename _fTrans, typename _tReference = void>
 	class transformed_iterator : public iterator_operators_t<transformed_iterator<
 		_tIter, _fTrans, _tReference>, details::transit_traits<_tIter, _fTrans,
-		_tReference>>, private totally_ordered<transformed_iterator<_tIter, _fTrans,
-		_tReference>, typename
-		details::transit_traits<_tIter, _fTrans, _tReference>::iterator_type>
+		_tReference>>
 	{
 		static_assert(is_decayed<_tIter>(), "Invalid type found.");
 		static_assert(is_decayed<_fTrans>(), "Invalid type found.");
@@ -260,33 +258,43 @@ namespace leo
 
 		//@{
 		template<limpl(typename = void)>
+		friend lconstfn auto
+			operator<=>(const transformed_iterator& x, const transformed_iterator& y)
+			lnoexcept_spec(x.get() <=> y.get())
+		{
+			return x.get() <=> y.get();
+		}
+		template<limpl(typename = void)>
 		friend lconstfn bool
 			operator==(const transformed_iterator& x, const transformed_iterator& y)
-			lnoexcept_spec(bool(x.get() == y.get()))
+			lnoexcept_spec(x.get() == y.get())
 		{
 			return x.get() == y.get();
+		}
+		friend lconstfn bool
+			operator!=(const transformed_iterator& x, const transformed_iterator& y) noexcept
+		{
+			return !(x.get() == y.get());
+		}
+		template<limpl(typename = void)>
+		friend lconstfn auto
+			operator<=>(const transformed_iterator& x, const iterator_type& y)
+			lnoexcept_spec(x.get() <=> y)
+		{
+			return x.get() <=> y;
 		}
 		template<limpl(typename = void)>
 		friend lconstfn bool
 			operator==(const transformed_iterator& x, const iterator_type& y)
-			lnoexcept_spec(bool(x.get() == y))
+			lnoexcept_spec(x.get() == y)
 		{
 			return x.get() == y;
 		}
-
-		template<limpl(typename = void)>
 		friend lconstfn bool
-			operator<(const transformed_iterator& x, const transformed_iterator& y)
-			lnoexcept_spec(bool(x.get() < y.get()))
+			operator!=(const transformed_iterator& x, const iterator_type& y)
+			lnoexcept_spec(!(x.get() == y))
 		{
-			return bool(x.get() < y.get());
-		}
-		template<limpl(typename = void)>
-		friend lconstfn bool
-			operator<(const transformed_iterator& x, const iterator_type& y)
-			lnoexcept_spec(bool(x.get() < y))
-		{
-			return bool(x.get() < y);
+			return !(x.get() == y);
 		}
 
 		template<limpl(typename = void)>
