@@ -12,6 +12,7 @@
 
 #include "../Render/PipleState.h"
 #include "../Render/Effect/Effect.hpp"
+#include "../Core/Coroutine/Task.h"
 
 namespace asset
 {
@@ -216,5 +217,7 @@ namespace platform::X {
 	using path = std::filesystem::path;
 
 	std::string GenHlslShader(const path& filepath);
+
+	leo::coroutine::Task<std::string> GenHlslShaderAsync(const path& filepath);
 }
 

@@ -509,6 +509,18 @@ public:
 		co_yield ParseNode();
 		co_yield CreateAsset();
 	}
+
+	leo::coroutine::Task<std::shared_ptr<HLSLAsset>> GetAwaiter()
+	{
+		PreCreate();
+
+		//TODO co_await
+		LoadNode();
+
+		ParseNode();
+
+		co_return CreateAsset();
+	}
 private:
 	std::shared_ptr<AssetType> PreCreate()
 	{
@@ -541,4 +553,11 @@ std::string platform::X::GenHlslShader(const path& filepath)
 	auto pAsset = AssetResourceScheduler::Instance().SyncLoad<HLSLLoadingDesc>(filepath);
 
 	return pAsset->Code;;
+}
+
+leo::coroutine::Task<std::string> platform::X::GenHlslShaderAsync(const path& filepath)
+{
+	auto pAsset = co_await  AssetResourceScheduler::Instance().AsyncLoad<HLSLLoadingDesc>(filepath);
+
+	co_return pAsset->Code;
 }

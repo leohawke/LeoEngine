@@ -83,7 +83,7 @@ namespace platform::Render::Shader
 
 		asset::X::Shader::ShaderCompilerInput input;
 
-		auto ShaderCode = platform::X::GenHlslShader(meta->GetSourceFileName());
+		auto ShaderCode =co_await platform::X::GenHlslShaderAsync(meta->GetSourceFileName());
 		input.Code = ShaderCode;
 		input.EntryPoint = meta->GetEntryPoint();
 		input.Type = meta->GetShaderType();
