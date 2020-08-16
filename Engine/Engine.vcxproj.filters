@@ -296,6 +296,12 @@
     <ClCompile Include="Core\Threading\TaskScheduler.cpp">
       <Filter>Core\Threading</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Threading\AutoResetEvent.cpp">
+      <Filter>Core\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Coroutine\IOScheduler.cpp">
+      <Filter>Core\Coroutine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Context.h">
@@ -695,6 +701,15 @@
     </ClInclude>
     <ClInclude Include="Core\Coroutine\WhenAllReady.h">
       <Filter>Core\Coroutine</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Threading\AutoResetEvent.h">
+      <Filter>Core\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\IOScheduler.h">
+      <Filter>Core\Coroutine</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\io_state.h">
+      <Filter>Core\Coroutine\details</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

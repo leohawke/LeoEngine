@@ -1,5 +1,6 @@
 #pragma once
 
+#include <LBase/ldef.h>
 #include <experimental/coroutine>
 #include <type_traits>
 #include <optional>

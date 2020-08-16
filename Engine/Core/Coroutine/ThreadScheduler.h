@@ -1,7 +1,7 @@
 #pragma once
 
+#include <LBase/ldef.h>
 #include <experimental/coroutine>
-
 
 namespace leo::coroutine {
 	class ThreadScheduler
@@ -30,6 +30,8 @@ namespace leo::coroutine {
 		ThreadScheduler();
 	private:
 		void schedule_impl(schedule_operation* operation) noexcept;
+
+		void wake() noexcept;
 
 		void run() noexcept;
 

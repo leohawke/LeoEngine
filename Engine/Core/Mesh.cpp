@@ -1,10 +1,11 @@
+
+#include <LBase/smart_ptr.hpp>
 #include "Mesh.h"
 #include "../Render/IContext.h"
 #include "AssetResourceScheduler.h"
 #include "../Asset/MeshX.h"
 #include "../Render/IRayDevice.h"
 #include "../Render/IRayContext.h"
-#include <LBase/smart_ptr.hpp>
 
 namespace platform {
 	using namespace Render;

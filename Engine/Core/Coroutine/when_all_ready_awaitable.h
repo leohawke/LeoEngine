@@ -139,7 +139,7 @@ namespace leo::coroutine::details {
 	public:
 
 		explicit when_all_ready_awaitable(TASK_CONTAINER&& InTasks) noexcept
-			: counter(tasks.size())
+			: counter(InTasks.size())
 			, tasks(std::forward<TASK_CONTAINER>(InTasks))
 		{}
 

@@ -1,7 +1,9 @@
 #pragma once
 
+#include <LBase/ldef.h>
 #include "../Coroutine/Task.h"
 #include "../Coroutine/ThreadScheduler.h"
+#include "../Coroutine/IOScheduler.h"
 
 namespace leo::threading {
 	class TaskScheduler
@@ -18,6 +20,13 @@ namespace leo::threading {
 			co_await schedule();
 
 			co_return co_await awaitable;
+		}
+
+		leo::coroutine::IOScheduler& GetIOScheduler() noexcept;
+
+		[[nodiscard]] leo::coroutine::IOScheduler::schedule_operation schedule_io() noexcept
+		{
+			return GetIOScheduler().schedule();
 		}
 	private:
 		class Scheduler;

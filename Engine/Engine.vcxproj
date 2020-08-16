@@ -35,6 +35,7 @@
     <ClCompile Include="Core\AssetResourceScheduler.cpp" />
     <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Core\CameraController.cpp" />
+    <ClCompile Include="Core\Coroutine\IOScheduler.cpp" />
     <ClCompile Include="Core\Coroutine\ThreadScheduler.cpp" />
     <ClCompile Include="Core\Hash\CityHash.cpp" />
     <ClCompile Include="Core\LSLBuilder.cpp" />
@@ -42,6 +43,7 @@
     <ClCompile Include="Core\Materail.cpp" />
     <ClCompile Include="Core\Mesh.cpp" />
     <ClCompile Include="Core\ResourcesHolder.cpp" />
+    <ClCompile Include="Core\Threading\AutoResetEvent.cpp" />
     <ClCompile Include="Core\Threading\ManualResetEvent.cpp" />
     <ClCompile Include="Core\Threading\TaskScheduler.cpp" />
     <ClCompile Include="Renderer\imgui\imgui_context.cpp" />
@@ -147,6 +149,8 @@
     <ClInclude Include="Core\CameraController.h" />
     <ClInclude Include="Core\Coroutine\AwaitableTraits.h" />
     <ClInclude Include="Core\Coroutine\get_awaiter.h" />
+    <ClInclude Include="Core\Coroutine\IOScheduler.h" />
+    <ClInclude Include="Core\Coroutine\io_state.h" />
     <ClInclude Include="Core\Coroutine\is_awaiter.h" />
     <ClInclude Include="Core\Coroutine\SyncWait.h" />
     <ClInclude Include="Core\Coroutine\sync_wait_task.h" />
@@ -164,6 +168,7 @@
     <ClInclude Include="Core\Mesh.h" />
     <ClInclude Include="Core\Resource.h" />
     <ClInclude Include="Core\ResourcesHolder.h" />
+    <ClInclude Include="Core\Threading\AutoResetEvent.h" />
     <ClInclude Include="Core\Threading\ManualResetEvent.h" />
     <ClInclude Include="Core\Threading\TaskScheduler.h" />
     <ClInclude Include="emacro.h" />

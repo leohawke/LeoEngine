@@ -1,4 +1,6 @@
 #include "ThreadScheduler.h"
+#include "../Threading/AutoResetEvent.h"
+#include "../../System/SystemEnvironment.h"
 #include <atomic>
 #include <memory>
 #include <thread>
@@ -23,8 +25,40 @@ namespace leo::coroutine {
 			:queue(std::make_unique<std::atomic<schedule_operation*>[]>(
 				local::initial_local_queue_size)),
 			queue_head(0),
-			queue_tail(0)
+			queue_tail(0),
+			sleeping(false)
 		{}
+
+		bool wake_up()
+		{
+			if (sleeping.load(std::memory_order_seq_cst))
+			{
+				if (sleeping.exchange(false, std::memory_order_seq_cst))
+				{
+					wakeup_event.set();
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		void notify_intent_to_sleep() noexcept
+		{
+			sleeping.store(true, std::memory_order_relaxed);
+		}
+
+		void sleep_until_woken() noexcept
+		{
+			wakeup_event.wait();
+		}
+
+		bool has_any_queued_work() noexcept
+		{
+			auto tail = queue_head.load(std::memory_order_relaxed);
+			auto head = queue_tail.load(std::memory_order_seq_cst);
+			return difference(head, tail) > 0;
+		}
 
 		bool try_local_enqueue(schedule_operation*& operation) noexcept
 		{
@@ -41,7 +75,7 @@ namespace leo::coroutine {
 			auto head = queue_head.load(std::memory_order_relaxed);
 			auto tail = queue_tail.load(std::memory_order_relaxed);
 
-			if (static_cast<std::int64_t>(head - tail) <= 0)
+			if (difference(head,tail) <= 0)
 				return nullptr;
 
 			auto new_head = head - 1;
@@ -52,9 +86,19 @@ namespace leo::coroutine {
 		}
 
 	private:
+		using offset_t = std::make_signed_t<std::size_t>;
+
+		static constexpr offset_t difference(size_t a, size_t b)
+		{
+			return static_cast<offset_t>(a - b);
+		}
+
 		std::unique_ptr<std::atomic<schedule_operation*>[]> queue;
 		std::atomic<std::size_t> queue_head;
 		std::atomic<std::size_t> queue_tail;
+
+		std::atomic<bool> sleeping;
+		leo::threading::auto_reset_event wakeup_event;
 	};
 
 	void ThreadScheduler::schedule_operation::await_suspend(std::experimental::coroutine_handle<> continuation) noexcept
@@ -87,12 +131,23 @@ namespace leo::coroutine {
 
 				op->continuation_handle.resume();
 			}
+
+			current_state->notify_intent_to_sleep();
+			current_state->sleep_until_woken();
+
+			Environment->Scheduler->GetIOScheduler().process_one_pending_event();
 		}
 	}
 
 	void ThreadScheduler::schedule_impl(schedule_operation* oper) noexcept
 	{
 		current_state->try_local_enqueue(oper);
+		wake();
+	}
+
+	void ThreadScheduler::wake() noexcept
+	{
+		current_state->wake_up();
 	}
 
 }
