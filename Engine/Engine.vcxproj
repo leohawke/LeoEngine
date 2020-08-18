@@ -35,7 +35,11 @@
     <ClCompile Include="Core\AssetResourceScheduler.cpp" />
     <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Core\CameraController.cpp" />
+    <ClCompile Include="Core\Coroutine\file.coroutine.cpp" />
+    <ClCompile Include="Core\Coroutine\file_read_operation.cpp" />
     <ClCompile Include="Core\Coroutine\IOScheduler.cpp" />
+    <ClCompile Include="Core\Coroutine\readable_file.cpp" />
+    <ClCompile Include="Core\Coroutine\ReadOnlyFile.cpp" />
     <ClCompile Include="Core\Coroutine\ThreadScheduler.cpp" />
     <ClCompile Include="Core\Hash\CityHash.cpp" />
     <ClCompile Include="Core\LSLBuilder.cpp" />
@@ -148,10 +152,15 @@
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core\CameraController.h" />
     <ClInclude Include="Core\Coroutine\AwaitableTraits.h" />
+    <ClInclude Include="Core\Coroutine\file.h" />
+    <ClInclude Include="Core\Coroutine\filemode.h" />
+    <ClInclude Include="Core\Coroutine\file_read_operation.h" />
     <ClInclude Include="Core\Coroutine\get_awaiter.h" />
     <ClInclude Include="Core\Coroutine\IOScheduler.h" />
     <ClInclude Include="Core\Coroutine\io_state.h" />
     <ClInclude Include="Core\Coroutine\is_awaiter.h" />
+    <ClInclude Include="Core\Coroutine\readable_file.h" />
+    <ClInclude Include="Core\Coroutine\ReadOnlyFile.h" />
     <ClInclude Include="Core\Coroutine\SyncWait.h" />
     <ClInclude Include="Core\Coroutine\sync_wait_task.h" />
     <ClInclude Include="Core\Coroutine\Task.h" />

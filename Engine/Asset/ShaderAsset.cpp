@@ -1,4 +1,5 @@
 #include "ShaderAsset.h"
+#include "../System/SystemEnvironment.h"
 
 using namespace asset;
 using namespace platform::Render::Shader;
@@ -514,8 +515,7 @@ public:
 	{
 		PreCreate();
 
-		//TODO co_await
-		LoadNode();
+		co_await LoadNodeAsync(Environment->Scheduler->GetIOScheduler());
 
 		ParseNode();
 

@@ -302,6 +302,18 @@
     <ClCompile Include="Core\Coroutine\IOScheduler.cpp">
       <Filter>Core\Coroutine</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Coroutine\file_read_operation.cpp">
+      <Filter>Core\Coroutine</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Coroutine\readable_file.cpp">
+      <Filter>Core\Coroutine</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Coroutine\ReadOnlyFile.cpp">
+      <Filter>Core\Coroutine</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Coroutine\file.coroutine.cpp">
+      <Filter>Core\Coroutine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Context.h">
@@ -710,6 +722,21 @@
     </ClInclude>
     <ClInclude Include="Core\Coroutine\io_state.h">
       <Filter>Core\Coroutine\details</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\file_read_operation.h">
+      <Filter>Core\Coroutine</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\filemode.h">
+      <Filter>Core\Coroutine</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\file.h">
+      <Filter>Core\Coroutine</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\readable_file.h">
+      <Filter>Core\Coroutine</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\ReadOnlyFile.h">
+      <Filter>Core\Coroutine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

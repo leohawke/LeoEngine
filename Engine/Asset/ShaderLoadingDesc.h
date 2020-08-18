@@ -10,6 +10,8 @@
 
 #include "ShaderAsset.h"
 #include "LSLAssetX.h"
+#include "../Core/Coroutine/ReadOnlyFile.h"
+#include "../Core/Coroutine/IOScheduler.h"
 
 namespace platform::X
 {
@@ -77,6 +79,11 @@ namespace platform::X
 		void LoadNode()
 		{
 			shader_desc.data->term_node = *LoadNode(shader_desc.path).begin();
+		}
+
+		leo::coroutine::Task<void> LoadNodeAsync(leo::coroutine::IOScheduler& io)
+		{
+			shader_desc.data->term_node = *(co_await LoadNodeAsync(io, shader_desc.path)).begin();
 		}
 
 		void ParseNode()
@@ -156,6 +163,29 @@ namespace platform::X
 			}
 
 			CatchExpr(..., leo::rethrow_badstate(fin, std::ios_base::failbit))
+		}
+
+		template<typename path_type>
+		leo::coroutine::Task<scheme::TermNode> LoadNodeAsync(leo::coroutine::IOScheduler& io,const path_type& path) {
+			auto file = leo::coroutine::ReadOnlyFile::open(io, path);
+
+			constexpr size_t bufferSize = 4096;
+			auto buffer = std::make_unique<char[]>(bufferSize);
+
+			scheme::LexicalAnalyzer lexer;
+			for (std::uint64_t offset = 0, fileSize = file.size(); offset < fileSize;)
+			{
+				const auto bytesToRead = static_cast<size_t>(
+					std::min<std::uint64_t>(bufferSize, fileSize - offset));
+
+				const auto bytesRead = co_await file.read(offset, buffer.get(), bytesToRead);
+
+				std::for_each(buffer.get(), buffer.get() + bytesRead, [&](char c) {lexer.ParseByte(c);});
+
+				offset += bytesRead;
+			}
+
+			return scheme::SContext::Analyze(scheme::Tokenize(lexer.Literalize()));
 		}
 
 		void RecursiveReferNode(const ValueNode& effct_node, std::vector<std::pair<std::string, scheme::TermNode>>& includes) {

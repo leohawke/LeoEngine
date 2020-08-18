@@ -130,6 +130,8 @@ namespace leo::coroutine {
 					break;
 
 				op->continuation_handle.resume();
+
+				Environment->Scheduler->GetIOScheduler().process_one_pending_event();
 			}
 
 			current_state->notify_intent_to_sleep();
