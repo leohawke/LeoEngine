@@ -12,6 +12,7 @@
 #include "LSLAssetX.h"
 #include "../Core/Coroutine/ReadOnlyFile.h"
 #include "../Core/Coroutine/IOScheduler.h"
+#include "../System/SystemEnvironment.h"
 
 namespace platform::X
 {
@@ -146,6 +147,66 @@ namespace platform::X
 			shader_desc.shader_code = shader_desc.asset->GenHLSLShader();
 		}
 
+		leo::coroutine::Task<> ParseNodeAsync(leo::coroutine::IOScheduler& io)
+		{
+			auto& term_node = shader_desc.data->term_node;
+			auto tag = leo::Access<std::string>(*term_node.begin());
+			shader_desc.is_ray_tracing = tag == "RayTracing";
+
+			LAssert(tag == "effect" || tag == "RayTracing", R"(Invalid Format")");
+
+			std::vector<std::pair<std::string, scheme::TermNode>> refers;
+			co_await RecursiveReferNodeAsync(term_node, refers,io);
+
+			auto new_node = leo::MakeNode(leo::MakeIndex(0));
+
+			for (auto& pair : refers) {
+				for (auto& node : pair.second) {
+					new_node.try_emplace(leo::MakeIndex(new_node), std::make_pair(node.begin(), node.end()), leo::MakeIndex(new_node));
+				}
+			}
+
+			for (auto& node : term_node)
+				new_node.try_emplace(leo::MakeIndex(new_node), std::make_pair(node.begin(), node.end()), leo::MakeIndex(new_node));
+
+			term_node = new_node;
+
+			auto hash = [](auto param) {
+				return std::hash<decltype(param)>()(param);
+			};
+
+			ParseMacro(shader_desc.asset->GetMacrosRef(), term_node, false);
+			ParseConstatnBuffers(term_node);
+			//parser params
+			{
+				auto param_nodes = term_node.SelectChildren([&](const scheme::TermNode& child) {
+					if (child.empty())
+						return false;
+					try {
+						return  AssetType::GetType(leo::Access<std::string>(*child.begin())) != SPT_shader;
+					}
+					catch (leo::unsupported&) {
+						return false;
+					}
+					});
+				for (auto& param_node : param_nodes)
+					ParseParam(param_node, false);
+			}
+			{
+				auto fragments = X::SelectNodes("shader", term_node);
+				for (auto& fragment : fragments) {
+					shader_desc.asset->EmplaceShaderGenInfo(AssetType::FRAGMENT, shader_desc.asset->GetFragmentsRef().size(), std::stoul(fragment.GetName()));
+					shader_desc.asset->GetFragmentsRef().emplace_back();
+					shader_desc.asset->GetFragmentsRef().back().
+						GetFragmentRef() = scheme::Deliteralize(
+							leo::Access<std::string>(*fragment.rbegin())
+						);
+				}
+			}
+			shader_desc.asset->PrepareShaderGen();
+			shader_desc.shader_code = shader_desc.asset->GenHLSLShader();
+		}
+
 		template<typename path_type>
 		scheme::TermNode LoadNode(const path_type& path) {
 			std::ifstream fin(path);
@@ -185,6 +246,8 @@ namespace platform::X
 				offset += bytesRead;
 			}
 
+			co_await Environment->Scheduler->schedule();
+
 			return scheme::SContext::Analyze(scheme::Tokenize(lexer.Literalize()));
 		}
 
@@ -200,6 +263,30 @@ namespace platform::X
 
 				auto include_node = *LoadNode(path).begin();
 				RecursiveReferNode(include_node, includes);
+
+				if (std::find_if(includes.begin(), includes.end(), [&path](const std::pair<std::string, scheme::TermNode>& pair)
+					{
+						return pair.first == path;
+					}
+				) == includes.end())
+				{
+					includes.emplace_back(path, include_node);
+				}
+			}
+		}
+
+		leo::coroutine::Task<> RecursiveReferNodeAsync(const ValueNode& effct_node, std::vector<std::pair<std::string, scheme::TermNode>>& includes, leo::coroutine::IOScheduler& io) {
+			auto refer_nodes = effct_node.SelectChildren([&](const scheme::TermNode& child) {
+				if (child.size()) {
+					return leo::Access<std::string>(*child.begin()) == "refer";
+				}
+				return false;
+				});
+			for (auto& refer_node : refer_nodes) {
+				auto path = leo::Access<std::string>(*refer_node.rbegin());
+
+				auto include_node = *(co_await LoadNodeAsync(io,path)).begin();
+				co_await RecursiveReferNodeAsync(include_node, includes,io);
 
 				if (std::find_if(includes.begin(), includes.end(), [&path](const std::pair<std::string, scheme::TermNode>& pair)
 					{

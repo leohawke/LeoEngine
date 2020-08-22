@@ -50,6 +50,7 @@
     <ClCompile Include="Core\Threading\AutoResetEvent.cpp" />
     <ClCompile Include="Core\Threading\ManualResetEvent.cpp" />
     <ClCompile Include="Core\Threading\TaskScheduler.cpp" />
+    <ClCompile Include="Core\Threading\Win32Thread.cpp" />
     <ClCompile Include="Renderer\imgui\imgui_context.cpp" />
     <ClCompile Include="Renderer\PostProcess\PostProcessCombineLUTs.cpp" />
     <ClCompile Include="Renderer\PostProcess\PostProcessToneMap.cpp" />

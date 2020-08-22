@@ -21,6 +21,12 @@ namespace leo::coroutine {
 
 		std::uint64_t process_one_pending_event();
 
+		/// Process events until the io_service is stopped.
+		///
+		/// \return
+		/// The number of events processed during this call.
+		std::uint64_t process_events();
+
 		void* native_iocp_handle() noexcept;
 	private:
 		friend class schedule_operation;

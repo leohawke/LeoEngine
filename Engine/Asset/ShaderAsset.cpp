@@ -517,7 +517,8 @@ public:
 
 		co_await LoadNodeAsync(Environment->Scheduler->GetIOScheduler());
 
-		ParseNode();
+		co_await ParseNodeAsync(Environment->Scheduler->GetIOScheduler());
+
 
 		co_return CreateAsset();
 	}

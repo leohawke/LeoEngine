@@ -15,6 +15,10 @@ namespace
 	}
 }
 
+namespace leo::threading {
+	void SetThreadDescription(void* hThread, const wchar_t* lpThreadDescription);
+}
+
 namespace leo::coroutine {
 	class ThreadScheduler::thread_state
 	{
@@ -112,6 +116,11 @@ namespace leo::coroutine {
 	{
 		std::thread fire_forget([this] {this->run(); });
 
+		static int thread_count = 0;
+		auto descirption = leo::sfmt(L"Scheduler Thread %d", thread_count++);
+
+		leo::threading::SetThreadDescription(fire_forget.native_handle(), descirption.c_str());
+
 		fire_forget.detach();
 	}
 
@@ -130,8 +139,6 @@ namespace leo::coroutine {
 					break;
 
 				op->continuation_handle.resume();
-
-				Environment->Scheduler->GetIOScheduler().process_one_pending_event();
 			}
 
 			current_state->notify_intent_to_sleep();

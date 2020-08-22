@@ -61,6 +61,23 @@ namespace leo::coroutine {
 		return eventCount;
 	}
 
+	std::uint64_t coroutine::IOScheduler::process_events()
+	{
+		std::uint64_t eventCount = 0;
+		if (try_enter_event_loop())
+		{
+			constexpr bool waitForEvent = true;
+			while (try_process_one_event(waitForEvent))
+			{
+				++eventCount;
+			}
+
+			exit_event_loop();
+		}
+
+		return eventCount;
+	}
+
 	bool IOScheduler::try_enter_event_loop() noexcept
 	{
 		auto currentState = thread_state.load(std::memory_order_relaxed);

@@ -314,6 +314,9 @@
     <ClCompile Include="Core\Coroutine\file.coroutine.cpp">
       <Filter>Core\Coroutine</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Threading\Win32Thread.cpp">
+      <Filter>Core\Threading</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Context.h">
