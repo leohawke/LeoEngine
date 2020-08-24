@@ -5,6 +5,7 @@
 #include <memory>
 #include <thread>
 #include <mutex>
+#include <queue>
 
 namespace
 {
@@ -200,6 +201,7 @@ namespace leo::threading {
 
 		std::atomic<leo::coroutine::ThreadScheduler::schedule_operation*> queue_tail;
 		std::atomic<leo::coroutine::ThreadScheduler::schedule_operation*> queue_head;
+
 		leo::coroutine::IOScheduler io_scheduler;
 		leo::coroutine::ThreadScheduler* schedulers;
 		unsigned int max_scheduler;
@@ -231,14 +233,7 @@ namespace leo::threading {
 		wake_one_thread();
 	}
 
-	void TaskScheduler::remote_enqueue(leo::coroutine::ThreadScheduler::schedule_operation* operation) noexcept
-	{
-		auto* tail = scheduler_impl->queue_tail.load(std::memory_order_relaxed);
-		do {
-			operation->next_oper = tail;
-		} while (scheduler_impl->queue_tail.compare_exchange_weak(tail, operation, std::memory_order_seq_cst,
-			std::memory_order_relaxed));
-	}
+	
 
 	void TaskScheduler::wake_one_thread() noexcept
 	{
@@ -256,6 +251,17 @@ namespace leo::threading {
 	}
 
 	std::mutex queue_head_mutex;
+
+
+	void TaskScheduler::remote_enqueue(leo::coroutine::ThreadScheduler::schedule_operation* operation) noexcept
+	{
+		auto* tail = scheduler_impl->queue_tail.load(std::memory_order_relaxed);
+		do {
+			operation->next_oper = tail;
+		} while (!scheduler_impl->queue_tail.compare_exchange_weak(tail, operation, std::memory_order_seq_cst,
+			std::memory_order_relaxed));
+	}
+
 	leo::coroutine::ThreadScheduler::schedule_operation* TaskScheduler::get_remote() noexcept
 	{
 		std::scoped_lock lock{ queue_head_mutex };
