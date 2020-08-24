@@ -40,7 +40,6 @@
     <ClCompile Include="Core\Coroutine\IOScheduler.cpp" />
     <ClCompile Include="Core\Coroutine\readable_file.cpp" />
     <ClCompile Include="Core\Coroutine\ReadOnlyFile.cpp" />
-    <ClCompile Include="Core\Coroutine\ThreadScheduler.cpp" />
     <ClCompile Include="Core\Hash\CityHash.cpp" />
     <ClCompile Include="Core\LSLBuilder.cpp" />
     <ClCompile Include="Core\LSLEvaluator.cpp" />

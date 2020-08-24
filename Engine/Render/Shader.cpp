@@ -92,7 +92,7 @@ namespace platform::Render::Shader
 
 		ShaderInfo Info{ input.Type };
 
-		LFL_DEBUG_DECL_TIMER(Commpile, sfmt("CompileGlobalShaderMap EntryPoint:%s ", input.EntryPoint.data()));
+		LFL_DEBUG_DECL_TIMER(Commpile, sfmt("CompileShader %s- Entry:%s ", meta->GetSourceFileName().c_str(), input.EntryPoint.data()));
 		auto blob = asset::X::Shader::CompileAndReflect(input, final_macros,
 #ifndef NDEBUG
 			D3DFlags::D3DCOMPILE_DEBUG

@@ -19,7 +19,7 @@ namespace leo::threading {
 		{
 			co_await schedule();
 
-			co_return co_await awaitable;
+			co_return co_await std::move(awaitable);
 		}
 
 		leo::coroutine::IOScheduler& GetIOScheduler() noexcept;
@@ -29,6 +29,16 @@ namespace leo::threading {
 			return GetIOScheduler().schedule();
 		}
 	private:
+		friend class leo::coroutine::ThreadScheduler;
+
+		void schedule_impl(leo::coroutine::ThreadScheduler::schedule_operation* operation) noexcept;
+
+		void remote_enqueue(leo::coroutine::ThreadScheduler::schedule_operation* operation) noexcept;
+
+		void wake_one_thread() noexcept;
+
+		leo::coroutine::ThreadScheduler::schedule_operation* get_remote() noexcept;
+
 		class Scheduler;
 
 		Scheduler* scheduler_impl;

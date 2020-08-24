@@ -287,9 +287,6 @@
     <ClCompile Include="Render\PipelineStateUtility.cpp">
       <Filter>Render\DeviceInterface</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Coroutine\ThreadScheduler.cpp">
-      <Filter>Core\Coroutine</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Threading\ManualResetEvent.cpp">
       <Filter>Core\Threading</Filter>
     </ClCompile>

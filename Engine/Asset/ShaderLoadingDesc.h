@@ -241,12 +241,12 @@ namespace platform::X
 
 				const auto bytesRead = co_await file.read(offset, buffer.get(), bytesToRead);
 
+				co_await Environment->Scheduler->schedule();
+
 				std::for_each(buffer.get(), buffer.get() + bytesRead, [&](char c) {lexer.ParseByte(c);});
 
 				offset += bytesRead;
 			}
-
-			co_await Environment->Scheduler->schedule();
 
 			return scheme::SContext::Analyze(scheme::Tokenize(lexer.Literalize()));
 		}
