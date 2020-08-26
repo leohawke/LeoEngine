@@ -17,9 +17,39 @@
 "
 static const float FLT_MAX = asfloat(0x7F7FFFFF);
 
+static const float DENOISER_INVALID_HIT_DISTANCE = -2.0;
+static const float DENOISER_MISS_HIT_DISTANCE = -1.0;
+
 uint CalcLinearIndex(uint2 PixelCoord)
 {
 	return PixelCoord.y * uint(Resolution.x) + PixelCoord.x;
+}
+
+struct OcclusionResult
+{
+	float Visibility;
+	float HitCount;
+	float ClosestRayDistance;
+	float RayCount;
+}
+
+float OcclusionToShadow(OcclusionResult In, uint LocalSamplesPerPixel)
+{
+	return (LocalSamplesPerPixel > 0) ? In.Visibility / LocalSamplesPerPixel : In.Visibility;
+}
+
+
+
+OcclusionResult InitOcclusionResult()
+{
+	OcclusionResult Out;
+
+	Out.Visibility = 0.0;
+	Out.ClosestRayDistance = DENOISER_INVALID_HIT_DISTANCE;
+	Out.HitCount = 0.0;
+	Out.RayCount = 0.0;
+
+	return Out;
 }
 
 RAY_TRACING_ENTRY_RAYGEN(RayGen)
@@ -49,8 +79,7 @@ RAY_TRACING_ENTRY_RAYGEN(RayGen)
 	uint LinearIndex = CalcLinearIndex(PixelCoord);
 	RandomSequence_Initialize(RandSequence, LinearIndex, StateFrameIndex);
 
-	float RayCount = 0;
-	float Visibility =0;
+	OcclusionResult Out = InitOcclusionResult();
 	for(uint SampleIndex =0;SampleIndex <SamplesPerPixel;++SampleIndex)
 	{
 		uint DummyVariable;
@@ -79,14 +108,35 @@ RAY_TRACING_ENTRY_RAYGEN(RayGen)
 			RayDirection,
 			RayTMax };
 
+		uint RayFlags = 0;
+
+		RayFlags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
+
+		RayFlags |= RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH;
+
 		FMinimalPayload payload = {-1};
 
-		TraceRay(TLAS, RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH, ~0,0,1,0, rayDesc, payload);
+		TraceRay(TLAS, RayFlags, ~0,0,1,0, rayDesc, payload);
 
-		RayCount += 1.0;
-		Visibility += payload.IsMiss() ? 1.0:0.0;
+		Out.RayCount += 1.0;
+		Out.Visibility += payload.IsMiss() ? 1.0:0.0;
+
+		if(payload.IsHit())
+		{
+			Out.ClosestRayDistance =
+				(Out.ClosestRayDistance == DENOISER_INVALID_HIT_DISTANCE) ||
+				(payload.HitT < Out.ClosestRayDistance) ? payload.HitT : Out.ClosestRayDistance;
+			Out.HitCount += 1.0;
+		}
+		else
+		{
+			Out.ClosestRayDistance = (Out.ClosestRayDistance == DENOISER_INVALID_HIT_DISTANCE) ? DENOISER_MISS_HIT_DISTANCE : Out.ClosestRayDistance;
+		}
 	}
-	Output[DispatchRaysIndex().xy].x = Visibility/RayCount;
+
+	const float Shadow = OcclusionToShadow(Occlusion, SamplesPerPixel);
+
+	Output[DispatchRaysIndex().xy] =float4(Shadow,Out.ClosestRayDistance,0,0);
 }
 "
 	)

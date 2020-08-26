@@ -82,17 +82,19 @@ namespace platform::Render::Shader
 		auto& RayDevice = Context::Instance().GetRayContext().GetDevice();
 
 		asset::X::Shader::ShaderCompilerInput input;
-
-		auto ShaderCode =co_await platform::X::GenHlslShaderAsync(meta->GetSourceFileName());
-		input.Code = ShaderCode;
 		input.EntryPoint = meta->GetEntryPoint();
 		input.Type = meta->GetShaderType();
+		input.SourceName = meta->GetSourceFileName();
+
+		LFL_DEBUG_DECL_TIMER(Commpile, sfmt("CompileShader %s- Entry:%s ", input.SourceName.data(), input.EntryPoint.data()));
+
+		auto Code = co_await platform::X::GenHlslShaderAsync(meta->GetSourceFileName());
+		input.Code = Code;
 
 		auto final_macros = asset::X::Shader::AppendCompileMacros({}, input.Type);
 
 		ShaderInfo Info{ input.Type };
 
-		LFL_DEBUG_DECL_TIMER(Commpile, sfmt("CompileShader %s- Entry:%s ", meta->GetSourceFileName().c_str(), input.EntryPoint.data()));
 		auto blob = asset::X::Shader::CompileAndReflect(input, final_macros,
 #ifndef NDEBUG
 			D3DFlags::D3DCOMPILE_DEBUG

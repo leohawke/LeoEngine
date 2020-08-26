@@ -84,7 +84,7 @@ namespace platform::X
 
 		leo::coroutine::Task<void> LoadNodeAsync(leo::coroutine::IOScheduler& io)
 		{
-			shader_desc.data->term_node = *(co_await LoadNodeAsync(io, shader_desc.path)).begin();
+			shader_desc.data->term_node = *(co_await LoadNodeAsync(io, shader_desc.path.string())).begin();
 		}
 
 		void ParseNode()
@@ -226,8 +226,7 @@ namespace platform::X
 			CatchExpr(..., leo::rethrow_badstate(fin, std::ios_base::failbit))
 		}
 
-		template<typename path_type>
-		leo::coroutine::Task<scheme::TermNode> LoadNodeAsync(leo::coroutine::IOScheduler& io,const path_type& path) {
+		leo::coroutine::Task<scheme::TermNode> LoadNodeAsync(leo::coroutine::IOScheduler& io,const std::string& path) {
 			auto file = leo::coroutine::ReadOnlyFile::open(io, path);
 
 			constexpr size_t bufferSize = 4096;

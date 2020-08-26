@@ -1,5 +1,6 @@
 #include <LFramework/LCLib/Platform.h>
 #include <LFramework/Win32/LCLib/COM.h>
+#include "LFramework/Helper/ShellHelper.h"
 #include <LFramework/Core/LString.h>
 #include "D3DShaderCompiler.h"
 #include "../Render/IContext.h"
@@ -774,6 +775,8 @@ namespace asset::X::Shader
 		bool use_dxc = IsRayTracingShader(input.Type);
 
 		bool use_dxbc = !use_dxc;
+
+		LFL_DEBUG_DECL_TIMER(Commpile, sfmt("CompileAndReflect %s- Entry:%s ", input.SourceName.data(), input.EntryPoint.data()));
 
 		if (use_dxbc)
 		{

@@ -115,6 +115,38 @@ namespace leo::coroutine {
 			void value() noexcept
 			{}
 		};
+
+		template<typename T>
+		class task_promise<T&> : public task_promise_base
+		{
+		public:
+			task_promise() noexcept = default;
+
+			Task<T&> get_return_object() noexcept;
+
+			void unhandled_exception() noexcept
+			{
+				m_exception = std::current_exception();
+			}
+
+			void return_value(T & value) noexcept
+			{
+				m_value = std::addressof(value);
+			}
+
+			T& value()
+			{
+				if (m_exception)
+				{
+					std::rethrow_exception(m_exception);
+				}
+
+				return *m_value;
+			}
+		private:
+			T* m_value = nullptr;
+			std::exception_ptr m_exception;
+		};
 	}
 
 	template<typename T = void>
@@ -235,6 +267,12 @@ namespace leo::coroutine {
 		inline Task<void> task_promise<void>::get_return_object() noexcept
 		{
 			return Task<void>{ std::experimental::coroutine_handle<task_promise>::from_promise(*this) };
+		}
+
+		template<typename T>
+		Task<T&> task_promise<T&>::get_return_object() noexcept
+		{
+			return Task<T&>{ std::experimental::coroutine_handle<task_promise>::from_promise(*this) };
 		}
 	}
 

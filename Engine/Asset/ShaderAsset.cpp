@@ -1,5 +1,6 @@
 #include "ShaderAsset.h"
 #include "../System/SystemEnvironment.h"
+#include "LFramework/Helper/ShellHelper.h"
 
 using namespace asset;
 using namespace platform::Render::Shader;
@@ -515,10 +516,14 @@ public:
 	{
 		PreCreate();
 
-		co_await LoadNodeAsync(Environment->Scheduler->GetIOScheduler());
-
-		co_await ParseNodeAsync(Environment->Scheduler->GetIOScheduler());
-
+		{
+			LFL_DEBUG_DECL_TIMER(Commpile, sfmt("LoadNode %s", Path().string().c_str()));
+			co_await LoadNodeAsync(Environment->Scheduler->GetIOScheduler());
+		}
+		{
+			LFL_DEBUG_DECL_TIMER(Commpile, sfmt("ParseNode %s", Path().string().c_str()));
+			co_await ParseNodeAsync(Environment->Scheduler->GetIOScheduler());
+		}
 
 		co_return CreateAsset();
 	}
