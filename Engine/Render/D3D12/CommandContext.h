@@ -25,6 +25,22 @@ namespace platform_ex::Windows::D3D12 {
 	public:
 		CommandContext(NodeDevice* InParent, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc, bool InIsDefaultContext, bool InIsAsyncComputeContext = false);
 	public:
+		void SetComputeShader(platform::Render::ComputeHWShader* ComputeShader) override;
+
+		void DispatchComputeShader(uint32 ThreadGroupCountX, uint32 ThreadGroupCountY, uint32 ThreadGroupCountZ) override;
+
+		void SetShaderTexture(platform::Render::ComputeHWShader* Shader, uint32 TextureIndex, platform::Render::Texture* Texture) override;
+
+		void SetShaderSampler(platform::Render::ComputeHWShader* Shader, uint32 SamplerIndex, const platform::Render::TextureSampleDesc& Desc) override;
+
+		void SetUAVParameter(platform::Render::ComputeHWShader* Shader, uint32 UAVIndex, platform::Render::UnorderedAccessView* UAV) override;
+
+		void SetUAVParameter(platform::Render::ComputeHWShader* Shader, uint32 UAVIndex, platform::Render::UnorderedAccessView* UAV, uint32 InitialCount) override;
+
+		void SetShaderParameter(platform::Render::ComputeHWShader* Shader, uint32 BufferIndex, uint32 BaseIndex, uint32 NumBytes, const void* NewValue) override;
+
+		void SetComputePipelineState(ComputePipelineState* ComputeState);
+
 		void BeginRenderPass(const platform::Render::RenderPassInfo& Info, const char* Name) override;
 
 		void SetViewport(uint32 MinX, uint32 MinY, float MinZ, uint32 MaxX, uint32 MaxY, float MaxZ) override;
@@ -76,6 +92,9 @@ namespace platform_ex::Windows::D3D12 {
 
 		void CommitGraphicsResourceTables();
 		void CommitNonComputeShaderConstants();
+
+		void CommitComputeShaderConstants();
+		void CommitComputeResourceTables(ComputeHWShader* ComputeShader);
 
 		CommandListManager& GetCommandListManager();
 

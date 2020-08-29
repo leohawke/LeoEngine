@@ -301,4 +301,10 @@ namespace platform_ex::Windows::D3D12
 		D3DPipelineStateCache(D3D12Adapter* InParent);
 		virtual ~D3DPipelineStateCache();
 	};
+
+	class ComputePipelineState :public platform::Render::ComputePipelineState
+	{
+	public:
+		ComputeHWShader* ComputeShader;
+	};
 }

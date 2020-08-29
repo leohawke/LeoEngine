@@ -270,6 +270,11 @@ namespace platform_ex::Windows::D3D12 {
 		return PSOCache.CreateAndAdd(initializer, RootSignature, LowLevelDesc);
 	}
 
+	ComputePipelineState* D3D12::Device::CreateComputePipelineState(const platform::Render::ComputeHWShader* ComputeShader)
+	{
+		return nullptr;
+	}
+
 	UnorderedAccessView* Device::CreateUnorderedAccessView(platform::Render::Texture2D* InTexture)
 	{
 		return std::make_unique<UnorderedAccessView>(Devices[0],CreateUAVDesc(*InTexture, 0, InTexture->GetArraySize(), 0),static_cast<Texture2D&>(*InTexture)).release();
@@ -310,6 +315,15 @@ namespace platform_ex::Windows::D3D12 {
 			return new PixelHWShader(initializer);
 		case platform::Render::GeometryShader:
 			return new GeometryHWShader(initializer);
+		case platform::Render::ComputeShader:
+		{
+			ComputeHWShader* Shader = new ComputeHWShader(initializer);
+			QuantizedBoundShaderState QBSS;
+			QuantizeBoundShaderState(GetResourceBindingTier(), Shader, QBSS);
+
+			Shader->pRootSignature = root_signatures->GetRootSignature(QBSS);
+			return Shader;
+		}
 		}
 		LAssert(false, "unimpl shader type");
 		return nullptr;

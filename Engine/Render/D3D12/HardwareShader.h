@@ -4,6 +4,8 @@
 #include "Utility.h"
 
 namespace platform_ex::Windows::D3D12 {
+	class RootSignature;
+
 	class D3D12HardwareShader
 	{
 	public:
@@ -61,5 +63,13 @@ namespace platform_ex::Windows::D3D12 {
 	{
 	public:
 		using D3D12HardwareShader::D3D12HardwareShader;
+	};
+
+	class ComputeHWShader : public platform::Render::ComputeHWShader, public D3D12HardwareShader
+	{
+	public:
+		using D3D12HardwareShader::D3D12HardwareShader;
+
+		const RootSignature* pRootSignature;
 	};
 }

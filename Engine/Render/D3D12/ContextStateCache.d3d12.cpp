@@ -72,6 +72,30 @@ void CommandContextStateCache::SetStencilRef(uint32 StencilRef)
 	}
 }
 
+void CommandContextStateCache::SetComputeShader(ComputeHWShader* Shader)
+{
+	ComputeHWShader* CurrentShader = nullptr;
+	GetComputeShader(&CurrentShader);
+	if (CurrentShader != Shader)
+	{
+		// See if we need to change the root signature
+		const auto* const pCurrentRootSignature = CurrentShader ? CurrentShader->pRootSignature : nullptr;
+		const auto* const pNewRootSignature = Shader ? Shader->pRootSignature : nullptr;
+		if (pCurrentRootSignature != pNewRootSignature)
+		{
+			PipelineState.Compute.bNeedSetRootSignature = true;
+		}
+
+		PipelineState.Common.CurrentShaderSamplerCounts[ShaderType::ComputeShader] = (Shader) ? Shader->ResourceCounts.NumSamplers : 0;
+		PipelineState.Common.CurrentShaderSRVCounts[ShaderType::ComputeShader] = (Shader) ? Shader->ResourceCounts.NumSRVs : 0;
+		PipelineState.Common.CurrentShaderCBCounts[ShaderType::ComputeShader] = (Shader) ? Shader->ResourceCounts.NumCBs : 0;
+		PipelineState.Common.CurrentShaderUAVCounts[ShaderType::ComputeShader] = (Shader) ? Shader->ResourceCounts.NumUAVs : 0;
+
+		// Shader changed so its resource table is dirty
+		CmdContext->DirtyConstantBuffers[ShaderType::ComputeShader] = 0xffff;
+	}
+}
+
 void CommandContextStateCache::InternalSetIndexBuffer(ResourceHolder* IndexBufferLocation, DXGI_FORMAT Format, uint32 Offset)
 {
 	auto& CommandList = CmdContext->CommandListHandle;

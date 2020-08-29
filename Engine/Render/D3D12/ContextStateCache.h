@@ -295,6 +295,15 @@ namespace platform_ex::Windows::D3D12 {
 
 			struct
 			{
+				//Cache
+				ComputePipelineState* CurrentPipelineStateObject;
+
+				// Note: Current root signature is part of the bound compute shader, which is part of the PSO
+				bool bNeedSetRootSignature;
+			} Compute;
+
+			struct
+			{
 				ShaderResourceViewCache SRVCache;
 				ConstantBufferCache CBVCache;
 				UnorderedAccessViewCache UAVCache;
@@ -604,6 +613,26 @@ namespace platform_ex::Windows::D3D12 {
 				// Set the PSO
 				InternalSetPipelineState<CPT_Graphics>();
 			}
+		}
+
+		void  SetComputePipelineState(ComputePipelineState* ComputePipelineState)
+		{
+			if (PipelineState.Compute.CurrentPipelineStateObject != ComputePipelineState)
+			{
+				// Save the PSO
+				PipelineState.Common.bNeedSetPSO = true;
+				PipelineState.Compute.CurrentPipelineStateObject = ComputePipelineState;
+
+				// Set the PSO
+				InternalSetPipelineState<CPT_Compute>();
+			}
+		}
+
+		void SetComputeShader(ComputeHWShader* Shader);
+
+		void GetComputeShader(ComputeHWShader** ComputeShader) const
+		{
+			*ComputeShader = PipelineState.Compute.CurrentPipelineStateObject ? PipelineState.Compute.CurrentPipelineStateObject->ComputeShader : nullptr;
 		}
 
 		void SetStreamStrides(const uint16* InStreamStrides)

@@ -690,3 +690,83 @@ void CommandContext::ClearMRT(bool bClearColor, int32 NumClearColors, const leo:
 		}
 	}
 }
+
+void CommandContext::SetComputeShader(platform::Render::ComputeHWShader* ComputeShader)
+{
+	auto ComputePipelineState = GetParentAdapter()->CreateComputePipelineState(ComputeShader);
+
+	SetComputePipelineState(ComputePipelineState);
+}
+
+void CommandContext::DispatchComputeShader(uint32 ThreadGroupCountX, uint32 ThreadGroupCountY, uint32 ThreadGroupCountZ)
+{
+	ComputeHWShader* ComputeShader = nullptr;
+	StateCache.GetComputeShader(&ComputeShader);
+
+	if (ComputeShader->bGlobalUniformBufferUsed)
+	{
+		CommitComputeShaderConstants();
+	}
+
+	CommitComputeResourceTables(ComputeShader);
+	StateCache.ApplyState<CPT_Compute>();
+
+	CommandListHandle->Dispatch(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);
+}
+
+void CommandContext::SetShaderTexture(platform::Render::ComputeHWShader* Shader, uint32 TextureIndex, platform::Render::Texture* ITexture)
+{
+	auto SRV = dynamic_cast_texture(ITexture)->RetriveShaderResourceView();
+
+	StateCache.SetShaderResourceView<ShaderType::ComputeShader>(SRV, TextureIndex);
+}
+
+void CommandContext::SetShaderSampler(platform::Render::ComputeHWShader* Shader, uint32 SamplerIndex, const platform::Render::TextureSampleDesc& Desc)
+{
+	auto pSampler = GetParentDevice()->CreateSampler(Convert(Desc));
+
+	StateCache.SetSamplerState<ShaderType::ComputeShader>(pSampler.get(), SamplerIndex);
+}
+
+void CommandContext::SetUAVParameter(platform::Render::ComputeHWShader* Shader, uint32 UAVIndex, platform::Render::UnorderedAccessView* IUAV)
+{
+	auto UAV = static_cast<UnorderedAccessView*>(IUAV);
+
+	uint32 InitialCount = -1;
+
+	StateCache.SetUAVs<ShaderType::ComputeShader>(UAVIndex, 1, &UAV, &InitialCount);
+}
+
+void CommandContext::SetUAVParameter(platform::Render::ComputeHWShader* Shader, uint32 UAVIndex, platform::Render::UnorderedAccessView* IUAV, uint32 InitialCount)
+{
+	auto UAV = static_cast<UnorderedAccessView*>(IUAV);
+
+	//Clear ShaderResource
+
+	StateCache.SetUAVs<ShaderType::ComputeShader>(UAVIndex, 1, &UAV, &InitialCount);
+}
+
+void CommandContext::SetShaderParameter(platform::Render::ComputeHWShader* Shader, uint32 BufferIndex, uint32 BaseIndex, uint32 NumBytes, const void* NewValue)
+{
+	lconstraint(BufferIndex == 0);
+	CSConstantBuffer.UpdateConstant(reinterpret_cast<const uint8*>(NewValue), BaseIndex, NumBytes);
+}
+
+void CommandContext::SetComputePipelineState(ComputePipelineState* ComputeState)
+{
+	StateCache.TransitionComputeState(CPT_Compute);
+
+	StateCache.SetComputeShader(ComputeState->ComputeShader);
+	StateCache.SetComputePipelineState(ComputeState);
+}
+
+void CommandContext::CommitComputeShaderConstants()
+{
+	StateCache.SetConstantBuffer<ShaderType::ComputeShader>(CSConstantBuffer, bDiscardSharedConstants);
+}
+
+
+void CommandContext::CommitComputeResourceTables(ComputeHWShader* ComputeShader)
+{
+	//don't support UE4 ShaderResourceTable
+}

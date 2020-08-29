@@ -107,4 +107,13 @@ namespace platform_ex::Windows::D3D12 {
 			return (Hash[0] != b.Hash[0] || Hash[1] != b.Hash[1]);
 		}
 	};
+
+	class ComputeHWShader;
+	struct QuantizedBoundShaderState;
+
+	void QuantizeBoundShaderState(
+		const D3D12_RESOURCE_BINDING_TIER& ResourceBindingTier,
+		const ComputeHWShader* const ComputeShader,
+		QuantizedBoundShaderState& OutQBSS
+	);
 }
