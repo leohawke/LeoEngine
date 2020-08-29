@@ -43,6 +43,9 @@ namespace platform::Render {
 	class GeometryHWShader : public HardwareShader
 	{};
 
+	class ComputeHWShader : public HardwareShader
+	{};
+
 
 	struct ShaderPassInput
 	{

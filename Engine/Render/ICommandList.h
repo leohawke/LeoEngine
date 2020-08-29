@@ -13,6 +13,7 @@ namespace platform::Render {
 		void SetContext(CommandContext* InContext)
 		{
 			Context = InContext;
+			ComputeContext = InContext;
 		}
 
 		CommandContext& GetContext()
@@ -20,9 +21,15 @@ namespace platform::Render {
 			return *Context;
 		}
 
+		ComputeContext& GetComputeContext()
+		{
+			return *ComputeContext;
+		}
+
 		void Reset();
 	private:
 		CommandContext* Context;
+		ComputeContext* ComputeContext;
 	};
 
 
@@ -98,7 +105,6 @@ namespace platform::Render {
 			GetContext().SetShaderParameter(Shader, BufferIndex, BaseIndex, NumBytes, NewValue);
 		}
 
-
 		void FillRenderTargetsInfo(GraphicsPipelineStateInitializer& GraphicsPSOInit)
 		{
 			GraphicsPSOInit.RenderTargetsEnabled = PSOContext.CachedNumSimultanousRenderTargets;
@@ -127,6 +133,26 @@ namespace platform::Render {
 			{
 				GraphicsPSOInit.DepthStencilTargetFormat = EF_Unknown;
 			}
+		}
+
+		void SetUAVParameter(ComputeHWShader* Shader, uint32 UAVIndex, UnorderedAccessView* UAV)
+		{
+			GetComputeContext().SetUAVParameter(Shader, UAVIndex, UAV);
+		}
+
+		void SetUAVParameter(ComputeHWShader* Shader, uint32 UAVIndex, UnorderedAccessView* UAV, uint32 InitialCount)
+		{
+			GetComputeContext().SetUAVParameter(Shader, UAVIndex, UAV,InitialCount);
+		}
+
+		void SetComputeShader(ComputeHWShader* Shader)
+		{
+			GetComputeContext().SetComputeShader(Shader);
+		}
+
+		void DispatchComputShader(uint32 ThreadGroupCountX, uint32 ThreadGroupCountY, uint32 ThreadGroupCountZ)
+		{
+			GetComputeContext().DispatchComputeShader(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);
 		}
 
 		void BeginFrame();

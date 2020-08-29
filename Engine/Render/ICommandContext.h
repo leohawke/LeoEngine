@@ -5,7 +5,25 @@
 
 namespace platform::Render {
 	class ComputeContext
-	{};
+	{
+	public:
+		/**
+		*Sets the current compute shader.
+		*/
+		virtual void SetComputeShader(ComputeHWShader* ComputeShader) = 0;
+
+		virtual void DispatchComputeShader(uint32 ThreadGroupCountX, uint32 ThreadGroupCountY, uint32 ThreadGroupCountZ) = 0;
+
+		virtual void SetShaderTexture(ComputeHWShader* Shader, uint32 TextureIndex, Texture* Texture) = 0;
+
+		virtual void SetShaderSampler(ComputeHWShader* Shader, uint32 SamplerIndex, const TextureSampleDesc& Desc) = 0;
+
+		virtual void SetUAVParameter(ComputeHWShader* Shader, uint32 UAVIndex, UnorderedAccessView* UAV) = 0;
+
+		virtual void SetUAVParameter(ComputeHWShader* Shader, uint32 UAVIndex, UnorderedAccessView* UAV, uint32 InitialCount) = 0;
+
+		virtual void SetShaderParameter(ComputeHWShader* Shader, uint32 BufferIndex, uint32 BaseIndex, uint32 NumBytes, const void* NewValue) = 0;
+	};
 
 	//command context
 	//On platforms that can processes command lists in parallel, it is a separate object.
