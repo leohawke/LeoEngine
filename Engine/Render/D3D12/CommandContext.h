@@ -39,7 +39,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		void SetShaderParameter(platform::Render::ComputeHWShader* Shader, uint32 BufferIndex, uint32 BaseIndex, uint32 NumBytes, const void* NewValue) override;
 
-		void SetComputePipelineState(ComputePipelineState* ComputeState);
+		void SetComputePipelineState(platform::Render::ComputePipelineState* ComputeState) override;
 
 		void BeginRenderPass(const platform::Render::RenderPassInfo& Info, const char* Name) override;
 

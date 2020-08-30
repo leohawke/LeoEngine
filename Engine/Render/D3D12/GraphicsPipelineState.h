@@ -174,6 +174,7 @@ namespace platform_ex::Windows::D3D12
 
 
 	struct GraphicsPipelineStateCreateArgs;
+	struct ComputePipelineCreationArgs;
 
 	//Async Support
 
@@ -185,6 +186,9 @@ namespace platform_ex::Windows::D3D12
 
 		void Create(const GraphicsPipelineStateCreateArgs& InCreationArgs);
 		void CreateAsync(const GraphicsPipelineStateCreateArgs& InCreationArgs);
+
+		void Create(const ComputePipelineCreationArgs& InCreationArgs);
+		void CreateAsync(const ComputePipelineCreationArgs& InCreationArgs);
 
 		bool IsValid()
 		{
@@ -260,6 +264,18 @@ namespace platform_ex::Windows::D3D12
 		}
 	};
 
+	struct ComputePipelineCreationArgs
+	{
+		ComputePipelineCreationArgs(const KeyComputePipelineStateDesc* InDesc, ID3D12PipelineLibrary* InLibrary)
+		{
+			Desc = InDesc;
+			Library = InLibrary;
+		}
+
+		const KeyComputePipelineStateDesc* Desc;
+		ID3D12PipelineLibrary* Library;
+	};
+
 	class D3DPipelineStateCacheBase : public AdapterChild
 	{
 	protected:
@@ -300,6 +316,7 @@ namespace platform_ex::Windows::D3D12
 		void CleanupPipelineStateCaches();
 
 		typedef std::function<void(D3DPipelineState**, const KeyGraphicsPipelineStateDesc&)> FPostCreateGraphicCallback;
+		typedef std::function<void(D3DPipelineState**, const KeyComputePipelineStateDesc&)> FPostCreateComputeCallback;
 
 		D3DPipelineState* FindInLowLevelCache(const KeyGraphicsPipelineStateDesc& Desc);
 		D3DPipelineState* CreateAndAddToLowLevelCache(const KeyGraphicsPipelineStateDesc& Desc);
@@ -313,6 +330,13 @@ namespace platform_ex::Windows::D3D12
 
 		D3DPipelineState* FindInLowLevelCache(const KeyComputePipelineStateDesc& Desc);
 
+		ComputePipelineState* CreateAndAdd(ComputeHWShader* ComputeShader,const KeyComputePipelineStateDesc& LowLevelDesc);
+
+		D3DPipelineState* CreateAndAddToLowLevelCache(const KeyComputePipelineStateDesc& Desc);
+
+		void AddToLowLevelCache(const KeyComputePipelineStateDesc& Desc, D3DPipelineState** OutPipelineState, const FPostCreateComputeCallback& PostCreateCallback);
+
+		virtual void OnPSOCreated(D3DPipelineState* PipelineState, const KeyComputePipelineStateDesc& Desc) = 0;
 	public:
 		static uint64 HashPSODesc(const KeyGraphicsPipelineStateDesc& Desc);
 		static uint64 HashPSODesc(const KeyComputePipelineStateDesc& Desc);
@@ -345,7 +369,7 @@ namespace platform_ex::Windows::D3D12
 	protected:
 
 		void OnPSOCreated(D3DPipelineState* PipelineState, const KeyGraphicsPipelineStateDesc& Desc) final override;
-
+		void OnPSOCreated(D3DPipelineState* PipelineState, const KeyComputePipelineStateDesc& Desc) final override;
 	public:
 		using D3DPipelineStateCacheBase::FindInLoadedCache;
 		using D3DPipelineStateCacheBase::CreateAndAdd;

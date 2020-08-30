@@ -39,6 +39,17 @@ D3D12_GRAPHICS_PIPELINE_STATE_DESC D3D12::D3DGraphicsPipelineStateDesc::Graphics
 	return D;
 }
 
+D3D12_COMPUTE_PIPELINE_STATE_DESC D3DComputePipelineStateDesc::ComputeDescV0() const
+{
+	D3D12_COMPUTE_PIPELINE_STATE_DESC D = {};
+	D.Flags = this->Flags;
+	D.NodeMask = this->NodeMask;
+	D.pRootSignature = this->pRootSignature;
+	D.CS = this->CS;
+	D.CachedPSO = this->CachedPSO;
+	return D;
+}
+
 D3D12::D3DPipelineState::D3DPipelineState(D3D12Adapter* Parent)
 	:AdapterChild(Parent), MultiNodeGPUObject(0, 0)
 {
@@ -355,6 +366,18 @@ D3DPipelineState* D3DPipelineStateCacheBase::CreateAndAddToLowLevelCache(const K
 	return PipelineState;
 }
 
+D3DPipelineState* D3DPipelineStateCacheBase::CreateAndAddToLowLevelCache(const KeyComputePipelineStateDesc& Desc)
+{
+	// Add PSO to low level cache.
+	D3DPipelineState* PipelineState = nullptr;
+	AddToLowLevelCache(Desc, &PipelineState, [this](D3DPipelineState** PipelineState, const KeyComputePipelineStateDesc& Desc)
+		{
+			OnPSOCreated(*PipelineState, Desc);
+		});
+
+	return PipelineState;
+}
+
 void D3DPipelineStateCacheBase::AddToLowLevelCache(const KeyGraphicsPipelineStateDesc& Desc, D3DPipelineState** OutPipelineState, const FPostCreateGraphicCallback& PostCreateCallback)
 {
 	lconstraint(Desc.CombinedHash != 0);
@@ -375,6 +398,34 @@ void D3DPipelineStateCacheBase::AddToLowLevelCache(const KeyGraphicsPipelineStat
 		// This allows multiple threads to create different PSOs at the same time.
 		D3DPipelineState* NewPipelineState = new D3DPipelineState(GetParentAdapter());
 		LowLevelGraphicsPipelineStateCache.emplace(Desc, NewPipelineState);
+
+		*OutPipelineState = NewPipelineState;
+	}
+
+	// Create the underlying PSO and then perform any other additional tasks like cleaning up/adding to caches, etc.
+	PostCreateCallback(OutPipelineState, Desc);
+}
+
+void D3DPipelineStateCacheBase::AddToLowLevelCache(const KeyComputePipelineStateDesc& Desc, D3DPipelineState** OutPipelineState, const FPostCreateComputeCallback& PostCreateCallback)
+{
+	lconstraint(Desc.CombinedHash != 0);
+
+	// Double check the desc doesn't already exist while the lock is taken.
+	// This avoids having multiple threads try to create the same PSO.
+	{
+		std::unique_lock Lock(ComputePipelineStateCacheMutex);
+		auto PipelineState = ComputePipelineStateCache.find(Desc);
+		if (PipelineState != ComputePipelineStateCache.end())
+		{
+			// This desc already exists.
+			*OutPipelineState = PipelineState->second;
+			return;
+		}
+
+		// Add the FD3D12PipelineState object to the cache, but don't actually create the underlying PSO yet while the lock is taken.
+		// This allows multiple threads to create different PSOs at the same time.
+		D3DPipelineState* NewPipelineState = new D3DPipelineState(GetParentAdapter());
+		ComputePipelineStateCache.emplace(Desc, NewPipelineState);
 
 		*OutPipelineState = NewPipelineState;
 	}
@@ -437,6 +488,18 @@ GraphicsPipelineState* D3DPipelineStateCacheBase::CreateAndAdd(
 	return nullptr;
 }
 
+ComputePipelineState* platform_ex::Windows::D3D12::D3DPipelineStateCacheBase::CreateAndAdd(ComputeHWShader* ComputeShader, const KeyComputePipelineStateDesc& LowLevelDesc)
+{
+	auto const PipelineState = CreateAndAddToLowLevelCache(LowLevelDesc);
+
+	if (PipelineState && PipelineState->IsValid())
+	{
+		return new ComputePipelineState(ComputeShader, PipelineState);
+	}
+
+	return nullptr;
+}
+
 //Windows Only
 
 void D3DPipelineStateCache::OnPSOCreated(D3DPipelineState* PipelineState, const KeyGraphicsPipelineStateDesc& Desc)
@@ -445,6 +508,22 @@ void D3DPipelineStateCache::OnPSOCreated(D3DPipelineState* PipelineState, const 
 
 	// Actually create the PSO.
 	GraphicsPipelineStateCreateArgs Args(&Desc, PipelineLibrary.Get());
+	if (bAsync)
+	{
+		PipelineState->CreateAsync(Args);
+	}
+	else
+	{
+		PipelineState->Create(Args);
+	}
+}
+
+void D3DPipelineStateCache::OnPSOCreated(D3DPipelineState* PipelineState, const KeyComputePipelineStateDesc& Desc)
+{
+	const bool bAsync = false;
+
+	// Actually create the PSO.
+	ComputePipelineCreationArgs Args(&Desc, PipelineLibrary.Get());
 	if (bAsync)
 	{
 		PipelineState->CreateAsync(Args);
@@ -504,6 +583,23 @@ static HRESULT CreatePipelineState(ID3D12PipelineState*& PSO, ID3D12Device* Devi
 	return hr;
 }
 
+static HRESULT CreatePipelineState(ID3D12PipelineState*& PSO, ID3D12Device* Device, const D3D12_COMPUTE_PIPELINE_STATE_DESC* Desc, ID3D12PipelineLibrary* Library, const TCHAR* Name)
+{
+	HRESULT hr = S_OK;
+	if (Library == nullptr || Library->LoadComputePipeline(Name, Desc, IID_PPV_ARGS(&PSO)) == E_INVALIDARG)
+	{
+		hr = Device->CreateComputePipelineState(Desc, IID_PPV_ARGS(&PSO));
+	}
+
+	if (Library && SUCCEEDED(hr))
+	{
+		HRESULT r = Library->StorePipeline(Name, PSO);
+		lconstraint(r != E_INVALIDARG);
+	}
+
+	return hr;
+}
+
 static inline void FastHashName(wchar_t Name[17], uint64 Hash)
 {
 	for (int32 i = 0; i < 16; i++)
@@ -524,6 +620,16 @@ static void CreateGraphicsPipelineState(ID3D12PipelineState** PSO, D3D12Adapter*
 	HRESULT hr = CreatePipelineState(*PSO, Adapter->GetDevice(), &Desc, CreationArgs->Library, Name);
 }
 
+static void CreateComputePipelineState(ID3D12PipelineState** PSO, D3D12Adapter* Adapter, const ComputePipelineCreationArgs* CreationArgs)
+{
+	// Get the pipeline state name, currently based on the hash.
+	wchar_t Name[17];
+	FastHashName(Name, CreationArgs->Desc->CombinedHash);
+
+	const auto Desc = CreationArgs->Desc->Desc.ComputeDescV0();
+	HRESULT hr = CreatePipelineState(*PSO, Adapter->GetDevice(), &Desc, CreationArgs->Library, Name);
+}
+
 
 void D3D12::D3DPipelineState::Create(const GraphicsPipelineStateCreateArgs& InCreationArgs)
 {
@@ -531,6 +637,16 @@ void D3D12::D3DPipelineState::Create(const GraphicsPipelineStateCreateArgs& InCr
 }
 
 void D3D12::D3DPipelineState::CreateAsync(const GraphicsPipelineStateCreateArgs& InCreationArgs)
+{
+	return Create(InCreationArgs);
+}
+
+void D3D12::D3DPipelineState::Create(const ComputePipelineCreationArgs& InCreationArgs)
+{
+	CreateComputePipelineState(PipelineState.ReleaseAndGetAddress(), GetParentAdapter(), &InCreationArgs);
+}
+
+void D3D12::D3DPipelineState::CreateAsync(const ComputePipelineCreationArgs& InCreationArgs)
 {
 	return Create(InCreationArgs);
 }

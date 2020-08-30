@@ -752,8 +752,10 @@ void CommandContext::SetShaderParameter(platform::Render::ComputeHWShader* Shade
 	CSConstantBuffer.UpdateConstant(reinterpret_cast<const uint8*>(NewValue), BaseIndex, NumBytes);
 }
 
-void CommandContext::SetComputePipelineState(ComputePipelineState* ComputeState)
+void CommandContext::SetComputePipelineState(platform::Render::ComputePipelineState* IComputeState)
 {
+	auto ComputeState = static_cast<ComputePipelineState*>(IComputeState);
+
 	StateCache.TransitionComputeState(CPT_Compute);
 
 	StateCache.SetComputeShader(ComputeState->ComputeShader);
