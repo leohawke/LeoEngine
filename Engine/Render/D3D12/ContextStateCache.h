@@ -365,7 +365,7 @@ namespace platform_ex::Windows::D3D12 {
 		template <CachePipelineType PipelineType>
 		void InternalSetPipelineState()
 		{
-			static_assert(PipelineType != CPT_Compute, "CommandContextStateCache is not support to be used with compute.");
+			static_assert(PipelineType != CPT_RayTracing, "CommandContextStateCache is not support to be used with ray tracing.");
 
 			// See if we need to set our PSO:
 			// In D3D11, you could Set dispatch arguments, then set Draw arguments, then call Draw/Dispatch/Draw/Dispatch without setting arguments again.
@@ -374,7 +374,7 @@ namespace platform_ex::Windows::D3D12 {
 			bool bNeedSetPSO = PipelineState.Common.bNeedSetPSO;
 			ID3D12PipelineState*& CurrentPSO = PipelineState.Common.CurrentPipelineStateObject;
 			ID3D12PipelineState* const RequiredPSO = (PipelineType == CPT_Compute)
-				? nullptr
+				? PipelineState.Compute.CurrentPipelineStateObject->PipelineState->GetPipelineState()
 				: PipelineState.Graphics.CurrentPipelineStateObject->GetPipelineState();
 
 			if (CurrentPSO != RequiredPSO)

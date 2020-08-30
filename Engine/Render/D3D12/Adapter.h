@@ -70,7 +70,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		GraphicsPipelineState* CreateGraphicsPipelineState(const platform::Render::GraphicsPipelineStateInitializer& initializer) override;
 
-		ComputePipelineState* CreateComputePipelineState(const platform::Render::ComputeHWShader* ComputeShader);
+		ComputePipelineState* CreateComputePipelineState(platform::Render::ComputeHWShader* ComputeShader);
 
 		UnorderedAccessView* CreateUnorderedAccessView(platform::Render::Texture2D* InTexture) override;
 

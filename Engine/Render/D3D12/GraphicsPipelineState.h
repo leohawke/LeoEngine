@@ -62,6 +62,24 @@ namespace platform_ex::Windows::D3D12
 		}
 	};
 
+	struct D3DComputePipelineStateDesc : public D3D12_COMPUTE_PIPELINE_STATE_DESC
+	{
+		D3D12_COMPUTE_PIPELINE_STATE_DESC ComputeDescV0() const;
+	};
+
+	struct KeyComputePipelineStateDesc
+	{
+		const RootSignature* pRootSignature;
+		D3DComputePipelineStateDesc Desc;
+		ShaderBytecodeHash CSHash;
+
+		SIZE_T CombinedHash;
+
+		std::string GetName() const {
+			return leo::sfmt("%llu", CombinedHash);
+		}
+	};
+
 	template <typename TDesc> struct equality_pipeline_state_desc;
 
 	template <> struct equality_pipeline_state_desc<KeyGraphicsPipelineStateDesc>
@@ -136,6 +154,25 @@ namespace platform_ex::Windows::D3D12
 #undef PSO_IF_STRING_COMPARE_FAILS_RETURN_FALSE
 	};
 
+	template <> struct equality_pipeline_state_desc<KeyComputePipelineStateDesc>
+	{
+#define PSO_IF_NOT_EQUAL_RETURN_FALSE( value ) if(lhs.##value != rhs.##value){ return false; }
+
+		bool operator()(const KeyComputePipelineStateDesc& lhs, const KeyComputePipelineStateDesc& rhs)
+		{
+			// Order from most likely to change to least
+			PSO_IF_NOT_EQUAL_RETURN_FALSE(Desc.CS.BytecodeLength)
+				PSO_IF_NOT_EQUAL_RETURN_FALSE(Desc.Flags)
+				PSO_IF_NOT_EQUAL_RETURN_FALSE(Desc.pRootSignature)
+				PSO_IF_NOT_EQUAL_RETURN_FALSE(Desc.NodeMask)
+				PSO_IF_NOT_EQUAL_RETURN_FALSE(CSHash)
+
+			return true;
+		}
+#undef PSO_IF_NOT_EQUAL_RETURN_FALSE
+	};
+
+
 	struct GraphicsPipelineStateCreateArgs;
 
 	//Async Support
@@ -193,6 +230,19 @@ namespace platform_ex::Windows::D3D12
 		KeyGraphicsPipelineStateDesc Key;
 	};
 
+	class ComputePipelineState :public platform::Render::ComputePipelineState
+	{
+	public:
+		ComputePipelineState(ComputeHWShader* InComputeShader, D3DPipelineState* InPipelineState)
+			:ComputeShader(InComputeShader), PipelineState(InPipelineState)
+		{
+		}
+	public:
+		ComputeHWShader* ComputeShader;
+		D3DPipelineState* const PipelineState;
+	};
+
+
 	KeyGraphicsPipelineStateDesc GetKeyGraphicsPipelineStateDesc(
 		const platform::Render::GraphicsPipelineStateInitializer& initializer, const RootSignature* RootSignature);
 
@@ -241,6 +291,7 @@ namespace platform_ex::Windows::D3D12
 		using TPipelineCache = std::unordered_map<TDesc, TValue, TStateCacheKeyFuncs<TDesc, TValue>,TStateCacheKeyFuncs<TDesc, TValue>>;
 
 		TPipelineCache<KeyGraphicsPipelineStateDesc> LowLevelGraphicsPipelineStateCache;
+		TPipelineCache<KeyComputePipelineStateDesc> ComputePipelineStateCache;
 
 		// Thread access mutual exclusion
 		mutable std::shared_mutex LowLevelGraphicsPipelineStateCacheMutex;
@@ -257,8 +308,14 @@ namespace platform_ex::Windows::D3D12
 
 		GraphicsPipelineState* FindInLoadedCache(const platform::Render::GraphicsPipelineStateInitializer& Initializer, const RootSignature* RootSignature, KeyGraphicsPipelineStateDesc& OutLowLevelDesc);
 		GraphicsPipelineState* CreateAndAdd(const platform::Render::GraphicsPipelineStateInitializer& Initializer, const RootSignature* RootSignature, const KeyGraphicsPipelineStateDesc& LowLevelDesc);
+
+		ComputePipelineState* FindInLoadedCache(ComputeHWShader* ComputeShader, KeyComputePipelineStateDesc& OutLowLevelDesc);
+
+		D3DPipelineState* FindInLowLevelCache(const KeyComputePipelineStateDesc& Desc);
+
 	public:
 		static uint64 HashPSODesc(const KeyGraphicsPipelineStateDesc& Desc);
+		static uint64 HashPSODesc(const KeyComputePipelineStateDesc& Desc);
 
 		static uint64 HashData(const void* Data, int32 NumBytes);
 
@@ -302,9 +359,4 @@ namespace platform_ex::Windows::D3D12
 		virtual ~D3DPipelineStateCache();
 	};
 
-	class ComputePipelineState :public platform::Render::ComputePipelineState
-	{
-	public:
-		ComputeHWShader* ComputeShader;
-	};
 }

@@ -132,6 +132,19 @@ KeyGraphicsPipelineStateDesc D3D12::GetKeyGraphicsPipelineStateDesc(
 	return Desc;
 }
 
+KeyComputePipelineStateDesc GetKeyComputePipelineStateDesc(const ComputeHWShader* ComputeShader)
+{
+	KeyComputePipelineStateDesc Desc;
+	std::memset(&Desc, 0, sizeof(Desc));
+
+	Desc.pRootSignature = ComputeShader->pRootSignature;
+	Desc.Desc.pRootSignature = Desc.pRootSignature->GetSignature();
+	Desc.Desc.CS << ComputeShader;
+	Desc.CSHash = ComputeShader->GetHash();
+
+	return Desc;
+}
+
 static void TranslateRenderTargetFormats(
 	const platform::Render::GraphicsPipelineStateInitializer& PsoInit,
 	D3D12_RT_FORMAT_ARRAY& RTFormatArray,
@@ -257,6 +270,24 @@ uint64 D3DPipelineStateCacheBase::HashPSODesc(const KeyGraphicsPipelineStateDesc
 	return HashData(Data, static_cast<int32>(TotalDataSize));
 }
 
+uint64 D3DPipelineStateCacheBase::HashPSODesc(const KeyComputePipelineStateDesc& Desc)
+{
+	struct ComputePSOData
+	{
+		ShaderBytecodeHash CSHash;
+		UINT NodeMask;
+		D3D12_PIPELINE_STATE_FLAGS Flags;
+	};
+	ComputePSOData Data;
+	std::memset(&Data,0,sizeof(Data));
+	Data.CSHash = Desc.CSHash;
+	Data.NodeMask = Desc.Desc.NodeMask;
+	Data.Flags = Desc.Desc.Flags;
+
+	return HashData(&Data, sizeof(Data));
+}
+
+
 D3DPipelineStateCacheBase::D3DPipelineStateCacheBase(D3D12Adapter* InParent)
 	: AdapterChild(InParent)
 {
@@ -294,6 +325,23 @@ D3DPipelineState* D3DPipelineStateCacheBase::FindInLowLevelCache(const KeyGraphi
 
 	return nullptr;
 }
+
+D3DPipelineState* D3DPipelineStateCacheBase::FindInLowLevelCache(const KeyComputePipelineStateDesc& Desc)
+{
+	lconstraint(Desc.CombinedHash != 0);
+
+	{
+		std::shared_lock Lock(ComputePipelineStateCacheMutex);
+		auto Found = ComputePipelineStateCache.find(Desc);
+		if (Found != ComputePipelineStateCache.end())
+		{
+			return Found->second;
+		}
+	}
+
+	return nullptr;
+}
+
 
 D3DPipelineState* D3DPipelineStateCacheBase::CreateAndAddToLowLevelCache(const KeyGraphicsPipelineStateDesc& Desc)
 {
@@ -352,6 +400,23 @@ GraphicsPipelineState* D3DPipelineStateCacheBase::FindInLoadedCache(
 	if (PipelineState && PipelineState->IsValid())
 	{
 		return new GraphicsPipelineState(Initializer, RootSignature, PipelineState);
+	}
+
+	return nullptr;
+}
+
+ComputePipelineState* D3DPipelineStateCacheBase::FindInLoadedCache(ComputeHWShader* ComputeShader, KeyComputePipelineStateDesc& OutLowLevelDesc)
+{
+	OutLowLevelDesc = GetKeyComputePipelineStateDesc(ComputeShader);
+	OutLowLevelDesc.Desc.NodeMask = 0;
+	OutLowLevelDesc.CombinedHash = D3DPipelineStateCacheBase::HashPSODesc(OutLowLevelDesc);
+
+	// First try to find the PSO in the low level cache that can be populated from disk.
+	auto PipelineState = FindInLowLevelCache(OutLowLevelDesc);
+
+	if (PipelineState && PipelineState->IsValid())
+	{
+		return new ComputePipelineState(ComputeShader, PipelineState);
 	}
 
 	return nullptr;

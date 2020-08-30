@@ -270,9 +270,20 @@ namespace platform_ex::Windows::D3D12 {
 		return PSOCache.CreateAndAdd(initializer, RootSignature, LowLevelDesc);
 	}
 
-	ComputePipelineState* D3D12::Device::CreateComputePipelineState(const platform::Render::ComputeHWShader* ComputeShader)
+	ComputePipelineState* D3D12::Device::CreateComputePipelineState(platform::Render::ComputeHWShader* ComputeShader)
 	{
-		return nullptr;
+		auto& PSOCache = PipelineStateCache;
+
+		KeyComputePipelineStateDesc LowLevelDesc;
+
+		auto Found = PSOCache.FindInLoadedCache(static_cast<ComputeHWShader*>(ComputeShader), LowLevelDesc);
+
+		if (Found)
+		{
+			return Found;
+		}
+
+		return PSOCache.CreateAndAdd(static_cast<ComputeHWShader*>(ComputeShader), LowLevelDesc);
 	}
 
 	UnorderedAccessView* Device::CreateUnorderedAccessView(platform::Render::Texture2D* InTexture)
