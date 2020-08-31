@@ -202,6 +202,8 @@ void CommandContextStateCache::ClearState()
 	leo::memset(PipelineState.Graphics.CurrentScissorRects, 0);
 	PipelineState.Graphics.CurrentNumberOfScissorRects = 0;
 
+	PipelineState.Compute.ComputeBudget = ::platform::Render::AsyncComputeBudget::All_4;
+	PipelineState.Graphics.CurrentPipelineStateObject = nullptr;
 	PipelineState.Graphics.CurrentPipelineStateObject = nullptr;
 	PipelineState.Common.CurrentPipelineStateObject = nullptr;
 
@@ -653,9 +655,32 @@ void CommandContextStateCache::ApplyState()
 			PipelineState.Common.CBVCache.DirtyGraphics();
 		}
 	}
+	else if (PipelineType == CPT_Compute)
+	{
+		pRootSignature = PipelineState.Compute.CurrentPipelineStateObject->ComputeShader->pRootSignature;
+
+		// See if we need to set a compute root signature
+		if (PipelineState.Compute.bNeedSetRootSignature)
+		{
+			CommandList->SetComputeRootSignature(pRootSignature->GetSignature());
+			PipelineState.Compute.bNeedSetRootSignature = false;
+
+			// After setting a root signature, all root parameters are undefined and must be set again.
+			PipelineState.Common.SRVCache.DirtyCompute();
+			PipelineState.Common.UAVCache.DirtyCompute();
+			PipelineState.Common.SamplerCache.DirtyCompute();
+			PipelineState.Common.CBVCache.DirtyCompute();
+		}
+	}
 
 	// Ensure the correct graphics or compute PSO is set.
 	InternalSetPipelineState<PipelineType>();
+
+	// Need to cache compute budget, as we need to reset after PSO changes
+	if (PipelineType == CPT_Compute && CommandList->GetType() == D3D12_COMMAND_LIST_TYPE_COMPUTE)
+	{
+		CmdContext->SetAsyncComputeBudgetInternal(PipelineState.Compute.ComputeBudget);
+	}
 
 	if (PipelineType == CPT_Graphics)
 	{
@@ -855,19 +880,21 @@ void CommandContextStateCache::ApplyState()
 #undef CONDITIONAL_SET_CBVS
 	}
 
-	//TODO Batch Resource barriers
 	// Flush any needed resource barriers
+	CommandList.FlushResourceBarriers();
 }
 
 
 
 template void CommandContextStateCache::SetShaderResourceView<ShaderType::VertexShader>(ShaderResourceView* SRV, uint32 ResourceIndex);
 template void CommandContextStateCache::SetShaderResourceView<ShaderType::PixelShader>(ShaderResourceView* SRV, uint32 ResourceIndex);
+template void CommandContextStateCache::SetShaderResourceView<ShaderType::ComputeShader>(ShaderResourceView* SRV, uint32 ResourceIndex);
 
 template void CommandContextStateCache::ApplyState<CPT_Graphics>();
+template void CommandContextStateCache::ApplyState<CPT_Compute>();
 
-template void CommandContextStateCache::SetUAVs<ShaderType::VertexShader>(uint32 UAVStartSlot, uint32 NumSimultaneousUAVs, UnorderedAccessView* const* UAVArray, uint32* UAVInitialCountArray);
 template void CommandContextStateCache::SetUAVs<ShaderType::PixelShader>(uint32 UAVStartSlot, uint32 NumSimultaneousUAVs, UnorderedAccessView* const* UAVArray, uint32* UAVInitialCountArray);
+template void CommandContextStateCache::SetUAVs<ShaderType::ComputeShader>(uint32 UAVStartSlot, uint32 NumSimultaneousUAVs, UnorderedAccessView* const* UAVArray, uint32* UAVInitialCountArray);
 
-template void CommandContextStateCache::ClearUAVs<ShaderType::VertexShader>();
 template void CommandContextStateCache::ClearUAVs<ShaderType::PixelShader>();
+template void CommandContextStateCache::ClearUAVs<ShaderType::ComputeShader>();

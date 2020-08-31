@@ -300,6 +300,9 @@ namespace platform_ex::Windows::D3D12 {
 
 				// Note: Current root signature is part of the bound compute shader, which is part of the PSO
 				bool bNeedSetRootSignature;
+
+				// Need to cache compute budget, as we need to reset if after PSO changes
+				platform::Render::AsyncComputeBudget ComputeBudget;
 			} Compute;
 
 			struct

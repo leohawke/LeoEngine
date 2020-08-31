@@ -118,6 +118,11 @@ namespace platform::Render {
 		Border
 	};
 
+	enum class AsyncComputeBudget
+	{
+		All_4 = 4, //Async compute can use the entire GPU.
+	};
+
 	namespace details
 	{
 		enum TexFilterOp {

@@ -25,6 +25,8 @@ namespace platform_ex::Windows::D3D12 {
 	public:
 		CommandContext(NodeDevice* InParent, SubAllocatedOnlineHeap::SubAllocationDesc& SubHeapDesc, bool InIsDefaultContext, bool InIsAsyncComputeContext = false);
 	public:
+		virtual void SetAsyncComputeBudgetInternal(platform::Render::AsyncComputeBudget Budget) {}
+
 		void SetComputeShader(platform::Render::ComputeHWShader* ComputeShader) override;
 
 		void DispatchComputeShader(uint32 ThreadGroupCountX, uint32 ThreadGroupCountY, uint32 ThreadGroupCountZ) override;
