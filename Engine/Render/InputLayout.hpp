@@ -108,13 +108,34 @@ namespace platform::Render {
 	{
 		uint8 StreamIndex;
 		uint8 Offset;
-		Vertex::Usage Usage;
-		leo::uint8 UsageIndex;
-		EFormat Format;
 		uint16 Stride;
+		Vertex::Usage Usage;
+		EFormat Format;
+		leo::uint8 UsageIndex;
 
 		friend bool operator==(const VertexElement&, const VertexElement&) = default;
 	};
+
+	constexpr inline VertexElement CtorVertexElement(
+		uint8 StreamIndex,
+		uint8 Offset,
+		Vertex::Usage Usage,
+		leo::uint8 UsageIndex,
+		EFormat Format,
+		uint16 Stride
+		)
+	{
+		VertexElement ve{};
+
+		ve.StreamIndex = StreamIndex;
+		ve.Offset = Offset;
+		ve.Usage = Usage;
+		ve.UsageIndex = UsageIndex;
+		ve.Format = Format;
+		ve.Stride = Stride;
+
+		return ve;
+	}
 
 	using VertexDeclarationElements = std::vector<VertexElement>;
 

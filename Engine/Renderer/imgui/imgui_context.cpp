@@ -111,7 +111,7 @@ void platform::imgui::Context_RenderDrawData(ImDrawData* draw_data)
     }
 
     // Setup pipelinestate
-    Render::GraphicsPipelineStateInitializer GraphicsPSOInit;
+    Render::GraphicsPipelineStateInitializer GraphicsPSOInit {};
     CmdList.FillRenderTargetsInfo(GraphicsPSOInit);
 
     FillGraphicsPipelineState(GraphicsPSOInit);
@@ -201,7 +201,7 @@ void platform::imgui::Context_RenderDrawData(ImDrawData* draw_data)
 void FillGraphicsPipelineState(GraphicsPipelineStateInitializer& GraphicsPSOInit)
 {
     {
-        platform::Render::BlendDesc BlendState;
+        platform::Render::BlendDesc BlendState {};
         BlendState.blend_factor = M::Color(0, 0, 0, 0);
         BlendState.alpha_to_coverage_enable = false;
         BlendState.blend_enable[0] = true;
@@ -227,9 +227,9 @@ void FillGraphicsPipelineState(GraphicsPipelineStateInitializer& GraphicsPSOInit
     }
     {
         auto& VertexDeclaration = GraphicsPSOInit.ShaderPass.VertexDeclaration;
-        VertexElement pos{ 0,loffsetof(ImDrawVert,pos),Vertex::Usage::Position,0,EF_GR32F,sizeof(ImDrawVert) };
-        VertexElement uv{ 0,loffsetof(ImDrawVert,uv),Vertex::Usage::TextureCoord,0,EF_GR32F,sizeof(ImDrawVert) };
-        VertexElement color{ 0,loffsetof(ImDrawVert,col),Vertex::Usage::Diffuse,0,EF_ARGB8,sizeof(ImDrawVert) };
+        VertexElement pos = CtorVertexElement(0,loffsetof(ImDrawVert,pos),Vertex::Usage::Position,0,EF_GR32F,sizeof(ImDrawVert));
+        VertexElement uv = CtorVertexElement(0,loffsetof(ImDrawVert,uv),Vertex::Usage::TextureCoord,0,EF_GR32F,sizeof(ImDrawVert));
+        VertexElement color = CtorVertexElement( 0,loffsetof(ImDrawVert,col),Vertex::Usage::Diffuse,0,EF_ARGB8,sizeof(ImDrawVert));
 
         GraphicsPSOInit.ShaderPass.VertexDeclaration.emplace_back(pos);
         GraphicsPSOInit.ShaderPass.VertexDeclaration.emplace_back(uv);

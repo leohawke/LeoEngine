@@ -7,10 +7,10 @@ using namespace platform::Render;
 VertexDeclarationElements platform::Render::GFilterVertexDeclaration()
 {
 	static VertexDeclarationElements Elements =
-	{ {
-		{0,loffsetof(FilterVertex,Position),Render::Vertex::Usage::Position,0,Render::EF_ABGR32F,sizeof(FilterVertex)},
-		{0,loffsetof(FilterVertex,UV),Render::Vertex::Usage::TextureCoord,0,Render::EF_GR32F,sizeof(FilterVertex)},
-	} };
+	{ 
+		CtorVertexElement(0,loffsetof(FilterVertex,Position),Render::Vertex::Usage::Position,0,Render::EF_ABGR32F,sizeof(FilterVertex)),
+		CtorVertexElement(0,loffsetof(FilterVertex,UV),Render::Vertex::Usage::TextureCoord,0,Render::EF_GR32F,sizeof(FilterVertex)),
+	};
 
     return Elements;
 }
