@@ -106,11 +106,11 @@ namespace platform::Render {
 
 	struct VertexElement
 	{
+		EFormat Format;
+		Vertex::Usage Usage;
+		uint16 Stride;
 		uint8 StreamIndex;
 		uint8 Offset;
-		uint16 Stride;
-		Vertex::Usage Usage;
-		EFormat Format;
 		leo::uint8 UsageIndex;
 
 		friend bool operator==(const VertexElement&, const VertexElement&) = default;

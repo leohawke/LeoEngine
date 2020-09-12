@@ -102,7 +102,17 @@ namespace platform_ex::Windows::D3D12 {
 		uint32 Count;
 		uint16 SamplerID[16];
 
-		bool operator==(const SamplerArrayDesc& rhs) const = default;
+		bool operator==(const SamplerArrayDesc& rhs) const
+		{
+			if (Count != rhs.Count)
+			{
+				return false;
+			}
+			else
+			{
+				return 0 == std::memcmp(SamplerID, rhs.SamplerID, sizeof(SamplerID[0]) * Count);
+			}
+		}
 	};
 
 	uint32 GetTypeHash(const SamplerArrayDesc& Key);
