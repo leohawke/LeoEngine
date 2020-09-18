@@ -101,7 +101,6 @@
       <PreprocessorDefinitions>ENGINE_TOOL;NDEBUG;_WINDOWS;%(PreprocessorDefinitions);INITGUID;LS_DLL</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

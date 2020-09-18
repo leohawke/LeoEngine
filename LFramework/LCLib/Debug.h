@@ -1,6 +1,7 @@
 #pragma once
 
 #include <LBase/cassert.h>
+#include <LBase/cstdio.h>
 #include "Platform.h"
 #include "LDescriptions.h"
 

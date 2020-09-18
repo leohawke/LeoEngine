@@ -2,6 +2,7 @@
 
 #include "ldef.h"
 #include <memory>
+#include <type_traits>
 
 
 namespace leo
@@ -250,7 +251,7 @@ namespace leo
 		std::unique_ptr<_type>>)
 		make_unique_default_init(size_t size)
 	{
-		return std::unique_ptr<_type>(new remove_extent_t<_type>[size]);
+		return std::unique_ptr<_type>(new std::remove_extent_t<_type>[size]);
 	}
 	template<typename _type, typename... _tParams>
 	limpl(std::enable_if_t<std::extent<_type>::value != 0>)

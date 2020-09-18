@@ -51,7 +51,7 @@ namespace leo {
 	void
 		TraceExceptionType(const std::exception& e, RecordLevel lv) lnothrow
 	{
-		LF_TraceRaw(lv, "Caught std::exception[%s].", typeid(e).name());
+		LFL_Log(lv, [](const std::exception& e) {return leo::sfmt("Caught std::exception[%s].", typeid(e).name()); },e);
 	}
 
 	void

@@ -14,6 +14,7 @@
 #include "LBase/sutility.h" // for noncopyable;
 #include "LBase/memory.hpp" // for leo::construct_in, leo::destruct_in;
 #include "LBase/functional.hpp" //for leo::one_shot
+#include "LBase/smart_ptr.hpp"
 
 namespace leo
 {

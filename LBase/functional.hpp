@@ -1199,7 +1199,7 @@ namespace leo
 			operator()(_tIn first, _tIn last, const _type& val = {}) const
 		{
 			return std::accumulate(first, last, val,
-				[](_type&, decltype(*first) v) {
+				[](const _type&, decltype(*first) v) {
 				return lforward(v);
 			});
 		}
