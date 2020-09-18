@@ -1,6 +1,8 @@
 #pragma once
 
-#include <experimental/coroutine>
+#include <coroutine>
+#include <cstdint>
+#include <atomic>
 
 namespace leo::coroutine {
 	class IOScheduler
@@ -64,14 +66,14 @@ namespace leo::coroutine {
 		{}
 
 		bool await_ready() const noexcept { return false; }
-		void await_suspend(std::experimental::coroutine_handle<> awaiter) noexcept;
+		void await_suspend(std::coroutine_handle<> awaiter) noexcept;
 		void await_resume() const noexcept {}
 
 	private:
 		friend class IOScheduler;
 
 		IOScheduler& service;
-		std::experimental::coroutine_handle<> continuation;
+		std::coroutine_handle<> continuation;
 		schedule_operation* pNext;
 	};
 }

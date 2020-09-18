@@ -1,7 +1,7 @@
 #pragma once
 
 #include <type_traits>
-#include <experimental/coroutine>
+#include <coroutine>
 
 namespace leo::coroutine
 {
@@ -11,7 +11,7 @@ namespace leo::coroutine
 	{};
 
 	template<typename PROMISE>
-	struct is_coroutine_handle<std::experimental::coroutine_handle<PROMISE>>
+	struct is_coroutine_handle<std::coroutine_handle<PROMISE>>
 		: std::true_type
 	{};
 
@@ -35,11 +35,11 @@ namespace leo::coroutine
 	template<typename T>
 	struct is_awaiter<T, std::void_t<
 		decltype(std::declval<T>().await_ready()),
-		decltype(std::declval<T>().await_suspend(std::declval<std::experimental::coroutine_handle<>>())),
+		decltype(std::declval<T>().await_suspend(std::declval<std::coroutine_handle<>>())),
 		decltype(std::declval<T>().await_resume())>> :
 		std::conjunction<
 		std::is_constructible<bool, decltype(std::declval<T>().await_ready())>,
 		is_valid_await_suspend_return_value<
-		decltype(std::declval<T>().await_suspend(std::declval<std::experimental::coroutine_handle<>>()))>>
+		decltype(std::declval<T>().await_suspend(std::declval<std::coroutine_handle<>>()))>>
 	{};
 }

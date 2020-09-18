@@ -112,7 +112,7 @@ namespace leo::coroutine {
 		leo::threading::auto_reset_event wakeup_event;
 	};
 
-	void ThreadScheduler::schedule_operation::await_suspend(std::experimental::coroutine_handle<> continuation) noexcept
+	void ThreadScheduler::schedule_operation::await_suspend(std::coroutine_handle<> continuation) noexcept
 	{
 		continuation_handle = continuation;
 		scheduler ? scheduler->schedule_impl(this): (any_scheduler->schedule_impl(this));

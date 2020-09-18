@@ -4,7 +4,7 @@
 #include <utility>
 #include <cstdint>
 #include <system_error>
-#include <experimental/coroutine>
+#include <coroutine>
 
 struct _OVERLAPPED;
 
@@ -146,7 +146,7 @@ namespace leo::coroutine::win32
 
 		bool await_ready() const noexcept { return false; }
 
-		bool await_suspend(std::experimental::coroutine_handle<> awaitingCoroutine)
+		bool await_suspend(std::coroutine_handle<> awaitingCoroutine)
 		{
 			static_assert(std::is_base_of_v<win32_overlapped_operation, OPERATION>);
 
@@ -173,6 +173,6 @@ namespace leo::coroutine::win32
 			operation->continuation.resume();
 		}
 
-		std::experimental::coroutine_handle<> continuation;
+		std::coroutine_handle<> continuation;
 	};
 }

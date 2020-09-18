@@ -1,7 +1,7 @@
 #pragma once
 
 #include <LBase/ldef.h>
-#include <experimental/coroutine>
+#include <coroutine>
 
 namespace leo::threading
 {
@@ -19,7 +19,7 @@ namespace leo::coroutine {
 			schedule_operation(leo::threading::TaskScheduler* ts) noexcept : scheduler(nullptr),any_scheduler(ts), next_oper(nullptr) {}
 
 			bool await_ready() noexcept { return false; }
-			void await_suspend(std::experimental::coroutine_handle<> continuation) noexcept;
+			void await_suspend(std::coroutine_handle<> continuation) noexcept;
 			void await_resume() noexcept {}
 		public:
 			schedule_operation* next_oper;
@@ -29,7 +29,7 @@ namespace leo::coroutine {
 
 			ThreadScheduler* scheduler;
 			leo::threading::TaskScheduler* any_scheduler;
-			std::experimental::coroutine_handle<> continuation_handle;
+			std::coroutine_handle<> continuation_handle;
 		};
 
 		[[nodiscard]]

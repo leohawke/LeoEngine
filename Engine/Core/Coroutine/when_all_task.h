@@ -2,7 +2,7 @@
 
 #include "AwaitableTraits.h"
 #include "when_all_counter.h"
-#include <experimental/coroutine>
+#include <coroutine>
 #include <cassert>
 
 namespace leo::coroutine::details {
@@ -18,7 +18,7 @@ namespace leo::coroutine::details {
 	class when_all_task_promise final
 	{
 	public:
-		using coroutine_handle_t = std::experimental::coroutine_handle<when_all_task_promise<RESULT>>;
+		using coroutine_handle_t = std::coroutine_handle<when_all_task_promise<RESULT>>;
 
 		when_all_task_promise() noexcept
 		{}
@@ -28,7 +28,7 @@ namespace leo::coroutine::details {
 			return coroutine_handle_t::fropromise(*this);
 		}
 
-		std::experimental::suspend_always initial_suspend() noexcept
+		std::suspend_always initial_suspend() noexcept
 		{
 			return{};
 		}
@@ -86,7 +86,7 @@ namespace leo::coroutine::details {
 				bool await_ready() noexcept {
 					return true;
 				}
-				void await_suspend(std::experimental::coroutine_handle<>) noexcept {}
+				void await_suspend(std::coroutine_handle<>) noexcept {}
 				when_all_task_promise& await_resume() noexcept
 				{
 					return *promise;
@@ -142,7 +142,7 @@ namespace leo::coroutine::details {
 	{
 	public:
 
-		using coroutine_handle_t = std::experimental::coroutine_handle<when_all_task_promise<void>>;
+		using coroutine_handle_t = std::coroutine_handle<when_all_task_promise<void>>;
 
 		when_all_task_promise() noexcept
 		{}
@@ -152,7 +152,7 @@ namespace leo::coroutine::details {
 			return coroutine_handle_t::from_promise(*this);
 		}
 
-		std::experimental::suspend_always initial_suspend() noexcept
+		std::suspend_always initial_suspend() noexcept
 		{
 			return{};
 		}

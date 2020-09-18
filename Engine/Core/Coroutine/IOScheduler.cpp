@@ -140,7 +140,7 @@ namespace leo::coroutine {
 				{
 					// This was a coroutine scheduled via a call to
 					// io_service::schedule().
-					std::experimental::coroutine_handle<>::from_address(
+					std::coroutine_handle<>::from_address(
 						reinterpret_cast<void*>(completionKey)).resume();
 					return true;
 				}
