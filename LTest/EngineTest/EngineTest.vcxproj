@@ -98,7 +98,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>ENGINE_TOOL;NDEBUG;_WINDOWS;%(PreprocessorDefinitions);INITGUID;LS_DLL</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ENGINE_TOOL;NDEBUG;_WINDOWS;%(PreprocessorDefinitions);INITGUID;</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <LBase/smart_ptr.hpp>
 #include "ShaderCore.h"
 
 #define PR_NAMESPACE_BEGIN  namespace platform::Render {

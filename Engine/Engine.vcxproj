@@ -29,7 +29,9 @@
     <ClCompile Include="Asset\MeshX.cpp" />
     <ClCompile Include="Asset\RayTracingX.cpp" />
     <ClCompile Include="Asset\ShaderAsset.cpp" />
-    <ClCompile Include="Asset\TexCompression.cpp" />
+    <ClCompile Include="Asset\TexCompression.cpp">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</PreprocessToFile>
+    </ClCompile>
     <ClCompile Include="Asset\CompressionBC.cpp" />
     <ClCompile Include="Asset\TextureX.cpp" />
     <ClCompile Include="Core\AssetResourceScheduler.cpp" />

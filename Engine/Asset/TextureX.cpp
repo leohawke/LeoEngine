@@ -432,19 +432,19 @@ namespace platform {
 		case EF_ETC2_ABGR8:
 		case EF_ETC2_ABGR8_SRGB:
 			// TODO
-			throw leo::unimplemented(false);
+			throw leo::unimplemented();
 			break;
 
 		case EF_ETC2_R11:
 		case EF_SIGNED_ETC2_R11:
 			// TODO
-			throw leo::unimplemented(false);
+			throw leo::unimplemented();
 			break;
 
 		case EF_ETC2_GR11:
 		case EF_SIGNED_ETC2_GR11:
 			// TODO
-			throw leo::unimplemented(false);
+			throw leo::unimplemented();
 			break;
 
 		default:
@@ -594,23 +594,23 @@ namespace platform {
 		case EF_ETC2_ABGR8:
 		case EF_ETC2_ABGR8_SRGB:
 			// TODO
-			throw leo::unimplemented(false);
+			throw leo::unimplemented();
 			break;
 
 		case EF_ETC2_R11:
 		case EF_SIGNED_ETC2_R11:
 			// TODO
-			throw leo::unimplemented(false);
+			throw leo::unimplemented();
 			break;
 
 		case EF_ETC2_GR11:
 		case EF_SIGNED_ETC2_GR11:
 			// TODO
-			throw leo::unimplemented(false);
+			throw leo::unimplemented();
 			break;
 
 		default:
-			throw leo::unimplemented(false);
+			throw leo::unimplemented();
 			break;
 		}
 

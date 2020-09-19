@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ldef.h"
+#include "cstring.h"
 #include <string>
 #include <type_traits>
 #include <algorithm>

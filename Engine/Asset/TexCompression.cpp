@@ -1,6 +1,6 @@
+#include <LBase/smart_ptr.hpp>
 #include "TexCompression.hpp"
 #include "../Render/IContext.h"
-#include <LBase/smart_ptr.hpp>
 
 namespace tc {
 	using platform::Render::Texture;

@@ -133,7 +133,7 @@ namespace platform_ex::Windows::D3D12 {
 		};
 
 		for (auto& fence : device->fences) {
-			fence.swap(std::make_unique<Fence>(device.get(), 0));
+			fence.reset(new Fence(device.get(), 0));
 			fence->CreateFence();
 		}
 

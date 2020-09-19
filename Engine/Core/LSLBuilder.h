@@ -29,17 +29,17 @@ namespace platform::lsl {
 
 	namespace access {
 		namespace details {
+			template<typename _target>
+			_target static_value_cast(TermNode& term) {
+				return AccessTerm<_target>(term);
+			}
+
 			template<typename _target,typename _head, typename... tails>
 			_target static_value_cast(TermNode & term) {
 				if (auto pHead = AccessTermPtr<_head>(term))
 					return static_cast<_target>(*pHead);
 				else
 					return static_value_cast<_target, tails...>(term);
-			}
-
-			template<typename _target>
-			_target static_value_cast(TermNode& term) {
-				return AccessTerm<_target>(term);
 			}
 		}
 

@@ -884,7 +884,52 @@ void CommandContextStateCache::ApplyState()
 	CommandList.FlushResourceBarriers();
 }
 
+template <typename TShader> 
+void CommandContextStateCache::SetShader(TShader* Shader)
+{
+	typedef StateCacheShaderTraits<TShader> Traits;
+	TShader* OldShader = Traits::GetShader(GetGraphicsPipelineState());
 
+	if (OldShader != Shader)
+	{
+		PipelineState.Common.CurrentShaderSamplerCounts[Traits::Frequency] = (Shader) ? Shader->ResourceCounts.NumSamplers : 0;
+		PipelineState.Common.CurrentShaderSRVCounts[Traits::Frequency] = (Shader) ? Shader->ResourceCounts.NumSRVs : 0;
+		PipelineState.Common.CurrentShaderCBCounts[Traits::Frequency] = (Shader) ? Shader->ResourceCounts.NumCBs : 0;
+		PipelineState.Common.CurrentShaderUAVCounts[Traits::Frequency] = (Shader) ? Shader->ResourceCounts.NumUAVs : 0;
+
+		// Shader changed so its resource table is dirty
+		this->CmdContext->DirtyConstantBuffers[Traits::Frequency] = 0xffff;
+	}
+}
+
+template <CachePipelineType PipelineType>
+void CommandContextStateCache::InternalSetPipelineState()
+{
+	static_assert(PipelineType != CPT_RayTracing, "CommandContextStateCache is not support to be used with ray tracing.");
+
+	// See if we need to set our PSO:
+	// In D3D11, you could Set dispatch arguments, then set Draw arguments, then call Draw/Dispatch/Draw/Dispatch without setting arguments again.
+	// In D3D12, we need to understand when the app switches between Draw/Dispatch and make sure the correct PSO is set.
+
+	bool bNeedSetPSO = PipelineState.Common.bNeedSetPSO;
+	ID3D12PipelineState*& CurrentPSO = PipelineState.Common.CurrentPipelineStateObject;
+	ID3D12PipelineState* const RequiredPSO = (PipelineType == CPT_Compute)
+		? PipelineState.Compute.CurrentPipelineStateObject->PipelineState->GetPipelineState()
+		: PipelineState.Graphics.CurrentPipelineStateObject->GetPipelineState();
+
+	if (CurrentPSO != RequiredPSO)
+	{
+		CurrentPSO = RequiredPSO;
+		bNeedSetPSO = true;
+	}
+
+	// Set the PSO on the command list if necessary.
+	if (bNeedSetPSO)
+	{
+		this->CmdContext->CommandListHandle->SetPipelineState(CurrentPSO);
+		PipelineState.Common.bNeedSetPSO = false;
+	}
+}
 
 template void CommandContextStateCache::SetShaderResourceView<ShaderType::VertexShader>(ShaderResourceView* SRV, uint32 ResourceIndex);
 template void CommandContextStateCache::SetShaderResourceView<ShaderType::PixelShader>(ShaderResourceView* SRV, uint32 ResourceIndex);
@@ -898,3 +943,12 @@ template void CommandContextStateCache::SetUAVs<ShaderType::ComputeShader>(uint3
 
 template void CommandContextStateCache::ClearUAVs<ShaderType::PixelShader>();
 template void CommandContextStateCache::ClearUAVs<ShaderType::ComputeShader>();
+
+template void CommandContextStateCache::SetShader<VertexHWShader>(VertexHWShader* Shader);
+template void CommandContextStateCache::SetShader<PixelHWShader>(PixelHWShader* Shader);
+template void CommandContextStateCache::SetShader<GeometryHWShader>(GeometryHWShader* Shader);
+template void CommandContextStateCache::SetShader<DomainHWShader>(DomainHWShader* Shader);
+template void CommandContextStateCache::SetShader<HullHWShader>(HullHWShader* Shader);
+
+template void CommandContextStateCache::InternalSetPipelineState<CPT_Graphics>();
+template void CommandContextStateCache::InternalSetPipelineState<CPT_Compute>();

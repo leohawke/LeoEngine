@@ -197,7 +197,7 @@ namespace details {
 			catch (std::exception& e) {
 				std::stringstream ss;
 				scheme::PrintNode(ss, scheme::v1::LoadNode(exp), scheme::LiteralizeEscapeNodeLiteral, [](std::size_t)->std::string {return {}; });
-				auto& nodestr = ss.str();
+				auto nodestr = ss.str();
 				X::ReduceLFToTab(nodestr, 178);
 				//ÒÆ³ýÁ¬ÐøµÄ\t
 				for (auto itr = nodestr.begin(); itr != nodestr.end();) {

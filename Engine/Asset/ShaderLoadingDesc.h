@@ -247,7 +247,7 @@ namespace platform::X
 				offset += bytesRead;
 			}
 
-			return scheme::SContext::Analyze(scheme::Tokenize(lexer.Literalize()));
+			co_return scheme::SContext::Analyze(scheme::Tokenize(lexer.Literalize()));
 		}
 
 		void RecursiveReferNode(const ValueNode& effct_node, std::vector<std::pair<std::string, scheme::TermNode>>& includes) {

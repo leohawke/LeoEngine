@@ -559,8 +559,8 @@ namespace platform {
 #endif
 						, pInfo.get()
 					);
-					blob.swap(Strip(blob, compile_type, D3DFlags::D3DCOMPILER_STRIP_DEBUG_INFO
-						| D3DFlags::D3DCOMPILER_STRIP_PRIVATE_DATA));
+					blob = Strip(blob, compile_type, D3DFlags::D3DCOMPILER_STRIP_DEBUG_INFO
+						| D3DFlags::D3DCOMPILER_STRIP_PRIVATE_DATA);
 
 					GetAsset()->EmplaceBlob(blob_hash, asset::ShaderBlobAsset(compile_type, std::move(blob),pInfo.release()));
 					pass.AssignOrInsertHash(compile_type, blob_hash);

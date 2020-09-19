@@ -798,7 +798,7 @@ namespace platform_ex::Windows::D3D12 {
 	public:
 		// Used for all other SRV resource types. Initialization is immediate on the calling thread.
 		// Should not be used for dynamic resources which can be renamed.
-		ShaderResourceView(NodeDevice* InParent, D3D12_SHADER_RESOURCE_VIEW_DESC& InDesc, ResourceHolder& InResourceLocation, uint32 InStride = -1, bool InSkipFastClearFinalize = false)
+		ShaderResourceView(NodeDevice* InParent,const D3D12_SHADER_RESOURCE_VIEW_DESC& InDesc, ResourceHolder& InResourceLocation, uint32 InStride = -1, bool InSkipFastClearFinalize = false)
 			:TView(InParent, ViewSubresourceSubsetFlags_None)
 		{
 			Initialize(InDesc, InResourceLocation, InStride, InSkipFastClearFinalize);
@@ -808,7 +808,7 @@ namespace platform_ex::Windows::D3D12 {
 		{
 		}
 
-		void Initialize(D3D12_SHADER_RESOURCE_VIEW_DESC& InDesc, ResourceHolder& InResourceLocation, uint32 InStride, bool InSkipFastClearFinalize = false)
+		void Initialize(const D3D12_SHADER_RESOURCE_VIEW_DESC& InDesc, ResourceHolder& InResourceLocation, uint32 InStride, bool InSkipFastClearFinalize = false)
 		{
 			Stride = InStride;
 			bContainsDepthPlane = InResourceLocation.IsDepthStencilResource() && GetPlaneSliceFromViewFormat(InResourceLocation.GetDesc().Format, InDesc.Format) == 0;
@@ -863,7 +863,7 @@ namespace platform_ex::Windows::D3D12 {
 		COMPtr<ID3D12Resource> CounterResource;
 		bool CounterResourceInitialized;
 
-		UnorderedAccessView(NodeDevice* InParent, D3D12_UNORDERED_ACCESS_VIEW_DESC& InDesc, ResourceHolder& InResourceLocation, ID3D12Resource* InCounterResource = nullptr)
+		UnorderedAccessView(NodeDevice* InParent,const D3D12_UNORDERED_ACCESS_VIEW_DESC& InDesc, ResourceHolder& InResourceLocation, ID3D12Resource* InCounterResource = nullptr)
 			: TView(InParent, ViewSubresourceSubsetFlags_None)
 			, CounterResource(InCounterResource)
 			, CounterResourceInitialized(false)

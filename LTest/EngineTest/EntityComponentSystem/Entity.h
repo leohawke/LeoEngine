@@ -4,7 +4,9 @@
 #include <LBase/lmacro.h>
 #include <LBase/typeindex.h>
 #include <LFramework/Adaptor/LAdaptor.h>
+#include <LFramework/Core/LException.h>
 #include "Component.h"
+#include "ECSException.h"
 
 namespace ecs {
 

@@ -120,7 +120,7 @@ namespace ecs {
 				if (free_index == index)
 					free_index = buffer[index].next_index;
 				else {
-					auto old = free_list;
+					auto old = free_index;
 					auto it = buffer[old].next_index;
 
 					for (;;) {

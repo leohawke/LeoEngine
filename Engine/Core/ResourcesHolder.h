@@ -21,7 +21,7 @@ namespace platform {
 		template<typename _type,typename ... _tParams>
 		std::shared_ptr<void> FindResource(const std::shared_ptr<_type> &asset, _tParams&&... args) {
 			std::weak_ptr<void> base = asset;
-			leo::any key = std::make_tuple(base, lforward(args)...);
+			std::any key = std::make_tuple(base,std::forward<_tParams>(args)...);
 			return FindResource(key);
 		}
 

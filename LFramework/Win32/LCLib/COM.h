@@ -7,6 +7,7 @@
 
 #include <LFramework/LCLib/Debug.h>
 #include <LFramework/LCLib/NativeAPI.h>
+#include <LBase/type_pun.hpp>
 #include <objbase.h>
 #include <stdexcept>
 
