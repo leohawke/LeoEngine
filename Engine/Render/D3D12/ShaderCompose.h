@@ -40,21 +40,9 @@ namespace platform_ex::Windows::D3D12 {
 			VertexHWShader* VertexShader;
 			PixelHWShader* PixelShader;
 
-			union {
-				struct {
-					std::optional<ShaderInfo> VertexInfo;
-					std::optional<ShaderInfo> PixelInfo;
-				};
-				std::array<ShaderInfo, NumTypes> Infos;
-			};
+			std::array<std::optional<ShaderInfo>, NumTypes> Infos;
 
-			union {
-				struct {
-					std::optional<std::vector<uint8>> VertexIndices;
-					std::optional<std::vector<uint8>> PixelIndices;
-				};
-				std::array<std::vector<uint8>, NumTypes> CBuffIndices;
-			};
+			std::array<std::vector<uint8>, NumTypes> CBuffIndices;
 
 			//Todo Support
 			std::vector<D3D12_SO_DECLARATION_ENTRY> so_decl;

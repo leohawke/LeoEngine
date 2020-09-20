@@ -172,8 +172,7 @@ namespace {
 platform_ex::Windows::D3D12::ShaderCompose::Template::~Template() = default;
 
 platform_ex::Windows::D3D12::ShaderCompose::Template::Template()
-	:VertexShader(nullptr), PixelShader(nullptr), VertexInfo(std::nullopt),
-	PixelInfo(std::nullopt), VertexIndices(std::nullopt), PixelIndices(std::nullopt) {
+	:VertexShader(nullptr), PixelShader(nullptr), Infos(), CBuffIndices() {
 	//uname union uname struct init
 }
 
