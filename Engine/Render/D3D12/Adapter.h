@@ -33,9 +33,6 @@ namespace platform_ex::Windows::D3D12 {
 	public:
 		Device(DXGI::Adapter& InAdapter);
 
-		D3D12_CPU_DESCRIPTOR_HANDLE AllocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE Type);
-		void DeallocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE Type, D3D12_CPU_DESCRIPTOR_HANDLE Handle);
-
 		ID3D12Device* operator->() lnoexcept;
 
 		Texture1D* CreateTexture(uint16 width, uint8 num_mipmaps, uint8 array_size,
@@ -116,11 +113,6 @@ namespace platform_ex::Windows::D3D12 {
 		lconstexpr static UINT const NUM_MAX_CBV_SRV_UAVS = 4 * 1024;
 
 		//@}
-
-		//@{
-		//\brief null bind object
-		D3D12_CPU_DESCRIPTOR_HANDLE null_srv_handle, null_uav_handle;
-		//@}
 	private:
 		void FillCaps();
 
@@ -158,12 +150,6 @@ namespace platform_ex::Windows::D3D12 {
 
 		array<COMPtr<ID3D12DescriptorHeap>, D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES> d3d_desc_heaps;
 		array<UINT, D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES> d3d_desc_incres_sizes;
-		//@{
-		//\brief host'memory so large can enough to store many bool
-		array<bool, NUM_MAX_RENDER_TARGET_VIEWS> rtv_heap_flag;
-		array<bool, NUM_MAX_DEPTH_STENCIL_VIEWS> dsv_heap_flag;
-		array<bool, NUM_MAX_CBV_SRV_UAVS> cbv_srv_uav_heap_flag;
-		//@}
 
 		//@{
 		//\brief cache Device Object for performance

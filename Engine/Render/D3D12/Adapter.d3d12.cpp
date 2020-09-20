@@ -32,7 +32,7 @@ namespace platform_ex::Windows::D3D12 {
 			if (SUCCEEDED(D3D12::CreateDevice(adapter.Get(),
 				level, IID_ID3D12Device, reinterpret_cast<void**>(&device)))) {
 
-#ifndef NDEBUG
+#if 1
 				COMPtr<ID3D12InfoQueue> info_queue;
 				if (SUCCEEDED(device->QueryInterface(COMPtr_RefParam(info_queue, IID_ID3D12InfoQueue)))) {
 					D3D12_INFO_QUEUE_FILTER filter;
@@ -98,66 +98,6 @@ namespace platform_ex::Windows::D3D12 {
 			}
 		}
 
-	}
-
-	D3D12_CPU_DESCRIPTOR_HANDLE Device::AllocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE Type)
-	{
-		leo::pointer_iterator<bool> desc_heap_flag_iter = nullptr;
-		size_t desc_heap_flag_num = 0;
-		size_t desc_heap_offset = 0;
-		switch (Type) {
-		case D3D12_DESCRIPTOR_HEAP_TYPE_RTV:
-			desc_heap_flag_iter = rtv_heap_flag.data();
-			desc_heap_flag_num = rtv_heap_flag.size();
-			desc_heap_offset = Display::NUM_BACK_BUFFERS;
-			break;
-		case D3D12_DESCRIPTOR_HEAP_TYPE_DSV:
-			desc_heap_flag_iter = dsv_heap_flag.data();
-			desc_heap_flag_num = dsv_heap_flag.size();
-			desc_heap_offset = 2;
-			break;
-		case D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV:
-			desc_heap_flag_iter = cbv_srv_uav_heap_flag.data();
-			desc_heap_flag_num = cbv_srv_uav_heap_flag.size();
-			break;
-		}
-		for (auto i = 0; i != desc_heap_flag_num; ++i) {
-			if (!*(desc_heap_flag_iter + i)) {
-				*(desc_heap_flag_iter + i) = true;
-				auto handle = d3d_desc_heaps[Type]->GetCPUDescriptorHandleForHeapStart();
-				handle.ptr += ((i + desc_heap_offset) * d3d_desc_incres_sizes[Type]);
-				return handle;
-			}
-		}
-		LAssert(false, "Not Enough Space");
-		throw;
-	}
-
-	void Device::DeallocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE Type, D3D12_CPU_DESCRIPTOR_HANDLE Handle)
-	{
-		leo::pointer_iterator<bool> desc_heap_flag_iter = nullptr;
-		size_t desc_heap_flag_num = 0;
-		size_t desc_heap_offset = 0;
-		switch (Type) {
-		case D3D12_DESCRIPTOR_HEAP_TYPE_RTV:
-			desc_heap_flag_iter = rtv_heap_flag.data();
-			desc_heap_flag_num = rtv_heap_flag.size();
-			desc_heap_offset = Display::NUM_BACK_BUFFERS;
-			break;
-		case D3D12_DESCRIPTOR_HEAP_TYPE_DSV:
-			desc_heap_flag_iter = dsv_heap_flag.data();
-			desc_heap_flag_num = dsv_heap_flag.size();
-			desc_heap_offset = 2;
-			break;
-		case D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV:
-			desc_heap_flag_iter = cbv_srv_uav_heap_flag.data();
-			desc_heap_flag_num = cbv_srv_uav_heap_flag.size();
-			break;
-		}
-		auto Offset = Handle.ptr - d3d_desc_heaps[Type]->GetCPUDescriptorHandleForHeapStart().ptr;
-		auto index = Offset / d3d_desc_incres_sizes[Type];
-		if (index >= desc_heap_offset)
-			*(desc_heap_flag_iter + index - desc_heap_offset) = false;
 	}
 
 	Texture1D* Device::CreateTexture(uint16 width, uint8 num_mipmaps, uint8 array_size, EFormat format, uint32 access, SampleDesc sample_info, std::optional<ElementInitData const *>  init_data)
@@ -401,29 +341,6 @@ namespace platform_ex::Windows::D3D12 {
 		create_desc_heap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, NUM_MAX_RENDER_TARGET_VIEWS);
 		create_desc_heap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, NUM_MAX_DEPTH_STENCIL_VIEWS);
 		create_desc_heap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, NUM_MAX_CBV_SRV_UAVS);
-
-		rtv_heap_flag.fill(false);
-		dsv_heap_flag.fill(false);
-		cbv_srv_uav_heap_flag.fill(false);
-
-		D3D12_SHADER_RESOURCE_VIEW_DESC null_srv_desc;
-		null_srv_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		null_srv_desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		null_srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		null_srv_desc.Texture2D.MipLevels = 1;
-		null_srv_desc.Texture2D.MostDetailedMip = 0;
-		null_srv_desc.Texture2D.PlaneSlice = 0;
-		null_srv_desc.Texture2D.ResourceMinLODClamp = 0;
-		null_srv_handle = AllocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		d3d_device->CreateShaderResourceView(nullptr, &null_srv_desc, null_srv_handle);
-
-		D3D12_UNORDERED_ACCESS_VIEW_DESC null_uav_desc;
-		null_uav_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		null_uav_desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-		null_uav_desc.Texture2D.MipSlice = 0;
-		null_uav_desc.Texture2D.PlaneSlice = 0;
-		null_uav_handle = AllocDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		d3d_device->CreateUnorderedAccessView(nullptr, nullptr, &null_uav_desc, null_uav_handle);
 
 		root_signatures = std::make_unique<RootSignatureMap>(device);
 

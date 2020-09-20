@@ -29,7 +29,7 @@ namespace platform_ex::Windows::D3D12 {
 	Context::Context()
 		:adapter_list()
 	{
-#ifndef NDEBUG
+#if 0
 		{
 			COMPtr<ID3D12Debug> debug_ctrl;
 			if (SUCCEEDED(D3D12::GetDebugInterface(COMPtr_RefParam(debug_ctrl, IID_ID3D12Debug)))) {
