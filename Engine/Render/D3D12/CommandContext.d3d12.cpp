@@ -25,7 +25,8 @@ CommandContext::CommandContext(NodeDevice* InParent, SubAllocatedOnlineHeap::Sub
 	PSConstantBuffer(InParent, ConstantsAllocator),
 	GSConstantBuffer(InParent, ConstantsAllocator),
 	CSConstantBuffer(InParent, ConstantsAllocator),
-	StateCache(0)
+	StateCache(0),
+	CommandAllocatorManager(InParent, InIsAsyncComputeContext ? D3D12_COMMAND_LIST_TYPE_COMPUTE : D3D12_COMMAND_LIST_TYPE_DIRECT)
 {
 	StateCache.Init(InParent, this, nullptr, SubHeapDesc);
 }
@@ -385,7 +386,7 @@ void CommandContext::ConditionalObtainCommandAllocator()
 	{
 		// Obtain a command allocator if the context doesn't already have one.
 		// This will check necessary fence values to ensure the returned command allocator isn't being used by the GPU, then reset it.
-		CommandAllocator = new D3D12::CommandAllocator(GetParentDevice()->GetDevice(), D3D12_COMMAND_LIST_TYPE_DIRECT);
+		CommandAllocator = CommandAllocatorManager.ObtainCommandAllocator();
 	}
 }
 
@@ -394,6 +395,8 @@ void CommandContext::ReleaseCommandAllocator()
 	if (CommandAllocator != nullptr)
 	{
 		// Release the command allocator so it can be reused.
+		CommandAllocatorManager.ReleaseCommandAllocator(CommandAllocator);
+		CommandAllocator = nullptr;
 	}
 }
 

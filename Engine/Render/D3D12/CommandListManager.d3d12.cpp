@@ -5,6 +5,53 @@
 
 using namespace platform_ex::Windows::D3D12;
 
+CommandAllocatorManager::CommandAllocatorManager(NodeDevice* InParent, const D3D12_COMMAND_LIST_TYPE& InType)
+	:DeviceChild(InParent), Type(InType)
+{
+}
+
+CommandAllocatorManager::~CommandAllocatorManager()
+{
+	for (auto pCommandAllocator : CommandAllocators)
+	{
+		delete pCommandAllocator;
+	}
+}
+
+CommandAllocator* CommandAllocatorManager::ObtainCommandAllocator()
+{
+	std::unique_lock Lock{ CS };
+
+	// See if the first command allocator in the queue is ready to be reset (will check associated fence)
+	CommandAllocator* pCommandAllocator = CommandAllocatorQueue.empty() ? nullptr:CommandAllocatorQueue.front();
+
+	if (pCommandAllocator && pCommandAllocator->IsReady())
+	{
+		pCommandAllocator->Reset();
+		CommandAllocatorQueue.pop();
+	}
+	else
+	{
+		// The queue was empty, or no command allocators were ready, so create a new command allocator.
+		pCommandAllocator = new CommandAllocator(GetParentDevice()->GetDevice(), Type);
+		CommandAllocators.emplace_back(pCommandAllocator);
+
+		// Set a valid sync point
+		Fence& FrameFence = GetParentDevice()->GetParentAdapter()->GetFrameFence();
+		const SyncPoint SyncPoint(&FrameFence, FrameFence.UpdateLastCompletedFence());
+		pCommandAllocator->SetSyncPoint(SyncPoint);
+	}
+
+	return pCommandAllocator;
+}
+
+void CommandAllocatorManager::ReleaseCommandAllocator(CommandAllocator* pCommandAllocator)
+{
+	std::unique_lock Lock{ CS };
+
+	CommandAllocatorQueue.push(pCommandAllocator);
+}
+
 void CommandListPayload::Reset()
 {
 	NumCommandLists = 0;

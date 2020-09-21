@@ -2,7 +2,7 @@
 
 #include "../ICommandContext.h"
 #include "ContextStateCache.h"
-#include "D3DCommandList.h"
+#include "CommandListManager.h"
 
 namespace platform_ex::Windows::D3D12 {
 	class CommandListManager;
@@ -110,6 +110,7 @@ namespace platform_ex::Windows::D3D12 {
 		// Handles to the command list and direct command allocator this context owns (granted by the command list manager/command allocator manager), and a direct pointer to the D3D command list/command allocator.
 		CommandListHandle CommandListHandle;
 		CommandAllocator* CommandAllocator;
+		CommandAllocatorManager CommandAllocatorManager;
 
 		CommandContextStateCache StateCache;
 

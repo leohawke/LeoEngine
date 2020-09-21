@@ -63,13 +63,29 @@ namespace platform_ex::Windows::D3D12 {
 	protected:
 		void InternalSignal(CommandQueueType InQueueType, uint64 FenceToSignal);
 
-	private:
+	protected:
 		uint64 last_completed_val;
 		std::atomic<uint64> fence_val;
 
 		FenceCore* FenceCores[MAX_NUM_GPUNODES];
 	};
 
+	class ManualFence : public Fence
+	{
+	public:
+		explicit ManualFence(D3D12Adapter* InParent, GPUMaskType InGPUMask, const std::string& InName = "<unnamed>")
+			: Fence(InParent, InGPUMask, InName)
+		{}
+
+		// Signals the specified fence value.
+		uint64 Signal(CommandQueueType InQueueType, uint64 FenceToSignal);
+
+		// Increments the current fence and returns the previous value.
+		inline uint64 IncrementCurrentFence()
+		{
+			return fence_val++;
+		}
+	};
 }
 
 #endif

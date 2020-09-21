@@ -7,6 +7,23 @@
 
 namespace platform_ex::Windows::D3D12
 {
+	class CommandAllocatorManager :public DeviceChild
+	{
+	public:
+		CommandAllocatorManager(NodeDevice* InParent, const D3D12_COMMAND_LIST_TYPE& InType);
+
+		~CommandAllocatorManager();
+
+		CommandAllocator* ObtainCommandAllocator();
+		void ReleaseCommandAllocator(CommandAllocator* CommandAllocator);
+	private:
+		std::vector<CommandAllocator*> CommandAllocators;
+		std::queue<CommandAllocator*> CommandAllocatorQueue;
+		std::recursive_mutex CS;
+		const D3D12_COMMAND_LIST_TYPE Type;
+	};
+
+
 	struct CommandListPayload
 	{
 		CommandListPayload()
@@ -68,4 +85,5 @@ namespace platform_ex::Windows::D3D12
 
 		std::mutex								FenceCS;
 	};
+
 }

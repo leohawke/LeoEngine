@@ -96,6 +96,8 @@ namespace platform_ex::Windows::D3D12 {
 		}
 
 		void InitializeRayTracing();
+
+		ManualFence& GetFrameFence() { return *frame_fence; }
 	public:
 		friend class Context;
 		friend class RayContext;
@@ -140,6 +142,8 @@ namespace platform_ex::Windows::D3D12 {
 		COMPtr<ID3D12Device5> raytracing_device;
 		//@}
 
+		COMPtr<ID3D12DebugDevice> d3d_debug_device;
+
 		D3D_FEATURE_LEVEL d3d_feature_level;
 
 		//@{
@@ -171,6 +175,8 @@ namespace platform_ex::Windows::D3D12 {
 		std::multimap<uint32_t, COMPtr<ID3D12Resource>> readback_resources;
 
 		array<std::unique_ptr<Fence>, Device::CommandTypeCount> fences;
+
+		ManualFence* frame_fence;
 
 		//feature support
 		D3D12_RESOURCE_BINDING_TIER ResourceBindingTier;

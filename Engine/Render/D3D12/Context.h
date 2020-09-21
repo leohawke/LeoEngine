@@ -33,6 +33,8 @@ namespace platform_ex {
 				RayContext& GetRayContext() override;
 
 				CommandContext* GetDefaultCommandContext() override;
+
+				void AdvanceFrameFence() override;
 			public:
 				void CreateDeviceAndDisplay() override;
 			private:

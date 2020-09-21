@@ -37,4 +37,5 @@ void platform::Render::CommandList::BeginFrame()
 void platform::Render::CommandList::EndFrame()
 {
 	GetContext().EndFrame();
+	platform::Render::Context::Instance().AdvanceFrameFence();
 }

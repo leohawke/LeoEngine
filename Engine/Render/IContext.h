@@ -29,6 +29,8 @@ namespace platform::Render {
 		virtual void EndFrame() = 0;
 
 		virtual CommandContext* GetDefaultCommandContext() = 0;
+
+		virtual void AdvanceFrameFence() = 0;
 	public:
 		virtual void CreateDeviceAndDisplay() = 0;
 	private:

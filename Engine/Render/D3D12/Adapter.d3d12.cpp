@@ -370,6 +370,13 @@ namespace platform_ex::Windows::D3D12 {
 		}
 
 		InitializeRayTracing();
+
+		frame_fence = new ManualFence(this, 0, "Adapter Frame Fence");
+		frame_fence->CreateFence();
+
+		if (SUCCEEDED(d3d_device->QueryInterface(COMPtr_RefParam(d3d_debug_device, IID_ID3D12DebugDevice)))) {
+			LAssertNonnull(d3d_debug_device);
+		}
 	}
 
 	void platform_ex::Windows::D3D12::Device::InitializeRayTracing()

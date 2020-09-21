@@ -139,4 +139,13 @@ void Fence::WaitForFence(uint64 FenceValue)
 	}
 }
 
+uint64 ManualFence::Signal(CommandQueueType InQueueType, uint64 FenceToSignal)
+{
+	InternalSignal(InQueueType, FenceToSignal);
+
+	UpdateLastCompletedFence();
+
+	return FenceToSignal;
+}
+
 

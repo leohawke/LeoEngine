@@ -219,3 +219,11 @@ void Display::UpdateFramewBufferView()
 		}
 	}
 }
+
+void Context::AdvanceFrameFence()
+{
+	auto FrameFence = &device->GetFrameFence();
+	const uint64 PreviousFence = FrameFence->IncrementCurrentFence();
+
+	FrameFence->Signal(CommandQueueType::Default, PreviousFence);
+}
