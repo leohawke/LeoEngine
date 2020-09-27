@@ -226,7 +226,7 @@ private:
 	void OnPostProcess()
 	{
 		//PostProcess
-		if (true || lut_dirty || !lut_texture)
+		if (/*true ||*/ lut_dirty || !lut_texture)
 		{
 			lut_texture = platform::CombineLUTPass(lut_params);
 		}
