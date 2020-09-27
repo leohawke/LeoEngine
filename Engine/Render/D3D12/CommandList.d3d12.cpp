@@ -28,7 +28,16 @@ CommandListHandle::CommandListData::CommandListData(NodeDevice* ParentDevice, D3
 
 	D3D::Debug(CommandList, name.c_str());
 
+
+#if ENABLE_AFTER_MATH
+	AftermathHandle = nullptr;
+	GFSDK_Aftermath_Result Result = GFSDK_Aftermath_DX12_CreateContextHandle(CommandList.Get(), &AftermathHandle);
+
+	lconstraint(Result == GFSDK_Aftermath_Result_Success);
+#endif
+
 	Close();
+
 }
 
 CommandListHandle::CommandListData::~CommandListData()

@@ -7,6 +7,10 @@
 #include <queue>
 #include <mutex>
 
+#if ENABLE_AFTER_MATH
+#include <Aftermath/GFSDK_Aftermath.h>
+#endif
+
 namespace platform_ex::Windows::D3D12 {
 	class UnorderedAccessView;
 	class ShaderResourceView;
@@ -109,6 +113,10 @@ namespace platform_ex::Windows::D3D12 {
 			std::recursive_mutex ActiveGenerationsCS;
 
 			ResourceBarrierBatcher ResourceBarrierBatcher;
+
+#if ENABLE_AFTER_MATH
+			GFSDK_Aftermath_ContextHandle			AftermathHandle;
+#endif
 		private:
 			void CleanupActiveGenerations();
 		};

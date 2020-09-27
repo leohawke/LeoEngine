@@ -913,4 +913,6 @@ namespace platform_ex::Windows::D3D12 {
 
 #define USE_PIX 1
 
+#define ENABLE_AFTER_MATH 1
+
 #endif
