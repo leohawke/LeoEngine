@@ -1,6 +1,6 @@
 /*! \file Engine\Render\d3d12_dxgi.h
 \ingroup Engine
-\brief °ü×°ÐèÒª¶¯Ì¬ÔØÈëµÄD3D12º¯ÊýºÍÉùÃ÷Ïà¹Ø½Ó¿ÚÒÔ¼°Ïà¹Ø³£Á¿¶¨Òå¡£
+\brief åŒ…è£…éœ€è¦åŠ¨æ€è½½å…¥çš„D3D12å‡½æ•°å’Œå£°æ˜Žç›¸å…³æŽ¥å£ä»¥åŠç›¸å…³å¸¸é‡å®šä¹‰ã€‚
 */
 #ifndef LE_RENDER_D3D12_d3d12_dxgi_h
 #define LE_RENDER_D3D12_d3d12_dxgi_h 1
@@ -31,10 +31,10 @@ namespace platform_ex {
 		}
 
 		/*
-		\note ×ÀÃæÆ½Ì¨ÕâÐ©º¯ÊýÊÇÖ±½ÓÍ¨¹ýLoadProcÀ´ÊµÏÖ
-		\warning ÒýÇæ¶ÔÓÚÕâÐ©º¯Êý²»»áÒ²²»ÄÜÆµ·±µ÷ÓÃ,ÎÞÊÓLoadProcµÄ¿ªÏú
-		\warning ÈôÏàÓ¦Ä£¿éÎ´ÊÂÏÈÔØÈë Å×³öWin32Exception
-		\todo UWPÖ§³Ö
+		\note æ¡Œé¢å¹³å°è¿™äº›å‡½æ•°æ˜¯ç›´æŽ¥é€šè¿‡LoadProcæ¥å®žçŽ°
+		\warning å¼•æ“Žå¯¹äºŽè¿™äº›å‡½æ•°ä¸ä¼šä¹Ÿä¸èƒ½é¢‘ç¹è°ƒç”¨,æ— è§†LoadProcçš„å¼€é”€
+		\warning è‹¥ç›¸åº”æ¨¡å—æœªäº‹å…ˆè½½å…¥ æŠ›å‡ºWin32Exception
+		\todo UWPæ”¯æŒ
 		*/
 		namespace DXGI {
 			using namespace leo;

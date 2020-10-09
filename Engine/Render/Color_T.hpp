@@ -1,6 +1,6 @@
 /*! \file Engine\Render\Color_T.hpp
 \ingroup Engine
-\brief ÖĞ¼äÑÕÉ«¸ñÊ½¡£
+\brief ä¸­é—´é¢œè‰²æ ¼å¼ã€‚
 */
 
 #ifndef LE_RENDER_ColorT_hpp
@@ -44,7 +44,7 @@ namespace platform {
 		template <typename T>
 		class Color_T;
 
-		// RGBA£¬ÓÃ4¸ö¸¡µãÊı±íÊ¾r, g, b, a
+		// RGBAï¼Œç”¨4ä¸ªæµ®ç‚¹æ•°è¡¨ç¤ºr, g, b, a
 		///////////////////////////////////////////////////////////////////////////////
 		template <typename T>
 		class Color_T
@@ -71,7 +71,7 @@ namespace platform {
 			Color_T(T r, T g, T b, T a) lnoexcept;
 			explicit Color_T(uint32 dw) lnoexcept;
 
-			// È¡ÑÕÉ«
+			// å–é¢œè‰²
 			iterator begin() lnoexcept
 			{
 				return col_.begin();
@@ -135,7 +135,7 @@ namespace platform {
 			uint32 ARGB() const lnoexcept;
 			uint32 ABGR() const lnoexcept;
 
-			// ¸³Öµ²Ù×÷·û
+			// èµ‹å€¼æ“ä½œç¬¦
 			Color_T& operator+=(Color_T<T> const & rhs) lnoexcept;
 			Color_T& operator-=(Color_T<T> const & rhs) lnoexcept;
 			Color_T& operator*=(T rhs) lnoexcept;
@@ -145,7 +145,7 @@ namespace platform {
 			Color_T& operator=(Color_T const & rhs) lnoexcept;
 			Color_T& operator=(Color_T&& rhs) lnoexcept;
 
-			// Ò»Ôª²Ù×÷·û
+			// ä¸€å…ƒæ“ä½œç¬¦
 			Color_T const operator+() const lnoexcept;
 			Color_T const operator-() const lnoexcept;
 
@@ -177,6 +177,29 @@ namespace platform {
 		void ConvertFromABGR32F(Render::EFormat fmt, Color const * input, uint32 num_elems, void* output);
 		void ConvertToABGR32F(Render::EFormat fmt, void const * input, uint32_t num_elems, Color* output);
 	}
+
+	template<Render::EFormat format>
+	struct TColor;
+
+	template<>
+	struct TColor<Render::EF_ARGB8_SRGB>
+	{
+		using uint8 = leo::uint8;
+
+		union { struct { uint8 B, G, R, A; }; leo::uint32 AlignmentDummy; };
+
+		TColor():AlignmentDummy(0){}
+
+		constexpr TColor(uint8 InR, uint8 InG, uint8 InB, uint8 InA = 255)
+			: B(InB), G(InG), R(InR), A(InA)
+		{}
+
+		leo::uint32& DWColor() { return *((leo::uint32*)this); }
+		const leo::uint32& DWColor() const { return *((leo::uint32*)this); }
+	};
+
+	//	Stores a color with 8 bits of precision per channel.  
+	using FColor = TColor<Render::EF_ARGB8_SRGB>;
 }
 
 #endif

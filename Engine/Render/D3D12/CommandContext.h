@@ -3,6 +3,7 @@
 #include "../ICommandContext.h"
 #include "ContextStateCache.h"
 #include "CommandListManager.h"
+#include "../Color_T.hpp"
 
 namespace platform_ex::Windows::D3D12 {
 	class CommandListManager;
@@ -71,6 +72,10 @@ namespace platform_ex::Windows::D3D12 {
 		void DrawIndexedPrimitive(platform::Render::GraphicsBuffer* IndexBuffer, int32 BaseVertexIndex, uint32 FirstInstance, uint32 NumVertices, uint32 StartIndex, uint32 NumPrimitives, uint32 NumInstances) override;
 
 		void DrawPrimitive(uint32 BaseVertexIndex, uint32 FirstInstance, uint32 NumPrimitives, uint32 NumInstances) override;
+
+		void PushEvent(const char16_t* Name, platform::FColor Color) override;
+
+		void PopEvent() override;
 
 		void SetRenderTargets(
 			uint32 NewNumSimultaneousRenderTargets,
