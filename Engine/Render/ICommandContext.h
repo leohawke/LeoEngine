@@ -25,6 +25,10 @@ namespace platform::Render {
 		virtual void SetUAVParameter(ComputeHWShader* Shader, uint32 UAVIndex, UnorderedAccessView* UAV, uint32 InitialCount) = 0;
 
 		virtual void SetShaderParameter(ComputeHWShader* Shader, uint32 BufferIndex, uint32 BaseIndex, uint32 NumBytes, const void* NewValue) = 0;
+
+		virtual void PushEvent(const char16_t* Name, platform::FColor Color) = 0;
+
+		virtual void PopEvent() = 0;
 	};
 
 	//command context

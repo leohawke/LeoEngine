@@ -4,6 +4,10 @@
 #include "Adapter.h"
 #include "CommandListManager.h"
 
+#if USE_PIX
+#include <WinPixEventRuntime/pix3.h>
+#endif
+
 using namespace platform_ex::Windows::D3D12;
 
 constexpr auto MaxSimultaneousRenderTargets = platform::Render::MaxSimultaneousRenderTargets;
@@ -774,4 +778,18 @@ void CommandContext::CommitComputeShaderConstants()
 void CommandContext::CommitComputeResourceTables(ComputeHWShader* ComputeShader)
 {
 	//don't support UE4 ShaderResourceTable
+}
+
+void CommandContext::PushEvent(const char16_t* Name, platform::FColor Color)
+{
+#if USE_PIX
+	PIXBeginEvent(CommandListHandle.GraphicsCommandList(), PIX_COLOR(Color.R, Color.G, Color.B), reinterpret_cast<const wchar_t*>(Name));
+#endif
+}
+
+void CommandContext::PopEvent()
+{
+#if USE_PIX
+	PIXEndEvent(CommandListHandle.GraphicsCommandList());
+#endif
 }

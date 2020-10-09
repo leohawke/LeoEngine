@@ -155,6 +155,16 @@ namespace platform::Render {
 			GetComputeContext().DispatchComputeShader(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);
 		}
 
+		void PushEvent(const char16_t* Name, platform::FColor Color)
+		{
+			GetComputeContext().PushEvent(Name, Color);
+		}
+
+		void PopEvent()
+		{
+			GetComputeContext().PopEvent();
+		}
+
 		void BeginFrame();
 		void EndFrame();
 	protected:
