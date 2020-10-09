@@ -314,6 +314,9 @@
     <ClCompile Include="Core\Threading\Win32Thread.cpp">
       <Filter>Core\Threading</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\ScreenSpaceDenoiser.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Context.h">
@@ -737,6 +740,9 @@
     </ClInclude>
     <ClInclude Include="Core\Coroutine\ReadOnlyFile.h">
       <Filter>Core\Coroutine</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\ScreenSpaceDenoiser.h">
+      <Filter>Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -55,6 +55,7 @@
     <ClCompile Include="Renderer\imgui\imgui_context.cpp" />
     <ClCompile Include="Renderer\PostProcess\PostProcessCombineLUTs.cpp" />
     <ClCompile Include="Renderer\PostProcess\PostProcessToneMap.cpp" />
+    <ClCompile Include="Renderer\ScreenSpaceDenoiser.cpp" />
     <ClCompile Include="Renderer\VolumeRendering.cpp">
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
     </ClCompile>
@@ -186,6 +187,7 @@
     <ClInclude Include="Renderer\imgui\imgui_context.h" />
     <ClInclude Include="Renderer\PostProcess\PostProcessCombineLUTs.h" />
     <ClInclude Include="Renderer\PostProcess\PostProcessToneMap.h" />
+    <ClInclude Include="Renderer\ScreenSpaceDenoiser.h" />
     <ClInclude Include="Renderer\VolumeRendering.h" />
     <ClInclude Include="Render\BuiltInRayTracingShader.h" />
     <ClInclude Include="Render\BuiltInShader.h" />

@@ -13,6 +13,7 @@
 #include "Engine/Render/IFrameBuffer.h"
 #include "Engine/Renderer/PostProcess/PostProcessCombineLUTs.h"
 #include "Engine/Renderer/PostProcess/PostProcessToneMap.h"
+#include "Engine/Renderer/ScreenSpaceDenoiser.h"
 
 #include "LFramework/Win32/LCLib/Mingw32.h"
 #include "LFramework/Helper/ShellHelper.h"
@@ -52,8 +53,12 @@ public:
 	std::shared_ptr<GraphicsBuffer> pLightConstatnBuffer;
 	std::shared_ptr<GraphicsBuffer> pGenShaderConstants;
 
-	std::shared_ptr<Texture2D> ShadowMap;
-	std::shared_ptr<UnorderedAccessView> ShadowMapUAV;
+	std::shared_ptr<Texture2D> RayShadowMask;
+	std::shared_ptr<UnorderedAccessView> RayShadowMaskUAV;
+
+	std::shared_ptr<Texture2D> RayShadowMaskDenoiser;
+	std::shared_ptr<UnorderedAccessView> RayShadowMaskDenoiserUAV;
+
 
 	std::shared_ptr<Texture2D> HDROutput;
 
@@ -171,26 +176,10 @@ private:
 			Context::Instance().Render(CmdList,*pPreZEffect, pPreZEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
 		}
 
-		GenShadowConstants shadowconstant;
-		{
-			shadowconstant.LightDirection = lights[0].direction;
-			shadowconstant.SourceRadius = sinf(LightHalfAngle* 3.14159265f / 180);
-			shadowconstant.SamplesPerPixel = SamplesPerPixel;
-			shadowconstant.StateFrameIndex = StateFrameIndex;
-			shadowconstant.CameraToWorld = lm::transpose(lm::inverse(viewproj));
-			shadowconstant.Resolution = lm::float2(1280, 720);
-			pGenShaderConstants->UpdateSubresource(0, static_cast<leo::uint32>(sizeof(shadowconstant)), &shadowconstant);
-		}
-		auto Scene = pEntities->BuildRayTracingScene();
-		Context::Instance().GetRayContext().GetDevice().BuildAccelerationStructure(Scene.get());
+		OnDrawLights(camera,projmatrix);
 
-		//clear rt?
-		Context::Instance().GetRayContext().RayTraceShadow(Scene.get(),
-			Context::Instance().GetScreenFrame().get(),
-			ShadowMapUAV.get(),
-			pGenShaderConstants.get());
-
-		pEffect->GetParameter("shadow_tex") = TextureSubresource(ShadowMap, 0, ShadowMap->GetArraySize(), 0, ShadowMap->GetNumMipMaps());
+		if(RayShadowMaskDenoiser)
+			pEffect->GetParameter("shadow_tex") = TextureSubresource(RayShadowMaskDenoiser, 0, RayShadowMaskDenoiser->GetArraySize(), 0, RayShadowMaskDenoiser->GetNumMipMaps());
 
 		platform::Render::RenderPassInfo GeometryPass(
 			HDROutput.get(),platform::Render::RenderTargetActions::Clear_Store,
@@ -239,6 +228,52 @@ private:
 		tonemap_inputs.SceneColor = HDROutput;
 
 		platform::TonemapPass(tonemap_inputs);
+	}
+
+	void OnDrawLights(const LeoEngine::Core::Camera& camera,const leo::math::float4x4& projmatrix)
+	{
+		auto viewmatrix = camera.GetViewMatrix();
+
+		auto viewproj = viewmatrix * projmatrix;
+
+		GenShadowConstants shadowconstant;
+		{
+			shadowconstant.LightDirection = lights[0].direction;
+			shadowconstant.SourceRadius = sinf(LightHalfAngle * 3.14159265f / 180);
+			shadowconstant.SamplesPerPixel = SamplesPerPixel;
+			shadowconstant.StateFrameIndex = StateFrameIndex;
+			shadowconstant.CameraToWorld = lm::transpose(lm::inverse(viewproj));
+			shadowconstant.Resolution = lm::float2(1280, 720);
+			pGenShaderConstants->UpdateSubresource(0, static_cast<leo::uint32>(sizeof(shadowconstant)), &shadowconstant);
+		}
+		auto Scene = pEntities->BuildRayTracingScene();
+		Context::Instance().GetRayContext().GetDevice().BuildAccelerationStructure(Scene.get());
+
+		//clear rt?
+		Context::Instance().GetRayContext().RayTraceShadow(Scene.get(),
+			Context::Instance().GetScreenFrame().get(),
+			RayShadowMaskUAV.get(),
+			pGenShaderConstants.get());
+
+		auto& CmdList = platform::Render::GetCommandList();
+
+		platform::ScreenSpaceDenoiser::ShadowVisibilityInput svinput =
+		{
+			.Mask = RayShadowMask.get()
+		};
+
+		platform::ScreenSpaceDenoiser::ShadowVisibilityOutput svoutput =
+		{
+			.Mask = RayShadowMaskDenoiser.get(),
+			.MaskUAV = RayShadowMaskDenoiserUAV.get()
+		};
+
+		platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(
+			CmdList,
+			{},
+			svinput,
+			svoutput
+		);
 	}
 
 	void OnDrawUI()
@@ -317,9 +352,11 @@ private:
 
 		pGenShaderConstants = leo::share_raw(Device.CreateConstanBuffer(Buffer::Usage::Dynamic, 0, sizeof(GenShadowConstants), EFormat::EF_Unknown));
 
-		ShadowMap = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_ABGR16F,EA_GPURead | EA_GPUWrite | EA_GPUUnordered, {}));
+		RayShadowMask = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_ABGR16F, EA_GPURead | EA_GPUWrite | EA_GPUUnordered, {}));
+		RayShadowMaskDenoiser = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_ABGR16F,EA_GPURead | EA_GPUWrite | EA_GPUUnordered, {}));
 
-		ShadowMapUAV = leo::share_raw(Device.CreateUnorderedAccessView(ShadowMap.get()));
+		RayShadowMaskUAV = leo::share_raw(Device.CreateUnorderedAccessView(RayShadowMask.get()));
+		RayShadowMaskDenoiserUAV = leo::share_raw(Device.CreateUnorderedAccessView(RayShadowMaskDenoiser.get()));
 
 		GetMessageMap()[WM_MOUSEMOVE] += [&](::WPARAM wParam, ::LPARAM lParam) {
 			static auto lastxPos = GET_X_LPARAM(lParam);
