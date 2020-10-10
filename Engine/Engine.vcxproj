@@ -100,6 +100,7 @@
     <ClCompile Include="Render\D3D12\TextureCube.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\Utility.d3d12.cpp" />
     <ClCompile Include="Render\D3D12\VertexDeclaration.d3d12.cpp" />
+    <ClCompile Include="Render\DrawEvent.cpp" />
     <ClCompile Include="Render\Effect\BiltEffect.cpp" />
     <ClCompile Include="Render\Effect\CopyEffect.cpp" />
     <ClCompile Include="Render\Effect\Effect.cpp" />
@@ -233,6 +234,7 @@
     <ClInclude Include="Render\D3D12\View.h" />
     <ClInclude Include="Render\DataStructures.h" />
     <ClInclude Include="Render\DeviceCaps.h" />
+    <ClInclude Include="Render\DrawEvent.h" />
     <ClInclude Include="Render\Effect\BiltEffect.h" />
     <ClInclude Include="Render\Effect\CopyEffect.h" />
     <ClInclude Include="Render\Effect\Effect.hpp" />

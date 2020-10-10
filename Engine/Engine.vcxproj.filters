@@ -317,6 +317,9 @@
     <ClCompile Include="Renderer\ScreenSpaceDenoiser.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="Render\DrawEvent.cpp">
+      <Filter>Render\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Context.h">
@@ -743,6 +746,9 @@
     </ClInclude>
     <ClInclude Include="Renderer\ScreenSpaceDenoiser.h">
       <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\DrawEvent.h">
+      <Filter>Render\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

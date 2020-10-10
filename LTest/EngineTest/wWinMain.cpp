@@ -11,6 +11,7 @@
 #include "Engine/Render/ICommandList.h"
 #include "Engine/Render/DataStructures.h"
 #include "Engine/Render/IFrameBuffer.h"
+#include "Engine/Render/DrawEvent.h"
 #include "Engine/Renderer/PostProcess/PostProcessCombineLUTs.h"
 #include "Engine/Renderer/PostProcess/PostProcessToneMap.h"
 #include "Engine/Renderer/ScreenSpaceDenoiser.h"
@@ -104,6 +105,9 @@ private:
 
 		auto& CmdList = platform::Render::GetCommandList();
 
+		SCOPED_GPU_EVENT(CmdList, Frame);
+
+
 		CmdList.BeginFrame();
 		Context::Instance().BeginFrame();
 		auto& screen_frame = Context::Instance().GetScreenFrame();
@@ -122,9 +126,7 @@ private:
 
 		ecs::EntitySystem::Instance().RemoveEntity(entityId);
 
-		platform::Render::RenderPassInfo prezPass(depth_tex, platform::Render::DepthStencilTargetActions::ClearDepthStencil_StoreDepthStencil);
-		CmdList.BeginRenderPass(prezPass, "PreZ");
-
+		
 		lm::float4x4 worldmatrix = {
 			{1,0,0,0},
 			{0,1,0,0},
@@ -170,10 +172,16 @@ private:
 			}
 		}
 
-		//pre-z
-		for (auto& entity : pEntities->GetRenderables())
 		{
-			Context::Instance().Render(CmdList,*pPreZEffect, pPreZEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
+			SCOPED_GPU_EVENT(CmdList, PreZ);
+			platform::Render::RenderPassInfo prezPass(depth_tex, platform::Render::DepthStencilTargetActions::ClearDepthStencil_StoreDepthStencil);
+			CmdList.BeginRenderPass(prezPass, "PreZ");
+
+			//pre-z
+			for (auto& entity : pEntities->GetRenderables())
+			{
+				Context::Instance().Render(CmdList, *pPreZEffect, pPreZEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
+			}
 		}
 
 		OnDrawLights(camera,projmatrix);
@@ -181,15 +189,18 @@ private:
 		if(RayShadowMaskDenoiser)
 			pEffect->GetParameter("shadow_tex") = TextureSubresource(RayShadowMaskDenoiser, 0, RayShadowMaskDenoiser->GetArraySize(), 0, RayShadowMaskDenoiser->GetNumMipMaps());
 
-		platform::Render::RenderPassInfo GeometryPass(
-			HDROutput.get(),platform::Render::RenderTargetActions::Clear_Store,
-			depth_tex, platform::Render::DepthStencilTargetActions::LoadDepthStencil_StoreDepthStencil);
-		CmdList.BeginRenderPass(GeometryPass, "Geometry");
-		
-		for (auto& entity : pEntities->GetRenderables())
 		{
-			entity.GetMaterial().UpdateParams(reinterpret_cast<const platform::Renderable*>(&entity));
-			Context::Instance().Render(CmdList ,*pEffect, pEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
+			SCOPED_GPU_EVENT(CmdList, GeometryShading);
+			platform::Render::RenderPassInfo GeometryPass(
+				HDROutput.get(), platform::Render::RenderTargetActions::Clear_Store,
+				depth_tex, platform::Render::DepthStencilTargetActions::LoadDepthStencil_StoreDepthStencil);
+			CmdList.BeginRenderPass(GeometryPass, "Geometry");
+
+			for (auto& entity : pEntities->GetRenderables())
+			{
+				entity.GetMaterial().UpdateParams(reinterpret_cast<const platform::Renderable*>(&entity));
+				Context::Instance().Render(CmdList, *pEffect, pEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
+			}
 		}
 
 		OnPostProcess();
@@ -214,6 +225,9 @@ private:
 
 	void OnPostProcess()
 	{
+		auto& CmdList = platform::Render::GetCommandList(); 
+		SCOPED_GPU_EVENT(CmdList, PostProcess);
+
 		//PostProcess
 		if (/*true ||*/ lut_dirty || !lut_texture)
 		{
@@ -249,13 +263,16 @@ private:
 		auto Scene = pEntities->BuildRayTracingScene();
 		Context::Instance().GetRayContext().GetDevice().BuildAccelerationStructure(Scene.get());
 
+		auto& CmdList = platform::Render::GetCommandList();
+
+		SCOPED_GPU_EVENT(CmdList, DrawLights);
+
 		//clear rt?
 		Context::Instance().GetRayContext().RayTraceShadow(Scene.get(),
 			Context::Instance().GetScreenFrame().get(),
 			RayShadowMaskUAV.get(),
 			pGenShaderConstants.get());
 
-		auto& CmdList = platform::Render::GetCommandList();
 
 		platform::ScreenSpaceDenoiser::ShadowVisibilityInput svinput =
 		{
@@ -267,6 +284,8 @@ private:
 			.Mask = RayShadowMaskDenoiser.get(),
 			.MaskUAV = RayShadowMaskDenoiserUAV.get()
 		};
+
+		SCOPED_GPU_EVENT(CmdList, ShadowDenoise);
 
 		platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(
 			CmdList,
@@ -282,6 +301,7 @@ private:
 
 		platform::Render::RenderPassInfo passInfo(GetScreenTex(), RenderTargetActions::Load_Store);
 
+		SCOPED_GPU_EVENT(CmdList, Imgui);
 		CmdList.BeginRenderPass(passInfo, "imguiPass");
 
 		platform::imgui::Context_RenderDrawData(ImGui::GetDrawData());
