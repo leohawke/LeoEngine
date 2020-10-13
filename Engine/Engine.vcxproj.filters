@@ -845,6 +845,12 @@
     <Filter Include="Core\Coroutine\details">
       <UniqueIdentifier>{4729c41f-8d7d-4ed8-b252-8956f69e7282}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\SSD">
+      <UniqueIdentifier>{4cabf620-236e-4148-aa2b-a7059b3445ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\SSD\Shadow">
+      <UniqueIdentifier>{68c1b9f6-f60c-4604-a01d-0041c1eddf2e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Render\Material\FPDS.mat.lsl">
@@ -927,6 +933,9 @@
     </None>
     <None Include="Shaders\RandomSequence.lsl">
       <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\SSD\Shadow\SSDInjest.lsl">
+      <Filter>Shaders\SSD\Shadow</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

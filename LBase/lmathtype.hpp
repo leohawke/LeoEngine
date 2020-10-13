@@ -815,6 +815,8 @@ namespace leo {
 			{0,0,0,1},
 			};
 
+		using int2 = vector2<int>;
+
 		struct int3 : vector3<int>
 		{
 			using base = vector3<int>;

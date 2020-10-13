@@ -208,6 +208,12 @@ void CommandContext::SetShaderParameter(platform::Render::PixelHWShader* Shader,
 	PSConstantBuffer.UpdateConstant(reinterpret_cast<const uint8*>(NewValue), BaseIndex, NumBytes);
 }
 
+void CommandContext::SetShaderParameter(platform::Render::ComputeHWShader* Shader, uint32 BufferIndex, uint32 BaseIndex, uint32 NumBytes, const void* NewValue)
+{
+	lconstraint(BufferIndex == 0);
+	CSConstantBuffer.UpdateConstant(reinterpret_cast<const uint8*>(NewValue), BaseIndex, NumBytes);
+}
+
 void CommandContext::CommitGraphicsResourceTables()
 {
 	//don't support UE4 ShaderResourceTable

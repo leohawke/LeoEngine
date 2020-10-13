@@ -150,7 +150,7 @@ namespace platform::Render {
 			GetComputeContext().SetComputeShader(Shader);
 		}
 
-		void DispatchComputShader(uint32 ThreadGroupCountX, uint32 ThreadGroupCountY, uint32 ThreadGroupCountZ)
+		void DispatchComputeShader(uint32 ThreadGroupCountX, uint32 ThreadGroupCountY, uint32 ThreadGroupCountZ)
 		{
 			GetComputeContext().DispatchComputeShader(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);
 		}

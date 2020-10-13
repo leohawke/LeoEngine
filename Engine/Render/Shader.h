@@ -11,6 +11,7 @@ class HardwareShader;
 class VertexHWShader;
 class PixelHWShader;
 class GeometryHWShader;
+class ComputeHWShader;
 
 inline namespace Shader
 {
@@ -102,6 +103,11 @@ inline namespace Shader
 		PixelHWShader* GetPixelShader() const
 		{
 			return GetHardwareShader<PixelHWShader>();
+		}
+
+		ComputeHWShader* GetComputeShader() const
+		{
+			return GetHardwareShader<ComputeHWShader>();
 		}
 	private:
 		template<class THardwareShader>
