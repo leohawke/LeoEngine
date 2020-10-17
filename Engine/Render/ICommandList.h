@@ -32,8 +32,22 @@ namespace platform::Render {
 		ComputeContext* ComputeContext;
 	};
 
+	class ComputeCommandList : public CommandListBase
+	{
+	public:
+		void SetShaderSampler(ComputeHWShader* Shader, uint32 SamplerIndex, const TextureSampleDesc& Desc)
+		{
+			GetComputeContext().SetShaderSampler(Shader, SamplerIndex, Desc);
+		}
 
-	class CommandList :public CommandListBase
+		void SetShaderTexture(ComputeHWShader* Shader, uint32 TextureIndex, Texture* Texture)
+		{
+			GetComputeContext().SetShaderTexture(Shader, TextureIndex, Texture);
+		}
+	};
+
+
+	class CommandList :public ComputeCommandList
 	{
 	public:
 		void BeginRenderPass(const RenderPassInfo& Info, const char* Name)
@@ -71,11 +85,15 @@ namespace platform::Render {
 			GetContext().SetShaderSampler(Shader, SamplerIndex, Desc);
 		}
 
+		using ComputeCommandList::SetShaderSampler;
+
 		template<typename THardwareShader>
 		void SetShaderTexture(THardwareShader* Shader, uint32 TextureIndex, Texture* Texture)
 		{
 			GetContext().SetShaderTexture(Shader, TextureIndex, Texture);
 		}
+
+		using ComputeCommandList::SetShaderTexture;
 
 		template<typename THardwareShader>
 		void SetShaderResourceView(THardwareShader* Shader, uint32 TextureIndex, ShaderResourceView* SRV)

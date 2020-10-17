@@ -759,12 +759,6 @@ void CommandContext::SetUAVParameter(platform::Render::ComputeHWShader* Shader, 
 	StateCache.SetUAVs<ShaderType::ComputeShader>(UAVIndex, 1, &UAV, &InitialCount);
 }
 
-void CommandContext::SetShaderParameter(platform::Render::ComputeHWShader* Shader, uint32 BufferIndex, uint32 BaseIndex, uint32 NumBytes, const void* NewValue)
-{
-	lconstraint(BufferIndex == 0);
-	CSConstantBuffer.UpdateConstant(reinterpret_cast<const uint8*>(NewValue), BaseIndex, NumBytes);
-}
-
 void CommandContext::SetComputePipelineState(platform::Render::ComputePipelineState* IComputeState)
 {
 	auto ComputeState = static_cast<ComputePipelineState*>(IComputeState);

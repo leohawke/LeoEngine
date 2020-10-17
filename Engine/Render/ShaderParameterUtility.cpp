@@ -70,6 +70,19 @@ struct ShaderParameterStructBinding
 
 				Bindings->Samplers.emplace_back(Parameter);
 			}
+
+			const bool bIsUAVType =
+				(ShaderType >= SPT_rwbuffer && ShaderType <= SPT_AppendStructuredBuffer) ||
+				ShaderType == SPT_rwbyteAddressBuffer;
+
+			if (bIsUAVType)
+			{
+				RenderShaderParameterBindings::ResourceParameter Parameter;
+				Parameter.BaseIndex = BaseIndex;
+				Parameter.ByteOffset = ByteOffset;
+
+				Bindings->UAVs.emplace_back(Parameter);
+			}
 		}
 	}
 };

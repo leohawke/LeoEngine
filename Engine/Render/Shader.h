@@ -72,6 +72,7 @@ inline namespace Shader
 		std::vector<Parameter> Paramters;
 		std::vector<ResourceParameter> Textures;
 		std::vector<ResourceParameter> Samplers;
+		std::vector<ResourceParameter> UAVs;
 
 		void BindForLegacyShaderParameters(const RenderShader* Shader, const ShaderParameterMap& ParameterMaps, const ShaderParametersMetadata& StructMetaData);
 	};

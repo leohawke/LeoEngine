@@ -35,5 +35,16 @@ namespace platform::Render {
 
 			cmdlist.SetShaderSampler(ShaderRHI, SamplerBinding.BaseIndex, ShaderParameterRef);
 		}
+
+		if constexpr (std::is_same_v<THardwareShader, ComputeHWShader>)
+		{
+			//UAVS
+			for (auto& UAVBinding : Bindings.UAVs)
+			{
+				auto ShaderParameterRef = *(UnorderedAccessView**)(Base + UAVBinding.ByteOffset);
+
+				cmdlist.SetUAVParameter(ShaderRHI, UAVBinding.BaseIndex, ShaderParameterRef);
+			}
+		}
 	}
 }

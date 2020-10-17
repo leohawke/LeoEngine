@@ -47,12 +47,13 @@ namespace platform::Render {
 		virtual void SetGraphicsPipelineState(GraphicsPipelineState* pso) = 0;
 
 		virtual void SetShaderSampler(VertexHWShader* Shader, uint32 SamplerIndex, const TextureSampleDesc& Desc) = 0;
-		virtual void SetShaderSampler(PixelHWShader* Shader, uint32 SamplerIndex,const TextureSampleDesc& Desc) = 0;
+		virtual void SetShaderSampler(PixelHWShader* Shader, uint32 SamplerIndex, const TextureSampleDesc& Desc) = 0;
 
 		virtual void SetShaderTexture(VertexHWShader* Shader, uint32 TextureIndex, Texture* Texture) = 0;
-		virtual void SetShaderTexture(PixelHWShader* Shader,uint32 TextureIndex,Texture* Texture) = 0;
+		virtual void SetShaderTexture(PixelHWShader* Shader, uint32 TextureIndex, Texture* Texture) = 0;
 		virtual void SetShaderResourceView(VertexHWShader* Shader, uint32 TextureIndex, ShaderResourceView* SRV) = 0;
 		virtual void SetShaderResourceView(PixelHWShader* Shader, uint32 TextureIndex, ShaderResourceView* SRV) = 0;
+
 
 		virtual void SetShaderConstantBuffer(VertexHWShader* Shader, uint32 BaseIndex, GraphicsBuffer* Buffer) = 0;
 		virtual void SetShaderConstantBuffer(PixelHWShader* Shader,uint32 BaseIndex, GraphicsBuffer* Buffer) = 0;

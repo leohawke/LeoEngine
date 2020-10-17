@@ -286,6 +286,7 @@ void FillD3D11Reflect(ID3D11ShaderReflection* pReflection, ShaderInfo* pInfo, Sh
 		case D3D_SIT_UAV_APPEND_STRUCTURED:
 		case D3D_SIT_UAV_CONSUME_STRUCTURED:
 		case D3D_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
+			Class = ShaderParamClass::UAV;
 			pInfo->ResourceCounts.NumUAVs = std::max(pInfo->ResourceCounts.NumUAVs, BindPoint);
 			break;
 

@@ -2,6 +2,7 @@
 #include "Engine/Render/BuiltInShader.h"
 #include "Engine/Render/ShaderParamterTraits.hpp"
 #include "Engine/Render/ShaderParameterStruct.h"
+#include "Engine/Render/ShaderTextureTraits.hpp"
 #include "Engine/Render/DrawEvent.h"
 
 using namespace platform;
@@ -18,6 +19,9 @@ namespace Shadow
 			SHADER_PARAMETER(leo::math::float4, BufferBilinearUVMinMax)
 			SHADER_PARAMETER(leo::math::float2, BufferUVToOutputPixelPosition)
 			SHADER_PARAMETER(float, HitDistanceToWorldBluringRadius)
+			SHADER_PARAMETER_TEXTURE(Texture2D, SignalInput_Textures_0)
+			SHADER_PARAMETER_TEXTURE(Shader::RWTexture2D, SignalOutput_UAVs_0)
+			SHADER_PARAMETER_SAMPLER(TextureSampleDesc, point_sampler)
 			END_SHADER_PARAMETER_STRUCT();
 
 		EXPORTED_BUILTIN_SHADER(SSDInjectCS);
@@ -52,6 +56,15 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 
 		Parameters.BufferUVToOutputPixelPosition = leo::math::float2(FullResW, FullResH);
 		Parameters.HitDistanceToWorldBluringRadius = 1;
+
+		Parameters.SignalInput_Textures_0 = InputParameters.Mask;
+		Parameters.SignalOutput_UAVs_0 = Output.MaskUAV;
+
+		Render::TextureSampleDesc point_sampler{};
+		point_sampler.address_mode_u = point_sampler.address_mode_v = point_sampler.address_mode_w = Render::TexAddressingMode::Clamp;
+		point_sampler.filtering = Render::TexFilterOp::Min_Mag_Mip_Point;
+
+		Parameters.point_sampler = point_sampler;
 
 		ComputeShaderUtils::Dispatch(CmdList, InjestShader, Parameters,
 			ComputeShaderUtils::GetGroupCount(leo::math::int2(FullResW,FullResH),Shadow::TILE_SIZE));

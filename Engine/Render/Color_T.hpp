@@ -1,6 +1,5 @@
 /*! \file Engine\Render\Color_T.hpp
 \ingroup Engine
-\brief 中间颜色格式。
 */
 
 #ifndef LE_RENDER_ColorT_hpp
@@ -44,7 +43,6 @@ namespace platform {
 		template <typename T>
 		class Color_T;
 
-		// RGBA，用4个浮点数表示r, g, b, a
 		///////////////////////////////////////////////////////////////////////////////
 		template <typename T>
 		class Color_T
@@ -71,7 +69,6 @@ namespace platform {
 			Color_T(T r, T g, T b, T a) lnoexcept;
 			explicit Color_T(uint32 dw) lnoexcept;
 
-			// 取颜色
 			iterator begin() lnoexcept
 			{
 				return col_.begin();
@@ -135,7 +132,6 @@ namespace platform {
 			uint32 ARGB() const lnoexcept;
 			uint32 ABGR() const lnoexcept;
 
-			// 赋值操作符
 			Color_T& operator+=(Color_T<T> const & rhs) lnoexcept;
 			Color_T& operator-=(Color_T<T> const & rhs) lnoexcept;
 			Color_T& operator*=(T rhs) lnoexcept;
@@ -145,7 +141,6 @@ namespace platform {
 			Color_T& operator=(Color_T const & rhs) lnoexcept;
 			Color_T& operator=(Color_T&& rhs) lnoexcept;
 
-			// 一元操作符
 			Color_T const operator+() const lnoexcept;
 			Color_T const operator-() const lnoexcept;
 
@@ -198,7 +193,7 @@ namespace platform {
 		const leo::uint32& DWColor() const { return *((leo::uint32*)this); }
 	};
 
-	//	Stores a color with 8 bits of precision per channel.  
+	//	Stores a color with 8 bits of precision per channel.
 	using FColor = TColor<Render::EF_ARGB8_SRGB>;
 }
 

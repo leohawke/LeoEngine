@@ -2,6 +2,7 @@
 
 #include "ShaderParamterTraits.hpp"
 #include "ITexture.hpp"
+#include "Engine/Render/IGPUResourceView.h"
 
 namespace platform::Render
 {
@@ -41,6 +42,19 @@ namespace platform::Render
 			static constexpr std::size_t Alignement = 4;
 
 			using DeclType = TextureSampleDesc;
+		};
+
+		using RWTexture2D = UnorderedAccessView;
+
+		template<>
+		struct TShaderTextureTypeInfo<RWTexture2D>
+		{
+			static constexpr ShaderParamType ShaderType = SPT_rwtexture2D;
+
+			using DeclType = RWTexture2D*;
+
+			template<std::size_t Boundary = 0>
+			static constexpr std::size_t Alignement = sizeof(DeclType);
 		};
 	}
 }

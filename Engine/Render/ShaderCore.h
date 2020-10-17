@@ -111,6 +111,7 @@ namespace platform::Render {
 			UniformBuffer,
 			Sampler,
 			SRV,
+			UAV,
 
 			Num
 		};
