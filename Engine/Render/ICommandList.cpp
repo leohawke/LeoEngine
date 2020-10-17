@@ -27,6 +27,7 @@ platform::Render::CommandListBase::CommandListBase()
 void platform::Render::CommandListBase::Reset()
 {
 	Context = platform::Render::Context::Instance().GetDefaultCommandContext();
+	ComputeContext = Context;
 }
 
 void platform::Render::CommandList::BeginFrame()

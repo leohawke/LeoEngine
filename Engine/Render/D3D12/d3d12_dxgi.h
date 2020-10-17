@@ -915,4 +915,8 @@ namespace platform_ex::Windows::D3D12 {
 
 #define ENABLE_AFTER_MATH 1
 
+#if ENABLE_AFTER_MATH
+extern int GEnableNvidaiAfterMath;
+#endif
+
 #endif

@@ -50,15 +50,18 @@ namespace platform_ex::Windows::D3D12 {
 		:adapter_list()
 	{
 #if ENABLE_AFTER_MATH
-		GFSDK_Aftermath_EnableGpuCrashDumps(
-			GFSDK_Aftermath_Version_API,
-			GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags_DX,
-			GFSDK_Aftermath_GpuCrashDumpFeatureFlags_DeferDebugInfoCallbacks,
-			GpuCrashDumpCallback,
-			nullptr,
-			nullptr,
-			this
-		);
+		if (GEnableNvidaiAfterMath)
+		{
+			GFSDK_Aftermath_EnableGpuCrashDumps(
+				GFSDK_Aftermath_Version_API,
+				GFSDK_Aftermath_GpuCrashDumpWatchedApiFlags_DX,
+				GFSDK_Aftermath_GpuCrashDumpFeatureFlags_DeferDebugInfoCallbacks,
+				GpuCrashDumpCallback,
+				nullptr,
+				nullptr,
+				this
+			);
+		}
 #else
 #if 0
 		{

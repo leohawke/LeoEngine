@@ -44,3 +44,7 @@ namespace platform_ex {
 		}
 	}
 }
+
+#if ENABLE_AFTER_MATH
+int GEnableNvidaiAfterMath = 0;
+#endif

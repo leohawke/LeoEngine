@@ -1,6 +1,6 @@
 (effect
     (texture2D SignalInput_Textures_0)
-    (RWTexture2D SignalOutput_UAVs_0)
+    (RWTexture2D (elemtype uint) SignalOutput_UAVs_0)
     (sampler point_sampler
         (filtering min_mag_mip_point)
 		(address_u clamp)
@@ -30,7 +30,7 @@ float SafeRcp(float x,float d= 0.0)
 }
 
 
-[numthreads[TILE_PIXEL_SIZE,TILE_PIXEL_SIZE,1]]
+[numthreads(TILE_PIXEL_SIZE,TILE_PIXEL_SIZE,1)]
 void MainCS(
     uint2 DispatchThreadId : SV_DispatchThreadID,
 	uint2 GroupId : SV_GroupID,

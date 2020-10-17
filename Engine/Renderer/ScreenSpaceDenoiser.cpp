@@ -11,7 +11,7 @@ namespace Shadow
 {
 	using namespace platform::Render;
 
-	class SSDInjectCS : public BuiltInShader
+	class SSDInjestCS : public BuiltInShader
 	{
 	public:
 		BEGIN_SHADER_PARAMETER_STRUCT(Parameters)
@@ -24,10 +24,10 @@ namespace Shadow
 			SHADER_PARAMETER_SAMPLER(TextureSampleDesc, point_sampler)
 			END_SHADER_PARAMETER_STRUCT();
 
-		EXPORTED_BUILTIN_SHADER(SSDInjectCS);
+		EXPORTED_BUILTIN_SHADER(SSDInjestCS);
 	};
 
-	IMPLEMENT_BUILTIN_SHADER(SSDInjectCS, "SSD/Shadow/SSDInject.lsl", "MainCS", platform::Render::ComputeShader);
+	IMPLEMENT_BUILTIN_SHADER(SSDInjestCS, "SSD/Shadow/SSDInjest.lsl", "MainCS", platform::Render::ComputeShader);
 
 	constexpr auto TILE_SIZE = 8;
 }
@@ -41,9 +41,9 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 	{
 		SCOPED_GPU_EVENT(CmdList, ShadowInjest);
 
-		auto InjestShader = Render::GetGlobalShaderMap()->GetShader<Shadow::SSDInjectCS>();
+		auto InjestShader = Render::GetGlobalShaderMap()->GetShader<Shadow::SSDInjestCS>();
 
-		Shadow::SSDInjectCS::Parameters Parameters;
+		Shadow::SSDInjestCS::Parameters Parameters;
 		Parameters.ThreadIdToBufferUV.x = 1.0f / FullResW;
 		Parameters.ThreadIdToBufferUV.y = 1.0f / FullResH;
 		Parameters.ThreadIdToBufferUV.z = 0.5f / FullResW;

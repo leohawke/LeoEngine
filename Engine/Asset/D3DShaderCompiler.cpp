@@ -58,6 +58,8 @@ namespace asset::X::Shader {
 				return "ps_5_0";
 			case ShaderType::GeometryShader:
 				return "gs_5_0";
+			case ShaderType::ComputeShader:
+				return "cs_5_0";
 			case ShaderType::RayGen:
 			case ShaderType::RayMiss:
 			case ShaderType::RayHitGroup:
