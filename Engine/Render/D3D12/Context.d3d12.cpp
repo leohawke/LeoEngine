@@ -62,8 +62,8 @@ namespace platform_ex::Windows::D3D12 {
 				this
 			);
 		}
-#else
-#if 0
+#endif
+#ifndef NDEBUG
 		{
 			COMPtr<ID3D12Debug> debug_ctrl;
 			if (SUCCEEDED(D3D12::GetDebugInterface(COMPtr_RefParam(debug_ctrl, IID_ID3D12Debug)))) {
@@ -71,8 +71,6 @@ namespace platform_ex::Windows::D3D12 {
 				debug_ctrl->EnableDebugLayer();
 			}
 		}
-#else
-#endif
 #endif
 	}
 

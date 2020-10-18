@@ -492,6 +492,7 @@ void CommandContextStateCache::DirtyStateForNewCommandList()
 
 	// Always need to set PSOs and root signatures
 	PipelineState.Common.bNeedSetPSO = true;
+	PipelineState.Compute.bNeedSetRootSignature = true;
 	PipelineState.Graphics.bNeedSetRootSignature = true;
 	bNeedSetPrimitiveTopology = true;
 
@@ -533,6 +534,7 @@ void CommandContextStateCache::DirtyState()
 {
 	// Mark bits dirty so the next call to ApplyState will set all this state again
 	PipelineState.Common.bNeedSetPSO = true;
+	PipelineState.Compute.bNeedSetRootSignature = true;
 	PipelineState.Graphics.bNeedSetRootSignature = true;
 	bNeedSetVB = true;
 	bNeedSetSOs = true;
