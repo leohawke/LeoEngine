@@ -204,7 +204,7 @@ void CommandContextStateCache::ClearState()
 
 	PipelineState.Compute.ComputeBudget = ::platform::Render::AsyncComputeBudget::All_4;
 	PipelineState.Graphics.CurrentPipelineStateObject = nullptr;
-	PipelineState.Graphics.CurrentPipelineStateObject = nullptr;
+	PipelineState.Compute.CurrentPipelineStateObject = nullptr;
 	PipelineState.Common.CurrentPipelineStateObject = nullptr;
 
 	leo::memset(PipelineState.Graphics.CurrentStreamOutTargets, 0);
