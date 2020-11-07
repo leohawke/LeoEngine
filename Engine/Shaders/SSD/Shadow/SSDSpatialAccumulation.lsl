@@ -128,6 +128,9 @@
     )
     (float4 ThreadIdToBufferUV)
     (float4 BufferBilinearUVMinMax)
+	(float4 (arraysize 1) InputBufferUVMinMax)
+	(float2 ViewportMin)
+	(float2 ViewportMax)
     (float2 BufferUVToOutputPixelPosition)
     (float HitDistanceToWorldBluringRadius)
 (shader
@@ -156,7 +159,7 @@ void MainCS(
 			Signal_Textures_1,
 			Signal_Textures_2,
 			Signal_Textures_3,
-			GlobalPointClampedSampler,
+			point_sampler,
 			CONFIG_SIGNAL_INPUT_LAYOUT,
 			/* MultiplexedSampleId = */ 0,
 			/* bNormalizeSample = */ CONFIG_NORMALIZE_INPUT != 0,

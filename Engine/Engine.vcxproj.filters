@@ -937,6 +937,9 @@
     <None Include="Shaders\SSD\Shadow\SSDInjest.lsl">
       <Filter>Shaders\SSD\Shadow</Filter>
     </None>
+    <None Include="Shaders\SSD\Shadow\SSDSpatialAccumulation.lsl">
+      <Filter>Shaders\SSD\Shadow</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Render\Effect\Bilt.lsl">

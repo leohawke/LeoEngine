@@ -7,6 +7,30 @@
 
 using namespace platform;
 
+constexpr auto TILE_SIZE = 8;
+
+class SSDSpatialAccumulationCS : public Render::BuiltInShader
+{
+public:
+	BEGIN_SHADER_PARAMETER_STRUCT(Parameters)
+		SHADER_PARAMETER(leo::math::float4, ThreadIdToBufferUV)
+		SHADER_PARAMETER(leo::math::float4, BufferBilinearUVMinMax)
+		SHADER_PARAMETER(leo::math::float2, BufferUVToOutputPixelPosition)
+		SHADER_PARAMETER(leo::math::float4, InputBufferUVMinMax)
+		SHADER_PARAMETER(leo::math::float2, ViewportMin)
+		SHADER_PARAMETER(leo::math::float2, ViewportMax)
+		SHADER_PARAMETER(float, HitDistanceToWorldBluringRadius)
+		SHADER_PARAMETER_TEXTURE(Render::Texture2D, SignalInput_Textures_0)
+		SHADER_PARAMETER_TEXTURE(Render::Shader::RWTexture2D, SignalOutput_UAVs_0)
+		SHADER_PARAMETER_SAMPLER(Render::TextureSampleDesc, point_sampler)
+		END_SHADER_PARAMETER_STRUCT();
+
+	EXPORTED_BUILTIN_SHADER(SSDSpatialAccumulationCS);
+};
+
+IMPLEMENT_BUILTIN_SHADER(SSDSpatialAccumulationCS, "SSD/Shadow/SSDSpatialAccumulation.lsl", "MainCS", platform::Render::ComputeShader);
+
+
 namespace Shadow
 {
 	using namespace platform::Render;
@@ -29,7 +53,6 @@ namespace Shadow
 
 	IMPLEMENT_BUILTIN_SHADER(SSDInjestCS, "SSD/Shadow/SSDInjest.lsl", "MainCS", platform::Render::ComputeShader);
 
-	constexpr auto TILE_SIZE = 8;
 }
 
 void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::CommandList& CmdList, const ShadowViewInfo& ViewInfo, const ShadowVisibilityInput& InputParameters, const ShadowVisibilityOutput& Output)
@@ -67,7 +90,7 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		Parameters.point_sampler = point_sampler;
 
 		ComputeShaderUtils::Dispatch(CmdList, InjestShader, Parameters,
-			ComputeShaderUtils::GetGroupCount(leo::math::int2(FullResW,FullResH),Shadow::TILE_SIZE));
+			ComputeShaderUtils::GetGroupCount(leo::math::int2(FullResW,FullResH),TILE_SIZE));
 
 	}
 }
