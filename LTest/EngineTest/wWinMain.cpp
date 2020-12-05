@@ -468,7 +468,7 @@ private:
 	{
 		if (ImGui::CollapsingHeader("Raytracing"))
 		{
-			ImGui::SliderFloat("SoftShadowAngle", &LightHalfAngle, 0.1, 10);
+			ImGui::SliderFloat("SoftShadowAngle", &LightHalfAngle, 0.1f, 10);
 			ImGui::SliderInt("RayPerPixel", &SamplesPerPixel, 1, 8);
 		}
 	}

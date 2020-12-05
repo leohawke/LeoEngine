@@ -1010,5 +1010,5 @@ void SubAllocatedOnlineHeap::NotifyCurrentCommandList(CommandListHandle& Command
 
 uint32  platform_ex::Windows::D3D12::GetTypeHash(const SamplerArrayDesc& Key)
 {
-	return CityHash64((char*)Key.SamplerID, Key.Count * sizeof(Key.SamplerID[0]));
+	return static_cast<uint32>(CityHash64((char*)Key.SamplerID,static_cast<leo::uint32>(Key.Count * sizeof(Key.SamplerID[0]))));
 }

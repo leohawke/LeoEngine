@@ -22,20 +22,9 @@ namespace leo::coroutine {
 				bool await_ready() const noexcept { return false; }
 
 				template<typename PROMISE>
-				void await_suspend(std::coroutine_handle<PROMISE> coroutine)
+				std::coroutine_handle<> await_suspend(std::coroutine_handle<PROMISE> coroutine)
 				{
-					task_promise_base& promise = coroutine.promise();
-
-					// Use 'release' memory semantics in case we finish before the
-					// awaiter can suspend so that the awaiting thread sees our
-					// writes to the resulting value.
-					// Use 'acquire' memory semantics in case the caller registered
-					// the continuation before we finished. Ensure we see their write
-					// to m_continuation.
-					if (promise.state.exchange(true, std::memory_order_acq_rel))
-					{
-						promise.continuation_handle.resume();
-					}
+					return coroutine.promise().continuation_handle;
 				}
 
 				void await_resume() noexcept {}
@@ -43,7 +32,6 @@ namespace leo::coroutine {
 
 		public:
 			task_promise_base() noexcept
-				:state(false)
 			{}
 
 			auto initial_suspend() noexcept
@@ -59,13 +47,10 @@ namespace leo::coroutine {
 			bool set_continuation(std::coroutine_handle<> continuation) noexcept
 			{
 				continuation_handle = continuation;
-				return !state.exchange(true, std::memory_order_acq_rel);
 			}
 
 		private:
 			std::coroutine_handle<> continuation_handle;
-
-			std::atomic<bool> state;
 		};
 
 		template<typename T>
@@ -170,11 +155,11 @@ namespace leo::coroutine {
 				return !coroutine_handle || coroutine_handle.done();
 			}
 
-			bool await_suspend(
+			std::coroutine_handle<> await_suspend(
 				std::coroutine_handle<> awaitingCoroutine) noexcept
 			{
-				coroutine_handle.resume();
-				return coroutine_handle.promise().set_continuation(awaitingCoroutine);
+				coroutine_handle.promise().set_continuation(awaitingCoroutine);
+				return coroutine_handle;
 			}
 		};
 	public:
