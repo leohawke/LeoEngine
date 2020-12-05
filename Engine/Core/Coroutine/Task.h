@@ -19,15 +19,15 @@ namespace leo::coroutine {
 
 			struct final_awaitable
 			{
-				bool await_ready() const noexcept { return false; }
+				constexpr bool await_ready() const noexcept { return false; }
 
 				template<typename PROMISE>
-				std::coroutine_handle<> await_suspend(std::coroutine_handle<PROMISE> coroutine)
+				std::coroutine_handle<> await_suspend(std::coroutine_handle<PROMISE> coroutine) const noexcept
 				{
 					return coroutine.promise().continuation_handle;
 				}
 
-				void await_resume() noexcept {}
+				constexpr void await_resume() const noexcept {}
 			};
 
 		public:
@@ -44,7 +44,7 @@ namespace leo::coroutine {
 				return final_awaitable{};
 			}
 
-			bool set_continuation(std::coroutine_handle<> continuation) noexcept
+			void set_continuation(std::coroutine_handle<> continuation) noexcept
 			{
 				continuation_handle = continuation;
 			}
