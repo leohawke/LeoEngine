@@ -1,6 +1,7 @@
 #include "file.h"
 #include <LFramework/LCLib/NativeAPI.h>
 #include "IOScheduler.h"
+#include <Engine/emacro.h>
 
 leo::coroutine::file::~file()
 {
@@ -107,6 +108,7 @@ leo::coroutine::win32::handle_t leo::coroutine::file::open(
 	if (fileHandle == INVALID_HANDLE_VALUE)
 	{
 		const DWORD errorCode = ::GetLastError();
+		LE_LogError("CreateFileW(%s) Failed,%d", path.string().c_str(),errorCode);
 		throw std::system_error
 		{
 			static_cast<int>(errorCode),
