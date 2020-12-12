@@ -1,4 +1,5 @@
 (effect
+    (include SSD/SSDDefinitions.h)
     (texture2D SignalInput_Textures_0)
     (RWTexture2D (elemtype uint) SignalOutput_UAVs_0)
     (sampler point_sampler
@@ -13,8 +14,7 @@
 (shader
 "
 static const float DENOISER_INVALID_HIT_DISTANCE = -2.0;
-static const float DENOISER_MISS_HIT_DISTANCE = -1.0;
-static const float WORLD_RADIUS_MISS = asfloat(0x7F7FFFFF);
+
 static const float WORLD_RADIUS_INVALID = -1;
 
 #define TILE_PIXEL_SIZE 8
