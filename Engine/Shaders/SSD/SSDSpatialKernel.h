@@ -1,3 +1,7 @@
+#pragma once
+
+#include "SSD/SSDMetadata.h"
+
 #ifndef CONFIG_VGPR_FREE_SAMPLE_TRACK_ID
 #define CONFIG_VGPR_FREE_SAMPLE_TRACK_ID 0
 #endif
