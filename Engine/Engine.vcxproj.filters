@@ -750,6 +750,15 @@
     <ClInclude Include="Render\DrawEvent.h">
       <Filter>Render\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Shaders\SSD\SSDDefinitions.h">
+      <Filter>Shaders\SSD</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\SSD\SSDMetadata.h">
+      <Filter>Shaders\SSD</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\SSD\SSDSpatialKernel.h">
+      <Filter>Shaders\SSD</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

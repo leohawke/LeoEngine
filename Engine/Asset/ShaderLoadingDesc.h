@@ -192,6 +192,7 @@ namespace platform::X
 				for (auto& param_node : param_nodes)
 					ParseParam(param_node, false);
 			}
+			//parser shader
 			{
 				auto fragments = X::SelectNodes("shader", term_node);
 				for (auto& fragment : fragments) {
@@ -202,9 +203,25 @@ namespace platform::X
 							leo::Access<std::string>(*fragment.rbegin())
 						);
 				}
+
+				auto includes = X::SelectNodes("include", term_node);
+				for (auto& include : includes) {
+					shader_desc.asset->EmplaceShaderGenInfo(AssetType::FRAGMENT, shader_desc.asset->GetFragmentsRef().size(), std::stoul(include.GetName()));
+					shader_desc.asset->GetFragmentsRef().emplace_back();
+					shader_desc.asset->GetFragmentsRef().back().
+						GetFragmentRef() = GenIncludeShaderLine(
+							leo::Access<std::string>(*include.rbegin())
+						);
+				}
 			}
 			shader_desc.asset->PrepareShaderGen();
 			shader_desc.shader_code = shader_desc.asset->GenHLSLShader();
+		}
+
+		std::string GenIncludeShaderLine(const std::string& path)
+		{
+			auto include_line = leo::sfmt("#include \"%s\"", path.c_str());
+			return include_line;
 		}
 
 		template<typename path_type>

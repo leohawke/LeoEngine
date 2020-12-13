@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SSDSpatialKernel_h
+#define SSDSpatialKernel_h 1
 
 #include "SSD/SSDMetadata.h"
 
@@ -224,3 +225,5 @@ FSSDKernelConfig CreateKernelConfig()
 
 	return KernelConfig;
 }
+
+#endif

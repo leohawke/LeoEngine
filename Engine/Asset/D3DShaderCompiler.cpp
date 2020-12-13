@@ -7,6 +7,8 @@
 #include "../Render/RayTracingDefinitions.h"
 #include "../Render/BuiltInRayTracingShader.h"
 #include "../emacro.h"
+#include "../Core/LFile.h"
+#include <filesystem>
 
 #include <algorithm>
 
@@ -348,6 +350,47 @@ void FillD3D11Reflect(ID3D11ShaderReflection* pReflection, ShaderInfo* pInfo, Sh
 
 
 namespace asset::X::Shader::DXBC {
+	static class CurrentDirInclude :public ID3DInclude
+	{
+	public:
+		HRESULT Open(
+			D3D_INCLUDE_TYPE IncludeType,
+			LPCSTR           pFileName,
+			LPCVOID          pParentData,
+			LPCVOID* ppData,
+			UINT* pBytes
+		) {
+			auto path = std::filesystem::path(pFileName);
+			auto file = platform::File(path.wstring(), platform::File::kToRead);
+
+			if (!file.IsOpen())
+			{
+				LE_LogError("#include %s open failed in %s",pFileName,std::filesystem::current_path().string().c_str());
+
+				*ppData = nullptr;
+				*pBytes = 0;
+				return  S_OK;
+			}
+
+			auto buffer = new std::byte[file.GetSize()];
+
+			auto length = file.Read(buffer, file.GetSize(), 0);
+
+			*pBytes = static_cast<UINT>(length);
+
+			*ppData = static_cast<LPCVOID>(buffer);
+
+			return S_OK;
+		}
+		HRESULT Close(
+			LPCVOID pData
+		) {
+			delete[] static_cast<const std::byte*>(pData);
+			return S_OK;
+		}
+	} currdir_include;
+
+
 	ShaderBlob CompileToDXBC(const ShaderCompilerInput& input, const std::vector<ShaderMacro>& macros,
 		leo::uint32 flags) {
 		std::vector<D3D_SHADER_MACRO> defines;
@@ -363,7 +406,7 @@ namespace asset::X::Shader::DXBC {
 		platform_ex::COMPtr<ID3DBlob> code_blob;
 		platform_ex::COMPtr<ID3DBlob> error_blob;
 
-		auto hr = D3DCompile(input.Code.data(), input.Code.size(), input.SourceName.data(), defines.data(), nullptr, input.EntryPoint.data(), CompileProfile(input.Type).data(), flags, 0, &code_blob, &error_blob);
+		auto hr = D3DCompile(input.Code.data(), input.Code.size(), input.SourceName.data(), defines.data(), &currdir_include, input.EntryPoint.data(), CompileProfile(input.Type).data(), flags, 0, &code_blob, &error_blob);
 		if (error_blob)
 		{
 			auto error = reinterpret_cast<char*>(error_blob->GetBufferPointer());

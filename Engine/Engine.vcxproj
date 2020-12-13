@@ -271,6 +271,9 @@
     <ClInclude Include="Render\InputLayout.hpp" />
     <ClInclude Include="Render\ShaderTextureTraits.hpp" />
     <ClInclude Include="Render\ViewPort.h" />
+    <ClInclude Include="Shaders\SSD\SSDDefinitions.h" />
+    <ClInclude Include="Shaders\SSD\SSDMetadata.h" />
+    <ClInclude Include="Shaders\SSD\SSDSpatialKernel.h" />
     <ClInclude Include="System\NinthTimer.h" />
     <ClInclude Include="System\SystemEnvironment.h" />
     <ClInclude Include="System\TimeValue.h" />

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SSDMetadata_h
+#define SSDMetadata_h 1
 
 #define MAX_COMPRESSED_METADATA_VGPRS 5
 
@@ -68,3 +69,5 @@ FSSDCompressedSceneInfos CompressSampleSceneInfo(
 	FSSDCompressedSceneInfos CompressedInfos = CreateCompressedSceneInfos();
 	return CompressedInfos;
 }
+
+#endif
