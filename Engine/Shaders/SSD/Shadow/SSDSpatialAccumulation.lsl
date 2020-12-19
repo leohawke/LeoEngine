@@ -118,6 +118,7 @@
 #endif
 "
 )
+(include SSD/SSDSignalCore.h)
 (include SSD/SSDSpatialKernel.h)
     (texture2D SignalInput_Textures_0)
     (RWTexture2D (elemtype uint) SignalOutput_UAVs_0)

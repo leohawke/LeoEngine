@@ -361,7 +361,7 @@ namespace asset::X::Shader::DXBC {
 			UINT* pBytes
 		) {
 			auto path = std::filesystem::path(pFileName);
-			auto file = platform::File(path.wstring(), platform::File::kToRead);
+			auto file = Open(path);
 
 			if (!file.IsOpen())
 			{
@@ -387,6 +387,17 @@ namespace asset::X::Shader::DXBC {
 		) {
 			delete[] static_cast<const std::byte*>(pData);
 			return S_OK;
+		}
+
+	private:
+		std::filesystem::path engine_path = std::filesystem::current_path().parent_path().parent_path();
+		std::filesystem::path shaders_path = engine_path / "Engine" / "Shaders";
+		platform::File Open(const std::filesystem::path& path)
+		{
+			auto local_path = shaders_path / path;
+			if(std::filesystem::exists(local_path))
+				return platform::File(local_path.wstring(), platform::File::kToRead);
+			return platform::File(path.wstring(), platform::File::kToRead);
 		}
 	} currdir_include;
 

@@ -759,6 +759,9 @@
     <ClInclude Include="Shaders\SSD\SSDSpatialKernel.h">
       <Filter>Shaders\SSD</Filter>
     </ClInclude>
+    <ClInclude Include="Shaders\SSD\SSDSignalCore.h">
+      <Filter>Shaders\SSD</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
