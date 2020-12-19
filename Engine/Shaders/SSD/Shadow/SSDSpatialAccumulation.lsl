@@ -206,7 +206,7 @@ void MainCS(
 		
 		KernelConfig.bComputeSampleColorSH = DIM_STAGE == STAGE_RECONSTRUCTION && DIM_MULTI_SPP == 0;
 		{
-			unroll(SIGNAL_ARRAY_SIZE)
+			[unroll(SIGNAL_ARRAY_SIZE)]
 			for (uint MultiplexId = 0; MultiplexId < 1; MultiplexId++)
 			{
 				KernelConfig.BufferColorSpace[MultiplexId] = CONFIG_INPUT_COLOR_SPACE;
@@ -222,7 +222,7 @@ void MainCS(
 		KernelConfig.HarmonicPeriode = HarmonicPeriode;
 
 		#if CONFIG_CLAMP_UV_PER_SIGNAL
-			unroll(CONFIG_SIGNAL_BATCH_SIZE)
+			[unroll(SIGNAL_ARRAY_SIZE)]
 			for (uint BatchedSignalId = 0; BatchedSignalId < CONFIG_SIGNAL_BATCH_SIZE; BatchedSignalId++)
 			{
 				uint MultiplexId = BatchedSignalId / CONFIG_MULTIPLEXED_SIGNALS_PER_SIGNAL_DOMAIN;
@@ -245,7 +245,7 @@ void MainCS(
 		{
 			KernelConfig.bMaxWithRefBilateralDistance = true;
 
-			unroll(SIGNAL_ARRAY_SIZE)
+			[unroll(SIGNAL_ARRAY_SIZE)]
 			for (uint MultiplexId = 0; MultiplexId < 1; MultiplexId++)
 			{
 				if (KernelConfig.BilateralDistanceComputation == SIGNAL_WORLD_FREQUENCY_PRECOMPUTED_BLURING_RADIUS)
@@ -267,7 +267,7 @@ void MainCS(
 		// When not upscaling, manually force accumulate the sample of the kernel.
 		if (!KernelConfig.bSampleKernelCenter && !KernelConfig.bDescOrder)
 		{
-			unroll(SIGNAL_ARRAY_SIZE)
+			[unroll(SIGNAL_ARRAY_SIZE)]
 			for (uint SignalMultiplexId = 0; SignalMultiplexId < SIGNAL_ARRAY_SIZE; SignalMultiplexId++)
 			{
 				const uint BatchedSignalId = ComputeSignalBatchIdFromSignalMultiplexId(KernelConfig, SignalMultiplexId);
@@ -383,7 +383,7 @@ void MainCS(
 		{
 			MultiplexCount = CONFIG_SIGNAL_BATCH_SIZE;
 			
-			unroll(CONFIG_SIGNAL_BATCH_SIZE)
+			[unroll(SIGNAL_ARRAY_SIZE)]
 			for (uint MultiplexId = 0; MultiplexId < CONFIG_SIGNAL_BATCH_SIZE; MultiplexId++)
 			{
 				UncompressSignalAccumulator(/* inout */ SignalAccumulators.Array[MultiplexId]);

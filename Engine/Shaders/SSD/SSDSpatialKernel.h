@@ -3,6 +3,25 @@
 
 #include "SSD/SSDMetadata.h"
 
+/** Enums to choose how to compute the world distance for bilateral rejection. */
+	// Only depends on the reference sample's pixel size and depth.
+	#define SIGNAL_WORLD_FREQUENCY_REF_METADATA_ONLY 0
+
+	// Only depends on the sample's pixel size and depth.
+	#define SIGNAL_WORLD_FREQUENCY_SAMPLE_METADATA_ONLY 1
+
+	// Is the smallest according of pixel size and depth between reference and sample.
+	#define SIGNAL_WORLD_FREQUENCY_MIN_METADATA 2
+
+	// Depends only based of the sample's hit distance and metadata.
+	#define SIGNAL_WORLD_FREQUENCY_HIT_DISTANCE 3
+
+	// Uses FSSDSignalSample::WorldBluringRadius precomputed in the sample.
+	#define SIGNAL_WORLD_FREQUENCY_PRECOMPUTED_BLURING_RADIUS 4
+
+	// Compute based on the harmonic being processed.
+	#define SIGNAL_WORLD_FREQUENCY_HARMONIC 5
+
 #ifndef CONFIG_VGPR_FREE_SAMPLE_TRACK_ID
 #define CONFIG_VGPR_FREE_SAMPLE_TRACK_ID 0
 #endif
@@ -169,7 +188,7 @@ FSSDKernelConfig CreateKernelConfig()
 	KernelConfig.bClampUVPerMultiplexedSignal = false;
 
 	{
-		unroll(SIGNAL_ARRAY_SIZE)
+		[unroll(SIGNAL_ARRAY_SIZE)]
 			for (uint MultiplexId = 0; MultiplexId < SIGNAL_ARRAY_SIZE; MultiplexId++)
 			{
 				KernelConfig.BufferColorSpace[MultiplexId] = STANDARD_BUFFER_COLOR_SPACE;
@@ -186,7 +205,7 @@ FSSDKernelConfig CreateKernelConfig()
 	KernelConfig.HarmonicPeriode = 1.0;
 
 	{
-		unroll(SIGNAL_ARRAY_SIZE)
+		[unroll(SIGNAL_ARRAY_SIZE)]
 			for (uint MultiplexId = 0; MultiplexId < SIGNAL_ARRAY_SIZE; MultiplexId++)
 			{
 				KernelConfig.PerSignalUVMinMax[MultiplexId] = 0.0;
@@ -208,7 +227,7 @@ FSSDKernelConfig CreateKernelConfig()
 	KernelConfig.HammersleySeed = 0;
 
 	{
-		unroll(SIGNAL_ARRAY_SIZE)
+		[unroll(SIGNAL_ARRAY_SIZE)]
 		for (uint MultiplexId = 0; MultiplexId < SIGNAL_ARRAY_SIZE; MultiplexId++)
 		{
 			KernelConfig.RefBilateralDistance[MultiplexId] = 0.0;
@@ -216,7 +235,7 @@ FSSDKernelConfig CreateKernelConfig()
 	}
 
 	{
-		unroll(2)
+		[unroll(SIGNAL_ARRAY_SIZE)]
 		for (uint RandomSignalId = 0; RandomSignalId < 1; RandomSignalId++)
 		{
 			KernelConfig.Randoms[RandomSignalId] = 0.0;

@@ -4,6 +4,12 @@
 static const float DENOISER_MISS_HIT_DISTANCE = -1.0;
 static const float WORLD_RADIUS_MISS = asfloat(0x7F7FFFFF);
 
+//------------------------------------------------------- ENUMS
+
+/** Layouts of the metadata buffer */
+	/** Uses standard depth buffer and gbuffer. */
+#define METADATA_BUFFER_LAYOUT_DISABLED 0
+
 /** Layouts of the signal buffer. */
 	/** Buffer layout for the shadow penumbra given as input. */
 #define SIGNAL_BUFFER_LAYOUT_UNINITIALIZED 0xDEAD
@@ -68,5 +74,9 @@ static const float WORLD_RADIUS_MISS = asfloat(0x7F7FFFFF);
 
 /** By default, the color space stored into intermediary buffer is linear premultiplied RGBA. */
 #define STANDARD_BUFFER_COLOR_SPACE COLOR_SPACE_RGB
+
+/** Technic used to compute the world vector betweem neighbor and reference. */
+// Directly use FSSDKernelConfig::RefSceneMetadata.TranslatedWorldPosition. Cost 3 VGPR over entire kernel inner loop.
+#define NEIGHBOR_TO_REF_CACHE_WORLD_POSITION 0
 
 #endif
