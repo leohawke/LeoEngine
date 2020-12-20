@@ -120,6 +120,7 @@
 )
 (include SSD/SSDSignalCore.h)
 (include SSD/SSDSpatialKernel.h)
+(include SSD/SSDSignalBufferEncoding.h)
     (texture2D SignalInput_Textures_0)
     (RWTexture2D (elemtype uint) SignalOutput_UAVs_0)
     (sampler point_sampler

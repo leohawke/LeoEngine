@@ -273,6 +273,7 @@
     <ClInclude Include="Render\ViewPort.h" />
     <CopyFileToFolders Include="Shaders\SSD\SSDDefinitions.h" />
     <ClInclude Include="Shaders\SSD\SSDMetadata.h" />
+    <ClInclude Include="Shaders\SSD\SSDSignalBufferEncoding.h" />
     <ClInclude Include="Shaders\SSD\SSDSignalCore.h" />
     <ClInclude Include="Shaders\SSD\SSDSpatialKernel.h" />
     <ClInclude Include="System\NinthTimer.h" />

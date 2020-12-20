@@ -750,9 +750,6 @@
     <ClInclude Include="Render\DrawEvent.h">
       <Filter>Render\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Shaders\SSD\SSDDefinitions.h">
-      <Filter>Shaders\SSD</Filter>
-    </ClInclude>
     <ClInclude Include="Shaders\SSD\SSDMetadata.h">
       <Filter>Shaders\SSD</Filter>
     </ClInclude>
@@ -760,6 +757,9 @@
       <Filter>Shaders\SSD</Filter>
     </ClInclude>
     <ClInclude Include="Shaders\SSD\SSDSignalCore.h">
+      <Filter>Shaders\SSD</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\SSD\SSDSignalBufferEncoding.h">
       <Filter>Shaders\SSD</Filter>
     </ClInclude>
   </ItemGroup>
@@ -957,5 +957,8 @@
     <CustomBuild Include="Render\Effect\Bilt.lsl">
       <Filter>Render\Effect</Filter>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="Shaders\SSD\SSDDefinitions.h" />
   </ItemGroup>
 </Project>
