@@ -1,6 +1,8 @@
 #ifndef SSDSignalCore_h
 #define SSDSignalCore_h 1
 
+#include "SSD/SSDCommon.h"
+
 #ifndef COMPILE_SIGNAL_COLOR
 #define COMPILE_SIGNAL_COLOR 0
 #endif

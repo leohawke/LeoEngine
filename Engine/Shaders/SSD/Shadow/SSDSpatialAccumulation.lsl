@@ -128,12 +128,7 @@
 		(address_u clamp)
 		(address_v clamp)
     )
-    (float4 ThreadIdToBufferUV)
-    (float4 BufferBilinearUVMinMax)
 	(float4 (arraysize 1) InputBufferUVMinMax)
-	(float2 ViewportMin)
-	(float2 ViewportMax)
-    (float2 BufferUVToOutputPixelPosition)
     (float HitDistanceToWorldBluringRadius)
 (shader
 "

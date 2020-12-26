@@ -762,6 +762,9 @@
     <ClInclude Include="Shaders\SSD\SSDSignalBufferEncoding.h">
       <Filter>Shaders\SSD</Filter>
     </ClInclude>
+    <ClInclude Include="Shaders\SSD\SSDCommon.h">
+      <Filter>Shaders\SSD</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

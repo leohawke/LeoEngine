@@ -92,13 +92,22 @@ namespace leo::coroutine {
 
 			Task<void> get_return_object() noexcept;
 
-			void unhandled_exception() { std::terminate(); }
+			void unhandled_exception() {
+				exception = std::current_exception();
+			}
 
 			void return_void() noexcept
 			{}
 
-			void value() noexcept
-			{}
+			void value()
+			{
+				if (exception)
+				{
+					std::rethrow_exception(exception);
+				}
+			}
+		private:
+			std::exception_ptr exception;
 		};
 
 		template<typename T>
