@@ -31,7 +31,7 @@ struct OcclusionResult
 	float HitCount;
 	float ClosestRayDistance;
 	float RayCount;
-}
+};
 
 float OcclusionToShadow(OcclusionResult In, uint LocalSamplesPerPixel)
 {
@@ -134,7 +134,7 @@ RAY_TRACING_ENTRY_RAYGEN(RayGen)
 		}
 	}
 
-	const float Shadow = OcclusionToShadow(Occlusion, SamplesPerPixel);
+	const float Shadow = OcclusionToShadow(Out, SamplesPerPixel);
 
 	Output[DispatchRaysIndex().xy] =float4(Shadow,Out.ClosestRayDistance,0,0);
 }
