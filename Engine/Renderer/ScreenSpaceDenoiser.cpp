@@ -91,6 +91,40 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 
 		ComputeShaderUtils::Dispatch(CmdList, InjestShader, Parameters,
 			ComputeShaderUtils::GetGroupCount(leo::math::int2(FullResW,FullResH),TILE_SIZE));
+	}
 
+	// Spatial reconstruction with ratio estimator to be more precise in the history rejection.
+	{
+		SCOPED_GPU_EVENT(CmdList, SSDSpatialAccumulation_Reconstruction);
+
+		//CreateUAV
+
+		auto ReconstShader = Render::GetGlobalShaderMap()->GetShader<SSDSpatialAccumulationCS>();
+
+		SSDSpatialAccumulationCS::Parameters Parameters;
+		Parameters.ThreadIdToBufferUV.x = 1.0f / FullResW;
+		Parameters.ThreadIdToBufferUV.y = 1.0f / FullResH;
+		Parameters.ThreadIdToBufferUV.z = 0.5f / FullResW;
+		Parameters.ThreadIdToBufferUV.w = 0.5f / FullResH;
+
+		Parameters.BufferBilinearUVMinMax = leo::math::float4(
+			0.5f / FullResW, 0.5f / FullResH,
+			(FullResW - 0.5f) / FullResW, (FullResH - 0.5f) / FullResH
+		);
+
+		Parameters.BufferUVToOutputPixelPosition = leo::math::float2(FullResW, FullResH);
+		Parameters.HitDistanceToWorldBluringRadius = 1;
+
+		Parameters.SignalInput_Textures_0 = InputParameters.Mask;
+		Parameters.SignalOutput_UAVs_0 = Output.MaskUAV;
+
+		Render::TextureSampleDesc point_sampler{};
+		point_sampler.address_mode_u = point_sampler.address_mode_v = point_sampler.address_mode_w = Render::TexAddressingMode::Clamp;
+		point_sampler.filtering = Render::TexFilterOp::Min_Mag_Mip_Point;
+
+		Parameters.point_sampler = point_sampler;
+
+		ComputeShaderUtils::Dispatch(CmdList, ReconstShader, Parameters,
+			ComputeShaderUtils::GetGroupCount(leo::math::int2(FullResW, FullResH), TILE_SIZE));
 	}
 }
