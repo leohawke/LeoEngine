@@ -962,6 +962,8 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="Shaders\SSD\SSDDefinitions.h" />
+    <CopyFileToFolders Include="Shaders\SSD\SSDDefinitions.h">
+      <Filter>Shaders\SSD</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

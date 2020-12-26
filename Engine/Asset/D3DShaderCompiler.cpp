@@ -2,6 +2,7 @@
 #include <LFramework/Win32/LCLib/COM.h>
 #include "LFramework/Helper/ShellHelper.h"
 #include <LFramework/Core/LString.h>
+#include <LFramework/Win32/LCLib/Mingw32.h>
 #include "D3DShaderCompiler.h"
 #include "../Render/IContext.h"
 #include "../Render/RayTracingDefinitions.h"
@@ -360,25 +361,26 @@ namespace asset::X::Shader::DXBC {
 			LPCVOID* ppData,
 			UINT* pBytes
 		) {
-			auto path = std::filesystem::path(pFileName);
-			auto file = Open(path);
+			try {
+				auto path = std::filesystem::path(pFileName);
+				auto file = Open(path);
 
-			if (!file.IsOpen())
+
+				auto buffer = new std::byte[file.GetSize()];
+
+				auto length = file.Read(buffer, file.GetSize(), 0);
+
+				*pBytes = static_cast<UINT>(length);
+
+				*ppData = static_cast<LPCVOID>(buffer);
+			}
+			catch (platform_ex::Windows::Win32Exception&)
 			{
-				LE_LogError("#include %s open failed in %s",pFileName,std::filesystem::current_path().string().c_str());
+				LE_LogError("#include %s open failed in %s", pFileName, std::filesystem::current_path().string().c_str());
 
 				*ppData = nullptr;
 				*pBytes = 0;
-				return  S_OK;
 			}
-
-			auto buffer = new std::byte[file.GetSize()];
-
-			auto length = file.Read(buffer, file.GetSize(), 0);
-
-			*pBytes = static_cast<UINT>(length);
-
-			*ppData = static_cast<LPCVOID>(buffer);
 
 			return S_OK;
 		}

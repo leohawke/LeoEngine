@@ -4,6 +4,9 @@
 static const float DENOISER_MISS_HIT_DISTANCE = -1.0;
 static const float WORLD_RADIUS_MISS = asfloat(0x7F7FFFFF);
 
+// Maximum number of buffer multiple signals can be encode to/decoded from.
+#define MAX_MULTIPLEXED_TEXTURES 4
+
 //------------------------------------------------------- ENUMS
 
 /** Layouts of the metadata buffer */

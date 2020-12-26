@@ -121,7 +121,6 @@
 (include SSD/SSDSignalCore.h)
 (include SSD/SSDSpatialKernel.h)
 (include SSD/SSDSignalBufferEncoding.h)
-    (texture2D SignalInput_Textures_0)
     (RWTexture2D (elemtype uint) SignalOutput_UAVs_0)
     (sampler point_sampler
         (filtering min_mag_mip_point)
@@ -132,9 +131,24 @@
     (float HitDistanceToWorldBluringRadius)
 (shader
 "
+FSSDTexture2D SignalInput_Textures_0;
+#if CONFIG_INPUT_TEXTURE_COUNT > 1
+FSSDTexture2D SignalInput_Textures_1;
+#else
 #define SignalInput_Textures_1 SignalInput_Textures_0
-#define SignalInput_Textures_2 SignalInput_Textures_1
-#define SignalInput_Textures_3 SignalInput_Textures_2
+#endif
+
+#if CONFIG_INPUT_TEXTURE_COUNT > 2
+FSSDTexture2D SignalInput_Textures_2;
+#else
+#define SignalInput_Textures_2 SignalInput_Textures_0
+#endif
+
+#if CONFIG_INPUT_TEXTURE_COUNT > 3
+FSSDTexture2D SignalInput_Textures_3;
+#else
+#define SignalInput_Textures_3 SignalInput_Textures_0
+#endif
 
 [numthreads(TILE_PIXEL_SIZE,TILE_PIXEL_SIZE,1)]
 void MainCS(
@@ -144,6 +158,11 @@ void MainCS(
 	uint GroupThreadIndex : SV_GroupIndex
 )
 {
+	FSSDTexture2D Signal_Textures_0 = SignalInput_Textures_0;
+	FSSDTexture2D Signal_Textures_1 = SignalInput_Textures_1;
+	FSSDTexture2D Signal_Textures_2 = SignalInput_Textures_2;
+	FSSDTexture2D Signal_Textures_3 = SignalInput_Textures_3;
+
     // Find out scene buffer UV.
 	float2 SceneBufferUV = DispatchThreadId * ThreadIdToBufferUV.xy + ThreadIdToBufferUV.zw;
 	if (true)

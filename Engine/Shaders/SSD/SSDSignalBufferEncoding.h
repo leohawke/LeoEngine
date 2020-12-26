@@ -1,7 +1,7 @@
 #ifndef SSDSignalBufferEncoding_h
 #define SSDSignalBufferEncoding_h 1
 
-#include "SSD/SSDefinitions.h"
+#include "SSD/SSDDefinitions.h"
 #include "SSD/SSDSignalCore.h"
 
 /** Whether the color should be clamped when encoding signal. */
@@ -35,7 +35,13 @@
 #define FSSDTexture2D Texture2D<FSSDRawSample>
 #else
 #error Unknown input type for a signal texture.
-#endif
+#endif`
+
+/** Raw data layout when sampling input texture of the denoiser. */
+struct FSSDCompressedMultiplexedSample
+{
+	FSSDRawSample VGPRArray[MAX_MULTIPLEXED_TEXTURES];
+};
 
 
 /** Decode input signal sample from raw float. */
@@ -174,7 +180,7 @@ FSSDSignalArray DecodeMultiplexedSignals(
 
 /** Sample multiple input signals that have been multiplexed. */
 FSSDSignalArray SampleMultiplexedSignals(
-	Texture2D SignalBuffer0, Texture2D SignalBuffer1, Texture2D SignalBuffer2, Texture2D SignalBuffer3,
+	FSSDTexture2D SignalBuffer0, FSSDTexture2D SignalBuffer1, FSSDTexture2D SignalBuffer2, FSSDTexture2D SignalBuffer3,
 	SamplerState Sampler,
 	const uint SignalBufferLayout, const uint MultiplexedSampleId,
 	const bool bNormalizeSample,

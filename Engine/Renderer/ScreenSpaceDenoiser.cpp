@@ -12,6 +12,13 @@ constexpr auto TILE_SIZE = 8;
 class SSDSpatialAccumulationCS : public Render::BuiltInShader
 {
 public:
+	enum class Stage
+	{
+		// Spatial kernel used to process raw input for the temporal accumulation.
+		ReConstruction,
+	};
+
+
 	BEGIN_SHADER_PARAMETER_STRUCT(Parameters)
 		SHADER_PARAMETER(leo::math::float4, ThreadIdToBufferUV)
 		SHADER_PARAMETER(leo::math::float4, BufferBilinearUVMinMax)
