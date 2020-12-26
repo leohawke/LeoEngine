@@ -118,4 +118,37 @@ FSSDSignalArray CreateSignalArrayFromScalarValue(float Scalar)
 	return OutSamples;
 }
 
+//------------------------------------------------------- SIGNAL OPERATORS
+FSSDSignalSample MulSignal(FSSDSignalSample Sample, float Scalar)
+{
+	FSSDSignalSample OutSample;
+#if COMPILE_SIGNAL_COLOR
+	OutSample.SceneColor = Sample.SceneColor * Scalar;
+#endif
+#if COMPILE_SIGNAL_COLOR_ARRAY
+	{
+		[unroll(COMPILE_SIGNAL_COLOR_ARRAY)]
+			for (uint ColorId = 0; ColorId < COMPILE_SIGNAL_COLOR_ARRAY; ColorId++)
+				OutSample.ColorArray[ColorId] = Sample.ColorArray[ColorId] * Scalar;
+	}
+#endif
+#if COMPILE_SIGNAL_COLOR_SH
+	OutSample.ColorSH = MulSH(Sample.ColorSH, Scalar);
+#endif
+	OutSample.SampleCount = Sample.SampleCount * Scalar;
+	OutSample.MissCount = Sample.MissCount * Scalar;
+	OutSample.ClosestHitDistance = Sample.ClosestHitDistance * Scalar;
+	OutSample.WorldBluringRadius = Sample.WorldBluringRadius * Scalar;
+	OutSample.TransmissionDistance = Sample.TransmissionDistance * Scalar;
+	return OutSample;
+}
+
+/** Normalize the signal sample to one. */
+FSSDSignalSample NormalizeToOneSample(FSSDSignalSample Sample)
+{
+	FSSDSignalSample OutSample = MulSignal(Sample, Sample.SampleCount > 0 ? rcp(Sample.SampleCount) : 0);
+	OutSample.SampleCount = Sample.SampleCount > 0 ? 1 : 0;
+	return OutSample;
+}
+
 #endif

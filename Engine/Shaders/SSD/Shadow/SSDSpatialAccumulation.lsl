@@ -121,6 +121,7 @@
 (include SSD/SSDSignalCore.h)
 (include SSD/SSDSpatialKernel.h)
 (include SSD/SSDSignalBufferEncoding.h)
+(include SSD/SSDSignalArray.h)
     (RWTexture2D (elemtype uint) SignalOutput_UAVs_0)
     (sampler point_sampler
         (filtering min_mag_mip_point)
