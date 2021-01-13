@@ -1,7 +1,7 @@
 (RayTracing
 	(refer RayTracing/RayTracingCommon.lsl)
 	(refer RayTracing/RayTracingDirectionalLight.lsl)
-	(refer RandomSequence.lsl)
+	(include RandomSequence.h)
 	(RaytracingAccelerationStructure (space RAY_TRACING_REGISTER_SPACE_GLOBAL) TLAS)
 	(RWTexture2D  (elemtype float4) (space RAY_TRACING_REGISTER_SPACE_GLOBAL) Output)
 	(texture2D (space RAY_TRACING_REGISTER_SPACE_GLOBAL) Depth)

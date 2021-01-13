@@ -1,6 +1,6 @@
-(effect
-(shader
-"
+#ifndef RandomSequence_h
+#define RandomSequence_h 1
+
 // http://burtleburtle.net/bob/hash/integer.html
 // Bob Jenkins integer hashing function in 6 shifts.
 uint IntegerHash(uint a)
@@ -247,5 +247,4 @@ float4 RandomSequence_GenerateSample4D(inout RandomSequence RandSequence, inout 
 	SampleIndex += 4;
 	return Sample;
 }
-"
-))
+#endif

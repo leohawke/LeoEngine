@@ -1,7 +1,8 @@
 #ifndef SSDSpatialKernel_h
 #define SSDSpatialKernel_h 1
 
-#include "SSD/SSDMetadata.h"
+#include "SSD/SSDSignalAccumulatorArray.h"
+#include "SSD/SSDSignalBufferEncoding.h"
 
 /** Enums to choose how to compute the world distance for bilateral rejection. */
 	// Only depends on the reference sample's pixel size and depth.

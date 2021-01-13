@@ -255,7 +255,7 @@ void MainCS(
 			KernelConfig.RefBufferUV = SceneBufferUV;
 			KernelConfig.RefSceneMetadataLayout = CONFIG_METADATA_BUFFER_LAYOUT;
 		}
-		KernelConfig.HammersleySeed = Rand3DPCG16(int3(SceneBufferUV * BufferUVToOutputPixelPosition, View.StateFrameIndexMod8)).xy;
+		KernelConfig.HammersleySeed = Rand3DPCG16(int3(SceneBufferUV * BufferUVToOutputPixelPosition, StateFrameIndexMod8)).xy;
 
 		// Set up reference distance for all signals.
 		#if CONFIG_MAX_WITH_REF_DISTANCE

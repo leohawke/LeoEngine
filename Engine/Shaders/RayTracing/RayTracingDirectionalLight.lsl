@@ -1,6 +1,6 @@
 (effect
 (refer RayTracing/RayTracingCommon.lsl)
-(refer MonteCarlo.lsl)
+(include MonteCarlo.h)
 (shader
 "
 

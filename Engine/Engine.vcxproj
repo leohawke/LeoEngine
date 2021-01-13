@@ -272,8 +272,11 @@
     <ClInclude Include="Render\ShaderTextureTraits.hpp" />
     <ClInclude Include="Render\ViewPort.h" />
     <CopyFileToFolders Include="Shaders\SSD\SSDDefinitions.h" />
+    <ClInclude Include="Shaders\Random.h" />
     <ClInclude Include="Shaders\SSD\SSDCommon.h" />
     <ClInclude Include="Shaders\SSD\SSDMetadata.h" />
+    <ClInclude Include="Shaders\SSD\SSDSignalAccumulator.h" />
+    <ClInclude Include="Shaders\SSD\SSDSignalAccumulatorArray.h" />
     <ClInclude Include="Shaders\SSD\SSDSignalArray.h" />
     <ClInclude Include="Shaders\SSD\SSDSignalBufferEncoding.h" />
     <ClInclude Include="Shaders\SSD\SSDSignalCore.h" />
@@ -305,12 +308,12 @@
     <None Include="Shaders\Common.lsl" />
     <None Include="Shaders\GammaCorrectionCommon.lsl" />
     <None Include="Shaders\imgui\imgui.lsl" />
-    <None Include="Shaders\MonteCarlo.lsl" />
+    <None Include="Shaders\MonteCarlo.h" />
     <None Include="Shaders\PostProcess\PostProcessCombineLUTs.lsl" />
     <None Include="Shaders\PostProcess\PostProcessToneMap.lsl" />
     <None Include="Shaders\PostProcess\TonemapCommon.lsl" />
     <None Include="Shaders\PostProcess\VolumeRendering.lsl" />
-    <None Include="Shaders\RandomSequence.lsl" />
+    <None Include="Shaders\RandomSequence.h" />
     <None Include="Shaders\RayTracing\RayTracingBuiltInShaders.lsl" />
     <None Include="Shaders\RayTracing\RayTracingCommon.lsl" />
     <None Include="Shaders\RayTracing\RayTracingDefaultHitShaders.lsl" />

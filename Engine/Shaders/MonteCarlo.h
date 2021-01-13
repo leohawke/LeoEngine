@@ -1,7 +1,5 @@
-(effect
-(refer Common.lsl)
-(shader
-"
+#ifndef MonteCarlo_h
+#define MonteCarlo_h 1
 float2 UniformSampleDiskConcentric( float2 E )
 {
 	float2 p = 2 * E - 1;
@@ -19,6 +17,4 @@ float2 UniformSampleDiskConcentric( float2 E )
 	}
 	return float2( Radius * cos( Phi ), Radius * sin( Phi ) );
 }
-"
-)
-)
+#endif

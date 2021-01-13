@@ -768,6 +768,15 @@
     <ClInclude Include="Shaders\SSD\SSDSignalArray.h">
       <Filter>Shaders\SSD</Filter>
     </ClInclude>
+    <ClInclude Include="Shaders\SSD\SSDSignalAccumulator.h">
+      <Filter>Shaders\SSD</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\SSD\SSDSignalAccumulatorArray.h">
+      <Filter>Shaders\SSD</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Random.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
@@ -940,23 +949,23 @@
     <None Include="Shaders\imgui\imgui.lsl">
       <Filter>Shaders\imgui</Filter>
     </None>
-    <None Include="Shaders\MonteCarlo.lsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="Shaders\RayTracing\RayTracingDirectionalLight.lsl">
       <Filter>Shaders\RayTracing</Filter>
     </None>
     <None Include="Render\Effect\DirectLight.lsl">
       <Filter>Shaders\Legacy</Filter>
     </None>
-    <None Include="Shaders\RandomSequence.lsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="Shaders\SSD\Shadow\SSDInjest.lsl">
       <Filter>Shaders\SSD\Shadow</Filter>
     </None>
     <None Include="Shaders\SSD\Shadow\SSDSpatialAccumulation.lsl">
       <Filter>Shaders\SSD\Shadow</Filter>
+    </None>
+    <None Include="Shaders\RandomSequence.h">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\MonteCarlo.h">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
