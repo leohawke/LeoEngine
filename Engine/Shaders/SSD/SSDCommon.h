@@ -2,6 +2,8 @@
 #define SSDCommon_h 1
 
 #include "Random.h"
+#include "SSD/SSDDefinitions.h"
+#include "SSD/SSDMetadata.h"
 
 float2 ViewportMin;
 float2 ViewportMax;

@@ -1,7 +1,6 @@
 #ifndef SSDSignalBufferEncoding_h
 #define SSDSignalBufferEncoding_h 1
 
-#include "SSD/SSDDefinitions.h"
 #include "SSD/SSDSignalCore.h"
 
 /** Whether the color should be clamped when encoding signal. */

@@ -82,6 +82,10 @@ static const float WORLD_RADIUS_MISS = asfloat(0x7F7FFFFF);
 // Directly use FSSDKernelConfig::RefSceneMetadata.TranslatedWorldPosition. Cost 3 VGPR over entire kernel inner loop.
 #define NEIGHBOR_TO_REF_CACHE_WORLD_POSITION 0
 
+// Compute by deriving the information of the reference pixel last minute from kernel configuration, trading VALU to save VGPR.
+	// Caution: does not work with previous frame reprojection.
+#define NEIGHBOR_TO_REF_LOWEST_VGPR_PRESSURE 1
+
 /** Type to use for texture sampling. */
 #define SIGNAL_TEXTURE_TYPE_FLOAT4 0
 #define SIGNAL_TEXTURE_TYPE_UINT1 1
