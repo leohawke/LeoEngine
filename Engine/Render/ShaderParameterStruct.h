@@ -3,7 +3,7 @@
 
 namespace platform::Render {
 	template<typename TCommandList,typename TShaderClass,typename THardwareShader>
-	inline void SetShaderParameters(TCommandList& cmdlist, const TShaderClass* Shader, THardwareShader* ShaderRHI, const typename TShaderClass::Parameters& Parameters)
+	inline void SetShaderParameters(TCommandList& cmdlist, const ShaderRef<TShaderClass>& Shader, THardwareShader* ShaderRHI, const typename TShaderClass::Parameters& Parameters)
 	{
 		//ValidateShaderParameters
 

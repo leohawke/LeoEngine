@@ -19,10 +19,11 @@ inline namespace Shader
 			const char* InSourceFileName,
 			const char* InEntryPoint,
 			platform::Render::ShaderType  InFrequency,
+			int32 TotalPermutationCount,
 			ConstructType InConstructRef,
 			ConstructCompiledType InConstructCompiledRef
 		):
-		 ShaderMeta(EShaderMetaForDownCast::BuitlIn,InName,InSourceFileName,InEntryPoint,InFrequency,InConstructRef),
+		 ShaderMeta(EShaderMetaForDownCast::BuitlIn,InName,InSourceFileName,InEntryPoint,InFrequency, TotalPermutationCount,InConstructRef),
 			ConstructCompiledRef(InConstructCompiledRef)
 		{}
 
@@ -44,6 +45,8 @@ inline namespace Shader
 		BuiltInShader(const ShaderMetaType::CompiledShaderInitializer& Initializer)
 			:RenderShader(Initializer)
 		{}
+
+		BuiltInShader(){}
 	};
 
 	class BuiltInShaderMapContent :public ShaderMapContent
@@ -88,16 +91,16 @@ inline namespace Shader
 
 		/** Finds the shader with the given type.  Asserts on failure. */
 		template<typename ShaderType>
-		ShaderType* GetShader(int32 PermutationId = 0) const
+		ShaderRef<ShaderType> GetShader(int32 PermutationId = 0) const
 		{
 			auto Shader = GetShader(&ShaderType::StaticType, PermutationId);
-			LAssert(Shader != nullptr, leo::sfmt("Failed to find shader type %s in Platform %s", ShaderType::StaticType.GetName(), "PCD3D_SM5").c_str());
-			return static_cast<ShaderType*>(Shader);
+			LAssert(Shader.IsValid(), leo::sfmt("Failed to find shader type %s in Platform %s", ShaderType::StaticType.GetTypeName().c_str(), "PCD3D_SM5").c_str());
+			return ShaderRef<ShaderType>::Cast(Shader);
 		}
 
 		/** Finds the shader with the given type.  Asserts on failure. */
 		template<typename ShaderType>
-		ShaderType* GetShader(const typename ShaderType::FPermutationDomain& PermutationVector) const
+		ShaderRef<ShaderType> GetShader(const typename ShaderType::FPermutationDomain& PermutationVector) const
 		{
 			return GetShader<ShaderType>(PermutationVector.ToDimensionValueId());
 		}
@@ -111,21 +114,7 @@ inline namespace Shader
 	BuiltInShaderMap* GetBuiltInShaderMap();
 
 
-#define EXPORTED_BUILTIN_SHADER(ShaderClass) \
-public:\
-	using ShaderMetaType = platform::Render::BuiltInShaderMeta;\
-	using ShaderMapType = ShaderMap<ShaderMeta>;\
-	static ShaderMetaType StaticType; \
-	static RenderShader* ConstructInstance() { return new ShaderClass();} \
-	static RenderShader* ConstructCompiledInstance(const ShaderMetaType::CompiledShaderInitializer& Initializer) { return new ShaderClass(Initializer);} \
-	static constexpr bool HasParameters =  platform::Render::ShaderParametersType<ShaderClass>::HasParameters;\
-	ShaderClass(const ShaderMetaType::CompiledShaderInitializer& Initializer) \
-		:DerivedType(Initializer)\
-	{\
-		platform::Render::BindForLegacyShaderParameters<platform::Render::ShaderParametersType_t<ShaderClass>>(this,Initializer.ParameterMap);\
-	}\
-	ShaderClass() \
-	{ }
+#define EXPORTED_BUILTIN_SHADER(ShaderClass) EXPORTED_SHADER_TYPE(ShaderClass,BuiltIn)
 
 #define IMPLEMENT_BUILTIN_SHADER(ShaderClass,SourceFileName,FunctionName,Frequency) \
 	ShaderClass::ShaderMetaType ShaderClass::StaticType( \
@@ -133,6 +122,7 @@ public:\
 		SourceFileName, \
 		FunctionName, \
 		Frequency, \
+		ShaderClass::FPermutationDomain::PermutationCount,\
 		ShaderClass::ConstructInstance, \
 		ShaderClass::ConstructCompiledInstance\
 	)

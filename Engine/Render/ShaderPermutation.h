@@ -1,7 +1,9 @@
 #pragma once
 
-#include "ShaderCore.h"
 #include <LBase/type_traits.hpp>
+#include <LBase/cformat.h>
+#include "ShaderCore.h"
+
 
 namespace platform::Render
 {

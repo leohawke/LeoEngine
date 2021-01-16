@@ -3,6 +3,7 @@
 #include <LBase/smart_ptr.hpp>
 #include "ShaderCore.h"
 #include "ShaderPermutation.h"
+#include <concepts>
 
 #define PR_NAMESPACE_BEGIN  namespace platform::Render {
 #define PR_NAMESPACE_END }
@@ -223,9 +224,27 @@ inline namespace Shader
 		ShaderRefBase(ShaderType* InShader) :ShaderContent(InShader)
 		{}
 
+		template<std::derived_from<ShaderType> OtherShaderType>
+		ShaderRefBase(const ShaderRefBase<OtherShaderType>& Rhs) 
+		: ShaderContent(Rhs.GetShader()) 
+		{
+		}
+
 		inline ShaderType* operator->() const { return ShaderContent; }
 
 		inline ShaderType* GetShader() const { return ShaderContent; }
+
+
+
+		template<typename OtherShaderType>
+		static ShaderRefBase<ShaderType> Cast(const ShaderRefBase<OtherShaderType>& Rhs)
+		{
+			return ShaderRefBase<ShaderType>(static_cast<ShaderType*>(Rhs.GetShader()));
+		}
+
+		inline bool IsValid() const { return ShaderContent != nullptr; }
+
+		inline explicit operator bool() const { return IsValid(); }
 	private:
 		ShaderType* ShaderContent;
 	};
@@ -261,6 +280,7 @@ public:\
 		SourceFileName, \
 		FunctionName, \
 		Frequency, \
+		ShaderClass::FPermutationDomain::PermutationCount,\
 		ShaderClass::ConstructInstance \
 	)
 

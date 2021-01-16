@@ -123,7 +123,7 @@ void platform::imgui::Context_RenderDrawData(ImDrawData* draw_data)
         // Setup viewport
         CmdList.SetViewport(0, 0, 0,static_cast<uint32>(draw_data->DisplaySize.x), static_cast<uint32>(draw_data->DisplaySize.y), 1);
         {
-            auto VertexShader = Render::GetGlobalShaderMap()->GetShader<imguiVS>();
+            auto VertexShader = Render::GetBuiltInShaderMap()->GetShader<imguiVS>();
 
             // Setup orthographic projection matrix into our constant buffer
             // Our visible imgui space lies from draw_data->DisplayPos (top left) to draw_data->DisplayPos+data_data->DisplaySize (bottom right). DisplayPos is (0,0) for single viewport apps.
@@ -238,9 +238,9 @@ void FillGraphicsPipelineState(GraphicsPipelineStateInitializer& GraphicsPSOInit
         GraphicsPSOInit.Primitive = PrimtivteType::TriangleList;
     }
     {
-        auto VertexShader = Render::GetGlobalShaderMap()->GetShader<imguiVS>();
+        auto VertexShader = Render::GetBuiltInShaderMap()->GetShader<imguiVS>();
 
-        auto PixelShader = Render::GetGlobalShaderMap()->GetShader<imguiPS>();
+        auto PixelShader = Render::GetBuiltInShaderMap()->GetShader<imguiPS>();
 
         GraphicsPSOInit.ShaderPass.VertexShader = VertexShader->GetVertexShader();
 
@@ -288,9 +288,9 @@ IMPLEMENT_BUILTIN_SHADER(imguiPS, "imgui/imgui.lsl", "MainPS", platform::Render:
 
 void CreateDeviceObjects(Render::Context& context)
 {
-    auto VertexShader = Render::GetGlobalShaderMap()->GetShader<imguiVS>();
+    auto VertexShader = Render::GetBuiltInShaderMap()->GetShader<imguiVS>();
     lconstraint(VertexShader);
-    auto PixelShader = Render::GetGlobalShaderMap()->GetShader<imguiPS>();
+    auto PixelShader = Render::GetBuiltInShaderMap()->GetShader<imguiPS>();
     lconstraint(PixelShader);
 
     CreateFontsTexture(context);

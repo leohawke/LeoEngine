@@ -1,8 +1,8 @@
 #pragma once
 
-#include <atomic>
 #include <LBase/type_traits.hpp>
 #include <LBase/smart_ptr.hpp>
+#include <atomic>
 
 namespace platform::Render {
 	class RObject

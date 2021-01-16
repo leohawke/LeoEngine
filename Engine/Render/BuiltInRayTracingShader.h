@@ -22,6 +22,8 @@ inline namespace Shader
 			:BuiltInShader(Initializer)
 		{}
 
+		BuiltInRayTracingShader(){}
+
 		RayTracingShader* GetRayTracingShader();
 		void SetRayTracingShader(RayTracingShader* pShader);
 	private:

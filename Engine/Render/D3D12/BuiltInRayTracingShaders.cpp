@@ -8,8 +8,8 @@
 using namespace platform_ex::Windows::D3D12;
 
 
-IMPLEMENT_SHADER(DefaultCHS, "RayTracing/RayTracingBuiltInShaders.lsl", "DefaultCHS", platform::Render::RayHitGroup);
+IMPLEMENT_BUILTIN_SHADER(DefaultCHS, "RayTracing/RayTracingBuiltInShaders.lsl", "DefaultCHS", platform::Render::RayHitGroup);
 
-IMPLEMENT_SHADER(DefaultMS, "RayTracing/RayTracingBuiltInShaders.lsl", "DefaultMS", platform::Render::RayMiss);
+IMPLEMENT_BUILTIN_SHADER(DefaultMS, "RayTracing/RayTracingBuiltInShaders.lsl", "DefaultMS", platform::Render::RayMiss);
 
-IMPLEMENT_SHADER(ShadowRG, "RayTracing/RayTracingScreenSpaceShadow.lsl", "RayGen", platform::Render::RayGen);
+IMPLEMENT_BUILTIN_SHADER(ShadowRG, "RayTracing/RayTracingScreenSpaceShadow.lsl", "RayGen", platform::Render::RayGen);

@@ -10,7 +10,7 @@ namespace platform_ex::Windows::D3D12 {
 	template<typename ShaderType>
 	inline platform::Render::RayTracingShader* GetBuildInRayTracingShader()
 	{
-		auto ShaderMap = GetGlobalShaderMap();
+		auto ShaderMap = GetBuiltInShaderMap();
 
 		auto Shader = ShaderMap->GetShader<ShaderType>();
 
@@ -21,16 +21,16 @@ namespace platform_ex::Windows::D3D12 {
 
 	class DefaultCHS :public BuiltInRayTracingShader
 	{
-		EXPORTED_BUILTIN_SHADER(DefaultCHS,);
+		EXPORTED_BUILTIN_SHADER(DefaultCHS);
 	};
 
 	class DefaultMS :public BuiltInRayTracingShader
 	{
-		EXPORTED_BUILTIN_SHADER(DefaultMS,);
+		EXPORTED_BUILTIN_SHADER(DefaultMS);
 	};
 
 	class ShadowRG : public BuiltInRayTracingShader
 	{
-		EXPORTED_BUILTIN_SHADER(ShadowRG,);
+		EXPORTED_BUILTIN_SHADER(ShadowRG);
 	};
 }

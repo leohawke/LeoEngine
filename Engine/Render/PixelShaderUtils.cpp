@@ -3,7 +3,7 @@
 
 using namespace platform::Render;
 
-void PixelShaderUtils::InitFullscreenPipelineState(CommandList& CmdList, const RenderShader& PixelShader, GraphicsPipelineStateInitializer& GraphicsPSOInit)
+void PixelShaderUtils::InitFullscreenPipelineState(CommandList& CmdList, const ShaderRef<RenderShader>& PixelShader, GraphicsPipelineStateInitializer& GraphicsPSOInit)
 {
 	CmdList.FillRenderTargetsInfo(GraphicsPSOInit);
 
@@ -14,7 +14,7 @@ void PixelShaderUtils::InitFullscreenPipelineState(CommandList& CmdList, const R
 	GraphicsPSOInit.Primitive = Render::PrimtivteType::TriangleList;
 
 	GraphicsPSOInit.ShaderPass.VertexDeclaration = GFilterVertexDeclaration();
-	GraphicsPSOInit.ShaderPass.PixelShader = PixelShader.GetPixelShader();
+	GraphicsPSOInit.ShaderPass.PixelShader = PixelShader->GetPixelShader();
 }
 
 void PixelShaderUtils::DrawFullscreenTriangle(CommandList& RHICmdList, uint32 InstanceCount)

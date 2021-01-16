@@ -37,16 +37,16 @@ void platform::TonemapPass(const TonemapInputs& Inputs)
 {
 	auto& CmdList = Render::GetCommandList();
 
-	auto PixelShader = Render::GetGlobalShaderMap()->GetShader<TonemapPS>();
+	auto PixelShader = Render::GetBuiltInShaderMap()->GetShader<TonemapPS>();
 
 	Render::RenderPassInfo passInfo(Inputs.OverrideOutput.Texture, Render::RenderTargetActions::Clear_Store);
 
 	CmdList.BeginRenderPass(passInfo, "TonemapPass");
 
 	Render::GraphicsPipelineStateInitializer GraphicsPSOInit {};
-	PixelShaderUtils::InitFullscreenPipelineState(CmdList,*PixelShader,GraphicsPSOInit);
+	PixelShaderUtils::InitFullscreenPipelineState(CmdList,PixelShader,GraphicsPSOInit);
 
-	auto VertexShader = Render::GetGlobalShaderMap()->GetShader<TonemapVS>();
+	auto VertexShader = Render::GetBuiltInShaderMap()->GetShader<TonemapVS>();
 	GraphicsPSOInit.ShaderPass.VertexShader = VertexShader->GetVertexShader();
 
 	SetGraphicsPipelineState(CmdList, GraphicsPSOInit);

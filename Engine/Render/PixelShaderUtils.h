@@ -8,7 +8,7 @@ namespace platform::Render {
 		/** Initialize a pipeline state object initializer with almost all the basics required to do a full viewport pass. */
 		static void InitFullscreenPipelineState(
 			CommandList& RHICmdList,
-			const RenderShader& PixelShader,
+			const ShaderRef<RenderShader>& PixelShader,
 			GraphicsPipelineStateInitializer& GraphicsPSOInit);
 
 		/** Draw a single triangle on the entire viewport. */

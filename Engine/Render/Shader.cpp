@@ -207,19 +207,21 @@ RenderShader* Shader::ShaderMapContent::GetShader(size_t TypeNameHash, int32 Per
 
 RenderShader* Shader::ShaderMapContent::FindOrAddShader(size_t TypeNameHash, int32 PermutationId, RenderShader* Shader)
 {
-	auto Shader = GetShader(TypeNameHash, PermutationId);
+	auto FindShader = GetShader(TypeNameHash, PermutationId);
 
-	if (Shader != nullptr)
-		return Shader;
+	if (FindShader != nullptr)
+		return FindShader;
 
 	auto Hash = (uint16)CityHash128to64({ TypeNameHash,(uint64)PermutationId });
 
-	const int32 Index = Shaders.size();
+	const int32 Index = GetNumShaders();
 
 	ShaderHash.emplace(Hash, Index);
 	Shaders.emplace_back(Shader);
 	ShaderTypes.emplace_back(TypeNameHash);
 	ShaderPermutations.emplace_back(PermutationId);
+
+	return Shader;
 }
 
 void Shader::ShaderMapContent::Clear()
@@ -237,5 +239,5 @@ void Shader::ShaderMapContent::Clear()
 
 uint32 Shader::ShaderMapContent::GetNumShaders() const
 {
-	return Shaders.size();
+	return static_cast<int32>(Shaders.size());
 }

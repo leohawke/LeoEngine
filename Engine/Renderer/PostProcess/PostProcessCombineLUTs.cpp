@@ -158,11 +158,11 @@ std::shared_ptr<Render::Texture> platform::CombineLUTPass(const CombineLUTSettin
 	{
 		const VolumeBounds Bounds(GLUTSize);
 
-		auto VertexShader = Render::GetGlobalShaderMap()->GetShader<WriteToSliceVS>();
+		auto VertexShader = Render::GetBuiltInShaderMap()->GetShader<WriteToSliceVS>();
 
-		auto GeometryShader = Render::GetGlobalShaderMap()->GetShader<WriteToSliceGS>();
+		auto GeometryShader = Render::GetBuiltInShaderMap()->GetShader<WriteToSliceGS>();
 
-		auto PixelShader = Render::GetGlobalShaderMap()->GetShader<LUTBlenderPS>();
+		auto PixelShader = Render::GetBuiltInShaderMap()->GetShader<LUTBlenderPS>();
 
 		GraphicsPSOInit.Primitive = Render::PrimtivteType::TriangleStrip;
 		GraphicsPSOInit.ShaderPass.VertexDeclaration = GScreenVertexDeclaration();

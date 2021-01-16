@@ -21,7 +21,7 @@ namespace platform
 		}
 
 		template<typename TShaderClass>
-		static void Dispatch(Render::CommandList& CmdList, const TShaderClass* ComputeShader, const typename TShaderClass::Parameters& Parameters, leo::math::int3 GroupCount)
+		static void Dispatch(Render::CommandList& CmdList, const Render::ShaderRef<TShaderClass>& ComputeShader, const typename TShaderClass::Parameters& Parameters, leo::math::int3 GroupCount)
 		{
 			auto ShaderRHI = ComputeShader->GetComputeShader();
 			CmdList.SetComputeShader(ShaderRHI);

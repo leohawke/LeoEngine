@@ -101,7 +101,7 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 	{
 		SCOPED_GPU_EVENT(CmdList, ShadowInjest);
 
-		auto InjestShader = Render::GetGlobalShaderMap()->GetShader<Shadow::SSDInjestCS>();
+		auto InjestShader = Render::GetBuiltInShaderMap()->GetShader<Shadow::SSDInjestCS>();
 
 		Shadow::SSDInjestCS::Parameters Parameters;
 		Parameters.ThreadIdToBufferUV.x = 1.0f / FullResW;
@@ -137,7 +137,7 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		//CreateUAV
 
 
-		auto ReconstShader = Render::GetGlobalShaderMap()->GetShader<SSDSpatialAccumulationCS>();
+		auto ReconstShader = Render::GetBuiltInShaderMap()->GetShader<SSDSpatialAccumulationCS>();
 
 		SSDSpatialAccumulationCS::Parameters Parameters;
 		Parameters.ThreadIdToBufferUV.x = 1.0f / FullResW;
@@ -169,9 +169,9 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		PermutationVector.Set<SSDSpatialAccumulationCS::FUpscaleDim>(false);
 		PermutationVector.Set<FMultiSPPDim>(true);
 
-		Render::ShaderMapRef<SSDSpatialAccumulationCS> ComputeShader(Render::GetGlobalShaderMap(), PermutationVector);
+		Render::ShaderMapRef<SSDSpatialAccumulationCS> ComputeShader(Render::GetBuiltInShaderMap(), PermutationVector);
 
-		ComputeShaderUtils::Dispatch(CmdList, ComputeShader.GetShader(), Parameters,
+		ComputeShaderUtils::Dispatch(CmdList, ComputeShader, Parameters,
 			ComputeShaderUtils::GetGroupCount(leo::math::int2(FullResW, FullResH), TILE_SIZE));
 	}
 }
