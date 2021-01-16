@@ -2,6 +2,7 @@
 
 #include <LBase/smart_ptr.hpp>
 #include "ShaderCore.h"
+#include "ShaderPermutation.h"
 
 #define PR_NAMESPACE_BEGIN  namespace platform::Render {
 #define PR_NAMESPACE_END }
@@ -146,6 +147,7 @@ inline namespace Shader
 		);
 
 		const std::string& GetTypeName() const { return TypeName; }
+		std::size_t GetHash() const { return Hash; }
 		const std::string& GetSourceFileName() const { return SourceFileName; }
 		const std::string& GetEntryPoint() const { return EntryPoint; }
 		platform::Render::ShaderType GetShaderType() const { return Frequency; }
@@ -160,6 +162,7 @@ inline namespace Shader
 		EShaderMetaForDownCast ShaderMetaForDownCast;
 
 		std::string TypeName;
+		std::size_t Hash;
 		std::string SourceFileName;
 		std::string EntryPoint;
 		platform::Render::ShaderType Frequency;
@@ -197,13 +200,42 @@ inline namespace Shader
 	template<class ShaderClass>
 	using ShaderParametersType_t = typename ShaderParametersType<ShaderClass>::type;
 
+
+	template<typename ShaderType>
+	class ShaderRefBase
+	{
+	public:
+		ShaderRefBase(ShaderType* InShader) :ShaderContent(InShader)
+		{}
+
+		inline ShaderType* operator->() const { return ShaderContent; }
+
+		inline ShaderType* GetShader() const { return ShaderContent; }
+	private:
+		ShaderType* ShaderContent;
+	};
+
+	template<typename ShaderType>
+	using ShaderRef = ShaderRefBase< ShaderType>;
+
+	
+
+#define EXPORTED_SHADER_VTABLE(ShaderClass) \
+	static RenderShader* ConstructInstance() { return new ShaderClass();} \
+	static RenderShader* ConstructCompiledInstance(const ShaderMetaType::CompiledShaderInitializer& Initializer) { return new ShaderClass(Initializer);} \
+	static constexpr bool HasParameters =  platform::Render::ShaderParametersType<ShaderClass>::HasParameters;
+
 #define EXPORTED_SHADER_TYPE(ShaderClass,ShaderMetaTypeShortcut) \
 public:\
-	using DerivedType = ShaderClass;\
 	using ShaderMetaType = platform::Render::##ShaderMetaTypeShortcut##ShaderMeta;\
+	using ShaderMapType = platform::Render::##ShaderMetaTypeShortcut##ShaderMap;\
 	static ShaderMetaType StaticType; \
-	static RenderShader* ConstructInstance() { return new ShaderClass();} \
-	static constexpr bool HasParameters =  platform::Render::ShaderParametersType<ShaderClass>::HasParameters;\
+	EXPORTED_SHADER_VTABLE(ShaderClass)\
+	ShaderClass(const ShaderMetaType::CompiledShaderInitializer& Initializer) \
+		:DerivedType(Initializer)\
+	{\
+		platform::Render::BindForLegacyShaderParameters<platform::Render::ShaderParametersType_t<ShaderClass>>(this,Initializer.ParameterMap);\
+	}\
 	ShaderClass() \
 	{ }
 
@@ -217,38 +249,98 @@ public:\
 		ShaderClass::ConstructInstance \
 	)
 
-	template<typename ShaderMetaType>
-	class ShaderMap
+	/** A reference which is initialized with the requested shader type from a shader map. */
+	template<typename ShaderType>
+	class ShaderMapRef : public ShaderRef<ShaderType>
 	{
-		std::vector<RenderShader*> SerializedShaders;
 	public:
+		ShaderMapRef(const typename ShaderType::ShaderMapType* ShaderIndex)
+			: ShaderRef<ShaderType>(ShaderIndex->template GetShader<ShaderType>(/* PermutationId = */ 0)) // gcc3 needs the template quantifier so it knows the < is not a less-than
+		{
+			static_assert(
+				std::is_same_v<typename ShaderType::FPermutationDomain, FShaderPermutationNone>,
+				"Missing permutation vector argument for shader that have a permutation domain.");
+		}
+
+		ShaderMapRef(
+			const typename ShaderType::ShaderMapType* ShaderIndex,
+			const typename ShaderType::FPermutationDomain& PermutationVector)
+			: ShaderRef<ShaderType>(ShaderIndex->template GetShader<ShaderType>(PermutationVector.ToDimensionValueId())) // gcc3 needs the template quantifier so it knows the < is not a less-than
+		{ }
+	};
+
+	class ShaderMapContent
+	{
+	public:
+		~ShaderMapContent()
+		{
+			Clear();
+		}
+
+		/** Finds the shader with the given type.  Asserts on failure. */
 		template<typename ShaderType>
-		ShaderType* GetShader() const
+		ShaderType* GetShader(int32 PermutationId = 0) const
 		{
-			auto find_itr = Shaders.find(&ShaderType::StaticType);
-
-			LAssert(find_itr != Shaders.end(), "Failed to find shader type");
-
-			return static_cast<ShaderType*>(find_itr->second.get());
+			auto Shader = GetShader(&ShaderType::StaticType, PermutationId);
+			LAssert(Shader != nullptr, leo::sfmt("Failed to find shader type %s in Platform %s", ShaderType::StaticType.GetName(),"PCD3D_SM5").c_str());
+			return static_cast<ShaderType*>(Shader);
 		}
 
-		void AddShader(ShaderMeta* Type, RenderShader* Shader)
+		/** Finds the shader with the given type.  Asserts on failure. */
+		template<typename ShaderType>
+		ShaderType* GetShader(const typename ShaderType::FPermutationDomain& PermutationVector) const
 		{
-			Shaders.emplace(Type, leo::share_raw(Shader));
+			return GetShader<ShaderType>(PermutationVector.ToDimensionValueId());
 		}
 
-		bool IsEmpty() const
+		/** Finds the shader with the given type.  May return NULL. */
+		RenderShader* GetShader(ShaderMeta* ShaderType, int32 PermutationId = 0) const
+		{
+			return GetShader(ShaderType->GetHash(), PermutationId);
+		}
+
+		/** Finds the shader with the given type name.  May return NULL. */
+		RenderShader* GetShader(size_t TypeNameHash, int32 PermutationId = 0) const;
+
+		/** Finds the shader with the given type. */
+		bool HasShader(size_t TypeNameHash, int32 PermutationId) const
+		{
+			auto Shader = GetShader(TypeNameHash, PermutationId);
+			return Shader != nullptr;
+		}
+
+		bool HasShader(const ShaderMeta* Type, int32 PermutationId) const
+		{
+			return HasShader(Type->GetHash(), PermutationId);
+		}
+
+		void AddShader(size_t TypeNameHash, int32 PermutationId, RenderShader* Shader);
+
+		RenderShader* FindOrAddShader(size_t TypeNameHash, int32 PermutationId, RenderShader* Shader);
+
+		/** clears out all shaders and deletes shader pipelines held in the map */
+		void Clear();
+
+		/** @return true if the map is empty */
+		inline bool IsEmpty() const
 		{
 			return Shaders.empty();
 		}
 
-	protected:
-		std::unordered_map< ShaderMeta*, std::shared_ptr<RenderShader>> Shaders;
+		/** @return The number of shaders in the map. */
+		uint32 GetNumShaders() const;
+	private:
+		std::unordered_map<std::size_t, RenderShader*> Shaders;
 	};
 
-	ShaderMap<ShaderMeta>* GetGlobalShaderMap();
+	template<typename ShaderMetaType>
+	class ShaderMapBase
+	{
+	public:
+		ShaderRef<RenderShader> GetShader(ShaderMeta* ShaderType, int32 PermutationId = 0) const;
+	};
 
-	void CompileGlobalShaderMap();
+	void CompileShaderMap();
 
 }
 

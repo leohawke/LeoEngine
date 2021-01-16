@@ -4,10 +4,29 @@
 #include "Engine/Render/ShaderParameterStruct.h"
 #include "Engine/Render/ShaderTextureTraits.hpp"
 #include "Engine/Render/DrawEvent.h"
+#include "Engine/Render/ShaderPermutation.h"
 
 using namespace platform;
 
 constexpr auto TILE_SIZE = 8;
+
+/** Different signals to denoise. */
+enum class SignalProcessing
+{
+	// Denoise a shadow mask.
+	ShadowVisibilityMask,
+
+	MAX
+};
+
+// Permutation dimension for the type of signal being denoised.
+class FSignalProcessingDim : SHADER_PERMUTATION_ENUM_CLASS("DIM_SIGNAL_PROCESSING", SignalProcessing);
+
+// Permutation dimension for the number of signal being denoised at the same time.
+class FSignalBatchSizeDim : SHADER_PERMUTATION_RANGE_INT("DIM_SIGNAL_BATCH_SIZE", 1, 4);
+
+// Permutation dimension for denoising multiple sample at same time.
+class FMultiSPPDim : SHADER_PERMUTATION_BOOL("DIM_MULTI_SPP");
 
 class SSDSpatialAccumulationCS : public Render::BuiltInShader
 {
@@ -16,7 +35,17 @@ public:
 	{
 		// Spatial kernel used to process raw input for the temporal accumulation.
 		ReConstruction,
+
+		// Spatial kernel to pre filter.
+		PreConvolution,
+
+		MAX
 	};
+
+	class FStageDim : SHADER_PERMUTATION_ENUM_CLASS("DIM_STAGE", Stage);
+	class FUpscaleDim : SHADER_PERMUTATION_BOOL("DIM_UPSCALE");
+
+	using FPermutationDomain = Render::TShaderPermutationDomain<FSignalProcessingDim, FStageDim, FUpscaleDim, FSignalBatchSizeDim, FMultiSPPDim>;
 
 
 	BEGIN_SHADER_PARAMETER_STRUCT(Parameters)
@@ -26,6 +55,7 @@ public:
 		SHADER_PARAMETER(leo::math::float4, InputBufferUVMinMax)
 		SHADER_PARAMETER(leo::math::float2, ViewportMin)
 		SHADER_PARAMETER(leo::math::float2, ViewportMax)
+		SHADER_PARAMETER(leo::uint32,StateFrameIndexMod8)
 		SHADER_PARAMETER(float, HitDistanceToWorldBluringRadius)
 		SHADER_PARAMETER_TEXTURE(Render::Texture2D, SignalInput_Textures_0)
 		SHADER_PARAMETER_TEXTURE(Render::Shader::RWTexture2D, SignalOutput_UAVs_0)
@@ -106,6 +136,7 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 
 		//CreateUAV
 
+
 		auto ReconstShader = Render::GetGlobalShaderMap()->GetShader<SSDSpatialAccumulationCS>();
 
 		SSDSpatialAccumulationCS::Parameters Parameters;
@@ -131,7 +162,16 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 
 		Parameters.point_sampler = point_sampler;
 
-		ComputeShaderUtils::Dispatch(CmdList, ReconstShader, Parameters,
+		SSDSpatialAccumulationCS::FPermutationDomain PermutationVector;
+		PermutationVector.Set<FSignalProcessingDim>(SignalProcessing::ShadowVisibilityMask);
+		PermutationVector.Set<FSignalBatchSizeDim>(1);
+		PermutationVector.Set<SSDSpatialAccumulationCS::FStageDim>(SSDSpatialAccumulationCS::Stage::ReConstruction);
+		PermutationVector.Set<SSDSpatialAccumulationCS::FUpscaleDim>(false);
+		PermutationVector.Set<FMultiSPPDim>(true);
+
+		Render::ShaderMapRef<SSDSpatialAccumulationCS> ComputeShader(Render::GetGlobalShaderMap(), PermutationVector);
+
+		ComputeShaderUtils::Dispatch(CmdList, ComputeShader.GetShader(), Parameters,
 			ComputeShaderUtils::GetGroupCount(leo::math::int2(FullResW, FullResH), TILE_SIZE));
 	}
 }

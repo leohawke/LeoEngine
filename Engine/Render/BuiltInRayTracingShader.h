@@ -13,9 +13,15 @@ inline namespace Shader
 	bool IsRayTracingShader(platform::Render::ShaderType type);
 
 
-	class BuiltInRayTracingShader :public RenderShader
+	class BuiltInRayTracingShader :public BuiltInShader
 	{
 	public:
+		using DerivedType = BuiltInRayTracingShader;
+	public:
+		BuiltInRayTracingShader(const ShaderMetaType::CompiledShaderInitializer& Initializer)
+			:BuiltInShader(Initializer)
+		{}
+
 		RayTracingShader* GetRayTracingShader();
 		void SetRayTracingShader(RayTracingShader* pShader);
 	private:

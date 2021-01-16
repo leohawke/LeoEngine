@@ -45,19 +45,12 @@ namespace platform::Render::Shader
 		return (*ConstructRef)();
 	}
 
-	ShaderMap<ShaderMeta>* GetGlobalShaderMap()
-	{
-		if (GGlobalShaderMap.IsEmpty())
-			CompileGlobalShaderMap();
-
-		return &GGlobalShaderMap;
-	}
-
 	ShaderMeta::ShaderMeta(EShaderMetaForDownCast InShaderMetaForDownCast, const char* InName, const char* InSourceFileName, const char* InEntryPoint, platform::Render::ShaderType InFrequency,
 		ConstructType InConstructRef)
 		:
 		ShaderMetaForDownCast(InShaderMetaForDownCast),
 		TypeName(InName), 
+		Hash(std::hash<std::string>()(TypeName)),
 		SourceFileName(InSourceFileName),
 		EntryPoint(InEntryPoint), 
 		Frequency(InFrequency), 
@@ -137,7 +130,7 @@ namespace platform::Render::Shader
 		co_return;
 	}
 
-	void CompileGlobalShaderMap()
+	void CompileShaderMap()
 	{
 		LFL_DEBUG_DECL_TIMER(Commpile, "CompileGlobalShaderMap");
 

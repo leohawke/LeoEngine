@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ShaderCore.h"
+#include <LBase/type_traits.hpp>
 
 namespace platform::Render
 {
@@ -352,7 +353,7 @@ namespace platform::Render
 			template<class DimensionToSet>
 			void Set(typename DimensionToSet::Type Value)
 			{
-				return TShaderPermutationDomainSpetialization<TIsSame<TDimension, DimensionToSet>::Value>::template SetDimension<Type, DimensionToSet>(*this, Value);
+				return TShaderPermutationDomainSpetialization<std::is_same_v<TDimension, DimensionToSet>>::template SetDimension<Type, DimensionToSet>(*this, Value);
 			}
 
 
@@ -360,7 +361,7 @@ namespace platform::Render
 			template<class DimensionToGet>
 			const typename DimensionToGet::Type& Get() const
 			{
-				return TShaderPermutationDomainSpetialization<TIsSame<TDimension, DimensionToGet>::Value>::template GetDimension<Type, DimensionToGet>(*this);
+				return TShaderPermutationDomainSpetialization<std::is_same_v<TDimension, DimensionToGet>>::template GetDimension<Type, DimensionToGet>(*this);
 			}
 
 
@@ -420,7 +421,7 @@ namespace platform::Render
 #define DECLARE_SHADER_PERMUTATION_IMPL(InDefineName,PermutationMetaType,...) \
 	public PermutationMetaType<__VA_ARGS__> { \
 	public: \
-		static constexpr const char* DefineName = #InDefineName; \
+		static constexpr const char* DefineName = InDefineName; \
 	}
 
 /** Implements a boolean shader permutation dimensions. Meant to be used like so:
@@ -430,7 +431,7 @@ namespace platform::Render
 #define SHADER_PERMUTATION_BOOL(InDefineName) \
 	public platform::Render::FShaderPermutationBool { \
 	public: \
-		static constexpr const char* DefineName = #InDefineName; \
+		static constexpr const char* DefineName = InDefineName; \
 	}
 
  /** Implements an integer shader permutation dimensions with N permutation values from [[0; N[[. Meant to be used like so:
@@ -438,14 +439,14 @@ namespace platform::Render
   * class FMyShaderDim : SHADER_PERMUTATION_INT("MY_SHADER_DEFINE_NAME", N);
   */
 #define SHADER_PERMUTATION_INT(InDefineName, Count) \
-	DECLARE_SHADER_PERMUTATION_IMPL(InDefineName, platform::Render::TShaderPermutationInt, int32, Count)
+	DECLARE_SHADER_PERMUTATION_IMPL(InDefineName, platform::Render::TShaderPermutationInt, leo::int32, Count)
 
   /** Implements an integer shader permutation dimensions with N permutation values from [[X; X+N[[. Meant to be used like so:
    *
    * class FMyShaderDim : SHADER_PERMUTATION_RANGE_INT("MY_SHADER_DEFINE_NAME", X, N);
    */
 #define SHADER_PERMUTATION_RANGE_INT(InDefineName, Start, Count) \
-	DECLARE_SHADER_PERMUTATION_IMPL(InDefineName, platform::Render::TShaderPermutationInt, int32, Count, Start)
+	DECLARE_SHADER_PERMUTATION_IMPL(InDefineName, platform::Render::TShaderPermutationInt, leo::int32, Count, Start)
 
    /** Implements an integer shader permutation dimensions with non contiguous permutation values. Meant to be used like so:
 	*
@@ -467,4 +468,4 @@ namespace platform::Render
 	 * class FMyShaderDim : SHADER_PERMUTATION_ENUM_CLASS("MY_SHADER_DEFINE_NAME", EMyEnum);
 	 */
 #define SHADER_PERMUTATION_ENUM_CLASS(InDefineName, EnumName) \
-	DECLARE_SHADER_PERMUTATION_IMPL(InDefineName, platform::Render::TShaderPermutationInt, EnumName, static_cast<int32>(EnumName::MAX))
+	DECLARE_SHADER_PERMUTATION_IMPL(InDefineName, platform::Render::TShaderPermutationInt, EnumName, static_cast<leo::int32>(EnumName::MAX))

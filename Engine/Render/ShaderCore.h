@@ -183,7 +183,9 @@ namespace platform::Render {
 
 		struct FShaderCompilerEnvironment
 		{
-
+			void SetDefine(const char* Name, const char* Value) { }
+			void SetDefine(const char* Name, bool Value) { }
+			void SetDefine(const char* Name, int32 Value) { }
 		};
 	}
 }

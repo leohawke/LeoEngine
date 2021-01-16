@@ -23,7 +23,7 @@ struct GlobalEnvironmentGurad {
 		pEnvironment->Gamma = 2.2f;
 
 		//±‡“ÎShader
-		platform::Render::CompileGlobalShaderMap();
+		platform::Render::CompileShaderMap();
 	}
 
 	~GlobalEnvironmentGurad() {
