@@ -538,6 +538,85 @@ static HRESULT D3DCreateReflectionFromBlob(ID3DBlob* DxilBlob, COMPtr<T>& OutRef
 }
 
 namespace asset::X::Shader::DXIL {
+	static class CurrentDirInclude :public IDxcIncludeHandler
+	{
+	public:
+		CurrentDirInclude()
+		{
+			GetDxcDllHelper().CreateInstance(CLSID_DxcLibrary, &Library.GetRef());
+		}
+
+		HRESULT LoadSource(
+			LPCWSTR pFilename,                                   // Candidate filename.
+			IDxcBlob** ppIncludeSource  // Resultant source object for included file, nullptr if not found.
+		)
+		{
+			auto path = std::filesystem::path(pFilename);
+			auto key = path.string();
+
+			try {
+
+				auto itr = caches.find(key);
+				if (itr == caches.end())
+				{
+					auto file = Open(path);
+
+					auto buffer = std::make_unique<byte[]>(file.GetSize());
+
+					auto length = file.Read(buffer.get(), file.GetSize(), 0);
+
+					COMPtr<IDxcBlobEncoding> TextBlob;
+					Library->CreateBlobWithEncodingFromPinned(buffer.get(), static_cast<UINT32>(file.GetSize()), CP_UTF8, &TextBlob.GetRef());
+
+					itr = caches.emplace(key, TextBlob.Get()).first;
+					itr->second->AddRef();
+				}
+
+				*ppIncludeSource = itr->second;
+				(*ppIncludeSource)->AddRef();
+				return S_OK;
+			}
+			catch (platform_ex::Windows::Win32Exception&)
+			{
+				*ppIncludeSource = nullptr;
+				return S_FALSE;
+			}
+		}
+
+		HRESULT STDMETHODCALLTYPE QueryInterface(
+			REFIID riid,
+			void** ppvObject)
+		{
+			return S_FALSE;
+		}
+
+		ULONG AddRef()
+		{
+			return 1;
+		}
+
+		ULONG Release()
+		{
+			return 1;
+		}
+
+	private:
+		std::filesystem::path engine_path = std::filesystem::current_path().parent_path().parent_path();
+		std::filesystem::path shaders_path = engine_path / "Engine" / "Shaders";
+		platform::File Open(const std::filesystem::path& path)
+		{
+			auto local_path = shaders_path / path;
+			if (std::filesystem::exists(local_path))
+				return platform::File(local_path.wstring(), platform::File::kToRead);
+			return platform::File(path.wstring(), platform::File::kToRead);
+		}
+
+		std::unordered_map<std::string, IDxcBlobEncoding*> caches;
+
+		COMPtr<IDxcLibrary> Library;
+	} currdir_include;
+
+
 
 	static void D3DCreateDXCArguments(std::vector<const WCHAR*>& OutArgs, const WCHAR* Exports, leo::uint32 CompileFlags,leo::uint32 AutoBindingSpace = ~0u)
 	{
@@ -710,19 +789,17 @@ namespace asset::X::Shader::DXIL {
 		COMPtr<IDxcBlobEncoding> TextBlob;
 		Library->CreateBlobWithEncodingFromPinned(input.Code.data(),static_cast<UINT32>(input.Code.size()), CP_UTF8, &TextBlob.GetRef());
 
-		leo::Text::String wSourceName(input.SourceName);
-
 		COMPtr<IDxcOperationResult> CompileResult;
 		CheckHResult(Compiler->Compile(
 			TextBlob.Get(),
-			(wchar_t*)wSourceName.data(),
+			nullptr,
 			(wchar_t*)String(input.EntryPoint).data(),
 			(wchar_t*)String(CompileProfile(input.Type)).data(),
 			args.data(),
 			static_cast<UINT32>(args.size()),
 			defs.data(),
 			static_cast<UINT32>(defs.size()),
-			nullptr,
+			&currdir_include,
 			&CompileResult.GetRef()
 		));
 
