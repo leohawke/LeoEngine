@@ -45,8 +45,13 @@ namespace platform::Render::Shader
 		return (*ConstructRef)();
 	}
 
+	void ShaderMeta::ModifyCompilationEnvironment(const FShaderPermutationParameters& Parameters, FShaderCompilerEnvironment& OutEnvironment) const
+	{
+		(*ModifyCompilationEnvironmentRef)(Parameters, OutEnvironment);
+	}
+
 	ShaderMeta::ShaderMeta(EShaderMetaForDownCast InShaderMetaForDownCast, const char* InName, const char* InSourceFileName, const char* InEntryPoint, platform::Render::ShaderType InFrequency, int32 InTotalPermutationCount,
-		ConstructType InConstructRef)
+		ConstructType InConstructRef, ModifyCompilationEnvironmentType InModifyCompilationEnvironmentRef)
 		:
 		ShaderMetaForDownCast(InShaderMetaForDownCast),
 		TypeName(InName), 
@@ -56,7 +61,8 @@ namespace platform::Render::Shader
 		EntryPoint(InEntryPoint), 
 		Frequency(InFrequency), 
 		TotalPermutationCount(InTotalPermutationCount),
-		ConstructRef(InConstructRef)
+		ConstructRef(InConstructRef),
+		ModifyCompilationEnvironmentRef(InModifyCompilationEnvironmentRef)
 	{
 		GetTypeList().emplace_front(this);
 	}
@@ -71,29 +77,32 @@ namespace platform::Render::Shader
 
 	static void FillParameterMapByShaderInfo(ShaderParameterMap& target, const ShaderInfo& src);
 
-	BuiltInShaderMap GGlobalShaderMap;
+	BuiltInShaderMap GGlobalBuiltInShaderMap;
 
 
-	leo::coroutine::Task<void> CompileShader(ShaderMeta* meta,int32 )
+	leo::coroutine::Task<void> CompileBuiltInShader(BuiltInShaderMeta* meta,int32 PermutationId)
 	{
 		auto& Device = Context::Instance().GetDevice();
 		auto& RayDevice = Context::Instance().GetRayContext().GetDevice();
 
 		asset::X::Shader::ShaderCompilerInput input;
+
 		input.EntryPoint = meta->GetEntryPoint();
 		input.Type = meta->GetShaderType();
 		input.SourceName = meta->GetSourceFileName();
+		// Allow the shader type to modify the compile environment.
+		meta->SetupCompileEnvironment(PermutationId, input.Environment);
 
 		LFL_DEBUG_DECL_TIMER(Commpile, sfmt("CompileShader %s- Entry:%s ", input.SourceName.data(), input.EntryPoint.data()));
 
 		auto Code = co_await platform::X::GenHlslShaderAsync(meta->GetSourceFileName());
 		input.Code = Code;
 
-		auto final_macros = asset::X::Shader::AppendCompileMacros({}, input.Type);
+		asset::X::Shader::AppendCompilerEnvironment(input.Environment, input.Type);
 
 		ShaderInfo Info{ input.Type };
 
-		auto blob = asset::X::Shader::CompileAndReflect(input, final_macros,
+		auto blob = asset::X::Shader::CompileAndReflect(input,
 #ifndef NDEBUG
 			D3DFlags::D3DCOMPILE_DEBUG
 #else
@@ -110,11 +119,11 @@ namespace platform::Render::Shader
 
 			auto pRayTracingShaderRHI = RayDevice.CreateRayTracingSahder(initializer);
 
-			auto pShader = static_cast<BuiltInRayTracingShader*>(meta->Construct());
+			auto pShader = static_cast<BuiltInRayTracingShader*>(static_cast<ShaderMeta*>(meta)->Construct());
 
 			pShader->SetRayTracingShader(pRayTracingShaderRHI);
 
-			GGlobalShaderMap.FindOrAddShader(meta,0, pShader);
+			GGlobalBuiltInShaderMap.FindOrAddShader(meta,0, pShader);
 		}
 		else if (auto pBuiltInMeta = meta->GetBuiltInShaderType()) {
 			platform::Render::ShaderInitializer initializer;
@@ -129,7 +138,7 @@ namespace platform::Render::Shader
 
 			auto pShader = pBuiltInMeta->Construct(compileOuput);
 
-			GGlobalShaderMap.FindOrAddShader(meta,0, pShader);
+			GGlobalBuiltInShaderMap.FindOrAddShader(meta,0, pShader);
 		}
 
 		co_return;
@@ -142,10 +151,11 @@ namespace platform::Render::Shader
 		std::vector< leo::coroutine::Task<void>> tasks;
 		for (auto meta : ShaderMeta::GetTypeList())
 		{
+			//TODO:dispatch type
 			int32 PermutationCountToCompile = 0;
 			for (int32 PermutationId = 0; PermutationId < meta->GetPermutationCount(); PermutationId++)
 			{
-				auto task = Environment->Scheduler->Schedule(CompileShader(meta, PermutationId));
+				auto task = Environment->Scheduler->Schedule(CompileBuiltInShader(static_cast<BuiltInShaderMeta*>(meta), PermutationId));
 				tasks.emplace_back(std::move(task));
 			}
 		}
@@ -185,7 +195,7 @@ namespace platform::Render::Shader
 
 	BuiltInShaderMap* Shader::GetBuiltInShaderMap()
 	{
-		return &GGlobalShaderMap;
+		return &GGlobalBuiltInShaderMap;
 	}
 }
 

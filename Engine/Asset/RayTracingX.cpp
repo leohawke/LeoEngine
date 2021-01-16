@@ -111,12 +111,12 @@ private:
 			input.Type = pair.first;
 			input.EntryPoint = pair.second;
 
-			auto final_macros =  asset::X::Shader::AppendCompileMacros(macros, input.Type);
+			asset::X::Shader::AppendCompilerEnvironment(input.Environment, input.Type);
 
 			auto pInfo = std::make_unique<ShaderInfo>(input.Type);
 
 			LFL_DEBUG_DECL_TIMER(Commpile, sfmt("CompileAndReflect Type:%s ", input.EntryPoint.data()));
-			auto blob =asset::X::Shader::CompileAndReflect(input, final_macros,
+			auto blob =asset::X::Shader::CompileAndReflect(input,
 #ifndef NDEBUG
 				D3DFlags::D3DCOMPILE_DEBUG
 #else

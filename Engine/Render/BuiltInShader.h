@@ -8,6 +8,9 @@
 PR_NAMESPACE_BEGIN
 inline namespace Shader
 {
+	using FBuiltInShaderPermutationParameters = FShaderPermutationParameters;
+
+
 	class BuiltInShaderMeta : public ShaderMeta
 	{
 	public:
@@ -21,15 +24,27 @@ inline namespace Shader
 			platform::Render::ShaderType  InFrequency,
 			int32 TotalPermutationCount,
 			ConstructType InConstructRef,
+			ModifyCompilationEnvironmentType InModifyCompilationEnvironmentRef,
 			ConstructCompiledType InConstructCompiledRef
 		):
-		 ShaderMeta(EShaderMetaForDownCast::BuitlIn,InName,InSourceFileName,InEntryPoint,InFrequency, TotalPermutationCount,InConstructRef),
+		 ShaderMeta(EShaderMetaForDownCast::BuitlIn,InName,InSourceFileName,InEntryPoint,InFrequency, TotalPermutationCount,InConstructRef, InModifyCompilationEnvironmentRef),
 			ConstructCompiledRef(InConstructCompiledRef)
 		{}
 
 		RenderShader* Construct(const CompiledShaderInitializer& initializer) const
 		{
 			return (*ConstructCompiledRef)(initializer);
+		}
+
+		/**
+	 * Sets up the environment used to compile an instance of this shader type.
+	 * @param Platform - Platform to compile for.
+	 * @param Environment - The shader compile environment that the function modifies.
+	 */
+		void SetupCompileEnvironment(int32 PermutationId, FShaderCompilerEnvironment& Environment)
+		{
+			// Allow the shader type to modify its compile environment.
+			ModifyCompilationEnvironment(FBuiltInShaderPermutationParameters(PermutationId), Environment);
 		}
 
 	private:
@@ -124,6 +139,7 @@ inline namespace Shader
 		Frequency, \
 		ShaderClass::FPermutationDomain::PermutationCount,\
 		ShaderClass::ConstructInstance, \
+		ShaderClass::ModifyCompilationEnvironmentImpl, \
 		ShaderClass::ConstructCompiledInstance\
 	)
 }

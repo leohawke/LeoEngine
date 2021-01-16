@@ -79,12 +79,22 @@ inline namespace Shader
 		void BindForLegacyShaderParameters(const RenderShader* Shader, const ShaderParameterMap& ParameterMaps, const ShaderParametersMetadata& StructMetaData);
 	};
 
+	struct FShaderPermutationParameters
+	{
+		/** Unique permutation identifier of the material shader type. */
+		const int32 PermutationId;
+
+		explicit FShaderPermutationParameters(int32 InPermutationId = 0)
+			:PermutationId(InPermutationId)
+		{}
+	};
+
 	
 	class RenderShader
 	{
 	public:
 		using FPermutationDomain = FShaderPermutationNone;
-
+		using FPermutationParameters = FShaderPermutationParameters;
 
 		struct CompiledShaderInitializer
 		{
@@ -115,6 +125,9 @@ inline namespace Shader
 		{
 			return GetHardwareShader<ComputeHWShader>();
 		}
+
+		/** Can be overridden by FShader subclasses to modify their compile environment just before compilation occurs. */
+		static void ModifyCompilationEnvironment(const FShaderPermutationParameters&, FShaderCompilerEnvironment&) {}
 	private:
 		template<class THardwareShader>
 		THardwareShader* GetHardwareShader() const
@@ -138,6 +151,8 @@ inline namespace Shader
 		};
 
 		typedef class RenderShader* (*ConstructType)();
+		typedef void (*ModifyCompilationEnvironmentType)(const FShaderPermutationParameters&, FShaderCompilerEnvironment&);
+
 
 		static std::list<ShaderMeta*>& GetTypeList();
 	public:
@@ -148,7 +163,8 @@ inline namespace Shader
 			const char* InEntryPoint,
 			platform::Render::ShaderType  InFrequency,
 			int32 TotalPermutationCount,
-			ConstructType InConstructRef
+			ConstructType InConstructRef,//InConstructCompiledRef
+			ModifyCompilationEnvironmentType InModifyCompilationEnvironmentRef
 		);
 
 		const std::string& GetTypeName() const { return TypeName; }
@@ -164,6 +180,9 @@ inline namespace Shader
 		}
 
 		RenderShader* Construct() const;
+
+		void ModifyCompilationEnvironment(const FShaderPermutationParameters& Parameters, FShaderCompilerEnvironment& OutEnvironment) const;
+
 
 		BuiltInShaderMeta* GetBuiltInShaderType()
 		{
@@ -181,6 +200,7 @@ inline namespace Shader
 		int32 TotalPermutationCount;
 
 		ConstructType ConstructRef;
+		ModifyCompilationEnvironmentType ModifyCompilationEnvironmentRef;
 	};
 
 	template <typename ParameterStruct>
@@ -257,7 +277,13 @@ inline namespace Shader
 #define EXPORTED_SHADER_VTABLE(ShaderClass) \
 	static RenderShader* ConstructInstance() { return new ShaderClass();} \
 	static RenderShader* ConstructCompiledInstance(const ShaderMetaType::CompiledShaderInitializer& Initializer) { return new ShaderClass(Initializer);} \
-	static constexpr bool HasParameters =  platform::Render::ShaderParametersType<ShaderClass>::HasParameters;
+	static constexpr bool HasParameters =  platform::Render::ShaderParametersType<ShaderClass>::HasParameters;\
+	static void ModifyCompilationEnvironmentImpl(const platform::Render::FShaderPermutationParameters& Parameters, platform::Render::FShaderCompilerEnvironment& OutEnvironment) \
+	{ \
+		const typename ShaderClass::FPermutationDomain PermutationVector(Parameters.PermutationId); \
+		PermutationVector.ModifyCompilationEnvironment(OutEnvironment); \
+		ShaderClass::ModifyCompilationEnvironment(static_cast<const typename ShaderClass::FPermutationParameters&>(Parameters), OutEnvironment); \
+	} \
 
 #define EXPORTED_SHADER_TYPE(ShaderClass,ShaderMetaTypeShortcut) \
 public:\
@@ -281,7 +307,8 @@ public:\
 		FunctionName, \
 		Frequency, \
 		ShaderClass::FPermutationDomain::PermutationCount,\
-		ShaderClass::ConstructInstance \
+		ShaderClass::ConstructInstance, \
+		ShaderClass::ModifyCompilationEnvironmentImpl\
 	)
 
 	/** A reference which is initialized with the requested shader type from a shader map. */

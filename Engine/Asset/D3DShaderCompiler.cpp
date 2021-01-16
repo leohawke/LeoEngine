@@ -20,31 +20,28 @@ using namespace D3DFlags;
 #define SHADER_OPTIMIZATION_LEVEL_MASK (D3DCOMPILE_OPTIMIZATION_LEVEL0 | D3DCOMPILE_OPTIMIZATION_LEVEL1 | D3DCOMPILE_OPTIMIZATION_LEVEL2 | D3DCOMPILE_OPTIMIZATION_LEVEL3)
 
 namespace asset::X::Shader {
-	std::vector<ShaderMacro> AppendCompileMacros(const std::vector<ShaderMacro>& macros, ShaderType type)
+	void AppendCompilerEnvironment(FShaderCompilerEnvironment& environment, ShaderType type)
 	{
 		using namespace  platform::Render;
 
-		auto append_macros = macros;
-
-		append_macros.emplace_back("SM4", "40");
+		environment.SetDefine("SM4", "40");
 
 		auto caps = Context::Instance().GetDevice().GetCaps();
 		switch (caps.type) {
 		case Caps::Type::D3D12:
-			append_macros.emplace_back("D3D12", "1");
+			environment.SetDefine("D3D12", "1");
 			//TODO depend feature_level
-			append_macros.emplace_back("SM_VERSION", "50");
+			environment.SetDefine("SM_VERSION", "50");
 			break;
 		}
 		switch (type) {
 		case ShaderType::VertexShader:
-			append_macros.emplace_back("VS", "1");
+			environment.SetDefine("VS", "1");
 			break;
 		case ShaderType::PixelShader:
-			append_macros.emplace_back("PS", "1");
+			environment.SetDefine("PS", "1");
 			break;
 		}
-		return append_macros;
 	}
 
 	std::string_view CompileProfile(ShaderType type)
@@ -403,11 +400,10 @@ namespace asset::X::Shader::DXBC {
 		}
 	} currdir_include;
 
-
-	ShaderBlob CompileToDXBC(const ShaderCompilerInput& input, const std::vector<ShaderMacro>& macros,
+	ShaderBlob CompileToDXBC(const ShaderCompilerInput& input,
 		leo::uint32 flags) {
 		std::vector<D3D_SHADER_MACRO> defines;
-		for (auto& macro : macros) {
+		for (auto& macro : input.Environment.GetDefinitions()) {
 			D3D_SHADER_MACRO define;
 			define.Name = macro.first.c_str();
 			define.Definition = macro.second.c_str();
@@ -731,7 +727,7 @@ namespace asset::X::Shader::DXIL {
 		}
 	}
 
-	ShaderBlob CompileAndReflectDXIL(const ShaderCompilerInput& input, const std::vector<ShaderMacro>& macros,
+	ShaderBlob CompileAndReflectDXIL(const ShaderCompilerInput& input,
 		leo::uint32 flags, ShaderInfo* pInfo) {
 		using String = leo::Text::String;
 
@@ -761,7 +757,7 @@ namespace asset::X::Shader::DXIL {
 		}
 
 		std::vector<std::pair<String, String>> def_holder;
-		for (auto& macro : macros) {
+		for (auto& macro : input.Environment.GetDefinitions()) {
 			def_holder.emplace_back(String(macro.first.c_str(), macro.first.size()), String(macro.second.c_str(), macro.second.size()));
 		}
 		
@@ -905,7 +901,7 @@ namespace asset::X::Shader::DXIL {
 
 namespace asset::X::Shader
 {
-	ShaderBlob CompileAndReflect(const ShaderCompilerInput& input, const std::vector<ShaderMacro>& macros,
+	ShaderBlob CompileAndReflect(const ShaderCompilerInput& input,
 		leo::uint32 flags, ShaderInfo* pInfo)
 	{
 		bool use_dxc = IsRayTracingShader(input.Type);
@@ -916,7 +912,7 @@ namespace asset::X::Shader
 
 		if (use_dxbc)
 		{
-			auto blob = DXBC::CompileToDXBC(input, macros, flags);
+			auto blob = DXBC::CompileToDXBC(input, flags);
 
 			if (pInfo)
 				DXBC::ReflectDXBC(blob, input.Type, pInfo);
@@ -924,7 +920,7 @@ namespace asset::X::Shader
 			return blob;
 		}
 
-		return DXIL::CompileAndReflectDXIL(input, macros, flags, pInfo);
+		return DXIL::CompileAndReflectDXIL(input, flags, pInfo);
 	}
 
 	ShaderBlob Strip(const ShaderBlob& code_blob, ShaderType type, leo::uint32 flags) {

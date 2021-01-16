@@ -46,17 +46,9 @@ namespace asset::X::Shader
 {
 	using namespace platform::Render::Shader;
 
-	struct ShaderCompilerInput
-	{
-		ShaderType Type;
-		std::string_view Code;
-		std::string_view EntryPoint;
-		std::string_view SourceName;
-	};
-
 	inline namespace DXBC
 	{
-		ShaderBlob CompileToDXBC(const ShaderCompilerInput& input, const std::vector<ShaderMacro>& macros,
+		ShaderBlob CompileToDXBC(const ShaderCompilerInput& input,
 			 leo::uint32 flags);
 		void ReflectDXBC(const ShaderBlob& blob, ShaderType type,ShaderInfo* pInfo);
 		ShaderBlob StripDXBC(const ShaderBlob& blob, leo::uint32 flags);
@@ -64,15 +56,15 @@ namespace asset::X::Shader
 
 	inline namespace DXIL
 	{
-		ShaderBlob CompileAndReflectDXIL(const ShaderCompilerInput& input, const std::vector<ShaderMacro>& macros,
+		ShaderBlob CompileAndReflectDXIL(const ShaderCompilerInput& input,
 			leo::uint32 flags,ShaderInfo* pInfo=nullptr);
 	}
 
-	ShaderBlob CompileAndReflect(const ShaderCompilerInput& input, const std::vector<ShaderMacro>& macros,
+	ShaderBlob CompileAndReflect(const ShaderCompilerInput& input, 
 		leo::uint32 flags, ShaderInfo* pInfo = nullptr);
 
 	ShaderBlob Strip(const ShaderBlob& blob, ShaderType type, leo::uint32 flags);
 
-	std::vector<ShaderMacro> AppendCompileMacros(const std::vector<ShaderMacro>& macros, ShaderType type);
+	void AppendCompilerEnvironment(FShaderCompilerEnvironment& environment, ShaderType type);
 	std::string_view CompileProfile(ShaderType type);
 }

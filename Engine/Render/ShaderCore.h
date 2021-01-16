@@ -161,7 +161,6 @@ namespace platform::Render {
 		};
 
 		using ShaderMacro = std::pair<std::string, std::string>;
-		
 		struct ParameterAllocation
 		{
 			uint16 BufferIndex;
@@ -186,6 +185,23 @@ namespace platform::Render {
 			void SetDefine(const char* Name, const char* Value) { }
 			void SetDefine(const char* Name, bool Value) { }
 			void SetDefine(const char* Name, int32 Value) { }
+
+			const std::unordered_map<std::string, std::string>& GetDefinitions() const
+			{
+				return Definitions;
+			}
+		private:
+			std::unordered_map<std::string, std::string> Definitions;
+		};
+
+		struct ShaderCompilerInput
+		{
+			ShaderType Type;
+			std::string_view Code;
+			std::string_view EntryPoint;
+			std::string_view SourceName;
+
+			FShaderCompilerEnvironment Environment;
 		};
 	}
 }
