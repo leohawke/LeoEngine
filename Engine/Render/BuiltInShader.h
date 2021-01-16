@@ -79,9 +79,11 @@ inline namespace Shader
 		BuiltInShaderMapContent Content;
 	};
 
-	class BuiltInShaderMap :public ShaderMapBase<ShaderMeta>
+	class BuiltInShaderMap
 	{
 	public:
+		~BuiltInShaderMap();
+
 		ShaderRef<RenderShader> GetShader(ShaderMeta* ShaderType, int32 PermutationId = 0) const;
 
 		/** Finds the shader with the given type.  Asserts on failure. */

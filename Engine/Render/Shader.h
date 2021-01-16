@@ -82,6 +82,9 @@ inline namespace Shader
 	class RenderShader
 	{
 	public:
+		using FPermutationDomain = FShaderPermutationNone;
+
+
 		struct CompiledShaderInitializer
 		{
 			HardwareShader* Shader;
@@ -143,14 +146,21 @@ inline namespace Shader
 			const char* InSourceFileName,
 			const char* InEntryPoint,
 			platform::Render::ShaderType  InFrequency,
+			int32 TotalPermutationCount,
 			ConstructType InConstructRef
 		);
 
 		const std::string& GetTypeName() const { return TypeName; }
 		std::size_t GetHash() const { return Hash; }
 		const std::string& GetSourceFileName() const { return SourceFileName; }
+		std::size_t GetHashedShaderFilename() const { return HashedShaderFilename; }
 		const std::string& GetEntryPoint() const { return EntryPoint; }
 		platform::Render::ShaderType GetShaderType() const { return Frequency; }
+
+		inline int32 GetPermutationCount() const
+		{
+			return TotalPermutationCount;
+		}
 
 		RenderShader* Construct() const;
 
@@ -164,8 +174,10 @@ inline namespace Shader
 		std::string TypeName;
 		std::size_t Hash;
 		std::string SourceFileName;
+		std::size_t HashedShaderFilename;
 		std::string EntryPoint;
 		platform::Render::ShaderType Frequency;
+		int32 TotalPermutationCount;
 
 		ConstructType ConstructRef;
 	};
@@ -205,6 +217,9 @@ inline namespace Shader
 	class ShaderRefBase
 	{
 	public:
+		ShaderRefBase():ShaderContent(nullptr)
+		{}
+
 		ShaderRefBase(ShaderType* InShader) :ShaderContent(InShader)
 		{}
 
@@ -314,8 +329,6 @@ public:\
 			return HasShader(Type->GetHash(), PermutationId);
 		}
 
-		void AddShader(size_t TypeNameHash, int32 PermutationId, RenderShader* Shader);
-
 		RenderShader* FindOrAddShader(size_t TypeNameHash, int32 PermutationId, RenderShader* Shader);
 
 		/** clears out all shaders and deletes shader pipelines held in the map */
@@ -330,15 +343,12 @@ public:\
 		/** @return The number of shaders in the map. */
 		uint32 GetNumShaders() const;
 	private:
-		std::unordered_map<std::size_t, RenderShader*> Shaders;
+		std::vector<RenderShader*> Shaders;
+		std::vector<size_t> ShaderTypes;
+		std::vector<int32> ShaderPermutations;
+		std::unordered_multimap<leo::uint16,leo::uint32> ShaderHash;
 	};
 
-	template<typename ShaderMetaType>
-	class ShaderMapBase
-	{
-	public:
-		ShaderRef<RenderShader> GetShader(ShaderMeta* ShaderType, int32 PermutationId = 0) const;
-	};
 
 	void CompileShaderMap();
 

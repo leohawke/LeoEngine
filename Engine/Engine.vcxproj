@@ -60,6 +60,7 @@
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
     </ClCompile>
     <ClCompile Include="Render\BuiltInRayTracingShader.cpp" />
+    <ClCompile Include="Render\BuiltInShader.cpp" />
     <ClCompile Include="Render\Color_T.cpp" />
     <ClCompile Include="Render\CommonRenderResources.cpp" />
     <ClCompile Include="Render\D3D12\CommandList.d3d12.cpp" />

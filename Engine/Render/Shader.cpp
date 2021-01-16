@@ -9,7 +9,8 @@
 #include "../Core/Coroutine/SyncWait.h"
 #include "../Core/Coroutine/WhenAllReady.h"
 #include "../System/SystemEnvironment.h"
-
+#include "../Core/Hash/CityHash.h"
+#include "BuiltInShader.h"
 
 
 using namespace platform::Render;
@@ -17,7 +18,6 @@ using namespace platform::Render;
 namespace platform::Render::Shader
 {
 	std::list<ShaderMeta*>* GShaderTypeList;
-	ShaderMap<ShaderMeta> GGlobalShaderMap;
 
 	bool IsRayTracingShader(ShaderType type)
 	{
@@ -45,15 +45,17 @@ namespace platform::Render::Shader
 		return (*ConstructRef)();
 	}
 
-	ShaderMeta::ShaderMeta(EShaderMetaForDownCast InShaderMetaForDownCast, const char* InName, const char* InSourceFileName, const char* InEntryPoint, platform::Render::ShaderType InFrequency,
+	ShaderMeta::ShaderMeta(EShaderMetaForDownCast InShaderMetaForDownCast, const char* InName, const char* InSourceFileName, const char* InEntryPoint, platform::Render::ShaderType InFrequency, int32 InTotalPermutationCount,
 		ConstructType InConstructRef)
 		:
 		ShaderMetaForDownCast(InShaderMetaForDownCast),
 		TypeName(InName), 
 		Hash(std::hash<std::string>()(TypeName)),
 		SourceFileName(InSourceFileName),
+		HashedShaderFilename(std::hash<std::string>()(SourceFileName)),
 		EntryPoint(InEntryPoint), 
 		Frequency(InFrequency), 
+		TotalPermutationCount(InTotalPermutationCount),
 		ConstructRef(InConstructRef)
 	{
 		GetTypeList().emplace_front(this);
@@ -69,7 +71,10 @@ namespace platform::Render::Shader
 
 	static void FillParameterMapByShaderInfo(ShaderParameterMap& target, const ShaderInfo& src);
 
-	leo::coroutine::Task<void> CompileShader(ShaderMeta* meta)
+	BuiltInShaderMap GGlobalShaderMap;
+
+
+	leo::coroutine::Task<void> CompileShader(ShaderMeta* meta,int32 )
 	{
 		auto& Device = Context::Instance().GetDevice();
 		auto& RayDevice = Context::Instance().GetRayContext().GetDevice();
@@ -109,7 +114,7 @@ namespace platform::Render::Shader
 
 			pShader->SetRayTracingShader(pRayTracingShaderRHI);
 
-			GGlobalShaderMap.AddShader(meta, pShader);
+			GGlobalShaderMap.FindOrAddShader(meta,0, pShader);
 		}
 		else if (auto pBuiltInMeta = meta->GetBuiltInShaderType()) {
 			platform::Render::ShaderInitializer initializer;
@@ -124,7 +129,7 @@ namespace platform::Render::Shader
 
 			auto pShader = pBuiltInMeta->Construct(compileOuput);
 
-			GGlobalShaderMap.AddShader(meta, pShader);
+			GGlobalShaderMap.FindOrAddShader(meta,0, pShader);
 		}
 
 		co_return;
@@ -137,8 +142,12 @@ namespace platform::Render::Shader
 		std::vector< leo::coroutine::Task<void>> tasks;
 		for (auto meta : ShaderMeta::GetTypeList())
 		{
-			auto task = Environment->Scheduler->Schedule(CompileShader(meta));
-			tasks.emplace_back(std::move(task));
+			int32 PermutationCountToCompile = 0;
+			for (int32 PermutationId = 0; PermutationId < meta->GetPermutationCount(); PermutationId++)
+			{
+				auto task = Environment->Scheduler->Schedule(CompileShader(meta, PermutationId));
+				tasks.emplace_back(std::move(task));
+			}
 		}
 
 		leo::coroutine::SyncWait(leo::coroutine::WhenAllReady(std::move(tasks)));
@@ -173,6 +182,60 @@ namespace platform::Render::Shader
 				 1, Class);
 		}
 	}
+
+	BuiltInShaderMap* Shader::GetBuiltInShaderMap()
+	{
+		return &GGlobalShaderMap;
+	}
 }
 
+RenderShader* Shader::ShaderMapContent::GetShader(size_t TypeNameHash, int32 PermutationId) const
+{
+	auto Hash = (uint16)CityHash128to64({ TypeNameHash,(uint64)PermutationId });
 
+	auto range = ShaderHash.equal_range(Hash);
+	for (auto itr = range.first; itr != range.second; ++itr)
+	{
+		auto Index = itr->second;
+		if (ShaderTypes[Index] == TypeNameHash && ShaderPermutations[Index] == PermutationId)
+		{
+			return Shaders[Index];
+		}
+	}
+	return nullptr;
+}
+
+RenderShader* Shader::ShaderMapContent::FindOrAddShader(size_t TypeNameHash, int32 PermutationId, RenderShader* Shader)
+{
+	auto Shader = GetShader(TypeNameHash, PermutationId);
+
+	if (Shader != nullptr)
+		return Shader;
+
+	auto Hash = (uint16)CityHash128to64({ TypeNameHash,(uint64)PermutationId });
+
+	const int32 Index = Shaders.size();
+
+	ShaderHash.emplace(Hash, Index);
+	Shaders.emplace_back(Shader);
+	ShaderTypes.emplace_back(TypeNameHash);
+	ShaderPermutations.emplace_back(PermutationId);
+}
+
+void Shader::ShaderMapContent::Clear()
+{
+	for (auto Shader : Shaders)
+	{
+		delete Shader;
+	}
+
+	Shaders.clear();
+	ShaderTypes.clear();
+	ShaderPermutations.clear();
+	ShaderHash.clear();
+}
+
+uint32 Shader::ShaderMapContent::GetNumShaders() const
+{
+	return Shaders.size();
+}

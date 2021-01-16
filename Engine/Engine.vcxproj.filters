@@ -320,6 +320,9 @@
     <ClCompile Include="Render\DrawEvent.cpp">
       <Filter>Render\Core</Filter>
     </ClCompile>
+    <ClCompile Include="Render\BuiltInShader.cpp">
+      <Filter>Render\Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Context.h">
