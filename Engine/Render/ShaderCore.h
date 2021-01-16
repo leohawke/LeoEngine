@@ -14,6 +14,7 @@ namespace platform::Render {
 	{
 		using leo::uint16;
 		using leo::uint32;
+		using leo::int32;
 
 		struct ShaderCodeResourceCounts
 		{
@@ -178,6 +179,11 @@ namespace platform::Render {
 
 		private:
 			std::unordered_map<std::string, ParameterAllocation> ParameterMap;
+		};
+
+		struct FShaderCompilerEnvironment
+		{
+
 		};
 	}
 }

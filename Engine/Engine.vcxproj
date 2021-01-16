@@ -269,6 +269,7 @@
     <ClInclude Include="Render\ITexture.hpp" />
     <ClInclude Include="Render\PipleState.h" />
     <ClInclude Include="Render\InputLayout.hpp" />
+    <ClInclude Include="Render\ShaderPermutation.h" />
     <ClInclude Include="Render\ShaderTextureTraits.hpp" />
     <ClInclude Include="Render\ViewPort.h" />
     <CopyFileToFolders Include="Shaders\SSD\SSDDefinitions.h" />

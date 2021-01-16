@@ -777,6 +777,9 @@
     <ClInclude Include="Shaders\Random.h">
       <Filter>Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="Render\ShaderPermutation.h">
+      <Filter>Render\Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
