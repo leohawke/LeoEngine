@@ -294,6 +294,87 @@ FSSDSignalSample TransformSignalSampleForAccumulation(
 	return Sample;
 }
 
+float2 ComputeRefBufferUV(FSSDKernelConfig KernelConfig)
+{
+	if (KernelConfig.bPreviousFrameMetadata)
+	{
+		// Impossible to compute from BufferUV because it's in the previous frame basis.
+		return KernelConfig.RefBufferUV;
+	}
+	else if (KernelConfig.SampleSet == SAMPLE_SET_HEXAWEB)
+	{
+		// Impossible to compute from BufferUV because of random offset certainely needed using this..
+		return KernelConfig.RefBufferUV;
+	}
+	else if (KernelConfig.SampleSet == SAMPLE_SET_STACKOWIAK_4_SETS)
+	{
+		uint SampleTrackId = KernelConfig.SampleTrackId;
+
+#if CONFIG_VGPR_FREE_SAMPLE_TRACK_ID
+		SampleTrackId = GetSampleTrackIdFromLaneIndex();
+#endif
+
+		// Matches first line of kStackowiakSampleSet0
+		// TODO(Denoiser): could be optimised further by just setting sign bit on 0.5.
+		float2 SampleOffset = float2(
+			SampleTrackId & 0x1 ? 0.5 : -0.5,
+			SampleTrackId & 0x2 ? 0.5 : -0.5);
+
+		return KernelConfig.BufferUV + SampleOffset * KernelConfig.BufferSizeAndInvSize.zw;
+	}
+
+	return KernelConfig.BufferUV;
+}
+
+FSSDSampleSceneInfos UncompressRefSceneMetadata(FSSDKernelConfig KernelConfig)
+{
+	// Find out the buffer UV of the reference pixel.
+	float2 RefBufferUV = ComputeRefBufferUV(KernelConfig);
+
+	// Uncompress the reference scene metadata to keep a low VGPR pressure.
+	return UncompressSampleSceneInfo(
+		KernelConfig.RefSceneMetadataLayout, /* bIsPrevFrame = */ false,
+		DenoiserBufferUVToScreenPosition(RefBufferUV),
+		KernelConfig.CompressedRefSceneMetadata);
+}
+
+void StartAccumulatingCluster(
+	FSSDKernelConfig KernelConfig,
+	inout FSSDSignalAccumulatorArray UncompressedAccumulators,
+	inout FSSDCompressedSignalAccumulatorArray CompressedAccumulators,
+	FSSDSampleClusterInfo ClusterInfo)
+{
+	FSSDSampleSceneInfos RefSceneMetadata = UncompressRefSceneMetadata(KernelConfig);
+
+#if CONFIG_ACCUMULATOR_VGPR_COMPRESSION != ACCUMULATOR_COMPRESSION_DISABLED
+	FSSDSignalAccumulatorArray Accumulators = UncompressAccumulatorArray(CompressedAccumulators, CONFIG_ACCUMULATOR_VGPR_COMPRESSION);
+#endif
+
+	[unrool(SIGNAL_ARRAY_SIZE)]
+		for (uint SignalMultiplexId = 0; SignalMultiplexId < SIGNAL_ARRAY_SIZE; SignalMultiplexId++)
+		{
+#if CONFIG_ACCUMULATOR_VGPR_COMPRESSION == ACCUMULATOR_COMPRESSION_DISABLED
+			{
+				StartAccumulatingCluster(
+					RefSceneMetadata,
+					/* inout */ UncompressedAccumulators.Array[SignalMultiplexId],
+					ClusterInfo);
+			}
+#else
+			{
+				StartAccumulatingCluster(
+					RefSceneMetadata,
+					/* inout */ Accumulators.Array[SignalMultiplexId],
+					ClusterInfo);
+			}
+#endif
+		}
+
+#if CONFIG_ACCUMULATOR_VGPR_COMPRESSION != ACCUMULATOR_COMPRESSION_DISABLED
+	CompressedAccumulators = CompressAccumulatorArray(Accumulators, CONFIG_ACCUMULATOR_VGPR_COMPRESSION);
+#endif
+}
+
 //------------------------------------------------------- STACKOWIAK 2018
 
 #if COMPILE_STACKOWIAK_KERNEL

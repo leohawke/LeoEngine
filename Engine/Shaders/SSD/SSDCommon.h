@@ -14,6 +14,20 @@ float4 BufferUVToScreenPosition;
 float2 BufferUVToOutputPixelPosition;
 uint StateFrameIndexMod8;
 
+//SceneTextureParameters
+Texture2D SceneDepthBuffer;
+SamplerState SceneDepthBufferSampler;
+
+float WorldDepthToPixelWorldRadius;
+
+
+/** Returns the radius of a pixel in world space. */
+float ComputeWorldBluringRadiusCausedByPixelSize(FSSDSampleSceneInfos SceneMetadata)
+{
+	// Should be multiplied 0.5* for the diameter to radius, and by 2.0 because GetTanHalfFieldOfView() cover only half of the pixels.
+	return WorldDepthToPixelWorldRadius * GetWorldDepth(SceneMetadata);
+}
+
 uint2 BufferUVToBufferPixelCoord(float2 SceneBufferUV)
 {
 	return uint2(SceneBufferUV * BufferUVToOutputPixelPosition);
@@ -38,5 +52,35 @@ float SafeRcp(float x, float d = 0.0)
 {
 	return x > 0.0 ? rcp(x) : d;
 }
+
+FSSDCompressedSceneInfos SampleCompressedSceneMetadata(
+	const bool bPrevFrame,
+	float2 BufferUV, uint2 PixelCoord)
+#if CONFIG_METADATA_BUFFER_LAYOUT == METADATA_BUFFER_LAYOUT_DISABLED
+{
+	FSSDCompressedSceneInfos CompressedMetadata = CreateCompressedSceneInfos();
+
+	if (bPrevFrame)
+	{
+	}
+	else
+	{
+		CompressedMetadata.VGPR[0] = asuint(SceneDepthBuffer.SampleLevel(SceneDepthBufferSampler, BufferUV, 0));
+	}
+
+	return CompressedMetadata;
+}
+#else
+{
+	FSSDCompressedSceneInfos CompressedMetadata = CreateCompressedSceneInfos();
+
+	Texture2D<uint> CompressedMetadata0 = bPrevFrame ? PrevCompressedMetadata_0 : CompressedMetadata_0;
+
+	int3 Coord = int3(PixelCoord, /* MipLevel = */ 0);
+	CompressedMetadata.VGPR[0] = CompressedMetadata0.Load(Coord);
+
+	return CompressedMetadata;
+}
+#endif
 
 #endif

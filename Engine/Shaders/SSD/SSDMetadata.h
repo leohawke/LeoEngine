@@ -6,7 +6,7 @@
 struct FSSDCompressedSceneInfos
 {
 	/** Raw compressed buffer, kept fully compressed to have minimal VGPR footprint. */
-	//uint VGPR[MAX_COMPRESSED_METADATA_VGPRS];
+	uint VGPR[MAX_COMPRESSED_METADATA_VGPRS];
 };
 
 FSSDCompressedSceneInfos CreateCompressedSceneInfos()
@@ -19,13 +19,13 @@ FSSDCompressedSceneInfos CreateCompressedSceneInfos()
 struct FSSDSampleSceneInfos
 {
 	/** Raw screen position of the sample. */
-	//float2 ScreenPosition;
+	float2 ScreenPosition;
 
 	/** The raw device Z. */
 	//float DeviceZ;
 
 	/** Raw pixel depth in world space. */
-	//float WorldDepth;
+	float WorldDepth;
 
 	/** Roughness of the pixel. */
 	//float Roughness;
@@ -43,7 +43,7 @@ struct FSSDSampleSceneInfos
 FSSDSampleSceneInfos CreateSampleSceneInfos()
 {
 	FSSDSampleSceneInfos Infos;
-	//Infos.WorldDepth = 0;
+	Infos.WorldDepth = 0;
 	//Infos.ScreenPosition = 0;
 	//Infos.Roughness = 0;
 	//Infos.WorldNormal = 0;
@@ -59,6 +59,17 @@ FSSDSampleSceneInfos UncompressSampleSceneInfo(
 {
 	FSSDSampleSceneInfos Infos = CreateSampleSceneInfos();
 
+	Infos.ScreenPosition = ScreenPosition;
+
+	if (CompressedLayout == METADATA_BUFFER_LAYOUT_DISABLED)
+	{
+		Infos.WorldDepth = asfloat(CompressedInfos.VGPR[0]);
+	}
+	else
+	{
+		// ERROR
+	}
+
 	return Infos;
 }
 
@@ -67,7 +78,22 @@ FSSDCompressedSceneInfos CompressSampleSceneInfo(
 	FSSDSampleSceneInfos Infos)
 {
 	FSSDCompressedSceneInfos CompressedInfos = CreateCompressedSceneInfos();
+
+	if (CompressedLayout == METADATA_BUFFER_LAYOUT_DISABLED)
+	{
+		CompressedInfos.VGPR[0] = asuint(Infos.WorldDepth);
+	}
+	else
+	{
+		// ERROR
+	}
+
 	return CompressedInfos;
+}
+
+float GetWorldDepth(FSSDSampleSceneInfos SceneMetadata)
+{
+	return SceneMetadata.WorldDepth;
 }
 
 #endif

@@ -193,7 +193,9 @@ void MainCS(
 	FSSDCompressedSceneInfos CompressedRefSceneMetadata;
 	FSSDSampleSceneInfos RefSceneMetadata;
 	{
-		CompressedRefSceneMetadata = CreateCompressedSceneInfos();
+		CompressedRefSceneMetadata = SampleCompressedSceneMetadata(
+			/* bPrevFrame = */ false,
+			SceneBufferUV, BufferUVToBufferPixelCoord(SceneBufferUV));
 
 		float2 ScreenPosition = DenoiserBufferUVToScreenPosition(SceneBufferUV);
 
