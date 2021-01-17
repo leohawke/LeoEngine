@@ -135,10 +135,14 @@
 		(address_u clamp)
 		(address_v clamp)
     )
-	(float4 (arraysize 1) InputBufferUVMinMax)
     (float HitDistanceToWorldBluringRadius)
 (shader
 "
+uint MaxSampleCount;
+uint UpscaleFactor;
+float HarmonicPeriode;
+float4 InputBufferUVMinMax[CONFIG_SIGNAL_BATCH_SIZE];
+
 FSSDTexture2D SignalInput_Textures_0;
 #if CONFIG_INPUT_TEXTURE_COUNT > 1
 FSSDTexture2D SignalInput_Textures_1;
