@@ -265,4 +265,29 @@ uint ComputeSignalBatchIdFromSignalMultiplexId(FSSDKernelConfig KernelConfig, co
 	return SignalMultiplexId / KernelConfig.MultiplexedSignalsPerSignalDomain;
 }
 
+FSSDSignalSample TransformSignalSampleForAccumulation(
+	FSSDKernelConfig KernelConfig,
+	uint MultiplexId,
+	FSSDSampleSceneInfos SampleSceneMetadata,
+	FSSDSignalSample Sample,
+	uint2 SamplePixelCoord)
+{
+	// Transform the color space.
+	// TODO(Denoiser): could pass down information that this sample may be normalized.
+	Sample = TransformSignal(
+		Sample,
+		/* SrcBasis  = */ KernelConfig.BufferColorSpace[MultiplexId],
+		/* DestBasis = */ KernelConfig.AccumulatorColorSpace[MultiplexId]);
+
+	// Compute the spherical harmonic of the sample.
+#if COMPILE_SIGNAL_COLOR_SH && COMPILE_SIGNAL_COLOR
+	if (KernelConfig.bComputeSampleColorSH)
+	{
+		Sample.ColorSH = ComputeSampleColorSH(SampleSceneMetadata, Sample, SamplePixelCoord);
+	}
+#endif
+
+	return Sample;
+}
+
 #endif

@@ -121,5 +121,17 @@ FSSDSignalAccumulator CreateSignalAccumulator()
 	return Accumulator;
 }
 
+struct FSSDSampleAccumulationInfos
+{
+	// Sample to accumulate.
+	FSSDSignalSample Sample;
+
+	// Weight of the sample in the kernel.
+	float FinalWeight;
+
+	// 1 / SignalFrequency
+	float InvFrequency;
+};
+
 
 #endif
