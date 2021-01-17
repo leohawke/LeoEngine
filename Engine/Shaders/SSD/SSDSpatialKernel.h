@@ -338,6 +338,234 @@ FSSDSampleSceneInfos UncompressRefSceneMetadata(FSSDKernelConfig KernelConfig)
 		KernelConfig.CompressedRefSceneMetadata);
 }
 
+float3 ComputeVectorFromNeighborToRef(
+	FSSDKernelConfig KernelConfig,
+	FSSDSampleSceneInfos RefSceneMetadata,
+	FSSDSampleSceneInfos NeighborSceneMetadata)
+{
+	float RefWorldDepth = GetWorldDepth(RefSceneMetadata);
+	float NeighborWorldDepth = GetWorldDepth(NeighborSceneMetadata);
+
+	if (KernelConfig.NeighborToRefComputation == NEIGHBOR_TO_REF_LOWEST_VGPR_PRESSURE)
+	{
+		// Recompute the the screen position of the reference, from the most minimal VGPR footprint.
+		float2 RefScreenPos = RefSceneMetadata.ScreenPosition;
+		float3 RefClipPosition = float3(RefScreenPos * (ViewToClip[3][3] < 1.0f ? RefWorldDepth : 1.0f), RefWorldDepth);
+
+		float2 NeighborScreenPos = NeighborSceneMetadata.ScreenPosition;
+		float3 NeighborClipPosition = float3(NeighborScreenPos * (ViewToClip[3][3] < 1.0f ? NeighborWorldDepth : 1.0f), NeighborWorldDepth);
+
+#if CONFIG_USE_VIEW_SPACE
+		float3 NeighborToRefVector = mul(float4(RefClipPosition - NeighborClipPosition, 0), GetScreenToViewDistanceMatrix()).xyz;
+#else
+		float3 NeighborToRefVector = mul(float4(RefClipPosition - NeighborClipPosition, 0),ScreenToTranslatedWorld).xyz;
+#endif
+
+		return NeighborToRefVector;
+	}
+	else // if (KernelConfig.NeighborToRefComputation == NEIGHBOR_TO_REF_CACHE_WORLD_POSITION)
+	{
+		//error
+		return 0;
+	}
+}
+
+
+/** Accumulate multiplexed samples and their metadata to an accumulator. */
+void AccumulateSampledMultiplexedSignals(
+	FSSDKernelConfig KernelConfig,
+	inout FSSDSignalAccumulatorArray UncompressedAccumulators,
+	inout FSSDCompressedSignalAccumulatorArray CompressedAccumulators,
+	FSSDSampleSceneInfos RefSceneMetadata,
+	float2 SampleBufferUV,
+	FSSDSampleSceneInfos SampleSceneMetadata,
+	FSSDSignalArray MultiplexedSamples,
+	float KernelSampleWeight,
+	const bool bForceSample,
+	bool bIsOutsideFrustum)
+{
+	// Compute the bluring radius of the output pixel itself.
+	float RefPixelWorldBluringRadius = ComputeWorldBluringRadiusCausedByPixelSize(RefSceneMetadata);
+
+#if CONFIG_ACCUMULATOR_VGPR_COMPRESSION != ACCUMULATOR_COMPRESSION_DISABLED
+	FSSDSignalAccumulatorArray Accumulators = UncompressAccumulatorArray(CompressedAccumulators, CONFIG_ACCUMULATOR_VGPR_COMPRESSION);
+#endif
+
+	// Compute the vector from neighbor to reference in the most optimal way.
+	float3 NeighborToRefVector = ComputeVectorFromNeighborToRef(
+		KernelConfig,
+		RefSceneMetadata,
+		SampleSceneMetadata);
+
+	[unroll(SIGNAL_ARRAY_SIZE)]
+		for (uint SignalMultiplexId = 0; SignalMultiplexId < SIGNAL_ARRAY_SIZE; SignalMultiplexId++)
+		{
+			// Compute at compile time the id of the signal being processed.
+			const uint BatchedSignalId = ComputeSignalBatchIdFromSignalMultiplexId(KernelConfig, SignalMultiplexId);
+
+			// TODO(Denoiser): direction of the ray should be cached by injest or output by RGS, otherwise ends up with VGPR pressure because of SampleBufferUV.
+			uint2 NeighborPixelCoord = floor(SampleBufferUV * KernelConfig.BufferSizeAndInvSize.xy);
+
+			// Fetch and pre process the sample for accumulation.
+			FSSDSignalSample Sample = MultiplexedSamples.Array[SignalMultiplexId];
+			Sample = TransformSignalSampleForAccumulation(KernelConfig, SignalMultiplexId, SampleSceneMetadata, Sample, NeighborPixelCoord);
+
+			// Compute the bluring radius of pixel itself.
+			float SamplePixelWorldBluringRadius = ComputeWorldBluringRadiusCausedByPixelSize(SampleSceneMetadata);
+
+			// Compute the bluring radius of the signal from ray hit distance and signal domain knowledge.
+			float SignalConvolutionBluringRadius = GetSignalWorldBluringRadius(Sample, SampleSceneMetadata, BatchedSignalId);
+
+			// But the signal's bluring radius might already be pre computed.
+			if (KernelConfig.BilateralDistanceComputation == SIGNAL_WORLD_FREQUENCY_PRECOMPUTED_BLURING_RADIUS)
+			{
+				// TODO(Denoiser): this is ineficient, could fetch the normalised WorldBluringRadius instead of SafeRcp().
+				SignalConvolutionBluringRadius = Sample.WorldBluringRadius * SafeRcp(Sample.SampleCount);
+			}
+
+			// Compute the final world distance to use for bilateral rejection.
+			float FinalWorldBluringDistance = -1;
+			if (KernelConfig.BilateralDistanceComputation == SIGNAL_WORLD_FREQUENCY_REF_METADATA_ONLY)
+			{
+				FinalWorldBluringDistance = AmendWorldBluringRadiusCausedByPixelSize(
+					RefPixelWorldBluringRadius);
+			}
+			else if (KernelConfig.BilateralDistanceComputation == SIGNAL_WORLD_FREQUENCY_SAMPLE_METADATA_ONLY)
+			{
+				FinalWorldBluringDistance = AmendWorldBluringRadiusCausedByPixelSize(
+					SamplePixelWorldBluringRadius);
+			}
+			else if (KernelConfig.BilateralDistanceComputation == SIGNAL_WORLD_FREQUENCY_MIN_METADATA)
+			{
+				FinalWorldBluringDistance = AmendWorldBluringRadiusCausedByPixelSize(
+					min(SamplePixelWorldBluringRadius, RefPixelWorldBluringRadius));
+			}
+			else if (
+				KernelConfig.BilateralDistanceComputation == SIGNAL_WORLD_FREQUENCY_HIT_DISTANCE ||
+				KernelConfig.BilateralDistanceComputation == SIGNAL_WORLD_FREQUENCY_PRECOMPUTED_BLURING_RADIUS)
+			{
+				FinalWorldBluringDistance = SignalConvolutionBluringRadius;
+			}
+			else if (KernelConfig.BilateralDistanceComputation == SIGNAL_WORLD_FREQUENCY_HARMONIC)
+			{
+				FinalWorldBluringDistance = AmendWorldBluringRadiusCausedByPixelSize(
+					RefPixelWorldBluringRadius) * KernelConfig.HarmonicPeriode;
+			}
+
+			FinalWorldBluringDistance *= KernelConfig.WorldBluringDistanceMultiplier;
+
+			if (KernelConfig.bMaxWithRefBilateralDistance)
+			{
+				FinalWorldBluringDistance = min(FinalWorldBluringDistance, KernelConfig.RefBilateralDistance[SignalMultiplexId]);
+			}
+
+			// Compute the weight to be applied to do bilateral rejection.
+			float BilateralWeight = ComputeBilateralWeight(
+				KernelConfig.BilateralSettings[SignalMultiplexId],
+				FinalWorldBluringDistance,
+				RefSceneMetadata,
+				SampleSceneMetadata,
+				NeighborToRefVector);
+
+			float RatioEstimatorWeight = GetRatioEstimatorWeight(
+				RefSceneMetadata, SampleSceneMetadata, Sample, NeighborPixelCoord);
+
+			FSSDSampleAccumulationInfos SampleInfos;
+			SampleInfos.Sample = Sample;
+			SampleInfos.FinalWeight = KernelSampleWeight * BilateralWeight * RatioEstimatorWeight;
+			SampleInfos.InvFrequency = SignalConvolutionBluringRadius;
+
+			if (bForceSample || KernelConfig.bForceAllAccumulation)
+			{
+				SampleInfos.FinalWeight = 1;
+			}
+
+			// TODO(Denoiser): bIsOutsideFrustum could afect number of samples for DRB.
+			[flatten]
+				if (SampleInfos.Sample.SampleCount != 0 && !bIsOutsideFrustum)
+				{
+#if CONFIG_ACCUMULATOR_VGPR_COMPRESSION == ACCUMULATOR_COMPRESSION_DISABLED
+					{
+						AccumulateSample(
+							/* inout */ UncompressedAccumulators.Array[SignalMultiplexId],
+							SampleInfos);
+					}
+#else
+					{
+						AccumulateSample(
+							/* inout */ Accumulators.Array[SignalMultiplexId],
+							SampleInfos);
+					}
+#endif
+				}
+		} // for (uint SignalMultiplexId = 0; SignalMultiplexId < SIGNAL_ARRAY_SIZE; SignalMultiplexId++)
+
+#if CONFIG_ACCUMULATOR_VGPR_COMPRESSION != ACCUMULATOR_COMPRESSION_DISABLED
+	CompressedAccumulators = CompressAccumulatorArray(Accumulators, CONFIG_ACCUMULATOR_VGPR_COMPRESSION);
+#endif
+} // AccumulateSampledMultiplexedSignals().
+
+/** Sample and accumulate to accumulatore array.
+ *
+ * Caution: you probably want to explicitly do this manually to help the shader compiler to do lattency hiding.
+ */
+void SampleAndAccumulateMultiplexedSignals(
+	FSSDKernelConfig KernelConfig,
+	FSSDTexture2D SignalBuffer0,
+	FSSDTexture2D SignalBuffer1,
+	FSSDTexture2D SignalBuffer2,
+	FSSDTexture2D SignalBuffer3,
+	inout FSSDSignalAccumulatorArray UncompressedAccumulators,
+	inout FSSDCompressedSignalAccumulatorArray CompressedAccumulators,
+	float2 SampleBufferUV,
+	float MipLevel,
+	float KernelSampleWeight,
+	const bool bForceSample)
+{
+	// Stores in SGPR whether this sample is outside the viewport, to avoid VGPR pressure to keep SampleBufferUV after texture fetches.
+	bool bIsOutsideFrustum = IsOutsideViewport(KernelConfig, SampleBufferUV);
+
+	FSSDCompressedSceneInfos CompressedSampleSceneMetadata;
+	FSSDCompressedMultiplexedSample CompressedMultiplexedSamples;
+
+	// Force all the signal texture fetch and metadata to overlap to minimize serial texture fetches.
+	{
+		SampleMultiplexedSignals(
+			KernelConfig,
+			SignalBuffer0,
+			SignalBuffer1,
+			SignalBuffer2,
+			SignalBuffer3,
+			SampleBufferUV,
+			MipLevel,
+			/* out */ CompressedSampleSceneMetadata,
+			/* out */ CompressedMultiplexedSamples);
+	}
+
+		// Accumulate the samples, giving full freedom for shader compiler scheduler to put instructions in most optimal way.
+	{
+		FSSDSignalArray MultiplexedSamples = UncompressMultiplexedSignals(
+			KernelConfig, SampleBufferUV, CompressedMultiplexedSamples);
+
+		FSSDSampleSceneInfos RefSceneMetadata = UncompressRefSceneMetadata(KernelConfig);
+
+		FSSDSampleSceneInfos SampleSceneMetadata = UncompressSampleSceneMetadata(
+			KernelConfig, SampleBufferUV, CompressedSampleSceneMetadata);
+
+		AccumulateSampledMultiplexedSignals(
+			KernelConfig,
+			/* inout */ UncompressedAccumulators,
+			/* inout */ CompressedAccumulators,
+			RefSceneMetadata,
+			SampleBufferUV,
+			SampleSceneMetadata,
+			MultiplexedSamples,
+			KernelSampleWeight,
+			bForceSample,
+			bIsOutsideFrustum);
+	}
+} // SampleAndAccumulateMultiplexedSignals()
+
 void StartAccumulatingCluster(
 	FSSDKernelConfig KernelConfig,
 	inout FSSDSignalAccumulatorArray UncompressedAccumulators,

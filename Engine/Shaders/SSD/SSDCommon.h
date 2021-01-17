@@ -5,6 +5,20 @@
 #include "SSD/SSDDefinitions.h"
 #include "SSD/SSDMetadata.h"
 
+#if CONFIG_SIGNAL_PROCESSING == SIGNAL_PROCESSING_AO || CONFIG_SIGNAL_PROCESSING == SIGNAL_PROCESSING_SHADOW_VISIBILITY_MASK
+// A gray scale valued encoded into a 16bit float only have 10bits mantissa.
+#define TARGETED_SAMPLE_COUNT 1024
+#endif
+
+#ifndef CONFIG_METADATA_BUFFER_LAYOUT
+#define CONFIG_METADATA_BUFFER_LAYOUT METADATA_BUFFER_LAYOUT_DISABLED
+#endif
+
+#ifndef CONFIG_USE_VIEW_SPACE
+#define CONFIG_USE_VIEW_SPACE 0
+#endif
+
+
 float2 ViewportMin;
 float2 ViewportMax;
 float4 ThreadIdToBufferUV;
@@ -13,12 +27,16 @@ float4 BufferSizeAndInvSize;
 float4 BufferUVToScreenPosition;
 float2 BufferUVToOutputPixelPosition;
 uint StateFrameIndexMod8;
+float4x4 ScreenToTranslatedWorld;
+float4x4 ViewToClip;
 
 //SceneTextureParameters
 Texture2D SceneDepthBuffer;
 SamplerState SceneDepthBufferSampler;
 
 float WorldDepthToPixelWorldRadius;
+
+
 
 
 /** Returns the radius of a pixel in world space. */
@@ -39,14 +57,6 @@ float2 DenoiserBufferUVToScreenPosition(float2 SceneBufferUV)
 }
 
 
-#if CONFIG_SIGNAL_PROCESSING == SIGNAL_PROCESSING_AO || CONFIG_SIGNAL_PROCESSING == SIGNAL_PROCESSING_SHADOW_VISIBILITY_MASK
-// A gray scale valued encoded into a 16bit float only have 10bits mantissa.
-#define TARGETED_SAMPLE_COUNT 1024
-#endif
-
-#ifndef CONFIG_METADATA_BUFFER_LAYOUT
-#define CONFIG_METADATA_BUFFER_LAYOUT METADATA_BUFFER_LAYOUT_DISABLED
-#endif
 
 float SafeRcp(float x, float d = 0.0)
 {
