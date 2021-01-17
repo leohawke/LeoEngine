@@ -246,4 +246,17 @@ FSSDKernelConfig CreateKernelConfig()
 	return KernelConfig;
 }
 
+void SetBilateralPreset(uint BilateralPresetId, inout FSSDKernelConfig KernelConfig)
+{
+	if (BilateralPresetId == BILATERAL_PRESET_MONOCHROMATIC_PENUMBRA)
+	{
+		[unroll(SIGNAL_ARRAY_SIZE)]
+			for (uint MultiplexId = 0; MultiplexId < SIGNAL_ARRAY_SIZE; MultiplexId++)
+			{
+				// Shadow masks are normal invarient, so only reject based on position.
+				KernelConfig.BilateralSettings[MultiplexId] = BILATERAL_POSITION_BASED(5);
+			}
+	}
+}
+
 #endif
