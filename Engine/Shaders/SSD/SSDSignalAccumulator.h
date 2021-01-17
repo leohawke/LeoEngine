@@ -199,6 +199,36 @@ void AccumulateSampleInDomainBoundaries(inout FSSDSignalAccumulator Accumulator,
 
 #if COMPILE_DRB_ACCUMULATOR
 
+void StartAccumulatingClusterInDRB(
+	FSSDSampleSceneInfos RefSceneMetadata,
+	inout FSSDSignalAccumulator Accumulator,
+	FSSDSampleClusterInfo ClusterInfo)
+{
+	const float ErrorCorrection = 1;
+
+	// Compute the bluring radius of the output pixel itself.
+	float RefPixelWorldBluringRadius = AmendWorldBluringRadiusCausedByPixelSize(ComputeWorldBluringRadiusCausedByPixelSize(RefSceneMetadata));
+
+	Accumulator.BorderingRadius = RefPixelWorldBluringRadius * (ClusterInfo.OutterBoundaryRadius + ErrorCorrection);
+
+	// TODO(Denoiser): could this be constant.
+	Accumulator.HighestInvFrequency = Accumulator.BorderingRadius * 2;
+
+	// Reset current bucket.
+	{
+		Accumulator.Current = CreateSignalSampleFromScalarValue(0.0);
+		Accumulator.CurrentInvFrequency = 0.0;
+		Accumulator.CurrentTranslucency = 0.0;
+	}
+
+#if CONFIG_SGPR_HINT_OPTIMIZATION && 0
+	{
+		Accumulator.BorderingRadius = ToScalarMemory(Accumulator.BorderingRadius);
+		Accumulator.HighestInvFrequency = ToScalarMemory(Accumulator.HighestInvFrequency);
+	}
+#endif
+}
+
 void AccumulateSampleInDRB(inout FSSDSignalAccumulator Accumulator, FSSDSampleAccumulationInfos A)
 {
 	float ClampedInvFrequency = min(A.InvFrequency, Accumulator.HighestInvFrequency);
@@ -290,6 +320,17 @@ void UncompressSignalAccumulator(inout FSSDSignalAccumulator Accumulator)
 
 #if COMPILE_MOMENT2_ACCUMULATOR
 	UncompressSignalSample(Accumulator.CompressedMoment2, CONFIG_SIGNAL_VGPR_COMPRESSION, /* inout */ Accumulator.Moment2);
+#endif
+}
+
+/** Start accumulating a cluster of samples. */
+void StartAccumulatingCluster(
+	FSSDSampleSceneInfos RefSceneMetadata,
+	inout FSSDSignalAccumulator Accumulator,
+	FSSDSampleClusterInfo ClusterInfo)
+{
+#if COMPILE_DRB_ACCUMULATOR
+	StartAccumulatingClusterInDRB(RefSceneMetadata, /* inout */ Accumulator, ClusterInfo);
 #endif
 }
 

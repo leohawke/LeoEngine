@@ -421,6 +421,358 @@ static const float2 kStackowiakSampleSet1[56 * 4] =
 static const uint kStackowiakSampleSetCount = 4;
 static const uint kStackowiakSampleCountPerSet = 56;
 
+void ConvolveStackowiakKernel(
+	FSSDKernelConfig KernelConfig,
+	FSSDTexture2D SignalBuffer0,
+	FSSDTexture2D SignalBuffer1,
+	FSSDTexture2D SignalBuffer2,
+	FSSDTexture2D SignalBuffer3,
+	inout FSSDSignalAccumulatorArray UncompressedAccumulators,
+	inout FSSDCompressedSignalAccumulatorArray CompressedAccumulators)
+{
+	// Number of batch size done at same time, to improve lattency hidding.
+	const uint kSamplingBatchSize = 2;
+
+	if (KernelConfig.bDescOrder)
+	{
+		// (SALU) Number of batch of samples to perform.
+		const uint BatchCountCount = (KernelConfig.SampleCount + (kSamplingBatchSize - 1)) / kSamplingBatchSize;
+
+		// (SALU) Compute a final number of sample quantize the sampling batch size.
+		const uint SampleCount = BatchCountCount * kSamplingBatchSize;
+
+		// Compile time number of samples between rings.
+		const uint StocasticSamplesPerCluster = 8 / kStackowiakSampleSetCount;
+
+		// Compute the first index at witch digestion must happen.
+		uint CurrentRingId = 0;
+		uint NextClusterBoundary = 0;
+
+		if (StocasticSamplesPerCluster == 2)
+		{
+			uint un = SampleCount - 1;
+
+			CurrentRingId = (uint(floor(sqrt(4 * un - 3))) + 1) / 2;
+
+			NextClusterBoundary = 1 + CurrentRingId * (CurrentRingId - 1);
+		}
+		else
+		{
+			// TODO(Denoiser)
+		}
+
+		FSSDSampleClusterInfo ClusterInfo;
+		ClusterInfo.OutterBoundaryRadius = (CurrentRingId + 1) * KernelConfig.KernelSpreadFactor;
+
+		StartAccumulatingCluster(
+			KernelConfig,
+			/* inout */ UncompressedAccumulators,
+			/* inout */ CompressedAccumulators,
+			ClusterInfo);
+
+		// Processes the samples in batches so that the compiler can do lattency hidding.
+		[loop]
+			for (uint BatchId = 0; BatchId < BatchCountCount; BatchId++)
+			{
+				[unrool(2)]
+					for (uint SampleBatchId = 0; SampleBatchId < 2; SampleBatchId++)
+					{
+						uint SampleId = (BatchCountCount - BatchId) * kSamplingBatchSize - 1 - SampleBatchId;
+
+						bool bIsKernelCenterSample = SampleId == 0 && (SampleBatchId == (kSamplingBatchSize - 1));
+
+						uint SampleTrackId = KernelConfig.SampleTrackId;
+#if CONFIG_VGPR_FREE_SAMPLE_TRACK_ID
+						SampleTrackId = GetSampleTrackIdFromLaneIndex();
+#endif
+
+						float2 SampleOffset = kStackowiakSampleSet0[kStackowiakSampleSetCount * SampleId + SampleTrackId];
+						if (KernelConfig.SampleSubSetId == 1)
+						{
+							SampleOffset = kStackowiakSampleSet1[kStackowiakSampleSetCount * SampleId + SampleTrackId];
+						}
+
+						float2 SampleBufferUV = KernelConfig.BufferUV + (SampleOffset * KernelConfig.KernelSpreadFactor) * KernelConfig.BufferSizeAndInvSize.zw;
+
+						float KernelWeight = 1;
+						SampleAndAccumulateMultiplexedSignals(
+							KernelConfig,
+							SignalBuffer0,
+							SignalBuffer1,
+							SignalBuffer2,
+							SignalBuffer3,
+							/* inout */ UncompressedAccumulators,
+							/* inout */ CompressedAccumulators,
+							SampleBufferUV,
+							/* MipLevel = */ 0.0,
+							/* KernelWeight = */ 1.0,
+							/* bForceSample = */ bIsKernelCenterSample && KernelConfig.bForceKernelCenterAccumulation);
+
+						// Change of cluster. Can only happens on odd SampleId, meaning even SampleBatchId.
+						[branch]
+							if (SampleId == NextClusterBoundary && (SampleBatchId % 2) == 0)
+							{
+								// Compute the number samples that have been accumulated for this sample.
+								uint SampleCountForCluster = min(CurrentRingId * StocasticSamplesPerCluster, SampleCount - SampleId);
+
+								// Digest all acumulators.
+								DijestAccumulatedClusterSamples(
+									/* inout */ UncompressedAccumulators,
+									/* inout */ CompressedAccumulators,
+									CurrentRingId, SampleCountForCluster);
+
+								BRANCH
+									if (!KernelConfig.bSampleKernelCenter && SampleId == 1)
+									{
+										break;
+									}
+
+								// Change cluster index and boundary.
+								CurrentRingId -= 1;
+								NextClusterBoundary -= CurrentRingId * StocasticSamplesPerCluster;
+
+								FSSDSampleClusterInfo ClusterInfo;
+								ClusterInfo.OutterBoundaryRadius = (CurrentRingId + 1) * KernelConfig.KernelSpreadFactor;
+
+								// Prepare the accumulators for new cluster.
+								StartAccumulatingCluster(
+									KernelConfig,
+									/* inout */ UncompressedAccumulators,
+									/* inout */ CompressedAccumulators,
+									ClusterInfo);
+							}
+					} // for (uint SampleBatchId = 0; SampleBatchId < kSamplingBatchSize; SampleBatchId++)
+			} // for (uint BatchId = 0; BatchId < BatchCountCount; BatchId++)
+
+			// NextClusterBoundary is not capable to reach 0, therefore need to manually digest the center sample.
+		if (KernelConfig.bSampleKernelCenter)
+		{
+			DijestAccumulatedClusterSamples(
+				/* inout */ UncompressedAccumulators,
+				/* inout */ CompressedAccumulators,
+				/* RingId = */ 0, /* SampleCount = */ 1);
+		}
+	}
+	else // if (!KernelConfig.bDescOrder)
+	{
+		if (KernelConfig.bSampleKernelCenter)
+		{
+			SampleAndAccumulateCenterSampleAsItsOwnCluster(
+				KernelConfig,
+				SignalBuffer0,
+				SignalBuffer1,
+				SignalBuffer2,
+				SignalBuffer3,
+				/* inout */ UncompressedAccumulators,
+				/* inout */ CompressedAccumulators);
+		}
+
+		// Accumulate second sample to lattency hide with the center sample.
+		{
+			uint SampleTrackId = KernelConfig.SampleTrackId;
+#if CONFIG_VGPR_FREE_SAMPLE_TRACK_ID
+			SampleTrackId = GetSampleTrackIdFromLaneIndex();
+#endif
+
+			uint SampleId = 1;
+
+			float2 SampleOffset = kStackowiakSampleSet0[kStackowiakSampleSetCount * SampleId + SampleTrackId];
+			if (KernelConfig.SampleSubSetId == 1)
+			{
+				SampleOffset = kStackowiakSampleSet1[kStackowiakSampleSetCount * SampleId + SampleTrackId];
+			}
+
+			float2 SampleBufferUV = KernelConfig.BufferUV + (SampleOffset * KernelConfig.KernelSpreadFactor) * KernelConfig.BufferSizeAndInvSize.zw;
+
+			SampleAndAccumulateMultiplexedSignals(
+				KernelConfig,
+				SignalBuffer0,
+				SignalBuffer1,
+				SignalBuffer2,
+				SignalBuffer3,
+				/* inout */ UncompressedAccumulators,
+				/* inout */ CompressedAccumulators,
+				SampleBufferUV,
+				/* MipLevel = */ 0.0,
+				/* KernelWeight = */ 1.0,
+				/* bForceSample = */ false);
+		}
+
+		// (SALU) Number of batch of samples to perform.
+		const uint BatchCountCount = (KernelConfig.SampleCount - 1) / kSamplingBatchSize;
+
+		// Processes the samples in batches so that the compiler can do lattency hidding.
+		// TODO(Denoiser): kSamplingBatchSize for lattency hidding
+		LOOP
+			for (uint BatchId = 0; BatchId < BatchCountCount; BatchId++)
+			{
+				float2 SampleBufferUV[2];
+
+				uint SampleTrackId = KernelConfig.SampleTrackId;
+#if CONFIG_VGPR_FREE_SAMPLE_TRACK_ID
+				SampleTrackId = GetSampleTrackIdFromLaneIndex();
+#endif
+
+				[unroll(2)]
+					for (uint SampleBatchId = 0; SampleBatchId < 2; SampleBatchId++)
+					{
+						uint SampleId = BatchId * kSamplingBatchSize + (SampleBatchId + kSamplingBatchSize);
+
+						float2 SampleOffset = kStackowiakSampleSet0[kStackowiakSampleSetCount * SampleId + SampleTrackId];
+						if (KernelConfig.SampleSubSetId == 1)
+						{
+							SampleOffset = kStackowiakSampleSet1[kStackowiakSampleSetCount * SampleId + SampleTrackId];
+						}
+
+						SampleBufferUV[SampleBatchId] = KernelConfig.BufferUV + (SampleOffset * KernelConfig.KernelSpreadFactor) * KernelConfig.BufferSizeAndInvSize.zw;
+					}
+
+				SampleAndAccumulateMultiplexedSignalsPair(
+					KernelConfig,
+					SignalBuffer0,
+					SignalBuffer1,
+					SignalBuffer2,
+					SignalBuffer3,
+					/* inout */ UncompressedAccumulators,
+					/* inout */ CompressedAccumulators,
+					SampleBufferUV,
+					/* KernelWeight = */ 1.0);
+			} // for (uint BatchId = 0; BatchId < BatchCountCount; BatchId++)
+	} // if (!KernelConfig.bDescOrder)
+} // ConvolveStackowiakKernel()
+
 #endif // COMPILE_STACKOWIAK_KERNEL
+
+void AccumulateKernel(
+	FSSDKernelConfig KernelConfig,
+	FSSDTexture2D SignalBuffer0,
+	FSSDTexture2D SignalBuffer1,
+	FSSDTexture2D SignalBuffer2,
+	FSSDTexture2D SignalBuffer3,
+	inout FSSDSignalAccumulatorArray UncompressedAccumulators,
+	inout FSSDCompressedSignalAccumulatorArray CompressedAccumulators)
+{
+	if (KernelConfig.SampleSet == 0xDEADDEAD)
+	{
+	}
+#if COMPILE_BOX_KERNEL
+	else if (KernelConfig.SampleSet == SAMPLE_SET_1X1)
+	{
+		if (KernelConfig.bSampleKernelCenter)
+		{
+			SampleAndAccumulateCenterSampleAsItsOwnCluster(
+				KernelConfig,
+				SignalBuffer0,
+				SignalBuffer1,
+				SignalBuffer2,
+				SignalBuffer3,
+				/* inout */ UncompressedAccumulators,
+				/* inout */ CompressedAccumulators);
+		}
+	}
+	else if (KernelConfig.SampleSet == SAMPLE_SET_2X2_BILINEAR)
+	{
+		AccumulateBilinear(
+			KernelConfig,
+			SignalBuffer0,
+			SignalBuffer1,
+			SignalBuffer2,
+			SignalBuffer3,
+			/* inout */ UncompressedAccumulators,
+			/* inout */ CompressedAccumulators);
+	}
+	else if (KernelConfig.SampleSet == SAMPLE_SET_2X2_STOCASTIC)
+	{
+		AccumulateStocasticBilinear(
+			KernelConfig,
+			SignalBuffer0,
+			SignalBuffer1,
+			SignalBuffer2,
+			SignalBuffer3,
+			/* inout */ UncompressedAccumulators,
+			/* inout */ CompressedAccumulators);
+	}
+	else if (
+		KernelConfig.SampleSet == SAMPLE_SET_3X3 ||
+		KernelConfig.SampleSet == SAMPLE_SET_3X3_PLUS ||
+		KernelConfig.SampleSet == SAMPLE_SET_3X3_CROSS)
+	{
+		AccumulateSquare3x3Kernel(
+			KernelConfig,
+			SignalBuffer0,
+			SignalBuffer1,
+			SignalBuffer2,
+			SignalBuffer3,
+			/* inout */ UncompressedAccumulators,
+			/* inout */ CompressedAccumulators);
+	}
+	else if (
+		KernelConfig.SampleSet == SAMPLE_SET_3X3_SOBEK2018 ||
+		KernelConfig.SampleSet == SAMPLE_SET_5X5_WAVELET ||
+		KernelConfig.SampleSet == SAMPLE_SET_NXN)
+	{
+		AccumulateSquareKernel(
+			KernelConfig,
+			SignalBuffer0,
+			SignalBuffer1,
+			SignalBuffer2,
+			SignalBuffer3,
+			/* inout */ UncompressedAccumulators,
+			/* inout */ CompressedAccumulators);
+	}
+#endif//  COMPILE_BOX_KERNEL
+#if COMPILE_STACKOWIAK_KERNEL
+	else if (KernelConfig.SampleSet == SAMPLE_SET_STACKOWIAK_4_SETS)
+	{
+		ConvolveStackowiakKernel(
+			KernelConfig,
+			SignalBuffer0,
+			SignalBuffer1,
+			SignalBuffer2,
+			SignalBuffer3,
+			/* inout */ UncompressedAccumulators,
+			/* inout */ CompressedAccumulators);
+	}
+#endif // COMPILE_STACKOWIAK_KERNEL
+#if COMPILE_DISK_KERNEL
+	else if (KernelConfig.SampleSet == SAMPLE_SET_HEXAWEB)
+	{
+		ConvolveDiskKernel(
+			KernelConfig,
+			SignalBuffer0,
+			SignalBuffer1,
+			SignalBuffer2,
+			SignalBuffer3,
+			/* inout */ UncompressedAccumulators,
+			/* inout */ CompressedAccumulators);
+	}
+#endif // COMPILE_DISK_KERNEL
+#if COMPILE_HEIRARCHY_KERNEL
+	else if (KernelConfig.SampleSet == SAMPLE_SET_STOCASTIC_HIERARCHY)
+	{
+		ConvolveStocasticHierarchy(
+			KernelConfig,
+			SignalBuffer0,
+			SignalBuffer1,
+			SignalBuffer2,
+			SignalBuffer3,
+			/* inout */ UncompressedAccumulators,
+			/* inout */ CompressedAccumulators);
+	}
+#endif // COMPILE_HEIRARCHY_KERNEL
+#if COMPILE_DIRECTIONAL_KERNEL
+	else if (KernelConfig.SampleSet == SAMPLE_SET_DIRECTIONAL_RECT || KernelConfig.SampleSet == SAMPLE_SET_DIRECTIONAL_ELLIPSE)
+	{
+		ConvolveDirectionalRect(
+			KernelConfig,
+			SignalBuffer0,
+			SignalBuffer1,
+			SignalBuffer2,
+			SignalBuffer3,
+			/* inout */ UncompressedAccumulators,
+			/* inout */ CompressedAccumulators);
+	}
+#endif // COMPILE_DIRECTIONAL_KERNEL
+} // AccumulateKernel()
 
 #endif
