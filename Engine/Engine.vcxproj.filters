@@ -783,6 +783,9 @@
     <ClInclude Include="Render\ShaderPermutation.h">
       <Filter>Render\Shader</Filter>
     </ClInclude>
+    <ClInclude Include="Shaders\SSD\SSDSignalFramework.h">
+      <Filter>Shaders\SSD</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

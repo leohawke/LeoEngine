@@ -2,9 +2,6 @@
 (include SSD/SSDDefinitions.h)
 (shader
 "
-//require macro DIM_STAGE
-#define SIGNAL_PROCESSING_SHADOW_VISIBILITY_MASK 0
-
 #define STAGE_RECONSTRUCTION 0
 
 //Policy to use to change the size of kernel.
@@ -17,7 +14,7 @@
 
 //configs
 #define TILE_PIXEL_SIZE 8
-#define CONFIG_SIGNAL_PROCESSING SIGNAL_PROCESSING_SHADOW_VISIBILITY_MASK
+#define CONFIG_SIGNAL_PROCESSING DIM_SIGNAL_PROCESSING
 #define CONFIG_UPSCALE  0
 #define CONFIG_SIGNAL_BATCH_SIZE 1
 
@@ -125,9 +122,8 @@
 #endif
 "
 )
-(include SSD/SSDSignalCore.h)
+(include SSD/SSDSignalFramework.h)
 (include SSD/SSDSpatialKernel.h)
-(include SSD/SSDSignalBufferEncoding.h)
 (include SSD/SSDSignalArray.h)
     (RWTexture2D (elemtype uint) SignalOutput_UAVs_0)
     (sampler point_sampler
@@ -135,7 +131,6 @@
 		(address_u clamp)
 		(address_v clamp)
     )
-    (float HitDistanceToWorldBluringRadius)
 (shader
 "
 uint MaxSampleCount;
@@ -180,6 +175,19 @@ void MainCS(
 	if (true)
 	{
 		SceneBufferUV = clamp(SceneBufferUV, BufferBilinearUVMinMax.xy, BufferBilinearUVMinMax.zw);
+	}
+
+	// Read reference meta data.
+	FSSDCompressedSceneInfos CompressedRefSceneMetadata;
+	FSSDSampleSceneInfos RefSceneMetadata;
+	{
+		CompressedRefSceneMetadata = CreateCompressedSceneInfos();
+
+		float2 ScreenPosition = DenoiserBufferUVToScreenPosition(SceneBufferUV);
+
+		RefSceneMetadata = UncompressSampleSceneInfo(
+			CONFIG_METADATA_BUFFER_LAYOUT, /* bPrevFrame = */ false,
+			ScreenPosition, CompressedRefSceneMetadata);
 	}
 
 	FSSDSignalArray RefSamples = SampleMultiplexedSignals(

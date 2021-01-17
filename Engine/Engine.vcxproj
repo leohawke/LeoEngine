@@ -282,6 +282,7 @@
     <ClInclude Include="Shaders\SSD\SSDSignalArray.h" />
     <ClInclude Include="Shaders\SSD\SSDSignalBufferEncoding.h" />
     <ClInclude Include="Shaders\SSD\SSDSignalCore.h" />
+    <ClInclude Include="Shaders\SSD\SSDSignalFramework.h" />
     <ClInclude Include="Shaders\SSD\SSDSpatialKernel.h" />
     <ClInclude Include="System\NinthTimer.h" />
     <ClInclude Include="System\SystemEnvironment.h" />

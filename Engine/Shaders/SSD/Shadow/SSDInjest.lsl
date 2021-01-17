@@ -13,9 +13,9 @@
     (float HitDistanceToWorldBluringRadius)
 (shader
 "
-static const float DENOISER_INVALID_HIT_DISTANCE = -2.0;
+#define CONFIG_SIGNAL_PROCESSING DIM_SIGNAL_PROCESSING
 
-static const float WORLD_RADIUS_INVALID = -1;
+static const float DENOISER_INVALID_HIT_DISTANCE = -2.0;
 
 #define TILE_PIXEL_SIZE 8
 

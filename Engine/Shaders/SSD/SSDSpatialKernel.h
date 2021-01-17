@@ -259,4 +259,10 @@ void SetBilateralPreset(uint BilateralPresetId, inout FSSDKernelConfig KernelCon
 	}
 }
 
+/** Compute at compile time the index of the signal in the batch, from the index of the multiplexed signal. */
+uint ComputeSignalBatchIdFromSignalMultiplexId(FSSDKernelConfig KernelConfig, const uint SignalMultiplexId)
+{
+	return SignalMultiplexId / KernelConfig.MultiplexedSignalsPerSignalDomain;
+}
+
 #endif
