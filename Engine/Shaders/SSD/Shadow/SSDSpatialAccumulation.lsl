@@ -45,6 +45,12 @@
 			#define CONFIG_CLAMP_UV_PER_SIGNAL 1
 		#endif
 #endif
+	// Compress the DRB accumulator to have lower VGPR footprint.
+	#if defined(CONFIG_OUTPUT_MODE) && CONFIG_OUTPUT_MODE == OUTPUT_MODE_DRB
+		// Looks like shader compilers completly give up.
+		// #define CONFIG_ACCUMULATOR_VGPR_COMPRESSION ACCUMULATOR_COMPRESSION_PENUMBRA_DRB
+	#endif
+		
 #endif
 
 //------------------------------------------------------- CONFIG DISABLED DEFAULTS
@@ -118,6 +124,12 @@
 // White list accumulators to compile.
 #if CONFIG_OUTPUT_MODE == OUTPUT_MODE_DRB
 	#define COMPILE_DRB_ACCUMULATOR 1
+	#define COMPILE_MININVFREQ_ACCUMULATOR 1
+#elif CONFIG_OUTPUT_MODE == OUTPUT_MODE_2MOMMENT_SUM
+	#define COMPILE_MOMENT1_ACCUMULATOR 1
+	#define COMPILE_MOMENT2_ACCUMULATOR 1
+#elif CONFIG_OUTPUT_MODE == OUTPUT_MODE_SUM
+	#define COMPILE_MOMENT1_ACCUMULATOR 1
 	#define COMPILE_MININVFREQ_ACCUMULATOR 1
 #endif
 "

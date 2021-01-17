@@ -79,6 +79,21 @@ static const float WORLD_RADIUS_INVALID = -1;
 /** By default, the color space stored into intermediary buffer is linear premultiplied RGBA. */
 #define STANDARD_BUFFER_COLOR_SPACE COLOR_SPACE_RGB
 
+/** Compression of signal for VGPR occupency. */
+	/** The signal is not being compressed. */
+#define SIGNAL_COMPRESSION_DISABLED 0
+
+/** VGPR compression for spherical harmonic. */
+#define SIGNAL_COMPRESSION_DIFFUSE_INDIRECT_HARMONIC 0xD200
+
+
+/** Compression of signal for VGPR occupency. */
+	/** The signal is not being compressed. */
+#define ACCUMULATOR_COMPRESSION_DISABLED 0
+
+/** VGPR compression for spherical harmonic. */
+#define ACCUMULATOR_COMPRESSION_PENUMBRA_DRB 0x0001
+
 /** Technic used to compute the world vector betweem neighbor and reference. */
 // Directly use FSSDKernelConfig::RefSceneMetadata.TranslatedWorldPosition. Cost 3 VGPR over entire kernel inner loop.
 #define NEIGHBOR_TO_REF_CACHE_WORLD_POSITION 0

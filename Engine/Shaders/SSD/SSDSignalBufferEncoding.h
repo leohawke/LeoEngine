@@ -3,6 +3,8 @@
 
 #include "SSD/SSDSignalCore.h"
 
+
+
 /** Whether the color should be clamped when encoding signal. */
 #define CONFIG_ENCODING_CLAMP_COLOR 1
 

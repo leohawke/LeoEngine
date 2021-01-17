@@ -2,6 +2,7 @@
 #define SSDSignalAccumulator_h 1
 
 #include "SSD/SSDSignalCore.h"
+#include "SSD/SSDSignalCompression.h"
 
 #ifndef CONFIG_SIGNAL_VGPR_COMPRESSION
 #define CONFIG_SIGNAL_VGPR_COMPRESSION SIGNAL_COMPRESSION_DISABLED
@@ -74,6 +75,13 @@ struct FSSDSignalAccumulator
 #endif // COMPILE_DRB_ACCUMULATOR
 };
 
+/** Informations about cluster of sample */
+struct FSSDSampleClusterInfo
+{
+	// Outter radius boundary of the cluster.
+	float OutterBoundaryRadius;
+};
+
 FSSDSignalAccumulator CreateSignalAccumulator()
 {
 	FSSDSignalAccumulator Accumulator;
@@ -132,6 +140,175 @@ struct FSSDSampleAccumulationInfos
 	// 1 / SignalFrequency
 	float InvFrequency;
 };
+
+// Transform the world bluring distance due to pixel size with some conservative to be forgiving
+float AmendWorldBluringRadiusCausedByPixelSize(float WorldBluringDistance)
+{
+	float Multiplier = 1;
+
+	// The distance between two pixel is 2 times the radius of the pixel.
+	Multiplier *= 2;
+
+	// Need to take into account the furthearest pixel of 3x3 neighborhood.
+	Multiplier *= sqrt(2);
+
+	return WorldBluringDistance * Multiplier;
+}
+
+/** Accumulate a sample withing the accumulator. */
+void AccumulateSampleInOneBin(inout FSSDSignalAccumulator Accumulator, FSSDSampleAccumulationInfos SampleInfos)
+{
+	float SampleWeight = SampleInfos.FinalWeight;
+
+#if COMPILE_MOMENT1_ACCUMULATOR
+	Accumulator.Moment1 = AddSignal(Accumulator.Moment1, MulSignal(SampleInfos.Sample, SampleWeight));
+#endif
+
+#if COMPILE_MOMENT2_ACCUMULATOR
+	Accumulator.Moment2 = AddSignal(Accumulator.Moment2, MulSignal(PowerSignal(SampleInfos.Sample, 2), SampleWeight));
+#endif
+}
+
+
+//------------------------------------------------------- MIN MAX tracking
+
+/** Tracks min and max values accumulator. */
+void AccumulateSampleInDomainBoundaries(inout FSSDSignalAccumulator Accumulator, FSSDSampleAccumulationInfos SampleInfos)
+{
+	[flatten]
+		if (SampleInfos.FinalWeight > 0)
+		{
+#if COMPILE_MINMAX_ACCUMULATOR
+			{
+				Accumulator.Min = MinSignal(Accumulator.Min, SampleInfos.Sample);
+				Accumulator.Max = MaxSignal(Accumulator.Max, SampleInfos.Sample);
+			}
+#endif
+
+			// Track the minimal frequency inverse.
+
+#if COMPILE_MININVFREQ_ACCUMULATOR
+			if (SampleInfos.InvFrequency != WORLD_RADIUS_MISS)
+				Accumulator.MinInvFrequency = min(Accumulator.MinInvFrequency, SampleInfos.InvFrequency);
+#endif
+		}
+}
+
+//------------------------------------------------------- DESCENDING RING BUCKETING
+// [ SIGGRAPH 2018, "A life of bokeh" ]
+
+#if COMPILE_DRB_ACCUMULATOR
+
+void AccumulateSampleInDRB(inout FSSDSignalAccumulator Accumulator, FSSDSampleAccumulationInfos A)
+{
+	float ClampedInvFrequency = min(A.InvFrequency, Accumulator.HighestInvFrequency);
+
+	// Compare the sample's frequency with the bucket bordering radius.
+	float bBelongsToPrevious = saturate(ClampedInvFrequency - Accumulator.BorderingRadius + 0.5);
+	float bBelongsToCurrent = 1.0 - bBelongsToPrevious;
+
+	// Accumulate current bucket.
+	{
+		float CurrentWeight = A.FinalWeight * bBelongsToCurrent;
+		Accumulator.Current = AddSignal(Accumulator.Current, MulSignal(A.Sample, CurrentWeight));
+		Accumulator.CurrentInvFrequency += A.Sample.SampleCount * ClampedInvFrequency * CurrentWeight;
+	}
+
+	// Accumulate current bucket translucency.
+	{
+		float SampleTranslucency = saturate(ClampedInvFrequency - Accumulator.BorderingRadius);
+
+		// TODO(Denoiser): do need (A.Sample.MissCount * SafeRcp(A.Sample.SampleCount)) computation onen 1spp reconstruction.
+		// TODO(Denoiser): could pass down a normalised version of A.Sample to avoid Rcp.
+		float R = A.Sample.MissCount * SafeRcp(A.Sample.SampleCount);
+
+		float Translucency = lerp(R, 1, SampleTranslucency);
+		float TranslucencyWeight = 1;
+
+		Accumulator.CurrentTranslucency += Translucency * TranslucencyWeight;
+	}
+
+	// Accumulate previous bucket.
+	{
+		float PreviousWeight = A.FinalWeight * bBelongsToPrevious;
+		Accumulator.Previous = AddSignal(Accumulator.Previous, MulSignal(A.Sample, PreviousWeight));
+		Accumulator.PreviousInvFrequency += A.Sample.SampleCount * ClampedInvFrequency * PreviousWeight;
+	}
+}
+
+void DijestSampleClusterInDRB(
+	inout FSSDSignalAccumulator Accumulator,
+	uint RingId, uint SampleCount)
+{
+	//if (RingId != 0)
+	//	return;
+
+	if (Accumulator.Current.SampleCount == 0.0)
+	{
+		return;
+	}
+
+	// Opacity of the current bucket.
+	float CurrentClusterOpacity = saturate(1 - Accumulator.CurrentTranslucency * rcp(float(SampleCount)));
+
+	// Compute current and previous Coc radii.
+	float PreviousInvFrequency = Accumulator.PreviousInvFrequency * SafeRcp(Accumulator.Previous.SampleCount);
+	float CurrentInvFrequency = Accumulator.CurrentInvFrequency * rcp(Accumulator.Current.SampleCount);
+
+	// Whether current bucket is occluding previous bucket.
+	// TODO(Denoiser): put a contrast.
+	float bOccludingCluster = saturate((PreviousInvFrequency - CurrentInvFrequency) * rcp(Accumulator.BorderingRadius));
+
+	// Compute final factor to use to with previous bucket.
+	float PreviousBucketFactor = (Accumulator.Previous.SampleCount == 0.0) ? 0.0 : (1.0 - CurrentClusterOpacity * bOccludingCluster);
+
+	// TODO(Denoiser): the big difference in sample count could lead to wrong opacity between sample clusters.
+	//if (PreviousBucketFactor < 1)
+	//	PreviousBucketFactor *= Accumulator.Current.SampleCount * SafeRcp(Accumulator.Previous.SampleCount);
+
+	Accumulator.Previous = AddSignal(MulSignal(Accumulator.Previous, PreviousBucketFactor), Accumulator.Current);
+	Accumulator.PreviousInvFrequency = Accumulator.PreviousInvFrequency * PreviousBucketFactor + Accumulator.CurrentInvFrequency;
+}
+#endif // COMPILE_DRB_ACCUMULATOR
+
+void CompressSignalAccumulator(inout FSSDSignalAccumulator Accumulator)
+{
+#if COMPILE_MOMENT1_ACCUMULATOR
+	CompressSignalSample(Accumulator.Moment1, CONFIG_SIGNAL_VGPR_COMPRESSION, /* out */ Accumulator.CompressedMoment1);
+#endif
+
+#if COMPILE_MOMENT2_ACCUMULATOR
+	CompressSignalSample(Accumulator.Moment2, CONFIG_SIGNAL_VGPR_COMPRESSION, /* out */ Accumulator.CompressedMoment2);
+#endif
+}
+
+void UncompressSignalAccumulator(inout FSSDSignalAccumulator Accumulator)
+{
+#if COMPILE_MOMENT1_ACCUMULATOR
+	UncompressSignalSample(Accumulator.CompressedMoment1, CONFIG_SIGNAL_VGPR_COMPRESSION, /* inout */ Accumulator.Moment1);
+#endif
+
+#if COMPILE_MOMENT2_ACCUMULATOR
+	UncompressSignalSample(Accumulator.CompressedMoment2, CONFIG_SIGNAL_VGPR_COMPRESSION, /* inout */ Accumulator.Moment2);
+#endif
+}
+
+/** Accumulate a sample withing the accumulator. */
+void AccumulateSample(
+	inout FSSDSignalAccumulator Accumulator,
+	FSSDSampleAccumulationInfos SampleInfos)
+{
+	UncompressSignalAccumulator(/* inout */ Accumulator);
+
+	AccumulateSampleInOneBin(/* inout */ Accumulator, SampleInfos);
+	AccumulateSampleInDomainBoundaries(/* inout */ Accumulator, SampleInfos);
+
+#if COMPILE_DRB_ACCUMULATOR
+	AccumulateSampleInDRB(/* inout */ Accumulator, SampleInfos);
+#endif // COMPILE_DRB_ACCUMULATOR
+
+	CompressSignalAccumulator(/* inout */ Accumulator);
+}
 
 
 #endif

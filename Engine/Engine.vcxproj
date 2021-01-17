@@ -277,10 +277,12 @@
     <ClInclude Include="Shaders\Random.h" />
     <ClInclude Include="Shaders\SSD\SSDCommon.h" />
     <ClInclude Include="Shaders\SSD\SSDMetadata.h" />
+    <ClInclude Include="Shaders\SSD\SSDPublicBufferEncoding.h" />
     <ClInclude Include="Shaders\SSD\SSDSignalAccumulator.h" />
     <ClInclude Include="Shaders\SSD\SSDSignalAccumulatorArray.h" />
     <ClInclude Include="Shaders\SSD\SSDSignalArray.h" />
     <ClInclude Include="Shaders\SSD\SSDSignalBufferEncoding.h" />
+    <ClInclude Include="Shaders\SSD\SSDSignalCompression.h" />
     <ClInclude Include="Shaders\SSD\SSDSignalCore.h" />
     <ClInclude Include="Shaders\SSD\SSDSignalFramework.h" />
     <ClInclude Include="Shaders\SSD\SSDSpatialKernel.h" />

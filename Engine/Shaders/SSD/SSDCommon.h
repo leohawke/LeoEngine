@@ -34,4 +34,9 @@ float2 DenoiserBufferUVToScreenPosition(float2 SceneBufferUV)
 #define CONFIG_METADATA_BUFFER_LAYOUT METADATA_BUFFER_LAYOUT_DISABLED
 #endif
 
+float SafeRcp(float x, float d = 0.0)
+{
+	return x > 0.0 ? rcp(x) : d;
+}
+
 #endif
