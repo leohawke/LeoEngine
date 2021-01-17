@@ -15,10 +15,6 @@
 // Output the result of descending ring bucketing.
 #define OUTPUT_MODE_DRB 2
 
-//TODO:define by cpp code
-#define DIM_STAGE STAGE_RECONSTRUCTION
-#define DIM_MULTI_SPP 1
-
 //configs
 #define TILE_PIXEL_SIZE 8
 #define CONFIG_SIGNAL_PROCESSING SIGNAL_PROCESSING_SHADOW_VISIBILITY_MASK

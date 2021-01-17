@@ -25,9 +25,15 @@ inline namespace Shader
 			int32 TotalPermutationCount,
 			ConstructType InConstructRef,
 			ModifyCompilationEnvironmentType InModifyCompilationEnvironmentRef,
+			ShouldCompilePermutationType InShouldCompilePermutationRef,
+
 			ConstructCompiledType InConstructCompiledRef
 		):
-		 ShaderMeta(EShaderMetaForDownCast::BuitlIn,InName,InSourceFileName,InEntryPoint,InFrequency, TotalPermutationCount,InConstructRef, InModifyCompilationEnvironmentRef),
+		 ShaderMeta(EShaderMetaForDownCast::BuitlIn,InName,InSourceFileName,InEntryPoint,InFrequency, 
+			 TotalPermutationCount,
+			 InConstructRef, 
+			 InModifyCompilationEnvironmentRef,
+			 InShouldCompilePermutationRef),
 			ConstructCompiledRef(InConstructCompiledRef)
 		{}
 
@@ -37,14 +43,24 @@ inline namespace Shader
 		}
 
 		/**
-	 * Sets up the environment used to compile an instance of this shader type.
-	 * @param Platform - Platform to compile for.
-	 * @param Environment - The shader compile environment that the function modifies.
-	 */
+		* Sets up the environment used to compile an instance of this shader type.
+		* @param Platform - Platform to compile for.
+		* @param Environment - The shader compile environment that the function modifies.
+		*/
 		void SetupCompileEnvironment(int32 PermutationId, FShaderCompilerEnvironment& Environment)
 		{
 			// Allow the shader type to modify its compile environment.
 			ModifyCompilationEnvironment(FBuiltInShaderPermutationParameters(PermutationId), Environment);
+		}
+
+		/**
+		 * Checks if the shader type should be cached for a particular platform.
+		* @param Platform - The platform to check.
+		* @return True if this shader type should be cached.
+		*/
+		bool ShouldCompilePermutation(int32 PermutationId) const
+		{
+			return ShaderMeta::ShouldCompilePermutation(FBuiltInShaderPermutationParameters(PermutationId));
 		}
 
 	private:
@@ -137,9 +153,7 @@ inline namespace Shader
 		SourceFileName, \
 		FunctionName, \
 		Frequency, \
-		ShaderClass::FPermutationDomain::PermutationCount,\
-		ShaderClass::ConstructInstance, \
-		ShaderClass::ModifyCompilationEnvironmentImpl, \
+		SHADER_VTABLE(ShaderClass),\
 		ShaderClass::ConstructCompiledInstance\
 	)
 }

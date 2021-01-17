@@ -19,6 +19,33 @@ enum class SignalProcessing
 	MAX
 };
 
+/** Returns whether a signal processing support upscaling. */
+static bool SignalSupportsUpscaling(SignalProcessing SignalProcessing)
+{
+	return false;
+}
+
+static bool SignalUsesPreConvolution(SignalProcessing SignalProcessing)
+{
+	return
+		SignalProcessing == SignalProcessing::ShadowVisibilityMask;
+}
+
+/** Returns whether a signal can denoise multi sample per pixel. */
+static bool SignalSupportMultiSPP(SignalProcessing SignalProcessing)
+{
+	return (
+		SignalProcessing == SignalProcessing::ShadowVisibilityMask
+		);
+}
+
+/** Returns whether a signal have a code path for 1 sample per pixel. */
+static bool SignalSupport1SPP(SignalProcessing SignalProcessing)
+{
+	return (
+		false);
+}
+
 // Permutation dimension for the type of signal being denoised.
 class FSignalProcessingDim : SHADER_PERMUTATION_ENUM_CLASS("DIM_SIGNAL_PROCESSING", SignalProcessing);
 
@@ -46,6 +73,68 @@ public:
 	class FUpscaleDim : SHADER_PERMUTATION_BOOL("DIM_UPSCALE");
 
 	using FPermutationDomain = Render::TShaderPermutationDomain<FSignalProcessingDim, FStageDim, FUpscaleDim, FSignalBatchSizeDim, FMultiSPPDim>;
+
+	static bool ShouldCompilePermutation(const Render::FBuiltInShaderPermutationParameters& Parameters)
+	{
+		FPermutationDomain PermutationVector(Parameters.PermutationId);
+		SignalProcessing SignalProcessing = PermutationVector.Get<FSignalProcessingDim>();
+
+		// Only reconstruction have upscale capability for now.
+		if (PermutationVector.Get<FUpscaleDim>() &&
+			PermutationVector.Get<FStageDim>() != Stage::ReConstruction)
+		{
+			return false;
+		}
+
+		// Only upscale is only for signal that needs it.
+		if (PermutationVector.Get<FUpscaleDim>() &&
+			!SignalSupportsUpscaling(SignalProcessing))
+		{
+			return false;
+		}
+
+		// Only compile pre convolution for signal that uses it.
+		if (!SignalUsesPreConvolution(SignalProcessing) &&
+			PermutationVector.Get<FStageDim>() == Stage::PreConvolution)
+		{
+			return false;
+		}
+
+		// Only compile multi SPP permutation for signal that supports it.
+		if (PermutationVector.Get<FStageDim>() == Stage::ReConstruction &&
+			PermutationVector.Get<FMultiSPPDim>() && !SignalSupportMultiSPP(SignalProcessing))
+		{
+			return false;
+		}
+
+		// Compile out the shader if this permutation gets remapped.
+		if (RemapPermutationVector(PermutationVector) != PermutationVector)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	static FPermutationDomain RemapPermutationVector(FPermutationDomain PermutationVector)
+	{
+		SignalProcessing SignalProcessing = PermutationVector.Get<FSignalProcessingDim>();
+
+		if (PermutationVector.Get<FStageDim>() == Stage::ReConstruction)
+		{
+			// force use the multi sample per pixel code path.
+			if (!SignalSupport1SPP(SignalProcessing))
+			{
+				PermutationVector.Set<FMultiSPPDim>(true);
+			}
+		}
+		else
+		{
+			PermutationVector.Set<FMultiSPPDim>(true);
+		}
+
+		return PermutationVector;
+	}
 
 
 	BEGIN_SHADER_PARAMETER_STRUCT(Parameters)
@@ -169,7 +258,7 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		PermutationVector.Set<SSDSpatialAccumulationCS::FUpscaleDim>(false);
 		PermutationVector.Set<FMultiSPPDim>(true);
 
-		Render::ShaderMapRef<SSDSpatialAccumulationCS> ComputeShader(Render::GetBuiltInShaderMap(), PermutationVector);
+		Render::ShaderMapRef<SSDSpatialAccumulationCS> ComputeShader(Render::GetBuiltInShaderMap(), SSDSpatialAccumulationCS::RemapPermutationVector(PermutationVector));
 
 		ComputeShaderUtils::Dispatch(CmdList, ComputeShader, Parameters,
 			ComputeShaderUtils::GetGroupCount(leo::math::int2(FullResW, FullResH), TILE_SIZE));

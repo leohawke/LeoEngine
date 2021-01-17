@@ -45,13 +45,21 @@ namespace platform::Render::Shader
 		return (*ConstructRef)();
 	}
 
+	bool Shader::ShaderMeta::ShouldCompilePermutation(const FShaderPermutationParameters& Parameters) const
+	{
+		return (*ShouldCompilePermutationRef)(Parameters);
+	}
+
 	void ShaderMeta::ModifyCompilationEnvironment(const FShaderPermutationParameters& Parameters, FShaderCompilerEnvironment& OutEnvironment) const
 	{
 		(*ModifyCompilationEnvironmentRef)(Parameters, OutEnvironment);
 	}
 
 	ShaderMeta::ShaderMeta(EShaderMetaForDownCast InShaderMetaForDownCast, const char* InName, const char* InSourceFileName, const char* InEntryPoint, platform::Render::ShaderType InFrequency, int32 InTotalPermutationCount,
-		ConstructType InConstructRef, ModifyCompilationEnvironmentType InModifyCompilationEnvironmentRef)
+		ConstructType InConstructRef, 
+		ModifyCompilationEnvironmentType InModifyCompilationEnvironmentRef,
+		ShouldCompilePermutationType InShouldCompilePermutationRef
+	)
 		:
 		ShaderMetaForDownCast(InShaderMetaForDownCast),
 		TypeName(InName), 
@@ -62,7 +70,8 @@ namespace platform::Render::Shader
 		Frequency(InFrequency), 
 		TotalPermutationCount(InTotalPermutationCount),
 		ConstructRef(InConstructRef),
-		ModifyCompilationEnvironmentRef(InModifyCompilationEnvironmentRef)
+		ModifyCompilationEnvironmentRef(InModifyCompilationEnvironmentRef),
+		ShouldCompilePermutationRef(InShouldCompilePermutationRef)
 	{
 		GetTypeList().emplace_front(this);
 	}
@@ -152,10 +161,15 @@ namespace platform::Render::Shader
 		for (auto meta : ShaderMeta::GetTypeList())
 		{
 			//TODO:dispatch type
+			auto builtin_meta = static_cast<BuiltInShaderMeta*>(meta);
+
 			int32 PermutationCountToCompile = 0;
 			for (int32 PermutationId = 0; PermutationId < meta->GetPermutationCount(); PermutationId++)
 			{
-				auto task = Environment->Scheduler->Schedule(CompileBuiltInShader(static_cast<BuiltInShaderMeta*>(meta), PermutationId));
+				if (!builtin_meta->ShouldCompilePermutation(PermutationId))
+					continue;
+
+				auto task = Environment->Scheduler->Schedule(CompileBuiltInShader(builtin_meta,PermutationId));
 				tasks.emplace_back(std::move(task));
 			}
 		}
