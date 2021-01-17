@@ -63,9 +63,6 @@ public:
 		// Spatial kernel used to process raw input for the temporal accumulation.
 		ReConstruction,
 
-		// Spatial kernel to pre filter.
-		PreConvolution,
-
 		MAX
 	};
 
@@ -93,12 +90,12 @@ public:
 			return false;
 		}
 
-		// Only compile pre convolution for signal that uses it.
-		if (!SignalUsesPreConvolution(SignalProcessing) &&
-			PermutationVector.Get<FStageDim>() == Stage::PreConvolution)
-		{
-			return false;
-		}
+		//// Only compile pre convolution for signal that uses it.
+		//if (!SignalUsesPreConvolution(SignalProcessing) &&
+		//	PermutationVector.Get<FStageDim>() == Stage::PreConvolution)
+		//{
+		//	return false;
+		//}
 
 		// Only compile multi SPP permutation for signal that supports it.
 		if (PermutationVector.Get<FStageDim>() == Stage::ReConstruction &&

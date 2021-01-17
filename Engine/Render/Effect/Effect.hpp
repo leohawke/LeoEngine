@@ -15,7 +15,7 @@
 
 #include "../PipleState.h"
 #include "../../Core/ResourcesHolder.h"
-#include "../Shader.h"
+#include "../ShaderCore.h"
 #include "../IShaderCompose.h"
 
 #include <tuple>

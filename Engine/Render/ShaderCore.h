@@ -4,6 +4,7 @@
 
 #include <LBase/linttype.hpp>
 #include <LBase/lmathtype.hpp>
+#include <LBase/cformat.h>
 #include <optional>
 
 namespace platform::Render {
@@ -182,9 +183,18 @@ namespace platform::Render {
 
 		struct FShaderCompilerEnvironment
 		{
-			void SetDefine(const char* Name, const char* Value) { }
-			void SetDefine(const char* Name, bool Value) { }
-			void SetDefine(const char* Name, int32 Value) { }
+			void SetDefine(const char* Name, const char* Value)
+			{
+				Definitions.emplace(Name, Value);
+			}
+			void SetDefine(const char* Name, bool Value)
+			{
+				SetDefine(Name, Value ? 1 : 0);
+			}
+			void SetDefine(const char* Name, int32 Value)
+			{
+				SetDefine(Name, leo::sfmt("%d", Value).c_str());
+			}
 
 			const std::unordered_map<std::string, std::string>& GetDefinitions() const
 			{
