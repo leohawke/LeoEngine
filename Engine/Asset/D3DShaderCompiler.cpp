@@ -561,11 +561,10 @@ namespace asset::X::Shader::DXIL {
 
 					auto length = file.Read(buffer.get(), file.GetSize(), 0);
 
-					COMPtr<IDxcBlobEncoding> TextBlob;
-					Library->CreateBlobWithEncodingFromPinned(buffer.get(), static_cast<UINT32>(file.GetSize()), CP_UTF8, &TextBlob.GetRef());
+					IDxcBlobEncoding* TextBlob;
+					Library->CreateBlobWithEncodingOnHeapCopy(buffer.get(), static_cast<UINT32>(file.GetSize()), CP_UTF8, &TextBlob);
 
-					itr = caches.emplace(key, TextBlob.Get()).first;
-					itr->second->AddRef();
+					itr = caches.emplace(key, TextBlob).first;
 				}
 
 				*ppIncludeSource = itr->second;
