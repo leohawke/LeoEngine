@@ -29,10 +29,13 @@ float2 BufferUVToOutputPixelPosition;
 uint StateFrameIndexMod8;
 float4x4 ScreenToTranslatedWorld;
 float4x4 ViewToClip;
+float4x4 TranslatedWorldToView;
 
 //SceneTextureParameters
 Texture2D SceneDepthBuffer;
 SamplerState SceneDepthBufferSampler;
+Texture2D WorldNormalBuffer;
+SamplerState WorldNormalSampler;
 
 float WorldDepthToPixelWorldRadius;
 
@@ -76,6 +79,10 @@ FSSDCompressedSceneInfos SampleCompressedSceneMetadata(
 	else
 	{
 		CompressedMetadata.VGPR[0] = asuint(SceneDepthBuffer.SampleLevel(SceneDepthBufferSampler, BufferUV, 0));
+		float3 WorldNormal = WorldNormalBuffer.SampleLevel(WorldNormalSampler, BufferUV, 0);
+		CompressedMetadata.VGPR[1] = asuint(WorldNormal.x);
+		CompressedMetadata.VGPR[2] = asuint(WorldNormal.y);
+		CompressedMetadata.VGPR[3] = asuint(WorldNormal.z);
 	}
 
 	return CompressedMetadata;

@@ -31,10 +31,10 @@ struct FSSDSampleSceneInfos
 	//float Roughness;
 
 	/** Normal of the pixel in world space. */
-	//float3 WorldNormal;
+	float3 WorldNormal;
 
 	/** Normal of the pixel in view space. */
-	//float3 ViewNormal;
+	float3 ViewNormal;
 
 	/** Position of the pixel in the translated world frame to save VALU. */
 	//float3 TranslatedWorldPosition;
@@ -64,6 +64,9 @@ FSSDSampleSceneInfos UncompressSampleSceneInfo(
 	if (CompressedLayout == METADATA_BUFFER_LAYOUT_DISABLED)
 	{
 		Infos.WorldDepth = asfloat(CompressedInfos.VGPR[0]);
+		Infos.WorldNormal.x = asfloat(CompressedInfos.VGPR[1]);
+		Infos.WorldNormal.y = asfloat(CompressedInfos.VGPR[2]);
+		Infos.WorldNormal.z = asfloat(CompressedInfos.VGPR[3]);
 	}
 	else
 	{
@@ -82,6 +85,9 @@ FSSDCompressedSceneInfos CompressSampleSceneInfo(
 	if (CompressedLayout == METADATA_BUFFER_LAYOUT_DISABLED)
 	{
 		CompressedInfos.VGPR[0] = asuint(Infos.WorldDepth);
+		CompressedInfos.VGPR[1] = asuint(Infos.WorldNormal.x);
+		CompressedInfos.VGPR[2] = asuint(Infos.WorldNormal.y);
+		CompressedInfos.VGPR[3] = asuint(Infos.WorldNormal.z);
 	}
 	else
 	{
