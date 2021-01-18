@@ -240,7 +240,7 @@ FSSDKernelConfig CreateKernelConfig()
 	}
 
 	{
-		[unroll(SIGNAL_ARRAY_SIZE)]
+		[unroll(2)]
 		for (uint RandomSignalId = 0; RandomSignalId < 1; RandomSignalId++)
 		{
 			KernelConfig.Randoms[RandomSignalId] = 0.0;

@@ -12,6 +12,11 @@ struct FSSDCompressedSceneInfos
 FSSDCompressedSceneInfos CreateCompressedSceneInfos()
 {
 	FSSDCompressedSceneInfos CompressedInfos;
+	[unroll(MAX_COMPRESSED_METADATA_VGPRS)]
+		for (uint i = 0; i < MAX_COMPRESSED_METADATA_VGPRS; i++)
+		{
+			CompressedInfos.VGPR[i] = 0;
+		}
 	return CompressedInfos;
 }
 
@@ -46,8 +51,8 @@ FSSDSampleSceneInfos CreateSampleSceneInfos()
 	Infos.WorldDepth = 0;
 	//Infos.ScreenPosition = 0;
 	//Infos.Roughness = 0;
-	//Infos.WorldNormal = 0;
-	//Infos.ViewNormal = 0;
+	Infos.WorldNormal = 0;
+	Infos.ViewNormal = 0;
 	//Infos.TranslatedWorldPosition = 0;
 	return Infos;
 }
