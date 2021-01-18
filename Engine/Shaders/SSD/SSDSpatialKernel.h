@@ -261,6 +261,16 @@ void SetBilateralPreset(uint BilateralPresetId, inout FSSDKernelConfig KernelCon
 			KernelConfig.BilateralSettings[MultiplexId] = BILATERAL_POSITION_BASED(5);
 		}
 	}
+	else if (BilateralPresetId == BILATERAL_PRESET_POLYCHROMATIC_PENUMBRA)
+	{
+		// Diffuse.
+		KernelConfig.BilateralSettings[0] = BILATERAL_POSITION_BASED(5) | BILATERAL_NORMAL;
+
+		// Specular.
+#if SIGNAL_ARRAY_SIZE > 1
+		KernelConfig.BilateralSettings[1] = BILATERAL_POSITION_BASED(5) | BILATERAL_TOKOYASHI;
+#endif
+	}
 }
 
 /** Compute at compile time the index of the signal in the batch, from the index of the multiplexed signal. */

@@ -19,8 +19,8 @@
 #endif
 
 
-float2 ViewportMin;
-float2 ViewportMax;
+uint2 ViewportMin;
+uint2 ViewportMax;
 float4 ThreadIdToBufferUV;
 float4 BufferBilinearUVMinMax;
 float4 BufferSizeAndInvSize;
