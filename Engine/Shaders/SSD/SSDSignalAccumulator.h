@@ -351,5 +351,14 @@ void AccumulateSample(
 	CompressSignalAccumulator(/* inout */ Accumulator);
 }
 
+/** Digest the accumulated cluster of samples. */
+void DijestAccumulatedClusterSamples(
+	inout FSSDSignalAccumulator Accumulator,
+	uint RingId, uint SampleCount)
+{
+#if COMPILE_DRB_ACCUMULATOR
+	DijestSampleClusterInDRB(/* inout */ Accumulator, RingId, SampleCount);
+#endif
+}
 
 #endif

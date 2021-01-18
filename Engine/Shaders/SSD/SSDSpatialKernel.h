@@ -255,11 +255,11 @@ void SetBilateralPreset(uint BilateralPresetId, inout FSSDKernelConfig KernelCon
 	if (BilateralPresetId == BILATERAL_PRESET_MONOCHROMATIC_PENUMBRA)
 	{
 		[unroll(SIGNAL_ARRAY_SIZE)]
-			for (uint MultiplexId = 0; MultiplexId < SIGNAL_ARRAY_SIZE; MultiplexId++)
-			{
-				// Shadow masks are normal invarient, so only reject based on position.
-				KernelConfig.BilateralSettings[MultiplexId] = BILATERAL_POSITION_BASED(5);
-			}
+		for (uint MultiplexId = 0; MultiplexId < SIGNAL_ARRAY_SIZE; MultiplexId++)
+		{
+			// Shadow masks are normal invarient, so only reject based on position.
+			KernelConfig.BilateralSettings[MultiplexId] = BILATERAL_POSITION_BASED(5);
+		}
 	}
 }
 
@@ -338,6 +338,18 @@ FSSDSampleSceneInfos UncompressRefSceneMetadata(FSSDKernelConfig KernelConfig)
 		KernelConfig.CompressedRefSceneMetadata);
 }
 
+/** Uncompress the scene metadata of a sample. */
+FSSDSampleSceneInfos UncompressSampleSceneMetadata(
+	FSSDKernelConfig KernelConfig,
+	float2 SampleBufferUV,
+	FSSDCompressedSceneInfos CompressedSampleSceneMetadata)
+{
+	return UncompressSampleSceneInfo(
+		CONFIG_METADATA_BUFFER_LAYOUT, KernelConfig.bPreviousFrameMetadata,
+		DenoiserBufferUVToScreenPosition(SampleBufferUV),
+		CompressedSampleSceneMetadata);
+}
+
 float3 ComputeVectorFromNeighborToRef(
 	FSSDKernelConfig KernelConfig,
 	FSSDSampleSceneInfos RefSceneMetadata,
@@ -370,6 +382,71 @@ float3 ComputeVectorFromNeighborToRef(
 	}
 }
 
+/** Returns whether this sample is outside the viewport. */
+bool IsOutsideViewport(FSSDKernelConfig KernelConfig, float2 SampleBufferUV)
+{
+	return any(SampleBufferUV < KernelConfig.BufferBilinearUVMinMax.xy || SampleBufferUV > KernelConfig.BufferBilinearUVMinMax.zw);
+}
+
+/** Sample multiplexed samples and their metadata for kernel use. */
+void SampleMultiplexedSignals(
+	FSSDKernelConfig KernelConfig,
+	FSSDTexture2D SignalBuffer0,
+	FSSDTexture2D SignalBuffer1,
+	FSSDTexture2D SignalBuffer2,
+	FSSDTexture2D SignalBuffer3,
+	float2 SampleBufferUV,
+	float MipLevel,
+	out FSSDCompressedSceneInfos OutCompressedSampleSceneMetadata,
+	out FSSDCompressedMultiplexedSample OutCompressedMultiplexedSamples)
+{
+	uint2 PixelCoord = BufferUVToBufferPixelCoord(SampleBufferUV);
+
+	OutCompressedSampleSceneMetadata = SampleCompressedSceneMetadata(
+		KernelConfig.bPreviousFrameMetadata, SampleBufferUV, PixelCoord);
+
+	// Fetches the signals sample
+	OutCompressedMultiplexedSamples = SampleCompressedMultiplexedSignals(
+		SignalBuffer0,
+		SignalBuffer1,
+		SignalBuffer2,
+		SignalBuffer3,
+		GlobalPointClampedSampler,
+		SampleBufferUV,
+		KernelConfig.BufferMipLevel + MipLevel,
+		PixelCoord);
+} // SampleMultiplexedSignals()
+
+/** Uncompressed multiplexed signal for accumulation. */
+FSSDSignalArray UncompressMultiplexedSignals(
+	FSSDKernelConfig KernelConfig,
+	float2 SampleBufferUV,
+	FSSDCompressedMultiplexedSample CompressedMultiplexedSamples)
+{
+	// TODO(Denoiser): offer multiplier to apply to each signal during Decode, to save mul VALU.
+	FSSDSignalArray MultiplexedSamples = DecodeMultiplexedSignals(
+		KernelConfig.BufferLayout,
+		/* MultiplexedSampleId = */ 0,
+		KernelConfig.bNormalizeSample,
+		CompressedMultiplexedSamples);
+
+	if (KernelConfig.bClampUVPerMultiplexedSignal)
+	{
+		[unroll(SIGNAL_ARRAY_SIZE)]
+			for (uint SignalMultiplexId = 0; SignalMultiplexId < SIGNAL_ARRAY_SIZE; SignalMultiplexId++)
+			{
+				bool bInvalidSample = any(SampleBufferUV != clamp(
+					SampleBufferUV, KernelConfig.PerSignalUVMinMax[SignalMultiplexId].xy, KernelConfig.PerSignalUVMinMax[SignalMultiplexId].zw));
+
+				if (bInvalidSample)
+				{
+					MultiplexedSamples.Array[SignalMultiplexId] = CreateSignalSampleFromScalarValue(0.0);
+				}
+			} // for (uint SignalMultiplexId = 0; SignalMultiplexId < SIGNAL_ARRAY_SIZE; SignalMultiplexId++)
+	}
+
+	return MultiplexedSamples;
+}
 
 /** Accumulate multiplexed samples and their metadata to an accumulator. */
 void AccumulateSampledMultiplexedSignals(
@@ -566,6 +643,97 @@ void SampleAndAccumulateMultiplexedSignals(
 	}
 } // SampleAndAccumulateMultiplexedSignals()
 
+void SampleAndAccumulateMultiplexedSignalsPair(
+	FSSDKernelConfig KernelConfig,
+	FSSDTexture2D SignalBuffer0,
+	FSSDTexture2D SignalBuffer1,
+	FSSDTexture2D SignalBuffer2,
+	FSSDTexture2D SignalBuffer3,
+	inout FSSDSignalAccumulatorArray UncompressedAccumulators,
+	inout FSSDCompressedSignalAccumulatorArray CompressedAccumulators,
+	float2 SampleBufferUV[2],
+	float KernelSampleWeight)
+{
+	FSSDCompressedSceneInfos CompressedSampleSceneMetadata[2];
+	FSSDCompressedMultiplexedSample CompressedMultiplexedSamples[2];
+	bool bIsOutsideFrustum[2];
+
+	// Force all the signal texture fetch and metadata to overlap to minimize serial texture fetches.
+	{
+		[unroll(2)]
+		for (uint PairFetchId = 0; PairFetchId < 2; PairFetchId++)
+		{
+			// Stores in SGPR whether this sample is outside the viewport, to avoid VGPR pressure to
+			// avoid keeping SampleBufferUV after texture fetches.
+			bIsOutsideFrustum[PairFetchId] = IsOutsideViewport(KernelConfig, SampleBufferUV[PairFetchId]);
+
+			SampleMultiplexedSignals(
+				KernelConfig,
+				SignalBuffer0,
+				SignalBuffer1,
+				SignalBuffer2,
+				SignalBuffer3,
+				SampleBufferUV[PairFetchId],
+				/* MipLevel = */ 0.0,
+				/* out */ CompressedSampleSceneMetadata[PairFetchId],
+				/* out */ CompressedMultiplexedSamples[PairFetchId]);
+		}
+	}
+
+		// Accumulate the samples, giving full freedom for shader compiler scheduler to put instructions in most optimal way.
+	{
+		// Uncompress the multiplexed signal.
+		FSSDSignalArray MultiplexedSamples[2];
+		[unroll(2)]
+			for (uint PairUncompressId = 0; PairUncompressId < 2; PairUncompressId++)
+			{
+				MultiplexedSamples[PairUncompressId] = UncompressMultiplexedSignals(
+					KernelConfig, SampleBufferUV[PairUncompressId], CompressedMultiplexedSamples[PairUncompressId]);
+			}
+
+		// Take the min inverse frequency per signal if desired.
+		// TODO(Denoiser): this should be normalized in theory...
+		if (KernelConfig.bMinSamplePairInvFrequency)
+		{
+			[unroll(SIGNAL_ARRAY_SIZE)]
+				for (uint SignalMultiplexId = 0; SignalMultiplexId < SIGNAL_ARRAY_SIZE; SignalMultiplexId++)
+				{
+					float MinInvFrequency = min(
+						MultiplexedSamples[0].Array[SignalMultiplexId].WorldBluringRadius,
+						MultiplexedSamples[1].Array[SignalMultiplexId].WorldBluringRadius);
+
+					[flatten]
+						if (MinInvFrequency > 0)
+						{
+							MultiplexedSamples[0].Array[SignalMultiplexId].WorldBluringRadius = MinInvFrequency;
+							MultiplexedSamples[1].Array[SignalMultiplexId].WorldBluringRadius = MinInvFrequency;
+						}
+				}
+		}
+
+		FSSDSampleSceneInfos RefSceneMetadata = UncompressRefSceneMetadata(KernelConfig);
+
+		[unroll(2)]
+			for (uint PairAccumulateId = 0; PairAccumulateId < 2; PairAccumulateId++)
+			{
+				FSSDSampleSceneInfos SampleSceneMetadata = UncompressSampleSceneMetadata(
+					KernelConfig, SampleBufferUV[PairAccumulateId], CompressedSampleSceneMetadata[PairAccumulateId]);
+
+				AccumulateSampledMultiplexedSignals(
+					KernelConfig,
+					/* inout */ UncompressedAccumulators,
+					/* inout */ CompressedAccumulators,
+					RefSceneMetadata,
+					SampleBufferUV[PairAccumulateId],
+					SampleSceneMetadata,
+					MultiplexedSamples[PairAccumulateId],
+					KernelSampleWeight,
+					/* bForceSample = */ false,
+					bIsOutsideFrustum[PairAccumulateId]);
+			}
+	}
+} // SampleAndAccumulateMultiplexedSignalsPair()
+
 void StartAccumulatingCluster(
 	FSSDKernelConfig KernelConfig,
 	inout FSSDSignalAccumulatorArray UncompressedAccumulators,
@@ -578,7 +746,7 @@ void StartAccumulatingCluster(
 	FSSDSignalAccumulatorArray Accumulators = UncompressAccumulatorArray(CompressedAccumulators, CONFIG_ACCUMULATOR_VGPR_COMPRESSION);
 #endif
 
-	[unrool(SIGNAL_ARRAY_SIZE)]
+	[unroll(SIGNAL_ARRAY_SIZE)]
 		for (uint SignalMultiplexId = 0; SignalMultiplexId < SIGNAL_ARRAY_SIZE; SignalMultiplexId++)
 		{
 #if CONFIG_ACCUMULATOR_VGPR_COMPRESSION == ACCUMULATOR_COMPRESSION_DISABLED
@@ -601,6 +769,77 @@ void StartAccumulatingCluster(
 #if CONFIG_ACCUMULATOR_VGPR_COMPRESSION != ACCUMULATOR_COMPRESSION_DISABLED
 	CompressedAccumulators = CompressAccumulatorArray(Accumulators, CONFIG_ACCUMULATOR_VGPR_COMPRESSION);
 #endif
+}
+
+void DijestAccumulatedClusterSamples(
+	inout FSSDSignalAccumulatorArray UncompressedAccumulators,
+	inout FSSDCompressedSignalAccumulatorArray CompressedAccumulators,
+	uint RingId, uint SampleCount)
+{
+#if CONFIG_ACCUMULATOR_VGPR_COMPRESSION != ACCUMULATOR_COMPRESSION_DISABLED
+	FSSDSignalAccumulatorArray Accumulators = UncompressAccumulatorArray(CompressedAccumulators, CONFIG_ACCUMULATOR_VGPR_COMPRESSION);
+#endif
+
+	[unroll(SIGNAL_ARRAY_SIZE)]
+		for (uint SignalMultiplexId = 0; SignalMultiplexId < SIGNAL_ARRAY_SIZE; SignalMultiplexId++)
+		{
+#if CONFIG_ACCUMULATOR_VGPR_COMPRESSION == ACCUMULATOR_COMPRESSION_DISABLED
+			{
+				DijestAccumulatedClusterSamples(
+					/* inout */ UncompressedAccumulators.Array[SignalMultiplexId],
+					RingId, SampleCount);
+			}
+#else
+			{
+				DijestAccumulatedClusterSamples(
+					/* inout */ Accumulators.Array[SignalMultiplexId],
+					RingId, SampleCount);
+			}
+#endif
+		}
+
+#if CONFIG_ACCUMULATOR_VGPR_COMPRESSION != ACCUMULATOR_COMPRESSION_DISABLED
+	CompressedAccumulators = CompressAccumulatorArray(Accumulators, CONFIG_ACCUMULATOR_VGPR_COMPRESSION);
+#endif
+}
+
+void SampleAndAccumulateCenterSampleAsItsOwnCluster(
+	FSSDKernelConfig KernelConfig,
+	FSSDTexture2D SignalBuffer0,
+	FSSDTexture2D SignalBuffer1,
+	FSSDTexture2D SignalBuffer2,
+	FSSDTexture2D SignalBuffer3,
+	inout FSSDSignalAccumulatorArray UncompressedAccumulators,
+	inout FSSDCompressedSignalAccumulatorArray CompressedAccumulators)
+{
+	const uint RingId = 0;
+
+	FSSDSampleClusterInfo ClusterInfo;
+	ClusterInfo.OutterBoundaryRadius = (RingId + 1) * KernelConfig.KernelSpreadFactor;
+
+	StartAccumulatingCluster(
+		KernelConfig,
+		/* inout */ UncompressedAccumulators,
+		/* inout */ CompressedAccumulators,
+		ClusterInfo);
+
+	SampleAndAccumulateMultiplexedSignals(
+		KernelConfig,
+		SignalBuffer0,
+		SignalBuffer1,
+		SignalBuffer2,
+		SignalBuffer3,
+		/* inout */ UncompressedAccumulators,
+		/* inout */ CompressedAccumulators,
+		KernelConfig.BufferUV,
+		/* MipLevel = */ 0.0,
+		/* KernelSampleWeight = */ 1.0,
+		/* bForceSample = */ KernelConfig.bForceKernelCenterAccumulation);
+
+	DijestAccumulatedClusterSamples(
+		/* inout */ UncompressedAccumulators,
+		/* inout */ CompressedAccumulators,
+		RingId, /* SampleCount = */ 1);
 }
 
 //------------------------------------------------------- STACKOWIAK 2018
@@ -783,7 +1022,7 @@ void ConvolveStackowiakKernel(
 		[loop]
 			for (uint BatchId = 0; BatchId < BatchCountCount; BatchId++)
 			{
-				[unrool(2)]
+				[unroll(2)]
 					for (uint SampleBatchId = 0; SampleBatchId < 2; SampleBatchId++)
 					{
 						uint SampleId = (BatchCountCount - BatchId) * kSamplingBatchSize - 1 - SampleBatchId;
@@ -830,7 +1069,7 @@ void ConvolveStackowiakKernel(
 									/* inout */ CompressedAccumulators,
 									CurrentRingId, SampleCountForCluster);
 
-								BRANCH
+								[branch]
 									if (!KernelConfig.bSampleKernelCenter && SampleId == 1)
 									{
 										break;
@@ -912,7 +1151,7 @@ void ConvolveStackowiakKernel(
 
 		// Processes the samples in batches so that the compiler can do lattency hidding.
 		// TODO(Denoiser): kSamplingBatchSize for lattency hidding
-		LOOP
+		[loop]
 			for (uint BatchId = 0; BatchId < BatchCountCount; BatchId++)
 			{
 				float2 SampleBufferUV[2];

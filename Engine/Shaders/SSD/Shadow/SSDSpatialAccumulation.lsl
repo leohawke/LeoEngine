@@ -137,7 +137,6 @@
 (include SSD/SSDSignalFramework.h)
 (include SSD/SSDSpatialKernel.h)
 (include SSD/SSDSignalArray.h)
-    (RWTexture2D (elemtype uint) SignalOutput_UAVs_0)
     (sampler point_sampler
         (filtering min_mag_mip_point)
 		(address_u clamp)
@@ -167,6 +166,25 @@ FSSDTexture2D SignalInput_Textures_2;
 FSSDTexture2D SignalInput_Textures_3;
 #else
 #define SignalInput_Textures_3 SignalInput_Textures_0
+#endif
+
+FSSDRWTexture2D	SignalOutput_UAVs_0;
+#if CONFIG_OUTPUT_TEXTURE_COUNT > 1
+FSSDRWTexture2D	SignalOutput_UAVs_1;
+#else
+#define SignalOutput_UAVs_1 SignalOutput_UAVs_0
+#endif
+
+#if CONFIG_OUTPUT_TEXTURE_COUNT > 2
+FSSDRWTexture2D	SignalOutput_UAVs_2;
+#else
+#define SignalOutput_UAVs_2 SignalOutput_UAVs_0
+#endif
+
+#if CONFIG_OUTPUT_TEXTURE_COUNT > 3
+FSSDRWTexture2D	SignalOutput_UAVs_3;
+#else
+#define SignalOutput_UAVs_3 SignalOutput_UAVs_0
 #endif
 
 [numthreads(TILE_PIXEL_SIZE,TILE_PIXEL_SIZE,1)]
@@ -264,7 +282,7 @@ void MainCS(
 			}
 		}
 
-		SetBilateralPreset(0x0011,  KernelConfig);
+		SetBilateralPreset(CONFIG_BILATERAL_PRESET,  KernelConfig);
 
 		KernelConfig.BufferSizeAndInvSize = BufferSizeAndInvSize;
 		KernelConfig.BufferBilinearUVMinMax = BufferBilinearUVMinMax;
@@ -444,12 +462,6 @@ void MainCS(
 				// TODO(Denoiser): store this in its own signal to avoid *= N; *= rcp(N);
 				OutputSamples.Array[MultiplexId].WorldBluringRadius = 
 					OutputSamples.Array[MultiplexId].SampleCount * SignalAccumulators.Array[MultiplexId].MinInvFrequency;
-			
-				// No need to keep the VGPR pressure at this point for WorldBluringRadius, because no passes use it after.
-				if (DIM_STAGE == STAGE_POST_FILTERING && 0)
-				{
-					OutputSamples.Array[MultiplexId].WorldBluringRadius = 0;
-				}
 			}
 		}
 		#endif
@@ -476,14 +488,14 @@ void MainCS(
 		OutputPixelPostion = ViewportMin + DispatchThreadId;
 	#endif 
 
-	RANCH
+	[branch]
 	if (all(OutputPixelPostion < ViewportMax))
 	{
 		OutputMultiplexedSignal(
 				SignalOutput_UAVs_0,
-				SignalOutput_UAVs_0,
-				SignalOutput_UAVs_0,
-				SignalOutput_UAVs_0,
+				SignalOutput_UAVs_1,
+				SignalOutput_UAVs_2,
+				SignalOutput_UAVs_3,
 				CONFIG_SIGNAL_OUTPUT_LAYOUT, MultiplexCount,
 				OutputPixelPostion, OutputSamples.Array);
 	}

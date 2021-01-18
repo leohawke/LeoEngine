@@ -36,6 +36,54 @@ static const float WORLD_RADIUS_INVALID = -1;
 /** Internal buffer layout for the shadow penumbra to be stored in indivual per light histories. */
 #define SIGNAL_BUFFER_LAYOUT_PENUMBRA_HISTORY 11
 
+/** Buffer layout input for denoising multi polychromatic penumbra. */
+#define SIGNAL_BUFFER_LAYOUT_POLYCHROMATIC_PENUMBRA_HARMONIC_INPUT 0x1000
+
+/** Internal buffer layout for denoising multi polychromatic penumbra. */
+#define SIGNAL_BUFFER_LAYOUT_POLYCHROMATIC_PENUMBRA_HARMONIC_RECONSTRUCTION 0x1001
+
+/** Internal buffer layout for denoising multi polychromatic penumbra. */
+#define SIGNAL_BUFFER_LAYOUT_POLYCHROMATIC_PENUMBRA_HISTORY 0x1002
+
+
+/** Buffer layout for the reflection given by the ray generation shader. */
+#define SIGNAL_BUFFER_LAYOUT_REFLECTIONS_INPUT 3
+
+/** Buffer layout for the rejection output. */
+#define SIGNAL_BUFFER_LAYOUT_REFLECTIONS_REJECTION 9
+
+/** Buffer layout for the reflection output. */
+#define SIGNAL_BUFFER_LAYOUT_REFLECTIONS_HISTORY 4
+
+
+/** Buffer layout given by the ray generation shader for ambient occlusion. */
+#define SIGNAL_BUFFER_LAYOUT_AO_INPUT 0xA000
+
+/** Internal buffer layout for ambient occlusion. */
+#define SIGNAL_BUFFER_LAYOUT_AO_REJECTION 0xA001
+
+/** Internal buffer layout for ambient occlusion. */
+#define SIGNAL_BUFFER_LAYOUT_AO_HISTORY 0xA002
+
+
+/** Buffer layout given by the ray generation shader for diffuse indirect  illumination. */
+#define SIGNAL_BUFFER_LAYOUT_DIFFUSE_INDIRECT_AND_AO_INPUT_NSPP 0xD100
+
+/** Internal buffer layout for diffuse indirect illumination. */
+#define SIGNAL_BUFFER_LAYOUT_DIFFUSE_INDIRECT_AND_AO_RECONSTRUCTION 0xD101
+
+/** Internal buffer layout for diffuse indirect illumination. */
+#define SIGNAL_BUFFER_LAYOUT_DIFFUSE_INDIRECT_AND_AO_HISTORY 0xD102
+
+
+/** Buffer layout given by the ray generation shader for diffuse indirect  illumination. */
+#define SIGNAL_BUFFER_LAYOUT_DIFFUSE_INDIRECT_HARMONIC 0xD200
+
+/** Buffer layout given by SSGI. */
+#define SIGNAL_BUFFER_LAYOUT_SSGI_INPUT 0xD300
+
+#define SIGNAL_BUFFER_LAYOUT_SSGI_HISTORY_R11G11B10 0xD301
+
 /** Defines how the signal is being processed. Matches C++'s ESignalProcessing. */
 	/** Shadow penumbra denoising. */
 #define SIGNAL_PROCESSING_SHADOW_VISIBILITY_MASK 0
