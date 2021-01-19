@@ -36,6 +36,8 @@ namespace platform
 		struct ShadowVisibilityInput
 		{
 			Render::Texture2D* Mask;
+			Render::Texture* SceneDepth;
+			Render::Texture2D* WorldNormal;
 		};
 
 		struct ShadowVisibilityOutput

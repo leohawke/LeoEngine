@@ -62,6 +62,7 @@ public:
 
 
 	std::shared_ptr<Texture2D> HDROutput;
+	std::shared_ptr<Texture2D> NormalOutput;
 
 
 	leo::math::float4 clear_color = { 0,0,0,0 };
@@ -143,6 +144,11 @@ private:
 
 		using namespace std::literals;
 
+		for (auto& entity : pEntities->GetRenderables())
+		{
+			entity.GetMaterial().UpdateParams(reinterpret_cast<const platform::Renderable*>(&entity));
+		}
+
 		//viewinfo materialinfo
 		{
 			//obj
@@ -174,12 +180,15 @@ private:
 
 		{
 			SCOPED_GPU_EVENT(CmdList, PreZ);
-			platform::Render::RenderPassInfo prezPass(depth_tex, platform::Render::DepthStencilTargetActions::ClearDepthStencil_StoreDepthStencil);
+			platform::Render::RenderPassInfo prezPass(
+				NormalOutput.get(), platform::Render::RenderTargetActions::Clear_Store, 
+				depth_tex, platform::Render::DepthStencilTargetActions::ClearDepthStencil_StoreDepthStencil);
 			CmdList.BeginRenderPass(prezPass, "PreZ");
 
 			//pre-z
 			for (auto& entity : pEntities->GetRenderables())
 			{
+				//copy normal map params
 				Context::Instance().Render(CmdList, *pPreZEffect, pPreZEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
 			}
 		}
@@ -198,7 +207,6 @@ private:
 
 			for (auto& entity : pEntities->GetRenderables())
 			{
-				entity.GetMaterial().UpdateParams(reinterpret_cast<const platform::Renderable*>(&entity));
 				Context::Instance().Render(CmdList, *pEffect, pEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
 			}
 		}
@@ -267,16 +275,22 @@ private:
 
 		SCOPED_GPU_EVENT(CmdList, DrawLights);
 
+		auto& screen_frame = Context::Instance().GetScreenFrame();
+		auto screen_tex = screen_frame->Attached(FrameBuffer::Target0);
+		auto depth_tex = screen_frame->Attached(FrameBuffer::DepthStencil);
+
 		//clear rt?
 		Context::Instance().GetRayContext().RayTraceShadow(Scene.get(),
-			Context::Instance().GetScreenFrame().get(),
+			screen_frame.get(),
 			RayShadowMaskUAV.get(),
 			pGenShaderConstants.get());
 
 
 		platform::ScreenSpaceDenoiser::ShadowVisibilityInput svinput =
 		{
-			.Mask = RayShadowMask.get()
+			.Mask = RayShadowMask.get(),
+			.SceneDepth =depth_tex,
+			.WorldNormal = NormalOutput.get()
 		};
 
 		platform::ScreenSpaceDenoiser::ShadowVisibilityOutput svoutput =
@@ -336,6 +350,7 @@ private:
 		data.clear_value = &ClearValueBinding::Black;
 
 		HDROutput = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_ABGR16F, EA_GPURead | EA_RTV, {}, &data));
+		NormalOutput = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_ABGR16F, EA_GPURead | EA_RTV, {}, &data));
 
 		pEntities = std::make_unique<Entities>("sponza_crytek.entities.lsl");
 
