@@ -221,10 +221,6 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		SCOPED_GPU_EVENT(CmdList, SSDSpatialAccumulation_Reconstruction);
 
 		//CreateUAV
-
-
-		auto ReconstShader = Render::GetBuiltInShaderMap()->GetShader<SSDSpatialAccumulationCS>();
-
 		SSDSpatialAccumulationCS::Parameters Parameters;
 		Parameters.ThreadIdToBufferUV.x = 1.0f / FullResW;
 		Parameters.ThreadIdToBufferUV.y = 1.0f / FullResH;

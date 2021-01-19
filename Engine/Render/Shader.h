@@ -4,6 +4,7 @@
 #include "ShaderCore.h"
 #include "ShaderPermutation.h"
 #include <concepts>
+#include <shared_mutex>
 
 #define PR_NAMESPACE_BEGIN  namespace platform::Render {
 #define PR_NAMESPACE_END }
@@ -406,6 +407,7 @@ public:\
 		std::vector<size_t> ShaderTypes;
 		std::vector<int32> ShaderPermutations;
 		std::unordered_multimap<leo::uint16,leo::uint32> ShaderHash;
+		std::shared_mutex ShaderMutex;
 	};
 
 

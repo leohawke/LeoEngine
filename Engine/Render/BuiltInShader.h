@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Shader.h"
+#include <shared_mutex>
 
 #define PR_NAMESPACE_BEGIN  namespace platform::Render {
 #define PR_NAMESPACE_END }
@@ -139,6 +140,7 @@ inline namespace Shader
 		RenderShader* FindOrAddShader(const ShaderMeta* ShaderType, int32 PermutationId, RenderShader* Shader);
 
 	private:
+		std::shared_mutex MapMutex;
 		std::unordered_map<std::size_t, BuiltInShaderMapSection*> SectionMap;
 	};
 

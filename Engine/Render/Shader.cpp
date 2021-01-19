@@ -232,10 +232,15 @@ RenderShader* Shader::ShaderMapContent::GetShader(size_t TypeNameHash, int32 Per
 
 RenderShader* Shader::ShaderMapContent::FindOrAddShader(size_t TypeNameHash, int32 PermutationId, RenderShader* Shader)
 {
-	auto FindShader = GetShader(TypeNameHash, PermutationId);
+	{
+		std::shared_lock lock{ ShaderMutex };
+		auto FindShader = GetShader(TypeNameHash, PermutationId);
 
-	if (FindShader != nullptr)
-		return FindShader;
+		if (FindShader != nullptr)
+			return FindShader;
+	}
+
+	std::unique_lock lock{ ShaderMutex };
 
 	auto Hash = (uint16)CityHash128to64({ TypeNameHash,(uint64)PermutationId });
 
