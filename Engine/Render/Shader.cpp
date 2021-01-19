@@ -132,7 +132,7 @@ namespace platform::Render::Shader
 
 			pShader->SetRayTracingShader(pRayTracingShaderRHI);
 
-			GGlobalBuiltInShaderMap.FindOrAddShader(meta,0, pShader);
+			GGlobalBuiltInShaderMap.FindOrAddShader(meta, PermutationId, pShader);
 		}
 		else if (auto pBuiltInMeta = meta->GetBuiltInShaderType()) {
 			platform::Render::ShaderInitializer initializer;
@@ -147,7 +147,7 @@ namespace platform::Render::Shader
 
 			auto pShader = pBuiltInMeta->Construct(compileOuput);
 
-			GGlobalBuiltInShaderMap.FindOrAddShader(meta,0, pShader);
+			GGlobalBuiltInShaderMap.FindOrAddShader(meta, PermutationId, pShader);
 		}
 
 		co_return;
@@ -161,16 +161,17 @@ namespace platform::Render::Shader
 		for (auto meta : ShaderMeta::GetTypeList())
 		{
 			//TODO:dispatch type
-			auto builtin_meta = static_cast<BuiltInShaderMeta*>(meta);
-
-			int32 PermutationCountToCompile = 0;
-			for (int32 PermutationId = 0; PermutationId < meta->GetPermutationCount(); PermutationId++)
+			if (auto pBuiltInMeta = meta->GetBuiltInShaderType())
 			{
-				if (!builtin_meta->ShouldCompilePermutation(PermutationId))
-					continue;
+				int32 PermutationCountToCompile = 0;
+				for (int32 PermutationId = 0; PermutationId < meta->GetPermutationCount(); PermutationId++)
+				{
+					if (!pBuiltInMeta->ShouldCompilePermutation(PermutationId))
+						continue;
 
-				auto task = Environment->Scheduler->Schedule(CompileBuiltInShader(builtin_meta,PermutationId));
-				tasks.emplace_back(std::move(task));
+					auto task = Environment->Scheduler->Schedule(CompileBuiltInShader(pBuiltInMeta, PermutationId));
+					tasks.emplace_back(std::move(task));
+				}
 			}
 		}
 
