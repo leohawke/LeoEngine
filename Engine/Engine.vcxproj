@@ -309,9 +309,9 @@
     <None Include="Render\Effect\PreZ.lsl" />
     <None Include="Render\Effect\Util.lsl" />
     <None Include="Render\Material\FPDS.mat.lsl" />
-    <None Include="Shaders\ACES.lsl" />
+    <None Include="Shaders\ACES.h" />
     <None Include="Shaders\Common.h" />
-    <None Include="Shaders\GammaCorrectionCommon.lsl" />
+    <None Include="Shaders\GammaCorrectionCommon.h" />
     <None Include="Shaders\imgui\imgui.lsl" />
     <None Include="Shaders\MonteCarlo.h" />
     <None Include="Shaders\PostProcess\PostProcessCombineLUTs.lsl" />

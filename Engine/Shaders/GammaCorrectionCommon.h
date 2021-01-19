@@ -1,6 +1,5 @@
-(effect
-(shader
-"
+#ifndef GammaCorrectionCommon_h
+#define GammaCorrectionCommon_h 1
 half3 LinearTo709Branchless(half3 lin) 
 {
 	lin = max(6.10352e-5, lin); // minimum positive non-denormal (fixes black problem on DX11 AMD and NV)
@@ -170,6 +169,4 @@ LinearToST2084(float3 lin)
 	
 	return P;
 }
-"
-)
-)
+#endif

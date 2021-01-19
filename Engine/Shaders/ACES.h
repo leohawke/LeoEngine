@@ -1,6 +1,5 @@
-(effect
-(shader
-"
+#ifndef ACES_h
+#define ACES_h 
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 /*
@@ -1160,6 +1159,5 @@ float3 ODT_2000nits( float3 oces )
 
 	return rgbPost;
 }
-"
-)
-)
+
+#endif

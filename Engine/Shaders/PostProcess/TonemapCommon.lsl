@@ -1,7 +1,7 @@
 (effect
     (include Common.h)
-    (refer ACES.lsl)
-    (refer GammaCorrectionCommon.lsl)
+    (include ACES.h)
+    (include GammaCorrectionCommon.h)
     (float3 InverseGamma)
     (float FilmSlope)
     (float FilmToe)

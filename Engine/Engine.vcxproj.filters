@@ -925,12 +925,6 @@
     <None Include="Shaders\PostProcess\VolumeRendering.lsl">
       <Filter>Shaders\PostProcess</Filter>
     </None>
-    <None Include="Shaders\ACES.lsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\GammaCorrectionCommon.lsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="Shaders\PostProcess\TonemapCommon.lsl">
       <Filter>Shaders\PostProcess</Filter>
     </None>
@@ -980,6 +974,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\Common.h">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\ACES.h">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\GammaCorrectionCommon.h">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
