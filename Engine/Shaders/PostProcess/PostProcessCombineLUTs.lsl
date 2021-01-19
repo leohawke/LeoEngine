@@ -1,6 +1,6 @@
 (effect
     (include Common.h)
-    (refer PostProcess/TonemapCommon.lsl)
+    (include PostProcess/TonemapCommon.h)
     (float4 ColorSaturation)
     (float4 ColorContrast)
     (float4 ColorGamma)

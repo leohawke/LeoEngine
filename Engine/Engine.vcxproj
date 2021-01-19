@@ -316,7 +316,7 @@
     <None Include="Shaders\MonteCarlo.h" />
     <None Include="Shaders\PostProcess\PostProcessCombineLUTs.lsl" />
     <None Include="Shaders\PostProcess\PostProcessToneMap.lsl" />
-    <None Include="Shaders\PostProcess\TonemapCommon.lsl" />
+    <None Include="Shaders\PostProcess\TonemapCommon.h" />
     <None Include="Shaders\PostProcess\VolumeRendering.lsl" />
     <None Include="Shaders\RandomSequence.h" />
     <None Include="Shaders\RayTracing\RayTracingBuiltInShaders.lsl" />

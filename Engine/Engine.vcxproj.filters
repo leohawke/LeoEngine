@@ -925,9 +925,6 @@
     <None Include="Shaders\PostProcess\VolumeRendering.lsl">
       <Filter>Shaders\PostProcess</Filter>
     </None>
-    <None Include="Shaders\PostProcess\TonemapCommon.lsl">
-      <Filter>Shaders\PostProcess</Filter>
-    </None>
     <None Include="Render\Effect\material.lsl">
       <Filter>Shaders\Legacy</Filter>
     </None>
@@ -981,6 +978,9 @@
     </None>
     <None Include="Shaders\GammaCorrectionCommon.h">
       <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\PostProcess\TonemapCommon.h">
+      <Filter>Shaders\PostProcess</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

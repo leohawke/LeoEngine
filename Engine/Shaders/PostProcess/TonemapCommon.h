@@ -1,15 +1,16 @@
-(effect
-    (include Common.h)
-    (include ACES.h)
-    (include GammaCorrectionCommon.h)
-    (float3 InverseGamma)
-    (float FilmSlope)
-    (float FilmToe)
-    (float FilmShoulder)
-    (float FilmBlackClip)
-    (float FilmWhiteClip)
-	(shader
-"
+#ifndef TonemapCommon_h
+#define TonemapCommon_h 1
+
+#include "Common.h"
+#include "ACES.h"
+#include "GammaCorrectionCommon.h"
+
+float3 InverseGamma;
+float FilmSlope;
+float FilmToe;
+float FilmShoulder;
+float FilmBlackClip;
+float FilmWhiteClip;
 half3 FilmToneMap( half3 LinearColor ) 
 {
 	const float3x3 sRGB_2_AP0 = mul( XYZ_2_AP0_MAT, mul( D65_2_D60_CAT, sRGB_2_XYZ_MAT ) );
@@ -131,6 +132,4 @@ float3x3 OuputGamutMappingMatrix( uint OutputGamut )
 	else
 		return AP1_2_sRGB;
 }
-"
-    )
- )
+#endif
