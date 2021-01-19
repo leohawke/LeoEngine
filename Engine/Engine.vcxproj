@@ -310,7 +310,7 @@
     <None Include="Render\Effect\Util.lsl" />
     <None Include="Render\Material\FPDS.mat.lsl" />
     <None Include="Shaders\ACES.lsl" />
-    <None Include="Shaders\Common.lsl" />
+    <None Include="Shaders\Common.h" />
     <None Include="Shaders\GammaCorrectionCommon.lsl" />
     <None Include="Shaders\imgui\imgui.lsl" />
     <None Include="Shaders\MonteCarlo.h" />

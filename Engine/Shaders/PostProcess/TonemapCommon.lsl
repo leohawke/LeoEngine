@@ -1,5 +1,5 @@
 (effect
-    (refer Common.lsl)
+    (include Common.h)
     (refer ACES.lsl)
     (refer GammaCorrectionCommon.lsl)
     (float3 InverseGamma)

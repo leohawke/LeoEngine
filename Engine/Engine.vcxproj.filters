@@ -919,9 +919,6 @@
     <None Include="Shaders\RayTracing\RayTracingBuiltInShaders.lsl">
       <Filter>Shaders\RayTracing</Filter>
     </None>
-    <None Include="Shaders\Common.lsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="Shaders\PostProcess\PostProcessCombineLUTs.lsl">
       <Filter>Shaders\PostProcess</Filter>
     </None>
@@ -980,6 +977,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\MonteCarlo.h">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Common.h">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

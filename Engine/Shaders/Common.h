@@ -1,6 +1,5 @@
-(effect
-    (shader
-    "
+#ifndef Common_h
+#define Common_h 1
 const static float PI = 3.1415926535897932f;
 
 float Square( float x )
@@ -49,6 +48,5 @@ void DrawRectangle(
 	OutTexCoord.xy = InTexCoord.xy ;
 }
 
-    "
-    )
-)
+
+#endif

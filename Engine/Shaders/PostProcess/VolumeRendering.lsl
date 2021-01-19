@@ -1,5 +1,5 @@
 (effect
-    (refer Common.lsl)
+    (include Common.h)
     (int MinZ)
     (float4 UVScaleBias)
     (shader

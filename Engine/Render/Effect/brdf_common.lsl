@@ -1,6 +1,6 @@
 (effect
 	(refer material.lsl)
-	(refer Common.lsl)
+	(include Common.h)
 	(shader 
 			"
 			float D_GGX(float nh,float roughness){

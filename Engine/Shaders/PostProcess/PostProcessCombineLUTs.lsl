@@ -1,5 +1,5 @@
 (effect
-    (refer Common.lsl)
+    (include Common.h)
     (refer PostProcess/TonemapCommon.lsl)
     (float4 ColorSaturation)
     (float4 ColorContrast)

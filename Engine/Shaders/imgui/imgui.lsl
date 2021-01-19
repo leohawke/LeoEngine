@@ -1,5 +1,5 @@
 (effect
-    (refer Common.lsl)
+    (include Common.h)
     (float4x4 ProjectionMatrix)
     (texture2D texture0)
 	(sampler sampler0)

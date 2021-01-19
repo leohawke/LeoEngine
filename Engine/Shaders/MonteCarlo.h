@@ -1,5 +1,7 @@
 #ifndef MonteCarlo_h
 #define MonteCarlo_h 1
+#include "Common.h"
+
 float2 UniformSampleDiskConcentric( float2 E )
 {
 	float2 p = 2 * E - 1;

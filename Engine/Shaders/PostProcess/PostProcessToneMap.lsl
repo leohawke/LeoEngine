@@ -1,5 +1,5 @@
 (effect
-    (refer Common.lsl)
+    (include Common.h)
     (refer PostProcess/TonemapCommon.lsl)
     (Texture2D ColorTexture)
     (Texture3D ColorGradingLUT)
