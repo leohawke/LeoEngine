@@ -137,11 +137,6 @@
 (include SSD/SSDSignalFramework.h)
 (include SSD/SSDSpatialKernel.h)
 (include SSD/SSDSignalArray.h)
-    (sampler point_sampler
-        (filtering min_mag_mip_point)
-		(address_u clamp)
-		(address_v clamp)
-    )
 (shader
 "
 uint MaxSampleCount;
@@ -227,7 +222,7 @@ void MainCS(
 			Signal_Textures_1,
 			Signal_Textures_2,
 			Signal_Textures_3,
-			point_sampler,
+			GlobalPointClampedSampler,
 			CONFIG_SIGNAL_INPUT_LAYOUT,
 			/* MultiplexedSampleId = */ 0,
 			/* bNormalizeSample = */ CONFIG_NORMALIZE_INPUT != 0,

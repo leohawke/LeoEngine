@@ -290,7 +290,8 @@ private:
 		{
 			.Mask = RayShadowMask.get(),
 			.SceneDepth =depth_tex,
-			.WorldNormal = NormalOutput.get()
+			.WorldNormal = NormalOutput.get(),
+			.StateFrameIndex = StateFrameIndex
 		};
 
 		platform::ScreenSpaceDenoiser::ShadowVisibilityOutput svoutput =

@@ -38,6 +38,7 @@ namespace platform
 			Render::Texture2D* Mask;
 			Render::Texture* SceneDepth;
 			Render::Texture2D* WorldNormal;
+			int StateFrameIndex;
 		};
 
 		struct ShadowVisibilityOutput

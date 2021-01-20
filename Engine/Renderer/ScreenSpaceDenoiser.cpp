@@ -135,17 +135,33 @@ public:
 
 
 	BEGIN_SHADER_PARAMETER_STRUCT(Parameters)
-		SHADER_PARAMETER(leo::math::float4, ThreadIdToBufferUV)
-		SHADER_PARAMETER(leo::math::float4, BufferBilinearUVMinMax)
-		SHADER_PARAMETER(leo::math::float2, BufferUVToOutputPixelPosition)
-		SHADER_PARAMETER(leo::math::float4, InputBufferUVMinMax)
+		//TODO:support ViewParams
 		SHADER_PARAMETER(leo::math::float2, ViewportMin)
 		SHADER_PARAMETER(leo::math::float2, ViewportMax)
-		SHADER_PARAMETER(leo::uint32,StateFrameIndexMod8)
+		SHADER_PARAMETER(leo::math::float4, ThreadIdToBufferUV)
+		SHADER_PARAMETER(leo::math::float4, BufferBilinearUVMinMax)
+		SHADER_PARAMETER(leo::math::float4, BufferSizeAndInvSize)
+		SHADER_PARAMETER(leo::math::float4, BufferUVToScreenPosition)
+		SHADER_PARAMETER(leo::math::float2, BufferUVToOutputPixelPosition)
+		SHADER_PARAMETER(leo::uint32, StateFrameIndexMod8)
+		SHADER_PARAMETER(leo::math::float4x4, ScreenToTranslatedWorld)
+		SHADER_PARAMETER(leo::math::float4x4, ViewToClip)
+		SHADER_PARAMETER(leo::math::float4x4, TranslatedWorldToView)
+		//TODO:SceneParamets
+		SHADER_PARAMETER_TEXTURE(Render::Texture2D, SceneDepthBuffer)
+		SHADER_PARAMETER_SAMPLER(Render::TextureSampleDesc, SceneDepthBufferSampler)
+		SHADER_PARAMETER_TEXTURE(Render::Texture2D, WorldNormalBuffer)
+		SHADER_PARAMETER_SAMPLER(Render::TextureSampleDesc, WorldNormalSampler)
+
+		SHADER_PARAMETER_SAMPLER(Render::TextureSampleDesc, GlobalPointClampedSampler)
+
+		SHADER_PARAMETER(float, WorldDepthToPixelWorldRadius)
+		//SignalFramework.h
 		SHADER_PARAMETER(float, HitDistanceToWorldBluringRadius)
+
 		SHADER_PARAMETER_TEXTURE(Render::Texture2D, SignalInput_Textures_0)
 		SHADER_PARAMETER_TEXTURE(Render::Shader::RWTexture2D, SignalOutput_UAVs_0)
-		SHADER_PARAMETER_SAMPLER(Render::TextureSampleDesc, point_sampler)
+		
 		END_SHADER_PARAMETER_STRUCT();
 
 	EXPORTED_BUILTIN_SHADER(SSDSpatialAccumulationCS);
@@ -165,10 +181,11 @@ namespace Shadow
 			SHADER_PARAMETER(leo::math::float4, ThreadIdToBufferUV)
 			SHADER_PARAMETER(leo::math::float4, BufferBilinearUVMinMax)
 			SHADER_PARAMETER(leo::math::float2, BufferUVToOutputPixelPosition)
+			SHADER_PARAMETER(leo::math::float4, InputBufferUVMinMax)
 			SHADER_PARAMETER(float, HitDistanceToWorldBluringRadius)
-			SHADER_PARAMETER_TEXTURE(Texture2D, SignalInput_Textures_0)
-			SHADER_PARAMETER_TEXTURE(Shader::RWTexture2D, SignalOutput_UAVs_0)
-			SHADER_PARAMETER_SAMPLER(TextureSampleDesc, point_sampler)
+			SHADER_PARAMETER_TEXTURE(Render::Texture2D, SignalInput_Textures_0)
+			SHADER_PARAMETER_TEXTURE(Render::Shader::RWTexture2D, SignalOutput_UAVs_0)
+			SHADER_PARAMETER_SAMPLER(Render::TextureSampleDesc, point_sampler)
 			END_SHADER_PARAMETER_STRUCT();
 
 		EXPORTED_BUILTIN_SHADER(SSDInjestCS);
@@ -201,6 +218,7 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		);
 
 		Parameters.BufferUVToOutputPixelPosition = leo::math::float2(FullResW, FullResH);
+
 		Parameters.HitDistanceToWorldBluringRadius = 1;
 
 		Parameters.SignalInput_Textures_0 = InputParameters.Mask;
@@ -222,6 +240,11 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 
 		//CreateUAV
 		SSDSpatialAccumulationCS::Parameters Parameters;
+
+		//ViewParams
+		Parameters.ViewportMin = leo::math::float2(0, 0);
+		Parameters.ViewportMax = leo::math::float2(FullResW, FullResH);
+
 		Parameters.ThreadIdToBufferUV.x = 1.0f / FullResW;
 		Parameters.ThreadIdToBufferUV.y = 1.0f / FullResH;
 		Parameters.ThreadIdToBufferUV.z = 0.5f / FullResW;
@@ -233,16 +256,33 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		);
 
 		Parameters.BufferUVToOutputPixelPosition = leo::math::float2(FullResW, FullResH);
-		Parameters.HitDistanceToWorldBluringRadius = 1;
 
-		Parameters.SignalInput_Textures_0 = InputParameters.Mask;
-		Parameters.SignalOutput_UAVs_0 = Output.MaskUAV;
+		Parameters.BufferUVToScreenPosition.x = 2;
+		Parameters.BufferUVToScreenPosition.y = -2;
+		Parameters.BufferUVToScreenPosition.z = -1.0f;
+		Parameters.BufferUVToScreenPosition.w = 1.0f;
+
+		Parameters.StateFrameIndexMod8 = InputParameters.StateFrameIndex % 8;
+
+		//SceneParams
+		Parameters.SceneDepthBuffer = static_cast<Render::Texture2D*>(InputParameters.SceneDepth);
+		Parameters.WorldNormalBuffer = InputParameters.WorldNormal;
 
 		Render::TextureSampleDesc point_sampler{};
 		point_sampler.address_mode_u = point_sampler.address_mode_v = point_sampler.address_mode_w = Render::TexAddressingMode::Clamp;
 		point_sampler.filtering = Render::TexFilterOp::Min_Mag_Mip_Point;
 
-		Parameters.point_sampler = point_sampler;
+		Parameters.GlobalPointClampedSampler = point_sampler;
+		Parameters.SceneDepthBufferSampler = point_sampler;
+		Parameters.WorldNormalSampler = point_sampler;
+
+		Parameters.WorldDepthToPixelWorldRadius = 1;
+		Parameters.HitDistanceToWorldBluringRadius = 1;
+
+		Parameters.SignalInput_Textures_0 = InputParameters.Mask;
+		Parameters.SignalOutput_UAVs_0 = Output.MaskUAV;
+
+		
 
 		SSDSpatialAccumulationCS::FPermutationDomain PermutationVector;
 		PermutationVector.Set<FSignalProcessingDim>(SignalProcessing::ShadowVisibilityMask);
