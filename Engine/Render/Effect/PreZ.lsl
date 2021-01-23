@@ -1,4 +1,5 @@
 (effect
+	(refer Util.lsl)
 	(cbuffer obj
 		(float4x4 world)
 	)
@@ -7,12 +8,18 @@
 		(float4x4 viewproj)
 	)
 	(texture2D normal_tex)
+	(sampler bilinear_sampler
+		(filtering min_mag_linear_mip_point)
+		(address_u clamp)
+		(address_v clamp)
+	)
 	(shader
 		"
 		void ForwardVS(in float3 Postion:POSITION,
 						in float4 Tangent_Quat:TANGENT,
 						in float2 TexCoord:TEXCOORD,
 					out float4 ClipPos:SV_POSITION,
+					out float2 Tex:TEXCOORD0,
 					out float3 oTsToW0:TEXCOORD3,
 					out float3 oTsToW1:TEXCOORD4,
 					out float3 oTsToW2:TEXCOORD5
@@ -21,7 +28,7 @@
 			float3 WorldPos = mul(float4(Postion,1.0f),world).xyz;
 
 			ClipPos = mul(float4(WorldPos,1.0f),viewproj);
-
+			Tex = TexCoord;
 			Tangent_Quat = Tangent_Quat * 2 - 1;
 
 			float3x3 obj_to_ts;
@@ -37,7 +44,8 @@
 		}
 
 		void ForwardPS(in float4 ClipPos:SV_POSITION,
-		in float3 t:TEXCOORD3,
+			in float2 tex:TEXCOORD0,
+			in float3 t:TEXCOORD3,
 			in float3 b:TEXCOORD4,
 			in float3 n:TEXCOORD5,
 			out float4 color :SV_Target

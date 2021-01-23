@@ -38,7 +38,6 @@ namespace platform
 			Render::Texture2D* Mask;
 			Render::Texture* SceneDepth;
 			Render::Texture2D* WorldNormal;
-			int StateFrameIndex;
 		};
 
 		struct ShadowVisibilityOutput
@@ -49,7 +48,10 @@ namespace platform
 
 		struct ShadowViewInfo
 		{
-
+			int StateFrameIndex;
+			leo::math::float4x4 ScreenToTranslatedWorld;
+			leo::math::float4x4 ViewToClip;
+			leo::math::float4x4 TranslatedWorldToView;
 		};
 
 		static void DenoiseShadowVisibilityMasks(

@@ -5,6 +5,7 @@
 #include "Engine/Render/ShaderTextureTraits.hpp"
 #include "Engine/Render/DrawEvent.h"
 #include "Engine/Render/ShaderPermutation.h"
+#include "Engine/Render/IContext.h"
 
 using namespace platform;
 
@@ -197,6 +198,7 @@ namespace Shadow
 
 void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::CommandList& CmdList, const ShadowViewInfo& ViewInfo, const ShadowVisibilityInput& InputParameters, const ShadowVisibilityOutput& Output)
 {
+	auto& Device = Render::Context::Instance().GetDevice();
 	auto FullResW = InputParameters.Mask->GetWidth(0);
 	auto FullResH = InputParameters.Mask->GetHeight(0);
 
@@ -234,11 +236,14 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 			ComputeShaderUtils::GetGroupCount(leo::math::int2(FullResW,FullResH),TILE_SIZE));
 	}
 
+	auto spatial_reconst =leo::share_raw(Device.CreateTexture(FullResW, FullResH,
+		1, 1, Render::EF_ABGR16F, Render::EA_GPURead | Render::EA_GPUUnordered | Render::EA_GPUWrite, {}));
 	// Spatial reconstruction with ratio estimator to be more precise in the history rejection.
 	{
 		SCOPED_GPU_EVENT(CmdList, SSDSpatialAccumulation_Reconstruction);
 
 		//CreateUAV
+
 		SSDSpatialAccumulationCS::Parameters Parameters;
 
 		//ViewParams
@@ -262,7 +267,10 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		Parameters.BufferUVToScreenPosition.z = -1.0f;
 		Parameters.BufferUVToScreenPosition.w = 1.0f;
 
-		Parameters.StateFrameIndexMod8 = InputParameters.StateFrameIndex % 8;
+		Parameters.StateFrameIndexMod8 = ViewInfo.StateFrameIndex % 8;
+		Parameters.ScreenToTranslatedWorld = ViewInfo.ScreenToTranslatedWorld;
+		Parameters.ViewToClip = ViewInfo.ViewToClip;
+		Parameters.TranslatedWorldToView = ViewInfo.TranslatedWorldToView;
 
 		//SceneParams
 		Parameters.SceneDepthBuffer = static_cast<Render::Texture2D*>(InputParameters.SceneDepth);
@@ -280,9 +288,8 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		Parameters.HitDistanceToWorldBluringRadius = 1;
 
 		Parameters.SignalInput_Textures_0 = InputParameters.Mask;
-		Parameters.SignalOutput_UAVs_0 = Output.MaskUAV;
+		Parameters.SignalOutput_UAVs_0 = Device.CreateUnorderedAccessView(spatial_reconst.get());
 
-		
 
 		SSDSpatialAccumulationCS::FPermutationDomain PermutationVector;
 		PermutationVector.Set<FSignalProcessingDim>(SignalProcessing::ShadowVisibilityMask);
@@ -295,5 +302,8 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 
 		ComputeShaderUtils::Dispatch(CmdList, ComputeShader, Parameters,
 			ComputeShaderUtils::GetGroupCount(leo::math::int2(FullResW, FullResH), TILE_SIZE));
+
+		//UAV RObject??
+		delete Parameters.SignalOutput_UAVs_0;
 	}
 }

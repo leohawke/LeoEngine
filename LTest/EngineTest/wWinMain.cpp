@@ -291,7 +291,6 @@ private:
 			.Mask = RayShadowMask.get(),
 			.SceneDepth =depth_tex,
 			.WorldNormal = NormalOutput.get(),
-			.StateFrameIndex = StateFrameIndex
 		};
 
 		platform::ScreenSpaceDenoiser::ShadowVisibilityOutput svoutput =
@@ -300,11 +299,24 @@ private:
 			.MaskUAV = RayShadowMaskDenoiserUAV.get()
 		};
 
+		platform::ScreenSpaceDenoiser::ShadowViewInfo viewinfo =
+		{
+			.StateFrameIndex = StateFrameIndex,
+			.ScreenToTranslatedWorld =leo::math::transpose(leo::math::float4x4(
+			leo::math::float4(1, 0, 0, 0),
+			leo::math::float4(0, 1, 0, 0),
+			leo::math::float4(0, 0, projmatrix[2][2], 1),
+			leo::math::float4(0, 0, projmatrix[3][2], 0)
+			) * leo::math::inverse(viewproj)),
+			.ViewToClip = leo::math::transpose(projmatrix),
+			.TranslatedWorldToView = leo::math::transpose(viewmatrix),
+		};
+
 		SCOPED_GPU_EVENT(CmdList, ShadowDenoise);
 
 		platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(
 			CmdList,
-			{},
+			viewinfo,
 			svinput,
 			svoutput
 		);

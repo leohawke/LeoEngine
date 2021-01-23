@@ -934,9 +934,6 @@
     <None Include="Render\Effect\PreZ.lsl">
       <Filter>Shaders\Legacy</Filter>
     </None>
-    <None Include="Render\Effect\Util.lsl">
-      <Filter>Shaders\Legacy</Filter>
-    </None>
     <None Include="Render\Effect\ForwardDirectLightShading.lsl">
       <Filter>Shaders\Legacy</Filter>
     </None>
@@ -981,6 +978,9 @@
     </None>
     <None Include="Shaders\PostProcess\TonemapCommon.h">
       <Filter>Shaders\PostProcess</Filter>
+    </None>
+    <None Include="Render\Effect\Util.lsl">
+      <Filter>Shaders\Legacy</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
