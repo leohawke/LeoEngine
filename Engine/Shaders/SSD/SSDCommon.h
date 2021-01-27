@@ -80,7 +80,8 @@ FSSDCompressedSceneInfos SampleCompressedSceneMetadata(
 	}
 	else
 	{
-		CompressedMetadata.VGPR[0] = asuint(SceneDepthBuffer.SampleLevel(SceneDepthBufferSampler, BufferUV, 0).x);
+		float DeviceZ = SceneDepthBuffer.SampleLevel(SceneDepthBufferSampler, BufferUV, 0).x;
+		CompressedMetadata.VGPR[0] = asuint(ConvertFromDeviceZ(DeviceZ));
 		float3 WorldNormal = WorldNormalBuffer.SampleLevel(WorldNormalSampler, BufferUV, 0).xyz;
 		CompressedMetadata.VGPR[1] = asuint(WorldNormal.x);
 		CompressedMetadata.VGPR[2] = asuint(WorldNormal.y);
