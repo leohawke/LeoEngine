@@ -52,6 +52,7 @@ namespace platform
 			leo::math::float4x4 ScreenToTranslatedWorld;
 			leo::math::float4x4 ViewToClip;
 			leo::math::float4x4 TranslatedWorldToView;
+			leo::math::float4 InvDeviceZToWorldZTransform;
 		};
 
 		static void DenoiseShadowVisibilityMasks(

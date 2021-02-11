@@ -10,10 +10,11 @@
 #include <functional>
 #include "../emacro.h"
 #include "IFormat.hpp"
+#include "RenderObject.h"
 
 
 namespace platform::Render {
-	class LE_API Texture {
+	class LE_API Texture : public RObject{
 	public:
 		enum class MapAccess {
 			ReadOnly,

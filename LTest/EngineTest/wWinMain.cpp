@@ -310,6 +310,7 @@ private:
 			) * leo::math::inverse(viewproj)),
 			.ViewToClip = leo::math::transpose(projmatrix),
 			.TranslatedWorldToView = leo::math::transpose(viewmatrix),
+			.InvDeviceZToWorldZTransform = LeoEngine::X::CreateInvDeviceZToWorldZTransform(projmatrix),
 		};
 
 		SCOPED_GPU_EVENT(CmdList, ShadowDenoise);

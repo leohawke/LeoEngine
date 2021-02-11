@@ -1,6 +1,9 @@
 #ifndef Common_h
 #define Common_h 1
+
 const static float PI = 3.1415926535897932f;
+
+float4 InvDeviceZToWorldZTransform;
 
 float Square( float x )
 {
@@ -48,5 +51,10 @@ void DrawRectangle(
 	OutTexCoord.xy = InTexCoord.xy ;
 }
 
+float ConvertFromDeviceZ(float DeviceZ)
+{
+	// Supports ortho and perspective, see CreateInvDeviceZToWorldZTransform()
+	return DeviceZ * InvDeviceZToWorldZTransform[0] + InvDeviceZToWorldZTransform[1] + 1.0f / (DeviceZ * InvDeviceZToWorldZTransform[2] - InvDeviceZToWorldZTransform[3]);
+}
 
 #endif

@@ -39,4 +39,5 @@ void platform::Render::CommandList::EndFrame()
 {
 	GetContext().EndFrame();
 	platform::Render::Context::Instance().AdvanceFrameFence();
+	RObject::FlushPendingDeletes();
 }

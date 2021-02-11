@@ -2,7 +2,9 @@
 
 #include <LBase/type_traits.hpp>
 #include <LBase/smart_ptr.hpp>
+#include <LBase/linttype.hpp>
 #include <atomic>
+#include <stack>
 
 namespace platform::Render {
 	class RObject
@@ -18,18 +20,38 @@ namespace platform::Render {
 			return ++NumRefs;
 		}
 
-		uint32_t Release()
+		value_type Release()
 		{
 			auto NewValue = --NumRefs;
 			if (NewValue == 0)
 			{
-				delete this;
+				PendingDeletes.push(this);
 			}
 			return NewValue;
 		}
 
+		static void FlushPendingDeletes();
+
 	private:
 		std::atomic_uint32_t NumRefs = 1;
+
+		static std::stack<RObject*> PendingDeletes;
+
+		//D3D12 API don't do internal reference counting
+		struct RObjectToDelete
+		{
+			RObjectToDelete(leo::uint32 InFrameDeleted = 0)
+				: FrameDeleted(InFrameDeleted)
+			{
+
+			}
+
+			std::vector<RObject*>	Objects;
+			leo::uint32					FrameDeleted;
+		};
+
+		static std::vector<RObjectToDelete> DeferredDeletionQueue;
+		static leo::uint32 CurrentFrame;
 	};
 
 	struct RObjectDeleter

@@ -2,6 +2,7 @@
 #define SSDCommon_h 1
 
 #include "Random.h"
+#include "Common.h"
 #include "SSD/SSDDefinitions.h"
 #include "SSD/SSDMetadata.h"
 
