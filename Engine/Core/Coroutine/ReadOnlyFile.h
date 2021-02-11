@@ -49,10 +49,13 @@ namespace leo::coroutine {
 	{
 	public:
 		FileAsyncStream(IOScheduler& ioService,
-			const std::filesystem::path& path,
+			const std::filesystem::path& _path,
 			file_share_mode shareMode = file_share_mode::read,
 			file_buffering_mode bufferingMode = file_buffering_mode::default_)
-			:file(ReadOnlyFile::open(ioService,path,shareMode,bufferingMode))
+			:file(ReadOnlyFile::open(ioService,_path,shareMode,bufferingMode))
+#ifndef NDEBUG
+			,path(_path)
+#endif
 		{
 		}
 
@@ -76,6 +79,10 @@ namespace leo::coroutine {
 
 					byteCount -= readCount;
 					dstoffset += readCount;
+					bufferOffset += readCount;
+
+					if (bufferOffset != bufferReadCount && bufferReadCount != 0)
+						break;
 
 					bufferReadCount = co_await file.read(fileOffset, buffer, bufferSize);
 					fileOffset += bufferReadCount;
@@ -112,5 +119,10 @@ namespace leo::coroutine {
 
 		std::uint64_t fileOffset = 0;
 		ReadOnlyFile file;
+
+		//debug_info
+#ifndef NDEBUG
+		std::filesystem::path path;
+#endif
 	};
 }
