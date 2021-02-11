@@ -290,9 +290,9 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		Parameters.WorldDepthToPixelWorldRadius = 1;
 		Parameters.HitDistanceToWorldBluringRadius = 1;
 
-		static auto uav = Device.CreateUnorderedAccessView(spatial_reconst.get());
+		auto uav = Render::shared_raw_robject(Device.CreateUnorderedAccessView(spatial_reconst.get()));
 		Parameters.SignalInput_Textures_0 = InputParameters.Mask;
-		Parameters.SignalOutput_UAVs_0 = uav;
+		Parameters.SignalOutput_UAVs_0 = uav.get();
 
 
 		SSDSpatialAccumulationCS::FPermutationDomain PermutationVector;

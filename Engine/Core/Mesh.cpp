@@ -6,6 +6,7 @@
 #include "../Asset/MeshX.h"
 #include "../Render/IRayDevice.h"
 #include "../Render/IRayContext.h"
+#include "../System/SystemEnvironment.h"
 
 namespace platform {
 	using namespace Render;
@@ -138,4 +139,21 @@ namespace platform {
 	}
 
 	template std::shared_ptr<Mesh> AssetResourceScheduler::SyncSpawnResource<Mesh, const X::path&, const std::string&>(const X::path& path, const std::string & name);
+
+	leo::coroutine::Task<std::shared_ptr<Mesh>> platform::X::AsyncLoadMesh(path const& meshpath, const std::string& name)
+	{
+		auto pAsset = co_await X::AsyncLoadMeshAsset(meshpath);
+
+		co_await Environment->Scheduler->schedule_render();
+		if (auto pMesh = MeshesHolder::Instance().FindResource(pAsset, name))
+			co_return pMesh;
+
+		auto pMesh = std::make_shared<Mesh>(*pAsset, name);
+
+		MeshesHolder::Instance().Connect(pAsset, pMesh);
+
+		co_await Environment->Scheduler->schedule();
+
+		co_return pMesh;
+	}
 }

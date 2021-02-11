@@ -223,6 +223,11 @@ namespace leo::threading {
 		return leo::coroutine::ThreadScheduler::schedule_operation { this };
 	}
 
+	leo::coroutine::ThreadScheduler::schedule_operation threading::TaskScheduler::schedule_render() noexcept
+	{
+		return leo::coroutine::ThreadScheduler::schedule_operation{ scheduler_impl->schedulers};
+	}
+
 	void TaskScheduler::schedule_impl(leo::coroutine::ThreadScheduler::schedule_operation* operation) noexcept
 	{
 		if (thread_local_scheduler == nullptr || !leo::coroutine::ThreadScheduler::thread_local_state->try_local_enqueue(operation))

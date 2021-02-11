@@ -16,7 +16,8 @@ namespace platform {
 			virtual ~ShaderResourceView();
 		};
 
-		class UnorderedAccessView{
+		class UnorderedAccessView :public RObject
+		{
 		public:
 			virtual ~UnorderedAccessView();
 		};

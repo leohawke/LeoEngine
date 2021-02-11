@@ -28,6 +28,8 @@ namespace leo::threading {
 		{
 			return GetIOScheduler().schedule();
 		}
+
+		[[nodiscard]] leo::coroutine::ThreadScheduler::schedule_operation schedule_render() noexcept;
 	private:
 		friend class leo::coroutine::ThreadScheduler;
 

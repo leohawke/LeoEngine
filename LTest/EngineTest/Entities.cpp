@@ -1,5 +1,8 @@
 #include "Entities.h"
 #include "Engine/Asset/LSLAssetX.h"
+#include "Engine/System/SystemEnvironment.h"
+#include "Engine/Core/Coroutine/WhenAllReady.h"
+#include "Engine/Core/Coroutine/SyncWait.h"
 
 std::string Access(const char* name, const scheme::TermNode& node) {
 	auto it = std::find_if(node.begin(), node.end(), [&](const scheme::TermNode& child) {
@@ -27,6 +30,19 @@ scheme::TermNode LoadNode(const path_type& path) {
 
 Entities::Entities(const fs::path& file) {
 	auto term_node = *LoadNode(file).begin();
+
+	std::vector< leo::coroutine::Task<void>> tasks;
+	for (auto& entity_node : platform::X::SelectNodes("entity", term_node))
+	{
+		auto mesh_name = Access("mesh", entity_node);
+
+		tasks.emplace_back(Environment->Scheduler->Schedule([&]()->leo::coroutine::Task<void> {
+			co_await platform::X::AsyncLoadMesh(mesh_name + ".asset", mesh_name);
+			co_return;
+			}()));
+	}
+
+	leo::coroutine::SyncWait(leo::coroutine::WhenAllReady(std::move(tasks)));
 
 	for (auto& entity_node : platform::X::SelectNodes("entity", term_node))
 	{

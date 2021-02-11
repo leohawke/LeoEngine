@@ -272,4 +272,10 @@ namespace platform {
 	{
 		return  platform::AssetResourceScheduler::Instance().SyncSpawnResource<Mesh>(meshpath, name);
 	}
+
+	leo::coroutine::Task<std::shared_ptr<asset::MeshAsset>> platform::X::AsyncLoadMeshAsset(path const& meshpath)
+	{
+		return platform::AssetResourceScheduler::Instance().AsyncLoad<MeshLoadingDesc<GeomertySection>>(meshpath);
+	}
+	
 }
