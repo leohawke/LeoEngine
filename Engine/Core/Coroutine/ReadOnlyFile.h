@@ -2,6 +2,7 @@
 
 #include "readable_file.h"
 #include "filemode.h"
+#include "Task.h"
 #include <filesystem>
 
 namespace leo::coroutine {
@@ -42,5 +43,74 @@ namespace leo::coroutine {
 
 	protected:
 		ReadOnlyFile(win32::handle_t&& fileHandle) noexcept;
+	};
+
+	class FileAsyncStream
+	{
+	public:
+		FileAsyncStream(IOScheduler& ioService,
+			const std::filesystem::path& path,
+			file_share_mode shareMode = file_share_mode::read,
+			file_buffering_mode bufferingMode = file_buffering_mode::default_)
+			:file(ReadOnlyFile::open(ioService,path,shareMode,bufferingMode))
+		{
+		}
+
+		Task<std::size_t> Read(
+			void* dstbuffer,
+			std::size_t byteCount) noexcept
+		{
+			if (bufferOffset + byteCount < bufferReadCount)
+			{
+				std::memcpy(dstbuffer, &buffer[bufferOffset], byteCount);
+				bufferOffset += byteCount;
+
+				co_return byteCount;
+			}
+			else {
+				std::uint64_t dstoffset = 0;
+				while (byteCount > 0)
+				{
+					auto readCount =std::min<std::size_t>(bufferReadCount - bufferOffset,byteCount);
+					std::memcpy((std::byte*)dstbuffer + dstoffset, buffer+bufferOffset, readCount);
+
+					byteCount -= readCount;
+					dstoffset += readCount;
+
+					bufferReadCount = co_await file.read(fileOffset, buffer, bufferSize);
+					fileOffset += bufferReadCount;
+					bufferOffset = 0;
+
+					if (bufferReadCount < bufferSize)
+					{
+						readCount = std::min<std::size_t>(bufferReadCount, byteCount);
+						std::memcpy((std::byte*)dstbuffer + dstoffset, buffer, readCount);
+
+						dstoffset += readCount;
+						break;
+					}
+				}
+				co_return dstoffset;
+			}
+		}
+
+		void Skip(std::uint64_t offset)
+		{
+			fileOffset += offset;
+		}
+
+		void SkipTo(std::uint64_t offset)
+		{
+			fileOffset = offset;
+		}
+	private:
+		static  constexpr size_t bufferSize = 4096;
+		std::byte buffer[bufferSize];
+		std::uint64_t bufferReadCount = 0;
+
+		std::size_t bufferOffset = 0;
+
+		std::uint64_t fileOffset = 0;
+		ReadOnlyFile file;
 	};
 }

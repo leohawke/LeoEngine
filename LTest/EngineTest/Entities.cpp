@@ -36,10 +36,10 @@ Entities::Entities(const fs::path& file) {
 	{
 		auto mesh_name = Access("mesh", entity_node);
 
-		tasks.emplace_back(Environment->Scheduler->Schedule([&]()->leo::coroutine::Task<void> {
+		tasks.emplace_back(Environment->Scheduler->Schedule([](std::string mesh_name)->leo::coroutine::Task<void> {
 			co_await platform::X::AsyncLoadMesh(mesh_name + ".asset", mesh_name);
 			co_return;
-			}()));
+			}(mesh_name)));
 	}
 
 	leo::coroutine::SyncWait(leo::coroutine::WhenAllReady(std::move(tasks)));
