@@ -94,6 +94,16 @@ namespace platform::Render
 			using DeclType = leo::uint32;
 		};
 
+		template<>
+		struct TShaderParameterTypeInfo<leo::math::uint2>
+		{
+			static constexpr ShaderParamType ShaderType = SPT_uint2;
+
+			template<std::size_t Boundary = 0>
+			static constexpr std::size_t Alignement = Boundary >= 8 ? 4 : 16;
+
+			using DeclType = leo::math::uint2;
+		};
 		
 
 		template<typename TypeParameter>

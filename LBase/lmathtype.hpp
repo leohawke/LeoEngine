@@ -836,6 +836,12 @@ namespace leo {
 			{}
 		};
 
+		struct uint2 :vector2<uint32>
+		{
+			using base = vector2<uint32>;
+			using base::base;
+		};
+
 		struct uint4 :vector4<uint32>
 		{
 			using base = vector4<uint32>;

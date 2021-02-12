@@ -138,8 +138,8 @@ public:
 
 	BEGIN_SHADER_PARAMETER_STRUCT(Parameters)
 		//TODO:support ViewParams
-		SHADER_PARAMETER(leo::math::float2, ViewportMin)
-		SHADER_PARAMETER(leo::math::float2, ViewportMax)
+		SHADER_PARAMETER(leo::math::uint2, ViewportMin)
+		SHADER_PARAMETER(leo::math::uint2, ViewportMax)
 		SHADER_PARAMETER(leo::math::float4, ThreadIdToBufferUV)
 		SHADER_PARAMETER(leo::math::float4, BufferBilinearUVMinMax)
 		SHADER_PARAMETER(leo::math::float4, BufferSizeAndInvSize)
@@ -161,6 +161,11 @@ public:
 		SHADER_PARAMETER(float, WorldDepthToPixelWorldRadius)
 		//SignalFramework.h
 		SHADER_PARAMETER(float, HitDistanceToWorldBluringRadius)
+		SHADER_PARAMETER(float, HarmonicPeriode)
+		SHADER_PARAMETER(leo::uint32, UpscaleFactor)
+		SHADER_PARAMETER_SAMPLER(leo::math::float4, InputBufferUVMinMax)
+		SHADER_PARAMETER(leo::uint32, MaxSampleCount)
+
 
 		SHADER_PARAMETER_TEXTURE(Render::Texture2D, SignalInput_Textures_0)
 		SHADER_PARAMETER_TEXTURE(Render::Shader::RWTexture2D, SignalOutput_UAVs_0)
@@ -198,13 +203,20 @@ namespace Shadow
 
 }
 
+constexpr auto kStackowiakMaxSampleCountPerSet = 56;
+
+
 void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::CommandList& CmdList, const ShadowViewInfo& ViewInfo, const ShadowVisibilityInput& InputParameters, const ShadowVisibilityOutput& Output)
 {
+	constexpr auto ReconstructionSamples = 8;
+
 	auto& Device = Render::Context::Instance().GetDevice();
 	auto FullResW = InputParameters.Mask->GetWidth(0);
 	auto FullResH = InputParameters.Mask->GetHeight(0);
 
 	//Injest
+	auto injeset = Render::shared_raw_robject(Device.CreateTexture(FullResW, FullResH,
+		1, 1, Render::EF_R32UI, Render::EA_GPURead | Render::EA_GPUUnordered | Render::EA_GPUWrite, {}));
 	{
 		SCOPED_GPU_EVENT(CmdList, ShadowInjest);
 
@@ -220,13 +232,15 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 			0.5f / FullResW,0.5f/ FullResH,
 			(FullResW-0.5f)/ FullResW, (FullResH - 0.5f) / FullResH
 		);
+		Parameters.InputBufferUVMinMax = Parameters.BufferBilinearUVMinMax;
 
 		Parameters.BufferUVToOutputPixelPosition = leo::math::float2(FullResW, FullResH);
 
 		Parameters.HitDistanceToWorldBluringRadius = 1;
 
 		Parameters.SignalInput_Textures_0 = InputParameters.Mask;
-		Parameters.SignalOutput_UAVs_0 = Output.MaskUAV;
+		auto uav = Render::shared_raw_robject(Device.CreateUnorderedAccessView(injeset.get()));
+		Parameters.SignalOutput_UAVs_0 = uav.get();
 
 		Render::TextureSampleDesc point_sampler{};
 		point_sampler.address_mode_u = point_sampler.address_mode_v = point_sampler.address_mode_w = Render::TexAddressingMode::Clamp;
@@ -248,9 +262,13 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 
 		SSDSpatialAccumulationCS::Parameters Parameters;
 
+		Parameters.MaxSampleCount = std::max(std::min(ReconstructionSamples, kStackowiakMaxSampleCountPerSet), 1);
+		Parameters.UpscaleFactor = 1;
+		Parameters.HarmonicPeriode = 1;
+
 		//ViewParams
-		Parameters.ViewportMin = leo::math::float2(0, 0);
-		Parameters.ViewportMax = leo::math::float2(FullResW, FullResH);
+		Parameters.ViewportMin = leo::math::uint2(0, 0);
+		Parameters.ViewportMax = leo::math::uint2(FullResW, FullResH);
 
 		Parameters.ThreadIdToBufferUV.x = 1.0f / FullResW;
 		Parameters.ThreadIdToBufferUV.y = 1.0f / FullResH;
@@ -261,6 +279,7 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 			0.5f / FullResW, 0.5f / FullResH,
 			(FullResW - 0.5f) / FullResW, (FullResH - 0.5f) / FullResH
 		);
+		Parameters.InputBufferUVMinMax = Parameters.BufferBilinearUVMinMax;
 
 		Parameters.BufferUVToOutputPixelPosition = leo::math::float2(FullResW, FullResH);
 
@@ -291,7 +310,7 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		Parameters.HitDistanceToWorldBluringRadius = 1;
 
 		auto uav = Render::shared_raw_robject(Device.CreateUnorderedAccessView(spatial_reconst.get()));
-		Parameters.SignalInput_Textures_0 = InputParameters.Mask;
+		Parameters.SignalInput_Textures_0 = injeset.get();
 		Parameters.SignalOutput_UAVs_0 = uav.get();
 
 

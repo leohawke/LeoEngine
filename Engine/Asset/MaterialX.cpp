@@ -71,7 +71,7 @@ namespace details {
 
 		std::shared_ptr<AssetType> LoadNode()
 		{
-			material_desc.material_node = *LoadNode(material_desc.material_path).begin();
+			material_desc.material_node = *platform::X::LoadNode(material_desc.material_path).begin();
 
 			auto& material_node = material_desc.material_node;
 			LAssert(leo::Access<std::string>(*material_node.begin()) == "material", R"(Invalid Format:Not Begin With "material")");
@@ -87,21 +87,6 @@ namespace details {
 
 			material_desc.material_asset->GetEffectNameRef() = material_desc.effect_name;
 			return  nullptr;
-		}
-
-		template<typename path_type>
-		scheme::TermNode LoadNode(const path_type& path) {
-			std::ifstream fin(path);
-			fin >> std::noskipws;
-			using sb_it_t = std::istream_iterator<char>;
-
-			scheme::Session session(sb_it_t(fin), sb_it_t{});
-
-			try {
-				return SContext::Analyze(std::move(session));
-			}
-
-			CatchExpr(..., leo::rethrow_badstate(fin, std::ios_base::failbit));
 		}
 
 
