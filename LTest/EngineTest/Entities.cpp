@@ -13,23 +13,8 @@ std::string Access(const char* name, const scheme::TermNode& node) {
 	return leo::Access<std::string>(*(it->rbegin()));
 }
 
-template<typename path_type>
-scheme::TermNode LoadNode(const path_type& path) {
-	std::ifstream fin(path);
-	fin >> std::noskipws;
-	using sb_it_t = std::istream_iterator<char>;
-
-	scheme::Session session(sb_it_t(fin), sb_it_t{});
-
-	try {
-		return scheme::SContext::Analyze(std::move(session));
-	}
-
-	CatchExpr(..., leo::rethrow_badstate(fin, std::ios_base::failbit))
-}
-
 Entities::Entities(const fs::path& file) {
-	auto term_node = *LoadNode(file).begin();
+	auto term_node = *platform::X::LoadNode(file).begin();
 
 	auto entity_nodes = platform::X::SelectNodes("entity", term_node);
 	

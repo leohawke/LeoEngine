@@ -118,6 +118,11 @@ namespace leo::coroutine {
 		scheduler ? scheduler->schedule_impl(this): (any_scheduler->schedule_impl(this));
 	}
 
+	ThreadScheduler::schedule_operation::~schedule_operation()
+	{
+		
+	}
+
 	ThreadScheduler::ThreadScheduler(const std::wstring& name)
 		:current_state(new thread_state())
 	{
@@ -239,9 +244,14 @@ namespace leo::threading {
 		return leo::coroutine::ThreadScheduler::schedule_operation{ scheduler_impl->render_scheduler };
 	}
 
+	bool threading::TaskScheduler::is_render_schedule() const noexcept
+	{
+		return scheduler_impl->render_scheduler == thread_local_scheduler;
+	}
+
 	void TaskScheduler::schedule_impl(leo::coroutine::ThreadScheduler::schedule_operation* operation) noexcept
 	{
-		if (thread_local_scheduler == nullptr || !leo::coroutine::ThreadScheduler::thread_local_state->try_local_enqueue(operation))
+		if (is_render_schedule() || thread_local_scheduler == nullptr || !leo::coroutine::ThreadScheduler::thread_local_state->try_local_enqueue(operation))
 		{
 			remote_enqueue(operation);
 		}

@@ -19,6 +19,8 @@ namespace leo::coroutine {
 			schedule_operation(ThreadScheduler* ts) noexcept : scheduler(ts), any_scheduler(nullptr), next_oper(nullptr){}
 			schedule_operation(leo::threading::TaskScheduler* ts) noexcept : scheduler(nullptr),any_scheduler(ts), next_oper(nullptr) {}
 
+			~schedule_operation();
+
 			bool await_ready() noexcept { return false; }
 			void await_suspend(std::coroutine_handle<> continuation) noexcept;
 			void await_resume() noexcept {}

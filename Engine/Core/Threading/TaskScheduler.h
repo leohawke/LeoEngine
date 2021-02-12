@@ -30,6 +30,8 @@ namespace leo::threading {
 		}
 
 		[[nodiscard]] leo::coroutine::ThreadScheduler::schedule_operation schedule_render() noexcept;
+
+		bool is_render_schedule() const noexcept;
 	private:
 		friend class leo::coroutine::ThreadScheduler;
 
