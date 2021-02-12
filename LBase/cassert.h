@@ -68,7 +68,7 @@ namespace leo
 #ifdef NDEBUG
 #define ldebug(format,...) (void)0
 #else
-#define ldebug(format,...) leo::platform::ldebug(format,__VA_ARGS__)
+#define ldebug(format,...) ::platform::ldebug(format,__VA_ARGS__)
 #endif
 
 #ifdef NDEBUG

@@ -8,7 +8,7 @@
 #include <cstdarg>
 
 //todo add platform.h
-#if WIN32
+#if _WIN32
 #include <Windows.h>
 #endif
 
@@ -16,7 +16,7 @@
 
 namespace platform {
 	void native_debug(const char* msg) {
-#if WIN32
+#if _WIN32
 		OutputDebugStringA(msg);
 #else
 		std::fprintf(stderr, msg);
@@ -65,7 +65,7 @@ namespace leo
 	{
 		if (lv < t)
 		{
-#if WIN32
+#if _WIN32
 			if (LB_LIKELY(stream == stderr)) {
 				platform::ldebug("Trace[%#X] @ \"%s\":%i:\n", unsigned(lv), file,
 					line);
