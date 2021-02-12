@@ -2,6 +2,7 @@
 
 #include <LBase/ldef.h>
 #include <coroutine>
+#include <thread>
 
 namespace leo::threading
 {
@@ -35,6 +36,7 @@ namespace leo::coroutine {
 		[[nodiscard]]
 		schedule_operation schedule() noexcept { return schedule_operation{ this }; }
 
+		ThreadScheduler(const std::wstring& name);
 		ThreadScheduler();
 	private:
 		void schedule_impl(schedule_operation* operation) noexcept;
@@ -48,6 +50,8 @@ namespace leo::coroutine {
 		thread_state* current_state;
 
 		static thread_local thread_state* thread_local_state;
+
+		std::thread::native_handle_type native_handle;
 
 		friend class leo::threading::TaskScheduler;
 	};

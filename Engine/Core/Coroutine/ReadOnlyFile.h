@@ -94,6 +94,8 @@ namespace leo::coroutine {
 						std::memcpy((std::byte*)dstbuffer + dstoffset, buffer, readCount);
 
 						dstoffset += readCount;
+						bufferOffset += readCount;
+
 						break;
 					}
 				}

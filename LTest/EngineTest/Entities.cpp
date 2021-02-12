@@ -31,15 +31,21 @@ scheme::TermNode LoadNode(const path_type& path) {
 Entities::Entities(const fs::path& file) {
 	auto term_node = *LoadNode(file).begin();
 
+	auto entity_nodes = platform::X::SelectNodes("entity", term_node);
+	
+	std::vector<std::shared_ptr<platform::Mesh>> meshs;
 	std::vector< leo::coroutine::Task<void>> tasks;
-	for (auto& entity_node : platform::X::SelectNodes("entity", term_node))
+
+	meshs.resize(entity_nodes.size());
+	int index = 0;
+	for (auto& entity_node : entity_nodes)
 	{
 		auto mesh_name = Access("mesh", entity_node);
 
-		tasks.emplace_back(Environment->Scheduler->Schedule([](std::string mesh_name)->leo::coroutine::Task<void> {
-			co_await platform::X::AsyncLoadMesh(mesh_name + ".asset", mesh_name);
+		tasks.emplace_back(Environment->Scheduler->Schedule([&meshs](std::string mesh_name,int index)->leo::coroutine::Task<void> {
+			meshs[index] = co_await platform::X::AsyncLoadMesh(mesh_name + ".asset", mesh_name);
 			co_return;
-			}(mesh_name)));
+			}(mesh_name,index++)));
 	}
 
 	leo::coroutine::SyncWait(leo::coroutine::WhenAllReady(std::move(tasks)));

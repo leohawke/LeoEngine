@@ -118,7 +118,7 @@ namespace leo::coroutine {
 		scheduler ? scheduler->schedule_impl(this): (any_scheduler->schedule_impl(this));
 	}
 
-	ThreadScheduler::ThreadScheduler()
+	ThreadScheduler::ThreadScheduler(const std::wstring& name)
 		:current_state(new thread_state())
 	{
 		std::thread fire_forget(
@@ -128,15 +128,23 @@ namespace leo::coroutine {
 			this->run(); 
 			}
 		);
+		native_handle = fire_forget.native_handle();
 
-		static int thread_count = 0;
-		auto descirption = leo::sfmt(L"Scheduler Thread %d", thread_count++);
+		std::wstring descirption = name;
+		if (descirption.empty())
+		{
+			static int thread_count = 0;
+			descirption = leo::sfmt(L"Scheduler Worker%d", thread_count++);
+		}
 
-		leo::threading::SetThreadDescription(fire_forget.native_handle(), descirption.c_str());
+		leo::threading::SetThreadDescription(native_handle, descirption.c_str());
 
 		fire_forget.detach();
 	}
 
+	ThreadScheduler::ThreadScheduler()
+		:ThreadScheduler(std::wstring{})
+	{}
 
 	void ThreadScheduler::run() noexcept
 	{
@@ -194,6 +202,8 @@ namespace leo::threading {
 			fire_forget.detach();
 
 			schedulers = new leo::coroutine::ThreadScheduler[InMaxScheduler];
+
+			render_scheduler = new leo::coroutine::ThreadScheduler(L"Scheduler Render");
 		}
 
 	private:
@@ -204,6 +214,7 @@ namespace leo::threading {
 
 		leo::coroutine::IOScheduler io_scheduler;
 		leo::coroutine::ThreadScheduler* schedulers;
+		leo::coroutine::ThreadScheduler* render_scheduler;
 		unsigned int max_scheduler;
 	};
 
@@ -225,7 +236,7 @@ namespace leo::threading {
 
 	leo::coroutine::ThreadScheduler::schedule_operation threading::TaskScheduler::schedule_render() noexcept
 	{
-		return leo::coroutine::ThreadScheduler::schedule_operation{ scheduler_impl->schedulers};
+		return leo::coroutine::ThreadScheduler::schedule_operation{ scheduler_impl->render_scheduler };
 	}
 
 	void TaskScheduler::schedule_impl(leo::coroutine::ThreadScheduler::schedule_operation* operation) noexcept
