@@ -1,4 +1,6 @@
 #include <LBase/cformat.h>
+#include <LFramework/LCLib/Logger.h>
+
 #include "TaskScheduler.h"
 #include "AutoResetEvent.h"
 #include <atomic>
@@ -6,6 +8,8 @@
 #include <thread>
 #include <mutex>
 #include <queue>
+
+using namespace platform;
 
 namespace
 {
@@ -30,13 +34,12 @@ namespace leo::coroutine {
 	class ThreadScheduler::thread_state
 	{
 	public:
-		constexpr static std::size_t mask = local::initial_local_queue_size - 1;
-
 		thread_state()
 			:queue(std::make_unique<std::atomic<schedule_operation*>[]>(
 				local::initial_local_queue_size)),
 			queue_head(0),
 			queue_tail(0),
+			queue_mask(local::initial_local_queue_size - 1),
 			sleeping(false)
 		{}
 
@@ -75,9 +78,53 @@ namespace leo::coroutine {
 		{
 			auto head = queue_head.load(std::memory_order_relaxed);
 
-			queue[queue_head & mask].store(operation, std::memory_order_relaxed);
-			queue_head.store(head + 1);
+			auto tail = queue_tail.load(std::memory_order_relaxed);
+			if (difference(head, tail) < static_cast<offset_t>(queue_mask))
+			{
+				queue[queue_head & queue_mask].store(operation, std::memory_order_relaxed);
+				queue_head.store(head + 1, std::memory_order_seq_cst);
+				return true;
+			}
 
+			if (queue_mask == local::max_local_queue_size)
+			{
+				LAssert(false, "ThreadScheduler Overflow");
+				// No space in the buffer and we don't want to grow
+				// it any further.
+				return false;
+			}
+
+			// Allocate the new buffer before taking out the lock so that
+			// we ensure we hold the lock for as short a time as possible.
+			const size_t newSize = (queue_mask + 1) * 2;
+			std::unique_ptr<std::atomic<schedule_operation*>[]> newLocalQueue{
+				new (std::nothrow) std::atomic<schedule_operation*>[newSize]
+			};
+			if (!newLocalQueue)
+			{
+				// Unable to allocate more memory.
+				LAssert(false, "ThreadScheduler Overflow[failed allocate memory]");
+				return false;
+			}
+
+			// We can now re-read tail, guaranteed that we are not seeing a stale version.
+			tail = queue_tail.load(std::memory_order_relaxed);
+
+			// Copy the existing operations.
+			const size_t newMask = newSize - 1;
+			for (size_t i = tail; i != head; ++i)
+			{
+				newLocalQueue[i & newMask].store(
+					queue[i & queue_mask].load(std::memory_order_relaxed),
+					std::memory_order_relaxed);
+			}
+
+			// Finally, write the new operation to the queue.
+			newLocalQueue[head & newMask].store(operation, std::memory_order_relaxed);
+
+			queue_head.store(head + 1, std::memory_order_relaxed);
+			queue = std::move(newLocalQueue);
+			queue_mask = newMask;
 			return true;
 		}
 
@@ -93,7 +140,7 @@ namespace leo::coroutine {
 
 			queue_head.store(new_head, std::memory_order_seq_cst);
 
-			return queue[new_head & mask].load(std::memory_order_relaxed);
+			return queue[new_head & queue_mask].load(std::memory_order_relaxed);
 		}
 
 	private:
@@ -107,6 +154,7 @@ namespace leo::coroutine {
 		std::unique_ptr<std::atomic<schedule_operation*>[]> queue;
 		std::atomic<std::size_t> queue_head;
 		std::atomic<std::size_t> queue_tail;
+		std::size_t queue_mask;
 
 		std::atomic<bool> sleeping;
 		leo::threading::auto_reset_event wakeup_event;
@@ -120,7 +168,6 @@ namespace leo::coroutine {
 
 	ThreadScheduler::schedule_operation::~schedule_operation()
 	{
-		
 	}
 
 	ThreadScheduler::ThreadScheduler(const std::wstring& name)
