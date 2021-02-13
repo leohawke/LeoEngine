@@ -133,10 +133,10 @@ namespace LeoEngine {
 				double t = ProjMatrix[2][1];
 
 				return lm::float4x4(
-					lm::float4(1.0 / a, 0.0f, 0.0f, 0.0f),
-					lm::float4(0.0f, 1.0 / b, 0.0f, 0.0f),
-					lm::float4(0.0f, 0.0f, 0.0f, 1.0 / d),
-					lm::float4(-s / a, -t / b, 1.0f, -c / d)
+					lm::float4(static_cast<float>(1.0 / a), 0.0f, 0.0f, 0.0f),
+					lm::float4(0.0f, static_cast<float>(1.0 / b), 0.0f, 0.0f),
+					lm::float4(0.0f, 0.0f, 0.0f, static_cast<float>(1.0 / d)),
+					lm::float4(static_cast<float>(-s / a), static_cast<float>(-t / b), 1.0f, static_cast<float>(-c / d))
 				);
 			}
 			else

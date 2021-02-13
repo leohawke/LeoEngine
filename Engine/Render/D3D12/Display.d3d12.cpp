@@ -12,12 +12,7 @@ using namespace platform_ex;
 
 using std::make_shared;
 
-DisplaySetting::DisplaySetting()
-	:depth_stencil_format(EF_D24S8)
-{
-}
-
-Display::Display(IDXGIFactory4 * factory_4, ID3D12CommandQueue* cmd_queue, const DisplaySetting& setting, HWND hWnd)
+Display::Display(IDXGIFactory4 * factory_4, ID3D12CommandQueue* cmd_queue, const platform::Render::DisplaySetting& setting, HWND hWnd)
 	:hwnd(hWnd), frame_buffer(std::make_shared<FrameBuffer>()), frame_waitable_object(nullptr)
 {
 	full_screen = setting.full_screen;
@@ -57,7 +52,7 @@ Display::Display(IDXGIFactory4 * factory_4, ID3D12CommandQueue* cmd_queue, const
 	//todo rotate support
 	//std::swap(width,height);
 
-	auto stereo = (Stereo_LCDShutter == setting.stereo_method) && stereo_feature;
+	auto stereo = (platform::Render::Stereo_LCDShutter == setting.stereo_method) && stereo_feature;
 	factory_4->RegisterStereoStatusWindow(hwnd, WM_SIZE, &stereo_cookie);
 
 	sc_desc.Width = width; sc_desc.Height = height;
@@ -189,7 +184,7 @@ void Display::UpdateFramewBufferView()
 	frame_buffer->Attach(FrameBuffer::Target0, view);
 
 
-	auto stereo = (Stereo_LCDShutter == stereo_method) && stereo_feature;
+	auto stereo = (platform::Render::Stereo_LCDShutter == stereo_method) && stereo_feature;
 
 	if (depth_stencil_format != EF_Unknown) {
 		platform::Render::ElementInitData initData;

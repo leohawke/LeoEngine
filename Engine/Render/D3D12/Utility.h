@@ -39,7 +39,6 @@ namespace platform_ex::Windows::D3D12 {
 		case DXGI_FORMAT_D24_UNORM_S8_UINT:
 		case DXGI_FORMAT_X24_TYPELESS_G8_UINT:
 			return DXGI_FORMAT_R24G8_TYPELESS;
-			// Changing Depth Buffers to 32 bit on Dingo as D24S8 is actually implemented as a 32 bit buffer in the hardware
 		case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
 		case DXGI_FORMAT_X32_TYPELESS_G8X24_UINT:
 			return DXGI_FORMAT_R32G8X24_TYPELESS;

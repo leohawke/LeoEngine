@@ -252,10 +252,9 @@ namespace platform_ex::Windows::D3D12 {
 		return *(device->fences[index]);
 	}
 
-	void Context::CreateDeviceAndDisplay() {
+	void Context::CreateDeviceAndDisplay(platform::Render::DisplaySetting setting) {
 		device = std::make_shared<Device>(DefaultAdapter());
 		ContextEx(device->d3d_device.Get(), nullptr);
-		DisplaySetting setting;
 
 		display = std::make_shared<Display>(GetDXGIFactory4(), device->GetNodeDevice(0)->GetD3DCommandQueue(CommandQueueType::Default), setting, g_hwnd);//test code
 		screen_frame_buffer = display->GetFrameBuffer();

@@ -32,7 +32,7 @@ namespace platform::Render {
 
 		virtual void AdvanceFrameFence() = 0;
 	public:
-		virtual void CreateDeviceAndDisplay() = 0;
+		virtual void CreateDeviceAndDisplay(DisplaySetting setting) = 0;
 	private:
 		virtual void DoBindFrameBuffer(const std::shared_ptr<FrameBuffer>&) = 0;
 	public:

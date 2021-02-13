@@ -190,6 +190,9 @@ DXGI_FORMAT platform_ex::Windows::D3D12::Convert(platform::Render::EFormat forma
 	case EF_D32F:
 		return DXGI_FORMAT_D32_FLOAT;
 
+	case EF_D32FS8X24:
+		return DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+
 	case EF_ARGB8_SRGB:
 		return DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
 

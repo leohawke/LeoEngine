@@ -138,6 +138,9 @@ D3D12_SHADER_RESOURCE_VIEW_DESC Texture2D::CreateSRVDesc(uint8 first_array_index
 	case EF_D32F:
 		desc.Format = DXGI_FORMAT_R32_FLOAT;
 		break;
+	case EF_D32FS8X24:
+		desc.Format = DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS;
+		break;
 	default:
 		desc.Format = dxgi_format;
 	}

@@ -36,7 +36,7 @@ namespace platform_ex {
 
 				void AdvanceFrameFence() override;
 			public:
-				void CreateDeviceAndDisplay() override;
+				void CreateDeviceAndDisplay(platform::Render::DisplaySetting setting) override;
 			private:
 				Context();
 

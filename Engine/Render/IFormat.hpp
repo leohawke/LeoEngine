@@ -23,7 +23,8 @@ namespace platform::Render {
 			EC_S = 5UL,
 			EC_BC = 6UL,
 			EC_E = 7UL,
-			EC_ETC = 8UL
+			EC_ETC = 8UL,
+			EC_X = 9UL,
 		};
 
 		enum EChannelType
@@ -276,6 +277,8 @@ namespace platform::Render {
 			EF_D24S8 = MakeElementFormat2<EC_D, EC_S, 24, 8, ECT_UNorm, ECT_UInt>::value,
 			// 32-bit element format, 32 bits depth
 			EF_D32F = MakeElementFormat1<EC_D, 32, ECT_Float>::value,
+			// 64-bit element format, 32 bits depth ,8 bits stencil,and 24 bits are unused.
+			EF_D32FS8X24 = MakeElementFormat3<EC_D, EC_S,EC_X,32,8,24,ECT_Float, ECT_UInt,ECT_Typeless>::value,
 
 			// 32-bit element format, 8 bits for alpha, red, green and blue. Standard RGB (gamma = 2.2).
 			EF_ARGB8_SRGB = MakeElementFormat4<EC_A, EC_R, EC_G, EC_B, 8, 8, 8, 8, ECT_UNorm_SRGB, ECT_UNorm_SRGB, ECT_UNorm_SRGB, ECT_UNorm_SRGB>::value,

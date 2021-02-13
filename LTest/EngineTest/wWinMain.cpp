@@ -341,7 +341,10 @@ private:
 		LFL_DEBUG_DECL_TIMER(creater_timer,__FUNCTION__);
 
 		auto swap_chain = ::Create(GetNativeHandle());
-		Context::Instance().CreateDeviceAndDisplay();
+
+		platform::Render::DisplaySetting display_setting;
+
+		Context::Instance().CreateDeviceAndDisplay(display_setting);
 
 		static auto pInitGuard = LeoEngine::System::InitGlobalEnvironment();
 
