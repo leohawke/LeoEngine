@@ -289,8 +289,9 @@ private:
 		platform::ScreenSpaceDenoiser::ShadowVisibilityInput svinput =
 		{
 			.Mask = RayShadowMask.get(),
-			.SceneDepth =depth_tex,
+			.SceneDepth = depth_tex,
 			.WorldNormal = NormalOutput.get(),
+			.LightHalfRadians = LightHalfAngle * 3.14159265f / 180,
 		};
 
 		platform::ScreenSpaceDenoiser::ShadowVisibilityOutput svoutput =
@@ -302,14 +303,15 @@ private:
 		platform::ScreenSpaceDenoiser::ShadowViewInfo viewinfo =
 		{
 			.StateFrameIndex = StateFrameIndex,
-			.ScreenToTranslatedWorld =leo::math::transpose(leo::math::float4x4(
+			.ScreenToTranslatedWorld = leo::math::float4x4(
 			leo::math::float4(1, 0, 0, 0),
 			leo::math::float4(0, 1, 0, 0),
 			leo::math::float4(0, 0, projmatrix[2][2], 1),
 			leo::math::float4(0, 0, projmatrix[3][2], 0)
-			) * leo::math::inverse(viewproj)),
-			.ViewToClip = leo::math::transpose(projmatrix),
-			.TranslatedWorldToView = leo::math::transpose(viewmatrix),
+			) * leo::math::inverse(viewproj),
+			.ViewToClip = projmatrix,
+			.TranslatedWorldToView = viewmatrix,
+			.InvProjectionMatrix = LeoEngine::X::InvertProjectionMatrix(projmatrix),
 			.InvDeviceZToWorldZTransform = LeoEngine::X::CreateInvDeviceZToWorldZTransform(projmatrix),
 		};
 

@@ -38,6 +38,8 @@ namespace platform
 			Render::Texture2D* Mask;
 			Render::Texture* SceneDepth;
 			Render::Texture2D* WorldNormal;
+
+			float LightHalfRadians;
 		};
 
 		struct ShadowVisibilityOutput
@@ -52,6 +54,7 @@ namespace platform
 			leo::math::float4x4 ScreenToTranslatedWorld;
 			leo::math::float4x4 ViewToClip;
 			leo::math::float4x4 TranslatedWorldToView;
+			leo::math::float4x4 InvProjectionMatrix;
 			leo::math::float4 InvDeviceZToWorldZTransform;
 		};
 

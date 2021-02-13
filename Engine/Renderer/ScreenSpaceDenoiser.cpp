@@ -236,7 +236,7 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 
 		Parameters.BufferUVToOutputPixelPosition = leo::math::float2(FullResW, FullResH);
 
-		Parameters.HitDistanceToWorldBluringRadius = 1;
+		Parameters.HitDistanceToWorldBluringRadius = std::tanf(InputParameters.LightHalfRadians);
 
 		Parameters.SignalInput_Textures_0 = InputParameters.Mask;
 		auto uav = Render::shared_raw_robject(Device.CreateUnorderedAccessView(injeset.get()));
@@ -289,9 +289,9 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		Parameters.BufferUVToScreenPosition.w = 1.0f;
 
 		Parameters.StateFrameIndexMod8 = ViewInfo.StateFrameIndex % 8;
-		Parameters.ScreenToTranslatedWorld = ViewInfo.ScreenToTranslatedWorld;
-		Parameters.ViewToClip = ViewInfo.ViewToClip;
-		Parameters.TranslatedWorldToView = ViewInfo.TranslatedWorldToView;
+		Parameters.ScreenToTranslatedWorld =leo::math::transpose(ViewInfo.ScreenToTranslatedWorld);
+		Parameters.ViewToClip = leo::math::transpose(ViewInfo.ViewToClip);
+		Parameters.TranslatedWorldToView = leo::math::transpose(ViewInfo.TranslatedWorldToView);
 		Parameters.InvDeviceZToWorldZTransform = ViewInfo.InvDeviceZToWorldZTransform;
 
 		//SceneParams
@@ -306,8 +306,10 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		Parameters.SceneDepthBufferSampler = point_sampler;
 		Parameters.WorldNormalSampler = point_sampler;
 
-		Parameters.WorldDepthToPixelWorldRadius = 1;
-		Parameters.HitDistanceToWorldBluringRadius = 1;
+		float TanHalfFieldOfView = ViewInfo.InvProjectionMatrix[0][0];
+
+		Parameters.WorldDepthToPixelWorldRadius = TanHalfFieldOfView / FullResW;
+		Parameters.HitDistanceToWorldBluringRadius = std::tanf(InputParameters.LightHalfRadians);
 
 		auto uav = Render::shared_raw_robject(Device.CreateUnorderedAccessView(spatial_reconst.get()));
 		Parameters.SignalInput_Textures_0 = injeset.get();
