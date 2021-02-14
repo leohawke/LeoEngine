@@ -354,74 +354,16 @@ void ReportCompileResult(HRESULT hr, const char* msg)
 }
 
 namespace asset::X::Shader::DXBC {
-	static class CurrentDirInclude :public ID3DInclude
-	{
-	public:
-		HRESULT Open(
-			D3D_INCLUDE_TYPE IncludeType,
-			LPCSTR           pFileName,
-			LPCVOID          pParentData,
-			LPCVOID* ppData,
-			UINT* pBytes
-		) {
-			try {
-				auto path = std::filesystem::path(pFileName);
-				auto file = Open(path);
-
-
-				auto buffer = new std::byte[file.GetSize()];
-
-				auto length = file.Read(buffer, file.GetSize(), 0);
-
-				*pBytes = static_cast<UINT>(length);
-
-				*ppData = static_cast<LPCVOID>(buffer);
-			}
-			catch (platform_ex::Windows::Win32Exception&)
-			{
-				LE_LogError("#include %s open failed in %s", pFileName, std::filesystem::current_path().string().c_str());
-
-				*ppData = nullptr;
-				*pBytes = 0;
-			}
-
-			return S_OK;
-		}
-		HRESULT Close(
-			LPCVOID pData
-		) {
-			delete[] static_cast<const std::byte*>(pData);
-			return S_OK;
-		}
-
-	private:
-		std::filesystem::path engine_path = std::filesystem::current_path().parent_path().parent_path();
-		std::filesystem::path shaders_path = engine_path / "Engine" / "Shaders";
-		platform::File Open(const std::filesystem::path& path)
-		{
-			auto local_path = shaders_path / path;
-			if(std::filesystem::exists(local_path))
-				return platform::File(local_path.wstring(), platform::File::kToRead);
-			return platform::File(path.wstring(), platform::File::kToRead);
-		}
-	} currdir_include;
-
 	ShaderBlob CompileToDXBC(const ShaderCompilerInput& input,
 		leo::uint32 flags) {
 		std::vector<D3D_SHADER_MACRO> defines;
-		for (auto& macro : input.Environment.GetDefinitions()) {
-			D3D_SHADER_MACRO define;
-			define.Name = macro.first.c_str();
-			define.Definition = macro.second.c_str();
-			defines.emplace_back(define);
-		}
 		D3D_SHADER_MACRO define_end = { nullptr, nullptr };
 		defines.push_back(define_end);
 
 		platform_ex::COMPtr<ID3DBlob> code_blob;
 		platform_ex::COMPtr<ID3DBlob> error_blob;
 
-		auto hr = D3DCompile(input.Code.data(), input.Code.size(), input.SourceName.data(), defines.data(), &currdir_include, input.EntryPoint.data(), CompileProfile(input.Type).data(), flags, 0, &code_blob, &error_blob);
+		auto hr = D3DCompile(input.Code.data(), input.Code.size(), input.SourceName.data(), defines.data(), nullptr, input.EntryPoint.data(), CompileProfile(input.Type).data(), flags, 0, &code_blob, &error_blob);
 		if (error_blob)
 		{
 			auto error = reinterpret_cast<char*>(error_blob->GetBufferPointer());
@@ -521,13 +463,13 @@ static dxc::DxcDllSupport& GetDxcDllHelper()
 }
 
 template <typename T>
-static HRESULT D3DCreateReflectionFromBlob(ID3DBlob* DxilBlob, COMPtr<T>& OutReflection)
+static HRESULT D3DCreateReflectionFromBlob(IDxcBlob* DxilBlob, COMPtr<T>& OutReflection)
 {
 	dxc::DxcDllSupport& DxcDllHelper = GetDxcDllHelper();
 
 	COMPtr<IDxcContainerReflection> ContainerReflection;
 	CheckHResult(DxcDllHelper.CreateInstance(CLSID_DxcContainerReflection, &ContainerReflection.GetRef()));
-	CheckHResult(ContainerReflection->Load((IDxcBlob*)DxilBlob));
+	CheckHResult(ContainerReflection->Load(DxilBlob));
 
 	const leo::uint32 DxilPartKind = DXIL_FOURCC('D', 'X', 'I', 'L');
 	leo::uint32 DxilPartIndex = ~0u;
@@ -760,19 +702,6 @@ namespace asset::X::Shader::DXIL {
 			}
 		}
 
-		std::vector<std::pair<String, String>> def_holder;
-		for (auto& macro : input.Environment.GetDefinitions()) {
-			def_holder.emplace_back(String(macro.first.c_str(), macro.first.size()), String(macro.second.c_str(), macro.second.size()));
-		}
-		
-		std::vector<DxcDefine> defs;
-		for (auto& def : def_holder)
-		{
-			DxcDefine define;
-			define.Name = (wchar_t*)def.first.c_str();
-			define.Value = (wchar_t*)def.second.c_str();
-			defs.emplace_back(define);
-		}
 
 		std::vector<const wchar_t*> args;
 		String wRayTracingExports(RayTracingExports);
@@ -797,9 +726,9 @@ namespace asset::X::Shader::DXIL {
 			(wchar_t*)String(CompileProfile(input.Type)).data(),
 			args.data(),
 			static_cast<UINT32>(args.size()),
-			defs.data(),
-			static_cast<UINT32>(defs.size()),
-			&currdir_include,
+			NULL,
+			0,
+			NULL,
 			&CompileResult.GetRef()
 		));
 
@@ -824,8 +753,8 @@ namespace asset::X::Shader::DXIL {
 			}
 		}
 
-		platform_ex::COMPtr<ID3DBlob> code_blob;
-		CheckHResult(CompileResult->GetResult((IDxcBlob**)&code_blob.GetRef()));
+		platform_ex::COMPtr<IDxcBlob> code_blob;
+		CheckHResult(CompileResult->GetResult(&code_blob.GetRef()));
 
 		if (pInfo)
 		{
@@ -910,6 +839,81 @@ namespace asset::X::Shader::DXIL {
 		blob.second = code_blob.second;
 		std::memcpy(blob.first.get(), code_blob.first.get(), blob.second);
 		return std::move(blob);
+	}
+
+	std::string PreprocessShader(const std::string& code, const ShaderCompilerInput& input)
+	{
+		using String = leo::Text::String;
+
+		std::vector<const wchar_t*> args;
+
+		std::vector<std::pair<String, String>> def_holder;
+		for (auto& macro : input.Environment.GetDefinitions()) {
+			def_holder.emplace_back(String(macro.first.c_str(), macro.first.size()), String(macro.second.c_str(), macro.second.size()));
+		}
+
+		std::vector<DxcDefine> defs;
+		for (auto& def : def_holder)
+		{
+			DxcDefine define;
+			define.Name = (wchar_t*)def.first.c_str();
+			define.Value = (wchar_t*)def.second.c_str();
+			defs.emplace_back(define);
+		}
+
+		dxc::DxcDllSupport& DxcDllHelper = GetDxcDllHelper();
+
+		COMPtr<IDxcCompiler> Compiler;
+		DxcDllHelper.CreateInstance(CLSID_DxcCompiler, &Compiler.GetRef());
+
+		COMPtr<IDxcLibrary> Library;
+		DxcDllHelper.CreateInstance(CLSID_DxcLibrary, &Library.GetRef());
+
+		COMPtr<IDxcBlobEncoding> TextBlob;
+		Library->CreateBlobWithEncodingFromPinned(code.c_str(), static_cast<UINT32>(code.size()), CP_UTF8, &TextBlob.GetRef());
+
+		COMPtr<IDxcOperationResult> CompileResult;
+		CheckHResult(Compiler->Preprocess(
+			TextBlob.Get(),
+			NULL,
+			args.data(),
+			static_cast<UINT32>(args.size()),
+			defs.data(),
+			static_cast<UINT32>(defs.size()),
+			&currdir_include,
+			&CompileResult.GetRef()
+		));
+
+		HRESULT CompileResultCode = S_OK;
+		CompileResult->GetStatus(&CompileResultCode);
+
+		platform_ex::COMPtr<IDxcBlobEncoding> error_blob;
+		CompileResult->GetErrorBuffer(&error_blob.GetRef());
+		if (error_blob && error_blob->GetBufferSize())
+		{
+			BOOL Knwon = false;
+			UINT32 CodePage = CP_UTF8;
+			if (SUCCEEDED(error_blob->GetEncoding(&Knwon, &CodePage)))
+			{
+				auto error = platform_ex::Windows::MBCSToMBCS(std::string_view((const char*)error_blob->GetBufferPointer(), error_blob->GetBufferSize()),
+					CodePage, CP_ACP);
+				leo::replace_all(error, "hlsl.hlsl", input.SourceName);
+				ReportCompileResult(CompileResultCode, error.c_str());
+			}
+			else {
+				ReportCompileResult(CompileResultCode, (const char*)error_blob->GetBufferPointer());
+			}
+		}
+
+		platform_ex::COMPtr<IDxcBlob> code_blob;
+		CheckHResult(CompileResult->GetResult(&code_blob.GetRef()));
+
+		platform_ex::COMPtr<IDxcBlobEncoding> code_utf_blob;
+		CheckHResult(Library->GetBlobAsUtf8(code_blob.Get(), &code_utf_blob.GetRef()));
+
+		std::string preprocess_code{ (const char*)code_utf_blob->GetBufferPointer(), code_utf_blob->GetBufferSize() };
+		leo::replace_all(preprocess_code, "hlsl.hlsl", input.SourceName);
+		return preprocess_code;
 	}
 }
 

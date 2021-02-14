@@ -1027,7 +1027,7 @@ namespace leo
 
 		while ((pos = out.find(pattern, pos)) != _tString::npos)
 		{
-			out.replace(pos, patternLength, replace, replaceLength);
+			out.replace(pos, patternLength, replace);
 
 			pos += replaceLength;
 

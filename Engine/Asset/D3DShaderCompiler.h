@@ -58,6 +58,8 @@ namespace asset::X::Shader
 	{
 		ShaderBlob CompileAndReflectDXIL(const ShaderCompilerInput& input,
 			leo::uint32 flags,ShaderInfo* pInfo=nullptr);
+
+		std::string PreprocessShader(const std::string& code, const ShaderCompilerInput& input);
 	}
 
 	ShaderBlob CompileAndReflect(const ShaderCompilerInput& input, 

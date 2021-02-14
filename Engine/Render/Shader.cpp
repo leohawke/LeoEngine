@@ -96,23 +96,24 @@ namespace platform::Render::Shader
 
 	leo::coroutine::Task<void> CompileBuiltInShader(BuiltInShaderMeta* meta,int32 PermutationId)
 	{
-		auto& Device = Context::Instance().GetDevice();
-		auto& RayDevice = Context::Instance().GetRayContext().GetDevice();
-
 		asset::X::Shader::ShaderCompilerInput input;
 
 		input.EntryPoint = meta->GetEntryPoint();
 		input.Type = meta->GetShaderType();
 		input.SourceName = meta->GetSourceFileName();
-		// Allow the shader type to modify the compile environment.
-		meta->SetupCompileEnvironment(PermutationId, input.Environment);
 
 		LFL_DEBUG_DECL_TIMER(Commpile, sfmt("CompileShader %s- Entry:%s ", input.SourceName.data(), input.EntryPoint.data()));
 
+		// Allow the shader type to modify the compile environment.
+		meta->SetupCompileEnvironment(PermutationId, input.Environment);
+		asset::X::Shader::AppendCompilerEnvironment(input.Environment, input.Type);
+
 		auto Code = co_await platform::X::GenHlslShaderAsync(meta->GetSourceFileName());
+
+		Code = asset::X::Shader::PreprocessShader(Code, input);
+
 		input.Code = Code;
 
-		asset::X::Shader::AppendCompilerEnvironment(input.Environment, input.Type);
 
 		ShaderInfo Info{ input.Type };
 
@@ -135,6 +136,7 @@ namespace platform::Render::Shader
 			initializer.pBlob = &blob;
 			initializer.pInfo = &Info;
 
+			auto& RayDevice = Context::Instance().GetRayContext().GetDevice();
 			auto pRayTracingShaderRHI = RayDevice.CreateRayTracingSahder(initializer);
 
 			RenderShader::CompiledShaderInitializer compileOuput;
@@ -150,6 +152,8 @@ namespace platform::Render::Shader
 			platform::Render::ShaderInitializer initializer;
 			initializer.pBlob = &blob;
 			initializer.pInfo = &Info;
+
+			auto& Device = Context::Instance().GetDevice();
 
 			auto pShaderRHI = Device.CreateShader(initializer);
 
