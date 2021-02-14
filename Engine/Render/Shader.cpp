@@ -139,6 +139,7 @@ namespace platform::Render::Shader
 
 			RenderShader::CompiledShaderInitializer compileOuput;
 			compileOuput.Shader = pRayTracingShaderRHI;
+			compileOuput.Meta = meta;
 			FillParameterMapByShaderInfo(compileOuput.ParameterMap, Info);
 
 			auto pShader = static_cast<BuiltInRayTracingShader*>(pBuiltInMeta->Construct(compileOuput));
@@ -154,6 +155,8 @@ namespace platform::Render::Shader
 
 			RenderShader::CompiledShaderInitializer compileOuput;
 			compileOuput.Shader = pShaderRHI;
+			compileOuput.Meta = meta;
+
 			FillParameterMapByShaderInfo(compileOuput.ParameterMap, Info);
 
 			auto pShader = pBuiltInMeta->Construct(compileOuput);

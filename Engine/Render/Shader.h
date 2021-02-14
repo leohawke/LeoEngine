@@ -351,7 +351,7 @@ public:\
 	{\
 		if constexpr(ShaderClass::RootParameterStruct)\
 			platform::Render::BindForRootShaderParameters(this, Initializer.ParameterMap); \
-		else\
+		else if constexpr(platform::Render::ShaderParametersType<ShaderClass>::HasParameters)\
 			platform::Render::BindForLegacyShaderParameters<platform::Render::ShaderParametersType_t<ShaderClass>>(this,Initializer.ParameterMap);\
 	}\
 	ShaderClass() \

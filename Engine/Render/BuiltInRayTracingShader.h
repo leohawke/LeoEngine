@@ -17,7 +17,6 @@ inline namespace Shader
 	{
 	public:
 		using DerivedType = BuiltInRayTracingShader;
-		static constexpr bool RootParameterStruct = true;
 	public:
 		BuiltInRayTracingShader(const ShaderMetaType::CompiledShaderInitializer& Initializer)
 			:BuiltInShader(Initializer)
@@ -31,7 +30,8 @@ inline namespace Shader
 }
 
 #define EXPORTED_RAYTRACING_SHADER(ShaderClass) EXPORTED_SHADER_TYPE(ShaderClass,BuiltIn) \
-	static inline const ShaderParametersMetadata* GetRootParametersMetadata() {return platform::Render::ParametersMetadata<ShaderClass>();}
+	static inline const ShaderParametersMetadata* GetRootParametersMetadata() {return platform::Render::ParametersMetadata<ShaderClass>();}\
+	static constexpr bool RootParameterStruct = ShaderParametersType<ShaderClass>::HasParameters;
 
 PR_NAMESPACE_END
 

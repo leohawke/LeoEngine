@@ -103,6 +103,7 @@ void RenderShaderParameterBindings::BindForLegacyShaderParameters(const RenderSh
 	case HullShader:
 	case DomainShader:
 	case GeometryShader:
+	case ComputeShader:
 		break;
 	default:
 		LAssert(false, "Invalid shader frequency for this shader binding technique.");
@@ -128,11 +129,10 @@ void RenderShaderParameterBindings::BindForRootShaderParameters(const RenderShad
 
 	switch (Meta->GetShaderType())
 	{
-	case VertexShader:
-	case PixelShader:
-	case HullShader:
-	case DomainShader:
-	case GeometryShader:
+	case RayGen:
+	case RayMiss:
+	case RayHitGroup:
+	case RayCallable:
 		break;
 	default:
 		LAssert(false, "Invalid shader frequency for this shader binding technique.");
