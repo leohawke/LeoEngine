@@ -77,7 +77,13 @@ inline namespace Shader
 		std::vector<ResourceParameter> Samplers;
 		std::vector<ResourceParameter> UAVs;
 
+		uint16 RootParameterBufferIndex;
+
+		static constexpr uint16 kInvalidBufferIndex = 0xFFFF;
+
+
 		void BindForLegacyShaderParameters(const RenderShader* Shader, const ShaderParameterMap& ParameterMaps, const ShaderParametersMetadata& StructMetaData);
+		void BindForRootShaderParameters(const RenderShader* Shader, const ShaderParameterMap& ParameterMaps);
 	};
 
 	struct FShaderPermutationParameters
@@ -96,11 +102,13 @@ inline namespace Shader
 	public:
 		using FPermutationDomain = FShaderPermutationNone;
 		using FPermutationParameters = FShaderPermutationParameters;
+		static constexpr bool RootParameterStruct = false;
 
 		struct CompiledShaderInitializer
 		{
 			HardwareShader* Shader;
 			ShaderParameterMap ParameterMap;
+			ShaderMeta* Meta;
 		};
 
 		RenderShader();
@@ -108,6 +116,9 @@ inline namespace Shader
 		virtual ~RenderShader();
 
 		RenderShader(const CompiledShaderInitializer& initializer);
+
+
+		inline ShaderMeta* GetMeta() const { return Meta; }
 
 		VertexHWShader* GetVertexShader() const
 		{
@@ -127,11 +138,17 @@ inline namespace Shader
 			return GetHardwareShader<ComputeHWShader>();
 		}
 
+		/** Returns the meta data for the root shader parameter struct. */
+		static inline const ShaderParametersMetadata* GetRootParametersMetadata()
+		{
+			return nullptr;
+		}
+
 		/** Can be overridden by FShader subclasses to modify their compile environment just before compilation occurs. */
 		static void ModifyCompilationEnvironment(const FShaderPermutationParameters&, FShaderCompilerEnvironment&) {}
 		/** Can be overridden by FShader subclasses to determine whether a specific permutation should be compiled. */
 		static bool ShouldCompilePermutation(const FShaderPermutationParameters&) { return true; }
-	private:
+	protected:
 		template<class THardwareShader>
 		THardwareShader* GetHardwareShader() const
 		{
@@ -140,6 +157,7 @@ inline namespace Shader
 	public:
 		std::unique_ptr<HardwareShader> Shader;
 		RenderShaderParameterBindings Bindings;
+		ShaderMeta* Meta;
 	};
 
 	class BuiltInShaderMeta;
@@ -169,7 +187,9 @@ inline namespace Shader
 			int32 TotalPermutationCount,
 			ConstructType InConstructRef,//InConstructCompiledRef
 			ModifyCompilationEnvironmentType InModifyCompilationEnvironmentRef,
-			ShouldCompilePermutationType InShouldCompilePermutationRef
+			ShouldCompilePermutationType InShouldCompilePermutationRef,
+			uint32 InTypeSize,
+			const ShaderParametersMetadata* InRootParametersMetadata
 		);
 
 		const std::string& GetTypeName() const { return TypeName; }
@@ -194,6 +214,12 @@ inline namespace Shader
 		{
 			return ShaderMetaForDownCast == EShaderMetaForDownCast::BuitlIn ? (BuiltInShaderMeta*)(this) : nullptr;
 		}
+
+		/** Returns the meta data for the root shader parameter struct. */
+		inline const ShaderParametersMetadata* GetRootParametersMetadata() const
+		{
+			return RootParametersMetadata;
+		}
 	private:
 		EShaderMetaForDownCast ShaderMetaForDownCast;
 
@@ -208,6 +234,8 @@ inline namespace Shader
 		ConstructType ConstructRef;
 		ModifyCompilationEnvironmentType ModifyCompilationEnvironmentRef;
 		ShouldCompilePermutationType ShouldCompilePermutationRef;
+
+		const ShaderParametersMetadata* const RootParametersMetadata;
 	};
 
 	template <typename ParameterStruct>
@@ -219,6 +247,11 @@ inline namespace Shader
 	template<>
 	inline void BindForLegacyShaderParameters<void>(RenderShader* Shader, const ShaderParameterMap& ParameterMap)
 	{
+	}
+
+	inline void BindForRootShaderParameters(RenderShader* Shader, const ShaderParameterMap& ParameterMap)
+	{
+		Shader->Bindings.BindForRootShaderParameters(Shader, ParameterMap);
 	}
 
 	template<class>
@@ -239,6 +272,19 @@ inline namespace Shader
 
 	template<class ShaderClass>
 	using ShaderParametersType_t = typename ShaderParametersType<ShaderClass>::type;
+
+	template <typename ShaderClass>
+	requires requires{typename ShaderClass::Parameters; }
+	inline const ShaderParametersMetadata* ParametersMetadata()
+	{
+		return ShaderClass::Parameters::TypeInfo::GetStructMetadata();
+	}
+
+	template<typename ShaderClass>
+	inline const ShaderParametersMetadata* ParametersMetadata()
+	{
+		return nullptr;
+	}
 
 
 	template<typename ShaderType>
@@ -303,7 +349,10 @@ public:\
 	ShaderClass(const ShaderMetaType::CompiledShaderInitializer& Initializer) \
 		:DerivedType(Initializer)\
 	{\
-		platform::Render::BindForLegacyShaderParameters<platform::Render::ShaderParametersType_t<ShaderClass>>(this,Initializer.ParameterMap);\
+		if constexpr(ShaderClass::RootParameterStruct)\
+			platform::Render::BindForRootShaderParameters(this, Initializer.ParameterMap); \
+		else\
+			platform::Render::BindForLegacyShaderParameters<platform::Render::ShaderParametersType_t<ShaderClass>>(this,Initializer.ParameterMap);\
 	}\
 	ShaderClass() \
 	{ }
@@ -322,6 +371,8 @@ public:\
 		FunctionName, \
 		Frequency, \
 		SHADER_VTABLE(ShaderClass),\
+		sizeof(ShaderClass),\
+		ShaderClass::GetRootParametersMetadata()\
 	)
 
 	/** A reference which is initialized with the requested shader type from a shader map. */

@@ -138,6 +138,7 @@ void D12::RayContext::RayTraceShadow(R::RayTracingScene* InScene, R::FrameBuffer
 
 	D12::ShaderResourceView* DepthSRV =Tex->RetriveShaderResourceView();
 
+	//todo:remove this
 	D3D12_RESOURCE_BARRIER barrier;
 	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	if (Resource->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_DEPTH_READ))
@@ -145,10 +146,15 @@ void D12::RayContext::RayTraceShadow(R::RayTracingScene* InScene, R::FrameBuffer
 		command_context->CommandListHandle.AddTransitionBarrier(Resource,barrier.Transition.StateBefore, D3D12_RESOURCE_STATE_DEPTH_READ, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES);
 	}
 
-	RayTracingShaderBindings Bindings;
+	ShadowRG::Parameters Parameters;
+
+	platform::Render::RayTracingShaderBindings Bindings;
+	platform::Render::ShaderMapRef<ShadowRG> RayGenerationShader(GetBuiltInShaderMap());
+	//SetShaderParameters(Bindings, RayGenerationShader, Parameters);
 
 	Bindings.SRVs[0] =static_cast<D12::RayTracingScene*>(InScene)->GetShaderResourceView();
 	Bindings.SRVs[1] = DepthSRV;
+
 	Bindings.UniformBuffers[0] = InConstants;
 	Bindings.UAVs[0] = Output;
 
@@ -167,6 +173,7 @@ void D12::RayContext::RayTraceShadow(R::RayTracingScene* InScene, R::FrameBuffer
 
 	DispatchRays(*command_context, Bindings, Pipeline, 0, nullptr, DispatchDesc);
 
+	//todo:remove this
 	if (Resource->UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_DEPTH_WRITE))
 	{
 		command_context->CommandListHandle.AddTransitionBarrier(Resource, barrier.Transition.StateBefore, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES);

@@ -1013,6 +1013,30 @@ namespace leo
 		return std::move(val);
 	}
 
+	template<typename _tString,typename _tPattern,typename _tReplace>
+	std::size_t replace_all(_tString& out, const _tPattern& pattern, const _tReplace& replace)
+	{
+		auto patternLength = string_length(pattern);
+		auto replaceLength = string_length(replace);
+
+		if (patternLength == 0)
+			return 0;
+
+		typename _tString::size_type pos = 0;
+		std::size_t count = 0;
+
+		while ((pos = out.find(pattern, pos)) != _tString::npos)
+		{
+			out.replace(pos, patternLength, replace, replaceLength);
+
+			pos += replaceLength;
+
+			++count;
+		}
+
+		return count;
+	}
+
 	
 }
 #endif

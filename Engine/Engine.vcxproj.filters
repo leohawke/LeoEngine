@@ -792,6 +792,12 @@
     <ClInclude Include="Shaders\SSD\SSDSignalCompression.h">
       <Filter>Shaders\SSD</Filter>
     </ClInclude>
+    <ClInclude Include="Render\ShaderParameters.h">
+      <Filter>Render\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\TextureSampleDesc.h">
+      <Filter>Render\DeviceInterface</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
@@ -910,7 +916,7 @@
     <None Include="Shaders\RayTracing\RayTracingScreenSpaceShadow.lsl">
       <Filter>Shaders\RayTracing</Filter>
     </None>
-    <None Include="Shaders\RayTracing\RayTracingCommon.lsl">
+    <None Include="Shaders\RayTracing\RayTracingCommon.h">
       <Filter>Shaders\RayTracing</Filter>
     </None>
     <None Include="Shaders\RayTracing\RayTracingDefaultHitShaders.lsl">
@@ -949,7 +955,7 @@
     <None Include="Shaders\imgui\imgui.lsl">
       <Filter>Shaders\imgui</Filter>
     </None>
-    <None Include="Shaders\RayTracing\RayTracingDirectionalLight.lsl">
+    <None Include="Shaders\RayTracing\RayTracingDirectionalLight.h">
       <Filter>Shaders\RayTracing</Filter>
     </None>
     <None Include="Render\Effect\DirectLight.lsl">

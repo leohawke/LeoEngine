@@ -257,6 +257,7 @@
     <ClInclude Include="Render\RenderObject.h" />
     <ClInclude Include="Render\IShaderCompose.h" />
     <ClInclude Include="Render\ShaderCore.h" />
+    <ClInclude Include="Render\ShaderParameters.h" />
     <ClInclude Include="Render\ShaderParametersMetadata.h" />
     <ClInclude Include="Render\ShaderParameterStruct.h" />
     <ClInclude Include="Render\ShaderParamterTraits.hpp" />
@@ -272,6 +273,7 @@
     <ClInclude Include="Render\InputLayout.hpp" />
     <ClInclude Include="Render\ShaderPermutation.h" />
     <ClInclude Include="Render\ShaderTextureTraits.hpp" />
+    <ClInclude Include="Render\TextureSampleDesc.h" />
     <ClInclude Include="Render\ViewPort.h" />
     <CopyFileToFolders Include="Shaders\SSD\SSDDefinitions.h" />
     <ClInclude Include="Shaders\Random.h" />
@@ -320,9 +322,9 @@
     <None Include="Shaders\PostProcess\VolumeRendering.lsl" />
     <None Include="Shaders\RandomSequence.h" />
     <None Include="Shaders\RayTracing\RayTracingBuiltInShaders.lsl" />
-    <None Include="Shaders\RayTracing\RayTracingCommon.lsl" />
+    <None Include="Shaders\RayTracing\RayTracingCommon.h" />
     <None Include="Shaders\RayTracing\RayTracingDefaultHitShaders.lsl" />
-    <None Include="Shaders\RayTracing\RayTracingDirectionalLight.lsl" />
+    <None Include="Shaders\RayTracing\RayTracingDirectionalLight.h" />
     <None Include="Shaders\RayTracing\RayTracingScreenSpaceShadow.lsl" />
     <None Include="Shaders\RayTracing\RayTracingBuiltInResources.lsl" />
     <None Include="Shaders\RayTracing\RayTracingHitGroupCommon.lsl" />

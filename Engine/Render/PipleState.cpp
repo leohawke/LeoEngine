@@ -50,16 +50,7 @@ namespace platform::Render {
 		color_write_mask.fill((leo::uint8)ColorMask::All);
 	}
 
-	TextureSampleDesc::TextureSampleDesc()
-		: border_clr(0, 0, 0, 0),
-		address_mode_u(TexAddressingMode::Wrap), address_mode_v(TexAddressingMode::Wrap), address_mode_w(TexAddressingMode::Wrap),
-		filtering(TexFilterOp::Min_Mag_Mip_Point),
-		max_anisotropy(16),
-		min_lod(0), max_lod(std::numeric_limits<float>::max()),
-		mip_map_lod_bias(0),
-		cmp_func(CompareOp::Fail)
-	{
-	}
+	
 
 	PipleState::~PipleState() = default;
 }

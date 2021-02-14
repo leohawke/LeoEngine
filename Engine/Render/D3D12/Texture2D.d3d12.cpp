@@ -32,6 +32,8 @@ static EFormat ConvertWrap(DXGI_FORMAT format) {
 		return EF_D24S8;
 	case DXGI_FORMAT_R32_TYPELESS:
 		return EF_D32F;
+	case DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS:
+		return EF_D32FS8X24;
 	}
 	return Convert(format);
 }

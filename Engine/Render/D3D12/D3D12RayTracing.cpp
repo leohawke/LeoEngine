@@ -681,7 +681,7 @@ template <typename ResourceBinderType>
 static void SetRayTracingShaderResources(
 	D3D12::CommandContext& CommandContext,
 	const platform_ex::Windows::D3D12::RayTracingShader* Shader,
-	const RayTracingShaderBindings& ResourceBindings,
+	const platform::Render::RayTracingShaderBindings& ResourceBindings,
 	RayTracingDescriptorCache& DescriptorCache,
 	ResourceBinderType& Binder)
 {
@@ -696,7 +696,7 @@ static void SetRayTracingShaderResources(
 		);
 }
 
-void ::DispatchRays(D3D12::CommandContext& CommandContext, const RayTracingShaderBindings& GlobalBindings, const D3D12RayTracingPipelineState* Pipeline,
+void ::DispatchRays(D3D12::CommandContext& CommandContext, const platform::Render::RayTracingShaderBindings& GlobalBindings, const D3D12RayTracingPipelineState* Pipeline,
 	uint32 RayGenShaderIndex, RayTracingShaderTable* OptShaderTable, const D3D12_DISPATCH_RAYS_DESC& DispatchDesc)
 {
 	//RT and non-RT descriptors should use the same global heap that's dynamically sub-allocated.

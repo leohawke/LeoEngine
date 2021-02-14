@@ -1,15 +1,19 @@
 #pragma once
 
-#include "d3d12_dxgi.h"
+#include <LBase/type_traits.hpp>
 #include <LBase/string.hpp>
 #include <LBase/span.hpp>
+
+#include "../RayTracingDefinitions.h"
+#include "../IGPUResourceView.h"
+#include "../ShaderParameters.h"
+
+#include "d3d12_dxgi.h"
 #include "GraphicsBuffer.hpp"
 #include "RayTracingShader.h"
 #include "RootSignature.h"
 #include "Common.h"
-#include "../RayTracingDefinitions.h"
-#include "../IGPUResourceView.h"
-#include <LBase/type_traits.hpp>
+
 #include <map>
 
 //pre decl
@@ -592,15 +596,8 @@ private:
 	Windows::D3D12::RootSignature DefaultLocalRootSignature;
 };
 
-struct RayTracingShaderBindings
-{
-	platform::Render::Texture* Textures[32] = {};
-	platform::Render::ShaderResourceView* SRVs[32] = {};
-	platform::Render::GraphicsBuffer* UniformBuffers[32] = {};
-	platform::Render::TextureSampleDesc* Samplers[32] = {};
-	platform::Render::UnorderedAccessView* UAVs[8] = {};
-};
 
-void DispatchRays(Windows::D3D12::CommandContext& CommandContext,const RayTracingShaderBindings& GlobalBindings, const D3D12RayTracingPipelineState* Pipeline,
+
+void DispatchRays(Windows::D3D12::CommandContext& CommandContext,const platform::Render::RayTracingShaderBindings& GlobalBindings, const D3D12RayTracingPipelineState* Pipeline,
 	uint32 RayGenShaderIndex, RayTracingShaderTable* OptShaderTable, const D3D12_DISPATCH_RAYS_DESC& DispatchDesc);
 

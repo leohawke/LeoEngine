@@ -7,9 +7,10 @@
 #define LE_RENDER_IRayTracingShader_h 1
 
 #include "RenderObject.h"
+#include "IDevice.h"
 
 namespace platform::Render {
-	class RayTracingShader :public RObject
+	class RayTracingShader :public HardwareShader
 	{
 	public:
 		virtual ~RayTracingShader();

@@ -27,14 +27,18 @@ inline namespace Shader
 			ConstructType InConstructRef,
 			ModifyCompilationEnvironmentType InModifyCompilationEnvironmentRef,
 			ShouldCompilePermutationType InShouldCompilePermutationRef,
-
+			uint32 InTypeSize,
+			const ShaderParametersMetadata* InRootParametersMetadata,
 			ConstructCompiledType InConstructCompiledRef
 		):
 		 ShaderMeta(EShaderMetaForDownCast::BuitlIn,InName,InSourceFileName,InEntryPoint,InFrequency, 
 			 TotalPermutationCount,
 			 InConstructRef, 
 			 InModifyCompilationEnvironmentRef,
-			 InShouldCompilePermutationRef),
+			 InShouldCompilePermutationRef,
+			 InTypeSize,
+			 InRootParametersMetadata
+			 ),
 			ConstructCompiledRef(InConstructCompiledRef)
 		{}
 
@@ -156,6 +160,8 @@ inline namespace Shader
 		FunctionName, \
 		Frequency, \
 		SHADER_VTABLE(ShaderClass),\
+		sizeof(ShaderClass),\
+		ShaderClass::GetRootParametersMetadata(),\
 		ShaderClass::ConstructCompiledInstance\
 	)
 }

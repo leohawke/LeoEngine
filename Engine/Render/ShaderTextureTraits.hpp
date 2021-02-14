@@ -2,7 +2,8 @@
 
 #include "ShaderParamterTraits.hpp"
 #include "ITexture.hpp"
-#include "Engine/Render/IGPUResourceView.h"
+#include "IGPUResourceView.h"
+#include "TextureSampleDesc.h"
 
 namespace platform::Render
 {

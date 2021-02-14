@@ -264,8 +264,6 @@ private:
 			shadowconstant.SourceRadius = sinf(LightHalfAngle * 3.14159265f / 180);
 			shadowconstant.SamplesPerPixel = SamplesPerPixel;
 			shadowconstant.StateFrameIndex = StateFrameIndex;
-			shadowconstant.CameraToWorld = lm::transpose(lm::inverse(viewproj));
-			shadowconstant.Resolution = lm::float2(1280, 720);
 			pGenShaderConstants->UpdateSubresource(0, static_cast<leo::uint32>(sizeof(shadowconstant)), &shadowconstant);
 		}
 		auto Scene = pEntities->BuildRayTracingScene();

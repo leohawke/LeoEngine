@@ -3,6 +3,7 @@
 #include "LFramework/Helper/ShellHelper.h"
 #include <LFramework/Core/LString.h>
 #include <LFramework/Win32/LCLib/Mingw32.h>
+#include <LFramework/Win32/LCLib/NLS.h>
 #include "D3DShaderCompiler.h"
 #include "../Render/IContext.h"
 #include "../Render/RayTracingDefinitions.h"
@@ -346,6 +347,11 @@ void FillD3D11Reflect(ID3D11ShaderReflection* pReflection, ShaderInfo* pInfo, Sh
 	}
 }
 
+void ReportCompileResult(HRESULT hr, const char* msg)
+{
+	hr == S_OK ? LE_LogWarning(msg):LE_LogError(msg);
+	CheckHResult(hr);
+}
 
 namespace asset::X::Shader::DXBC {
 	static class CurrentDirInclude :public ID3DInclude
@@ -419,9 +425,8 @@ namespace asset::X::Shader::DXBC {
 		if (error_blob)
 		{
 			auto error = reinterpret_cast<char*>(error_blob->GetBufferPointer());
-			LE_LogError(error);
+			ReportCompileResult(hr, error);
 		}
-		platform_ex::CheckHResult(hr);
 
 		if (code_blob) {
 			ShaderBlob blob;
@@ -798,15 +803,25 @@ namespace asset::X::Shader::DXIL {
 			&CompileResult.GetRef()
 		));
 
-		HRESULT CompileResultCode;
+		HRESULT CompileResultCode = S_OK;
 		CompileResult->GetStatus(&CompileResultCode);
 
 		platform_ex::COMPtr<IDxcBlobEncoding> error_blob;
 		CompileResult->GetErrorBuffer(&error_blob.GetRef());
 		if (error_blob && error_blob->GetBufferSize())
 		{
-			auto error =reinterpret_cast<char*>(error_blob->GetBufferPointer());
-			LE_LogError(error);
+			BOOL Knwon = false;
+			UINT32 CodePage = CP_UTF8;
+			if (SUCCEEDED(error_blob->GetEncoding(&Knwon, &CodePage)))
+			{
+				auto error = platform_ex::Windows::MBCSToMBCS(std::string_view((const char*)error_blob->GetBufferPointer(), error_blob->GetBufferSize()),
+					CodePage, CP_ACP);
+				leo::replace_all(error, "hlsl.hlsl", input.SourceName);
+				ReportCompileResult(CompileResultCode, error.c_str());
+			}
+			else{
+				ReportCompileResult(CompileResultCode, (const char*)error_blob->GetBufferPointer());
+			}
 		}
 
 		platform_ex::COMPtr<ID3DBlob> code_blob;

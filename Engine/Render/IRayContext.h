@@ -17,12 +17,7 @@ namespace platform::Render {
 		leo::uint32 SamplesPerPixel;
 		leo::uint32 StateFrameIndex;
 		leo::uint32 padding[2];
-		leo::math::float4x4 CameraToWorld;
-		leo::math::float2 Resolution;
-		leo::math::float2 Padding1;
 	};
-
-	static_assert(loffsetof(GenShadowConstants, CameraToWorld) % 16 == 0);
 
 	class RayContext
 	{

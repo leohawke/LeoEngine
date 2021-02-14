@@ -15,6 +15,7 @@
 #include "Shader.h"
 #include "IGraphicsPipelineState.h"
 #include "IShaderCompose.h"
+#include "RenderObject.h"
 #include <optional>
 
 namespace asset {
@@ -28,7 +29,7 @@ namespace platform::Render::Effect {
 
 namespace platform::Render {
 
-	class HardwareShader
+	class HardwareShader : public RObject
 	{
 	public:
 		virtual ~HardwareShader() = 0;

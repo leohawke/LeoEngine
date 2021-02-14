@@ -1,6 +1,6 @@
 (RayTracing
-	(refer RayTracing/RayTracingCommon.lsl)
-	(refer RayTracing/RayTracingDirectionalLight.lsl)
+	(include RayTracing/RayTracingCommon.h)
+	(include RayTracing/RayTracingDirectionalLight.h)
 	(include RandomSequence.h)
 	(RaytracingAccelerationStructure (space RAY_TRACING_REGISTER_SPACE_GLOBAL) TLAS)
 	(RWTexture2D  (elemtype float4) (space RAY_TRACING_REGISTER_SPACE_GLOBAL) Output)
@@ -10,20 +10,16 @@
 		(float SourceRadius)
 		(uint SamplesPerPixel)
 		(uint StateFrameIndex)
-		(float4x4 CameraToWorld)
-		(float2 Resolution)
 	)
 	(shader 
 "
+Texture2D WorldNormalBuffer;
+float NormalBias;
+
 static const float FLT_MAX = asfloat(0x7F7FFFFF);
 
 static const float DENOISER_INVALID_HIT_DISTANCE = -2.0;
 static const float DENOISER_MISS_HIT_DISTANCE = -1.0;
-
-uint CalcLinearIndex(uint2 PixelCoord)
-{
-	return PixelCoord.y * uint(Resolution.x) + PixelCoord.x;
-}
 
 struct OcclusionResult
 {
@@ -54,59 +50,48 @@ OcclusionResult InitOcclusionResult()
 
 RAY_TRACING_ENTRY_RAYGEN(RayGen)
 {
-		
-	uint2 DTid = DispatchRaysIndex().xy;
-	float2 xy = DTid.xy + 0.5;
-
-	float2 readGBufferAt = xy;
-
-	// Read depth and normal
-	float sceneDepth = Depth.Load(int3(readGBufferAt, 0));
-
-	 // Screen position for the ray
-    float2 screenPos = xy / Resolution * 2.0 - 1.0;
-
-	// Invert Y for DirectX-style coordinates
-    screenPos.y = -screenPos.y;
-
-	// Unproject into the world position using depth
-	float4 unprojected = mul(float4(screenPos, sceneDepth, 1),CameraToWorld);
-	float3 world = unprojected.xyz / unprojected.w;
-
 	uint2 PixelCoord = DispatchRaysIndex().xy;
+		
+	// Read depth and normal
+	float DeviceZ = Depth.Load(int3(PixelCoord, 0)).r;
+
+	float3 WorldNormal = WorldNormalBuffer.Load(int3(PixelCoord, 0)).xyz;
+	float3 WorldPosition = ReconstructWorldPositionFromDeviceZ(PixelCoord, DeviceZ);
 
 	RandomSequence RandSequence;
 	uint LinearIndex = CalcLinearIndex(PixelCoord);
 	RandomSequence_Initialize(RandSequence, LinearIndex, StateFrameIndex);
 
 	OcclusionResult Out = InitOcclusionResult();
+
+	bool bApplyNormalCulling = true;
+
 	for(uint SampleIndex =0;SampleIndex <SamplesPerPixel;++SampleIndex)
 	{
 		uint DummyVariable;
 		float2 RandSample = RandomSequence_GenerateSample2D(RandSequence, DummyVariable);
 
-		float3 RayOrigin;
-		float3 RayDirection;
-		float RayTMin;
-		float RayTMax;
-
 		LightShaderParameters LightParameters = {LightDirection,SourceRadius};
 
+		RayDesc Ray;
 		GenerateDirectionalLightOcclusionRay(
 			LightParameters,
-			world,
+			WorldPosition,
 			float3(0,1,0),
 			RandSample,
-			RayOrigin,
-			RayDirection,
-			RayTMin,
-			RayTMax
+			Ray.Origin,
+			Ray.Direction,
+			Ray.TMin,
+			Ray.TMax
 		);
+		ApplyCameraRelativeDepthBias(Ray, PixelCoord, DeviceZ, WorldNormal, NormalBias);
 
-		RayDesc rayDesc = { RayOrigin,
-			RayTMin,
-			RayDirection,
-			RayTMax };
+		if(bApplyNormalCulling && dot(WorldNormal, Ray.Direction) <= 0.0)
+		{
+			//self-intersection
+			Out.ClosestRayDistance = 0.001;
+			continue;
+		}
 
 		uint RayFlags = 0;
 
@@ -116,7 +101,7 @@ RAY_TRACING_ENTRY_RAYGEN(RayGen)
 
 		FMinimalPayload payload = {-1};
 
-		TraceRay(TLAS, RayFlags, ~0,0,1,0, rayDesc, payload);
+		TraceRay(TLAS, RayFlags, ~0,0,1,0, Ray, payload);
 
 		Out.RayCount += 1.0;
 		Out.Visibility += payload.IsMiss() ? 1.0:0.0;

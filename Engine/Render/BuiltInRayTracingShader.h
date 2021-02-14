@@ -17,6 +17,7 @@ inline namespace Shader
 	{
 	public:
 		using DerivedType = BuiltInRayTracingShader;
+		static constexpr bool RootParameterStruct = true;
 	public:
 		BuiltInRayTracingShader(const ShaderMetaType::CompiledShaderInitializer& Initializer)
 			:BuiltInShader(Initializer)
@@ -25,11 +26,13 @@ inline namespace Shader
 		BuiltInRayTracingShader(){}
 
 		RayTracingShader* GetRayTracingShader();
-		void SetRayTracingShader(RayTracingShader* pShader);
 	private:
-		std::shared_ptr<RayTracingShader> pRayTracingShader;
 	};
 }
+
+#define EXPORTED_RAYTRACING_SHADER(ShaderClass) EXPORTED_SHADER_TYPE(ShaderClass,BuiltIn) \
+	static inline const ShaderParametersMetadata* GetRootParametersMetadata() {return platform::Render::ParametersMetadata<ShaderClass>();}
+
 PR_NAMESPACE_END
 
 #undef PR_NAMESPACE_BEGIN

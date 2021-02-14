@@ -1,8 +1,8 @@
-(effect
-(refer RayTracing/RayTracingCommon.lsl)
-(include MonteCarlo.h)
-(shader
-"
+#ifndef RayTracingDirectionalLight_h
+#define RayTracingDirectionalLight_h 1
+
+#include "RayTracing/RayTracingCommon.h"
+#include "MonteCarlo.h"
 
 struct LightShaderParameters
 {
@@ -67,7 +67,6 @@ void GenerateDirectionalLightOcclusionRay(
 	RayTMin = 0.0;
 	RayTMax = 1.0e27;
 }
-"
-)
-)
+
+#endif
 

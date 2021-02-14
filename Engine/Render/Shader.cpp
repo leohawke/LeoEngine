@@ -58,7 +58,9 @@ namespace platform::Render::Shader
 	ShaderMeta::ShaderMeta(EShaderMetaForDownCast InShaderMetaForDownCast, const char* InName, const char* InSourceFileName, const char* InEntryPoint, platform::Render::ShaderType InFrequency, int32 InTotalPermutationCount,
 		ConstructType InConstructRef, 
 		ModifyCompilationEnvironmentType InModifyCompilationEnvironmentRef,
-		ShouldCompilePermutationType InShouldCompilePermutationRef
+		ShouldCompilePermutationType InShouldCompilePermutationRef,
+		uint32 InTypeSize,
+		const ShaderParametersMetadata* InRootParametersMetadata
 	)
 		:
 		ShaderMetaForDownCast(InShaderMetaForDownCast),
@@ -71,7 +73,8 @@ namespace platform::Render::Shader
 		TotalPermutationCount(InTotalPermutationCount),
 		ConstructRef(InConstructRef),
 		ModifyCompilationEnvironmentRef(InModifyCompilationEnvironmentRef),
-		ShouldCompilePermutationRef(InShouldCompilePermutationRef)
+		ShouldCompilePermutationRef(InShouldCompilePermutationRef),
+		RootParametersMetadata(InRootParametersMetadata)
 	{
 		GetTypeList().emplace_front(this);
 	}
@@ -80,8 +83,10 @@ namespace platform::Render::Shader
 	ImplDeDtor(RenderShader);
 
 	RenderShader::RenderShader(const CompiledShaderInitializer& initializer)
+		:
+		Shader(initializer.Shader),
+		Meta(initializer.Meta)
 	{
-		Shader = leo::unique_raw(initializer.Shader);
 	}
 
 	static void FillParameterMapByShaderInfo(ShaderParameterMap& target, const ShaderInfo& src);
@@ -120,6 +125,10 @@ namespace platform::Render::Shader
 			, &Info
 		);
 
+		auto pBuiltInMeta = meta->GetBuiltInShaderType();
+		if (!pBuiltInMeta)
+			co_return;
+
 		if (IsRayTracingShader(meta->GetShaderType()))
 		{
 			platform::Render::RayTracingShaderInitializer initializer;
@@ -128,13 +137,15 @@ namespace platform::Render::Shader
 
 			auto pRayTracingShaderRHI = RayDevice.CreateRayTracingSahder(initializer);
 
-			auto pShader = static_cast<BuiltInRayTracingShader*>(static_cast<ShaderMeta*>(meta)->Construct());
+			RenderShader::CompiledShaderInitializer compileOuput;
+			compileOuput.Shader = pRayTracingShaderRHI;
+			FillParameterMapByShaderInfo(compileOuput.ParameterMap, Info);
 
-			pShader->SetRayTracingShader(pRayTracingShaderRHI);
+			auto pShader = static_cast<BuiltInRayTracingShader*>(pBuiltInMeta->Construct(compileOuput));
 
 			GGlobalBuiltInShaderMap.FindOrAddShader(meta, PermutationId, pShader);
 		}
-		else if (auto pBuiltInMeta = meta->GetBuiltInShaderType()) {
+		else{
 			platform::Render::ShaderInitializer initializer;
 			initializer.pBlob = &blob;
 			initializer.pInfo = &Info;

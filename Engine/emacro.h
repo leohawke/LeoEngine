@@ -48,4 +48,8 @@
 #define LE_LogError(...) platform_ex::SendDebugString(platform::Descriptions::Err,leo::sfmt(__VA_ARGS__).c_str())
 #endif
 
+#ifndef LE_LogWarning
+#define LE_LogWarning(...) platform_ex::SendDebugString(platform::Descriptions::Warning,leo::sfmt(__VA_ARGS__).c_str())
+#endif
+
 #endif

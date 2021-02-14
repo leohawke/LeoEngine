@@ -5,10 +5,6 @@ using namespace platform::Render;
 
 RayTracingShader* Shader::BuiltInRayTracingShader::GetRayTracingShader()
 {
-	return pRayTracingShader.get();
+	return GetHardwareShader<RayTracingShader>();
 }
 
-void Shader::BuiltInRayTracingShader::SetRayTracingShader(RayTracingShader* pShader)
-{
-	pRayTracingShader = shared_raw_robject(pShader);
-}

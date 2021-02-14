@@ -14,6 +14,8 @@ struct ShaderParameterStructBinding
 
 	const ShaderParameterMap* ParametersMap;
 
+	bool RootShaderParameters = false;
+
 	void Bind(const ShaderParametersMetadata& StructMetaData)
 	{
 		auto& StructMembers = StructMetaData.GetMembers();
@@ -30,6 +32,9 @@ struct ShaderParameterStructBinding
 				ShaderType >= SPT_uint &&
 				ShaderType <= SPT_float4x4 
 				);
+
+			if (RootShaderParameters && bIsVariableNativeType)
+				continue;
 
 			uint16 BufferIndex, BaseIndex, BoundSize;
 			if (!ParametersMap->FindParameterAllocation(ShaderBindingName, BufferIndex, BaseIndex, BoundSize))
@@ -89,10 +94,55 @@ struct ShaderParameterStructBinding
 
 void RenderShaderParameterBindings::BindForLegacyShaderParameters(const RenderShader* Shader, const ShaderParameterMap& ParameterMaps, const ShaderParametersMetadata& StructMetaData)
 {
+	auto Meta = Shader->GetMeta();
+
+	switch (Meta->GetShaderType())
+	{
+	case VertexShader:
+	case PixelShader:
+	case HullShader:
+	case DomainShader:
+	case GeometryShader:
+		break;
+	default:
+		LAssert(false, "Invalid shader frequency for this shader binding technique.");
+	}
+
 	ShaderParameterStructBinding Binding;
 	Binding.Shader = Shader;
 	Binding.Bindings = this;
 	Binding.ParametersMap = &ParameterMaps;
+
+	Binding.Bind(StructMetaData);
+
+	RootParameterBufferIndex = kInvalidBufferIndex;
+
+}
+
+void RenderShaderParameterBindings::BindForRootShaderParameters(const RenderShader* Shader, const ShaderParameterMap& ParameterMaps)
+{
+	//LAssert(StructMetaData.GetSize() < (1<<16),"Shader parameter structure can only have a size < 65536 bytes.");
+
+	auto Meta = Shader->GetMeta();
+	auto& StructMetaData = *Meta->GetRootParametersMetadata();
+
+	switch (Meta->GetShaderType())
+	{
+	case VertexShader:
+	case PixelShader:
+	case HullShader:
+	case DomainShader:
+	case GeometryShader:
+		break;
+	default:
+		LAssert(false, "Invalid shader frequency for this shader binding technique.");
+	}
+
+	ShaderParameterStructBinding Binding;
+	Binding.Shader = Shader;
+	Binding.Bindings = this;
+	Binding.ParametersMap = &ParameterMaps;
+	Binding.RootShaderParameters = true;
 
 	Binding.Bind(StructMetaData);
 }
