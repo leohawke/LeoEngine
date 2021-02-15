@@ -20,7 +20,7 @@ namespace platform_ex::Windows::D3D12 {
 
 		CommandContext* GetCommandContext() const;
 
-		void RayTraceShadow(platform::Render::RayTracingScene* InScene, platform::Render::FrameBuffer* InDepth, platform::Render::UnorderedAccessView* Ouput, platform::Render::GraphicsBuffer* InConstants) final;
+		void RayTraceShadow(platform::Render::RayTracingScene* InScene, const platform::Render::ShadowRGParameters& InConstants) final;
 
 		BasicRayTracingPipeline* GetBasicRayTracingPipeline() const;
 	private:

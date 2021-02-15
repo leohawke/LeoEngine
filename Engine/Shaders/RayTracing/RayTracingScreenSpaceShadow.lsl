@@ -4,17 +4,15 @@
 	(include RandomSequence.h)
 	(RaytracingAccelerationStructure (space RAY_TRACING_REGISTER_SPACE_GLOBAL) TLAS)
 	(RWTexture2D  (elemtype float4) (space RAY_TRACING_REGISTER_SPACE_GLOBAL) Output)
-	(texture2D (space RAY_TRACING_REGISTER_SPACE_GLOBAL) Depth)
-	(cbuffer GenShaderConstants (space RAY_TRACING_REGISTER_SPACE_GLOBAL)
-		(float3 LightDirection)
-		(float SourceRadius)
-		(uint SamplesPerPixel)
-		(uint StateFrameIndex)
-	)
 	(shader 
 "
 Texture2D WorldNormalBuffer;
+Texture2D Depth;
 float NormalBias;
+float3 LightDirection;
+float SourceRadius;
+uint SamplesPerPixel;
+uint StateFrameIndex;
 
 static const float FLT_MAX = asfloat(0x7F7FFFFF);
 

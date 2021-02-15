@@ -7,24 +7,30 @@
 
 #include "IRayDevice.h"
 #include "IFrameBuffer.h"
+#include "ShaderParamterTraits.hpp"
+#include "ShaderTextureTraits.hpp"
 
 namespace platform::Render {
 
-	struct GenShadowConstants
-	{
-		leo::math::float3 LightDirection;
-		float SourceRadius;
-		leo::uint32 SamplesPerPixel;
-		leo::uint32 StateFrameIndex;
-		leo::uint32 padding[2];
-	};
+	BEGIN_SHADER_PARAMETER_STRUCT(ShadowRGParameters)
+		SHADER_PARAMETER(leo::math::float4x4, SVPositionToWorld)
+		SHADER_PARAMETER(leo::math::float3, WorldCameraOrigin)
+		SHADER_PARAMETER(leo::math::float4, BufferSizeAndInvSize)
+		SHADER_PARAMETER(float, NormalBias)
+		SHADER_PARAMETER(leo::math::float3, LightDirection)
+		SHADER_PARAMETER(float, SourceRadius)
+		SHADER_PARAMETER(unsigned, SamplesPerPixel)
+		SHADER_PARAMETER(unsigned, StateFrameIndex)
+		SHADER_PARAMETER_TEXTURE(platform::Render::Texture2D, WorldNormalBuffer)
+		SHADER_PARAMETER_TEXTURE(platform::Render::Texture2D, Depth)
+		END_SHADER_PARAMETER_STRUCT();
 
 	class RayContext
 	{
 	public:
 		virtual RayDevice& GetDevice() = 0;
 
-		virtual void RayTraceShadow(RayTracingScene* InScene, FrameBuffer* InDepth, UnorderedAccessView* Ouput, GraphicsBuffer* InConstants) =0;
+		virtual void RayTraceShadow(RayTracingScene* InScene,const ShadowRGParameters& InConstants) =0;
 	};
 }
 

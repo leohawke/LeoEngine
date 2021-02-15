@@ -596,6 +596,7 @@ namespace asset::X::Shader::DXIL {
 		{
 			CompileFlags &= ~D3DCOMPILE_DEBUG;
 			OutArgs.push_back(L"/Zi");
+			OutArgs.push_back(L"-Qembed_debug");
 		}
 
 		if (CompileFlags & D3DCOMPILE_SKIP_OPTIMIZATION)
@@ -721,7 +722,7 @@ namespace asset::X::Shader::DXIL {
 		COMPtr<IDxcOperationResult> CompileResult;
 		CheckHResult(Compiler->Compile(
 			TextBlob.Get(),
-			nullptr,
+			L"hlsl.hlsl",
 			(wchar_t*)String(input.EntryPoint).data(),
 			(wchar_t*)String(CompileProfile(input.Type)).data(),
 			args.data(),

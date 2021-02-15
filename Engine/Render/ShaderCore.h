@@ -203,18 +203,6 @@ namespace platform::Render {
 		private:
 			std::unordered_map<std::string, std::string> Definitions;
 		};
-
-		struct ShaderCompilerInput
-		{
-			ShaderType Type;
-			std::string_view Code;
-			std::string_view EntryPoint;
-			std::string_view SourceName;
-
-			FShaderCompilerEnvironment Environment;
-
-			std::size_t RootParameterBindingCount = 0;
-		};
 	}
 }
 

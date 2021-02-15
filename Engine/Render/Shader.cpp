@@ -9,6 +9,7 @@
 #include "../Core/Coroutine/SyncWait.h"
 #include "../Core/Coroutine/WhenAllReady.h"
 #include "../System/SystemEnvironment.h"
+#include "../Asset/ShaderAsset.h"
 #include "../Core/Hash/CityHash.h"
 #include "BuiltInShader.h"
 #include "ShaderParametersMetadata.h"
@@ -315,18 +316,38 @@ void Shader::PullRootShaderParametersLayout(asset::X::Shader::ShaderCompilerInpu
 
 		if (bIsVariableNativeType)
 		{
-			Input.RootParameterBindingCount++;
+			ShaderCompilerInput::RootParameterBinding RootParameterBinding;
+			RootParameterBinding.Name = member.GetName();
+			RootParameterBinding.ExpectedShaderType = asset::ShadersAsset::GetTypeName(member.GetShaderType());
+			RootParameterBinding.ByteOffset = member.GetOffset();
+			Input.RootParameterBindings.emplace_back(RootParameterBinding);
 		}
 	}
 }
 
 std::string Shader::ParseAndMoveShaderParametersToRootConstantBuffer(std::string code, const asset::X::Shader::ShaderCompilerInput& input)
 {
-	if (input.RootParameterBindingCount == 0)
+	if (input.RootParameterBindings.empty())
 		return code;
 
+	struct ParsedShaderParameter
+	{
+		std::string Type;
+
+		bool IsFound() const
+		{
+			return !Type.empty();
+		}
+	};
+	std::map<std::string, ParsedShaderParameter> ParsedParameters;
+
+	for (auto& Member : input.RootParameterBindings)
+	{
+		ParsedParameters.emplace(Member.Name, ParsedShaderParameter{});
+	}
+
+
 	// Browse the code for global shader parameter, Save their type and erase them white spaces.
-	std::map<std::string, std::string> ParsedParameters;
 	{
 		enum class EState
 		{
@@ -401,15 +422,15 @@ std::string Shader::ParseAndMoveShaderParametersToRootConstantBuffer(std::string
 				auto Type = code.substr(TypeStartPos, TypeEndPos - TypeStartPos + 1);
 				auto Name = code.substr(NameStartPos, NameEndPos - NameStartPos + 1);
 
-				if (true)
+				if (ParsedParameters.contains(Name))
 				{
-					if (ParsedParameters.count(Name) != 0)
+					if (ParsedParameters[Name].IsFound())
 					{
 						// If it has already been found, it means it is duplicated. Do nothing and let the shader compiler throw the error.
 					}
 					else
 					{
-						ParsedParameters[Name] = Type;
+						ParsedParameters[Name] = ParsedShaderParameter{.Type = Type};
 
 						// Erases this shader parameter conserving the same line numbers.
 						if (true)
@@ -712,7 +733,7 @@ std::string Shader::ParseAndMoveShaderParametersToRootConstantBuffer(std::string
 	std::string rootcbuffer;
 	for (auto& ParsedParameter : ParsedParameters)
 	{
-		rootcbuffer += leo::sfmt("%s %s;\r\n", ParsedParameter.second.c_str(), ParsedParameter.first.c_str());
+		rootcbuffer += leo::sfmt("%s %s;\r\n", ParsedParameter.second.Type.c_str(), ParsedParameter.first.c_str());
 	}
 
 	std::string new_code = leo::sfmt(

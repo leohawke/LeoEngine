@@ -50,7 +50,7 @@ struct ShaderParameterStructBinding
 				Parameter.ByteOffset = ByteOffset;
 				Parameter.ByteSize = BoundSize;
 
-				Bindings->Paramters.emplace_back(Parameter);
+				Bindings->Parameters.emplace_back(Parameter);
 			}
 
 			const bool bIsTextureType = (

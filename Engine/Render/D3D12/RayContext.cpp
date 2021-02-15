@@ -123,20 +123,13 @@ namespace platform_ex::Windows::D3D12 {
 	};
 }
 
-void D12::RayContext::RayTraceShadow(R::RayTracingScene* InScene, R::FrameBuffer* InDepth,R::UnorderedAccessView* Output, R::GraphicsBuffer* InConstants)
+void D12::RayContext::RayTraceShadow(R::RayTracingScene* InScene, const platform::Render::ShadowRGParameters& InConstants)
 {
-	lconstraint(Output);
-	lconstraint(InConstants);
-
-	auto Depth = static_cast<D12::FrameBuffer*>(InDepth);
-	auto DepthView = Depth->GetDepthStencilView();
-
-	auto Resource = DepthView->GetResourceLocation();
+	auto Resource = dynamic_cast<D12::Texture2D*>(InConstants.Depth);
 
 	auto ITex = dynamic_cast<R::Texture*>(Resource);
-	auto Tex = dynamic_cast<D12::Texture*>(Resource);
 
-	D12::ShaderResourceView* DepthSRV =Tex->RetriveShaderResourceView();
+	D12::ShaderResourceView* DepthSRV = Resource->RetriveShaderResourceView();
 
 	//todo:remove this
 	D3D12_RESOURCE_BARRIER barrier;
@@ -146,17 +139,11 @@ void D12::RayContext::RayTraceShadow(R::RayTracingScene* InScene, R::FrameBuffer
 		command_context->CommandListHandle.AddTransitionBarrier(Resource,barrier.Transition.StateBefore, D3D12_RESOURCE_STATE_DEPTH_READ, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES);
 	}
 
-	ShadowRG::Parameters Parameters;
-
-	platform::Render::RayTracingShaderBindings Bindings;
+	platform::Render::RayTracingShaderBindingsWriter Bindings;
 	platform::Render::ShaderMapRef<ShadowRG> RayGenerationShader(GetBuiltInShaderMap());
-	//SetShaderParameters(Bindings, RayGenerationShader, Parameters);
+	SetShaderParameters(Bindings, RayGenerationShader, InConstants);
 
 	Bindings.SRVs[0] =static_cast<D12::RayTracingScene*>(InScene)->GetShaderResourceView();
-	Bindings.SRVs[1] = DepthSRV;
-
-	Bindings.UniformBuffers[0] = InConstants;
-	Bindings.UAVs[0] = Output;
 
 	lconstraint(Bindings.SRVs[0]);
 

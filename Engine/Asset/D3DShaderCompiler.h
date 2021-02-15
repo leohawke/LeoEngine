@@ -2,6 +2,37 @@
 
 #include "../Render/Shader.h"
 
+namespace platform::Render {
+	inline namespace Shader
+	{
+		
+
+		struct ShaderCompilerInput
+		{
+			ShaderType Type;
+			std::string_view Code;
+			std::string_view EntryPoint;
+			std::string_view SourceName;
+
+			struct RootParameterBinding
+			{
+				/** Name of the constant buffer stored parameter. */
+				std::string Name;
+
+				/** Type expected in the shader code to ensure the binding is bug free. */
+				std::string ExpectedShaderType;
+
+				/** The offset of the parameter in the root shader parameter struct. */
+				uint16 ByteOffset;
+			};
+
+			FShaderCompilerEnvironment Environment;
+
+			std::vector<RootParameterBinding> RootParameterBindings;
+		};
+	}
+}
+
 namespace D3DFlags {
 	enum COMPILER_FLAGS
 	{

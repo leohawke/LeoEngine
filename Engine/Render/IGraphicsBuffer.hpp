@@ -8,6 +8,8 @@
 #include <LBase/linttype.hpp>
 #include <LBase/sutility.h>
 #include <LBase/lmacro.h>
+#include "RenderObject.h"
+#include "ShaderParametersMetadata.h"
 namespace platform::Render {
 	namespace Buffer {
 		enum  Usage
@@ -16,6 +18,10 @@ namespace platform::Render {
 			Dynamic = 0x0002,
 
 			AccelerationStructure = 0x8000,
+
+			SingleDraw = 0x8001,
+			SingleFrame = 0x8002,
+			MultiFrame = 0x8003,
 		};
 
 		enum Access {
@@ -28,7 +34,7 @@ namespace platform::Render {
 		class Mapper;
 	}
 
-	class GraphicsBuffer {
+	class GraphicsBuffer:public RObject {
 	public:
 		virtual ~GraphicsBuffer();
 
@@ -92,6 +98,38 @@ namespace platform::Render {
 			GraphicsBuffer& buffer;
 			void* data;
 		};
+	}
+
+	GraphicsBuffer* CreateConstantBuffer(const void* Contents, Buffer::Usage Usage,const ShaderParametersMetadata& Layout);
+
+	template<typename TBufferStruct>
+	requires requires{ TBufferStruct::TypeInfo::GetStructMetadata(); }
+	class GraphicsBufferRef
+	{
+	public:
+		static GraphicsBufferRef<TBufferStruct> CreateGraphicsBuffeImmediate(const TBufferStruct& Value, Buffer::Usage Usage)
+		{
+			return GraphicsBufferRef<TBufferStruct>(CreateConstantBuffer(&Value, Usage, *TBufferStruct::TypeInfo::GetStructMetadata()));
+		}
+
+		operator std::shared_ptr<GraphicsBuffer>()
+		{
+			return buffer;
+		}
+	private:
+		GraphicsBufferRef(GraphicsBuffer* InBuffer)
+			:buffer(InBuffer,RObjectDeleter())
+		{
+		}
+
+		std::shared_ptr<GraphicsBuffer> buffer;
+	};
+
+	template<typename TBufferStruct>
+	requires requires{ TBufferStruct::TypeInfo::GetStructMetadata(); }
+	GraphicsBufferRef<TBufferStruct> CreateGraphicsBuffeImmediate(const TBufferStruct& Value, Buffer::Usage Usage)
+	{
+		return GraphicsBufferRef<TBufferStruct>::CreateGraphicsBuffeImmediate(Value, Usage);
 	}
 }
 

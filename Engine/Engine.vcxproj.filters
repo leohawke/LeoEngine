@@ -836,15 +836,6 @@
     <Filter Include="Core\Base">
       <UniqueIdentifier>{53562c64-6239-4065-b2b0-0ed9aab29db3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Core\Engine">
-      <UniqueIdentifier>{2f19aeeb-134b-431b-be54-8b80a98a7b20}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Core\Engine\WhiteEngine">
-      <UniqueIdentifier>{a6ef2baf-91cf-4e9a-9993-ecf28ebd4c86}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Core\Engine\LeoEngine">
-      <UniqueIdentifier>{8ecf8778-317a-4554-a213-d94ef458eca9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Core\Threading">
       <UniqueIdentifier>{551030a7-f19e-45ed-87c8-0cd0d623401e}</UniqueIdentifier>
     </Filter>

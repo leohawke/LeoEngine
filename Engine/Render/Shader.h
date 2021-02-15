@@ -72,7 +72,8 @@ inline namespace Shader
 			uint16 ByteOffset;
 		};
 
-		std::vector<Parameter> Paramters;
+		std::vector<Parameter> Parameters;
+		//TODO:RaytracingAccelerationStructure
 		std::vector<ResourceParameter> Textures;
 		std::vector<ResourceParameter> Samplers;
 		std::vector<ResourceParameter> UAVs;
