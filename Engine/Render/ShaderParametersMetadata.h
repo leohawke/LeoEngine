@@ -14,6 +14,9 @@ inline namespace Shader
 	class ShaderParametersMetadata
 	{
 	public:
+		static constexpr const char* kRootUniformBufferBindingName = "_RootShaderParameters";
+
+
 		class Member
 		{
 		public:

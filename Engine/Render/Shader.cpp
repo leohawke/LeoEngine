@@ -11,6 +11,7 @@
 #include "../System/SystemEnvironment.h"
 #include "../Core/Hash/CityHash.h"
 #include "BuiltInShader.h"
+#include "ShaderParametersMetadata.h"
 
 
 using namespace platform::Render;
@@ -93,16 +94,23 @@ namespace platform::Render::Shader
 
 	BuiltInShaderMap GGlobalBuiltInShaderMap;
 
+	std::string ParseAndMoveShaderParametersToRootConstantBuffer(std::string code,const asset::X::Shader::ShaderCompilerInput& input);
+	void PullRootShaderParametersLayout(asset::X::Shader::ShaderCompilerInput& Input, const ShaderParametersMetadata& ParameterMeta);
 
 	leo::coroutine::Task<void> CompileBuiltInShader(BuiltInShaderMeta* meta,int32 PermutationId)
 	{
+		LFL_DEBUG_DECL_TIMER(Commpile, sfmt("CompileShader %s- Entry:%s ", meta->GetSourceFileName().c_str(), meta->GetEntryPoint().c_str()));
+
 		asset::X::Shader::ShaderCompilerInput input;
 
 		input.EntryPoint = meta->GetEntryPoint();
 		input.Type = meta->GetShaderType();
 		input.SourceName = meta->GetSourceFileName();
 
-		LFL_DEBUG_DECL_TIMER(Commpile, sfmt("CompileShader %s- Entry:%s ", input.SourceName.data(), input.EntryPoint.data()));
+		if (meta->GetRootParametersMetadata())
+		{
+			PullRootShaderParametersLayout(input, *meta->GetRootParametersMetadata());
+		}
 
 		// Allow the shader type to modify the compile environment.
 		meta->SetupCompileEnvironment(PermutationId, input.Environment);
@@ -112,8 +120,10 @@ namespace platform::Render::Shader
 
 		Code = asset::X::Shader::PreprocessShader(Code, input);
 
-		input.Code = Code;
+		if (IsRayTracingShader(meta->GetShaderType()))
+			Code = ParseAndMoveShaderParametersToRootConstantBuffer(Code, input);
 
+		input.Code = Code;
 
 		ShaderInfo Info{ input.Type };
 
@@ -288,4 +298,433 @@ void Shader::ShaderMapContent::Clear()
 uint32 Shader::ShaderMapContent::GetNumShaders() const
 {
 	return static_cast<int32>(Shaders.size());
+}
+
+
+void Shader::PullRootShaderParametersLayout(asset::X::Shader::ShaderCompilerInput& Input, const ShaderParametersMetadata& ParameterMeta)
+{
+	//only do count now
+	for (auto& member : ParameterMeta.GetMembers())
+	{
+		auto ShaderType = member.GetShaderType();
+
+		const bool bIsVariableNativeType = (
+			ShaderType >= SPT_uint &&
+			ShaderType <= SPT_float4x4
+			);
+
+		if (bIsVariableNativeType)
+		{
+			Input.RootParameterBindingCount++;
+		}
+	}
+}
+
+std::string Shader::ParseAndMoveShaderParametersToRootConstantBuffer(std::string code, const asset::X::Shader::ShaderCompilerInput& input)
+{
+	if (input.RootParameterBindingCount == 0)
+		return code;
+
+	// Browse the code for global shader parameter, Save their type and erase them white spaces.
+	std::map<std::string, std::string> ParsedParameters;
+	{
+		enum class EState
+		{
+			// When to look for something to scan.
+			Scanning,
+
+			// When going to next ; in the global scope and reset.
+			GoToNextSemicolonAndReset,
+
+			// Parsing what might be a type of the parameter.
+			ParsingPotentialType,
+			FinishedPotentialType,
+
+			// Parsing what might be a name of the parameter.
+			ParsingPotentialName,
+			FinishedPotentialName,
+
+			// Parsing what looks like array of the parameter.
+			ParsingPotentialArraySize,
+			FinishedArraySize,
+
+			// Found a parameter, just finish to it's semi colon.
+			FoundParameter,
+		};
+
+		const int32 ShaderSourceLen =static_cast<int32>(code.size());
+
+		int32 CurrentPragamLineoffset = -1;
+		int32 CurrentLineoffset = 0;
+
+		int32 TypeStartPos = -1;
+		int32 TypeEndPos = -1;
+		int32 NameStartPos = -1;
+		int32 NameEndPos = -1;
+		int32 ScopeIndent = 0;
+
+		EState State = EState::Scanning;
+		bool bGoToNextLine = false;
+
+		auto ResetState = [&]()
+		{
+			TypeStartPos = -1;
+			TypeEndPos = -1;
+			NameStartPos = -1;
+			NameEndPos = -1;
+			State = EState::Scanning;
+		};
+
+		auto EmitError = [&](const std::string& ErrorMessage)
+		{
+			LE_LogError(ErrorMessage.c_str());
+		};
+
+		auto EmitUnpextectedHLSLSyntaxError = [&]()
+		{
+			EmitError("Unexpected syntax when parsing shader parameters from shader code.");
+			State = EState::GoToNextSemicolonAndReset;
+		};
+
+		for (int32 Cursor = 0; Cursor < ShaderSourceLen; Cursor++)
+		{
+			const auto Char = code[Cursor];
+
+			auto FoundShaderParameter = [&]()
+			{
+				lconstraint(Char == ';');
+				lconstraint(TypeStartPos != -1);
+				lconstraint(TypeEndPos != -1);
+				lconstraint(NameStartPos != -1);
+				lconstraint(NameEndPos != -1);
+
+				auto Type = code.substr(TypeStartPos, TypeEndPos - TypeStartPos + 1);
+				auto Name = code.substr(NameStartPos, NameEndPos - NameStartPos + 1);
+
+				if (true)
+				{
+					if (ParsedParameters.count(Name) != 0)
+					{
+						// If it has already been found, it means it is duplicated. Do nothing and let the shader compiler throw the error.
+					}
+					else
+					{
+						ParsedParameters[Name] = Type;
+
+						// Erases this shader parameter conserving the same line numbers.
+						if (true)
+						{
+							for (int32 j = TypeStartPos; j <= Cursor; j++)
+							{
+								if (code[j] != '\r' && code[j] != '\n')
+									code[j] = ' ';
+							}
+						}
+					}
+				}
+
+				ResetState();
+			};
+
+			const bool bIsWhiteSpace = Char == ' ' || Char == '\t' || Char == '\r' || Char == '\n';
+			const bool bIsLetter = (Char >= 'a' && Char <= 'z') || (Char >= 'A' && Char <= 'Z');
+			const bool bIsNumber = Char >= '0' && Char <= '9';
+
+			const auto UpComing = (code.c_str()) + Cursor;
+			const int32 RemainingSize = ShaderSourceLen - Cursor;
+
+			CurrentLineoffset += Char == '\n';
+
+			// Go to the next line if this is a preprocessor macro.
+			if (bGoToNextLine)
+			{
+				if (Char == '\n')
+				{
+					bGoToNextLine = false;
+				}
+				continue;
+			}
+			else if (Char == '#')
+			{
+				if (RemainingSize > 6 && std::strncmp(UpComing, "#line ", 6) == 0)
+				{
+					CurrentPragamLineoffset = Cursor;
+					CurrentLineoffset = -1; // that will be incremented to 0 when reaching the \n at the end of the #line
+				}
+
+				bGoToNextLine = true;
+				continue;
+			}
+
+			// If within a scope, just carry on until outside the scope.
+			if (ScopeIndent > 0 || Char == '{')
+			{
+				if (Char == '{')
+				{
+					ScopeIndent++;
+				}
+				else if (Char == '}')
+				{
+					ScopeIndent--;
+					if (ScopeIndent == 0)
+					{
+						ResetState();
+					}
+				}
+				continue;
+			}
+
+			if (State == EState::Scanning)
+			{
+				if (bIsLetter)
+				{
+					static const char* KeywordTable[] = {
+						"enum",
+						"class",
+						"const",
+						"struct",
+						"static",
+					};
+					static int32 KeywordTableSize[] = { 4, 5, 5, 6, 6 };
+
+					int32 RecognisedKeywordId = -1;
+					for (int32 KeywordId = 0; KeywordId < leo::arrlen(KeywordTable); KeywordId++)
+					{
+						const char* Keyword = KeywordTable[KeywordId];
+						const int32 KeywordSize = KeywordTableSize[KeywordId];
+
+						if (RemainingSize > KeywordSize)
+						{
+							char KeywordEndTestChar = UpComing[KeywordSize];
+
+							if ((KeywordEndTestChar == ' ' || KeywordEndTestChar == '\r' || KeywordEndTestChar == '\n' || KeywordEndTestChar == '\t') &&
+								std::strncmp(UpComing, Keyword, KeywordSize) == 0)
+							{
+								RecognisedKeywordId = KeywordId;
+								break;
+							}
+						}
+					}
+
+					if (RecognisedKeywordId == -1)
+					{
+						// Might have found beginning of the type of a parameter.
+						State = EState::ParsingPotentialType;
+						TypeStartPos = Cursor;
+					}
+					else if (RecognisedKeywordId == 2)
+					{
+						// Ignore the const keywords, but still parse given it might still be a shader parameter.
+						Cursor += KeywordTableSize[RecognisedKeywordId];
+					}
+					else
+					{
+						// Purposefully ignore enum, class, struct, static
+						State = EState::GoToNextSemicolonAndReset;
+					}
+				}
+				else if (bIsWhiteSpace)
+				{
+					// Keep parsing void.
+				}
+				else if (Char == ';')
+				{
+					// Looks like redundant semicolon, just ignore and keep scanning.
+				}
+				else
+				{
+					// No idea what this is, just go to next semi colon.
+					State = EState::GoToNextSemicolonAndReset;
+				}
+			}
+			else if (State == EState::GoToNextSemicolonAndReset)
+			{
+				// If need to go to next global semicolon and reach it. Resume browsing.
+				if (Char == ';')
+				{
+					ResetState();
+				}
+			}
+			else if (State == EState::ParsingPotentialType)
+			{
+				// Found character legal for a type...
+				if (bIsLetter ||
+					bIsNumber ||
+					Char == '<' || Char == '>' || Char == '_')
+				{
+					// Keep browsing what might be type of the parameter.
+				}
+				else if (bIsWhiteSpace)
+				{
+					// Might have found a type.
+					State = EState::FinishedPotentialType;
+					TypeEndPos = Cursor - 1;
+				}
+				else
+				{
+					// Found unexpected character in the type.
+					State = EState::GoToNextSemicolonAndReset;
+				}
+			}
+			else if (State == EState::FinishedPotentialType)
+			{
+				if (bIsLetter)
+				{
+					// Might have found beginning of the name of a parameter.
+					State = EState::ParsingPotentialName;
+					NameStartPos = Cursor;
+				}
+				else if (bIsWhiteSpace)
+				{
+					// Keep parsing void.
+				}
+				else
+				{
+					// No idea what this is, just go to next semi colon.
+					State = EState::GoToNextSemicolonAndReset;
+				}
+			}
+			else if (State == EState::ParsingPotentialName)
+			{
+				// Found character legal for a name...
+				if (bIsLetter ||
+					bIsNumber ||
+					Char == '_')
+				{
+					// Keep browsing what might be name of the parameter.
+				}
+				else if (Char == ':' || Char == '=')
+				{
+					// Found a parameter with syntax:
+					// uint MyParameter : <whatever>;
+					// uint MyParameter = <DefaultValue>;
+					NameEndPos = Cursor - 1;
+					State = EState::FoundParameter;
+				}
+				else if (Char == ';')
+				{
+					// Found a parameter with syntax:
+					// uint MyParameter;
+					NameEndPos = Cursor - 1;
+					FoundShaderParameter();
+				}
+				else if (Char == '[')
+				{
+					// Syntax:
+					//  uint MyArray[
+					NameEndPos = Cursor - 1;
+					State = EState::ParsingPotentialArraySize;
+				}
+				else if (bIsWhiteSpace)
+				{
+					// Might have found a name.
+					// uint MyParameter <Still need to know what is after>;
+					NameEndPos = Cursor - 1;
+					State = EState::FinishedPotentialName;
+				}
+				else
+				{
+					// Found unexpected character in the name.
+					// syntax:
+					// uint MyFunction(<Don't care what is after>
+					State = EState::GoToNextSemicolonAndReset;
+				}
+			}
+			else if (
+				State == EState::FinishedPotentialName ||
+				State == EState::FinishedArraySize)
+			{
+				if (Char == ';')
+				{
+					// Found a parameter with syntax:
+					// uint MyParameter <a bit of OK stuf>;
+					FoundShaderParameter();
+				}
+				else if (Char == ':')
+				{
+					// Found a parameter with syntax:
+					// uint MyParameter <a bit of OK stuf> : <Ignore all this crap>;
+					State = EState::FoundParameter;
+				}
+				else if (Char == '=')
+				{
+					// Found syntax that doesn't make any sens:
+					// uint MyParameter <a bit of OK stuf> = <Ignore all this crap>;
+					State = EState::FoundParameter;
+					// TDOO: should error out that this is useless.
+				}
+				else if (Char == '[')
+				{
+					if (State == EState::FinishedPotentialName)
+					{
+						// Syntax:
+						//  uint MyArray [
+						State = EState::ParsingPotentialArraySize;
+					}
+					else
+					{
+						EmitError("Shader parameters can only support one dimensional array");
+					}
+				}
+				else if (bIsWhiteSpace)
+				{
+					// Keep parsing void.
+				}
+				else
+				{
+					// Found unexpected stuff.
+					State = EState::GoToNextSemicolonAndReset;
+				}
+			}
+			else if (State == EState::ParsingPotentialArraySize)
+			{
+				if (Char == ']')
+				{
+					State = EState::FinishedArraySize;
+				}
+				else if (Char == ';')
+				{
+					EmitUnpextectedHLSLSyntaxError();
+				}
+				else
+				{
+					// Keep going through the array size that might be a complex expression.
+				}
+			}
+			else if (State == EState::FoundParameter)
+			{
+				if (Char == ';')
+				{
+					FoundShaderParameter();
+				}
+				else
+				{
+					// Cary on skipping all crap we don't care about shader parameter until we find it's semi colon.
+				}
+			}
+			else
+			{
+				throw leo::unimplemented();
+			}
+		} // for (int32 Cursor = 0; Cursor < PreprocessedShaderSource.Len(); Cursor++)
+	}
+
+	std::string rootcbuffer;
+	for (auto& ParsedParameter : ParsedParameters)
+	{
+		rootcbuffer += leo::sfmt("%s %s;\r\n", ParsedParameter.second.c_str(), ParsedParameter.first.c_str());
+	}
+
+	std::string new_code = leo::sfmt(
+		"%s %s\r\n"
+		"{\r\n"
+		"%s"
+		"}\r\n\r\n%s",
+		"cbuffer",
+		ShaderParametersMetadata::kRootUniformBufferBindingName,
+		rootcbuffer.c_str(),
+		code.c_str()
+	);
+
+	return new_code;
 }

@@ -212,6 +212,8 @@ namespace platform::Render {
 			std::string_view SourceName;
 
 			FShaderCompilerEnvironment Environment;
+
+			std::size_t RootParameterBindingCount = 0;
 		};
 	}
 }
