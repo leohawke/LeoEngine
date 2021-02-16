@@ -669,7 +669,7 @@ namespace platform
 							pri.resize(LFN::MaxAliasMainPartLength, '_');
 							alias = pri + '.' + ext;
 							leo::retry_on_cond(check, [&] {
-								if (LB_UNLIKELY(LFN::MaxNumericTail < i))
+								if LB_UNLIKELY(LFN::MaxNumericTail < i)
 									leo::throw_error(std::errc::invalid_argument,
 										lfsig);
 								LFN::WriteNumericTail(alias, i++);

@@ -75,7 +75,7 @@ namespace leo {
 	path_category
 		classify_path(const _tString& name) lnothrow
 	{
-		if (LB_UNLIKELY(name.empty()))
+		if LB_UNLIKELY(name.empty())
 			return path_category::empty;
 		if (_tTraits::is_self(name))
 			return path_category::self;

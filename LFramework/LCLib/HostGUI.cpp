@@ -118,7 +118,7 @@ namespace platform_ex
 		{
 			auto p(unique_raw(::GlobalAlloc(GMEM_MOVEABLE, size), GlobalDelete()));
 
-			if (LB_UNLIKELY(!p))
+			if LB_UNLIKELY(!p)
 				// TODO: Use inherited class of exception.
 				throw std::bad_alloc();
 			return p;
@@ -498,7 +498,7 @@ namespace platform_ex
 		: name((Nonnull(class_name.data()), class_name)), atom(class_atom),
 		h_instance(h_inst)
 	{
-		if (LB_UNLIKELY(atom == 0))
+		if LB_UNLIKELY(atom == 0)
 			throw std::invalid_argument("Invalid atom value found.");
 		TraceDe(Notice, "Window class '%s' of atom '%hu' registered.",
 			name.empty() ? "<unknown>" : WCSToUTF8(name).c_str(), atom);
@@ -540,8 +540,8 @@ namespace platform_ex
 		if (std::wcscmp(buf, WindowClassName) != 0)
 			throw GeneralEvent("Wrong windows class name found.");
 		::SetLastError(0);
-		if (LB_UNLIKELY(::SetWindowLongPtrW(GetNativeHandle(), GWLP_USERDATA,
-			::LONG_PTR(this)) == 0 && GetLastError() != 0))
+		if LB_UNLIKELY(::SetWindowLongPtrW(GetNativeHandle(), GWLP_USERDATA,
+			::LONG_PTR(this)) == 0 && GetLastError() != 0)
 			LCL_Raise_Win32E("SetWindowLongPtrW", lfsig);
 		LCL_CallF_Win32(SetWindowPos, GetNativeHandle(), {}, 0, 0, 0, 0,
 			SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOREDRAW
@@ -627,8 +627,8 @@ namespace platform_ex
 		// TODO: Use '{}' to simplify initialization after CWG 1368 resolved by
 		//	C++14. See $2015-09 @ %Documentation::Workflow::Annual2015.
 		leo::trivially_fill_n(&ri);
-		if (LB_LIKELY(::GetRawInputData(::HRAWINPUT(l_param), RID_INPUT, &ri,
-			&size, sizeof(::RAWINPUTHEADER)) != unsigned(-1) && ri.header.dwType
+		if (::GetRawInputData(::HRAWINPUT(l_param), RID_INPUT, &ri,
+			&size, sizeof(::RAWINPUTHEADER) != unsigned(-1) && ri.header.dwType
 			== RIM_TYPEMOUSE) && ri.data.mouse.usButtonFlags == RI_MOUSE_WHEEL)
 			// NOTE: This value is safe to cast because it is
 			//	specified as a signed value, see https://msdn.microsoft.com/en-us/library/windows/desktop/ms645578(v=vs.85).aspx.
@@ -680,7 +680,7 @@ namespace platform_ex
 	void
 		WindowInputHost::UpdateCandidateWindowLocationUnlocked()
 	{
-		if (LB_LIKELY(caret_location != Point::Invalid))
+		if LB_LIKELY(caret_location != Point::Invalid)
 		{
 			TraceDe(Informative, "Update composition form position: %s.",
 				to_string(caret_location).c_str());

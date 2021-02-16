@@ -125,7 +125,7 @@ namespace platform_ex {
 	[&](const char* msg) LB_NONNULL(1){ \
 		const auto res(_fn(__VA_ARGS__)); \
 	\
-		if(LB_UNLIKELY(!res)) \
+		if LB_UNLIKELY(!res) \
 			LCL_Raise_Win32E(#_fn, msg); \
 		return res; \
 	}
@@ -146,7 +146,7 @@ namespace platform_ex {
 	[&](const char* msg) LB_NONNULL(1){ \
 		const auto res(_fn(__VA_ARGS__)); \
 	\
-		if(LB_UNLIKELY(!res)) \
+		if LB_UNLIKELY(!res) \
 			LCL_Trace_Win32E(platform::Descriptions::Warning, _fn, msg); \
 		return res; \
 	}

@@ -115,7 +115,7 @@ namespace platform_ex
 	pair<string, int>
 		FetchCommandOutput(const char* cmd, size_t buf_size)
 	{
-		if (LB_UNLIKELY(buf_size == 0))
+		if LB_UNLIKELY(buf_size == 0)
 			throw std::invalid_argument("Zero buffer size found.");
 
 		string str;
@@ -276,7 +276,7 @@ namespace platform_ex
 	{
 		if (p_terminal && *p_terminal)
 			FilterExceptions([this] {
-			if (!LB_LIKELY(p_terminal->p_data->RestoreAttributes()))
+			if LB_UNLIKELY(!p_terminal->p_data->RestoreAttributes())
 				throw LoggedEvent("Restoring terminal attributes failed.");
 		});
 	}

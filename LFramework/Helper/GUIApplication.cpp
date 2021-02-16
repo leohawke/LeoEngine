@@ -67,7 +67,7 @@ namespace leo {
 	bool
 		Application::Switch(shared_ptr<Shell>& h) lnothrow
 	{
-		if (LB_LIKELY(hShell != h))
+		if LB_LIKELY(hShell != h)
 		{
 			std::swap(hShell, h);
 			return true;
@@ -178,7 +178,7 @@ namespace leo {
 #	if LFL_Win32
 		::POINT cursor;
 
-		if (LB_UNLIKELY(!::GetCursorPos(&cursor)))
+		if LB_UNLIKELY(!::GetCursorPos(&cursor))
 			return { {}, Point::Invalid };
 
 		const Point pt{ cursor.x, cursor.y };
@@ -279,7 +279,7 @@ namespace leo {
 				return mq.cbegin();
 			}));
 
-			if (LB_UNLIKELY(i->second.GetMessageID() == SM_Quit))
+			if LB_UNLIKELY(i->second.GetMessageID() == SM_Quit)
 				return {};
 			if (i->first < UIResponseLimit)
 				Idle(UIResponseLimit);

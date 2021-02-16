@@ -37,7 +37,7 @@ namespace leo
 		LB_NONNULL(1) void
 			Remove(const _tChar* path)
 		{
-			if (LB_UNLIKELY(!uremove(path)))
+			if LB_UNLIKELY(!uremove(path))
 			{
 				const int err(errno);
 
@@ -51,7 +51,7 @@ namespace leo
 		LB_NONNULL(1) void
 			Unlink(const _tChar* path)
 		{
-			if (LB_UNLIKELY(!uunlink(path)))
+			if LB_UNLIKELY(!uunlink(path))
 			{
 				const int err(errno);
 

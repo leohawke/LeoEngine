@@ -210,19 +210,19 @@ public:
 		switch(GetIndexOf(st))
 		{
 		case 0:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
 			if((seq[0] & 0x80) == 0)
 			{
 				Assign(uc, seq[0]);
 				break;
 			}
-			if(LB_UNLIKELY(CheckInvalid(seq[0], 0xC0)))
+			if LB_UNLIKELY(CheckInvalid(seq[0], 0xC0))
 				return ConversionResult::Invalid;
 		case 1:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
-			if(LB_UNLIKELY(CheckInvalid(seq[1])))
+			if LB_UNLIKELY(CheckInvalid(seq[1]))
 				return ConversionResult::Invalid;
 			if(((seq[0] ^ 0xC0) & 0xE0) == 0)
 			{
@@ -230,9 +230,9 @@ public:
 				break;
 			}
 		case 2:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
-			if(LB_UNLIKELY(CheckInvalid(seq[2])))
+			if LB_UNLIKELY(CheckInvalid(seq[2]))
 				return ConversionResult::Invalid;
 			if(((seq[0] ^ 0xE0) & 0xF0) == 0)
 			{
@@ -240,11 +240,11 @@ public:
 				break;
 			}
 		case 3:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
-			if(LB_UNLIKELY(CheckInvalid(seq[3])))
+			if LB_UNLIKELY(CheckInvalid(seq[3]))
 				return ConversionResult::Invalid;
-			if(LB_LIKELY(((seq[0] ^ 0xF0) & 0xF8) == 0))
+			if LB_LIKELY(((seq[0] ^ 0xF0) & 0xF8) == 0)
 			{
 				Assign2(uc, seq);
 				break;
@@ -267,7 +267,7 @@ public:
 	{
 		byte b(0);
 
-		if(LB_UNLIKELY(!FillByte(i, b)))
+		if LB_UNLIKELY(!FillByte(i, b))
 			return ConversionResult::BadSource;
 		if((b & 0x80U) == 0)
 		{
@@ -289,7 +289,7 @@ public:
 		static lconstexpr const state_t t_data_2[]{1, 2, 4, 4};
 		auto& code(st.Value.UCS4);
 #define CHRLib_Impl_UTF8_Decode_Fill \
-	if(LB_UNLIKELY(!FillByte(i, b))) \
+	if LB_UNLIKELY(!FillByte(i, b)) \
 		return ConversionResult::BadSource; \
 	code = (code << 6U) | (b & 0x3FU)
 #define CHRLib_Impl_UTF8_Decode_Tail \
@@ -408,14 +408,14 @@ struct GUCSMapper<CharSet::UTF_16BE> : UCSMapperBase
 		switch(GetIndexOf(st))
 		{
 		case 0:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
 		case 1:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
-			if(LB_UNLIKELY(CHRLib::IsSurrogateHead(seq[0])))
+			if LB_UNLIKELY(CHRLib::IsSurrogateHead(seq[0]))
 			{
-				if(LB_UNLIKELY(!CHRLib::IsValidSurrogateHead(seq[0])))
+				if LB_UNLIKELY(!CHRLib::IsValidSurrogateHead(seq[0]))
 					return ConversionResult::Invalid;
 			}
 			else
@@ -424,12 +424,12 @@ struct GUCSMapper<CharSet::UTF_16BE> : UCSMapperBase
 				break;
 			}
 		case 2:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
 		case 3:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
-			if(LB_UNLIKELY(!CHRLib::IsValidSurrogateTail(seq[2])))
+			if LB_UNLIKELY(!CHRLib::IsValidSurrogateTail(seq[2]))
 				return ConversionResult::Invalid;
 			Assign(uc, ucs4_t(seq[0] & 0x03U) << 18U | ucs4_t(seq[1]) << 10U
 				| ucs4_t(seq[2] & 0x03U) << 8U | ucs4_t(seq[3]));
@@ -461,14 +461,14 @@ struct GUCSMapper<CharSet::UTF_16LE> : UCSMapperBase
 		switch(GetIndexOf(st))
 		{
 		case 0:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
 		case 1:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
-			if(LB_UNLIKELY(CHRLib::IsSurrogateHead(seq[1])))
+			if LB_UNLIKELY(CHRLib::IsSurrogateHead(seq[1]))
 			{
-				if(LB_UNLIKELY(!CHRLib::IsValidSurrogateHead(seq[1])))
+				if LB_UNLIKELY(!CHRLib::IsValidSurrogateHead(seq[1]))
 					return ConversionResult::Invalid;
 			}
 			else
@@ -477,12 +477,12 @@ struct GUCSMapper<CharSet::UTF_16LE> : UCSMapperBase
 				break;
 			}
 		case 2:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
 		case 3:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
-			if(LB_UNLIKELY(!CHRLib::IsValidSurrogateTail(seq[3])))
+			if LB_UNLIKELY(!CHRLib::IsValidSurrogateTail(seq[3]))
 				return ConversionResult::Invalid;
 			Assign(uc, ucs4_t(seq[0] << 10U) | ucs4_t(seq[1] & 0x03U) << 18U
 				| ucs4_t(seq[2]) | ucs4_t(seq[3] & 0x03U) << 8U);
@@ -515,16 +515,16 @@ struct GUCSMapper<CharSet::UTF_32BE> : UCSMapperBase
 		switch(GetIndexOf(st))
 		{
 		case 0:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
 		case 1:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
 		case 2:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
 		case 3:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
 			Assign(uc, ucs4_t(seq[0]) << 24U | ucs4_t(seq[1]) << 16U
 				| ucs4_t(seq[2]) << 8U | ucs4_t(seq[3]));
@@ -556,16 +556,16 @@ struct GUCSMapper<CharSet::UTF_32LE> : UCSMapperBase
 		switch(GetIndexOf(st))
 		{
 		case 0:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
 		case 1:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
 		case 2:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
 		case 3:
-			if(LB_UNLIKELY(!FillByte(i, st)))
+			if LB_UNLIKELY(!FillByte(i, st))
 				return ConversionResult::BadSource;
 			Assign(uc, ucs4_t(seq[2]) | ucs4_t(seq[3]) << 8U
 				| ucs4_t(seq[0]) << 16U | ucs4_t(seq[1]) << 24U);

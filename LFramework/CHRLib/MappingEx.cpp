@@ -14,7 +14,7 @@ namespace CHRLib
 		{
 			const auto idx(size_t(seq0 << 8U | seq1));
 
-			return LB_LIKELY(idx < 0xFF7E)
+			return idx < 0xFF7E
 				? reinterpret_cast<const ucs2_t*>(_vCPMapPtr + 0x0100)[idx] : 0;
 		}
 

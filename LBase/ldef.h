@@ -357,8 +357,13 @@
 #	define LB_UNLIKELY(expr) (__builtin_expect(bool(expr), 0))
 #else
 #	define LB_EXPECT(expr, constant) (expr)
+#if __has_cpp_attribute(likely)
+#	define LB_LIKELY(expr) (expr) [[likely]]
+#	define LB_UNLIKELY(expr) (expr) [[unlikely]]
+#else
 #	define LB_LIKELY(expr) (expr)
 #	define LB_UNLIKELY(expr) (expr)
+#endif
 #endif
 
 /*!

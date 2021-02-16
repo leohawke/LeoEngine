@@ -42,7 +42,7 @@ namespace leo
 				const auto& pr(FetchTarget<SM_Bound>(msg));
 				const auto h_shl(pr.first.lock());
 
-				if (LB_LIKELY(h_shl))
+				if LB_LIKELY(h_shl)
 					h_shl->OnGotMessage(pr.second);
 			}
 			break;

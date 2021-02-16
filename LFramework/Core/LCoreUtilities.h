@@ -21,7 +21,7 @@ namespace leo {
 	{
 		using common_t = common_type_t<_tDst, _type>;
 
-		if (LB_UNLIKELY(common_t(val) > common_t(std::numeric_limits<_tDst>::max())))
+		if LB_UNLIKELY(common_t(val) > common_t(std::numeric_limits<_tDst>::max()))
 			throw LoggedEvent(name + " value out of range.", lv);
 		return _tDst(val);
 	}

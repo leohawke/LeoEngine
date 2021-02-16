@@ -9,7 +9,7 @@ namespace leo
 
 		const auto val(std::fgetc(stream));
 
-		if (LB_UNLIKELY(val == EOF))
+		if LB_UNLIKELY(val == EOF)
 			stream = {};
 		else
 		{

@@ -254,7 +254,7 @@ namespace platform
 #	if LFL_Win32
 			const auto res(platform_ex::Windows::UnlockFile(ToHandle(fd)));
 
-			if (LB_UNLIKELY(!res))
+			if LB_UNLIKELY(!res)
 				LCL_Trace_Win32E(Descriptions::Warning, UnlockFileEx, sig);
 			LAssert(res, "Narrow contract violated.");
 #	else
@@ -342,13 +342,13 @@ namespace platform
 #endif
 		if ((m & Mode::Regular) == Mode::Regular)
 			res |= NodeCategory::Regular;
-		if (LB_UNLIKELY((m & Mode::Character) == Mode::Character))
+		if LB_UNLIKELY((m & Mode::Character) == Mode::Character)
 			res |= NodeCategory::Character;
 #if !LFL_Win32
-		else if (LB_UNLIKELY((m & Mode::Block) == Mode::Block))
+		else if LB_UNLIKELY((m & Mode::Block) == Mode::Block)
 			res |= NodeCategory::Block;
 #endif
-		if (LB_UNLIKELY((m & Mode::FIFO) == Mode::FIFO))
+		if LB_UNLIKELY((m & Mode::FIFO) == Mode::FIFO)
 			res |= NodeCategory::FIFO;
 #if !LFL_Win32
 		if ((m & Mode::Socket) == Mode::Socket)
@@ -361,7 +361,7 @@ namespace platform
 	void
 		FileDescriptor::Deleter::operator()(pointer p) const lnothrow
 	{
-		if (p && LB_UNLIKELY(LCL_CallGlobal(close, *p) < 0))
+		if (p && LCL_CallGlobal(close, *p) < 0)
 			// NOTE: This is not a necessarily error. See $2016-04
 			//	@ %Documentation::Workflow::Annual2016.
 			TraceDe(Descriptions::Warning,

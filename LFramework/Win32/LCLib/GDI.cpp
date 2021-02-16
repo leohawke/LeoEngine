@@ -66,7 +66,7 @@ CreateCompatibleDIBSection(const leo::Drawing::Size& s, BitmapPtr& p_buffer)
 	const auto h(LCL_CallF_Win32(CreateDIBSection, {}, &bmi, DIB_RGB_COLORS,
 		&p_buf, {}, 0));
 
-	if (LB_LIKELY(p_buf))
+	if LB_LIKELY(p_buf)
 		p_buffer = static_cast<BitmapPtr>(p_buf);
 	else
 		// XXX: This should not occur unless there are bugs in implementation of
@@ -143,7 +143,7 @@ WindowMemorySurface::UpdateBounds(ScreenBuffer& sbuf, const Rect& r,
 		LFL_CallWin32F_Trace(BitBlt, h_owner_dc, int(r.X), int(r.Y),
 			int(r.Width), int(r.Height), h_mem_dc, int(sp.X), int(sp.Y),
 			SRCCOPY);
-		if (LB_UNLIKELY(!::SelectObject(h_mem_dc, h_old)))
+		if LB_UNLIKELY(!::SelectObject(h_mem_dc, h_old))
 			TraceDe(Err, "Restoring GDI object failed"
 				" @ WindowMemorySurface::UpdateBounds.");
 	}
@@ -176,7 +176,7 @@ WindowDeviceContext::WindowDeviceContext(NativeWindowHandle h_wnd)
 //	of input boundary.
 	: WindowDeviceContextBase(h_wnd, ::GetDC(Nonnull(h_wnd)))
 {
-	if (LB_UNLIKELY(!hDC))
+	if LB_UNLIKELY(!hDC)
 		throw LoggedEvent("Retrieving device context failure.");
 }
 WindowDeviceContext::~WindowDeviceContext()
@@ -202,7 +202,7 @@ WindowRegionDeviceContext::WindowRegionDeviceContext(NativeWindowHandle h_wnd)
 	: PaintStructData(),
 	WindowDeviceContextBase(h_wnd, ::BeginPaint(Nonnull(h_wnd), &Get()))
 {
-	if (LB_UNLIKELY(!hDC))
+	if LB_UNLIKELY(!hDC)
 		throw LoggedEvent("Device context initialization failure.");
 }
 WindowRegionDeviceContext::~WindowRegionDeviceContext()

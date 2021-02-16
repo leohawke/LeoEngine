@@ -1173,7 +1173,7 @@ namespace platform
 	[&](const char* sig_) LB_NONNULL(1){ \
 		const auto res_(_fn(__VA_ARGS__)); \
 	\
-		if(LB_UNLIKELY(res_ < decltype(res_)())) \
+		if LB_UNLIKELY(res_ < decltype(res_)()) \
 			LCL_Raise_SysE(_t, #_fn, sig_); \
 		return res_; \
 	}

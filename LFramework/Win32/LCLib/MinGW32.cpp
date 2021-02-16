@@ -286,7 +286,7 @@ namespace platform_ex {
 			GlobalDelete::operator()(pointer h) const lnothrow
 		{
 			// NOTE: %::GlobalFree does not ignore null handle value.
-			if (h && LB_UNLIKELY(::GlobalFree(h)))
+			if (h && ::GlobalFree(h))
 				LCL_Trace_Win32E(Warning, GlobalFree, lfsig);
 		}
 
@@ -304,7 +304,7 @@ namespace platform_ex {
 		{
 			// FIXME: For some platforms, no %::LocalFree available. See https://msdn.microsoft.com/zh-cn/library/windows/desktop/ms679351(v=vs.85).aspx.
 			// NOTE: %::LocalFree ignores null handle value.
-			if (LB_UNLIKELY(::LocalFree(h)))
+			if LB_UNLIKELY(::LocalFree(h))
 				TraceDe(Warning, "Error %lu: failed calling LocalFree @ %s.",
 					::GetLastError(), lfsig);
 		}
@@ -728,7 +728,7 @@ namespace platform_ex {
 			LockFile(UniqueHandle::pointer h, std::uint64_t off, std::uint64_t len,
 				bool exclusive, bool immediate)
 		{
-			if (LB_UNLIKELY(!TryLockFile(h, off, len, exclusive, immediate)))
+			if LB_UNLIKELY(!TryLockFile(h, off, len, exclusive, immediate))
 				LCL_Raise_Win32E("LockFileEx", lfsig);
 		}
 

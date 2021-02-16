@@ -66,7 +66,7 @@ namespace leo
 		if (lv < t)
 		{
 #if _WIN32
-			if (LB_LIKELY(stream == stderr)) {
+			if LB_LIKELY(stream == stderr) {
 				platform::ldebug("Trace[%#X] @ \"%s\":%i:\n", unsigned(lv), file,
 					line);
 

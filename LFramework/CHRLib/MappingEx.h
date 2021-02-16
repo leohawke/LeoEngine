@@ -136,7 +136,7 @@ namespace CHRLib
 			switch (GetIndexOf(st))
 			{
 			case 0:
-				if (LB_UNLIKELY(!FillByte(i, st)))
+				if LB_UNLIKELY(!FillByte(i, st))
 					return ConversionResult::BadSource;
 				if (seq[0] < 0x80)
 				{
@@ -144,12 +144,12 @@ namespace CHRLib
 					break;
 				}
 			case 1:
-				if (LB_UNLIKELY(!FillByte(i, st)))
+				if LB_UNLIKELY(!FillByte(i, st))
 					return ConversionResult::BadSource;
 				{
 					const auto t(cp113_lkp(seq[0], seq[1]));
 
-					if (LB_LIKELY(t != 0))
+					if LB_LIKELY(t != 0)
 					{
 						Assign(uc, t);
 						break;
