@@ -156,6 +156,7 @@ namespace platform_ex::Windows::D3D12 {
 		curr_state = init_state;
 
 		if (init_data != nullptr) {
+			LAssert(init_state == D3D12_RESOURCE_STATE_COMMON, "requires D3D12_RESOURCE_STATE_COMMON,check access");
 			auto const & cmd_list = Context::Instance().GetCommandList(Device::Command_Resource);
 			std::lock_guard<std::mutex> lock(Context::Instance().GetCommandListMutex(Device::Command_Resource));
 

@@ -53,7 +53,7 @@ namespace details {
 				}) - effect_asset->GetParams().begin();
 
 				auto& param = effect_asset->GetParams()[param_index];
-				if (param.GetType() <=SPT_textureCUBEArray) {
+				if (IsTextureReadType(param.GetType())) {
 					auto path = leo::any_cast<std::string>(pair.second.GetContent());
 					platform::AssetResourceScheduler::Instance().SyncLoad<dds::DDSLoadingDesc>(path);
 					co_yield nullptr;

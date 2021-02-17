@@ -142,6 +142,13 @@ namespace platform::Render {
 			return base_type == SBT_INT32 || base_type == SBT_UINT32 || base_type == SBT_FLOAT32;
 		}
 
+		constexpr bool IsTextureReadType(ShaderParamType type)
+		{
+			auto base_type = GetBaseType(type);
+
+			return base_type == SBT_SRV && type <= SPT_textureCUBEArray;
+		}
+
 		constexpr uint8 GetNumRows(ShaderParamType type)
 		{
 			return ((type >> 8) & 0XF0) >> 4;

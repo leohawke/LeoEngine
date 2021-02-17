@@ -50,6 +50,6 @@ namespace platform::Render {
 
 		Usage = Buffer::Usage::Static;
 
-		return Device.CreateConstanBuffer(Usage, 0,Layout.GetSize(), EFormat::EF_Unknown,Contents);
+		return Device.CreateConstanBuffer(Usage, EAccessHint::EA_GPURead,Layout.GetSize(), EFormat::EF_Unknown,Contents);
 	}
 }
