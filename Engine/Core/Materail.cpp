@@ -15,7 +15,7 @@ platform::Material::Material(const asset::MaterailAsset & asset, const std::stri
 	:identity_name(asset::path(AssetResourceScheduler::Instance().FindAssetPath(&asset)).replace_extension().string() + "-" + name)
 {
 	for (auto& bind_value : asset.GetBindValues()) {
-		if (LB_UNLIKELY(bind_value.second.GetContent().type() == leo::type_id<MaterialEvaluator::InstanceDelayedTerm>())){
+		if LB_UNLIKELY(bind_value.second.GetContent().type() == leo::type_id<MaterialEvaluator::InstanceDelayedTerm>()){
 			auto ret = GetInstanceEvaluator().Reduce(bind_value.second.Access<MaterialEvaluator::InstanceDelayedTerm>());
 
 			MaterialEvaluator::CheckReductionStatus(ret.second);
@@ -23,7 +23,7 @@ platform::Material::Material(const asset::MaterailAsset & asset, const std::stri
 				ret.first.Value.GetContent()
 			);
 		}
-		else if (LB_UNLIKELY(bind_value.second.GetContent().type() == leo::type_id<MaterialEvaluator::RenderDelayedTerm>())) {
+		else if LB_UNLIKELY(bind_value.second.GetContent().type() == leo::type_id<MaterialEvaluator::RenderDelayedTerm>()) {
 			delay_values.emplace_back(bind_value.first,
 				scheme::TermNode(bind_value.second.Access<MaterialEvaluator::RenderDelayedTerm>()));
 		}
@@ -36,7 +36,7 @@ platform::Material::Material(const asset::MaterailAsset & asset, const std::stri
 
 	for (auto& bind_value : bind_values) {
 		if (bind_effects->GetParameter(bind_value.first).GetType() < SPT_textureCUBEArray) {
-			if (LB_LIKELY(bind_value.second.type() == leo::type_id<std::string>())) {
+			if LB_LIKELY(bind_value.second.type() == leo::type_id<std::string>()) {
 				auto pTexture = X::LoadTexture(std::any_cast<std::string>(bind_value.second), Render::EA_GPURead | Render::EA_Immutable);
 
 				bind_value.second =Render::TextureSubresource(pTexture, 0, pTexture->GetArraySize(),0, pTexture->GetNumMipMaps());

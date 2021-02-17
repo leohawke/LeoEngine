@@ -145,4 +145,14 @@ void RenderShaderParameterBindings::BindForRootShaderParameters(const RenderShad
 	Binding.RootShaderParameters = true;
 
 	Binding.Bind(StructMetaData);
+
+	uint16 BufferIndex, BaseIndex, BoundSize;
+	if (ParameterMaps.FindParameterAllocation(ShaderParametersMetadata::kRootUniformBufferBindingName, BufferIndex, BaseIndex, BoundSize))
+	{
+		RootParameterBufferIndex = BufferIndex;
+	}
+	else
+	{
+		lassume(RootParameterBufferIndex == kInvalidBufferIndex);
+	}
 }

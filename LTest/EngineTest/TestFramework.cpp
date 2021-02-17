@@ -95,7 +95,7 @@ void TestFrameWork::Run()
 #if LF_Hosted
 	FetchGUIHost().ExitOnAllWindowThreadCompleted = true;
 #endif
-	if (LB_UNLIKELY(!FetchAppInstance().Switch(shared_ptr<Shell>(p_shl))))
+	if LB_UNLIKELY(!FetchAppInstance().Switch(shared_ptr<Shell>(p_shl)))
 		throw GeneralEvent("Failed activating the main shell.");
 	while (FetchGlobalInstance().DealMessage())
 		Update(0);

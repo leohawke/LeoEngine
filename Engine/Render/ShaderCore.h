@@ -16,6 +16,7 @@ namespace platform::Render {
 		using leo::uint16;
 		using leo::uint32;
 		using leo::int32;
+		using leo::uint8;
 
 		struct ShaderCodeResourceCounts
 		{
@@ -46,9 +47,33 @@ namespace platform::Render {
 
 		using ShaderBlob = std::pair<std::unique_ptr<stdex::byte[]>, std::size_t>;
 
-		enum ShaderParamType
+		enum ShaderBaseType
 		{
-			SPT_texture1D,
+			SBT_INVALID,
+
+			SBT_SRV,
+			SBT_UAV,
+			SBT_SAMPLER,
+			SBT_CBUFFER,
+
+			SBT_BOOL,
+
+			SBT_INT32,
+			SBT_UINT32,
+			SBT_FLOAT32,
+
+			SBT_ELEMTYPE = 1<<15,
+		};
+
+		template<uint8 row, uint8 col>
+		constexpr uint8 MakeFormatRowCol = (row << 4) | col;
+
+		template<uint16 ch0,uint8 row,uint8 col,uint8 index>
+		constexpr uint32 MakeShaderFormat = (ch0 << 16) | (MakeFormatRowCol<row, col> << 8) | index;
+
+		enum ShaderParamType :uint32
+		{
+			SPT_texture1D = MakeShaderFormat<SBT_SRV| SBT_ELEMTYPE,1,1,0>,
 			SPT_texture2D,
 			SPT_texture3D,
 			SPT_textureCUBE,
@@ -56,10 +81,10 @@ namespace platform::Render {
 			SPT_texture2DArray,
 			SPT_texture3DArray,
 			SPT_textureCUBEArray,
-			SPT_ConstantBuffer,
-			SPT_buffer,
+			SPT_ConstantBuffer = MakeShaderFormat<SBT_CBUFFER| SBT_ELEMTYPE, 1, 1, 0>,
+			SPT_buffer = MakeShaderFormat<SBT_SRV| SBT_ELEMTYPE, 1, 1, 8>,
 			SPT_StructuredBuffer,
-			SPT_rwbuffer,
+			SPT_rwbuffer = MakeShaderFormat<SBT_UAV| SBT_ELEMTYPE, 1, 1, 0>,
 			SPT_rwstructured_buffer,
 			SPT_rwtexture1D,
 			SPT_rwtexture2D,
@@ -67,38 +92,65 @@ namespace platform::Render {
 			SPT_rwtexture1DArray,
 			SPT_rwtexture2DArray,
 			SPT_AppendStructuredBuffer,
-			SPT_ConsumeStructuredBuffer,
-			SPT_byteAddressBuffer,
-			SPT_rwbyteAddressBuffer,
-			SPT_RaytracingAccelerationStructure,
-			SPT_sampler,
-			SPT_shader,
-			SPT_bool,
-			SPT_string,
-			SPT_uint,
-			SPT_uint2,
-			SPT_uint3,
-			SPT_uint4,
-			SPT_int,
-			SPT_int2,
-			SPT_int3,
-			SPT_int4,
-			SPT_float,
-			SPT_float2,
-			SPT_float2x2,
-			SPT_float2x3,
-			SPT_float2x4,
-			SPT_float3,
-			SPT_float3x2,
-			SPT_float3x3,
-			SPT_float3x4,
-			SPT_float4,
-			SPT_float4x2,
-			SPT_float4x3,
-			SPT_float4x4,
+			SPT_ConsumeStructuredBuffer = MakeShaderFormat<SBT_SRV| SBT_ELEMTYPE, 1, 1, 10>,
+			SPT_byteAddressBuffer = MakeShaderFormat<SBT_SRV , 1, 1, 10>,
+			SPT_rwbyteAddressBuffer = MakeShaderFormat<SBT_UAV, 1, 1, 8>,
+			SPT_RaytracingAccelerationStructure = MakeShaderFormat<SBT_SRV, 1, 1, 12>,
+			SPT_sampler = MakeShaderFormat<SBT_SAMPLER, 1, 1, 0>,
+			SPT_shader = MakeShaderFormat<SBT_INVALID, 1, 1, 0>,
+			SPT_bool = MakeShaderFormat<SBT_BOOL, 1, 1, 0>,
+			SPT_string = MakeShaderFormat<SBT_INVALID, 1, 1, 1>,
+			SPT_uint  = MakeShaderFormat<SBT_UINT32, 1, 1, 0>,
+			SPT_uint2 = MakeShaderFormat<SBT_UINT32, 1, 2, 0>,
+			SPT_uint3 = MakeShaderFormat<SBT_UINT32, 1, 3, 0>,
+			SPT_uint4 = MakeShaderFormat<SBT_UINT32, 1, 4, 0>,
+			SPT_int   = MakeShaderFormat<SBT_INT32, 1, 1, 0>,
+			SPT_int2  = MakeShaderFormat<SBT_INT32, 1, 2, 0>,
+			SPT_int3  = MakeShaderFormat<SBT_INT32, 1, 3, 0>,
+			SPT_int4  = MakeShaderFormat<SBT_INT32, 1, 4, 0>,
+			SPT_float = MakeShaderFormat<SBT_FLOAT32, 1, 1, 0>,
+			SPT_float2 = MakeShaderFormat<SBT_FLOAT32, 1, 2, 0>,
+			SPT_float2x2 = MakeShaderFormat<SBT_FLOAT32, 2, 2, 0>,
+			SPT_float2x3 = MakeShaderFormat<SBT_FLOAT32, 2, 3, 0>,
+			SPT_float2x4 = MakeShaderFormat<SBT_FLOAT32, 2, 4, 0>,
+			SPT_float3 = MakeShaderFormat<SBT_FLOAT32, 1, 3, 0>,
+			SPT_float3x2 = MakeShaderFormat<SBT_FLOAT32, 3, 2, 0>,
+			SPT_float3x3 = MakeShaderFormat<SBT_FLOAT32, 3, 3, 0>,
+			SPT_float3x4 = MakeShaderFormat<SBT_FLOAT32, 3, 4, 0>,
+			SPT_float4 = MakeShaderFormat<SBT_FLOAT32, 1, 4, 0>,
+			SPT_float4x2 = MakeShaderFormat<SBT_FLOAT32, 4, 2, 0>,
+			SPT_float4x3 = MakeShaderFormat<SBT_FLOAT32, 4, 3, 0>,
+			SPT_float4x4 = MakeShaderFormat<SBT_FLOAT32, 4, 4, 0>,
 
-			SPT_ElemEmpty,
+			SPT_ElemEmpty = MakeShaderFormat<SBT_INVALID, 1, 1, 2>,
 		};
+
+		constexpr ShaderBaseType GetBaseType(ShaderParamType type)
+		{
+			return static_cast<ShaderBaseType>((type >> 16) & ~SBT_ELEMTYPE);
+		}
+
+		constexpr bool IsElemType(ShaderParamType type)
+		{
+			return static_cast<ShaderBaseType>(type >> 16) & SBT_ELEMTYPE;
+		}
+
+		constexpr bool IsNumberType(ShaderParamType type)
+		{
+			auto base_type = GetBaseType(type);
+
+			return base_type == SBT_INT32 || base_type == SBT_UINT32 || base_type == SBT_FLOAT32;
+		}
+
+		constexpr uint8 GetNumRows(ShaderParamType type)
+		{
+			return ((type >> 8) & 0XF0) >> 4;
+		}
+
+		constexpr uint8 GetNumColumns(ShaderParamType type)
+		{
+			return ((type >> 8) & 0X0F);
+		}
 
 		struct RayTracingShaderInfo
 		{

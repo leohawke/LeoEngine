@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Render/Shader.h"
+#include <compare>
 
 namespace platform::Render {
 	inline namespace Shader
@@ -24,6 +25,11 @@ namespace platform::Render {
 
 				/** The offset of the parameter in the root shader parameter struct. */
 				uint16 ByteOffset;
+
+				friend auto operator<=>(const RootParameterBinding& lhs, const RootParameterBinding& rhs)
+				{
+					return lhs.ByteOffset <=> rhs.ByteOffset;
+				}
 			};
 
 			FShaderCompilerEnvironment Environment;

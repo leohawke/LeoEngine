@@ -13,10 +13,8 @@ namespace platform::Render
 		struct TShaderTextureTypeInfo;
 
 		template<>
-		struct TShaderTextureTypeInfo<Texture2D>
+		struct TShaderTextureTypeInfo<Texture2D> : ShaderTypeInfo<SPT_texture2D>
 		{
-			static constexpr ShaderParamType ShaderType = SPT_texture2D;
-
 			using DeclType = Texture2D*;
 
 			template<std::size_t Boundary = 0>
@@ -24,10 +22,8 @@ namespace platform::Render
 		};
 
 		template<>
-		struct TShaderTextureTypeInfo<Texture3D>
+		struct TShaderTextureTypeInfo<Texture3D> : ShaderTypeInfo<SPT_texture3D>
 		{
-			static constexpr ShaderParamType ShaderType = SPT_texture3D;
-
 			using DeclType = Texture3D*;
 
 			template<std::size_t Boundary = 0>
@@ -35,10 +31,8 @@ namespace platform::Render
 		};
 
 		template<>
-		struct TShaderParameterTypeInfo<TextureSampleDesc>
+		struct TShaderParameterTypeInfo<TextureSampleDesc> : ShaderTypeInfo<SPT_sampler>
 		{
-			static constexpr ShaderParamType ShaderType = SPT_sampler;
-
 			template<std::size_t Boundary = 0>
 			static constexpr std::size_t Alignement = 4;
 
@@ -48,10 +42,8 @@ namespace platform::Render
 		using RWTexture2D = UnorderedAccessView;
 
 		template<>
-		struct TShaderTextureTypeInfo<RWTexture2D>
+		struct TShaderTextureTypeInfo<RWTexture2D> : ShaderTypeInfo<SPT_rwtexture2D>
 		{
-			static constexpr ShaderParamType ShaderType = SPT_rwtexture2D;
-
 			using DeclType = RWTexture2D*;
 
 			template<std::size_t Boundary = 0>

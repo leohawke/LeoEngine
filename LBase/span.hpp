@@ -351,7 +351,7 @@ namespace absl {
 		//
 		// Returns a reference to the i'th element of this span.
 		constexpr reference at(size_type i) const {
-			return LB_LIKELY(i < size())  //
+			return i < size()  //
 				? *(data() + i)
 				: (leo::throw_out_of_range("invalid span subscript"), *(data() + i));
 		}

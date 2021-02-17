@@ -50,7 +50,7 @@ namespace platform
 
 		struct ShadowViewInfo
 		{
-			int StateFrameIndex;
+			unsigned StateFrameIndex;
 			leo::math::float4x4 ScreenToTranslatedWorld;
 			leo::math::float4x4 ViewToClip;
 			leo::math::float4x4 TranslatedWorldToView;

@@ -69,7 +69,7 @@ namespace scheme
 	void
 		PrintIndent(std::ostream& os, IndentGenerator igen, size_t n)
 	{
-		if (LB_LIKELY(n != 0))
+		if LB_LIKELY(n != 0)
 			leo::write(os, igen(n));
 	}
 
@@ -180,7 +180,7 @@ namespace scheme
 							string head('<' + str);
 							bool nl{};
 
-							if (LB_UNLIKELY(!is_content && depth > 0))
+							if LB_UNLIKELY(!is_content && depth > 0)
 								TraceDe(Warning, "Invalid *TOP* found.");
 							if (i != con.end())
 							{
@@ -406,7 +406,7 @@ namespace scheme
 		if (status == ReductionStatus::Clean
 			|| status == ReductionStatus::Retained)
 			return {};
-		if (LB_UNLIKELY(status != ReductionStatus::Retrying))
+		if LB_UNLIKELY(status != ReductionStatus::Retrying)
 			TraceDe(Warning, "Unexpected status found");
 		return true;
 	}
@@ -571,9 +571,9 @@ namespace scheme
 			for (const auto& env : vo.GetObject<EnvironmentList>())
 				CheckParent(env);
 		}
-		else if (LB_UNLIKELY(tp != leo::type_id<observer_ptr<const Environment>>()
+		else if LB_UNLIKELY(tp != leo::type_id<observer_ptr<const Environment>>()
 			&& tp != leo::type_id<EnvironmentReference>()
-			&& tp != leo::type_id<shared_ptr<Environment>>()))
+			&& tp != leo::type_id<shared_ptr<Environment>>())
 			ThrowForInvalidType(tp);
 	}
 

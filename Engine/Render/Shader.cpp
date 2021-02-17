@@ -111,6 +111,7 @@ namespace platform::Render::Shader
 		if (meta->GetRootParametersMetadata())
 		{
 			PullRootShaderParametersLayout(input, *meta->GetRootParametersMetadata());
+			std::sort(input.RootParameterBindings.begin(),input.RootParameterBindings.end());
 		}
 
 		// Allow the shader type to modify the compile environment.
@@ -304,7 +305,6 @@ uint32 Shader::ShaderMapContent::GetNumShaders() const
 
 void Shader::PullRootShaderParametersLayout(asset::X::Shader::ShaderCompilerInput& Input, const ShaderParametersMetadata& ParameterMeta)
 {
-	//only do count now
 	for (auto& member : ParameterMeta.GetMembers())
 	{
 		auto ShaderType = member.GetShaderType();
@@ -731,9 +731,30 @@ std::string Shader::ParseAndMoveShaderParametersToRootConstantBuffer(std::string
 	}
 
 	std::string rootcbuffer;
-	for (auto& ParsedParameter : ParsedParameters)
+	for (auto& Member : input.RootParameterBindings)
 	{
-		rootcbuffer += leo::sfmt("%s %s;\r\n", ParsedParameter.second.Type.c_str(), ParsedParameter.first.c_str());
+		std::string register_alloc = leo::to_string(Member.ByteOffset/16);
+
+		switch (Member.ByteOffset % 16)
+		{
+		case 0:
+			break;
+		case 4:
+			register_alloc += ".y";
+			break;
+		case 8:
+			register_alloc += ".z";
+			break;
+		case 12:
+			register_alloc += ".w";
+			break;
+		default:
+			lassume(false);//not alignment to 4 bytes
+		}
+
+		const auto& ParsedParameter = ParsedParameters[Member.Name];
+
+		rootcbuffer += leo::sfmt("%s %s : packoffset(c%s);\r\n", ParsedParameter.Type.c_str(), Member.Name.c_str(), register_alloc.c_str());
 	}
 
 	std::string new_code = leo::sfmt(

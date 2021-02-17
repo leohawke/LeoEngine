@@ -79,7 +79,7 @@ namespace platform::X
 
 		void LoadNode()
 		{
-			shader_desc.data->term_node = *LoadNode(shader_desc.path).begin();
+			shader_desc.data->term_node = *platform::X::LoadNode(shader_desc.path).begin();
 		}
 
 		leo::coroutine::Task<void> LoadNodeAsync(leo::coroutine::IOScheduler& io)
@@ -224,25 +224,6 @@ namespace platform::X
 			return include_line;
 		}
 
-		template<typename path_type>
-		scheme::TermNode LoadNode(const path_type& path) {
-			std::ifstream fin(path);
-
-			if (!fin.is_open())
-				throw;
-
-			fin >> std::noskipws;
-			using sb_it_t = std::istream_iterator<char>;
-
-			scheme::Session session(sb_it_t(fin), sb_it_t{});
-
-			try {
-				return scheme::SContext::Analyze(std::move(session));
-			}
-
-			CatchExpr(..., leo::rethrow_badstate(fin, std::ios_base::failbit))
-		}
-
 		leo::coroutine::Task<scheme::TermNode> LoadNodeAsync(leo::coroutine::IOScheduler& io,const std::string& path) {
 			auto file = leo::coroutine::ReadOnlyFile::open(io, path);
 
@@ -277,7 +258,7 @@ namespace platform::X
 			for (auto& refer_node : refer_nodes) {
 				auto path = leo::Access<std::string>(*refer_node.rbegin());
 
-				auto include_node = *LoadNode(path).begin();
+				auto include_node = *platform::X::LoadNode(path).begin();
 				RecursiveReferNode(include_node, includes);
 
 				if (std::find_if(includes.begin(), includes.end(), [&path](const std::pair<std::string, scheme::TermNode>& pair)
@@ -447,11 +428,11 @@ namespace platform::X
 				param.SetSpace(index_space.second);
 			}
 
-			if (param.GetType() >= SPT_bool) {
+			if (IsNumberType(param.GetType())) {
 				if (auto p = leo::AccessChildPtr<std::string>(param_node, "arraysize"))
 					param.GetArraySizeRef() = std::stoul(*p);
 			}
-			else if (param.GetType() <= SPT_ConsumeStructuredBuffer) {
+			else if (IsElemType(param.GetType())) {
 				if (auto elemtype = AccessPtr("elemtype", param_node)) {
 					try {
 						param.GetElemInfoRef() = AssetType::GetType(*elemtype);

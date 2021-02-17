@@ -52,7 +52,6 @@ public:
 
 	std::vector<DirectLight> lights;
 	std::shared_ptr<GraphicsBuffer> pLightConstatnBuffer;
-	std::shared_ptr<GraphicsBuffer> pGenShaderConstants;
 
 	std::shared_ptr<Texture2D> RayShadowMask;
 	std::shared_ptr<UnorderedAccessView> RayShadowMaskUAV;
@@ -73,7 +72,7 @@ public:
 
 	float LightHalfAngle = 0.5f;
 	int SamplesPerPixel = 1;
-	int StateFrameIndex = 0;
+	unsigned StateFrameIndex = 0;
 private:
 	bool SubWndProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam) override
 	{
@@ -254,18 +253,48 @@ private:
 
 	void OnDrawLights(const LeoEngine::Core::Camera& camera,const leo::math::float4x4& projmatrix)
 	{
+		auto& screen_frame = Context::Instance().GetScreenFrame();
+		auto screen_tex = screen_frame->Attached(FrameBuffer::Target0);
+		auto depth_tex =static_cast<Texture2D*>(screen_frame->Attached(FrameBuffer::DepthStencil));
+
+		auto width = depth_tex->GetWidth(0);
+		auto height = depth_tex->GetHeight(0);
+
 		auto viewmatrix = camera.GetViewMatrix();
 
 		auto viewproj = viewmatrix * projmatrix;
 
-		GenShadowConstants shadowconstant;
-		{
-			shadowconstant.LightDirection = lights[0].direction;
-			shadowconstant.SourceRadius = sinf(LightHalfAngle * 3.14159265f / 180);
-			shadowconstant.SamplesPerPixel = SamplesPerPixel;
-			shadowconstant.StateFrameIndex = StateFrameIndex;
-			pGenShaderConstants->UpdateSubresource(0, static_cast<leo::uint32>(sizeof(shadowconstant)), &shadowconstant);
-		}
+		auto invviewproj = leo::math::inverse(viewproj);
+
+		auto ViewSizeAndInvSize = leo::math::float4(width, height, 1.0f / width, 1.0f / height);
+		// setup a matrix to transform float4(SvPosition.xyz,1) directly to World (quality, performance as we don't need to convert or use interpolator)
+
+		float Mx = 2.0f * ViewSizeAndInvSize.z;
+		float My = -2.0f * ViewSizeAndInvSize.w;
+		float Ax = -1.0f;
+		float Ay = 1.0f;
+
+		leo::math::float4x4 SVPositionToWorld = leo::math::float4x4(
+			leo::math::float4(Mx, 0, 0, 0),
+			leo::math::float4(0, Mx, 0, 0),
+			leo::math::float4(0, 0, 1, 0),
+			leo::math::float4(Ax, Ay, 0, 1)
+		) * invviewproj;
+
+		platform::Render::ShadowRGParameters shadowconstant{
+			.SVPositionToWorld = leo::math::transpose(SVPositionToWorld),
+			.WorldCameraOrigin = camera.GetEyePos(),
+			.BufferSizeAndInvSize = leo::math::float4(width,height,1.0f/width,1.0f/height),
+			.NormalBias = 1,
+			.LightDirection = lights[0].direction,
+			.SourceRadius = sinf(LightHalfAngle * 3.14159265f / 180),
+			.SamplesPerPixel =static_cast<unsigned>(SamplesPerPixel),
+			.StateFrameIndex = StateFrameIndex,
+			.WorldNormalBuffer = NormalOutput.get(),
+			.Depth = depth_tex,
+			.Output = RayShadowMaskUAV.get()
+		};
+		
 		auto Scene = pEntities->BuildRayTracingScene();
 		Context::Instance().GetRayContext().GetDevice().BuildAccelerationStructure(Scene.get());
 
@@ -273,15 +302,11 @@ private:
 
 		SCOPED_GPU_EVENT(CmdList, DrawLights);
 
-		auto& screen_frame = Context::Instance().GetScreenFrame();
-		auto screen_tex = screen_frame->Attached(FrameBuffer::Target0);
-		auto depth_tex = screen_frame->Attached(FrameBuffer::DepthStencil);
+		
 
 		//clear rt?
 		Context::Instance().GetRayContext().RayTraceShadow(Scene.get(),
-			screen_frame.get(),
-			RayShadowMaskUAV.get(),
-			pGenShaderConstants.get());
+			shadowconstant);
 
 
 		platform::ScreenSpaceDenoiser::ShadowVisibilityInput svinput =
@@ -401,8 +426,6 @@ private:
 		lights.push_back(directioal_light);
 
 		pLightConstatnBuffer = leo::share_raw(Device.CreateConstanBuffer(Buffer::Usage::Dynamic, EAccessHint::EA_GPURead | EAccessHint::EA_GPUStructured, sizeof(DirectLight)*lights.size(), static_cast<EFormat>(sizeof(DirectLight)),lights.data()));
-
-		pGenShaderConstants = leo::share_raw(Device.CreateConstanBuffer(Buffer::Usage::Dynamic, 0, sizeof(GenShadowConstants), EFormat::EF_Unknown));
 
 		RayShadowMask = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_ABGR16F, EA_GPURead | EA_GPUWrite | EA_GPUUnordered, {}));
 		RayShadowMaskDenoiser = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_R32F,EA_GPURead | EA_GPUWrite | EA_GPUUnordered, {}));

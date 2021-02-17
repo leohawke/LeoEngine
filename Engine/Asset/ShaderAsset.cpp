@@ -189,7 +189,7 @@ bool asset::RequireStructElemType(ShaderParamType type)
 
 bool asset::RequireElemType(ShaderParamType type)
 {
-	if (type >= SPT_rwtexture1D && type <= SPT_rwtexture2DArray)
+	if (GetBaseType(type) == SBT_UAV && type != SPT_rwbyteAddressBuffer)
 		return true;
 
 	if (RequireStructElemType(type))
@@ -294,7 +294,7 @@ std::string asset::ShadersAsset::GenHLSLShader() const
 
 			lconstraint(!RequireElemType(param.GetType())|| !elem_type.empty());
 
-			if (param.GetType() <= SPT_ConsumeStructuredBuffer && !elem_type.empty()) {
+			if (IsElemType(param.GetType()) && !elem_type.empty()) {
 				ss << leo::sfmt("%s<%s> %s", GetTypeName(param.GetType()).c_str(),
 					elem_type.c_str(), param.GetName().c_str())
 					<< FormatBindDesc(allocator, param, param.GetType())
@@ -380,7 +380,7 @@ public:
 		{
 			if (hashs[i] == name_hash)
 			{
-				return i;
+				return types[i].second;
 			}
 		}
 		throw leo::unsupported();
@@ -388,72 +388,75 @@ public:
 
 	std::string const& type_name(uint32_t code) const
 	{
-		if (code < types.size())
+		for (uint32_t i = 0; i < types.size(); ++i)
 		{
-			return types[code];
+			if (types[i].second == code)
+			{
+				return types[i].first;
+			}
 		}
 		throw leo::unsupported();
 	}
 
 	type_define()
 	{
-		types.emplace_back("Texture1D");
-		types.emplace_back("Texture2D");
-		types.emplace_back("Texture3D");
-		types.emplace_back("TextureCUBE");
-		types.emplace_back("Texture1DArray");
-		types.emplace_back("Texture2DArray");
-		types.emplace_back("Texture3DArray");
-		types.emplace_back("TextureCUBEArray");
-		types.emplace_back("ConstantBuffer");
-		types.emplace_back("Buffer");
-		types.emplace_back("StructuredBuffer");
-		types.emplace_back("RWBuffer");
-		types.emplace_back("RWStructuredBuffer");
-		types.emplace_back("RWTexture1D");
-		types.emplace_back("RWTexture2D");
-		types.emplace_back("RWTexture3D");
-		types.emplace_back("RWTexture1DArray");
-		types.emplace_back("RWTexture2DArray");
-		types.emplace_back("AppendStructuredBuffer");
-		types.emplace_back("ConsumeStructuredBuffer");
-		types.emplace_back("ByteAddressBuffer");
-		types.emplace_back("RWByteAddressBuffer");
-		types.emplace_back("RaytracingAccelerationStructure");
-		types.emplace_back("sampler");
-		types.emplace_back("shader");
-		types.emplace_back("bool");
-		types.emplace_back("string");
-		types.emplace_back("uint");
-		types.emplace_back("uint2");
-		types.emplace_back("uint3");
-		types.emplace_back("uint4");
-		types.emplace_back("int");
-		types.emplace_back("int2");
-		types.emplace_back("int3");
-		types.emplace_back("int4");
-		types.emplace_back("float");
-		types.emplace_back("float2");
-		types.emplace_back("float2x2");
-		types.emplace_back("float2x3");
-		types.emplace_back("float2x4");
-		types.emplace_back("float3");
-		types.emplace_back("float3x2");
-		types.emplace_back("float3x3");
-		types.emplace_back("float3x4");
-		types.emplace_back("float4");
-		types.emplace_back("float4x2");
-		types.emplace_back("float4x3");
-		types.emplace_back("float4x4");
+		types.emplace_back("Texture1D",SPT_texture1D);
+		types.emplace_back("Texture2D", SPT_texture2D);
+		types.emplace_back("Texture3D", SPT_texture3D);
+		types.emplace_back("TextureCUBE", SPT_textureCUBE);
+		types.emplace_back("Texture1DArray", SPT_texture1DArray);
+		types.emplace_back("Texture2DArray", SPT_texture2DArray);
+		types.emplace_back("Texture3DArray", SPT_texture3DArray);
+		types.emplace_back("TextureCUBEArray", SPT_textureCUBEArray);
+		types.emplace_back("ConstantBuffer", SPT_ConstantBuffer);
+		types.emplace_back("Buffer", SPT_buffer);
+		types.emplace_back("StructuredBuffer", SPT_StructuredBuffer);
+		types.emplace_back("RWBuffer", SPT_rwbuffer);
+		types.emplace_back("RWStructuredBuffer", SPT_rwstructured_buffer);
+		types.emplace_back("RWTexture1D", SPT_rwtexture1D);
+		types.emplace_back("RWTexture2D", SPT_rwtexture2D);
+		types.emplace_back("RWTexture3D", SPT_rwtexture3D);
+		types.emplace_back("RWTexture1DArray", SPT_rwtexture1DArray);
+		types.emplace_back("RWTexture2DArray", SPT_rwtexture2DArray);
+		types.emplace_back("AppendStructuredBuffer", SPT_AppendStructuredBuffer);
+		types.emplace_back("ConsumeStructuredBuffer", SPT_ConsumeStructuredBuffer);
+		types.emplace_back("ByteAddressBuffer", SPT_byteAddressBuffer);
+		types.emplace_back("RWByteAddressBuffer", SPT_rwbyteAddressBuffer);
+		types.emplace_back("RaytracingAccelerationStructure", SPT_RaytracingAccelerationStructure);
+		types.emplace_back("sampler",  SPT_sampler);
+		types.emplace_back("shader",   SPT_shader);
+		types.emplace_back("bool",     SPT_bool);
+		types.emplace_back("string",   SPT_string);
+		types.emplace_back("uint",     SPT_uint);
+		types.emplace_back("uint2",    SPT_uint2);
+		types.emplace_back("uint3",    SPT_uint3);
+		types.emplace_back("uint4",    SPT_uint4);
+		types.emplace_back("int",      SPT_int);
+		types.emplace_back("int2",     SPT_int2);
+		types.emplace_back("int3",     SPT_int3);
+		types.emplace_back("int4",	   SPT_int4);
+		types.emplace_back("float",    SPT_float);
+		types.emplace_back("float2",   SPT_float2);
+		types.emplace_back("float2x2", SPT_float2x2);
+		types.emplace_back("float2x3", SPT_float2x3);
+		types.emplace_back("float2x4", SPT_float2x4);
+		types.emplace_back("float3",   SPT_float3);
+		types.emplace_back("float3x2", SPT_float3x2);
+		types.emplace_back("float3x3", SPT_float3x3);
+		types.emplace_back("float3x4", SPT_float3x4);
+		types.emplace_back("float4",   SPT_float4);
+		types.emplace_back("float4x2", SPT_float4x2);
+		types.emplace_back("float4x3", SPT_float4x3);
+		types.emplace_back("float4x4", SPT_float4x4);
 
 		for (auto type : types) {
-			leo::to_lower(type);
-			hashs.emplace_back(leo::constfn_hash(type));
+			leo::to_lower(type.first);
+			hashs.emplace_back(leo::constfn_hash(type.first));
 		}
 	}
 
 private:
-	std::vector<std::string> types;
+	std::vector<std::pair<std::string, ShaderParamType>> types;
 	std::vector<size_t> hashs;
 };
 

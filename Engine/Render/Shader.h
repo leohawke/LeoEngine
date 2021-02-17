@@ -78,9 +78,10 @@ inline namespace Shader
 		std::vector<ResourceParameter> Samplers;
 		std::vector<ResourceParameter> UAVs;
 
-		uint16 RootParameterBufferIndex;
-
 		static constexpr uint16 kInvalidBufferIndex = 0xFFFF;
+
+		uint16 RootParameterBufferIndex = kInvalidBufferIndex;
+
 
 
 		void BindForLegacyShaderParameters(const RenderShader* Shader, const ShaderParameterMap& ParameterMaps, const ShaderParametersMetadata& StructMetaData);

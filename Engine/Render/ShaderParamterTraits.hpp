@@ -17,11 +17,20 @@ namespace platform::Render
 		template<typename TypeParameter>
 		struct TShaderParameterTypeInfo;
 
-		template<>
-		struct TShaderParameterTypeInfo<float>
+		template<ShaderParamType ShaderType,uint32 NumElements=0>
+		struct ShaderTypeInfo
 		{
-			static constexpr ShaderParamType ShaderType = SPT_float;
+			static constexpr ShaderParamType ShaderType = ShaderType;
 
+			static constexpr ShaderBaseType BaseType = GetBaseType(ShaderType);
+			static constexpr uint32 NumRows = GetNumRows(ShaderType);
+			static constexpr uint32 NumColumns = GetNumColumns(ShaderType);
+			static constexpr uint32 NumElements = NumElements;
+		};
+
+		template<>
+		struct TShaderParameterTypeInfo<float> : ShaderTypeInfo<SPT_float>
+		{
 			template<std::size_t Boundary = 0>
 			static constexpr std::size_t Alignement = 4;
 
@@ -29,10 +38,8 @@ namespace platform::Render
 		};
 
 		template<>
-		struct TShaderParameterTypeInfo<leo::math::float2>
+		struct TShaderParameterTypeInfo<leo::math::float2> : ShaderTypeInfo<SPT_float2>
 		{
-			static constexpr ShaderParamType ShaderType = SPT_float2;
-
 			template<std::size_t Boundary = 0>
 			static constexpr std::size_t Alignement = Boundary >= 8 ? 4 : 16;
 
@@ -40,10 +47,8 @@ namespace platform::Render
 		};
 
 		template<>
-		struct TShaderParameterTypeInfo<leo::math::float3>
+		struct TShaderParameterTypeInfo<leo::math::float3> : ShaderTypeInfo<SPT_float3>
 		{
-			static constexpr ShaderParamType ShaderType = SPT_float3;
-
 			template<std::size_t Boundary = 0>
 			static constexpr std::size_t Alignement = Boundary >= 12 ? 4 : 16;
 
@@ -51,10 +56,8 @@ namespace platform::Render
 		};
 
 		template<>
-		struct TShaderParameterTypeInfo<leo::math::float4>
+		struct TShaderParameterTypeInfo<leo::math::float4> : ShaderTypeInfo<SPT_float4>
 		{
-			static constexpr ShaderParamType ShaderType = SPT_float4;
-
 			template<std::size_t Boundary = 0>
 			static constexpr std::size_t Alignement = 16;
 
@@ -62,10 +65,8 @@ namespace platform::Render
 		};
 
 		template<>
-		struct TShaderParameterTypeInfo<leo::math::float4x4>
+		struct TShaderParameterTypeInfo<leo::math::float4x4> : ShaderTypeInfo<SPT_float4x4>
 		{
-			static constexpr ShaderParamType ShaderType = SPT_float4x4;
-
 			template<std::size_t Boundary = 0>
 			static constexpr std::size_t Alignement = 16;
 
@@ -73,10 +74,8 @@ namespace platform::Render
 		};
 
 		template<>
-		struct TShaderParameterTypeInfo<int>
+		struct TShaderParameterTypeInfo<int> : ShaderTypeInfo<SPT_int>
 		{
-			static constexpr ShaderParamType ShaderType = SPT_int;
-
 			template<std::size_t Boundary = 0>
 			static constexpr std::size_t Alignement = 4;
 
@@ -84,10 +83,8 @@ namespace platform::Render
 		};
 
 		template<>
-		struct TShaderParameterTypeInfo<unsigned int>
+		struct TShaderParameterTypeInfo<unsigned int> : ShaderTypeInfo<SPT_uint>
 		{
-			static constexpr ShaderParamType ShaderType = SPT_uint;
-
 			template<std::size_t Boundary = 0>
 			static constexpr std::size_t Alignement = 4;
 
@@ -95,24 +92,21 @@ namespace platform::Render
 		};
 
 		template<>
-		struct TShaderParameterTypeInfo<leo::math::uint2>
+		struct TShaderParameterTypeInfo<leo::math::uint2> : ShaderTypeInfo<SPT_uint2>
 		{
-			static constexpr ShaderParamType ShaderType = SPT_uint2;
-
 			template<std::size_t Boundary = 0>
 			static constexpr std::size_t Alignement = Boundary >= 8 ? 4 : 16;
 
 			using DeclType = leo::math::uint2;
 		};
 		
-
 		template<typename TypeParameter>
 		struct TShaderTextureTypeInfo;
 	}
 }
 
 #define INTERNAL_LOCAL_SHADER_PARAMETER_GET_STRUCT_METADATA(StructTypeName) \
-	static platform::Render::ShaderParametersMetadata StaticStructMetadata(\
+	static platform::Render::ShaderParametersMetadata StaticStructMetadata(sizeof(StructTypeName),\
 		StructTypeName::zzGetMembers()); \
 	return &StaticStructMetadata;
 
@@ -121,6 +115,11 @@ namespace platform::Render
 	{ \
 	public: \
 		struct TypeInfo{\
+			static constexpr leo::uint32 NumRows = 1;\
+			static constexpr leo::uint32 NumColumns =1;\
+			static constexpr leo::uint32 NumElements = 0;\
+			template<std::size_t Boundary = 0>\
+			static constexpr std::size_t Alignement = 16;\
 			static inline const platform::Render::ShaderParametersMetadata* GetStructMetadata() { GetStructMetadataScope } \
 		};\
 	private: \
@@ -134,7 +133,7 @@ namespace platform::Render
 		} \
 		typedef zzFirstMemberId
 
-#define INTERNAL_SHADER_PARAMETER_EXPLICIT(BaseType,TypeInfo,MemberType,MemberName) \
+#define INTERNAL_SHADER_PARAMETER_EXPLICIT(ShaderType,TypeInfo,MemberType,MemberName) \
 	zzMemberId##MemberName; \
 	public: \
 		alignas(TypeInfo::Alignement<zzMemberId##MemberName::Boundary>) TypeInfo::DeclType MemberName {}; \
@@ -149,7 +148,11 @@ namespace platform::Render
 			Members->emplace_back(\
 				#MemberName,\
 				static_cast<leo::uint32>(loffsetof(zzThisStruct,MemberName)),\
-				BaseType \
+				ShaderType, \
+				TypeInfo::BaseType,\
+				TypeInfo::NumRows,\
+				TypeInfo::NumColumns,\
+				TypeInfo::NumElements\
 			);\
 			zzFuncPtr(*PrevFunc)(zzMemberId##MemberName, std::vector<platform::Render::ShaderParametersMetadata::Member>*); \
 			PrevFunc = zzAppendMemberGetPrev; \

@@ -3,11 +3,11 @@
 	(include RayTracing/RayTracingDirectionalLight.h)
 	(include RandomSequence.h)
 	(RaytracingAccelerationStructure (space RAY_TRACING_REGISTER_SPACE_GLOBAL) TLAS)
-	(RWTexture2D  (elemtype float4) (space RAY_TRACING_REGISTER_SPACE_GLOBAL) Output)
 	(shader 
 "
 Texture2D WorldNormalBuffer;
 Texture2D Depth;
+RWTexture2D<float4> Output;
 float NormalBias;
 float3 LightDirection;
 float SourceRadius;

@@ -23,12 +23,19 @@ inline namespace Shader
 			Member(
 				const char* InName,
 				uint32 InOffset,
-				ShaderParamType InType
+				ShaderParamType InType,
+				ShaderBaseType InBaseType,
+				uint32 InNumRows,
+				uint32 InNumColumns,
+				uint32 InNumElements
 				)
-				:
-				Name(InName),
-				Offset(InOffset),
-				Type(InType)
+				: Name(InName)
+				, Offset(InOffset)
+				, Type(InType)
+				, BaseType(InBaseType)
+				, NumRows(InNumRows)
+				, NumColumns(InNumColumns)
+				, NumElements(InNumElements)
 			{}
 
 			const char* GetName() const { return Name; }
@@ -37,17 +44,50 @@ inline namespace Shader
 
 			ShaderParamType GetShaderType() const { return Type; }
 
-			uint32 GetMemberSize() const { throw leo::unimplemented(); }
+			/** Returns the number of row in the element. For instance FMatrix would return 4, or FVector would return 1. */
+			uint32 GetNumRows() const { return NumRows; }
+
+			/** Returns the number of column in the element. For instance FMatrix would return 4, or FVector would return 3. */
+			uint32 GetNumColumns() const { return NumColumns; }
+
+			/** Returns the number of elements in array, or 0 if this is not an array. */
+			uint32 GetNumElements() const { return NumElements; }
+
+			/** Returns the size of the member. */
+			uint32 GetMemberSize() const { 
+				lassume(BaseType == SBT_INT32 || BaseType == SBT_UINT32 || BaseType == SBT_FLOAT32);
+
+				uint32 ElementSize = sizeof(uint32) * NumRows * NumColumns;
+
+				/** If this an array, the alignment of the element are changed. */
+				if (NumElements > 0)
+				{
+					return leo::Align(ElementSize, 16) * NumElements;
+				}
+				return ElementSize;
+			}
 		private:
 			const char* Name;
 			uint32 Offset;
 			ShaderParamType Type;
+			ShaderBaseType BaseType;
+
+			uint32 NumRows;
+			uint32 NumColumns;
+			uint32 NumElements;
 		};
 
-		ShaderParametersMetadata(const std::vector<Member>& InMembers);
+		ShaderParametersMetadata(
+			uint32 InSize,
+			const std::vector<Member>& InMembers);
 
 		const std::vector<Member>& GetMembers() const { return Members; }
+
+		uint32 GetSize() const { return Size; }
 	private:
+		/** Size of the entire struct in bytes. */
+		const uint32 Size;
+
 		std::vector<Member> Members;
 	};
 }

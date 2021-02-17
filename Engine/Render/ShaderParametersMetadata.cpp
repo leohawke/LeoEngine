@@ -2,7 +2,10 @@
 
 using namespace platform::Render;
 
-ShaderParametersMetadata::ShaderParametersMetadata(const std::vector<Member>& InMembers)
-	:Members(InMembers)
+ShaderParametersMetadata::ShaderParametersMetadata(
+	uint32 InSize, 
+	const std::vector<Member>& InMembers)
+	:Size(InSize),
+	Members(InMembers)
 {
 }

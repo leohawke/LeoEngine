@@ -1573,7 +1573,7 @@ namespace scheme
 				case LexemeCategory::Code:
 					// TODO: When do code literals need to be evaluated?
 					id = DeliteralizeUnchecked(id);
-					if (LB_UNLIKELY(id.empty()))
+					if LB_UNLIKELY(id.empty())
 						break;
 				case LexemeCategory::Symbol:
 					return CheckReducible(ctx.EvaluateLiteral(term, ctx, id))

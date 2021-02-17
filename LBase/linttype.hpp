@@ -155,6 +155,20 @@ namespace leo
 		using least_type = std::int_least64_t;
 		using unsigned_least_type = std::uint_least64_t;
 	};
+
+	/**
+	* Aligns a value to the nearest higher multiple of 'Alignment', which must be a power of two.
+	*
+	* @param  Val        The value to align.
+	* @param  Alignment  The alignment value, must be a power of two.
+	*
+	* @return The value aligned up to the specified alignment.
+	*/
+	template <typename T>
+	inline constexpr T Align(T Val, uint64 Alignment)
+	{
+		return (T)(((uint64)Val + Alignment - 1) & ~(Alignment - 1));
+	}
 }
 
 #endif

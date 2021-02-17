@@ -23,6 +23,7 @@ namespace platform::Render {
 		SHADER_PARAMETER(unsigned, StateFrameIndex)
 		SHADER_PARAMETER_TEXTURE(platform::Render::Texture2D, WorldNormalBuffer)
 		SHADER_PARAMETER_TEXTURE(platform::Render::Texture2D, Depth)
+		SHADER_PARAMETER_TEXTURE(platform::Render::RWTexture2D, Output)
 		END_SHADER_PARAMETER_STRUCT();
 
 	class RayContext
