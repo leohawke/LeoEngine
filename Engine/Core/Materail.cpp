@@ -46,17 +46,26 @@ platform::Material::Material(const asset::MaterailAsset & asset, const std::stri
 }
 
 void platform::Material::UpdateParams(const Renderable* pRenderable) const{
+	UpdateParams(pRenderable, bind_effects.get());
+}
+
+void platform::Material::UpdateParams(const Renderable* pRenderable, Render::Effect::Effect* target_effect) const
+{
+	if (target_effect == nullptr)
+		return;
+
 	for (auto& bind_value : bind_values) {
-		bind_effects->GetParameter(bind_value.first) = bind_value.second;
+		target_effect->TrySetParametr(bind_value.first, bind_value.second);
 	}
-	for (auto & delay_value : delay_values) {
+	for (auto& delay_value : delay_values) {
 		auto ret = GetInstanceEvaluator().Reduce(delay_value.second);
 		if (ret.second == ReductionStatus::Clean)
-			bind_effects->GetParameter(delay_value.first) = Render::Effect::Parameter::any_cast(ret.first.Value.GetContent());
+			target_effect->TrySetParametr(delay_value.first, Render::Effect::Parameter::any_cast(ret.first.Value.GetContent()));
 		else
-			LF_TraceRaw(Descriptions::Warning, "Material::UpdateParams(pRenderable=%p) 求值%s 规约失败,放弃设置该值", pRenderable, bind_effects->GetParameter(delay_value.first).Name.c_str());
+			LF_TraceRaw(Descriptions::Warning, "Material::UpdateParams(pRenderable=%p) 求值%s 规约失败,放弃设置该值", pRenderable, target_effect->GetParameter(delay_value.first).Name.c_str());
 	}
 }
+
 
 
 MaterialEvaluator & platform::Material::GetInstanceEvaluator()

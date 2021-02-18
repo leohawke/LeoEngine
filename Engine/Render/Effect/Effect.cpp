@@ -208,6 +208,17 @@ namespace platform::Render::Effect {
 		return parameters.find(hash)->second;
 	}
 
+	bool Effect::Effect::TrySetParametr(size_t hash, const std::any& val)
+	{
+		auto itr = parameters.find(hash);
+		if (itr != parameters.end())
+		{
+			itr->second = val;
+			return true;
+		}
+		return false;
+	}
+
 
 	ConstantBuffer & Effect::GetConstantBuffer(size_t index)
 	{

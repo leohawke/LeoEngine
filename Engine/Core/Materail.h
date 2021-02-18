@@ -40,6 +40,7 @@ namespace platform {
 
 		//after effect set/before render
 		void UpdateParams(const Renderable* pRenderable) const;
+		void UpdateParams(const Renderable* pRenderable, Render::Effect::Effect* target_effect) const;
 	private:
 		std::vector<std::pair<size_t, std::any>> bind_values;
 		std::vector<std::pair<size_t, scheme::TermNode>> delay_values;

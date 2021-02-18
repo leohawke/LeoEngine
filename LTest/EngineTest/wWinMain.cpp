@@ -143,11 +143,6 @@ private:
 
 		using namespace std::literals;
 
-		for (auto& entity : pEntities->GetRenderables())
-		{
-			entity.GetMaterial().UpdateParams(reinterpret_cast<const platform::Renderable*>(&entity));
-		}
-
 		//viewinfo materialinfo
 		{
 			//obj
@@ -188,14 +183,16 @@ private:
 			for (auto& entity : pEntities->GetRenderables())
 			{
 				//copy normal map params
+				entity.GetMaterial().UpdateParams(reinterpret_cast<const platform::Renderable*>(&entity), pPreZEffect.get());
+
 				Context::Instance().Render(CmdList, *pPreZEffect, pPreZEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
 			}
 		}
 
-		OnDrawLights(camera,projmatrix);
+		OnDrawLights(viewmatrix,projmatrix);
 
-		if(RayShadowMaskDenoiser)
-			pEffect->GetParameter("shadow_tex") = TextureSubresource(RayShadowMaskDenoiser, 0, RayShadowMaskDenoiser->GetArraySize(), 0, RayShadowMaskDenoiser->GetNumMipMaps());
+		if(RayShadowMask)
+			pEffect->GetParameter("shadow_tex") = TextureSubresource(RayShadowMask, 0, RayShadowMask->GetArraySize(), 0, RayShadowMask->GetNumMipMaps());
 
 		{
 			SCOPED_GPU_EVENT(CmdList, GeometryShading);
@@ -206,6 +203,7 @@ private:
 
 			for (auto& entity : pEntities->GetRenderables())
 			{
+				entity.GetMaterial().UpdateParams(reinterpret_cast<const platform::Renderable*>(&entity));
 				Context::Instance().Render(CmdList, *pEffect, pEffect->GetTechniqueByIndex(0), entity.GetMesh().GetInputLayout());
 			}
 		}
@@ -251,7 +249,7 @@ private:
 		platform::TonemapPass(tonemap_inputs);
 	}
 
-	void OnDrawLights(const LeoEngine::Core::Camera& camera,const leo::math::float4x4& projmatrix)
+	void OnDrawLights(const leo::math::float4x4& viewmatrix,const leo::math::float4x4& projmatrix)
 	{
 		auto& screen_frame = Context::Instance().GetScreenFrame();
 		auto screen_tex = screen_frame->Attached(FrameBuffer::Target0);
@@ -260,11 +258,12 @@ private:
 		auto width = depth_tex->GetWidth(0);
 		auto height = depth_tex->GetHeight(0);
 
-		auto viewmatrix = camera.GetViewMatrix();
-
 		auto viewproj = viewmatrix * projmatrix;
 
-		auto invviewproj = leo::math::inverse(viewproj);
+		auto invproj = LeoEngine::X::InvertProjectionMatrix(projmatrix);
+		auto invview = leo::math::inverse(viewmatrix);
+
+		auto invviewproj = invproj * invview;
 
 		auto ViewSizeAndInvSize = leo::math::float4(width, height, 1.0f / width, 1.0f / height);
 		// setup a matrix to transform float4(SvPosition.xyz,1) directly to World (quality, performance as we don't need to convert or use interpolator)
@@ -276,7 +275,7 @@ private:
 
 		leo::math::float4x4 SVPositionToWorld = leo::math::float4x4(
 			leo::math::float4(Mx, 0, 0, 0),
-			leo::math::float4(0, Mx, 0, 0),
+			leo::math::float4(0, My, 0, 0),
 			leo::math::float4(0, 0, 1, 0),
 			leo::math::float4(Ax, Ay, 0, 1)
 		) * invviewproj;
@@ -285,7 +284,7 @@ private:
 			.SVPositionToWorld = leo::math::transpose(SVPositionToWorld),
 			.WorldCameraOrigin = camera.GetEyePos(),
 			.BufferSizeAndInvSize = leo::math::float4(width,height,1.0f/width,1.0f/height),
-			.NormalBias = 1,
+			.NormalBias = 0.1,
 			.LightDirection = lights[0].direction,
 			.SourceRadius = sinf(LightHalfAngle * 3.14159265f / 180),
 			.SamplesPerPixel =static_cast<unsigned>(SamplesPerPixel),
@@ -331,10 +330,10 @@ private:
 			leo::math::float4(0, 1, 0, 0),
 			leo::math::float4(0, 0, projmatrix[2][2], 1),
 			leo::math::float4(0, 0, projmatrix[3][2], 0)
-			) * leo::math::inverse(viewproj),
+			) * invviewproj,
 			.ViewToClip = projmatrix,
 			.TranslatedWorldToView = viewmatrix,
-			.InvProjectionMatrix = LeoEngine::X::InvertProjectionMatrix(projmatrix),
+			.InvProjectionMatrix = invproj,
 			.InvDeviceZToWorldZTransform = LeoEngine::X::CreateInvDeviceZToWorldZTransform(projmatrix),
 		};
 

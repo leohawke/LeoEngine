@@ -290,6 +290,8 @@ namespace platform::Render::Effect {
 		Parameter& GetParameter(const std::string_view& name);
 		Parameter& GetParameter(size_t hash);
 
+		bool TrySetParametr(size_t hash, const std::any& val);
+
 
 		ConstantBuffer& GetConstantBuffer(size_t index);
 		size_t ConstantBufferIndex(const std::string& name);
