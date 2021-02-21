@@ -279,6 +279,7 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 			0.5f / FullResW, 0.5f / FullResH,
 			(FullResW - 0.5f) / FullResW, (FullResH - 0.5f) / FullResH
 		);
+		Parameters.BufferSizeAndInvSize = leo::math::float4(FullResW, FullResH, 1.0f / FullResW, 1.0f / FullResH);
 		Parameters.InputBufferUVMinMax = Parameters.BufferBilinearUVMinMax;
 
 		Parameters.BufferUVToOutputPixelPosition = leo::math::float2(FullResW, FullResH);
