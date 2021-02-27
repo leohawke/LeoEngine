@@ -26,6 +26,8 @@ namespace platform::Render
 			static constexpr uint32 NumRows = GetNumRows(ShaderType);
 			static constexpr uint32 NumColumns = GetNumColumns(ShaderType);
 			static constexpr uint32 NumElements = NumElements;
+
+			static inline const platform::Render::ShaderParametersMetadata* GetStructMetadata() { return nullptr; }
 		};
 
 		template<>
@@ -115,11 +117,13 @@ namespace platform::Render
 	{ \
 	public: \
 		struct TypeInfo{\
+			static constexpr platform::Render::ShaderBaseType BaseType = platform::Render::SBT_INVALID;\
 			static constexpr leo::uint32 NumRows = 1;\
 			static constexpr leo::uint32 NumColumns =1;\
 			static constexpr leo::uint32 NumElements = 0;\
 			template<std::size_t Boundary = 0>\
 			static constexpr std::size_t Alignement = 16;\
+			using DeclType = StructTypeName;\
 			static inline const platform::Render::ShaderParametersMetadata* GetStructMetadata() { GetStructMetadataScope } \
 		};\
 	private: \
@@ -152,7 +156,8 @@ namespace platform::Render
 				TypeInfo::BaseType,\
 				TypeInfo::NumRows,\
 				TypeInfo::NumColumns,\
-				TypeInfo::NumElements\
+				TypeInfo::NumElements,\
+				TypeInfo::GetStructMetadata()\
 			);\
 			zzFuncPtr(*PrevFunc)(zzMemberId##MemberName, std::vector<platform::Render::ShaderParametersMetadata::Member>*); \
 			PrevFunc = zzAppendMemberGetPrev; \
@@ -190,17 +195,33 @@ namespace platform::Render
 #define SHADER_PARAMETER_EX(MemberType,MemberName) \
 		INTERNAL_SHADER_PARAMETER_EXPLICIT(platform::Render::TShaderParameterTypeInfo<MemberType>::ShaderType, platform::Render::TShaderParameterTypeInfo<MemberType>,MemberType,MemberName)
 
- /** Adds a texture.
-  *
-  * Example:
-  *	SHADER_PARAMETER_TEXTURE(Texture2D, MyTexture)
-  */
+/** Adds a texture.
+ *
+ * Example:
+ * SHADER_PARAMETER_TEXTURE(Texture2D, MyTexture)
+ */
 #define SHADER_PARAMETER_TEXTURE(MemberType,MemberName) \
 	INTERNAL_SHADER_PARAMETER_EXPLICIT(platform::Render::TShaderTextureTypeInfo<MemberType>::ShaderType, platform::Render::TShaderTextureTypeInfo<MemberType>, ShaderType*,MemberName)
 
-  /** Adds a sampler.
-   *
-   * Example:
-   *	SHADER_PARAMETER_SAMPLER(SamplerState, MySampler)
-   */
+/** Adds a sampler.
+ *
+ * Example:
+ * SHADER_PARAMETER_SAMPLER(SamplerState, MySampler)
+ */
 #define SHADER_PARAMETER_SAMPLER(MemberType,MemberName) SHADER_PARAMETER(MemberType,MemberName)
+
+/** Include a shader parameter structure into another one in shader code.
+*
+* Example:
+*	BEGIN_SHADER_PARAMETER_STRUCT(FMyNestedStruct,)
+*		SHADER_PARAMETER(float, MyScalar)
+*		// ...
+*	END_SHADER_PARAMETER_STRUCT()
+*
+*	BEGIN_SHADER_PARAMETER_STRUCT(FOtherStruct)
+*		SHADER_PARAMETER_STRUCT_INCLUDE(FMyNestedStruct, MyStruct)
+*
+* 
+*/
+#define SHADER_PARAMETER_STRUCT_INCLUDE(StructType,MemberName) \
+	INTERNAL_SHADER_PARAMETER_EXPLICIT(platform::Render::SPT_StructInclude, StructType::TypeInfo, StructType, MemberName)

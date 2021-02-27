@@ -27,7 +27,8 @@ inline namespace Shader
 				ShaderBaseType InBaseType,
 				uint32 InNumRows,
 				uint32 InNumColumns,
-				uint32 InNumElements
+				uint32 InNumElements,
+				const ShaderParametersMetadata* InStruct
 				)
 				: Name(InName)
 				, Offset(InOffset)
@@ -36,6 +37,7 @@ inline namespace Shader
 				, NumRows(InNumRows)
 				, NumColumns(InNumColumns)
 				, NumElements(InNumElements)
+				, Struct(InStruct)
 			{}
 
 			const char* GetName() const { return Name; }
@@ -52,6 +54,9 @@ inline namespace Shader
 
 			/** Returns the number of elements in array, or 0 if this is not an array. */
 			uint32 GetNumElements() const { return NumElements; }
+
+			/** Returns the metadata of the struct. */
+			const ShaderParametersMetadata* GetStructMetadata() const { return Struct; }
 
 			/** Returns the size of the member. */
 			uint32 GetMemberSize() const { 
@@ -75,6 +80,8 @@ inline namespace Shader
 			uint32 NumRows;
 			uint32 NumColumns;
 			uint32 NumElements;
+
+			const ShaderParametersMetadata* Struct;
 		};
 
 		ShaderParametersMetadata(

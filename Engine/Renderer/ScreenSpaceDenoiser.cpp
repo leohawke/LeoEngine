@@ -21,6 +21,17 @@ enum class SignalProcessing
 	MAX
 };
 
+BEGIN_SHADER_PARAMETER_STRUCT(SSDCommonParameters)
+	SHADER_PARAMETER(leo::math::uint2, ViewportMin)
+	SHADER_PARAMETER(leo::math::uint2, ViewportMax)
+	SHADER_PARAMETER(leo::math::float4, ThreadIdToBufferUV)
+	SHADER_PARAMETER(leo::math::float4, BufferSizeAndInvSize)
+	SHADER_PARAMETER(leo::math::float4, BufferBilinearUVMinMax)
+	SHADER_PARAMETER(leo::math::float2, BufferUVToOutputPixelPosition)
+	SHADER_PARAMETER(float, WorldDepthToPixelWorldRadius)
+	SHADER_PARAMETER(leo::math::float4, BufferUVToScreenPosition)
+END_SHADER_PARAMETER_STRUCT();
+
 /** Returns whether a signal processing support upscaling. */
 static bool SignalSupportsUpscaling(SignalProcessing SignalProcessing)
 {
@@ -65,6 +76,9 @@ public:
 		// Spatial kernel used to process raw input for the temporal accumulation.
 		ReConstruction,
 
+		// Spatial kernel to pre filter.
+		PreConvolution,
+
 		MAX
 	};
 
@@ -92,12 +106,12 @@ public:
 			return false;
 		}
 
-		//// Only compile pre convolution for signal that uses it.
-		//if (!SignalUsesPreConvolution(SignalProcessing) &&
-		//	PermutationVector.Get<FStageDim>() == Stage::PreConvolution)
-		//{
-		//	return false;
-		//}
+		// Only compile pre convolution for signal that uses it.
+		if (!SignalUsesPreConvolution(SignalProcessing) &&
+			PermutationVector.Get<FStageDim>() == Stage::PreConvolution)
+		{
+			return false;
+		}
 
 		// Only compile multi SPP permutation for signal that supports it.
 		if (PermutationVector.Get<FStageDim>() == Stage::ReConstruction &&
@@ -137,14 +151,8 @@ public:
 
 
 	BEGIN_SHADER_PARAMETER_STRUCT(Parameters)
-		//TODO:support ViewParams
-		SHADER_PARAMETER(leo::math::uint2, ViewportMin)
-		SHADER_PARAMETER(leo::math::uint2, ViewportMax)
-		SHADER_PARAMETER(leo::math::float4, ThreadIdToBufferUV)
-		SHADER_PARAMETER(leo::math::float4, BufferBilinearUVMinMax)
-		SHADER_PARAMETER(leo::math::float4, BufferSizeAndInvSize)
-		SHADER_PARAMETER(leo::math::float4, BufferUVToScreenPosition)
-		SHADER_PARAMETER(leo::math::float2, BufferUVToOutputPixelPosition)
+		SHADER_PARAMETER_STRUCT_INCLUDE(SSDCommonParameters, CommonParameters)
+		//TODO:ViewUniformBuffer
 		SHADER_PARAMETER(leo::uint32, StateFrameIndexMod8)
 		SHADER_PARAMETER(leo::math::float4x4, ScreenToTranslatedWorld)
 		SHADER_PARAMETER(leo::math::float4x4, ViewToClip)
@@ -163,7 +171,7 @@ public:
 		SHADER_PARAMETER(float, HitDistanceToWorldBluringRadius)
 		SHADER_PARAMETER(float, HarmonicPeriode)
 		SHADER_PARAMETER(leo::uint32, UpscaleFactor)
-		SHADER_PARAMETER_SAMPLER(leo::math::float4, InputBufferUVMinMax)
+		SHADER_PARAMETER(leo::math::float4, InputBufferUVMinMax)
 		SHADER_PARAMETER(leo::uint32, MaxSampleCount)
 
 
@@ -186,11 +194,8 @@ namespace Shadow
 	{
 	public:
 		BEGIN_SHADER_PARAMETER_STRUCT(Parameters)
-			SHADER_PARAMETER(leo::math::float4, ThreadIdToBufferUV)
-			SHADER_PARAMETER(leo::math::float4, BufferBilinearUVMinMax)
-			SHADER_PARAMETER(leo::math::float2, BufferUVToOutputPixelPosition)
+			SHADER_PARAMETER_STRUCT_INCLUDE(SSDCommonParameters, CommonParameters)
 			SHADER_PARAMETER(leo::math::float4, InputBufferUVMinMax)
-			SHADER_PARAMETER(float, HitDistanceToWorldBluringRadius)
 			SHADER_PARAMETER_TEXTURE(Render::Texture2D, SignalInput_Textures_0)
 			SHADER_PARAMETER_TEXTURE(Render::Shader::RWTexture2D, SignalOutput_UAVs_0)
 			SHADER_PARAMETER_SAMPLER(Render::TextureSampleDesc, point_sampler)
@@ -214,6 +219,30 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 	auto FullResW = InputParameters.Mask->GetWidth(0);
 	auto FullResH = InputParameters.Mask->GetHeight(0);
 
+	SSDCommonParameters CommonParameters;
+	{
+		CommonParameters.ViewportMin = leo::math::uint2(0, 0);
+		CommonParameters.ViewportMax = leo::math::uint2(FullResW, FullResH);
+
+		CommonParameters.ThreadIdToBufferUV.x = 1.0f / FullResW;
+		CommonParameters.ThreadIdToBufferUV.y = 1.0f / FullResH;
+		CommonParameters.ThreadIdToBufferUV.z = 0.5f / FullResW;
+		CommonParameters.ThreadIdToBufferUV.w = 0.5f / FullResH;
+
+		CommonParameters.BufferBilinearUVMinMax = leo::math::float4(
+			0.5f / FullResW, 0.5f / FullResH,
+			(FullResW - 0.5f) / FullResW, (FullResH - 0.5f) / FullResH
+		);
+		CommonParameters.BufferSizeAndInvSize = leo::math::float4(FullResW, FullResH, 1.0f / FullResW, 1.0f / FullResH);
+
+		CommonParameters.BufferUVToOutputPixelPosition = leo::math::float2(FullResW, FullResH);
+
+		CommonParameters.BufferUVToScreenPosition.x = 2;
+		CommonParameters.BufferUVToScreenPosition.y = -2;
+		CommonParameters.BufferUVToScreenPosition.z = -1.0f;
+		CommonParameters.BufferUVToScreenPosition.w = 1.0f;
+	}
+
 	//Injest
 	auto injeset = Render::shared_raw_robject(Device.CreateTexture(FullResW, FullResH,
 		1, 1, Render::EF_R32UI, Render::EA_GPURead | Render::EA_GPUUnordered | Render::EA_GPUWrite, {}));
@@ -223,20 +252,9 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		auto InjestShader = Render::GetBuiltInShaderMap()->GetShader<Shadow::SSDInjestCS>();
 
 		Shadow::SSDInjestCS::Parameters Parameters;
-		Parameters.ThreadIdToBufferUV.x = 1.0f / FullResW;
-		Parameters.ThreadIdToBufferUV.y = 1.0f / FullResH;
-		Parameters.ThreadIdToBufferUV.z = 0.5f / FullResW;
-		Parameters.ThreadIdToBufferUV.w = 0.5f / FullResH;
-
-		Parameters.BufferBilinearUVMinMax = leo::math::float4(
-			0.5f / FullResW,0.5f/ FullResH,
-			(FullResW-0.5f)/ FullResW, (FullResH - 0.5f) / FullResH
-		);
-		Parameters.InputBufferUVMinMax = Parameters.BufferBilinearUVMinMax;
-
-		Parameters.BufferUVToOutputPixelPosition = leo::math::float2(FullResW, FullResH);
-
-		Parameters.HitDistanceToWorldBluringRadius = std::tanf(InputParameters.LightHalfRadians);
+		
+		Parameters.CommonParameters = CommonParameters;
+		Parameters.InputBufferUVMinMax = CommonParameters.BufferBilinearUVMinMax;
 
 		Parameters.SignalInput_Textures_0 = InputParameters.Mask;
 		auto uav = Render::shared_raw_robject(Device.CreateUnorderedAccessView(injeset.get()));
@@ -262,32 +280,12 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 
 		SSDSpatialAccumulationCS::Parameters Parameters;
 
+		Parameters.CommonParameters = CommonParameters;
 		Parameters.MaxSampleCount = std::max(std::min(ReconstructionSamples, kStackowiakMaxSampleCountPerSet), 1);
 		Parameters.UpscaleFactor = 1;
 		Parameters.HarmonicPeriode = 1;
 
-		//ViewParams
-		Parameters.ViewportMin = leo::math::uint2(0, 0);
-		Parameters.ViewportMax = leo::math::uint2(FullResW, FullResH);
-
-		Parameters.ThreadIdToBufferUV.x = 1.0f / FullResW;
-		Parameters.ThreadIdToBufferUV.y = 1.0f / FullResH;
-		Parameters.ThreadIdToBufferUV.z = 0.5f / FullResW;
-		Parameters.ThreadIdToBufferUV.w = 0.5f / FullResH;
-
-		Parameters.BufferBilinearUVMinMax = leo::math::float4(
-			0.5f / FullResW, 0.5f / FullResH,
-			(FullResW - 0.5f) / FullResW, (FullResH - 0.5f) / FullResH
-		);
-		Parameters.BufferSizeAndInvSize = leo::math::float4(FullResW, FullResH, 1.0f / FullResW, 1.0f / FullResH);
-		Parameters.InputBufferUVMinMax = Parameters.BufferBilinearUVMinMax;
-
-		Parameters.BufferUVToOutputPixelPosition = leo::math::float2(FullResW, FullResH);
-
-		Parameters.BufferUVToScreenPosition.x = 2;
-		Parameters.BufferUVToScreenPosition.y = -2;
-		Parameters.BufferUVToScreenPosition.z = -1.0f;
-		Parameters.BufferUVToScreenPosition.w = 1.0f;
+		Parameters.InputBufferUVMinMax = CommonParameters.BufferBilinearUVMinMax;
 
 		Parameters.StateFrameIndexMod8 = ViewInfo.StateFrameIndex % 8;
 		Parameters.ScreenToTranslatedWorld =leo::math::transpose(ViewInfo.ScreenToTranslatedWorld);

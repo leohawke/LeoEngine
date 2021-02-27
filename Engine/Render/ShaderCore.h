@@ -123,6 +123,7 @@ namespace platform::Render {
 			SPT_float4x4 = MakeShaderFormat<SBT_FLOAT32, 4, 4, 0>,
 
 			SPT_ElemEmpty = MakeShaderFormat<SBT_INVALID, 1, 1, 2>,
+			SPT_StructInclude,
 		};
 
 		constexpr ShaderBaseType GetBaseType(ShaderParamType type)
