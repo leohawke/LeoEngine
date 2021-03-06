@@ -174,6 +174,7 @@ public:
 		SHADER_PARAMETER(leo::math::float4, InputBufferUVMinMax)
 		SHADER_PARAMETER(leo::uint32, MaxSampleCount)
 
+		SHADER_PARAMETER(float, KernelSpreadFactor)
 
 		SHADER_PARAMETER_TEXTURE(Render::Texture2D, SignalInput_Textures_0)
 		SHADER_PARAMETER_TEXTURE(Render::Shader::RWTexture2D, SignalOutput_UAVs_0)
@@ -350,7 +351,7 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		SSDSpatialAccumulationCS::Parameters Parameters;
 
 		setup_common_parameters(Parameters);
-
+		Parameters.KernelSpreadFactor = 8 * (1 << PreConvolutionId);
 
 		auto uav = Render::shared_raw_robject(Device.CreateUnorderedAccessView(convolution.get()));
 		Parameters.SignalInput_Textures_0 = SignalHistroy;
