@@ -120,8 +120,8 @@ namespace leo
 		using used_list_type = _tList;
 		using used_cache_type = std::unordered_map<_tKey,
 			typename _tList::iterator, _fHash, typename map_type::key_equal,
-			typename _tAlloc::template
-			rebind<std::pair<const _tKey, typename _tList::iterator>>::other>;
+			typename std::allocator_traits<_tAlloc>::template rebind_alloc<std::pair<const _tKey, typename _tList::iterator>>
+			>;
 	};
 
 	template<typename _tKey, typename _tMapped, typename _tPred, class _tAlloc, class _tList>
