@@ -1201,6 +1201,245 @@ void ConvolveStackowiakKernel(
 
 #endif // COMPILE_STACKOWIAK_KERNEL
 
+//------------------------------------------------------- DISK
+
+#if COMPILE_DISK_KERNEL
+
+// Returns the position of the sample on the unit circle (radius = 1) for a given ring.
+float2 GetDiskSampleOnUnitCirle(uint RingId, uint RingSampleIteration, uint RingSampleId)
+{
+	RingId -= 1; // TODO(Denoiser).
+
+	float SampleRingPos = RingSampleId;
+
+	// Do not allign all j == 0 samples of the different ring on the X axis to increase minimal distance between all
+	// samples, that reduce variance to clean by post filtering.
+#if 1
+	SampleRingPos += (RingId - 2 * (RingId / 2)) * 0.5;
+#endif
+
+#if 1
+	SampleRingPos += (RingId + 1) * 0.2;
+#endif
+
+	float SampleAngle = PI * SampleRingPos / float(RingSampleIteration);
+
+	return float2(cos(SampleAngle), sin(SampleAngle));
+}
+
+// Returns the rotation matrix to use between sample of the ring.
+float2x2 GetSampleRotationMatrix(uint RingSampleIteration)
+{
+	float RotationAngle = PI / float(RingSampleIteration);
+
+	float C = cos(RotationAngle);
+	float S = sin(RotationAngle);
+
+	return float2x2(
+		float2(C, S),
+		float2(-S, C));
+}
+
+// Returns the total number of sampling iteration for a given ring id.
+uint GetRingSamplingPairCount(const uint SampleSet, uint RingId)
+{
+	if (SampleSet == SAMPLE_SET_HEXAWEB)
+	{
+		return RingId * 3;
+	}
+
+	// This number of sample is carefully chosen to have exact number of sample a square shaped ring (SquarePos).
+	return RingId * 4;
+}
+
+// Returns the total number of sample of the kernel.
+uint GetDiskKernelSampleCount(const uint SampleSet, uint RingCount)
+{
+	if (SampleSet == SAMPLE_SET_HEXAWEB)
+	{
+		return 1 + 3 * RingCount * (RingCount + 1);
+	}
+
+	// Depends on GetRingSamplingPairCount().
+	return 1 + 4 * RingCount * (RingCount + 1);
+}
+
+// Transform at compile time a 2 dimensional batch's constant into sample pair constant, by using rotation invariance.
+float2 SampleConstFromBatchConst(const uint BatchSampleId, float2 BatchConst)
+{
+	/**
+	 *             Y
+	 *             ^
+	 *             |
+	 *        1    |
+	 *             |
+	 *             |       0
+	 *             |
+	 * - - - - - - O - - - - > X
+	 */
+	if (BatchSampleId == 1)
+		return float2(-BatchConst.y, BatchConst.x);
+	return BatchConst;
+}
+
+
+
+// Gather a ring into the accumulator.
+void GatherRingSamples(
+	FSSDKernelConfig KernelConfig,
+	FSSDTexture2D SignalBuffer0,
+	FSSDTexture2D SignalBuffer1,
+	FSSDTexture2D SignalBuffer2,
+	FSSDTexture2D SignalBuffer3,
+	inout FSSDSignalAccumulatorArray UncompressedAccumulators,
+	inout FSSDCompressedSignalAccumulatorArray CompressedAccumulators,
+	const uint RingId)
+{
+	// Number of sample iteration for this ring.
+	const uint RingSamplePairCount = GetRingSamplingPairCount(KernelConfig.SampleSet, RingId);
+
+	// Number of sample pair to process per batch.
+	// TODO(Denoiser): Could potentially do 4 using symetries? Might be unpracticable because of VGPR pressure. 
+	const uint SamplePairBatchSize = (KernelConfig.SampleSet == SAMPLE_SET_HEXAWEB) ? 1 : 2;
+
+	// Number of batch to process.
+	const uint BatchCount = RingSamplePairCount / SamplePairBatchSize;
+
+	// Distance of the ring from the center of the kernel in sample count.
+	const uint RingDistance = uint(RingId + 0);
+
+	// Generate at compile time sample rotation matrix.
+	const float2x2 SampleRotationMatrix = GetSampleRotationMatrix(RingSamplePairCount);
+
+	// Generates at compile time first sample location on circle (radius = 1).
+	const float2 FirstCircleUnitPos = GetDiskSampleOnUnitCirle(RingId, RingSamplePairCount, /* BatchId = */ 0);
+
+	// Position of the first sample on circle with radius according to KernelRadius.
+	float2 FirstCircleSamplePosOffset = (RingDistance * FirstCircleUnitPos) * KernelConfig.KernelSpreadFactor;
+
+	// Setup iteratable SGPR
+	float2 CurrentCircleUnitPos = FirstCircleUnitPos;
+	float2 CurrentCircleSamplePosOffset = FirstCircleSamplePosOffset;
+
+#if CONFIG_SGPR_HINT_OPTIMIZATION
+	{
+		CurrentCircleUnitPos = ToScalarMemory(CurrentCircleUnitPos);
+		CurrentCircleSamplePosOffset = ToScalarMemory(CurrentCircleSamplePosOffset);
+	}
+#endif
+
+	// Loops through all batch of samples to process.
+	[loop]
+		for (uint BatchId = 0; BatchId < BatchCount; BatchId++)
+		{
+			// Rotate the samples position along the ring.
+			CurrentCircleUnitPos = mul(CurrentCircleUnitPos, SampleRotationMatrix);
+			CurrentCircleSamplePosOffset = mul(CurrentCircleSamplePosOffset, SampleRotationMatrix);
+
+#if CONFIG_SGPR_HINT_OPTIMIZATION
+			{
+				CurrentCircleUnitPos = ToScalarMemory(CurrentCircleUnitPos);
+				CurrentCircleSamplePosOffset = ToScalarMemory(CurrentCircleSamplePosOffset);
+			}
+#endif
+
+			// Sample in batch of multiple pair to increase texture fetch concurency, to have better
+			// lattency hidding.
+			[unroll]
+				for (uint BatchSampleId = 0; BatchSampleId < SamplePairBatchSize; BatchSampleId++)
+				{
+					float2 CircleSamplePosOffset = SampleConstFromBatchConst(BatchSampleId, CurrentCircleSamplePosOffset);
+
+					float2 SampleUVPair[2];
+					SampleUVPair[0] = KernelConfig.BufferUV + CircleSamplePosOffset * KernelConfig.BufferSizeAndInvSize.zw;
+					SampleUVPair[1] = KernelConfig.BufferUV - CircleSamplePosOffset * KernelConfig.BufferSizeAndInvSize.zw;
+
+					SampleAndAccumulateMultiplexedSignalsPair(
+						KernelConfig,
+						SignalBuffer0,
+						SignalBuffer1,
+						SignalBuffer2,
+						SignalBuffer3,
+						/* inout */ UncompressedAccumulators,
+						/* inout */ CompressedAccumulators,
+						SampleUVPair,
+						/* KernelWeight = */ 1.0);
+				} // for (uint BatchSampleId = 0; BatchSampleId < SamplePairBatchSize; BatchSampleId++)
+		} // for (uint BatchId = 0; BatchId < BatchCount; BatchId++)
+}
+
+void ConvolveDiskKernel(
+	FSSDKernelConfig KernelConfig,
+	FSSDTexture2D SignalBuffer0,
+	FSSDTexture2D SignalBuffer1,
+	FSSDTexture2D SignalBuffer2,
+	FSSDTexture2D SignalBuffer3,
+	inout FSSDSignalAccumulatorArray UncompressedAccumulators,
+	inout FSSDCompressedSignalAccumulatorArray CompressedAccumulators)
+{
+	// Accumulate the center of the kernel.
+	if (KernelConfig.bSampleKernelCenter && !KernelConfig.bDescOrder)
+	{
+		SampleAndAccumulateCenterSampleAsItsOwnCluster(
+			KernelConfig,
+			SignalBuffer0,
+			SignalBuffer1,
+			SignalBuffer2,
+			SignalBuffer3,
+			/* inout */ UncompressedAccumulators,
+			/* inout */ CompressedAccumulators);
+	}
+
+	// Accumulate each ring. Use LOOP, because FXC is going through its pace otherwise.
+	[loop]
+		for (
+			uint RingId = (KernelConfig.bDescOrder ? KernelConfig.RingCount : 1);
+			(KernelConfig.bDescOrder ? RingId > 0 : RingId <= KernelConfig.RingCount);
+			RingId += (KernelConfig.bDescOrder ? ~0u : 1))
+		{
+			const uint RingSamplePairCount = GetRingSamplingPairCount(KernelConfig.SampleSet, RingId);
+
+			FSSDSampleClusterInfo ClusterInfo;
+			ClusterInfo.OutterBoundaryRadius = (RingId + 1) * KernelConfig.KernelSpreadFactor;
+
+			StartAccumulatingCluster(
+				KernelConfig,
+				/* inout */ UncompressedAccumulators,
+				/* inout */ CompressedAccumulators,
+				ClusterInfo);
+
+			GatherRingSamples(
+				KernelConfig,
+				SignalBuffer0,
+				SignalBuffer1,
+				SignalBuffer2,
+				SignalBuffer3,
+				/* inout */ UncompressedAccumulators,
+				/* inout */ CompressedAccumulators,
+				RingId);
+
+			DijestAccumulatedClusterSamples(
+				/* inout */ UncompressedAccumulators,
+				/* inout */ CompressedAccumulators,
+				RingId, RingSamplePairCount * 2);
+		} // for (uint RingId = 0; RingId < KernelConfig.RingCount; RingId++)
+
+		// Accumulate the center of the kernel.
+	if (KernelConfig.bSampleKernelCenter && KernelConfig.bDescOrder)
+	{
+		SampleAndAccumulateCenterSampleAsItsOwnCluster(
+			KernelConfig,
+			SignalBuffer0,
+			SignalBuffer1,
+			SignalBuffer2,
+			SignalBuffer3,
+			/* inout */ UncompressedAccumulators,
+			/* inout */ CompressedAccumulators);
+	}
+}
+
+#endif // COMPILE_DISK_KERNEL
+
 void AccumulateKernel(
 	FSSDKernelConfig KernelConfig,
 	FSSDTexture2D SignalBuffer0,
