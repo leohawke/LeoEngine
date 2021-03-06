@@ -3,6 +3,7 @@
 (shader
 "
 #define STAGE_RECONSTRUCTION 0
+#define STAGE_PRE_CONVOLUTION 1
 
 //Policy to use to change the size of kernel.
 #define SAMPLE_COUNT_POLICY_DISABLED 0
@@ -44,6 +45,22 @@
 		#if DIM_SIGNAL_BATCH_SIZE > 1
 			#define CONFIG_CLAMP_UV_PER_SIGNAL 1
 		#endif
+#elif DIM_STAGE == STAGE_PRE_CONVOLUTION
+		#define CONFIG_SIGNAL_INPUT_LAYOUT  SIGNAL_BUFFER_LAYOUT_PENUMBRA_RECONSTRUCTION
+		#define CONFIG_SIGNAL_OUTPUT_LAYOUT SIGNAL_BUFFER_LAYOUT_PENUMBRA_RECONSTRUCTION
+
+		#define CONFIG_SIGNAL_INPUT_TEXTURE_TYPE SIGNAL_TEXTURE_TYPE_FLOAT4
+		#define CONFIG_SIGNAL_OUTPUT_TEXTURE_TYPE SIGNAL_TEXTURE_TYPE_FLOAT4
+
+		#define CONFIG_INPUT_TEXTURE_COUNT CONFIG_SIGNAL_BATCH_SIZE
+		#define CONFIG_OUTPUT_TEXTURE_COUNT CONFIG_SIGNAL_BATCH_SIZE
+
+		#define CONFIG_SAMPLE_SET           SAMPLE_SET_HEXAWEB
+		#define CONFIG_CUSTOM_SPREAD_FACTOR 1
+
+		#define CONFIG_BILATERAL_DISTANCE_COMPUTATION SIGNAL_WORLD_FREQUENCY_PRECOMPUTED_BLURING_RADIUS
+		#define CONFIG_MAX_WITH_REF_DISTANCE 1
+		#define CONFIG_OUTPUT_MODE          OUTPUT_MODE_DRB
 #endif
 	// Compress the DRB accumulator to have lower VGPR footprint.
 	#if defined(CONFIG_OUTPUT_MODE) && CONFIG_OUTPUT_MODE == OUTPUT_MODE_DRB
@@ -119,6 +136,8 @@
 // Whitelist kernel to compile.
 #if CONFIG_SAMPLE_SET == SAMPLE_SET_STACKOWIAK_4_SETS
 	#define COMPILE_STACKOWIAK_KERNEL 1
+#elif CONFIG_SAMPLE_SET == SAMPLE_SET_HEXAWEB
+	#define COMPILE_DISK_KERNEL 1
 #endif
 
 // White list accumulators to compile.
@@ -141,6 +160,11 @@
 "
 uint MaxSampleCount;
 uint UpscaleFactor;
+
+#if !CONFIG_UPSCALE && CONFIG_CUSTOM_SPREAD_FACTOR
+	float KernelSpreadFactor;
+#endif
+
 float HarmonicPeriode;
 float4 InputBufferUVMinMax[CONFIG_SIGNAL_BATCH_SIZE];
 
@@ -322,6 +346,23 @@ void MainCS(
 					KernelConfig.RefBilateralDistance[MultiplexId] = GetSignalWorldBluringRadius(RefSamples.Array[MultiplexId], RefSceneMetadata, BatchedSignalId);
 				}
 			}
+		}
+		#endif
+
+		#if CONFIG_SAMPLE_SET == SAMPLE_SET_HEXAWEB
+		{
+			KernelConfig.RingCount = 1;
+
+			// TODO(Denoiser): could be improved.
+			//KernelConfig.bMinSamplePairInvFrequency = true;
+
+			float2 E = float2(
+				InterleavedGradientNoise(DispatchThreadId, 0),
+				InterleavedGradientNoise(DispatchThreadId, 1));
+
+			// Add a bit of jittering to hide low sample.
+			KernelConfig.bSampleKernelCenter = false;
+			KernelConfig.BufferUV += BufferSizeAndInvSize.zw * (E - 0.5) * (KernelConfig.KernelSpreadFactor * (0.5 * rcp(2)));
 		}
 		#endif
 

@@ -243,12 +243,13 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		CommonParameters.BufferUVToScreenPosition.w = 1.0f;
 	}
 
+	auto SignalHistroy = InputParameters.Mask;
 	//Injest
-	auto injeset = Render::shared_raw_robject(Device.CreateTexture(FullResW, FullResH,
-		1, 1, Render::EF_R32UI, Render::EA_GPURead | Render::EA_GPUUnordered | Render::EA_GPUWrite, {}));
 	{
 		SCOPED_GPU_EVENT(CmdList, ShadowInjest);
+		auto injeset = Render::shared_raw_robject(Device.CreateTexture(FullResW, FullResH,
 
+			1, 1, Render::EF_R32UI, Render::EA_GPURead | Render::EA_GPUUnordered | Render::EA_GPUWrite, {}));
 		auto InjestShader = Render::GetBuiltInShaderMap()->GetShader<Shadow::SSDInjestCS>();
 
 		Shadow::SSDInjestCS::Parameters Parameters;
@@ -256,7 +257,7 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		Parameters.CommonParameters = CommonParameters;
 		Parameters.InputBufferUVMinMax = CommonParameters.BufferBilinearUVMinMax;
 
-		Parameters.SignalInput_Textures_0 = InputParameters.Mask;
+		Parameters.SignalInput_Textures_0 = SignalHistroy;
 		auto uav = Render::shared_raw_robject(Device.CreateUnorderedAccessView(injeset.get()));
 		Parameters.SignalOutput_UAVs_0 = uav.get();
 
@@ -268,27 +269,19 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 
 		ComputeShaderUtils::Dispatch(CmdList, InjestShader, Parameters,
 			ComputeShaderUtils::GetGroupCount(leo::math::int2(FullResW,FullResH),TILE_SIZE));
+
+		SignalHistroy = injeset.get();
 	}
 
-	auto spatial_reconst =Render::shared_raw_robject(Device.CreateTexture(FullResW, FullResH,
-		1, 1, Render::EF_ABGR16F, Render::EA_GPURead | Render::EA_GPUUnordered | Render::EA_GPUWrite, {}));
-	// Spatial reconstruction with ratio estimator to be more precise in the history rejection.
+	auto setup_common_parameters = [&](SSDSpatialAccumulationCS::Parameters& Parameters)
 	{
-		SCOPED_GPU_EVENT(CmdList, SSDSpatialAccumulation_Reconstruction);
-
-		//CreateUAV
-
-		SSDSpatialAccumulationCS::Parameters Parameters;
-
 		Parameters.CommonParameters = CommonParameters;
-		Parameters.MaxSampleCount = std::max(std::min(ReconstructionSamples, kStackowiakMaxSampleCountPerSet), 1);
-		Parameters.UpscaleFactor = 1;
-		Parameters.HarmonicPeriode = 1;
+
 
 		Parameters.InputBufferUVMinMax = CommonParameters.BufferBilinearUVMinMax;
 
 		Parameters.StateFrameIndexMod8 = ViewInfo.StateFrameIndex % 8;
-		Parameters.ScreenToTranslatedWorld =leo::math::transpose(ViewInfo.ScreenToTranslatedWorld);
+		Parameters.ScreenToTranslatedWorld = leo::math::transpose(ViewInfo.ScreenToTranslatedWorld);
 		Parameters.ViewToClip = leo::math::transpose(ViewInfo.ViewToClip);
 		Parameters.TranslatedWorldToView = leo::math::transpose(ViewInfo.TranslatedWorldToView);
 		Parameters.InvDeviceZToWorldZTransform = ViewInfo.InvDeviceZToWorldZTransform;
@@ -309,9 +302,26 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 
 		Parameters.WorldDepthToPixelWorldRadius = TanHalfFieldOfView / FullResW;
 		Parameters.HitDistanceToWorldBluringRadius = std::tanf(InputParameters.LightHalfRadians);
+	};
+
+	// Spatial reconstruction with ratio estimator to be more precise in the history rejection.
+	{
+		SCOPED_GPU_EVENT(CmdList, SSDSpatialAccumulation_Reconstruction);
+
+		auto spatial_reconst = Render::shared_raw_robject(Device.CreateTexture(FullResW, FullResH,
+			1, 1, Render::EF_ABGR16F, Render::EA_GPURead | Render::EA_GPUUnordered | Render::EA_GPUWrite, {}));
+
+		SSDSpatialAccumulationCS::Parameters Parameters;
+
+		setup_common_parameters(Parameters);
+
+		Parameters.MaxSampleCount = std::max(std::min(ReconstructionSamples, kStackowiakMaxSampleCountPerSet), 1);
+		Parameters.UpscaleFactor = 1;
+		Parameters.HarmonicPeriode = 1;
+
 
 		auto uav = Render::shared_raw_robject(Device.CreateUnorderedAccessView(spatial_reconst.get()));
-		Parameters.SignalInput_Textures_0 = injeset.get();
+		Parameters.SignalInput_Textures_0 = SignalHistroy;
 		Parameters.SignalOutput_UAVs_0 = uav.get();
 
 
@@ -326,5 +336,37 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 
 		ComputeShaderUtils::Dispatch(CmdList, ComputeShader, Parameters,
 			ComputeShaderUtils::GetGroupCount(leo::math::int2(FullResW, FullResH), TILE_SIZE));
+
+		SignalHistroy = spatial_reconst.get();
+	}
+
+	const int PreConvolutionCount = 1;
+	// Spatial pre convolutions
+	for (int PreConvolutionId = 0; PreConvolutionId < PreConvolutionCount; PreConvolutionId++)
+	{
+		auto convolution = Render::shared_raw_robject(Device.CreateTexture(FullResW, FullResH,
+			1, 1, Render::EF_ABGR16F, Render::EA_GPURead | Render::EA_GPUUnordered | Render::EA_GPUWrite, {}));
+
+		SSDSpatialAccumulationCS::Parameters Parameters;
+
+		setup_common_parameters(Parameters);
+
+
+		auto uav = Render::shared_raw_robject(Device.CreateUnorderedAccessView(convolution.get()));
+		Parameters.SignalInput_Textures_0 = SignalHistroy;
+		Parameters.SignalOutput_UAVs_0 = uav.get();
+
+		SSDSpatialAccumulationCS::FPermutationDomain PermutationVector;
+		PermutationVector.Set<FSignalProcessingDim>(SignalProcessing::ShadowVisibilityMask);
+		PermutationVector.Set<FSignalBatchSizeDim>(1);
+		PermutationVector.Set<SSDSpatialAccumulationCS::FStageDim>(SSDSpatialAccumulationCS::Stage::PreConvolution);
+		PermutationVector.Set<FMultiSPPDim>(true);
+
+		Render::ShaderMapRef<SSDSpatialAccumulationCS> ComputeShader(Render::GetBuiltInShaderMap(), PermutationVector);
+
+		ComputeShaderUtils::Dispatch(CmdList, ComputeShader, Parameters,
+			ComputeShaderUtils::GetGroupCount(leo::math::int2(FullResW, FullResH), TILE_SIZE));
+
+		SignalHistroy = convolution.get();
 	}
 }
