@@ -852,6 +852,462 @@ void SampleAndAccumulateCenterSampleAsItsOwnCluster(
 		RingId, /* SampleCount = */ 1);
 }
 
+//------------------------------------------------------- EASY CONVOLUTIONS
+
+#if COMPILE_BOX_KERNEL && 0
+
+/** Pixel offsets to use for manual bilinear filtering. */
+static const uint2 BilinearSamplingOffsets2x2[4] =
+{
+	int2(0,  0),
+	int2(1,  0),
+	int2(0,  1),
+	int2(1,  1),
+};
+
+void AccumulateBilinear(
+	FSSDKernelConfig KernelConfig,
+	FSSDTexture2D SignalBuffer0,
+	FSSDTexture2D SignalBuffer1,
+	FSSDTexture2D SignalBuffer2,
+	FSSDTexture2D SignalBuffer3,
+	inout FSSDSignalAccumulatorArray UncompressedAccumulators,
+	inout FSSDCompressedSignalAccumulatorArray CompressedAccumulators)
+{
+	const float MipLevelPow2 = 1;
+
+	FBilinearSampleInfos BilinearInfos = GetBilinearSampleLevelInfosEx(
+		KernelConfig.BufferUV,
+		KernelConfig.BufferSizeAndInvSize.xy,
+		KernelConfig.BufferSizeAndInvSize.zw,
+		MipLevelPow2, rcp(MipLevelPow2));
+
+	[unrool(4)]
+		for (uint i = 0; i < 4; i++)
+		{
+			float2 SampleOffset = BilinearSamplingOffsets2x2[i];
+
+			// TODO(Denoiser): could be more ALU efficient for this.
+			// TODO(Denoiser): -0.5 full res pixel to ensure always select the mip, regardless of mantissa precision?
+			float2 SampleBufferUV = (BilinearInfos.TopLeftPixelCoord + (SampleOffset + 0.5)) * MipLevelPow2 * KernelConfig.BufferSizeAndInvSize.zw;
+
+			float BilinearWeight = GetSampleWeight(BilinearInfos, i);
+
+			SampleAndAccumulateMultiplexedSignals(
+				KernelConfig,
+				SignalBuffer0,
+				SignalBuffer1,
+				SignalBuffer2,
+				SignalBuffer3,
+				/* inout */ UncompressedAccumulators,
+				/* inout */ CompressedAccumulators,
+				SampleBufferUV,
+				/* MipLevel = */ 0.0,
+				BilinearWeight,
+				/* bForceSample = */ false);
+		}
+} // AccumulateBilinear()
+
+void AccumulateStocasticBilinear(
+	FSSDKernelConfig KernelConfig,
+	FSSDTexture2D SignalBuffer0,
+	FSSDTexture2D SignalBuffer1,
+	FSSDTexture2D SignalBuffer2,
+	FSSDTexture2D SignalBuffer3,
+	inout FSSDSignalAccumulatorArray UncompressedAccumulators,
+	inout FSSDCompressedSignalAccumulatorArray CompressedAccumulators)
+{
+	const float MipLevelPow2 = 1;
+
+	FBilinearSampleInfos BilinearInfos = GetBilinearSampleLevelInfosEx(
+		KernelConfig.BufferUV,
+		KernelConfig.BufferSizeAndInvSize.xy,
+		KernelConfig.BufferSizeAndInvSize.zw,
+		MipLevelPow2, rcp(MipLevelPow2));
+
+	float2 SampleOffset;
+	float WeigthAccumulation = 0.0;
+
+	UNROLL_N(4)
+		for (uint i = 0; i < 4; i++)
+		{
+			SampleOffset = BilinearSamplingOffsets2x2[i];
+			WeigthAccumulation += GetSampleWeight(BilinearInfos, i);
+
+			if (KernelConfig.Randoms[0] < WeigthAccumulation)
+				break;
+		}
+
+	// TODO(Denoiser): could be more ALU efficient for this.
+	// TODO(Denoiser): -0.5 full res pixel to ensure always select the mip, regardless of mantissa precision?
+	float2 SampleBufferUV = (BilinearInfos.TopLeftPixelCoord + (SampleOffset + 0.5)) * MipLevelPow2 * KernelConfig.BufferSizeAndInvSize.zw;
+
+	SampleAndAccumulateMultiplexedSignals(
+		KernelConfig,
+		SignalBuffer0,
+		SignalBuffer1,
+		SignalBuffer2,
+		SignalBuffer3,
+		/* inout */ UncompressedAccumulators,
+		/* inout */ CompressedAccumulators,
+		SampleBufferUV,
+		/* MipLevel = */ 0.0,
+		/* KernelWeight = */ 1.0,
+		/* bForceSample = */ false);
+} // AccumulateStocasticBilinear()
+
+void AccumulateSquareKernel(
+	FSSDKernelConfig KernelConfig,
+	FSSDTexture2D SignalBuffer0,
+	FSSDTexture2D SignalBuffer1,
+	FSSDTexture2D SignalBuffer2,
+	FSSDTexture2D SignalBuffer3,
+	inout FSSDSignalAccumulatorArray UncompressedAccumulators,
+	inout FSSDCompressedSignalAccumulatorArray CompressedAccumulators)
+{
+	int KernelRadius = 1;
+	if (KernelConfig.SampleSet == SAMPLE_SET_5X5_WAVELET)
+	{
+		KernelRadius = 2;
+	}
+	else if (KernelConfig.SampleSet == SAMPLE_SET_NXN)
+	{
+		KernelRadius = KernelConfig.BoxKernelRadius;
+	}
+
+	if (KernelConfig.bUnroll)
+	{
+		UNROLL for (int x = -KernelRadius; x <= KernelRadius; x++)
+			UNROLL for (int y = -KernelRadius; y <= KernelRadius; y++)
+		{
+			const bool bIsKernelCenterSample = x == 0 && y == 0;
+
+			if (bIsKernelCenterSample && !KernelConfig.bSampleKernelCenter) continue;
+
+			float2 SampleOffset = float2(x, y);
+			if (KernelConfig.SampleSet == SAMPLE_SET_3X3_SOBEK2018)
+			{
+				SampleOffset = mul(float2x2(float2(2, -1), float2(1, 2)), SampleOffset);
+			}
+
+			float2 SampleBufferUV = KernelConfig.BufferUV + (SampleOffset * KernelConfig.KernelSpreadFactor) * KernelConfig.BufferSizeAndInvSize.zw;
+
+			float KernelWeight = 1;
+			if (KernelConfig.SampleSet == SAMPLE_SET_5X5_WAVELET)
+			{
+				KernelWeight =
+					kWaveletFilterWeights5x5[abs(x)] *
+					kWaveletFilterWeights5x5[abs(y)] *
+					rcp(kWaveletFilterWeights5x5[0] * kWaveletFilterWeights5x5[0]);
+			}
+
+			SampleAndAccumulateMultiplexedSignals(
+				KernelConfig,
+				SignalBuffer0,
+				SignalBuffer1,
+				SignalBuffer2,
+				SignalBuffer3,
+				/* inout */ UncompressedAccumulators,
+				/* inout */ CompressedAccumulators,
+				SampleBufferUV,
+				/* MipLevel = */ 0.0,
+				KernelWeight,
+				/* bForceSample = */ bIsKernelCenterSample && KernelConfig.bForceKernelCenterAccumulation);
+		}
+	}
+	else
+	{
+		// TODO(Denoiser): lattency hiding of this is terrible.
+		LOOP for (int x = -KernelRadius; x <= KernelRadius; x++)
+			LOOP for (int y = -KernelRadius; y <= KernelRadius; y++)
+		{
+			const bool bIsKernelCenterSample = x == 0 && y == 0;
+
+			if (bIsKernelCenterSample && !KernelConfig.bSampleKernelCenter) continue;
+
+			float2 SampleOffset = float2(x, y);
+			if (KernelConfig.SampleSet == SAMPLE_SET_3X3_SOBEK2018)
+			{
+				SampleOffset = mul(float2x2(float2(2, -1), float2(1, 2)), SampleOffset);
+			}
+
+			float2 SampleBufferUV = KernelConfig.BufferUV + (SampleOffset * KernelConfig.KernelSpreadFactor) * KernelConfig.BufferSizeAndInvSize.zw;
+
+			float KernelWeight = 1;
+			if (KernelConfig.SampleSet == SAMPLE_SET_5X5_WAVELET)
+			{
+				KernelWeight =
+					kWaveletFilterWeights5x5[abs(x)] *
+					kWaveletFilterWeights5x5[abs(y)] *
+					rcp(kWaveletFilterWeights5x5[0] * kWaveletFilterWeights5x5[0]);
+			}
+
+			SampleAndAccumulateMultiplexedSignals(
+				KernelConfig,
+				SignalBuffer0,
+				SignalBuffer1,
+				SignalBuffer2,
+				SignalBuffer3,
+				/* inout */ UncompressedAccumulators,
+				/* inout */ CompressedAccumulators,
+				SampleBufferUV,
+				/* MipLevel = */ 0.0,
+				KernelWeight,
+				/* bForceSample = */ bIsKernelCenterSample && KernelConfig.bForceKernelCenterAccumulation);
+		}
+	}
+} // AccumulateSquareKernel()
+
+void BroadcastAccumulateSquare3x3KernelCenter(
+	FSSDKernelConfig KernelConfig,
+	inout FSSDSignalAccumulatorArray UncompressedAccumulators,
+	inout FSSDCompressedSignalAccumulatorArray CompressedAccumulators,
+	FSSDSampleSceneInfos RefSceneMetadata,
+	float2 SampleBufferUV,
+	FSSDSampleSceneInfos SampleSceneMetadata,
+	FSSDSignalArray SampleMultiplexedSamples)
+#if CONFIG_ENABLE_WAVE_BROADCAST
+{
+	const FWaveBroadcastSettings BroadcastSettingsX = InitWaveSwapWithinLaneGroup(/* LaneGroupSize = */ 2);
+	const FWaveBroadcastSettings BroadcastSettingsY = InitWaveSwapWithinLaneGroup(/* LaneGroupSize = */ 16);
+
+	// Broadcast X.
+	SampleBufferUV = WaveBroadcast(BroadcastSettingsX, SampleBufferUV);
+	SampleSceneMetadata = WaveBroadcastSceneMetadata(BroadcastSettingsX, SampleSceneMetadata);
+	SampleMultiplexedSamples = WaveBroadcastSignalArray(BroadcastSettingsX, SampleMultiplexedSamples);
+
+	if (KernelConfig.SampleSet == SAMPLE_SET_3X3 || KernelConfig.SampleSet == SAMPLE_SET_3X3_PLUS)
+	{
+		AccumulateSampledMultiplexedSignals(
+			KernelConfig,
+			/* inout */ UncompressedAccumulators,
+			/* inout */ CompressedAccumulators,
+			RefSceneMetadata,
+			SampleBufferUV,
+			SampleSceneMetadata,
+			SampleMultiplexedSamples,
+			/* KernelWeight = */ 1.0,
+			/* bForceSample = */ false,
+			/* bIsOutsideFrustum = */ false);
+	}
+
+	// Broadcast Y.
+	SampleBufferUV = WaveBroadcast(BroadcastSettingsY, SampleBufferUV);
+	SampleSceneMetadata = WaveBroadcastSceneMetadata(BroadcastSettingsY, SampleSceneMetadata);
+	SampleMultiplexedSamples = WaveBroadcastSignalArray(BroadcastSettingsY, SampleMultiplexedSamples);
+
+	if (KernelConfig.SampleSet == SAMPLE_SET_3X3 || KernelConfig.SampleSet == SAMPLE_SET_3X3_CROSS)
+	{
+		AccumulateSampledMultiplexedSignals(
+			KernelConfig,
+			/* inout */ UncompressedAccumulators,
+			/* inout */ CompressedAccumulators,
+			RefSceneMetadata,
+			SampleBufferUV,
+			SampleSceneMetadata,
+			SampleMultiplexedSamples,
+			/* KernelWeight = */ 1.0,
+			/* bForceSample = */ false,
+			/* bIsOutsideFrustum = */ false);
+	}
+
+	// Broadcast X Again.
+	SampleBufferUV = WaveBroadcast(BroadcastSettingsX, SampleBufferUV);
+	SampleSceneMetadata = WaveBroadcastSceneMetadata(BroadcastSettingsX, SampleSceneMetadata);
+	SampleMultiplexedSamples = WaveBroadcastSignalArray(BroadcastSettingsX, SampleMultiplexedSamples);
+
+	if (KernelConfig.SampleSet == SAMPLE_SET_3X3 || KernelConfig.SampleSet == SAMPLE_SET_3X3_PLUS)
+	{
+		AccumulateSampledMultiplexedSignals(
+			KernelConfig,
+			/* inout */ UncompressedAccumulators,
+			/* inout */ CompressedAccumulators,
+			RefSceneMetadata,
+			SampleBufferUV,
+			SampleSceneMetadata,
+			SampleMultiplexedSamples,
+			/* KernelWeight = */ 1.0,
+			/* bForceSample = */ false,
+			/* bIsOutsideFrustum = */ false);
+	}
+} // BroadcastAccumulateSquare3x3KernelCenter()
+#else
+{ }
+#endif
+
+void AccumulateSquare3x3Kernel(
+	FSSDKernelConfig KernelConfig,
+	FSSDTexture2D SignalBuffer0,
+	FSSDTexture2D SignalBuffer1,
+	FSSDTexture2D SignalBuffer2,
+	FSSDTexture2D SignalBuffer3,
+	inout FSSDSignalAccumulatorArray UncompressedAccumulators,
+	inout FSSDCompressedSignalAccumulatorArray CompressedAccumulators)
+#if CONFIG_ENABLE_WAVE_BROADCAST
+{
+	if (KernelConfig.bSampleKernelCenter)
+	{
+		float2 SampleBufferUV = KernelConfig.BufferUV;
+
+		// TODO(Denoiser):
+		const bool bIsOutsideFrustum = false;
+
+		FSSDCompressedSceneInfos CompressedSampleSceneMetadata;
+		FSSDCompressedMultiplexedSample CompressedMultiplexedSamples;
+
+		// Force all the signal texture fetch and metadata to overlap to minimize serial texture fetches.
+		ISOLATE
+		{
+			SampleMultiplexedSignals(
+				KernelConfig,
+				SignalBuffer0,
+				SignalBuffer1,
+				SignalBuffer2,
+				SignalBuffer3,
+				SampleBufferUV,
+				/* MipLevel = */ 0,
+				/* out */ CompressedSampleSceneMetadata,
+				/* out */ CompressedMultiplexedSamples);
+		}
+
+		FSSDSampleSceneInfos RefSceneMetadata = UncompressRefSceneMetadata(KernelConfig);
+
+		FSSDSignalArray MultiplexedSamples = UncompressMultiplexedSignals(
+			KernelConfig, SampleBufferUV, CompressedMultiplexedSamples);
+		FSSDSampleSceneInfos SampleSceneMetadata = UncompressSampleSceneMetadata(
+			KernelConfig, SampleBufferUV, CompressedSampleSceneMetadata);
+
+		AccumulateSampledMultiplexedSignals(
+			KernelConfig,
+			/* inout */ UncompressedAccumulators,
+			/* inout */ CompressedAccumulators,
+			RefSceneMetadata,
+			SampleBufferUV,
+			SampleSceneMetadata,
+			MultiplexedSamples,
+			/* KernelWeight = */ 1.0,
+			/* bForceSample = */ true,
+			bIsOutsideFrustum);
+
+		BroadcastAccumulateSquare3x3KernelCenter(
+			KernelConfig,
+			/* inout */ UncompressedAccumulators,
+			/* inout */ CompressedAccumulators,
+			RefSceneMetadata,
+			SampleBufferUV,
+			SampleSceneMetadata,
+			MultiplexedSamples);
+	}
+
+	// Store whether needs to flip offsets to have lowest VGPR pressure.
+	uint2 OutputPixelPostion = BufferUVToBufferPixelCoord(KernelConfig.RefBufferUV);
+	bool bFlipX = (OutputPixelPostion.x & 0x1) != 0;
+	bool bFlipY = (OutputPixelPostion.y & 0x1) != 0;
+
+	if (KernelConfig.SampleSet == SAMPLE_SET_3X3 || KernelConfig.SampleSet == SAMPLE_SET_3X3_CROSS)
+	{
+		float2 SampleOffset = float2(bFlipX ? 1.0 : -1.0, bFlipY ? 1.0 : -1.0);
+
+		float2 SampleBufferUV = KernelConfig.BufferUV + SampleOffset * KernelConfig.BufferSizeAndInvSize.zw;
+
+		SampleAndAccumulateMultiplexedSignals(
+			KernelConfig,
+			SignalBuffer0,
+			SignalBuffer1,
+			SignalBuffer2,
+			SignalBuffer3,
+			/* inout */ UncompressedAccumulators,
+			/* inout */ CompressedAccumulators,
+			SampleBufferUV,
+			/* MipLevel = */ 0.0,
+			/* KernelWeight = */ 1.0,
+			/* bForceSample = */ false);
+	}
+
+	static const float2 SampleOffsetArray[5] = {
+		float2(-1.0,  0.0),
+		float2(0.0, -1.0),
+		float2(-1.0, 1.0),
+		float2(1.0, -1.0),
+	};
+
+	UNROLL
+		for (
+			uint BatchId = (KernelConfig.SampleSet == SAMPLE_SET_3X3_CROSS ? 1 : 0);
+			BatchId < (KernelConfig.SampleSet == SAMPLE_SET_3X3_PLUS ? 1 : 2);
+			BatchId++)
+			ISOLATE
+		{
+
+			float2 SampleOffset0 = (bool2(bFlipX, bFlipY) ? -SampleOffsetArray[BatchId * 2 + 0] : SampleOffsetArray[BatchId * 2 + 0]);
+			float2 SampleOffset1 = (bool2(bFlipX, bFlipY) ? -SampleOffsetArray[BatchId * 2 + 1] : SampleOffsetArray[BatchId * 2 + 1]);
+
+			float2 SampleBufferUV[2];
+			SampleBufferUV[0] = KernelConfig.BufferUV + SampleOffset0 * KernelConfig.BufferSizeAndInvSize.zw;
+			SampleBufferUV[1] = KernelConfig.BufferUV + SampleOffset1 * KernelConfig.BufferSizeAndInvSize.zw;
+
+			SampleAndAccumulateMultiplexedSignalsPair(
+				KernelConfig,
+				SignalBuffer0,
+				SignalBuffer1,
+				SignalBuffer2,
+				SignalBuffer3,
+				/* inout */ UncompressedAccumulators,
+				/* inout */ CompressedAccumulators,
+				SampleBufferUV,
+				/* KernelWeight = */ 1.0);
+		}
+} // AccumulateSquare3x3Kernel()
+#else // !CONFIG_ENABLE_WAVE_BROADCAST
+{
+	if (KernelConfig.bSampleKernelCenter)
+	{
+		SampleAndAccumulateCenterSampleAsItsOwnCluster(
+			KernelConfig,
+			SignalBuffer0,
+			SignalBuffer1,
+			SignalBuffer2,
+			SignalBuffer3,
+			/* inout */ UncompressedAccumulators,
+			/* inout */ CompressedAccumulators);
+	}
+
+	static const float2 SampleOffsetArray[4] = {
+		float2(1.0, 0.0),
+		float2(1.0, 1.0),
+		float2(0.0, 1.0),
+		float2(-1.0, 1.0),
+	};
+
+	UNROLL
+		for (
+			uint BatchId = (KernelConfig.SampleSet == SAMPLE_SET_3X3_CROSS ? 1 : 0);
+			BatchId < 4;
+			BatchId += (KernelConfig.SampleSet != SAMPLE_SET_3X3 ? 2 : 1))
+			ISOLATE
+		{
+			float2 SampleOffset = SampleOffsetArray[BatchId];
+
+			float2 SampleBufferUV[2];
+			SampleBufferUV[0] = KernelConfig.BufferUV + SampleOffset * KernelConfig.BufferSizeAndInvSize.zw;
+			SampleBufferUV[1] = KernelConfig.BufferUV - SampleOffset * KernelConfig.BufferSizeAndInvSize.zw;
+
+			SampleAndAccumulateMultiplexedSignalsPair(
+				KernelConfig,
+				SignalBuffer0,
+				SignalBuffer1,
+				SignalBuffer2,
+				SignalBuffer3,
+				/* inout */ UncompressedAccumulators,
+				/* inout */ CompressedAccumulators,
+				SampleBufferUV,
+				/* KernelWeight = */ 1.0);
+		}
+} // AccumulateSquare3x3Kernel()
+#endif // !CONFIG_ENABLE_WAVE_BROADCAST
+
+#endif // COMPILE_BOX_KERNEL
+
 //------------------------------------------------------- STACKOWIAK 2018
 
 #if COMPILE_STACKOWIAK_KERNEL
@@ -1467,56 +1923,56 @@ void AccumulateKernel(
 				/* inout */ CompressedAccumulators);
 		}
 	}
-	else if (KernelConfig.SampleSet == SAMPLE_SET_2X2_BILINEAR)
-	{
-		AccumulateBilinear(
-			KernelConfig,
-			SignalBuffer0,
-			SignalBuffer1,
-			SignalBuffer2,
-			SignalBuffer3,
-			/* inout */ UncompressedAccumulators,
-			/* inout */ CompressedAccumulators);
-	}
-	else if (KernelConfig.SampleSet == SAMPLE_SET_2X2_STOCASTIC)
-	{
-		AccumulateStocasticBilinear(
-			KernelConfig,
-			SignalBuffer0,
-			SignalBuffer1,
-			SignalBuffer2,
-			SignalBuffer3,
-			/* inout */ UncompressedAccumulators,
-			/* inout */ CompressedAccumulators);
-	}
-	else if (
-		KernelConfig.SampleSet == SAMPLE_SET_3X3 ||
-		KernelConfig.SampleSet == SAMPLE_SET_3X3_PLUS ||
-		KernelConfig.SampleSet == SAMPLE_SET_3X3_CROSS)
-	{
-		AccumulateSquare3x3Kernel(
-			KernelConfig,
-			SignalBuffer0,
-			SignalBuffer1,
-			SignalBuffer2,
-			SignalBuffer3,
-			/* inout */ UncompressedAccumulators,
-			/* inout */ CompressedAccumulators);
-	}
-	else if (
-		KernelConfig.SampleSet == SAMPLE_SET_3X3_SOBEK2018 ||
-		KernelConfig.SampleSet == SAMPLE_SET_5X5_WAVELET ||
-		KernelConfig.SampleSet == SAMPLE_SET_NXN)
-	{
-		AccumulateSquareKernel(
-			KernelConfig,
-			SignalBuffer0,
-			SignalBuffer1,
-			SignalBuffer2,
-			SignalBuffer3,
-			/* inout */ UncompressedAccumulators,
-			/* inout */ CompressedAccumulators);
-	}
+	//else if (KernelConfig.SampleSet == SAMPLE_SET_2X2_BILINEAR)
+	//{
+	//	AccumulateBilinear(
+	//		KernelConfig,
+	//		SignalBuffer0,
+	//		SignalBuffer1,
+	//		SignalBuffer2,
+	//		SignalBuffer3,
+	//		/* inout */ UncompressedAccumulators,
+	//		/* inout */ CompressedAccumulators);
+	//}
+	//else if (KernelConfig.SampleSet == SAMPLE_SET_2X2_STOCASTIC)
+	//{
+	//	AccumulateStocasticBilinear(
+	//		KernelConfig,
+	//		SignalBuffer0,
+	//		SignalBuffer1,
+	//		SignalBuffer2,
+	//		SignalBuffer3,
+	//		/* inout */ UncompressedAccumulators,
+	//		/* inout */ CompressedAccumulators);
+	//}
+	//else if (
+	//	KernelConfig.SampleSet == SAMPLE_SET_3X3 ||
+	//	KernelConfig.SampleSet == SAMPLE_SET_3X3_PLUS ||
+	//	KernelConfig.SampleSet == SAMPLE_SET_3X3_CROSS)
+	//{
+	//	AccumulateSquare3x3Kernel(
+	//		KernelConfig,
+	//		SignalBuffer0,
+	//		SignalBuffer1,
+	//		SignalBuffer2,
+	//		SignalBuffer3,
+	//		/* inout */ UncompressedAccumulators,
+	//		/* inout */ CompressedAccumulators);
+	//}
+	//else if (
+	//	KernelConfig.SampleSet == SAMPLE_SET_3X3_SOBEK2018 ||
+	//	KernelConfig.SampleSet == SAMPLE_SET_5X5_WAVELET ||
+	//	KernelConfig.SampleSet == SAMPLE_SET_NXN)
+	//{
+	//	AccumulateSquareKernel(
+	//		KernelConfig,
+	//		SignalBuffer0,
+	//		SignalBuffer1,
+	//		SignalBuffer2,
+	//		SignalBuffer3,
+	//		/* inout */ UncompressedAccumulators,
+	//		/* inout */ CompressedAccumulators);
+	//}
 #endif//  COMPILE_BOX_KERNEL
 #if COMPILE_STACKOWIAK_KERNEL
 	else if (KernelConfig.SampleSet == SAMPLE_SET_STACKOWIAK_4_SETS)

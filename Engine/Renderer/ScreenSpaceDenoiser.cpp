@@ -44,6 +44,25 @@ static bool SignalUsesPreConvolution(SignalProcessing SignalProcessing)
 		SignalProcessing == SignalProcessing::ShadowVisibilityMask;
 }
 
+/** Returns whether a signal processing uses a history rejection pre convolution pass. */
+static bool SignalUsesRejectionPreConvolution(SignalProcessing SignalProcessing)
+{
+	return false;
+}
+
+/** Returns whether a signal processing uses a convolution pass after temporal accumulation pass. */
+static bool SignalUsesPostConvolution(SignalProcessing SignalProcessing)
+{
+	return false;
+}
+
+/** Returns whether a signal processing uses a history rejection pre convolution pass. */
+static bool SignalUsesFinalConvolution(SignalProcessing SignalProcessing)
+{
+	return SignalProcessing == SignalProcessing::ShadowVisibilityMask;
+}
+
+
 /** Returns whether a signal can denoise multi sample per pixel. */
 static bool SignalSupportMultiSPP(SignalProcessing SignalProcessing)
 {
@@ -58,6 +77,7 @@ static bool SignalSupport1SPP(SignalProcessing SignalProcessing)
 	return (
 		false);
 }
+
 
 // Permutation dimension for the type of signal being denoised.
 class FSignalProcessingDim : SHADER_PERMUTATION_ENUM_CLASS("DIM_SIGNAL_PROCESSING", SignalProcessing);
@@ -78,6 +98,15 @@ public:
 
 		// Spatial kernel to pre filter.
 		PreConvolution,
+
+		// Spatial kernel used to pre convolve history rejection.
+		RejectionPreConvolution,
+
+		// Spatial kernel used to post filter the temporal accumulation.
+		PostFiltering,
+
+		// Final spatial kernel, that may output specific buffer encoding to integrate with the rest of the renderer
+		FinalOutput,
 
 		MAX
 	};
@@ -109,6 +138,27 @@ public:
 		// Only compile pre convolution for signal that uses it.
 		if (!SignalUsesPreConvolution(SignalProcessing) &&
 			PermutationVector.Get<FStageDim>() == Stage::PreConvolution)
+		{
+			return false;
+		}
+
+		// Only compile rejection pre convolution for signal that uses it.
+		if (!SignalUsesRejectionPreConvolution(SignalProcessing) &&
+			PermutationVector.Get<FStageDim>() == Stage::RejectionPreConvolution)
+		{
+			return false;
+		}
+
+		// Only compile post convolution for signal that uses it.
+		if (!SignalUsesPostConvolution(SignalProcessing) &&
+			PermutationVector.Get<FStageDim>() == Stage::PostFiltering)
+		{
+			return false;
+		}
+
+		// Only compile final convolution for signal that uses it.
+		if (!SignalUsesFinalConvolution(SignalProcessing) &&
+			PermutationVector.Get<FStageDim>() == Stage::FinalOutput)
 		{
 			return false;
 		}
@@ -345,6 +395,7 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 	// Spatial pre convolutions
 	for (int PreConvolutionId = 0; PreConvolutionId < PreConvolutionCount; PreConvolutionId++)
 	{
+
 		auto convolution = Render::shared_raw_robject(Device.CreateTexture(FullResW, FullResH,
 			1, 1, Render::EF_ABGR16F, Render::EA_GPURead | Render::EA_GPUUnordered | Render::EA_GPUWrite, {}));
 
@@ -365,9 +416,35 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 
 		Render::ShaderMapRef<SSDSpatialAccumulationCS> ComputeShader(Render::GetBuiltInShaderMap(), PermutationVector);
 
+		SCOPED_GPU_EVENTF(CmdList, "PreConvolution(ConvolutionId=%d Spread=%d)", PreConvolutionId, Parameters.KernelSpreadFactor);
+
 		ComputeShaderUtils::Dispatch(CmdList, ComputeShader, Parameters,
 			ComputeShaderUtils::GetGroupCount(leo::math::int2(FullResW, FullResH), TILE_SIZE));
 
 		SignalHistroy = convolution.get();
+	}
+
+	//TODO:Temporal
+
+	//Final convolution
+	{
+		SSDSpatialAccumulationCS::Parameters Parameters;
+
+		setup_common_parameters(Parameters);
+		Parameters.SignalInput_Textures_0 = SignalHistroy;
+		Parameters.SignalOutput_UAVs_0 = Output.MaskUAV;
+
+		SSDSpatialAccumulationCS::FPermutationDomain PermutationVector;
+		PermutationVector.Set<FSignalProcessingDim>(SignalProcessing::ShadowVisibilityMask);
+		PermutationVector.Set<FSignalBatchSizeDim>(1);
+		PermutationVector.Set<SSDSpatialAccumulationCS::FStageDim>(SSDSpatialAccumulationCS::Stage::FinalOutput);
+		PermutationVector.Set<FMultiSPPDim>(true);
+
+		Render::ShaderMapRef<SSDSpatialAccumulationCS> ComputeShader(Render::GetBuiltInShaderMap(), PermutationVector);
+
+		SCOPED_GPU_EVENTF(CmdList, "SpatialAccumulation(Final)");
+
+		ComputeShaderUtils::Dispatch(CmdList, ComputeShader, Parameters,
+			ComputeShaderUtils::GetGroupCount(leo::math::int2(FullResW, FullResH), TILE_SIZE));
 	}
 }

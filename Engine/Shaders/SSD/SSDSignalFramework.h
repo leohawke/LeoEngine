@@ -152,6 +152,13 @@ float GetSignalWorldBluringRadius(FSSDSignalSample Sample, FSSDSampleSceneInfos 
 }
 #endif
 
+
+// Returns the penumbra of this sample, or 1 if invalid.
+float GetSamplePenumbraSafe(FSSDSignalSample Sample)
+{
+	return (Sample.SampleCount > 0 ? Sample.MissCount / Sample.SampleCount : 1);
+}
+
 /** Conveniently transform one simple from a source basis to a destination basis. */
 FSSDSignalSample TransformSignal(FSSDSignalSample Sample, const uint SrcBasis, const uint DestBasis)
 #if COMPILE_SIGNAL_COLOR

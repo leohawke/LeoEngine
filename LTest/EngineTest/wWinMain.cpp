@@ -191,8 +191,8 @@ private:
 
 		OnDrawLights(viewmatrix,projmatrix);
 
-		if(RayShadowMask)
-			pEffect->GetParameter("shadow_tex") = TextureSubresource(RayShadowMask, 0, RayShadowMask->GetArraySize(), 0, RayShadowMask->GetNumMipMaps());
+		if(RayShadowMaskDenoiser)
+			pEffect->GetParameter("shadow_tex") = TextureSubresource(RayShadowMaskDenoiser, 0, RayShadowMask->GetArraySize(), 0, RayShadowMaskDenoiser->GetNumMipMaps());
 
 		{
 			SCOPED_GPU_EVENT(CmdList, GeometryShading);

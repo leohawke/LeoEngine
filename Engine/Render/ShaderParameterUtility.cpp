@@ -16,7 +16,7 @@ struct ShaderParameterStructBinding
 
 	bool RootShaderParameters = false;
 
-	void Bind(const ShaderParametersMetadata& StructMetaData)
+	void Bind(const ShaderParametersMetadata& StructMetaData,uint32 GeneralByteOffset)
 	{
 		auto& StructMembers = StructMetaData.GetMembers();
 
@@ -24,7 +24,7 @@ struct ShaderParameterStructBinding
 		{
 			auto ShaderBindingName = leo::sfmt("%s", Member.GetName());
 
-			auto ByteOffset = static_cast<uint16>(Member.GetOffset());
+			auto ByteOffset = GeneralByteOffset + static_cast<uint16>(Member.GetOffset());
 
 			auto ShaderType = Member.GetShaderType();
 
@@ -32,6 +32,12 @@ struct ShaderParameterStructBinding
 				ShaderType >= SPT_uint &&
 				ShaderType <= SPT_float4x4 
 				);
+
+			if (ShaderType == SPT_StructInclude)
+			{
+				Bind(*Member.GetStructMetadata(), ByteOffset);
+				continue;
+			}
 
 			if (RootShaderParameters && bIsVariableNativeType)
 				continue;
@@ -114,7 +120,7 @@ void RenderShaderParameterBindings::BindForLegacyShaderParameters(const RenderSh
 	Binding.Bindings = this;
 	Binding.ParametersMap = &ParameterMaps;
 
-	Binding.Bind(StructMetaData);
+	Binding.Bind(StructMetaData,0);
 
 	RootParameterBufferIndex = kInvalidBufferIndex;
 
@@ -144,7 +150,7 @@ void RenderShaderParameterBindings::BindForRootShaderParameters(const RenderShad
 	Binding.ParametersMap = &ParameterMaps;
 	Binding.RootShaderParameters = true;
 
-	Binding.Bind(StructMetaData);
+	Binding.Bind(StructMetaData,0);
 
 	uint16 BufferIndex, BaseIndex, BoundSize;
 	if (ParameterMaps.FindParameterAllocation(ShaderParametersMetadata::kRootUniformBufferBindingName, BufferIndex, BaseIndex, BoundSize))

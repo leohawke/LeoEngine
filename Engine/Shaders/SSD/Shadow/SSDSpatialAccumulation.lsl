@@ -4,6 +4,7 @@
 "
 #define STAGE_RECONSTRUCTION 0
 #define STAGE_PRE_CONVOLUTION 1
+#define STAGE_FINAL_OUTPUT 4
 
 //Policy to use to change the size of kernel.
 #define SAMPLE_COUNT_POLICY_DISABLED 0
@@ -61,6 +62,16 @@
 		#define CONFIG_BILATERAL_DISTANCE_COMPUTATION SIGNAL_WORLD_FREQUENCY_PRECOMPUTED_BLURING_RADIUS
 		#define CONFIG_MAX_WITH_REF_DISTANCE 1
 		#define CONFIG_OUTPUT_MODE          OUTPUT_MODE_DRB
+#elif DIM_STAGE == STAGE_FINAL_OUTPUT
+		#define CONFIG_SIGNAL_INPUT_LAYOUT  SIGNAL_BUFFER_LAYOUT_PENUMBRA_RECONSTRUCTION
+
+		#define CONFIG_SIGNAL_INPUT_TEXTURE_TYPE SIGNAL_TEXTURE_TYPE_FLOAT4
+		#define CONFIG_SIGNAL_OUTPUT_TEXTURE_TYPE SIGNAL_TEXTURE_TYPE_FLOAT4
+
+		#define CONFIG_INPUT_TEXTURE_COUNT CONFIG_SIGNAL_BATCH_SIZE
+		#define CONFIG_OUTPUT_TEXTURE_COUNT CONFIG_SIGNAL_BATCH_SIZE
+
+		#define CONFIG_SAMPLE_SET           SAMPLE_SET_1X1
 #endif
 	// Compress the DRB accumulator to have lower VGPR footprint.
 	#if defined(CONFIG_OUTPUT_MODE) && CONFIG_OUTPUT_MODE == OUTPUT_MODE_DRB
@@ -138,6 +149,8 @@
 	#define COMPILE_STACKOWIAK_KERNEL 1
 #elif CONFIG_SAMPLE_SET == SAMPLE_SET_HEXAWEB
 	#define COMPILE_DISK_KERNEL 1
+#else
+	#define COMPILE_BOX_KERNEL 1
 #endif
 
 // White list accumulators to compile.
@@ -527,6 +540,36 @@ void MainCS(
 	[branch]
 	if (all(OutputPixelPostion < ViewportMax))
 	{
+	// Output the multiplexed signal.
+		#if DIM_STAGE == STAGE_FINAL_OUTPUT && CONFIG_SIGNAL_PROCESSING == SIGNAL_PROCESSING_SHADOW_VISIBILITY_MASK
+		{
+			[unroll]
+			for (uint MultiplexId = 0; MultiplexId < MultiplexCount; MultiplexId++)
+			{
+				float Shadow = GetSamplePenumbraSafe(OutputSamples.Array[MultiplexId]);
+
+				const float ShadowFadeFraction = 1;
+				float SSSTransmission = (OutputSamples.Array[MultiplexId].SampleCount > 0 ? OutputSamples.Array[MultiplexId].TransmissionDistance / OutputSamples.Array[MultiplexId].SampleCount : OutputSamples.Array[MultiplexId].TransmissionDistance);
+
+				// 0 is shadowed, 1 is unshadowed
+				// RETURN_COLOR not needed unless writing to SceneColor;
+				float FadedShadow = lerp(1.0f, Square(Shadow), ShadowFadeFraction);
+				float FadedSSSShadow = lerp(1.0f, Square(SSSTransmission), ShadowFadeFraction);
+
+				float4 OutColor = float4(FadedShadow, FadedSSSShadow, FadedShadow, FadedSSSShadow);
+
+				if (MultiplexId == 0)
+					SignalOutput_UAVs_0[OutputPixelPostion] = OutColor;
+				if (MultiplexId == 1)
+					SignalOutput_UAVs_1[OutputPixelPostion] = OutColor;
+				if (MultiplexId == 2)
+					SignalOutput_UAVs_2[OutputPixelPostion] = OutColor;
+				if (MultiplexId == 3)
+					SignalOutput_UAVs_3[OutputPixelPostion] = OutColor;
+			}
+		}
+		#else
+		{
 		OutputMultiplexedSignal(
 				SignalOutput_UAVs_0,
 				SignalOutput_UAVs_1,
@@ -534,6 +577,8 @@ void MainCS(
 				SignalOutput_UAVs_3,
 				CONFIG_SIGNAL_OUTPUT_LAYOUT, MultiplexCount,
 				OutputPixelPostion, OutputSamples.Array);
+		}
+		#endif
 	}
 }
 ")

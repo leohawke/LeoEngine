@@ -1,6 +1,9 @@
 #ifndef SSDDefinitions_h
 #define SSDDefinitions_h 1
 
+/** Disable any VGPR compression of the signal. */
+#define DEBUG_DISABLE_SIGNAL_COMPRESSION 0
+
 static const float DENOISER_MISS_HIT_DISTANCE = -1.0;
 static const float WORLD_RADIUS_MISS = asfloat(0x7F7FFFFF);
 static const float WORLD_RADIUS_INVALID = -1;
