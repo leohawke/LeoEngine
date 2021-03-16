@@ -90,10 +90,8 @@ namespace platform {
 					});
 					LAssert(inherit_technique != exist_techniques.end(), "Can't Find Inherit Technique");
 					technique.GetMacrosRef() = inherit_technique->GetMacros();
-					//继承technique意味继承所有的pass
 					technique.GetPassesRef() = inherit_technique->GetPasses();
 				}
-				//techinque中的宏要求push到顶端
 				ParseMacro(technique.GetMacrosRef(), technique_node,true);
 
 				auto passes = X::SelectNodes("pass", technique_node);
@@ -114,13 +112,11 @@ namespace platform {
 					}
 					if (!pass_ptr)
 					{
-						//找不到已知的pass构造一个新的
 						technique.GetPassesRef().emplace_back();
 						pass_ptr = &technique.GetPassesRef().back();
 						pass_ptr->SetName(pass.GetName());
 					}
 
-					//pass本身还能继承
 					auto inherit_pass = AccessPtr("inherit", pass_node);
 					if (inherit_pass) {
 						auto exist_passes = technique.GetPasses();
@@ -134,7 +130,6 @@ namespace platform {
 						pass_ptr->GetPipleStateRef() = exist_pass->GetPipleState();
 					}
 
-					//pass也有宏节点
 					ParseMacro(pass.GetMacrosRef(), pass_node,true);
 					ParsePassState(*pass_ptr, pass_node);
 					ComposePassShader(technique, *pass_ptr, pass_node);
@@ -542,11 +537,13 @@ namespace platform {
 					LFL_DEBUG_DECL_TIMER(ComposePassShader, sfmt("CompilerReflectStrip Type:%s ", first.c_str()));
 					ShaderCompilerInput input;
 					input.Type = compile_type;
-					input.Code = GetCode();
 					input.EntryPoint = compile_entry_point;
 					input.SourceName = path;
 
 					asset::X::Shader::AppendCompilerEnvironment(input.Environment, input.Type);
+
+					auto Code = asset::X::Shader::PreprocessShader(GetCode(), input);
+					input.Code = Code;
 
 					auto pInfo = std::make_unique<ShaderInfo>(compile_type);
 
