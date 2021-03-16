@@ -12,6 +12,7 @@
 #include "LSLAssetX.h"
 #include "../Core/Coroutine/ReadOnlyFile.h"
 #include "../Core/Coroutine/IOScheduler.h"
+#include "../Core/Coroutine/SyncWait.h"
 #include "../System/SystemEnvironment.h"
 
 namespace platform::X
@@ -89,62 +90,7 @@ namespace platform::X
 
 		void ParseNode()
 		{
-			auto& term_node = shader_desc.data->term_node;
-			auto tag = leo::Access<std::string>(*term_node.begin());
-			shader_desc.is_ray_tracing = tag == "RayTracing";
-
-			LAssert(tag == "effect" || tag == "RayTracing", R"(Invalid Format")");
-
-			std::vector<std::pair<std::string, scheme::TermNode>> refers;
-			RecursiveReferNode(term_node, refers);
-
-			auto new_node = leo::MakeNode(leo::MakeIndex(0));
-
-			for (auto& pair : refers) {
-				for (auto& node : pair.second) {
-					new_node.try_emplace(leo::MakeIndex(new_node), std::make_pair(node.begin(), node.end()), leo::MakeIndex(new_node));
-				}
-			}
-
-			for (auto& node : term_node)
-				new_node.try_emplace(leo::MakeIndex(new_node), std::make_pair(node.begin(), node.end()), leo::MakeIndex(new_node));
-
-			term_node = new_node;
-
-			auto hash = [](auto param) {
-				return std::hash<decltype(param)>()(param);
-			};
-
-			ParseMacro(shader_desc.asset->GetMacrosRef(), term_node, false);
-			ParseConstatnBuffers(term_node);
-			//parser params
-			{
-				auto param_nodes = term_node.SelectChildren([&](const scheme::TermNode& child) {
-					if (child.empty())
-						return false;
-					try {
-						return  AssetType::GetType(leo::Access<std::string>(*child.begin())) != SPT_shader;
-					}
-					catch (leo::unsupported&) {
-						return false;
-					}
-					});
-				for (auto& param_node : param_nodes)
-					ParseParam(param_node, false);
-			}
-			{
-				auto fragments = X::SelectNodes("shader", term_node);
-				for (auto& fragment : fragments) {
-					shader_desc.asset->EmplaceShaderGenInfo(AssetType::FRAGMENT, shader_desc.asset->GetFragmentsRef().size(), std::stoul(fragment.GetName()));
-					shader_desc.asset->GetFragmentsRef().emplace_back();
-					shader_desc.asset->GetFragmentsRef().back().
-						GetFragmentRef() = scheme::Deliteralize(
-							leo::Access<std::string>(*fragment.rbegin())
-						);
-				}
-			}
-			shader_desc.asset->PrepareShaderGen();
-			shader_desc.shader_code = shader_desc.asset->GenHLSLShader();
+			leo::coroutine::SyncWait(ParseNodeAsync(Environment->Scheduler->GetIOScheduler()));
 		}
 
 		leo::coroutine::Task<> ParseNodeAsync(leo::coroutine::IOScheduler& io)
@@ -307,7 +253,6 @@ namespace platform::X
 			return ReverseAccess<_type>([&](const scheme::TermNode& child) {return child.empty(); }, node);
 		}
 
-		//根据name判断 取尾部
 		std::string Access(const char* name, const scheme::TermNode& node) {
 			auto it = std::find_if(node.begin(), node.end(), [&](const scheme::TermNode& child) {
 				if (!child.empty())
@@ -387,7 +332,6 @@ namespace platform::X
 					shader_desc.asset->EmplaceShaderGenInfo(AssetType::MACRO, macros.size(), std::stoul(macro_node.GetName()));
 				}
 				else {
-					//当有其他类型使用index 0时，宏会排在前面
 					shader_desc.asset->EmplaceShaderGenInfo(AssetType::MACRO, macros.size(), 0);
 				}
 				macros.emplace_back(
@@ -400,7 +344,6 @@ namespace platform::X
 		void UniqueMacro(std::vector<asset::ShaderMacro>& macros)
 		{
 			//TODO! remap shader gen info
-			//宏的覆盖原则 删除前面已定义的宏
 			auto iter = macros.begin();
 			while (iter != macros.end()) {
 				auto exist = std::find_if(iter + 1, macros.end(), [&iter](const asset::ShaderMacro& tail)
@@ -415,7 +358,6 @@ namespace platform::X
 			}
 		}
 
-		//Param的名字总是位于Node最后
 		size_t ParseParam(const scheme::TermNode& param_node, bool cbuffer_param) {
 			asset::ShaderParameterAsset param;
 			param.SetName(AccessLastNoChild<std::string>(param_node));
