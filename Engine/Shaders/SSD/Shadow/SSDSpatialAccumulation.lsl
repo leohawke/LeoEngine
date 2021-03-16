@@ -11,6 +11,9 @@
 
 // Only output the sum of the signal 0.
 #define OUTPUT_MODE_SUM 0
+// Only output the sum of the momment 1 & 2 of the signal 0.
+#define OUTPUT_MODE_2MOMMENT_SUM 1
+
 // Output the result of descending ring bucketing.
 #define OUTPUT_MODE_DRB 2
 
@@ -496,7 +499,24 @@ void MainCS(
 	uint MultiplexCount = 1;
 	FSSDSignalArray OutputSamples = CreateSignalArrayFromScalarValue(0.0);
 	{
-	#if CONFIG_OUTPUT_MODE == OUTPUT_MODE_DRB
+	#if CONFIG_OUTPUT_MODE == OUTPUT_MODE_SUM
+	{
+		MultiplexCount = CONFIG_SIGNAL_BATCH_SIZE;
+			
+		[unroll(CONFIG_SIGNAL_BATCH_SIZE)]
+		for (uint MultiplexId = 0; MultiplexId < CONFIG_SIGNAL_BATCH_SIZE; MultiplexId++)
+		{
+			UncompressSignalAccumulator(/* inout */ SignalAccumulators.Array[MultiplexId]);
+
+			OutputSamples.Array[MultiplexId] = SignalAccumulators.Array[MultiplexId].Moment1;
+			
+			// Output the minimal inverse frequency as new world bluring radius for subsequent passes.
+			// TODO(Denoiser): store this in its own signal to avoid *= N; *= rcp(N);
+			OutputSamples.Array[MultiplexId].WorldBluringRadius = 
+				OutputSamples.Array[MultiplexId].SampleCount * SignalAccumulators.Array[MultiplexId].MinInvFrequency;
+		}
+	}
+	#elif CONFIG_OUTPUT_MODE == OUTPUT_MODE_DRB
 		{
 			MultiplexCount = CONFIG_SIGNAL_BATCH_SIZE;
 			
@@ -513,7 +533,7 @@ void MainCS(
 					OutputSamples.Array[MultiplexId].SampleCount * SignalAccumulators.Array[MultiplexId].MinInvFrequency;
 			}
 		}
-		#endif
+	#endif
 	}
 
 	uint2 OutputPixelPostion;
