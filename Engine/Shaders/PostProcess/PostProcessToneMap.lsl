@@ -1,6 +1,6 @@
 (effect
     (include Common.h)
-    (refer PostProcess/TonemapCommon.h)
+    (include PostProcess/TonemapCommon.h)
     (Texture2D ColorTexture)
     (Texture3D ColorGradingLUT)
 	(sampler ColorSampler)
