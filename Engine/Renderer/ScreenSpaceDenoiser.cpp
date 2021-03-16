@@ -29,6 +29,7 @@ BEGIN_SHADER_PARAMETER_STRUCT(SSDCommonParameters)
 	SHADER_PARAMETER(leo::math::float4, BufferBilinearUVMinMax)
 	SHADER_PARAMETER(leo::math::float2, BufferUVToOutputPixelPosition)
 	SHADER_PARAMETER(float, WorldDepthToPixelWorldRadius)
+	SHADER_PARAMETER(float, HitDistanceToWorldBluringRadius)
 	SHADER_PARAMETER(leo::math::float4, BufferUVToScreenPosition)
 END_SHADER_PARAMETER_STRUCT();
 
@@ -218,7 +219,6 @@ public:
 
 		SHADER_PARAMETER(float, WorldDepthToPixelWorldRadius)
 		//SignalFramework.h
-		SHADER_PARAMETER(float, HitDistanceToWorldBluringRadius)
 		SHADER_PARAMETER(float, HarmonicPeriode)
 		SHADER_PARAMETER(leo::uint32, UpscaleFactor)
 		SHADER_PARAMETER(leo::math::float4, InputBufferUVMinMax)
@@ -292,6 +292,7 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		CommonParameters.BufferUVToScreenPosition.y = -2;
 		CommonParameters.BufferUVToScreenPosition.z = -1.0f;
 		CommonParameters.BufferUVToScreenPosition.w = 1.0f;
+		CommonParameters.HitDistanceToWorldBluringRadius = std::tanf(InputParameters.LightHalfRadians);
 	}
 
 	auto SignalHistroy = InputParameters.Mask;
@@ -352,7 +353,6 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		float TanHalfFieldOfView = ViewInfo.InvProjectionMatrix[0][0];
 
 		Parameters.WorldDepthToPixelWorldRadius = TanHalfFieldOfView / FullResW;
-		Parameters.HitDistanceToWorldBluringRadius = std::tanf(InputParameters.LightHalfRadians);
 	};
 
 	// Spatial reconstruction with ratio estimator to be more precise in the history rejection.
