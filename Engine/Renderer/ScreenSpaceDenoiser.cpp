@@ -217,7 +217,6 @@ public:
 
 		SHADER_PARAMETER_SAMPLER(Render::TextureSampleDesc, GlobalPointClampedSampler)
 
-		SHADER_PARAMETER(float, WorldDepthToPixelWorldRadius)
 		//SignalFramework.h
 		SHADER_PARAMETER(float, HarmonicPeriode)
 		SHADER_PARAMETER(leo::uint32, UpscaleFactor)
@@ -293,6 +292,10 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		CommonParameters.BufferUVToScreenPosition.z = -1.0f;
 		CommonParameters.BufferUVToScreenPosition.w = 1.0f;
 		CommonParameters.HitDistanceToWorldBluringRadius = std::tanf(InputParameters.LightHalfRadians);
+
+		float TanHalfFieldOfView = ViewInfo.InvProjectionMatrix[0][0];
+
+		CommonParameters.WorldDepthToPixelWorldRadius = TanHalfFieldOfView / FullResW;
 	}
 
 	auto SignalHistroy = InputParameters.Mask;
@@ -349,10 +352,6 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		Parameters.GlobalPointClampedSampler = point_sampler;
 		Parameters.SceneDepthBufferSampler = point_sampler;
 		Parameters.WorldNormalSampler = point_sampler;
-
-		float TanHalfFieldOfView = ViewInfo.InvProjectionMatrix[0][0];
-
-		Parameters.WorldDepthToPixelWorldRadius = TanHalfFieldOfView / FullResW;
 	};
 
 	// Spatial reconstruction with ratio estimator to be more precise in the history rejection.
@@ -416,7 +415,7 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 
 		Render::ShaderMapRef<SSDSpatialAccumulationCS> ComputeShader(Render::GetBuiltInShaderMap(), PermutationVector);
 
-		SCOPED_GPU_EVENTF(CmdList, "PreConvolution(ConvolutionId=%d Spread=%d)", PreConvolutionId, Parameters.KernelSpreadFactor);
+		SCOPED_GPU_EVENTF(CmdList, "PreConvolution(ConvolutionId=%d Spread=%f)", PreConvolutionId, Parameters.KernelSpreadFactor);
 
 		ComputeShaderUtils::Dispatch(CmdList, ComputeShader, Parameters,
 			ComputeShaderUtils::GetGroupCount(leo::math::int2(FullResW, FullResH), TILE_SIZE));
