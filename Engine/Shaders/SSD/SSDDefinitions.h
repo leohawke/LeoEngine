@@ -1,11 +1,13 @@
 #ifndef SSDDefinitions_h
 #define SSDDefinitions_h 1
 
+#include "Platform.h"
+
 /** Disable any VGPR compression of the signal. */
 #define DEBUG_DISABLE_SIGNAL_COMPRESSION 0
 
 static const float DENOISER_MISS_HIT_DISTANCE = -1.0;
-static const float WORLD_RADIUS_MISS = asfloat(0x7F7FFFFF);
+#define WORLD_RADIUS_MISS (INFINITE_FLOAT)
 static const float WORLD_RADIUS_INVALID = -1;
 
 // Maximum number of buffer multiple signals can be encode to/decoded from.

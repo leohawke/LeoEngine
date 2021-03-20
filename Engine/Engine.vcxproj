@@ -276,6 +276,7 @@
     <ClInclude Include="Render\TextureSampleDesc.h" />
     <ClInclude Include="Render\ViewPort.h" />
     <CopyFileToFolders Include="Shaders\SSD\SSDDefinitions.h" />
+    <ClInclude Include="Shaders\Platform.h" />
     <ClInclude Include="Shaders\Random.h" />
     <ClInclude Include="Shaders\SSD\SSDCommon.h" />
     <ClInclude Include="Shaders\SSD\SSDMetadata.h" />

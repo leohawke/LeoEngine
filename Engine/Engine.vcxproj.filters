@@ -798,6 +798,9 @@
     <ClInclude Include="Render\TextureSampleDesc.h">
       <Filter>Render\DeviceInterface</Filter>
     </ClInclude>
+    <ClInclude Include="Shaders\Platform.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

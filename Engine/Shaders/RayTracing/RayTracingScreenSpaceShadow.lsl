@@ -14,8 +14,6 @@ float SourceRadius;
 uint SamplesPerPixel;
 uint StateFrameIndex;
 
-static const float FLT_MAX = asfloat(0x7F7FFFFF);
-
 static const float DENOISER_INVALID_HIT_DISTANCE = -2.0;
 static const float DENOISER_MISS_HIT_DISTANCE = -1.0;
 
