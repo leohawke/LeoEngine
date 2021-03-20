@@ -117,7 +117,7 @@ RAY_TRACING_ENTRY_RAYGEN(RayGen)
 
 	const float Shadow = OcclusionToShadow(Out, SamplesPerPixel);
 
-	Output[DispatchRaysIndex().xy] =float4(Shadow,Out.ClosestRayDistance,0,0);
+	Output[DispatchRaysIndex().xy] =float4(Shadow,Out.ClosestRayDistance,0,Shadow);
 }
 "
 	)
