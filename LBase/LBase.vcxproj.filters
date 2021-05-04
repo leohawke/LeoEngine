@@ -4,6 +4,9 @@
     <Filter Include="MCF">
       <UniqueIdentifier>{b387822f-6105-4454-b1c9-5fd6f2980d4d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="VSVisualizer">
+      <UniqueIdentifier>{ad2b47d0-c845-4a4f-a5d3-41988161b5be}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ldef.h" />
@@ -87,5 +90,10 @@
     <ClCompile Include="operators.hpp" />
     <ClCompile Include="LBase.cpp" />
     <ClCompile Include="cformat.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="LBase.natvis">
+      <Filter>VSVisualizer</Filter>
+    </Natvis>
   </ItemGroup>
 </Project>

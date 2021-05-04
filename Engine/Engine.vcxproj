@@ -187,6 +187,7 @@
     <ClInclude Include="Core\Threading\ManualResetEvent.h" />
     <ClInclude Include="Core\Threading\TaskScheduler.h" />
     <ClInclude Include="emacro.h" />
+    <ClInclude Include="Math\RotationMatrix.h" />
     <ClInclude Include="Math\Rotator.h" />
     <ClInclude Include="Renderer\imgui\imgui_context.h" />
     <ClInclude Include="Renderer\PostProcess\PostProcessCombineLUTs.h" />

@@ -99,6 +99,9 @@
     <ClCompile Include="sutility.cpp" />
     <ClCompile Include="LBase.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="LBase.natvis" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4F3AE107-3FFD-4D5C-82A8-5034C0041562}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>

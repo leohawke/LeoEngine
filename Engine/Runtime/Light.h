@@ -17,6 +17,6 @@ namespace LeoEngine
 	public:
 		void SetTransform(const lm::float4x4& light2world);
 
-		lm::float3 GetDirection();
+		lm::float3 GetDirection() const;
 	};
 }

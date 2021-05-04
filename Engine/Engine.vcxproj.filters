@@ -811,7 +811,10 @@
       <Filter>Runtime</Filter>
     </ClInclude>
     <ClInclude Include="Math\Rotator.h">
-      <Filter>Rotator</Filter>
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\RotationMatrix.h">
+      <Filter>Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -908,7 +911,7 @@
     <Filter Include="Runtime">
       <UniqueIdentifier>{0652b36a-68ef-4cfe-b077-d44ab03e3ad0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Rotator">
+    <Filter Include="Math">
       <UniqueIdentifier>{d81b66ec-3168-4ea4-9210-ea8fe28dcb62}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
