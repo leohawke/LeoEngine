@@ -323,6 +323,9 @@
     <ClCompile Include="Render\BuiltInShader.cpp">
       <Filter>Render\Shader</Filter>
     </ClCompile>
+    <ClCompile Include="Runtime\Light.cpp">
+      <Filter>Runtime</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Context.h">
@@ -801,6 +804,15 @@
     <ClInclude Include="Shaders\Platform.h">
       <Filter>Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="Runtime\DirectionalLight.h">
+      <Filter>Runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="Runtime\Light.h">
+      <Filter>Runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Rotator.h">
+      <Filter>Rotator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
@@ -892,6 +904,12 @@
     </Filter>
     <Filter Include="Shaders\SSD\Shadow">
       <UniqueIdentifier>{68c1b9f6-f60c-4604-a01d-0041c1eddf2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Runtime">
+      <UniqueIdentifier>{0652b36a-68ef-4cfe-b077-d44ab03e3ad0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rotator">
+      <UniqueIdentifier>{d81b66ec-3168-4ea4-9210-ea8fe28dcb62}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

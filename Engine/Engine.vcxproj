@@ -128,6 +128,7 @@
     <ClCompile Include="Render\ShaderParamterTraits.cpp">
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
     </ClCompile>
+    <ClCompile Include="Runtime\Light.cpp" />
     <ClCompile Include="System\NinthTimer.cpp" />
     <ClCompile Include="System\SystemEnvironment.cpp" />
     <ClCompile Include="test.cpp" />
@@ -186,6 +187,7 @@
     <ClInclude Include="Core\Threading\ManualResetEvent.h" />
     <ClInclude Include="Core\Threading\TaskScheduler.h" />
     <ClInclude Include="emacro.h" />
+    <ClInclude Include="Math\Rotator.h" />
     <ClInclude Include="Renderer\imgui\imgui_context.h" />
     <ClInclude Include="Renderer\PostProcess\PostProcessCombineLUTs.h" />
     <ClInclude Include="Renderer\PostProcess\PostProcessToneMap.h" />
@@ -276,6 +278,8 @@
     <ClInclude Include="Render\TextureSampleDesc.h" />
     <ClInclude Include="Render\ViewPort.h" />
     <CopyFileToFolders Include="Shaders\SSD\SSDDefinitions.h" />
+    <ClInclude Include="Runtime\DirectionalLight.h" />
+    <ClInclude Include="Runtime\Light.h" />
     <ClInclude Include="Shaders\Platform.h" />
     <ClInclude Include="Shaders\Random.h" />
     <ClInclude Include="Shaders\SSD\SSDCommon.h" />

@@ -1,7 +1,6 @@
 /*! \file Core\Camera.h
 \ingroup Engine
-\brief 提供相机相关的数学计算和基础数据类型。
-\note 该文件实际上约束了左手坐标系的轴向描述
+\brief 提供相机基础数据类型。
 */
 
 #ifndef LE_Core_Camera_H
