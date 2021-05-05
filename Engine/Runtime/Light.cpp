@@ -12,7 +12,7 @@ void Light::SetTransform(const lm::float4x4& light2world)
 lm::float3 Light::GetDirection() const
 {
 	return lm::float3(
-		WorldToLight[0][0],
-		WorldToLight[1][0],
-		WorldToLight[2][0]);
+		WorldToLight[0][2],
+		WorldToLight[1][2],
+		WorldToLight[2][2]);
 }
