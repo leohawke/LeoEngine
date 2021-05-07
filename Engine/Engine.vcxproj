@@ -128,6 +128,7 @@
     <ClCompile Include="Render\ShaderParamterTraits.cpp">
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
     </ClCompile>
+    <ClCompile Include="Runtime\DirectionalLight.cpp" />
     <ClCompile Include="Runtime\Light.cpp" />
     <ClCompile Include="System\NinthTimer.cpp" />
     <ClCompile Include="System\SystemEnvironment.cpp" />
@@ -187,8 +188,10 @@
     <ClInclude Include="Core\Threading\ManualResetEvent.h" />
     <ClInclude Include="Core\Threading\TaskScheduler.h" />
     <ClInclude Include="emacro.h" />
+    <ClInclude Include="Math\InverseRotationMatrix.h" />
     <ClInclude Include="Math\RotationMatrix.h" />
     <ClInclude Include="Math\Rotator.h" />
+    <ClInclude Include="Math\Sphere.h" />
     <ClInclude Include="Renderer\imgui\imgui_context.h" />
     <ClInclude Include="Renderer\PostProcess\PostProcessCombineLUTs.h" />
     <ClInclude Include="Renderer\PostProcess\PostProcessToneMap.h" />
@@ -281,6 +284,7 @@
     <CopyFileToFolders Include="Shaders\SSD\SSDDefinitions.h" />
     <ClInclude Include="Runtime\DirectionalLight.h" />
     <ClInclude Include="Runtime\Light.h" />
+    <ClInclude Include="Runtime\SceneClasses.h" />
     <ClInclude Include="Shaders\Platform.h" />
     <ClInclude Include="Shaders\Random.h" />
     <ClInclude Include="Shaders\SSD\SSDCommon.h" />
@@ -396,7 +400,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir);$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)SDKs</IncludePath>
+    <IncludePath>$(SolutionDir)Engine;$(SolutionDir);$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)SDKs</IncludePath>
     <OutDir>$(ProjectDir)toollib\$(Platform)\</OutDir>
     <TargetName>$(ProjectName)d</TargetName>
     <LibraryPath>$(SolutionDir);$(LibraryPath)</LibraryPath>
@@ -408,7 +412,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir);$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)SDKs</IncludePath>
+    <IncludePath>$(SolutionDir)Engine;$(SolutionDir);$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)SDKs</IncludePath>
     <OutDir>$(ProjectDir)toollib\$(Platform)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

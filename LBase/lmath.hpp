@@ -689,6 +689,7 @@ namespace leo {
 namespace leo::math
 {
 	constexpr float PI = 3.1415926535897932f;
+	constexpr float KindaEpsilon = std::numeric_limits<float>::epsilon()*1.e+3f;
 }
 
 #endif

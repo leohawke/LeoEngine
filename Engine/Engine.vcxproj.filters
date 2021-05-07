@@ -326,6 +326,9 @@
     <ClCompile Include="Runtime\Light.cpp">
       <Filter>Runtime</Filter>
     </ClCompile>
+    <ClCompile Include="Runtime\DirectionalLight.cpp">
+      <Filter>Runtime</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Context.h">
@@ -814,6 +817,15 @@
       <Filter>Math</Filter>
     </ClInclude>
     <ClInclude Include="Math\RotationMatrix.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Runtime\SceneClasses.h">
+      <Filter>Runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\InverseRotationMatrix.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Sphere.h">
       <Filter>Math</Filter>
     </ClInclude>
   </ItemGroup>
