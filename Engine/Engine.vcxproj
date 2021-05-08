@@ -188,14 +188,19 @@
     <ClInclude Include="Core\Threading\ManualResetEvent.h" />
     <ClInclude Include="Core\Threading\TaskScheduler.h" />
     <ClInclude Include="emacro.h" />
+    <ClInclude Include="Math\BoxSphereBounds.h" />
     <ClInclude Include="Math\InverseRotationMatrix.h" />
     <ClInclude Include="Math\RotationMatrix.h" />
     <ClInclude Include="Math\Rotator.h" />
+    <ClInclude Include="Math\ScaleMatrix.h" />
+    <ClInclude Include="Math\ShadowProjectionMatrix.h" />
     <ClInclude Include="Math\Sphere.h" />
+    <ClInclude Include="Math\TranslationMatrix.h" />
     <ClInclude Include="Renderer\imgui\imgui_context.h" />
     <ClInclude Include="Renderer\PostProcess\PostProcessCombineLUTs.h" />
     <ClInclude Include="Renderer\PostProcess\PostProcessToneMap.h" />
     <ClInclude Include="Renderer\ScreenSpaceDenoiser.h" />
+    <ClInclude Include="Renderer\ShadowRendering.h" />
     <ClInclude Include="Renderer\VolumeRendering.h" />
     <ClInclude Include="Render\BuiltInRayTracingShader.h" />
     <ClInclude Include="Render\BuiltInShader.h" />
@@ -285,6 +290,7 @@
     <ClInclude Include="Runtime\DirectionalLight.h" />
     <ClInclude Include="Runtime\Light.h" />
     <ClInclude Include="Runtime\SceneClasses.h" />
+    <ClInclude Include="Runtime\SceneInfo.h" />
     <ClInclude Include="Shaders\Platform.h" />
     <ClInclude Include="Shaders\Random.h" />
     <ClInclude Include="Shaders\SSD\SSDCommon.h" />

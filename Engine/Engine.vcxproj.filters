@@ -828,6 +828,24 @@
     <ClInclude Include="Math\Sphere.h">
       <Filter>Math</Filter>
     </ClInclude>
+    <ClInclude Include="Runtime\SceneInfo.h">
+      <Filter>Runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\ScaleMatrix.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\ShadowProjectionMatrix.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\BoxSphereBounds.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\TranslationMatrix.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\ShadowRendering.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

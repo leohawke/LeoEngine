@@ -19,6 +19,12 @@ namespace LeoEngine
 
 		}
 
+		Sphere(lm::float3 center,float r)
+			:Center(center)
+			, W(r)
+		{
+		}
+
 		friend bool operator==(const Sphere& l, const Sphere& r)
 		{
 			return (l.Center == r.Center) && lm::float_equal(l.W, r.W);

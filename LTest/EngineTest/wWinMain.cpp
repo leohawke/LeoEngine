@@ -1,20 +1,27 @@
-#include "Engine/test.h"
-#include "Engine/Asset/EffectX.h"
+
 #define TEST_CODE 1
 
-#include "Engine/System/NinthTimer.h"
-#include "Engine/Core/CameraController.h"
-#include "Engine/Core/Camera.h"
-#include "Engine/System/SystemEnvironment.h"
 #include "EntityComponentSystem/EntitySystem.h"
-#include "Engine/Renderer/imgui/imgui_context.h"
-#include "Engine/Render/ICommandList.h"
-#include "Engine/Render/DataStructures.h"
-#include "Engine/Render/IFrameBuffer.h"
-#include "Engine/Render/DrawEvent.h"
-#include "Engine/Renderer/PostProcess/PostProcessCombineLUTs.h"
-#include "Engine/Renderer/PostProcess/PostProcessToneMap.h"
-#include "Engine/Renderer/ScreenSpaceDenoiser.h"
+
+#include "test.h"
+#include "Asset/EffectX.h"
+#include "System/NinthTimer.h"
+#include "Core/CameraController.h"
+#include "Core/Camera.h"
+#include "System/SystemEnvironment.h"
+#include "Renderer/imgui/imgui_context.h"
+#include "Render/ICommandList.h"
+#include "Render/DataStructures.h"
+#include "Render/IFrameBuffer.h"
+#include "Render/DrawEvent.h"
+#include "Renderer/PostProcess/PostProcessCombineLUTs.h"
+#include "Renderer/PostProcess/PostProcessToneMap.h"
+#include "Renderer/ScreenSpaceDenoiser.h"
+#include "Runtime/DirectionalLight.h"
+#include "Math/RotationMatrix.h"
+#include "Math/ScaleMatrix.h"
+#include "Math/ShadowProjectionMatrix.h"
+#include "Math/TranslationMatrix.h"
 
 #include "LFramework/Win32/LCLib/Mingw32.h"
 #include "LFramework/Helper/ShellHelper.h"
@@ -32,6 +39,7 @@ using namespace LeoEngine::Render;
 using namespace platform_ex::Windows;
 
 namespace lm = leo::math;
+namespace le = LeoEngine;
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -52,6 +60,10 @@ public:
 
 	std::vector<DirectLight> lights;
 	std::shared_ptr<GraphicsBuffer> pLightConstatnBuffer;
+
+	LeoEngine::DirectionalLight sun_light;
+	le::SceneInfo scene;
+
 
 	std::shared_ptr<Texture2D> RayShadowMask;
 	std::shared_ptr<UnorderedAccessView> RayShadowMaskUAV;
@@ -228,6 +240,22 @@ private:
 		return Context::Instance().GetScreenFrame()->Attached(FrameBuffer::Target0);
 	}
 
+	void RenderShadowDepth()
+	{
+		le::ProjectedShadowInitializer initializer;
+		sun_light.GetProjectedShadowInitializer(scene,initializer);
+
+		const auto WorldToLightScaled = initializer.WorldToLight * le::ScaleMatrix(initializer.Scales);
+
+		const auto MaxSubjectZ = lm::transformpoint(initializer.SubjectBounds.Origin, WorldToLightScaled).z + initializer.SubjectBounds.Radius;
+
+		const auto MinSubjectZ = (MaxSubjectZ - initializer.SubjectBounds.Radius * 2);
+
+		const auto SubjectAndReceiverMatrix = WorldToLightScaled * le::ShadowProjectionMatrix(MinSubjectZ, MaxSubjectZ, initializer.WAxis);
+
+		const auto ProjectionMatrix = le::TranslationMatrix(initializer.ShadowTranslation) * SubjectAndReceiverMatrix;
+	}
+
 	void OnPostProcess()
 	{
 		auto& CmdList = platform::Render::GetCommandList(); 
@@ -345,6 +373,8 @@ private:
 			svinput,
 			svoutput
 		);
+
+		RenderShadowDepth();
 	}
 
 	void OnDrawUI()
@@ -395,6 +425,9 @@ private:
 
 		pEntities = std::make_unique<Entities>("sponza_crytek.entities.lsl");
 
+		scene.AABBMin = pEntities->min;
+		scene.AABBMax = pEntities->max;
+
 		float modelRaidus = leo::math::length(pEntities->max - pEntities->min) * .5f;
 
 		auto  eye = (pEntities->max + pEntities->min) *.5f;
@@ -423,6 +456,9 @@ private:
 		directioal_light.direction = lm::float3(0.335837096f,0.923879147f,-0.183468640f);
 		directioal_light.color = lm::float3(1.0f, 1.0f, 1.0f);
 		lights.push_back(directioal_light);
+
+		sun_light.SetTransform(le::RotationMatrix(le::Rotator(directioal_light.direction)));
+
 
 		pLightConstatnBuffer = leo::share_raw(Device.CreateConstanBuffer(Buffer::Usage::Dynamic, EAccessHint::EA_GPURead | EAccessHint::EA_GPUStructured, sizeof(DirectLight)*lights.size(), static_cast<EFormat>(sizeof(DirectLight)),lights.data()));
 

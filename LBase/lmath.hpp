@@ -203,6 +203,13 @@ namespace leo {
 		}
 
 		template<typename _type, limpl(typename = enable_if_t<is_lmathtype_v<_type>>)>
+		inline _type operator/(const _type& l, float r) {
+			auto ret = l;
+			ret /= r;
+			return ret;
+		}
+
+		template<typename _type, limpl(typename = enable_if_t<is_lmathtype_v<_type>>)>
 		inline float length(const _type & l) noexcept {
 			return sqrtf(dot(l, l));
 		}
