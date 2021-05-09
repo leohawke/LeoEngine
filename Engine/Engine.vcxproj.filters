@@ -329,6 +329,9 @@
     <ClCompile Include="Runtime\DirectionalLight.cpp">
       <Filter>Runtime</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\ShadowRendering.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Context.h">

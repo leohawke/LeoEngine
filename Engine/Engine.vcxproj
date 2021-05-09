@@ -56,6 +56,7 @@
     <ClCompile Include="Renderer\PostProcess\PostProcessCombineLUTs.cpp" />
     <ClCompile Include="Renderer\PostProcess\PostProcessToneMap.cpp" />
     <ClCompile Include="Renderer\ScreenSpaceDenoiser.cpp" />
+    <ClCompile Include="Renderer\ShadowRendering.cpp" />
     <ClCompile Include="Renderer\VolumeRendering.cpp">
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
     </ClCompile>
