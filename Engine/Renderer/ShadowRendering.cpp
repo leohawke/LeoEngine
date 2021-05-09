@@ -2,6 +2,7 @@
 #include "Render/BuiltInShader.h"
 #include "Render/ShaderParamterTraits.hpp"
 #include "Render/ShaderParameterStruct.h"
+#include "Math/TranslationMatrix.h"
 
 using namespace LeoEngine;
 using namespace platform;
@@ -40,10 +41,15 @@ lr::GraphicsPipelineStateInitializer LeoEngine::SetupShadowDepthPass(const Proje
 
 	ShadowDepthVS::Parameters Parameters;
 
+	Parameters.ProjectionMatrix =lm::transpose(TranslationMatrix(ShadowInfo.PreShadowTranslation) * ShadowInfo.SubjectAndReceiverMatrix);
+
 	Render::SetShaderParameters(CmdList, VertexShader, VertexShader->GetVertexShader(), Parameters);
 
 	psoInit.ShaderPass.VertexShader = VertexShader->GetVertexShader();
 	psoInit.ShaderPass.PixelShader = PixelShader->GetPixelShader();
+
+	// Disable color writes
+	psoInit.BlendState.color_write_mask[0] = 0;
 
 	return psoInit;;
 }

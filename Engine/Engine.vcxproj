@@ -346,6 +346,8 @@
     <None Include="Shaders\RayTracing\RayTracingScreenSpaceShadow.lsl" />
     <None Include="Shaders\RayTracing\RayTracingBuiltInResources.lsl" />
     <None Include="Shaders\RayTracing\RayTracingHitGroupCommon.lsl" />
+    <None Include="Shaders\ShadowDepthPixelShader.lsl" />
+    <None Include="Shaders\ShadowDepthVertexShader.lsl" />
     <None Include="Shaders\SSD\Shadow\SSDInjest.lsl" />
     <None Include="Shaders\SSD\Shadow\SSDSpatialAccumulation.lsl" />
   </ItemGroup>
