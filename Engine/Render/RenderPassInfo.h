@@ -30,6 +30,8 @@ namespace platform::Render {
 		Clear_Store = RTACTION_MAKE_MASK(Clear, Store),
 
 		Load_Store = RTACTION_MAKE_MASK(Load, Store),
+
+		Clear_DontStore = RTACTION_MAKE_MASK(Clear, NoAction),
 #undef RTACTION_MAKE_MASK
 	};
 
@@ -54,6 +56,8 @@ namespace platform::Render {
 		ClearDepthStencil_StoreDepthStencil = RTACTION_MAKE_MASK(Clear_Store, Clear_Store),
 
 		LoadDepthStencil_StoreDepthStencil = RTACTION_MAKE_MASK(Load_Store, Load_Store),
+
+		ClearDepthStencil_StoreDepthNotStencil = RTACTION_MAKE_MASK(Clear_Store, Clear_DontStore),
 #undef RTACTION_MAKE_MASK
 	};
 

@@ -14,9 +14,11 @@
 #include "Render/DataStructures.h"
 #include "Render/IFrameBuffer.h"
 #include "Render/DrawEvent.h"
+#include "Render/PipelineStateUtility.h"
 #include "Renderer/PostProcess/PostProcessCombineLUTs.h"
 #include "Renderer/PostProcess/PostProcessToneMap.h"
 #include "Renderer/ScreenSpaceDenoiser.h"
+#include "Renderer/ShadowRendering.h"
 #include "Runtime/DirectionalLight.h"
 #include "Math/RotationMatrix.h"
 #include "Math/ScaleMatrix.h"
@@ -70,6 +72,8 @@ public:
 
 	std::shared_ptr<Texture2D> RayShadowMaskDenoiser;
 	std::shared_ptr<UnorderedAccessView> RayShadowMaskDenoiserUAV;
+
+	std::shared_ptr<Texture2D> ShadowMap;
 
 
 	std::shared_ptr<Texture2D> HDROutput;
@@ -254,6 +258,80 @@ private:
 		const auto SubjectAndReceiverMatrix = WorldToLightScaled * le::ShadowProjectionMatrix(MinSubjectZ, MaxSubjectZ, initializer.WAxis);
 
 		const auto ProjectionMatrix = le::TranslationMatrix(initializer.ShadowTranslation) * SubjectAndReceiverMatrix;
+
+		le::ProjectedShadowInfo ProjectedShadowInfo;
+
+		platform::Render::RenderPassInfo shadowDepth(
+			ShadowMap.get(), platform::Render::DepthStencilTargetActions::ClearDepthStencil_StoreDepthNotStencil);
+
+		ProjectedShadowInfo.PassInfo = &shadowDepth;
+
+		ProjectedShadowInfo.PreShadowTranslation = initializer.ShadowTranslation;
+		ProjectedShadowInfo.SubjectAndReceiverMatrix = SubjectAndReceiverMatrix;
+
+		ProjectedShadowInfo.X = 0;
+		ProjectedShadowInfo.Y = 0;
+		ProjectedShadowInfo.ResolutionX = ShadowMap->GetWidth(0);
+		ProjectedShadowInfo.ResolutionY = ShadowMap->GetHeight(0);
+
+		ProjectedShadowInfo.BorderSize = 0;
+
+		auto& CmdList = platform::Render::GetCommandList();
+
+		SCOPED_GPU_EVENT(CmdList, RenderShadowDepth);
+
+		auto psoInit = le::SetupShadowDepthPass(ProjectedShadowInfo, CmdList);
+
+		for (auto& entity : pEntities->GetRenderables())
+		{
+			auto& layout = entity.GetMesh().GetInputLayout();
+
+			DrawInputLayout(CmdList, psoInit, layout);
+		}
+	}
+
+	void DrawInputLayout(platform::Render::CommandList& CmdList, platform::Render::GraphicsPipelineStateInitializer psoInit, const platform::Render::InputLayout& layout)
+	{
+		psoInit.ShaderPass.VertexDeclaration = layout.GetVertexDeclaration();
+		psoInit.Primitive = layout.GetTopoType();
+
+		platform::Render::SetGraphicsPipelineState(CmdList, psoInit);
+
+		auto num_vertex_streams = layout.GetVertexStreamsSize();
+		for (auto i = 0; i != num_vertex_streams; ++i) {
+			auto& stream = layout.GetVertexStream(i);
+			auto& vb = static_cast<GraphicsBuffer&>(*stream.stream);
+			CmdList.SetVertexBuffer(i, &vb);
+		}
+
+		auto index_stream = layout.GetIndexStream();
+		auto vertex_count = index_stream ? layout.GetNumIndices() : layout.GetNumVertices();
+		auto prim_count = vertex_count;
+		switch (psoInit.Primitive)
+		{
+		case platform::Render::PrimtivteType::LineList:
+			prim_count /= 2;
+			break;
+		case platform::Render::PrimtivteType::TriangleList:
+			prim_count /= 3;
+			break;
+		case platform::Render::PrimtivteType::TriangleStrip:
+			prim_count -= 2;
+			break;
+		}
+
+		auto num_instances = layout.GetVertexStream(0).instance_freq;
+		if (index_stream) {
+			auto num_indices = layout.GetNumIndices();
+			CmdList.DrawIndexedPrimitive(index_stream.get(),
+				layout.GetVertexStart(), 0, layout.GetNumVertices(),
+				layout.GetIndexStart(), prim_count, num_instances
+			);
+		}
+		else {
+			auto num_vertices = layout.GetNumVertices();
+			CmdList.DrawPrimitive(layout.GetVertexStart(), 0, prim_count, num_instances);
+		}
 	}
 
 	void OnPostProcess()
@@ -464,6 +542,8 @@ private:
 
 		RayShadowMask = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_ABGR16F, EA_GPURead | EA_GPUWrite | EA_GPUUnordered, {}));
 		RayShadowMaskDenoiser = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_R32F,EA_GPURead | EA_GPUWrite | EA_GPUUnordered, {}));
+
+		ShadowMap = leo::share_raw(Device.CreateTexture(2048, 2048, 1, 1, EFormat::EF_D32F, EA_GPURead | EA_GPUWrite, {}));
 
 		RayShadowMaskUAV = leo::share_raw(Device.CreateUnorderedAccessView(RayShadowMask.get()));
 		RayShadowMaskDenoiserUAV = leo::share_raw(Device.CreateUnorderedAccessView(RayShadowMaskDenoiser.get()));

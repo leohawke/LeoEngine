@@ -4,8 +4,6 @@
 
 namespace LeoEngine
 {
-	namespace lm = leo::math;
-
 	class ProjectedShadowInitializer
 	{
 	public:

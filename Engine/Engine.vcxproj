@@ -189,6 +189,7 @@
     <ClInclude Include="Core\Threading\TaskScheduler.h" />
     <ClInclude Include="emacro.h" />
     <ClInclude Include="Math\BoxSphereBounds.h" />
+    <ClInclude Include="Math\IntRect.h" />
     <ClInclude Include="Math\InverseRotationMatrix.h" />
     <ClInclude Include="Math\RotationMatrix.h" />
     <ClInclude Include="Math\Rotator.h" />

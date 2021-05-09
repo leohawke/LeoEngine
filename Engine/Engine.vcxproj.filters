@@ -846,6 +846,9 @@
     <ClInclude Include="Renderer\ShadowRendering.h">
       <Filter>Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="Math\IntRect.h">
+      <Filter>Math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
