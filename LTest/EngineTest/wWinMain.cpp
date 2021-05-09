@@ -443,14 +443,16 @@ private:
 			.InvDeviceZToWorldZTransform = LeoEngine::X::CreateInvDeviceZToWorldZTransform(projmatrix),
 		};
 
-		SCOPED_GPU_EVENT(CmdList, ShadowDenoise);
+		{
+			SCOPED_GPU_EVENT(CmdList, ShadowDenoise);
 
-		platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(
-			CmdList,
-			viewinfo,
-			svinput,
-			svoutput
-		);
+			platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(
+				CmdList,
+				viewinfo,
+				svinput,
+				svoutput
+			);
+		}
 
 		RenderShadowDepth();
 	}

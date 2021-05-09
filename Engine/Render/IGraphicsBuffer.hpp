@@ -116,6 +116,11 @@ namespace platform::Render {
 		{
 			return buffer;
 		}
+
+		GraphicsBuffer* Get() const
+		{
+			return buffer.get();
+		}
 	private:
 		GraphicsBufferRef(GraphicsBuffer* InBuffer)
 			:buffer(InBuffer,RObjectDeleter())

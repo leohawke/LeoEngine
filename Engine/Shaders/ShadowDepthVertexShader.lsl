@@ -1,7 +1,10 @@
 (effect
 	(shader
 	"
-		float4x4 ProjectionMatrix;
+		cbuffer ShadowDepthPass
+		{
+			float4x4 ProjectionMatrix;
+		};
 
 
 		void Main(in float3 Position:POSITION,

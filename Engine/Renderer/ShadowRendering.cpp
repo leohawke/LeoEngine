@@ -9,12 +9,14 @@ using namespace platform;
 
 class ShadowDepthVS : public Render::BuiltInShader
 {
-	EXPORTED_BUILTIN_SHADER(ShadowDepthVS);
-
+public:
 	BEGIN_SHADER_PARAMETER_STRUCT(Parameters)
 		SHADER_PARAMETER(lm::float4x4, ProjectionMatrix)
-	END_SHADER_PARAMETER_STRUCT();
+		END_SHADER_PARAMETER_STRUCT();
+
+	EXPORTED_BUILTIN_SHADER(ShadowDepthVS);
 };
+
 
 class ShadowDepthPS : public Render::BuiltInShader
 {
@@ -43,7 +45,8 @@ lr::GraphicsPipelineStateInitializer LeoEngine::SetupShadowDepthPass(const Proje
 
 	Parameters.ProjectionMatrix =lm::transpose(TranslationMatrix(ShadowInfo.PreShadowTranslation) * ShadowInfo.SubjectAndReceiverMatrix);
 
-	Render::SetShaderParameters(CmdList, VertexShader, VertexShader->GetVertexShader(), Parameters);
+	auto ShadowDepthPassUniformBuffer = Render::CreateGraphicsBuffeImmediate(Parameters, Render::Buffer::Usage::SingleFrame);
+	CmdList.SetShaderConstantBuffer(VertexShader->GetVertexShader(), 0, ShadowDepthPassUniformBuffer.Get());
 
 	psoInit.ShaderPass.VertexShader = VertexShader->GetVertexShader();
 	psoInit.ShaderPass.PixelShader = PixelShader->GetPixelShader();
