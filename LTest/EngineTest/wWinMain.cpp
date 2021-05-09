@@ -543,7 +543,7 @@ private:
 		RayShadowMask = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_ABGR16F, EA_GPURead | EA_GPUWrite | EA_GPUUnordered, {}));
 		RayShadowMaskDenoiser = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_R32F,EA_GPURead | EA_GPUWrite | EA_GPUUnordered, {}));
 
-		ShadowMap = leo::share_raw(Device.CreateTexture(2048, 2048, 1, 1, EFormat::EF_D32F, EA_GPURead | EA_GPUWrite, {}));
+		ShadowMap = leo::share_raw(Device.CreateTexture(2048, 2048, 1, 1, EFormat::EF_D32F, EA_GPURead | EA_DSV, {}));
 
 		RayShadowMaskUAV = leo::share_raw(Device.CreateUnorderedAccessView(RayShadowMask.get()));
 		RayShadowMaskDenoiserUAV = leo::share_raw(Device.CreateUnorderedAccessView(RayShadowMaskDenoiser.get()));

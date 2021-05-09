@@ -484,6 +484,7 @@ namespace platform::Render {
 			EA_Raw = 1U <<8,
 
 			EA_RTV = (1U << 9) | EA_GPUWrite,
+			EA_DSV = (1U << 10) | EA_GPUWrite,
 		};
 
 		enum class ClearBinding

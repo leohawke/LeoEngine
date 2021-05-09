@@ -78,6 +78,8 @@ namespace platform::Render {
 		{
 			return 0;
 		}
+
+		static constexpr uint32 MaxIndex = 1;
 	};
 
 	class RenderTarget

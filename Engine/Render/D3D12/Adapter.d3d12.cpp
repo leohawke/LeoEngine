@@ -10,6 +10,7 @@
 #include "Texture.h"
 #include "RootSignature.h"
 #include "HardwareShader.h"
+#include "Utility.h"
 
 namespace Vertex = platform::Render::Vertex;
 namespace Buffer = platform::Render::Buffer;
@@ -129,6 +130,24 @@ namespace platform_ex::Windows::D3D12 {
 			RTVDesc.Texture2D.PlaneSlice = 0;
 
 			texture->SetRenderTargetViewIndex(new RenderTargetView(GetDefaultNodeDevice(), RTVDesc, *texture), RTVIndex);
+		}
+
+		if ((access & platform::Render::EA_DSV) == platform::Render::EA_DSV)
+		{
+			// Create a depth-stencil-view for the texture.
+			D3D12_DEPTH_STENCIL_VIEW_DESC DSVDesc = {};
+			DSVDesc.Format = platform_ex::Windows::D3D12::FindDepthStencilDXGIFormat(texture->GetDXGIFormat());
+			DSVDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+			DSVDesc.Texture2D.MipSlice = 0;
+
+			const bool HasStencil = IsStencilFormat(format);
+
+			for (uint32 AccessType = 0; AccessType != platform::Render::ExclusiveDepthStencil::MaxIndex; ++AccessType)
+			{
+				DSVDesc.Flags = D3D12_DSV_FLAG_NONE;
+
+				texture->SetDepthStencilView(new DepthStencilView(GetDefaultNodeDevice(), DSVDesc, *texture, HasStencil), AccessType);
+			}
 		}
 
 		return texture.release();

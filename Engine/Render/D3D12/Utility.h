@@ -50,6 +50,24 @@ namespace platform_ex::Windows::D3D12 {
 		return InFormat;
 	}
 
+	/** Find the appropriate depth-stencil targetable DXGI format for the given format. */
+	inline DXGI_FORMAT FindDepthStencilDXGIFormat(DXGI_FORMAT InFormat)
+	{
+		switch (InFormat)
+		{
+		case DXGI_FORMAT_R24G8_TYPELESS:
+			return DXGI_FORMAT_D24_UNORM_S8_UINT;
+			// Changing Depth Buffers to 32 bit on Dingo as D24S8 is actually implemented as a 32 bit buffer in the hardware
+		case DXGI_FORMAT_R32G8X24_TYPELESS:
+			return DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+		case DXGI_FORMAT_R32_TYPELESS:
+			return DXGI_FORMAT_D32_FLOAT;
+		case DXGI_FORMAT_R16_TYPELESS:
+			return DXGI_FORMAT_D16_UNORM;
+		};
+		return InFormat;
+	}
+
 	inline uint8 GetPlaneSliceFromViewFormat(DXGI_FORMAT ResourceFormat, DXGI_FORMAT ViewFormat)
 	{
 		// Currently, the only planar resources used are depth-stencil formats
