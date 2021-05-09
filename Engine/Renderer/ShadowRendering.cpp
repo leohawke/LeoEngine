@@ -22,7 +22,7 @@ class ShadowDepthPS : public Render::BuiltInShader
 };
 
 IMPLEMENT_BUILTIN_SHADER(ShadowDepthVS, "ShadowDepthVertexShader.lsl", "Main", platform::Render::VertexShader);
-IMPLEMENT_BUILTIN_SHADER(ShadowDepthVS, "ShadowDepthPixelShader.lsl", "Main", platform::Render::PixelShader);
+IMPLEMENT_BUILTIN_SHADER(ShadowDepthPS, "ShadowDepthPixelShader.lsl", "Main", platform::Render::PixelShader);
 
 
 
