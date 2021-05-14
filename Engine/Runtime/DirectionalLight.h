@@ -12,10 +12,29 @@ namespace LeoEngine
 	class DirectionalLight : public Light
 	{
 	public:
-		void GetProjectedShadowInitializer(const SceneInfo& scene,ProjectedShadowInitializer& initializer) const;
+		int32 FarShadowCascadeCount = 0;
 
-		Sphere GetShadowSplitBounds(const SceneInfo& scene) const;
+		[[cafe::range(0,3)]]
+		int32 DynamicShadowCascades = 3;
 
+		float WholeSceneDynamicShadowRadius = 200;
+	public:
+		void GetProjectedShadowInitializer(const SceneInfo& scene,int32 CascadeIndex, WholeSceneProjectedShadowInitializer& initializer) const;
 
+		uint32 GetNumViewDependentWholeSceneShadows(const SceneInfo& scene) const;
+
+		Sphere GetShadowSplitBounds(const SceneInfo& scene, int32 CascadeIndex,ShadowCascadeSettings* OutCascadeSettings) const;
+
+	private:
+		uint32 GetNumShadowMappedCascades(uint32 MaxShadowCascades) const;
+
+		float GetCSMMaxDistance(int32 MaxShadowCascades) const;
+
+		float GetEffectiveWholeSceneDynamicShadowRadius() const
+		{
+			return WholeSceneDynamicShadowRadius;
+		}
+
+		float GetSplitDistance(const SceneInfo& scene, uint32 SplitIndex) const;
 	};
 }

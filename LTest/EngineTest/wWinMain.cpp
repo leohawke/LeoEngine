@@ -89,6 +89,8 @@ public:
 	float LightHalfAngle = 0.5f;
 	int SamplesPerPixel = 1;
 	unsigned StateFrameIndex = 0;
+
+	std::vector<std::unique_ptr<le::ProjectedShadowInfo>> ShadowInfos;
 private:
 	bool SubWndProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam) override
 	{
@@ -208,7 +210,10 @@ private:
 		OnDrawLights(viewmatrix,projmatrix);
 
 		if(RayShadowMaskDenoiser)
-			pEffect->GetParameter("shadow_tex") = TextureSubresource(RayShadowMaskDenoiser, 0, RayShadowMask->GetArraySize(), 0, RayShadowMaskDenoiser->GetNumMipMaps());
+			pEffect->GetParameter("ssshadow_tex") = TextureSubresource(RayShadowMaskDenoiser, 0, RayShadowMask->GetArraySize(), 0, RayShadowMaskDenoiser->GetNumMipMaps());
+		if (ShadowMap) {
+			pEffect->GetParameter("projshadow_tex") = TextureSubresource(ShadowMap, 0, ShadowMap->GetArraySize(), 0, ShadowMap->GetNumMipMaps());
+		}
 
 		{
 			SCOPED_GPU_EVENT(CmdList, GeometryShading);
@@ -246,48 +251,80 @@ private:
 
 	void RenderShadowDepth()
 	{
-		le::ProjectedShadowInitializer initializer;
-		sun_light.GetProjectedShadowInitializer(scene,initializer);
+		ShadowInfos.clear();
 
-		const auto WorldToLightScaled = initializer.WorldToLight * le::ScaleMatrix(initializer.Scales);
+		//ViewDependentWholeSceneShadowsForView
+		auto ProjectCount = sun_light.GetNumViewDependentWholeSceneShadows(scene);
 
-		const auto MaxSubjectZ = lm::transformpoint(initializer.SubjectBounds.Origin, WorldToLightScaled).z + initializer.SubjectBounds.Radius;
+		std::array<lm::float4x4,8> ProjectionMatrix;
+		for (int32 Index = 0; Index < ProjectCount; ++Index)
+		{
+			const uint32 ShadowBorder = 4;
 
-		const auto MinSubjectZ = (MaxSubjectZ - initializer.SubjectBounds.Radius * 2);
+			const uint32 MaxShadowResolution = 2048;
 
-		const auto SubjectAndReceiverMatrix = WorldToLightScaled * le::ShadowProjectionMatrix(MinSubjectZ, MaxSubjectZ, initializer.WAxis);
+			le::WholeSceneProjectedShadowInitializer initializer;
+			sun_light.GetProjectedShadowInitializer(scene, Index, initializer);
 
-		const auto ProjectionMatrix = le::TranslationMatrix(initializer.ShadowTranslation) * SubjectAndReceiverMatrix;
+			auto& ProjectedShadowInfo = ShadowInfos.emplace_back(std::make_unique<le::ProjectedShadowInfo>());
+			ProjectedShadowInfo->SetupWholeSceneProjection(
+				scene,
+				initializer,
+				MaxShadowResolution - ShadowBorder * 2,
+				MaxShadowResolution - ShadowBorder * 2,
+				ShadowBorder);
 
-		le::ProjectedShadowInfo ProjectedShadowInfo;
+			ProjectionMatrix[std::min(Index,7)] =lm::transpose(le::TranslationMatrix(initializer.ShadowTranslation) * ProjectedShadowInfo->SubjectAndReceiverMatrix);
+		}
 
-		platform::Render::RenderPassInfo shadowDepth(
-			ShadowMap.get(), platform::Render::DepthStencilTargetActions::ClearDepthStencil_StoreDepthNotStencil);
+		//AllocateCSMDepthTargets
+		bool Atlasing = true;
 
-		ProjectedShadowInfo.PassInfo = &shadowDepth;
+		//TODO TextureLayout
+		uint32 LayoutX = 0;
+		uint32 LayoutY = 0;
+		uint32 LayoutWidth = 0;
+		uint32 LayoutHeight = 0;
 
-		ProjectedShadowInfo.PreShadowTranslation = initializer.ShadowTranslation;
-		ProjectedShadowInfo.SubjectAndReceiverMatrix = SubjectAndReceiverMatrix;
+		for (int32 ShadowIndex = 0; ShadowIndex < ShadowInfos.size(); ++ShadowIndex)
+		{
+			auto ElementSizeX = ShadowInfos[ShadowIndex]->ResolutionX + 2 * ShadowInfos[ShadowIndex]->BorderSize;
 
-		ProjectedShadowInfo.X = 0;
-		ProjectedShadowInfo.Y = 0;
-		ProjectedShadowInfo.ResolutionX = ShadowMap->GetWidth(0);
-		ProjectedShadowInfo.ResolutionY = ShadowMap->GetHeight(0);
+			LayoutWidth += ShadowInfos[ShadowIndex]->ResolutionX + 2 * ShadowInfos[ShadowIndex]->BorderSize;
+			LayoutHeight =std::max(LayoutHeight,ShadowInfos[ShadowIndex]->ResolutionY + 2 * ShadowInfos[ShadowIndex]->BorderSize);
 
-		ProjectedShadowInfo.BorderSize = 0;
+			ShadowInfos[ShadowIndex]->X = LayoutX;
+			ShadowInfos[ShadowIndex]->Y = LayoutY;
+
+			LayoutX += ElementSizeX;
+		}
+
+		auto& Device = Context::Instance().GetDevice();
+		ShadowMap = leo::share_raw(Device.CreateTexture(LayoutWidth, LayoutHeight, 1, 1, EFormat::EF_D32F, EA_GPURead | EA_DSV, {}));
+
+		//Frustum Cull
 
 		auto& CmdList = platform::Render::GetCommandList();
-
-		SCOPED_GPU_EVENT(CmdList, RenderShadowDepth);
-
-		auto psoInit = le::SetupShadowDepthPass(ProjectedShadowInfo, CmdList);
-
-		for (auto& entity : pEntities->GetRenderables())
+		SCOPED_GPU_EVENTF(CmdList, "ShadowDepth Atlas %dx%d", LayoutWidth, LayoutHeight);
+		for (int32 ShadowIndex = 0; ShadowIndex < ShadowInfos.size(); ++ShadowIndex)
 		{
-			auto& layout = entity.GetMesh().GetInputLayout();
+			SCOPED_GPU_EVENTF(CmdList, "ShadowIndex%d", ShadowIndex);
 
-			DrawInputLayout(CmdList, psoInit, layout);
+			auto psoInit = le::SetupShadowDepthPass(*ShadowInfos[ShadowIndex], CmdList);
+
+			for (auto& entity : pEntities->GetRenderables())
+			{
+				auto& layout = entity.GetMesh().GetInputLayout();
+
+				DrawInputLayout(CmdList, psoInit, layout);
+			}
 		}
+
+		//const auto ProjectionMatrix = le::TranslationMatrix(initializer.ShadowTranslation) * ProjectedShadowInfo.SubjectAndReceiverMatrix;
+
+		auto pEffect = platform::X::LoadEffect("ForwardDirectLightShading");
+
+		pEffect->GetParameter("ReceiverMatrix") = ProjectionMatrix;
 	}
 
 	void DrawInputLayout(platform::Render::CommandList& CmdList, platform::Render::GraphicsPipelineStateInitializer psoInit, const platform::Render::InputLayout& layout)
@@ -537,15 +574,13 @@ private:
 		directioal_light.color = lm::float3(1.0f, 1.0f, 1.0f);
 		lights.push_back(directioal_light);
 
-		sun_light.SetTransform(le::RotationMatrix(le::Rotator(directioal_light.direction)));
+		sun_light.SetTransform(le::RotationMatrix(le::Rotator(-directioal_light.direction)));
 
 
 		pLightConstatnBuffer = leo::share_raw(Device.CreateConstanBuffer(Buffer::Usage::Dynamic, EAccessHint::EA_GPURead | EAccessHint::EA_GPUStructured, sizeof(DirectLight)*lights.size(), static_cast<EFormat>(sizeof(DirectLight)),lights.data()));
 
 		RayShadowMask = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_ABGR16F, EA_GPURead | EA_GPUWrite | EA_GPUUnordered, {}));
 		RayShadowMaskDenoiser = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_R32F,EA_GPURead | EA_GPUWrite | EA_GPUUnordered, {}));
-
-		ShadowMap = leo::share_raw(Device.CreateTexture(2048, 2048, 1, 1, EFormat::EF_D32F, EA_GPURead | EA_DSV, {}));
 
 		RayShadowMaskUAV = leo::share_raw(Device.CreateUnorderedAccessView(RayShadowMask.get()));
 		RayShadowMaskDenoiserUAV = leo::share_raw(Device.CreateUnorderedAccessView(RayShadowMaskDenoiser.get()));

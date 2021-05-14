@@ -3,6 +3,8 @@
 #include <LBase/lmath.hpp>
 #include "Render/ICommandList.h"
 #include "Math/IntRect.h"
+#include "Runtime/SceneInfo.h"
+#include "Runtime/SceneClasses.h"
 
 namespace LeoEngine
 {
@@ -16,7 +18,13 @@ namespace LeoEngine
 
 		lm::float4x4 SubjectAndReceiverMatrix;
 
-		lr::RenderPassInfo* PassInfo;
+		lr::Texture* DepthTarget;
+
+		float MaxSubjectZ;
+		float MinSubjectZ;
+
+		ShadowCascadeSettings CascadeSettings;
+
 
 		/**
 		* X and Y position of the shadow in the appropriate depth buffer.  These are only initialized after the shadow has been allocated.
@@ -34,6 +42,8 @@ namespace LeoEngine
 
 		/** Size of the border, if any, used to allow filtering without clamping for shadows stored in an atlas. */
 		uint32 BorderSize;
+
+		void SetupWholeSceneProjection(const SceneInfo& scne, const WholeSceneProjectedShadowInitializer& ShadowInfo, uint32 InResolutionX, uint32 InResoultionY, uint32 InBorderSize);
 	};
 
 	lr::GraphicsPipelineStateInitializer SetupShadowDepthPass(const ProjectedShadowInfo& ShadowInfo, lr::CommandList& CmdList);

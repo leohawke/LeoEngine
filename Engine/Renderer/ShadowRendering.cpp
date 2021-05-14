@@ -3,6 +3,10 @@
 #include "Render/ShaderParamterTraits.hpp"
 #include "Render/ShaderParameterStruct.h"
 #include "Math/TranslationMatrix.h"
+#include "Math/RotationMatrix.h"
+#include "Math/ScaleMatrix.h"
+#include "Math/ShadowProjectionMatrix.h"
+#include "Math/TranslationMatrix.h"
 
 using namespace LeoEngine;
 using namespace platform;
@@ -26,6 +30,22 @@ class ShadowDepthPS : public Render::BuiltInShader
 IMPLEMENT_BUILTIN_SHADER(ShadowDepthVS, "ShadowDepthVertexShader.lsl", "Main", platform::Render::VertexShader);
 IMPLEMENT_BUILTIN_SHADER(ShadowDepthPS, "ShadowDepthPixelShader.lsl", "Main", platform::Render::PixelShader);
 
+
+void ProjectedShadowInfo::SetupWholeSceneProjection(const SceneInfo& scne, const WholeSceneProjectedShadowInitializer& initializer, uint32 InResolutionX, uint32 InResoultionY, uint32 InBorderSize)
+{
+	ResolutionX = InResolutionX;
+	ResolutionY = InResoultionY;
+	BorderSize = InBorderSize;
+	CascadeSettings = initializer.CascadeSettings;
+
+	const auto WorldToLightScaled = initializer.WorldToLight * ScaleMatrix(initializer.Scales);
+
+	MaxSubjectZ = lm::transformpoint(initializer.SubjectBounds.Origin, WorldToLightScaled).z + initializer.SubjectBounds.Radius;
+
+	MinSubjectZ = (MaxSubjectZ - initializer.SubjectBounds.Radius * 2);
+
+	SubjectAndReceiverMatrix = WorldToLightScaled * ShadowProjectionMatrix(MinSubjectZ, MaxSubjectZ, initializer.WAxis);
+}
 
 
 lr::GraphicsPipelineStateInitializer LeoEngine::SetupShadowDepthPass(const ProjectedShadowInfo& ShadowInfo, lr::CommandList& CmdList)
