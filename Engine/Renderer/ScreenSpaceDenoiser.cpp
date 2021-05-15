@@ -401,7 +401,7 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		SSDSpatialAccumulationCS::Parameters Parameters;
 
 		setup_common_parameters(Parameters);
-		Parameters.KernelSpreadFactor = 8 * (1 << PreConvolutionId);
+		Parameters.KernelSpreadFactor =static_cast<float>(8 * (1 << PreConvolutionId));
 
 		auto uav = Render::shared_raw_robject(Device.CreateUnorderedAccessView(convolution.get()));
 		Parameters.SignalInput_Textures_0 = SignalHistroy;

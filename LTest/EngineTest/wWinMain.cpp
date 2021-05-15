@@ -254,7 +254,7 @@ private:
 		ShadowInfos.clear();
 
 		//ViewDependentWholeSceneShadowsForView
-		auto ProjectCount = sun_light.GetNumViewDependentWholeSceneShadows(scene);
+		auto ProjectCount =static_cast<int32>(sun_light.GetNumViewDependentWholeSceneShadows(scene));
 
 		std::array<lm::float4x4,8> ProjectionMatrix;
 		for (int32 Index = 0; Index < ProjectCount; ++Index)
@@ -304,12 +304,25 @@ private:
 
 		//Frustum Cull
 
+		//RenderShadowDepthMapAtlases
+		auto BeginShadowRenderPass = [this](platform::Render::CommandList& CmdList, bool Clear)
+		{
+			platform::Render::RenderTargetLoadAction DepthLoadAction = Clear ? RenderTargetLoadAction::Clear : RenderTargetLoadAction::Load;
+
+			platform::Render::RenderPassInfo RPInfo(ShadowMap.get(), MakeDepthStencilTargetActions(MakeRenderTargetActions(DepthLoadAction, RenderTargetStoreAction::Store),
+				RenderTargetActions::DontLoad_DontStore));
+
+			CmdList.BeginRenderPass(RPInfo, "ShadowDepth Atlas");
+		};
+
 		auto& CmdList = platform::Render::GetCommandList();
 		SCOPED_GPU_EVENTF(CmdList, "ShadowDepth Atlas %dx%d", LayoutWidth, LayoutHeight);
+		BeginShadowRenderPass(CmdList, true);
 		for (int32 ShadowIndex = 0; ShadowIndex < ShadowInfos.size(); ++ShadowIndex)
 		{
 			SCOPED_GPU_EVENTF(CmdList, "ShadowIndex%d", ShadowIndex);
 
+			BeginShadowRenderPass(CmdList, false);
 			auto psoInit = le::SetupShadowDepthPass(*ShadowInfos[ShadowIndex], CmdList);
 
 			for (auto& entity : pEntities->GetRenderables())
@@ -427,7 +440,7 @@ private:
 			.SVPositionToWorld = leo::math::transpose(SVPositionToWorld),
 			.WorldCameraOrigin = camera.GetEyePos(),
 			.BufferSizeAndInvSize = leo::math::float4(width,height,1.0f/width,1.0f/height),
-			.NormalBias = 0.1,
+			.NormalBias = 0.1f,
 			.LightDirection = lights[0].direction,
 			.SourceRadius = sinf(LightHalfAngle * 3.14159265f / 180),
 			.SamplesPerPixel =static_cast<unsigned>(SamplesPerPixel),

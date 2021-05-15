@@ -35,12 +35,17 @@ namespace platform::Render {
 #undef RTACTION_MAKE_MASK
 	};
 
-	inline RenderTargetLoadAction GetLoadAction(RenderTargetActions Action)
+	inline constexpr RenderTargetActions MakeRenderTargetActions(RenderTargetLoadAction Load, RenderTargetStoreAction Store)
+	{
+		return (RenderTargetActions)(((uint8)Load << (uint8)RenderTargetActions::LoadOpMask) | (uint8)Store);
+	}
+
+	inline constexpr RenderTargetLoadAction GetLoadAction(RenderTargetActions Action)
 	{
 		return (RenderTargetLoadAction)((uint8)Action >> (uint8)RenderTargetActions::LoadOpMask);
 	}
 
-	inline RenderTargetStoreAction GetStoreAction(RenderTargetActions Action)
+	inline constexpr RenderTargetStoreAction GetStoreAction(RenderTargetActions Action)
 	{
 		return (RenderTargetStoreAction)((uint8)Action & ((1 << (uint8)RenderTargetActions::LoadOpMask) - 1));
 	}
@@ -61,12 +66,17 @@ namespace platform::Render {
 #undef RTACTION_MAKE_MASK
 	};
 
-	inline RenderTargetActions GetDepthActions(DepthStencilTargetActions Action)
+	inline constexpr DepthStencilTargetActions MakeDepthStencilTargetActions(const RenderTargetActions Depth, const RenderTargetActions Stencil)
+	{
+		return (DepthStencilTargetActions)(((uint8)Depth << (uint8)DepthStencilTargetActions::DepthMask) | (uint8)Stencil);
+	}
+
+	inline constexpr RenderTargetActions GetDepthActions(DepthStencilTargetActions Action)
 	{
 		return (RenderTargetActions)((uint8)Action >> (uint8)DepthStencilTargetActions::DepthMask);
 	}
 
-	inline RenderTargetActions GetStencilActions(DepthStencilTargetActions Action)
+	inline constexpr RenderTargetActions GetStencilActions(DepthStencilTargetActions Action)
 	{
 		return (RenderTargetActions)((uint8)Action & ((1 << (uint8)DepthStencilTargetActions::DepthMask) - 1));
 	}

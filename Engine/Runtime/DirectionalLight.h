@@ -14,7 +14,6 @@ namespace LeoEngine
 	public:
 		int32 FarShadowCascadeCount = 0;
 
-		[[cafe::range(0,3)]]
 		int32 DynamicShadowCascades = 3;
 
 		float WholeSceneDynamicShadowRadius = 200;

@@ -1,9 +1,12 @@
 #pragma once
 
 #include "Math/BoxSphereBounds.h"
+#include <LBase/linttype.hpp>
 
 namespace LeoEngine
 {
+	using namespace leo::inttype;
+
 	constexpr float SCENE_MAX = 2097152.0;
 
 	class ShadowCascadeSettings

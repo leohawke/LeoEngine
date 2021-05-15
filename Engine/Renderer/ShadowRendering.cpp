@@ -52,8 +52,6 @@ lr::GraphicsPipelineStateInitializer LeoEngine::SetupShadowDepthPass(const Proje
 {
 	lr::GraphicsPipelineStateInitializer psoInit;
 
-	CmdList.BeginRenderPass(*ShadowInfo.PassInfo, "ShadowDepth");
-
 	CmdList.FillRenderTargetsInfo(psoInit);
 
 	CmdList.SetViewport(ShadowInfo.X, ShadowInfo.Y, 0,ShadowInfo.ResolutionX, ShadowInfo.ResolutionY,1);
