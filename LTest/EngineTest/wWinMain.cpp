@@ -156,6 +156,9 @@ private:
 
 		auto viewproj = viewmatrix * projmatrix;
 
+		//SetupViewFrustum
+		scene.NearClippingDistance = -projmatrix[3][2];
+
 		auto pEffect = platform::X::LoadEffect("ForwardDirectLightShading");
 		auto pPreZEffect = platform::X::LoadEffect("PreZ");
 

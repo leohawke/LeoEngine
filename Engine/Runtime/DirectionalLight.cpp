@@ -22,7 +22,9 @@ uint32 DirectionalLight::GetNumViewDependentWholeSceneShadows(const SceneInfo& s
 {
 	auto ClampedFarShadowCascadeCount = std::min<uint32>(MaxNumFarShadowCascades, FarShadowCascadeCount);
 
-	return uint32();
+	auto TotalCascades = GetNumShadowMappedCascades(scene.MaxShadowCascades) + ClampedFarShadowCascadeCount;
+
+	return TotalCascades;
 }
 
 Sphere DirectionalLight::GetShadowSplitBounds(const SceneInfo& scene, int32 CascadeIndex, ShadowCascadeSettings* OutCascadeSettings) const
@@ -70,5 +72,24 @@ float DirectionalLight::GetCSMMaxDistance(int32 MaxShadowCascades) const
 
 float DirectionalLight::GetSplitDistance(const SceneInfo& scene, uint32 SplitIndex) const
 {
+	auto NumCascades = GetNumShadowMappedCascades(scene.MaxShadowCascades);
+
+	float CascadeDistance = GetCSMMaxDistance(scene.MaxShadowCascades);
+
+	float ShadowNear = scene.NearClippingDistance;
+
+	const float CascadeDistribution = GetEffectiveCascadeDistributionExponent();
+
+	if (SplitIndex > NumCascades)
+	{
+		auto ClampedFarShadowCascadeCount = std::min<uint32>(MaxNumFarShadowCascades, FarShadowCascadeCount);
+
+		return CascadeDistance + ComputeAccumulatedScale(CascadeDistribution, SplitIndex- NumCascades, ClampedFarShadowCascadeCount) * (FarShadowDistance - CascadeDistance);
+	}
+	else
+	{
+		return ShadowNear + ComputeAccumulatedScale(CascadeDistribution, SplitIndex, NumCascades) * (CascadeDistance - ShadowNear);
+	}
+
 	return 0.0f;
 }

@@ -14,6 +14,8 @@ namespace LeoEngine
 		lm::float3 AABBMin;
 		lm::float3 AABBMax;
 
+		float NearClippingDistance;
+
 		int32 MaxShadowCascades = 10;
 	};
 }

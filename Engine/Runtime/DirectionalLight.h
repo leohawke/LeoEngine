@@ -17,6 +17,10 @@ namespace LeoEngine
 		int32 DynamicShadowCascades = 3;
 
 		float WholeSceneDynamicShadowRadius = 200;
+
+		float CascadeDistributionExponent = 3.0f;
+
+		float FarShadowDistance = 3000.0f;
 	public:
 		void GetProjectedShadowInitializer(const SceneInfo& scene,int32 CascadeIndex, WholeSceneProjectedShadowInitializer& initializer) const;
 
@@ -35,5 +39,35 @@ namespace LeoEngine
 		}
 
 		float GetSplitDistance(const SceneInfo& scene, uint32 SplitIndex) const;
+
+		float GetEffectiveCascadeDistributionExponent() const
+		{
+			return CascadeDistributionExponent;
+		}
+	public:
+		static constexpr float ComputeAccumulatedScale(float Exponent, int32 CascadeIndex, int32 CascadeCount)
+		{
+			if (CascadeIndex <= 0)
+			{
+				return 0.0f;
+			}
+
+			float CurrentScale = 1;
+			float TotalScale = 0.0f;
+			float Ret = 0.0f;
+
+			// lame implementation for simplicity, CascadeIndex is small anyway
+			for (int i = 0; i < CascadeCount; ++i)
+			{
+				if (i < CascadeIndex)
+				{
+					Ret += CurrentScale;
+				}
+				TotalScale += CurrentScale;
+				CurrentScale *= Exponent;
+			}
+
+			return Ret / TotalScale;
+		}
 	};
 }
