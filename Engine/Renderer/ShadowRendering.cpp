@@ -33,6 +33,8 @@ IMPLEMENT_BUILTIN_SHADER(ShadowDepthPS, "ShadowDepthPixelShader.lsl", "Main", pl
 
 void ProjectedShadowInfo::SetupWholeSceneProjection(const SceneInfo& scne, const WholeSceneProjectedShadowInitializer& initializer, uint32 InResolutionX, uint32 InResoultionY, uint32 InBorderSize)
 {
+	PreShadowTranslation = initializer.ShadowTranslation;
+
 	ResolutionX = InResolutionX;
 	ResolutionY = InResoultionY;
 	BorderSize = InBorderSize;
@@ -45,23 +47,31 @@ void ProjectedShadowInfo::SetupWholeSceneProjection(const SceneInfo& scne, const
 	MinSubjectZ = (MaxSubjectZ - initializer.SubjectBounds.Radius * 2);
 
 	SubjectAndReceiverMatrix = WorldToLightScaled * ShadowProjectionMatrix(MinSubjectZ, MaxSubjectZ, initializer.WAxis);
+
+	ShadowBounds = Sphere(-initializer.ShadowTranslation, initializer.SubjectBounds.Radius);
 }
 
 
-lr::GraphicsPipelineStateInitializer LeoEngine::SetupShadowDepthPass(const ProjectedShadowInfo& ShadowInfo, lr::CommandList& CmdList)
+lr::GraphicsPipelineStateInitializer ProjectedShadowInfo::SetupShadowDepthPass(lr::CommandList& CmdList)
 {
 	lr::GraphicsPipelineStateInitializer psoInit;
 
 	CmdList.FillRenderTargetsInfo(psoInit);
 
-	CmdList.SetViewport(ShadowInfo.X, ShadowInfo.Y, 0,ShadowInfo.ResolutionX, ShadowInfo.ResolutionY,1);
+	CmdList.SetViewport(
+		X + BorderSize, 
+		Y + BorderSize,
+		0, 
+		X + BorderSize +ResolutionX,
+		Y + BorderSize +ResolutionY,
+		1);
 
 	auto VertexShader = Render::GetBuiltInShaderMap()->GetShader<ShadowDepthVS>();
 	auto PixelShader = Render::GetBuiltInShaderMap()->GetShader<ShadowDepthPS>();
 
 	ShadowDepthVS::Parameters Parameters;
 
-	Parameters.ProjectionMatrix =lm::transpose(TranslationMatrix(ShadowInfo.PreShadowTranslation) * ShadowInfo.SubjectAndReceiverMatrix);
+	Parameters.ProjectionMatrix =lm::transpose(TranslationMatrix(PreShadowTranslation) * SubjectAndReceiverMatrix);
 
 	auto ShadowDepthPassUniformBuffer = Render::CreateGraphicsBuffeImmediate(Parameters, Render::Buffer::Usage::SingleFrame);
 	CmdList.SetShaderConstantBuffer(VertexShader->GetVertexShader(), 0, ShadowDepthPassUniformBuffer.Get());

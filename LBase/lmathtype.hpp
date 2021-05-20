@@ -786,6 +786,11 @@ namespace leo {
 				return r[row];
 			}
 
+			float3 GetColumn(int32 i) const noexcept
+			{
+				return float3(r[0][i], r[1][i], r[2][i]);
+			}
+
 			explicit float4x4(const float* t) noexcept {
 				std::memcpy(r.data(), t, sizeof(float) * 4 * 4);
 			}

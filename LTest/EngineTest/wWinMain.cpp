@@ -24,6 +24,8 @@
 #include "Math/ScaleMatrix.h"
 #include "Math/ShadowProjectionMatrix.h"
 #include "Math/TranslationMatrix.h"
+#include "Engine/Core/Coroutine/WhenAllReady.h"
+#include "Engine/Core/Coroutine/SyncWait.h"
 
 #include "LFramework/Win32/LCLib/Mingw32.h"
 #include "LFramework/Helper/ShellHelper.h"
@@ -158,6 +160,9 @@ private:
 
 		//SetupViewFrustum
 		scene.NearClippingDistance = -projmatrix[3][2];
+		scene.ViewMatrix = viewmatrix;
+		scene.ProjectionMatrix = projmatrix;
+		scene.ViewOrigin = camera.GetEyePos();
 
 		auto pEffect = platform::X::LoadEffect("ForwardDirectLightShading");
 		auto pPreZEffect = platform::X::LoadEffect("PreZ");
@@ -252,6 +257,45 @@ private:
 		return Context::Instance().GetScreenFrame()->Attached(FrameBuffer::Target0);
 	}
 
+	float Square(float v)
+	{
+		return v * v;
+	}
+
+	bool SphereAABBIntersection(const lm::float3& SphereCenter, const float RadiusSquared, const lm::float3& Min,const lm::float3& Max)
+	{
+		// Accumulates the distance as we iterate axis
+		float DistSquared = 0.f;
+		// Check each axis for min/max and add the distance accordingly
+		// NOTE: Loop manually unrolled for > 2x speed up
+		if (SphereCenter.x < Min.x)
+		{
+			DistSquared += Square(SphereCenter.x - Min.x);
+		}
+		else if (SphereCenter.x > Max.x)
+		{
+			DistSquared += Square(SphereCenter.x - Max.x);
+		}
+		if (SphereCenter.y < Min.y)
+		{
+			DistSquared += Square(SphereCenter.y - Min.y);
+		}
+		else if (SphereCenter.y > Max.y)
+		{
+			DistSquared += Square(SphereCenter.y - Max.y);
+		}
+		if (SphereCenter.z < Min.z)
+		{
+			DistSquared += Square(SphereCenter.z - Min.z);
+		}
+		else if (SphereCenter.z > Max.z)
+		{
+			DistSquared += Square(SphereCenter.z - Max.z);
+		}
+		// If the distance is less than or equal to the radius, they intersect
+		return DistSquared <= RadiusSquared;
+	}
+
 	void RenderShadowDepth()
 	{
 		ShadowInfos.clear();
@@ -303,10 +347,45 @@ private:
 		}
 
 		auto& Device = Context::Instance().GetDevice();
-		ShadowMap = leo::share_raw(Device.CreateTexture(LayoutWidth, LayoutHeight, 1, 1, EFormat::EF_D32F, EA_GPURead | EA_DSV, {}));
+		if(!ShadowMap || ShadowMap->GetWidth(0) < LayoutWidth || ShadowMap->GetHeight(0) < LayoutHeight)
+			ShadowMap = leo::share_raw(Device.CreateTexture(LayoutWidth, LayoutHeight, 1, 1, EFormat::EF_D32F, EA_GPURead | EA_DSV, {}));
 
 		//Frustum Cull
+		std::vector<std::vector<const Entity*>> Subjects { ShadowInfos.size() };
 
+		{
+			std::vector<leo::coroutine::Task<>> taskes;
+
+			for (int32 ShadowIndex = 0; ShadowIndex < ShadowInfos.size(); ++ShadowIndex)
+			{
+				taskes.emplace_back([this,&Subjects](int ShadowIndex)->leo::coroutine::Task<void> {
+					for (int32 PrimitiveIndex = 0; PrimitiveIndex < pEntities->GetRenderables().size(); ++PrimitiveIndex)
+					{
+						auto& Primitive = pEntities->GetRenderables()[PrimitiveIndex];
+
+						le::Sphere ShadowBounds = ShadowInfos[ShadowIndex]->ShadowBounds;
+
+						le::BoxSphereBounds PrimitiveBounds;
+						PrimitiveBounds.Origin = (Primitive.GetMesh().GetBoundingMin() + Primitive.GetMesh().GetBoundingMax()) / 2;
+						PrimitiveBounds.Extent = (Primitive.GetMesh().GetBoundingMax() - Primitive.GetMesh().GetBoundingMin()) / 2;
+						PrimitiveBounds.Radius = lm::length(PrimitiveBounds.Extent);
+
+						const auto LightDirection = sun_light.GetDirection();
+						const auto PrimitiveToShadowCenter = ShadowBounds.Center - PrimitiveBounds.Origin;
+						const auto ProjectedDistanceFromShadowOriginAlongLightDir = lm::dot(PrimitiveToShadowCenter, LightDirection);
+						const auto PrimitiveDistanceFromCylinderAxisSq = lm::length_sq(LightDirection * (-ProjectedDistanceFromShadowOriginAlongLightDir) + PrimitiveToShadowCenter);
+						const auto CombinedRadiusSq = Square(ShadowBounds.W + PrimitiveBounds.Radius);
+						if (PrimitiveDistanceFromCylinderAxisSq < CombinedRadiusSq)
+						{
+							Subjects[ShadowIndex].emplace_back(&Primitive);
+						}
+					}
+					co_return;
+					}(ShadowIndex));
+			}
+
+			leo::coroutine::SyncWait(leo::coroutine::WhenAllReady(std::move(taskes)));
+		}
 		//RenderShadowDepthMapAtlases
 		auto BeginShadowRenderPass = [this](platform::Render::CommandList& CmdList, bool Clear)
 		{
@@ -326,11 +405,11 @@ private:
 			SCOPED_GPU_EVENTF(CmdList, "ShadowIndex%d", ShadowIndex);
 
 			BeginShadowRenderPass(CmdList, false);
-			auto psoInit = le::SetupShadowDepthPass(*ShadowInfos[ShadowIndex], CmdList);
+			auto psoInit = ShadowInfos[ShadowIndex]->SetupShadowDepthPass( CmdList);
 
-			for (auto& entity : pEntities->GetRenderables())
+			for (auto pEntity : Subjects[ShadowIndex])
 			{
-				auto& layout = entity.GetMesh().GetInputLayout();
+				auto& layout = pEntity->GetMesh().GetInputLayout();
 
 				DrawInputLayout(CmdList, psoInit, layout);
 			}

@@ -3,6 +3,7 @@
 #include <LBase/lmath.hpp>
 #include "Render/ICommandList.h"
 #include "Math/IntRect.h"
+#include "Math/Sphere.h"
 #include "Runtime/SceneInfo.h"
 #include "Runtime/SceneClasses.h"
 
@@ -22,6 +23,8 @@ namespace LeoEngine
 
 		float MaxSubjectZ;
 		float MinSubjectZ;
+
+		Sphere ShadowBounds;
 
 		ShadowCascadeSettings CascadeSettings;
 
@@ -44,7 +47,7 @@ namespace LeoEngine
 		uint32 BorderSize;
 
 		void SetupWholeSceneProjection(const SceneInfo& scne, const WholeSceneProjectedShadowInitializer& ShadowInfo, uint32 InResolutionX, uint32 InResoultionY, uint32 InBorderSize);
-	};
 
-	lr::GraphicsPipelineStateInitializer SetupShadowDepthPass(const ProjectedShadowInfo& ShadowInfo, lr::CommandList& CmdList);
+		lr::GraphicsPipelineStateInitializer SetupShadowDepthPass(lr::CommandList& CmdList);
+	};
 }

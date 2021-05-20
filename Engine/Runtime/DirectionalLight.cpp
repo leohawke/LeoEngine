@@ -29,19 +29,35 @@ uint32 DirectionalLight::GetNumViewDependentWholeSceneShadows(const SceneInfo& s
 
 Sphere DirectionalLight::GetShadowSplitBounds(const SceneInfo& scene, int32 CascadeIndex, ShadowCascadeSettings* OutCascadeSettings) const
 {
-	auto NumTotalCascade = GetNumViewDependentWholeSceneShadows(scene);
+	auto NumTotalCascades = GetNumViewDependentWholeSceneShadows(scene);
 
 	const uint32 ShadowSplitIndex = CascadeIndex;
 
 	float SplitNear = GetSplitDistance(scene, ShadowSplitIndex);
 	float SplitFar = GetSplitDistance(scene, ShadowSplitIndex+1);
 
-	auto Center = (scene.AABBMin + scene.AABBMax) / 2.0f;
-	auto Radius = lm::length(scene.AABBMax - scene.AABBMin) / 2;
+	float LocalCascadeTransitionFraction = CascadeTransitionFraction * GetShadowTransitionScale();
 
-	Sphere CascadeSpere(Center, Radius);
+	float FadeExtension = (SplitFar - SplitNear) * LocalCascadeTransitionFraction;
 
-	return CascadeSpere;
+	// Add the fade region to the end of the subfrustum, if this is not the last cascade.
+	if ((int32)ShadowSplitIndex < (int32)NumTotalCascades - 1)
+	{
+		SplitFar += FadeExtension;
+	}
+
+	if (OutCascadeSettings)
+	{
+		OutCascadeSettings->SplitNear = SplitNear;
+		OutCascadeSettings->SplitFar = SplitFar;
+		OutCascadeSettings->ShadowSplitIndex = (int32)ShadowSplitIndex;
+	}
+
+	const float BoundsCalcNear = SplitNear;
+
+	const Sphere CascadeSphere = GetShadowSplitBoundsDepthRange(scene, scene.ViewOrigin, BoundsCalcNear, SplitFar, OutCascadeSettings);
+
+	return CascadeSphere;
 }
 
 uint32 DirectionalLight::GetNumShadowMappedCascades(uint32 MaxShadowCascades) const
@@ -93,3 +109,70 @@ float DirectionalLight::GetSplitDistance(const SceneInfo& scene, uint32 SplitInd
 
 	return 0.0f;
 }
+
+Sphere DirectionalLight::GetShadowSplitBoundsDepthRange(const SceneInfo& scene, lm::float3 ViewOrigin, float SplitNear, float SplitFar, ShadowCascadeSettings* OutCascadeSettings) const
+{
+	auto ViewMatrix = scene.ViewMatrix;
+
+	const auto CameraDirection = ViewMatrix.GetColumn(2);
+
+	float Aspect = scene.ProjectionMatrix[1][1] / scene.ProjectionMatrix[0][0];
+
+	float HalfVerticalFOV = std::atan(1.0f / scene.ProjectionMatrix[1][1]);
+	float HalfHorizontalFOV = std::atan(1.0f / scene.ProjectionMatrix[0][0]);
+
+	float AsymmetricFOVScaleX = scene.ProjectionMatrix[2][0];
+	float AsymmetricFOVScaleY = scene.ProjectionMatrix[2][1];
+
+	// Near plane
+	const float StartHorizontalTotalLength = SplitNear * std::tan(HalfHorizontalFOV);
+	const float StartVerticalTotalLength = SplitNear * std::tan(HalfVerticalFOV);
+	const lm::float3 StartCameraLeftOffset = ViewMatrix.GetColumn(0) * -StartHorizontalTotalLength * (1 + AsymmetricFOVScaleX);
+	const lm::float3 StartCameraRightOffset = ViewMatrix.GetColumn(0) * StartHorizontalTotalLength * (1 - AsymmetricFOVScaleX);
+	const lm::float3 StartCameraBottomOffset = ViewMatrix.GetColumn(1) * -StartVerticalTotalLength * (1 + AsymmetricFOVScaleY);
+	const lm::float3 StartCameraTopOffset = ViewMatrix.GetColumn(1) * StartVerticalTotalLength * (1 - AsymmetricFOVScaleY);
+	// Far plane
+	const float EndHorizontalTotalLength = SplitFar * std::tan(HalfHorizontalFOV);
+	const float EndVerticalTotalLength = SplitFar * std::tan(HalfVerticalFOV);
+	const lm::float3 EndCameraLeftOffset = ViewMatrix.GetColumn(0) * -EndHorizontalTotalLength * (1 + AsymmetricFOVScaleX);
+	const lm::float3 EndCameraRightOffset = ViewMatrix.GetColumn(0) * EndHorizontalTotalLength * (1 - AsymmetricFOVScaleX);
+	const lm::float3 EndCameraBottomOffset = ViewMatrix.GetColumn(1) * -EndVerticalTotalLength * (1 + AsymmetricFOVScaleY);
+	const lm::float3 EndCameraTopOffset = ViewMatrix.GetColumn(1) * EndVerticalTotalLength * (1 - AsymmetricFOVScaleY);
+
+	// Get the 8 corners of the cascade's camera frustum, in world space
+	lm::float3 CascadeFrustumVerts[8];
+	CascadeFrustumVerts[0] = ViewOrigin + CameraDirection * SplitNear + StartCameraRightOffset + StartCameraTopOffset;    // 0 Near Top    Right
+	CascadeFrustumVerts[1] = ViewOrigin + CameraDirection * SplitNear + StartCameraRightOffset + StartCameraBottomOffset; // 1 Near Bottom Right
+	CascadeFrustumVerts[2] = ViewOrigin + CameraDirection * SplitNear + StartCameraLeftOffset + StartCameraTopOffset;     // 2 Near Top    Left
+	CascadeFrustumVerts[3] = ViewOrigin + CameraDirection * SplitNear + StartCameraLeftOffset + StartCameraBottomOffset;  // 3 Near Bottom Left
+	CascadeFrustumVerts[4] = ViewOrigin + CameraDirection * SplitFar + EndCameraRightOffset + EndCameraTopOffset;       // 4 Far  Top    Right
+	CascadeFrustumVerts[5] = ViewOrigin + CameraDirection * SplitFar + EndCameraRightOffset + EndCameraBottomOffset;    // 5 Far  Bottom Right
+	CascadeFrustumVerts[6] = ViewOrigin + CameraDirection * SplitFar + EndCameraLeftOffset + EndCameraTopOffset;       // 6 Far  Top    Left
+	CascadeFrustumVerts[7] = ViewOrigin + CameraDirection * SplitFar + EndCameraLeftOffset + EndCameraBottomOffset;    // 7 Far  Bottom Left
+
+	// Calculate the ideal bounding sphere for the subfrustum.
+	//https://lxjk.github.io/2017/04/15/Calculate-Minimal-Bounding-Sphere-of-Frustum.html
+
+	float k = std::sqrt(1 + Aspect * Aspect) * std::tan(HalfHorizontalFOV);
+
+	Sphere CascadeSphere(ViewOrigin + CameraDirection * SplitFar, SplitFar*k);
+
+	float k2 = k * k;
+	if (k2 < (SplitFar - SplitNear) / (SplitFar + SplitNear))
+	{
+		float k4 = k2 * k2;
+
+		float CentreZ = 0.5f * (SplitFar + SplitNear) * (1 + k2);
+
+		CascadeSphere.Center = ViewOrigin + CameraDirection * CentreZ;
+
+		CascadeSphere.W = 0.5f * std::sqrt(
+			(SplitFar - SplitNear)* (SplitFar - SplitNear)+
+			2*(SplitFar* SplitFar+ SplitNear* SplitNear)*k2+
+			(SplitFar+SplitNear)* (SplitFar + SplitNear)*k4
+		);
+	}
+
+	return CascadeSphere;
+}
+

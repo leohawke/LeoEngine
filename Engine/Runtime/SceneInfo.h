@@ -14,6 +14,11 @@ namespace LeoEngine
 		lm::float3 AABBMin;
 		lm::float3 AABBMax;
 
+		lm::float4x4 ViewMatrix;
+		lm::float4x4 ProjectionMatrix;
+
+		lm::float3 ViewOrigin;
+
 		float NearClippingDistance;
 
 		int32 MaxShadowCascades = 10;

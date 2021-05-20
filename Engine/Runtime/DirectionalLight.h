@@ -21,6 +21,8 @@ namespace LeoEngine
 		float CascadeDistributionExponent = 3.0f;
 
 		float FarShadowDistance = 3000.0f;
+
+		float CascadeTransitionFraction = 0.1f;
 	public:
 		void GetProjectedShadowInitializer(const SceneInfo& scene,int32 CascadeIndex, WholeSceneProjectedShadowInitializer& initializer) const;
 
@@ -44,6 +46,13 @@ namespace LeoEngine
 		{
 			return CascadeDistributionExponent;
 		}
+
+		constexpr float GetShadowTransitionScale() const
+		{
+			return 1.0f;
+		}
+
+		Sphere GetShadowSplitBoundsDepthRange(const SceneInfo& scene, lm::float3 ViewOrigin, float SplitNear, float SplitFar, ShadowCascadeSettings* OutCascadeSettings) const;
 	public:
 		static constexpr float ComputeAccumulatedScale(float Exponent, int32 CascadeIndex, int32 CascadeCount)
 		{
