@@ -32,15 +32,6 @@
 //data type
 namespace leo {
 	namespace math {
-		struct float2;
-		struct float3;
-		struct float4;
-
-		struct half;
-		struct half2;
-		struct half3;
-		struct half4;
-
 		template<typename scalar, size_t multi>
 		struct data_storage;
 
@@ -205,8 +196,9 @@ namespace leo {
 				using component_type = typename type_struct::component_type;
 
 				component_type data[1];
-				operator component_type&(void) { return (data[index]); }
-				operator const component_type&(void) const { return (data[index]); }
+
+				operator component_type() const { return (data[index]); }
+				operator component_type&() { return (data[index]); }
 
 				const component_type* operator&() const { return data+index; }
 				component_type* operator&() { return data+index; }
@@ -231,40 +223,11 @@ namespace leo {
 				using component_type = typename type_struct::component_type;
 				using vector2d_type = typename type_struct::vector2d_type;
 
-				static vector2d_type convert(component_type* data) {
+				static constexpr vector2d_type convert(const component_type* data) {
 					return vector2d_type(data[index_x], data[index_y]);
 				}
 			};
 
-			template<typename type_struct>
-			struct converter_vector2d<type_struct, 0, 1> {
-				using component_type = typename type_struct::component_type;
-				using vector2d_type = typename type_struct::vector2d_type;
-
-				static vector2d_type convert(component_type* data) {
-					return reinterpret_cast<vector2d_type>(data[0]);
-				}
-			};
-
-			template<typename type_struct>
-			struct converter_vector2d<type_struct, 1, 2> {
-				using component_type = typename type_struct::component_type;
-				using vector2d_type = typename type_struct::vector2d_type;
-
-				static vector2d_type convert(component_type* data) {
-					return reinterpret_cast<vector2d_type>(data[1]);
-				}
-			};
-
-			template<typename type_struct>
-			struct converter_vector2d<type_struct, 2, 3> {
-				using component_type = typename type_struct::component_type;
-				using vector2d_type = typename type_struct::vector2d_type;
-
-				static vector2d_type convert(component_type* data) {
-					return reinterpret_cast<vector2d_type>(data[2]);
-				}
-			};
 
 			template<typename type_struct, bool anti, int index_x, int index_y>
 			struct sub_vector2d {
@@ -273,7 +236,7 @@ namespace leo {
 
 				component_type data[2];
 
-				operator typename converter_vector2d<type_struct, index_x, index_y>::vector2d_type(void)
+				constexpr operator typename converter_vector2d<type_struct, index_x, index_y>::vector2d_type()
 				{
 					return converter_vector2d<type_struct, index_x, index_y>::convert(data);
 				}
@@ -350,28 +313,8 @@ namespace leo {
 				using component_type = typename type_struct::component_type;
 				using vector3d_type = typename type_struct::vector3d_type;
 
-				static vector3d_type convert(component_type* data) {
+				static constexpr vector3d_type convert(const component_type* data) {
 					return vector3d_type(data[index_x], data[index_y], data[index_z]);
-				}
-			};
-
-			template<typename type_struct>
-			struct converter_vector3d<type_struct, 0, 1, 2> {
-				using component_type = typename type_struct::component_type;
-				using vector3d_type = typename type_struct::vector3d_type;
-
-				static vector3d_type convert(component_type* data) {
-					return reinterpret_cast<vector3d_type>(data[0]);
-				}
-			};
-
-			template<typename type_struct>
-			struct converter_vector3d<type_struct, 1, 2, 3> {
-				using component_type = typename type_struct::component_type;
-				using vector3d_type = typename type_struct::vector3d_type;
-
-				static vector3d_type convert(component_type* data) {
-					return reinterpret_cast<vector3d_type>(data[0]);
 				}
 			};
 
@@ -382,7 +325,7 @@ namespace leo {
 
 				component_type data[3];
 
-				operator typename converter_vector3d<type_struct, index_x, index_y, index_z>::vector3d_type() const
+				constexpr operator typename converter_vector3d<type_struct, index_x, index_y, index_z>::vector3d_type() const
 				{
 					return converter_vector3d<type_struct, index_x, index_y, index_z>::convert(data);
 				}
@@ -441,29 +384,29 @@ namespace leo {
 					return 3;
 				}
 
-				const scalar_type& operator[](std::size_t index) const noexcept {
+				const constexpr scalar_type& operator[](std::size_t index) const noexcept {
 					lassume(index < size());
 					return data[index];
 				}
 
-				scalar_type& operator[](std::size_t index) noexcept {
+				constexpr scalar_type& operator[](std::size_t index) noexcept {
 					lassume(index < size());
 					return data[index];
 				}
 
-				const scalar_type* begin() const noexcept {
+				const constexpr scalar_type* begin() const noexcept {
 					return data + 0;
 				}
 
-				const scalar_type* end() const noexcept {
+				const constexpr scalar_type* end() const noexcept {
 					return data + size();
 				}
 
-				scalar_type* begin() noexcept {
+				constexpr scalar_type* begin() noexcept {
 					return data + 0;
 				}
 
-				scalar_type* end() noexcept {
+				constexpr scalar_type* end() noexcept {
 					return data + size();
 				}
 			};
@@ -670,11 +613,7 @@ namespace leo {
 		};
 
 		//The float2 data type
-		struct float2 :vector2<float>
-		{
-			using base = vector2<float>;
-			using base::base;
-		};
+		using float2 = vector2<float>;
 
 		template<typename scalar>
 		struct vector3 : vector_3d<scalar, vector2<scalar>,vector3<scalar>>
@@ -683,16 +622,8 @@ namespace leo {
 			using base::base;
 		};
 
-		//The float3 data type
-		struct float3 :vector3<float>
-		{
-			using base = vector3<float>;
-			using base::base;
-
-			constexpr float3 operator-() const noexcept {
-				return { -x,-y,-z };
-			}
-		};
+		using float3 = vector3<float>;
+		
 
 		template<typename scalar>
 		struct vector4 : vector_4d<scalar, vector2<scalar>, vector3<scalar>,vector4<scalar>>
@@ -701,24 +632,7 @@ namespace leo {
 			using base::base;
 		};
 
-		//The float4 data type
-		struct float4 :vector4<float>
-		{
-			using base = vector4<float>;
-			using base::base;
-		};
-
-		template<>
-		struct is_lmathtype<float2> :true_
-		{};
-
-		template<>
-		struct is_lmathtype<float3> :true_
-		{};
-
-		template<>
-		struct is_lmathtype<float4> :true_
-		{};
+		using float4 = vector4<float>;
 
 		template<>
 		struct is_lmathtype<vector2<float>> :true_

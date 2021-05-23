@@ -35,6 +35,14 @@ namespace leo::math {
 		l.w /= r;
 		return l;
 	}
+
+	template<typename T>
+	inline vector3<T>& operator+=(vector3<T>& l, const vector3<T>& r) noexcept {
+		l.x += r.x;
+		l.y += r.y;
+		l.z += r.z;
+		return l;
+	}
 }
 
 //vector<float>
@@ -51,6 +59,11 @@ namespace leo {
 		inline constexpr float
 			sgn(float value) noexcept {
 			return value < 0.f ? -1.f : (value > 0.f ? 1.f : +0.f);
+		}
+
+		constexpr inline float3 operator-(const float3& v) noexcept
+		{
+			return float3(-v.x, -v.y, -v.z);
 		}
 
 		/* \!brief float4‘ÀÀ„∑˚÷ÿ‘ÿ
@@ -90,15 +103,6 @@ namespace leo {
 			return l;
 		}
 
-		template<typename _type>
-		inline float4& operator/=(float4& l, _type r) {
-			l.x /= r;
-			l.y /= r;
-			l.z /= r;
-			l.w /= r;
-			return l;
-		}
-
 		inline float4& operator/=(float4& l, const float4& r) {
 			l.x /= r.x;
 			l.y /= r.y;
@@ -124,33 +128,12 @@ namespace leo {
 			return !(l == r);
 		}
 
-		inline float3& operator+=(float3& l, const float3& r) noexcept {
-			l.x += r.x;
-			l.y += r.y;
-			l.z += r.z;
-			return l;
-		}
+		
 
 		inline float3& operator-=(float3& l, const float3& r) {
 			l.x -= r.x;
 			l.y -= r.y;
 			l.z -= r.z;
-			return l;
-		}
-
-		template<typename _type>
-		inline float3& operator*=(float3& l, _type r) noexcept {
-			l.x *= r;
-			l.y *= r;
-			l.z *= r;
-			return l;
-		}
-
-		template<typename T>
-		inline float3& operator/=(float3&l, T r) noexcept {
-			l.x /= r;
-			l.y /= r;
-			l.z /= r;
 			return l;
 		}
 
@@ -174,10 +157,11 @@ namespace leo {
 		}
 		//@}
 
-		template<typename _type, limpl(typename = enable_if_t<is_lmathtype_v<_type>>)>
-		inline constexpr _type operator+(const _type& l, const _type& r) noexcept {
-			auto ret = l;
-			ret += r;
+		template<typename _type,typename _type2>
+		requires (is_lmathtype_v<_type> || is_lmathtype_v<_type2>)
+		inline constexpr std::common_type_t<_type, _type2> operator+( _type l, _type2 r) noexcept {
+			std::common_type_t<_type,_type2> ret = l;
+			ret += static_cast<std::common_type_t<_type, _type2>>(r);
 			return ret;
 		}
 
