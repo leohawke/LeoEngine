@@ -375,10 +375,10 @@ namespace bc
 
 	bc::ARGBColor32 Quantize(float4 const & p, bc::ARGBColor32 const & channelMask = bc::ARGBColor32(255, 255, 255, 255), int bit = -1)
 	{
-		uint8 const r = QuantizeChannel(static_cast<uint32>(p.x + 0.5) & 0xFF, channelMask.r(), bit);
-		uint8 const g = QuantizeChannel(static_cast<uint32>(p.y + 0.5) & 0xFF, channelMask.g(), bit);
-		uint8 const b = QuantizeChannel(static_cast<uint32>(p.z + 0.5) & 0xFF, channelMask.b(), bit);
-		uint8 const a = QuantizeChannel(static_cast<uint32>(p.w + 0.5) & 0xFF, channelMask.a(), bit);
+		uint8 const r = QuantizeChannel(static_cast<uint32>(p.x + 0.5f) & 0xFF, channelMask.r(), bit);
+		uint8 const g = QuantizeChannel(static_cast<uint32>(p.y + 0.5f) & 0xFF, channelMask.g(), bit);
+		uint8 const b = QuantizeChannel(static_cast<uint32>(p.z + 0.5f) & 0xFF, channelMask.b(), bit);
+		uint8 const a = QuantizeChannel(static_cast<uint32>(p.w + 0.5f) & 0xFF, channelMask.a(), bit);
 		return bc::ARGBColor32(a, r, g, b);
 	}
 

@@ -1386,7 +1386,7 @@ namespace etc
 			luma_[i] = static_cast<uint16>(c.r() + c.g() + c.b());
 			sorted_luma_[0][i] = i;
 		}
-		avg_color_ /= N;
+		avg_color_ /= static_cast<float>(N);
 
 		br_ = clamp(static_cast<int>(avg_color_[0] * limit_ / 255.0f + 0.5f), 0, limit_);
 		bg_ = clamp(static_cast<int>(avg_color_[1] * limit_ / 255.0f + 0.5f), 0, limit_);

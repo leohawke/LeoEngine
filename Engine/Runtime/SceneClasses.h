@@ -17,6 +17,8 @@ namespace LeoEngine
 		float SplitFar = SCENE_MAX;
 
 		int32 ShadowSplitIndex = -1;
+
+		float ShadowCascadeBiasDistribution = 1.0f;
 	};
 
 	class ProjectedShadowInitializer
