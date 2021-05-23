@@ -37,10 +37,19 @@ namespace leo::math {
 	}
 
 	template<typename T>
-	inline vector3<T>& operator+=(vector3<T>& l, const vector3<T>& r) noexcept {
+	inline constexpr vector3<T>& operator+=(vector3<T>& l, const vector3<T>& r) noexcept {
 		l.x += r.x;
 		l.y += r.y;
 		l.z += r.z;
+		return l;
+	}
+
+	template<typename T>
+	inline constexpr  vector4<T>& operator+=(vector4<T>& l, const vector4<T>& r) {
+		l.x += r.x;
+		l.y += r.y;
+		l.z += r.z;
+		l.w += r.w;
 		return l;
 	}
 }
@@ -78,13 +87,7 @@ namespace leo {
 			return !(l == r);
 		}
 
-		inline float4& operator+=(float4& l, const float4& r) {
-			l.x += r.x;
-			l.y += r.y;
-			l.z += r.z;
-			l.w += r.w;
-			return l;
-		}
+		
 
 		inline float4& operator-=(float4& l, const float4& r) {
 			l.x -= r.x;
@@ -157,11 +160,17 @@ namespace leo {
 		}
 		//@}
 
-		template<typename _type,typename _type2>
-		requires (is_lmathtype_v<_type> || is_lmathtype_v<_type2>)
-		inline constexpr std::common_type_t<_type, _type2> operator+( _type l, _type2 r) noexcept {
-			std::common_type_t<_type,_type2> ret = l;
-			ret += static_cast<std::common_type_t<_type, _type2>>(r);
+		inline constexpr float4 operator+(float4 l, float4 r) noexcept
+		{
+			auto ret = l;
+			ret += r;
+			return ret;
+		}
+
+		inline constexpr float3 operator+(float3 l, float3 r) noexcept
+		{
+			auto ret = l;
+			ret += r;
 			return ret;
 		}
 
