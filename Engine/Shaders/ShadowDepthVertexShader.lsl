@@ -32,7 +32,7 @@
 			const float SlopeDepthBias = ShadowParams.y;
 			const float SlopeBias = SlopeDepthBias * Slope;
 
-			const float ConstantDepthBias = PassStruct.ShadowParams.x;
+			const float ConstantDepthBias = ShadowParams.x;
 			const float DepthBias = SlopeBias + ConstantDepthBias;
 
 			const float InvMaxSubjectDepth = ShadowParams.w;
@@ -47,8 +47,6 @@
 		out float4 OutPosition:SV_POSITION)
 		{
 			float4	WorldPos = float4(Position,1);
-
-			ClipPos = mul(float4(Position,1),ProjectionMatrix);
 
 			Tangent_Quat = Tangent_Quat * 2 - 1;
 
