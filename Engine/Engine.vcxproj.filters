@@ -1045,6 +1045,9 @@
     <None Include="Shaders\ShadowDepthVertexShader.lsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="Shaders\ShadowProjectionPixelShader.lsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Render\Effect\Bilt.lsl">
@@ -1055,5 +1058,10 @@
     <CopyFileToFolders Include="Shaders\SSD\SSDDefinitions.h">
       <Filter>Shaders\SSD</Filter>
     </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Shaders\ShadowProjectionVertexShader.lsl">
+      <Filter>Shaders</Filter>
+    </Text>
   </ItemGroup>
 </Project>

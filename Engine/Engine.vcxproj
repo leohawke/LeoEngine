@@ -348,8 +348,12 @@
     <None Include="Shaders\RayTracing\RayTracingHitGroupCommon.lsl" />
     <None Include="Shaders\ShadowDepthPixelShader.lsl" />
     <None Include="Shaders\ShadowDepthVertexShader.lsl" />
+    <None Include="Shaders\ShadowProjectionPixelShader.lsl" />
     <None Include="Shaders\SSD\Shadow\SSDInjest.lsl" />
     <None Include="Shaders\SSD\Shadow\SSDSpatialAccumulation.lsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Shaders\ShadowProjectionVertexShader.lsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6946CA48-2E7E-4770-9D61-0F59C02D0271}</ProjectGuid>

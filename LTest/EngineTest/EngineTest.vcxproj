@@ -107,6 +107,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>Synchronization.lib;Comctl32.lib;Imm32.lib;Aftermath\lib\x64\GFSDK_Aftermath_Lib.x64.lib;WinPixEventRuntime\lib\x64\WinPixEventRuntime.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -158,6 +159,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>Imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
