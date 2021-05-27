@@ -23,7 +23,7 @@ namespace LeoEngine
 
 		float InvMaxSubjectDepth = 0;
 
-		lr::Texture* DepthTarget;
+		lr::Texture2D* DepthTarget;
 
 		float MaxSubjectZ = 0;
 		float MinSubjectZ = 0;
@@ -54,6 +54,29 @@ namespace LeoEngine
 
 		lr::GraphicsPipelineStateInitializer SetupShadowDepthPass(lr::CommandList& CmdList);
 
+		lm::float4x4 GetScreenToShadowMatrix(const SceneInfo& scene) const
+		{
+			return GetScreenToShadowMatrix(scene, X, Y, ResolutionX, ResolutionY);
+		}
+
+		lm::float4x4 GetScreenToShadowMatrix(const SceneInfo& scene, uint32 TileOffsetX, uint32 TileOffsetY, uint32 TileResolutionX, uint32 TileResolutionY) const;
+
+		lm::vector2<int> GetShadowBufferResolution() const;
+
+		float GetShaderDepthBias() const
+		{
+			return ShaderDepthBias;
+		}
+
+		float GetShaderSlopeDepthBias() const
+		{
+			return ShaderSlopeDepthBias;
+		}
+
+		float GetShaderReceiverDepthBias() const
+		{
+			return 0.1f;
+		}
 	private:
 		float ShaderDepthBias = 0;
 		float ShaderSlopeDepthBias = 0;

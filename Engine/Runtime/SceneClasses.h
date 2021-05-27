@@ -19,6 +19,10 @@ namespace LeoEngine
 		int32 ShadowSplitIndex = -1;
 
 		float ShadowCascadeBiasDistribution = 1.0f;
+
+		float FadePlaneOffset = SplitFar;
+
+		float FadePlaneLength = SplitFar-FadePlaneOffset;
 	};
 
 	class ProjectedShadowInitializer

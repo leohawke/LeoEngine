@@ -35,6 +35,7 @@ Sphere DirectionalLight::GetShadowSplitBounds(const SceneInfo& scene, int32 Casc
 
 	float SplitNear = GetSplitDistance(scene, ShadowSplitIndex);
 	float SplitFar = GetSplitDistance(scene, ShadowSplitIndex+1);
+	float FadePlane = SplitFar;
 
 	float LocalCascadeTransitionFraction = CascadeTransitionFraction * GetShadowTransitionScale();
 
@@ -51,6 +52,8 @@ Sphere DirectionalLight::GetShadowSplitBounds(const SceneInfo& scene, int32 Casc
 		OutCascadeSettings->SplitNear = SplitNear;
 		OutCascadeSettings->SplitFar = SplitFar;
 		OutCascadeSettings->ShadowSplitIndex = (int32)ShadowSplitIndex;
+		OutCascadeSettings->FadePlaneOffset = FadePlane;
+		OutCascadeSettings->FadePlaneLength = SplitFar - FadePlane;
 	}
 
 	const float BoundsCalcNear = SplitNear;

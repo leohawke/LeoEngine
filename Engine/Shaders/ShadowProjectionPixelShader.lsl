@@ -12,6 +12,7 @@
 
 		//View
 		float4 BufferSizeAndInvSize;
+		float4 ScreenPositionScaleBias;
 		Texture2D SceneDepthTexture;
 		sampler SceneDepthTextureSampler;
 		float4x4 ScreenToWorld;
@@ -28,7 +29,7 @@
 			float2 ScreenUV = SVPos.xy * BufferSizeAndInvSize;
 			float SceneW =  CalcSceneDepth(ScreenUV);
 
-			float4 ScreenPosition = float4(ScreenUV*SceneW,SceneW,1);
+			float4 ScreenPosition = float4((ScreenUV-ScreenPositionScaleBias.zw)/ScreenPositionScaleBias.xy*SceneW,SceneW,1);
 			float4 ShadowPosition = mul(ScreenPosition, ScreenToShadowMatrix);
 			float3 WorldPosition = mul(ScreenPosition, ScreenToWorld).xyz;
 
