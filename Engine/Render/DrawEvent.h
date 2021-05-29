@@ -44,9 +44,9 @@ namespace platform::Render
 	};
 }
 
-#define SCOPED_GPU_EVENT(CmdList,Name) platform::Render::DrawEvent LPP_Concat(Event_##Name,__LINE__);LPP_Concat(Event_##Name,__LINE__).Start(CmdList,platform::FColor(),LPP_Concat(u,#Name));
+#define SCOPED_GPU_EVENT(CmdList,Name) platform::Render::DrawEvent LPP_Join(Event_##Name,__LINE__);LPP_Join(Event_##Name,__LINE__).Start(CmdList,platform::FColor(),LPP_Join(u,#Name));
 
-#define SCOPED_GPU_EVENTF(CmdList, Format, ...) platform::Render::DrawEvent LPP_Concat(Event_##Name,__LINE__);LPP_Concat(Event_##Name,__LINE__).Start(CmdList,platform::FColor(),platform::Render::DrawEventName(Format, ##__VA_ARGS__).c_str());
+#define SCOPED_GPU_EVENTF(CmdList, Format, ...) platform::Render::DrawEvent LPP_Join(Event_##Name,__LINE__);LPP_Join(Event_##Name,__LINE__).Start(CmdList,platform::FColor(),platform::Render::DrawEventName(Format, ##__VA_ARGS__).c_str());
 
 #else
 

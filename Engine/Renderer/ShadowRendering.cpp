@@ -3,12 +3,16 @@
 #include "Render/ShaderParamterTraits.hpp"
 #include "Render/ShaderParameterStruct.h"
 #include "Engine/Render/ShaderTextureTraits.hpp"
+#include "Render/DrawEvent.h"
 #include "Render/ITexture.hpp"
+#include "Render/IContext.h"
+#include "Render/PipelineStateUtility.h"
 #include "Math/TranslationMatrix.h"
 #include "Math/RotationMatrix.h"
 #include "Math/ScaleMatrix.h"
 #include "Math/ShadowProjectionMatrix.h"
 #include "Math/TranslationMatrix.h"
+#include <LBase/smart_ptr.hpp>
 
 using namespace LeoEngine;
 using namespace platform;
@@ -164,6 +168,8 @@ lm::float4x4 ProjectedShadowInfo::GetScreenToShadowMatrix(const SceneInfo& scene
 				0, 1)
 		)
 		;
+
+	return ViewDependeTransform * ShadowMapDependentTransform;
 }
 
 class ShadowProjectionVS : public Render::BuiltInShader
@@ -209,3 +215,48 @@ public:
 
 IMPLEMENT_BUILTIN_SHADER(ShadowProjectionVS, "ShadowProjectionVertexShader.lsl", "Main", platform::Render::VertexShader);
 IMPLEMENT_BUILTIN_SHADER(ShadowProjectionPS, "ShadowProjectionPixelShader.lsl", "Main", platform::Render::PixelShader);
+
+void ProjectedShadowInfo::RenderProjection(lr::CommandList& CmdList, const SceneInfo& scene)
+{
+	SCOPED_GPU_EVENTF(CmdList, "WholeScene split%d",CascadeSettings.ShadowSplitIndex);
+
+	lr::GraphicsPipelineStateInitializer psoInit;
+
+	CmdList.FillRenderTargetsInfo(psoInit);
+
+	psoInit.DepthStencilState.depth_enable = false;
+	psoInit.DepthStencilState.depth_func = lr::CompareOp::Pass;
+
+	psoInit.BlendState.blend_enable[0] = true;
+	psoInit.BlendState.src_blend[0] = lr::BlendFactor::Src_Alpha;
+	psoInit.BlendState.dst_blend[0] = lr::BlendFactor::Inv_Src_Alpha;
+
+	psoInit.Primitive = lr::PrimtivteType::TriangleStrip;
+	psoInit.ShaderPass.VertexDeclaration =lr::VertexDeclarationElements { 
+		lr::CtorVertexElement(0,0,lr::Vertex::Usage::Position,0,lr::EF_ABGR32F,sizeof(lm::float4))
+	};
+
+	//BindShadowProjectionShaders
+	auto PixelShader = lr::GetBuiltInShaderMap()->GetShader< ShadowProjectionPS>();
+	auto VertexShader = lr::GetBuiltInShaderMap()->GetShader< ShadowProjectionVS>();
+	psoInit.ShaderPass.VertexShader = VertexShader->GetVertexShader();
+	psoInit.ShaderPass.PixelShader = VertexShader->GetPixelShader();
+
+	lr::SetGraphicsPipelineState(CmdList, psoInit);
+
+	PixelShader->Set(CmdList, scene, this);
+	//
+	lm::float4 DestVertex[] =
+	{
+		lm::float4(-1.0f, 1.0f, 0.0f, 1.0f),
+		lm::float4(1.0f, 1.0f, 0.0f, 1.0f),
+		lm::float4(-1.0f, -1.0f, 0.0f, 1.0f),
+		lm::float4(1.0f, -1.0f, 0.0f, 1.0f),
+	};
+	auto ClearVertexBuffer = leo::share_raw(Render::Context::Instance().GetDevice().CreateVertexBuffer(Render::Buffer::Usage::Static,
+		Render::EAccessHint::EA_GPURead | Render::EAccessHint::EA_Immutable,
+		sizeof(DestVertex),
+		Render::EF_Unknown, DestVertex));
+	CmdList.SetVertexBuffer(0, ClearVertexBuffer.get());
+	CmdList.DrawPrimitive(0, 0, 2, 1);
+}

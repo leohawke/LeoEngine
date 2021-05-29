@@ -76,6 +76,7 @@ public:
 	std::shared_ptr<UnorderedAccessView> RayShadowMaskDenoiserUAV;
 
 	std::shared_ptr<Texture2D> ShadowMap;
+	std::shared_ptr<Texture2D> ShadowMapMask;
 
 
 	std::shared_ptr<Texture2D> HDROutput;
@@ -425,6 +426,16 @@ private:
 			}
 		}
 
+		SCOPED_GPU_EVENTF(CmdList, "ShadowProjections %d", ShadowInfos.size());
+		platform::Render::RenderPassInfo RPInfo(ShadowMapMask.get(), MakeRenderTargetActions(RenderTargetLoadAction::Load,
+			RenderTargetStoreAction::Store));
+		CmdList.BeginRenderPass(RPInfo, "ShadowProjections");
+
+		for (int32 ShadowIndex =static_cast<int32>(ShadowInfos.size()) - 1; ShadowIndex > 0; ++ShadowIndex)
+		{
+			ShadowInfos[ShadowIndex]->RenderProjection(CmdList, scene);
+		}
+
 		//const auto ProjectionMatrix = le::TranslationMatrix(initializer.ShadowTranslation) * ProjectedShadowInfo.SubjectAndReceiverMatrix;
 
 		auto pEffect = platform::X::LoadEffect("ForwardDirectLightShading");
@@ -508,10 +519,8 @@ private:
 
 		auto viewproj = viewmatrix * projmatrix;
 
-		auto invproj = LeoEngine::X::InvertProjectionMatrix(projmatrix);
 		auto invview = leo::math::inverse(viewmatrix);
 
-		auto invviewproj = invproj * invview;
 
 		auto ViewSizeAndInvSize = leo::math::float4(width, height, 1.0f / width, 1.0f / height);
 		// setup a matrix to transform float4(SvPosition.xyz,1) directly to World (quality, performance as we don't need to convert or use interpolator)
@@ -526,7 +535,7 @@ private:
 			leo::math::float4(0, My, 0, 0),
 			leo::math::float4(0, 0, 1, 0),
 			leo::math::float4(Ax, Ay, 0, 1)
-		) * invviewproj;
+		) * scene.Matrices.GetInvViewProjectionMatrix();
 
 		platform::Render::ShadowRGParameters shadowconstant{
 			.SVPositionToWorld = leo::math::transpose(SVPositionToWorld),
@@ -578,10 +587,10 @@ private:
 			leo::math::float4(0, 1, 0, 0),
 			leo::math::float4(0, 0, projmatrix[2][2], 1),
 			leo::math::float4(0, 0, projmatrix[3][2], 0)
-			) * invviewproj,
+			) * scene.Matrices.GetInvViewProjectionMatrix(),
 			.ViewToClip = projmatrix,
 			.TranslatedWorldToView = viewmatrix,
-			.InvProjectionMatrix = invproj,
+			.InvProjectionMatrix =scene.Matrices.GetProjectionMatrix(),
 			.InvDeviceZToWorldZTransform = LeoEngine::X::CreateInvDeviceZToWorldZTransform(projmatrix),
 		};
 
@@ -686,6 +695,8 @@ private:
 
 		RayShadowMask = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_ABGR16F, EA_GPURead | EA_GPUWrite | EA_GPUUnordered, {}));
 		RayShadowMaskDenoiser = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_R32F,EA_GPURead | EA_GPUWrite | EA_GPUUnordered, {}));
+
+		ShadowMapMask = leo::share_raw(Device.CreateTexture(1280, 720, 1, 1, EFormat::EF_ABGR16F, EA_GPURead | EA_RTV, {}));
 
 		RayShadowMaskUAV = leo::share_raw(Device.CreateUnorderedAccessView(RayShadowMask.get()));
 		RayShadowMaskDenoiserUAV = leo::share_raw(Device.CreateUnorderedAccessView(RayShadowMaskDenoiser.get()));

@@ -27,6 +27,9 @@ namespace LeoEngine
 
 			lm::float3 ViewOrigin;
 		};
+
+		SceneMatrices()
+		{}
 	private:
 		lm::float4x4 ViewMatrix;
 		lm::float4x4 ProjectionMatrix;
@@ -42,12 +45,17 @@ namespace LeoEngine
 
 		inline const lm::float4x4& GetInvViewProjectionMatrix() const
 		{
-			return InvProjectionMatrix;
+			return InvViewProjectionMatrix;
 		}
 
 		inline const lm::float4x4& GetProjectionMatrix() const
 		{
 			return ProjectionMatrix;
+		}
+
+		inline const lm::float4x4& GetInvProjectionMatrix() const
+		{
+			return InvProjectionMatrix;
 		}
 
 		inline const lm::float4x4& GetViewMatrix() const

@@ -54,6 +54,8 @@ namespace LeoEngine
 
 		lr::GraphicsPipelineStateInitializer SetupShadowDepthPass(lr::CommandList& CmdList);
 
+		void RenderProjection(lr::CommandList& CmdList, const SceneInfo& scene);
+
 		lm::float4x4 GetScreenToShadowMatrix(const SceneInfo& scene) const
 		{
 			return GetScreenToShadowMatrix(scene, X, Y, ResolutionX, ResolutionY);
