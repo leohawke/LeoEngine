@@ -316,11 +316,7 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		auto uav = Render::shared_raw_robject(Device.CreateUnorderedAccessView(injeset.get()));
 		Parameters.SignalOutput_UAVs_0 = uav.get();
 
-		Render::TextureSampleDesc point_sampler{};
-		point_sampler.address_mode_u = point_sampler.address_mode_v = point_sampler.address_mode_w = Render::TexAddressingMode::Clamp;
-		point_sampler.filtering = Render::TexFilterOp::Min_Mag_Mip_Point;
-
-		Parameters.point_sampler = point_sampler;
+		Parameters.point_sampler = Render::TextureSampleDesc::point_sampler;
 
 		ComputeShaderUtils::Dispatch(CmdList, InjestShader, Parameters,
 			ComputeShaderUtils::GetGroupCount(leo::math::int2(FullResW,FullResH),TILE_SIZE));
@@ -345,13 +341,9 @@ void platform::ScreenSpaceDenoiser::DenoiseShadowVisibilityMasks(Render::Command
 		Parameters.SceneDepthBuffer = static_cast<Render::Texture2D*>(InputParameters.SceneDepth);
 		Parameters.WorldNormalBuffer = InputParameters.WorldNormal;
 
-		Render::TextureSampleDesc point_sampler{};
-		point_sampler.address_mode_u = point_sampler.address_mode_v = point_sampler.address_mode_w = Render::TexAddressingMode::Clamp;
-		point_sampler.filtering = Render::TexFilterOp::Min_Mag_Mip_Point;
-
-		Parameters.GlobalPointClampedSampler = point_sampler;
-		Parameters.SceneDepthBufferSampler = point_sampler;
-		Parameters.WorldNormalSampler = point_sampler;
+		Parameters.GlobalPointClampedSampler = Render::TextureSampleDesc::point_sampler;
+		Parameters.SceneDepthBufferSampler = Render::TextureSampleDesc::point_sampler;
+		Parameters.WorldNormalSampler = Render::TextureSampleDesc::point_sampler;
 	};
 
 	// Spatial reconstruction with ratio estimator to be more precise in the history rejection.

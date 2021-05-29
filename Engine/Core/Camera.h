@@ -101,48 +101,6 @@ namespace LeoEngine {
 				);
 			}
 		}
-
-		inline lm::float4x4 InvertProjectionMatrix(const lm::float4x4& ProjMatrix)
-		{
-			if (ProjMatrix[1][0] == 0.0f &&
-				ProjMatrix[3][0] == 0.0f &&
-				ProjMatrix[0][1] == 0.0f &&
-				ProjMatrix[3][1] == 0.0f &&
-				ProjMatrix[0][2] == 0.0f &&
-				ProjMatrix[1][2] == 0.0f &&
-				ProjMatrix[0][3] == 0.0f &&
-				ProjMatrix[1][3] == 0.0f &&
-				ProjMatrix[2][3] == 1.0f &&
-				ProjMatrix[3][3] == 0.0f)
-			{
-				// Solve the common case directly with very high precision.
-				/*
-				M =
-				| a | 0 | 0 | 0 |
-				| 0 | b | 0 | 0 |
-				| s | t | c | 1 |
-				| 0 | 0 | d | 0 |
-				*/
-
-				double a = ProjMatrix[0][0];
-				double b = ProjMatrix[1][1];
-				double c = ProjMatrix[2][2];
-				double d = ProjMatrix[3][2];
-				double s = ProjMatrix[2][0];
-				double t = ProjMatrix[2][1];
-
-				return lm::float4x4(
-					lm::float4(static_cast<float>(1.0 / a), 0.0f, 0.0f, 0.0f),
-					lm::float4(0.0f, static_cast<float>(1.0 / b), 0.0f, 0.0f),
-					lm::float4(0.0f, 0.0f, 0.0f, static_cast<float>(1.0 / d)),
-					lm::float4(static_cast<float>(-s / a), static_cast<float>(-t / b), 1.0f, static_cast<float>(-c / d))
-				);
-			}
-			else
-			{
-				return lm::inverse(ProjMatrix);
-			}
-		}
 	}
 }
 

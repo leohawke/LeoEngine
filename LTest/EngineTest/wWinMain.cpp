@@ -131,8 +131,8 @@ private:
 		CmdList.BeginFrame();
 		Context::Instance().BeginFrame();
 		auto& screen_frame = Context::Instance().GetScreenFrame();
-		auto screen_tex = screen_frame->Attached(FrameBuffer::Target0);
-		auto depth_tex = screen_frame->Attached(FrameBuffer::DepthStencil);
+		auto screen_tex =static_cast<Texture2D*>(screen_frame->Attached(FrameBuffer::Target0));
+		auto depth_tex = static_cast<Texture2D*>(screen_frame->Attached(FrameBuffer::DepthStencil));
 
 		auto& Device = Context::Instance().GetDevice();
 
@@ -160,9 +160,19 @@ private:
 
 		//SetupViewFrustum
 		scene.NearClippingDistance = -projmatrix[3][2];
-		scene.ViewMatrix = viewmatrix;
-		scene.ProjectionMatrix = projmatrix;
-		scene.ViewOrigin = camera.GetEyePos();
+
+		le::SceneMatrices::Initializer matrices;
+		matrices.ViewMatrix = viewmatrix;
+		matrices.ProjectionMatrix = projmatrix;
+		matrices.ViewOrigin = camera.GetEyePos();
+
+		scene.Matrices = le::SceneMatrices{ matrices };
+		scene.BufferSize.x = screen_tex->GetWidth(0);
+		scene.BufferSize.y = screen_tex->GetHeight(0);
+		scene.ViewRect =le::IntRect(0,0, scene.BufferSize.x, scene.BufferSize.y);
+		scene.SceneDepth = depth_tex;
+
+		scene.SetupParameters();
 
 		auto pEffect = platform::X::LoadEffect("ForwardDirectLightShading");
 		auto pPreZEffect = platform::X::LoadEffect("PreZ");

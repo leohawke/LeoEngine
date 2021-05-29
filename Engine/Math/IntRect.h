@@ -16,12 +16,31 @@ namespace LeoEngine
 
 		IntPoint Max;
 
-		IntRect()
+		constexpr IntRect()
 			:Min(),Max()
 		{}
 
-		IntRect(IntPoint min,IntPoint max)
+		constexpr IntRect(IntPoint min,IntPoint max)
 			:Min(min),Max(max)
 		{}
+
+		constexpr IntRect(int32 x0, int32 y0, int32 x1, int32 y1)
+			:Min(x0,y0),Max(x1,y1)
+		{
+		}
+
+		constexpr IntRect(lm::vector4<int> minmax)
+			:Min(minmax.xy),Max(minmax.zw)
+		{}
+
+		int Width() const
+		{
+			return Max.x - Min.x;
+		}
+
+		int Height() const
+		{
+			return Max.x - Min.x;
+		}
 	};
 }

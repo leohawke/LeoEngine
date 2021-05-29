@@ -131,6 +131,7 @@
     </ClCompile>
     <ClCompile Include="Runtime\DirectionalLight.cpp" />
     <ClCompile Include="Runtime\Light.cpp" />
+    <ClCompile Include="Runtime\SceneRendering.cpp" />
     <ClCompile Include="System\NinthTimer.cpp" />
     <ClCompile Include="System\SystemEnvironment.cpp" />
     <ClCompile Include="test.cpp" />

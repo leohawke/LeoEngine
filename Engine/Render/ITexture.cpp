@@ -139,3 +139,18 @@ platform::Render::TextureSampleDesc::TextureSampleDesc()
 	cmp_func(CompareOp::Fail)
 {
 }
+
+platform::Render::TextureSampleDesc::TextureSampleDesc(TexAddressingMode address_mode, TexFilterOp _filtering)
+	: border_clr(0, 0, 0, 0),
+	address_mode_u(address_mode), address_mode_v(address_mode), address_mode_w(address_mode),
+	filtering(_filtering),
+	max_anisotropy(16),
+	min_lod(0), max_lod(std::numeric_limits<float>::max()),
+	mip_map_lod_bias(0),
+	cmp_func(CompareOp::Fail)
+{
+}
+
+using namespace platform::Render;
+
+TextureSampleDesc TextureSampleDesc::point_sampler { TexAddressingMode::Clamp ,TexFilterOp::Min_Mag_Mip_Point };

@@ -85,6 +85,8 @@ namespace platform::Render
 
 		TextureSampleDesc();
 
+		TextureSampleDesc(TexAddressingMode address_mode, TexFilterOp filtering);
+
 		friend auto operator<=>(const TextureSampleDesc& lhs, const TextureSampleDesc& rhs) = default;
 		friend bool operator==(const TextureSampleDesc& lhs, const TextureSampleDesc& rhs) = default;
 
@@ -110,7 +112,7 @@ namespace platform::Render
 			throw leo::narrowing_error();
 		}
 
-
+		static TextureSampleDesc point_sampler;
 	};
 
 	template<>
