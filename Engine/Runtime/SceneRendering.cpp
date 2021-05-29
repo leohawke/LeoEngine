@@ -74,10 +74,10 @@ void SceneInfo::SetupParameters(lm::vector2<int> BufferSize, const SceneMatrices
 
 	Parameters.ScreenPositionScaleBias = ScreenPositionScaleBias;
 
-	Parameters.BufferSizeAndInvSize = lm::float4(BufferSize.x, BufferSize.y,
+	Parameters.BufferSizeAndInvSize = lm::float4(static_cast<float>(BufferSize.x), static_cast<float>(BufferSize.y),
 		InvBufferSizeX, InvBufferSizeY);
 
-	auto ProjectionMatrix = Matrices.ProjectionMatrix;
+	auto& ProjectionMatrix = Matrices.GetProjectionMatrix();
 
 	Parameters.SceneDepthTexture = SceneDepth;
 	Parameters.SceneDepthTextureSampler = platform::Render::TextureSampleDesc::point_sampler;

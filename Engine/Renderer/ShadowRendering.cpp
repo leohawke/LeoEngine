@@ -144,10 +144,10 @@ lm::float4x4 ProjectedShadowInfo::GetScreenToShadowMatrix(const SceneInfo& scene
 		lm::float4x4(
 			lm::float4(1, 0, 0, 0),
 			lm::float4(0, 1, 0, 0),
-			lm::float4(0, 0, scene.ProjectionMatrix[2][2], 1),
-			lm::float4(0, 0, scene.ProjectionMatrix[3][2], 0)
+			lm::float4(0, 0, scene.Matrices.GetProjectionMatrix()[2][2], 1),
+			lm::float4(0, 0, scene.Matrices.GetProjectionMatrix()[3][2], 0)
 		) *
-		lm::inverse(scene.ViewMatrix * scene.ProjectionMatrix);
+		scene.Matrices.GetInvViewProjectionMatrix();
 
 	lm::float4x4 ShadowMapDependentTransform =
 		// Translate to the origin of the shadow's translated world space

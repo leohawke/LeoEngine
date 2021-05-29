@@ -58,7 +58,7 @@ Sphere DirectionalLight::GetShadowSplitBounds(const SceneInfo& scene, int32 Casc
 
 	const float BoundsCalcNear = SplitNear;
 
-	const Sphere CascadeSphere = GetShadowSplitBoundsDepthRange(scene, scene.ViewOrigin, BoundsCalcNear, SplitFar, OutCascadeSettings);
+	const Sphere CascadeSphere = GetShadowSplitBoundsDepthRange(scene, scene.Matrices.GetViewOrigin(), BoundsCalcNear, SplitFar, OutCascadeSettings);
 
 	return CascadeSphere;
 }
@@ -115,17 +115,18 @@ float DirectionalLight::GetSplitDistance(const SceneInfo& scene, uint32 SplitInd
 
 Sphere DirectionalLight::GetShadowSplitBoundsDepthRange(const SceneInfo& scene, lm::float3 ViewOrigin, float SplitNear, float SplitFar, ShadowCascadeSettings* OutCascadeSettings) const
 {
-	auto ViewMatrix = scene.ViewMatrix;
+	auto ViewMatrix = scene.Matrices.GetViewMatrix();
+	auto ProjMatrix = scene.Matrices.GetProjectionMatrix();
 
 	const auto CameraDirection = ViewMatrix.GetColumn(2);
 
-	float Aspect = scene.ProjectionMatrix[1][1] / scene.ProjectionMatrix[0][0];
+	float Aspect = ProjMatrix[1][1] / ProjMatrix[0][0];
 
-	float HalfVerticalFOV = std::atan(1.0f / scene.ProjectionMatrix[1][1]);
-	float HalfHorizontalFOV = std::atan(1.0f / scene.ProjectionMatrix[0][0]);
+	float HalfVerticalFOV = std::atan(1.0f / ProjMatrix[1][1]);
+	float HalfHorizontalFOV = std::atan(1.0f / ProjMatrix[0][0]);
 
-	float AsymmetricFOVScaleX = scene.ProjectionMatrix[2][0];
-	float AsymmetricFOVScaleY = scene.ProjectionMatrix[2][1];
+	float AsymmetricFOVScaleX = ProjMatrix[2][0];
+	float AsymmetricFOVScaleY = ProjMatrix[2][1];
 
 	// Near plane
 	const float StartHorizontalTotalLength = SplitNear * std::tan(HalfHorizontalFOV);
