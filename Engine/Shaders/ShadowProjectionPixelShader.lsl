@@ -5,8 +5,10 @@
 		float4x4 ScreenToShadowMatrix;
 		// .x:DepthBias, .y:SlopeDepthBias, .z:ReceiverBias, .w: MaxSubjectZ - MinSubjectZ
 		float4 ProjectionDepthBiasParameters;
+		#if USE_FADE_PLANE
 		float FadePlaneOffset;
 		float InvFadePlaneLength;
+		#endif
 		Texture2D ShadowDepthTexture;
 		sampler ShadowDepthTextureSampler;
 
@@ -44,7 +46,9 @@
 
 			Shadow = LightSpacePixelDepthForOpaque < ShadowDepthTexture.SampleLevel(ShadowDepthTextureSampler, ShadowPosition.xy, 0).r;
 
-			BlendFactor = 1.0f - saturate((SceneW - FadePlaneOffset) * InvFadePlaneLength);
+			#if USE_FADE_PLANE
+				BlendFactor = 1.0f - saturate((SceneW - FadePlaneOffset) * InvFadePlaneLength);
+			#endif
 
 			OutColor.a = BlendFactor;
 

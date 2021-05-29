@@ -55,6 +55,7 @@
     <ClCompile Include="Renderer\imgui\imgui_context.cpp" />
     <ClCompile Include="Renderer\PostProcess\PostProcessCombineLUTs.cpp" />
     <ClCompile Include="Renderer\PostProcess\PostProcessToneMap.cpp" />
+    <ClCompile Include="Renderer\ScreenRendering.cpp" />
     <ClCompile Include="Renderer\ScreenSpaceDenoiser.cpp" />
     <ClCompile Include="Renderer\ShadowRendering.cpp" />
     <ClCompile Include="Renderer\VolumeRendering.cpp">
@@ -202,6 +203,7 @@
     <ClInclude Include="Renderer\imgui\imgui_context.h" />
     <ClInclude Include="Renderer\PostProcess\PostProcessCombineLUTs.h" />
     <ClInclude Include="Renderer\PostProcess\PostProcessToneMap.h" />
+    <ClInclude Include="Renderer\ScreenRendering.h" />
     <ClInclude Include="Renderer\ScreenSpaceDenoiser.h" />
     <ClInclude Include="Renderer\ShadowRendering.h" />
     <ClInclude Include="Renderer\VolumeRendering.h" />

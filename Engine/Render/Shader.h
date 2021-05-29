@@ -122,24 +122,11 @@ inline namespace Shader
 
 		inline ShaderMeta* GetMeta() const { return Meta; }
 
-		VertexHWShader* GetVertexShader() const
-		{
-			return GetHardwareShader<VertexHWShader>();
-		}
-		GeometryHWShader* GetGeometryShader() const
-		{
-			return GetHardwareShader<GeometryHWShader>();
-		}
-		PixelHWShader* GetPixelShader() const
-		{
-			return GetHardwareShader<PixelHWShader>();
-		}
+		VertexHWShader* GetVertexShader() const;
+		GeometryHWShader* GetGeometryShader() const;
+		PixelHWShader* GetPixelShader() const;
 
-		ComputeHWShader* GetComputeShader() const
-		{
-			return GetHardwareShader<ComputeHWShader>();
-		}
-
+		ComputeHWShader* GetComputeShader() const;
 		/** Returns the meta data for the root shader parameter struct. */
 		static inline const ShaderParametersMetadata* GetRootParametersMetadata()
 		{
@@ -239,6 +226,28 @@ inline namespace Shader
 
 		const ShaderParametersMetadata* const RootParametersMetadata;
 	};
+
+	inline VertexHWShader* RenderShader::GetVertexShader() const
+	{
+		LAssert(GetMeta()->GetShaderType() == VertexShader, "mismatch vertexshader type");
+		return GetHardwareShader<VertexHWShader>();
+	}
+	inline GeometryHWShader* RenderShader::GetGeometryShader() const
+	{
+		LAssert(GetMeta()->GetShaderType() == GeometryShader, "mismatch geometryshader type");
+		return GetHardwareShader<GeometryHWShader>();
+	}
+	inline PixelHWShader* RenderShader::GetPixelShader() const
+	{
+		LAssert(GetMeta()->GetShaderType() == PixelShader, "mismatch pixelshader type");
+		return GetHardwareShader<PixelHWShader>();
+	}
+
+	inline ComputeHWShader* RenderShader::GetComputeShader() const
+	{
+		LAssert(GetMeta()->GetShaderType() == ComputeShader, "mismatch computeshader type");
+		return GetHardwareShader<ComputeHWShader>();
+	}
 
 	template <typename ParameterStruct>
 	inline void BindForLegacyShaderParameters(RenderShader* Shader, const ShaderParameterMap& ParameterMap)

@@ -13,7 +13,7 @@
   <Type Name="leo::math::type_details::component&lt;*,3&gt;">
     <DisplayString>{data[3]}</DisplayString>
   </Type>
-  <Type Name="leo::math::float3">
+  <Type Name="leo::math::vector3&lt;*&gt;">
     <DisplayString>{x},{y},{z}</DisplayString>
     <Expand HideRawView="true">
       <Item Name="X">x</Item>
@@ -21,7 +21,7 @@
       <Item Name="Z">z</Item>
     </Expand>
   </Type>
-  <Type Name="leo::math::float4">
+  <Type Name="leo::math::vector4&lt;*&gt;">
     <DisplayString>{x},{y},{z},{w}</DisplayString>
     <Expand HideRawView="true">
       <Item Name="X">x</Item>

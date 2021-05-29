@@ -202,8 +202,8 @@ namespace platform::lsl::math {
 	{
 		auto& root(context.Root);
 
-		RegisterStrict(root, "float3", TypeLiteralAction<leo::math::float3>);
 		RegisterStrict(root, "float2", TypeLiteralAction<leo::math::float2>);
+		RegisterStrict(root, "float3", TypeLiteralAction<leo::math::float3>);
 		RegisterStrict(root, "float4", TypeLiteralAction<leo::math::float4>);
 	}
 

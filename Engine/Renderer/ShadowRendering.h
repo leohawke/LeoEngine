@@ -52,7 +52,7 @@ namespace LeoEngine
 
 		void SetupWholeSceneProjection(const SceneInfo& scne, const WholeSceneProjectedShadowInitializer& ShadowInfo, uint32 InResolutionX, uint32 InResoultionY, uint32 InBorderSize);
 
-		lr::GraphicsPipelineStateInitializer SetupShadowDepthPass(lr::CommandList& CmdList);
+		lr::GraphicsPipelineStateInitializer SetupShadowDepthPass(lr::CommandList& CmdList, lr::Texture2D* Target);
 
 		void RenderProjection(lr::CommandList& CmdList, const SceneInfo& scene);
 

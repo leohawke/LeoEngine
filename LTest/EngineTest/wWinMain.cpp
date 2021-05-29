@@ -416,7 +416,7 @@ private:
 			SCOPED_GPU_EVENTF(CmdList, "ShadowIndex%d", ShadowIndex);
 
 			BeginShadowRenderPass(CmdList, false);
-			auto psoInit = ShadowInfos[ShadowIndex]->SetupShadowDepthPass( CmdList);
+			auto psoInit = ShadowInfos[ShadowIndex]->SetupShadowDepthPass( CmdList,ShadowMap.get());
 
 			for (auto pEntity : Subjects[ShadowIndex])
 			{
@@ -431,7 +431,7 @@ private:
 			RenderTargetStoreAction::Store));
 		CmdList.BeginRenderPass(RPInfo, "ShadowProjections");
 
-		for (int32 ShadowIndex =static_cast<int32>(ShadowInfos.size()) - 1; ShadowIndex > 0; ++ShadowIndex)
+		for (int32 ShadowIndex =static_cast<int32>(ShadowInfos.size()) - 1; ShadowIndex >= 0; --ShadowIndex)
 		{
 			ShadowInfos[ShadowIndex]->RenderProjection(CmdList, scene);
 		}
@@ -591,7 +591,7 @@ private:
 			.ViewToClip = projmatrix,
 			.TranslatedWorldToView = viewmatrix,
 			.InvProjectionMatrix =scene.Matrices.GetProjectionMatrix(),
-			.InvDeviceZToWorldZTransform = LeoEngine::X::CreateInvDeviceZToWorldZTransform(projmatrix),
+			.InvDeviceZToWorldZTransform = LeoEngine::CreateInvDeviceZToWorldZTransform(projmatrix),
 		};
 
 		{

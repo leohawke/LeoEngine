@@ -69,7 +69,7 @@ namespace platform::Render::Effect {
 		if (search != map_fuctors.end())
 			return std::invoke(search->second, value);
 		else
-			throw leo::unsupported("the type is not a value class");
+			throw std::invalid_argument("the type is not a value class");
 
 		return value;
 	}

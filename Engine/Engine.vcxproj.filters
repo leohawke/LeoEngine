@@ -335,6 +335,9 @@
     <ClCompile Include="Runtime\SceneRendering.cpp">
       <Filter>Runtime</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\ScreenRendering.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Context.h">
@@ -854,6 +857,9 @@
     </ClInclude>
     <ClInclude Include="Math\IntRect.h">
       <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\ScreenRendering.h">
+      <Filter>Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

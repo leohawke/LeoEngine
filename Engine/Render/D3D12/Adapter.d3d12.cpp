@@ -266,7 +266,10 @@ namespace platform_ex::Windows::D3D12 {
 
 	GraphicsBuffer * Device::CreateVertexBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const*> init_data)
 	{
-		return CreateBuffer(usage, access, size_in_byte, format, init_data);
+		auto vb = CreateBuffer(usage, access, size_in_byte, format, init_data);
+
+		vb->SetName(leo::sfmt("VertexBuffer [size=%d]", size_in_byte).c_str());
+		return vb;
 	}
 
 	GraphicsBuffer * Device::CreateIndexBuffer(platform::Render::Buffer::Usage usage, leo::uint32 access, uint32 size_in_byte, EFormat format, std::optional<void const*> init_data)

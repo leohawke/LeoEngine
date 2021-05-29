@@ -7,6 +7,7 @@
 #include "Render/ITexture.hpp"
 #include "Render/IContext.h"
 #include "Render/PipelineStateUtility.h"
+#include "Renderer/ScreenRendering.h"
 #include "Math/TranslationMatrix.h"
 #include "Math/RotationMatrix.h"
 #include "Math/ScaleMatrix.h"
@@ -89,8 +90,10 @@ void ProjectedShadowInfo::SetupWholeSceneProjection(const SceneInfo& scne, const
 }
 
 
-lr::GraphicsPipelineStateInitializer ProjectedShadowInfo::SetupShadowDepthPass(lr::CommandList& CmdList)
+lr::GraphicsPipelineStateInitializer ProjectedShadowInfo::SetupShadowDepthPass(lr::CommandList& CmdList,lr::Texture2D* Target)
 {
+	DepthTarget = Target;
+
 	lr::GraphicsPipelineStateInitializer psoInit;
 
 	CmdList.FillRenderTargetsInfo(psoInit);
@@ -189,9 +192,15 @@ public:
 		SHADER_PARAMETER_TEXTURE(lr::Texture2D, ShadowDepthTexture)
 		SHADER_PARAMETER_SAMPLER(lr::TextureSampleDesc, ShadowDepthTextureSampler)
 
+		SHADER_PARAMETER(lm::float4, InvDeviceZToWorldZTransform)
+
 		SHADER_PARAMETER_STRUCT_INCLUDE(SceneParameters, SceneParameters)
 		END_SHADER_PARAMETER_STRUCT();
 	EXPORTED_BUILTIN_SHADER(ShadowProjectionPS);
+
+	class FFadePlane : SHADER_PERMUTATION_BOOL("USE_FADE_PLANE");
+
+	using FPermutationDomain = Render::TShaderPermutationDomain<FFadePlane>;
 
 	void Set(lr::CommandList& CmdList, const SceneInfo& scene, const ProjectedShadowInfo* ShadowInfo)
 	{
@@ -207,9 +216,13 @@ public:
 		);
 
 		Parameters.FadePlaneOffset = ShadowInfo->CascadeSettings.FadePlaneOffset;
-		Parameters.InvFadePlaneLength = 1.0f /ShadowInfo->CascadeSettings.FadePlaneLength;
+		if(ShadowInfo->CascadeSettings.FadePlaneLength > 0)
+			Parameters.InvFadePlaneLength = 1.0f /ShadowInfo->CascadeSettings.FadePlaneLength;
 
 		Parameters.SceneParameters = scene.GetParameters();
+		Parameters.InvDeviceZToWorldZTransform = CreateInvDeviceZToWorldZTransform(scene.Matrices.GetProjectionMatrix());
+
+		lr::SetShaderParameters(CmdList,lr::ShaderRef<ShadowProjectionPS>(this), this->GetPixelShader(), Parameters);
 	}
 };
 
@@ -237,26 +250,18 @@ void ProjectedShadowInfo::RenderProjection(lr::CommandList& CmdList, const Scene
 	};
 
 	//BindShadowProjectionShaders
-	auto PixelShader = lr::GetBuiltInShaderMap()->GetShader< ShadowProjectionPS>();
+	ShadowProjectionPS::FPermutationDomain PermutationVector;
+	PermutationVector.Set < ShadowProjectionPS::FFadePlane>(CascadeSettings.FadePlaneLength > 0);
+
+	auto PixelShader = lr::GetBuiltInShaderMap()->GetShader< ShadowProjectionPS>(PermutationVector);
 	auto VertexShader = lr::GetBuiltInShaderMap()->GetShader< ShadowProjectionVS>();
 	psoInit.ShaderPass.VertexShader = VertexShader->GetVertexShader();
-	psoInit.ShaderPass.PixelShader = VertexShader->GetPixelShader();
+	psoInit.ShaderPass.PixelShader = PixelShader->GetPixelShader();
 
 	lr::SetGraphicsPipelineState(CmdList, psoInit);
 
 	PixelShader->Set(CmdList, scene, this);
-	//
-	lm::float4 DestVertex[] =
-	{
-		lm::float4(-1.0f, 1.0f, 0.0f, 1.0f),
-		lm::float4(1.0f, 1.0f, 0.0f, 1.0f),
-		lm::float4(-1.0f, -1.0f, 0.0f, 1.0f),
-		lm::float4(1.0f, -1.0f, 0.0f, 1.0f),
-	};
-	auto ClearVertexBuffer = leo::share_raw(Render::Context::Instance().GetDevice().CreateVertexBuffer(Render::Buffer::Usage::Static,
-		Render::EAccessHint::EA_GPURead | Render::EAccessHint::EA_Immutable,
-		sizeof(DestVertex),
-		Render::EF_Unknown, DestVertex));
-	CmdList.SetVertexBuffer(0, ClearVertexBuffer.get());
+
+	CmdList.SetVertexBuffer(0, GFullScreenVertexBuffer().get());
 	CmdList.DrawPrimitive(0, 0, 2, 1);
 }
