@@ -229,9 +229,9 @@ private:
 		OnDrawLights(viewmatrix,projmatrix);
 
 		if(RayShadowMaskDenoiser)
-			pEffect->GetParameter("ssshadow_tex") = TextureSubresource(RayShadowMaskDenoiser, 0, RayShadowMask->GetArraySize(), 0, RayShadowMaskDenoiser->GetNumMipMaps());
+			pEffect->GetParameter("rayshadow_tex") = TextureSubresource(RayShadowMaskDenoiser, 0, RayShadowMask->GetArraySize(), 0, RayShadowMaskDenoiser->GetNumMipMaps());
 		if (ShadowMap) {
-			pEffect->GetParameter("projshadow_tex") = TextureSubresource(ShadowMap, 0, ShadowMap->GetArraySize(), 0, ShadowMap->GetNumMipMaps());
+			pEffect->GetParameter("shadowmask_tex") = TextureSubresource(ShadowMapMask, 0, ShadowMapMask->GetArraySize(), 0, ShadowMapMask->GetNumMipMaps());
 		}
 
 		{
@@ -386,7 +386,7 @@ private:
 						const auto ProjectedDistanceFromShadowOriginAlongLightDir = lm::dot(PrimitiveToShadowCenter, LightDirection);
 						const auto PrimitiveDistanceFromCylinderAxisSq = lm::length_sq(LightDirection * (-ProjectedDistanceFromShadowOriginAlongLightDir) + PrimitiveToShadowCenter);
 						const auto CombinedRadiusSq = Square(ShadowBounds.W + PrimitiveBounds.Radius);
-						if (PrimitiveDistanceFromCylinderAxisSq < CombinedRadiusSq)
+						//if (PrimitiveDistanceFromCylinderAxisSq < CombinedRadiusSq)
 						{
 							Subjects[ShadowIndex].emplace_back(&Primitive);
 						}

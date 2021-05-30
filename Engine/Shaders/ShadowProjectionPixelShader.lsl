@@ -2,7 +2,7 @@
 	(include Common.h)
 	(shader
 	"
-		float4x4 ScreenToShadowMatrix;
+		float4x4 ScreenToShadow;
 		// .x:DepthBias, .y:SlopeDepthBias, .z:ReceiverBias, .w: MaxSubjectZ - MinSubjectZ
 		float4 ProjectionDepthBiasParameters;
 		#if USE_FADE_PLANE
@@ -28,11 +28,11 @@
 		out float4 OutColor : SV_Target0
 		)
 		{
-			float2 ScreenUV = SVPos.xy * BufferSizeAndInvSize;
+			float2 ScreenUV = SVPos.xy * BufferSizeAndInvSize.zw;
 			float SceneW =  CalcSceneDepth(ScreenUV);
 
 			float4 ScreenPosition = float4((ScreenUV-ScreenPositionScaleBias.zw)/ScreenPositionScaleBias.xy*SceneW,SceneW,1);
-			float4 ShadowPosition = mul(ScreenPosition, ScreenToShadowMatrix);
+			float4 ShadowPosition = mul(ScreenPosition, ScreenToShadow);
 			float3 WorldPosition = mul(ScreenPosition, ScreenToWorld).xyz;
 
 			float ShadowZ = ShadowPosition.z;

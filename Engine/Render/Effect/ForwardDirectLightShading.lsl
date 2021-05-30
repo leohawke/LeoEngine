@@ -22,7 +22,8 @@
 	(texture2D albedo_tex)
 	(texture2D glossiness_tex)
 	(texture2D normal_tex)
-	(texture2D shadow_tex)
+	(texture2D shadowmask_tex)
+	(texture2D rayshadow_tex)
 	(sampler bilinear_sampler
 		(filtering min_mag_linear_mip_point)
 		(address_u clamp)
@@ -133,7 +134,12 @@
 			float3 diffuse,specular = 0;
 			ShadingMaterial(material,view_dir,shadow,occlusion,diffuse,specular);
 
-			color.xyz = (diffuse + specular)*shadow_tex.Sample(bilinear_sampler,ClipPos.xy*inv_sscreen).r;
+			float p = shadowmask_tex.Sample(bilinear_sampler,ClipPos.xy*inv_sscreen).r;
+			p *= p;
+			float r = rayshadow_tex.Sample(bilinear_sampler,ClipPos.xy*inv_sscreen).r;
+			r *= r;
+
+			color.xyz = (diffuse + specular)*p;
 			color.w = 1.0f;
 		}
 		"

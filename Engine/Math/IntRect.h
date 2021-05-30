@@ -40,7 +40,7 @@ namespace LeoEngine
 
 		int Height() const
 		{
-			return Max.x - Min.x;
+			return Max.y - Min.y;
 		}
 	};
 }
