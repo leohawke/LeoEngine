@@ -182,7 +182,7 @@ namespace LeoEngine
 	}
 
 	inline LinearColor  lerp(LinearColor lhs, LinearColor rhs, float w) {
-		return { lm::lerp(lhs.rgba, rhs.rgba, w) };
+		return { lm::lerp<lm::float4>(lhs.rgba, rhs.rgba, w) };
 	}
 
 	inline float dot(LinearColor lhs, LinearColor rhs) {
