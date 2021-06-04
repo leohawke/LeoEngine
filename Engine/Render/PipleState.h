@@ -246,7 +246,7 @@ namespace platform::Render {
 
 	struct BlendDesc
 	{
-		M::Color blend_factor;
+		LinearColor blend_factor;
 		uint32_t sample_mask;
 
 		bool				alpha_to_coverage_enable;

@@ -17,6 +17,7 @@ namespace platform {
 	using namespace Render::IFormat;
 	using Render::TextureType;
 	using Render::Texture;
+	using LeoEngine::lerp;
 	uint64 X::GetImageInfo(File const& file, Render::TextureType& type,
 		uint16& width, uint16& height, uint16& depth,
 		uint8& num_mipmaps, uint8& array_size, Render::EFormat& format,
@@ -774,7 +775,7 @@ namespace platform {
 		}
 		else
 		{
-			std::vector<M::Color> src_32f(src_width * src_height * src_depth);
+			std::vector<LinearColor> src_32f(src_width * src_height * src_depth);
 			{
 				for (uint32 z = 0; z < src_depth; ++z)
 				{
@@ -786,7 +787,7 @@ namespace platform {
 				}
 			}
 
-			std::vector<M::Color> dst_32f(dst_width * dst_height * dst_depth);
+			std::vector<LinearColor> dst_32f(dst_width * dst_height * dst_depth);
 			if (linear)
 			{
 				for (uint32 z = 0; z < dst_depth; ++z)
@@ -809,16 +810,16 @@ namespace platform {
 							uint32 sx0 = static_cast<uint32>(fx);
 							uint32 sx1 = clamp<uint32>(0, src_width - 1, sx0 + 1);
 							float weight_x = fx - sx0;
-							M::Color clr_x00 = lerp(src_32f[(sz0 * src_height + sy0) * src_width + sx0],
+							LinearColor clr_x00 = lerp(src_32f[(sz0 * src_height + sy0) * src_width + sx0],
 								src_32f[(sz0 * src_height + sy0) * src_width + sx1], weight_x);
-							M::Color clr_x01 = lerp(src_32f[(sz0 * src_height + sy1) * src_width + sx0],
+							LinearColor clr_x01 = lerp(src_32f[(sz0 * src_height + sy1) * src_width + sx0],
 								src_32f[(sz0 * src_height + sy1) * src_width + sx1], weight_x);
-							M::Color clr_y0 = lerp(clr_x00, clr_x01, weight_y);
-							M::Color clr_x10 = lerp(src_32f[(sz1 * src_height + sy0) * src_width + sx0],
+							LinearColor clr_y0 = lerp(clr_x00, clr_x01, weight_y);
+							LinearColor clr_x10 = lerp(src_32f[(sz1 * src_height + sy0) * src_width + sx0],
 								src_32f[(sz1 * src_height + sy0) * src_width + sx1], weight_x);
-							M::Color clr_x11 = lerp(src_32f[(sz1 * src_height + sy1) * src_width + sx0],
+							LinearColor clr_x11 = lerp(src_32f[(sz1 * src_height + sy1) * src_width + sx0],
 								src_32f[(sz1 * src_height + sy1) * src_width + sx1], weight_x);
-							M::Color clr_y1 = lerp(clr_x10, clr_x11, weight_y);
+							LinearColor clr_y1 = lerp(clr_x10, clr_x11, weight_y);
 							dst_32f[(z * dst_height + y) * dst_width + x] = lerp(clr_y0, clr_y1, weight_z);
 						}
 					}

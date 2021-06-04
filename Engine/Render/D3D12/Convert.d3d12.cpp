@@ -437,10 +437,10 @@ D3D12_SAMPLER_DESC platform_ex::Windows::D3D12::Convert(platform::Render::Textur
 	sampler_desc.MaxAnisotropy = desc.max_anisotropy;
 	sampler_desc.ComparisonFunc = Convert(desc.cmp_func);
 
-	sampler_desc.BorderColor[0] = desc.border_clr.r();
-	sampler_desc.BorderColor[1] = desc.border_clr.g();
-	sampler_desc.BorderColor[2] = desc.border_clr.b();
-	sampler_desc.BorderColor[3] = desc.border_clr.a();
+	sampler_desc.BorderColor[0] = desc.border_clr.r;
+	sampler_desc.BorderColor[1] = desc.border_clr.g;
+	sampler_desc.BorderColor[2] = desc.border_clr.b;
+	sampler_desc.BorderColor[3] = desc.border_clr.a;
 	sampler_desc.MinLOD = desc.min_lod;
 	sampler_desc.MaxLOD = desc.max_lod;
 

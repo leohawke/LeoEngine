@@ -8,6 +8,8 @@
 #include "../emacro.h"
 #include "CoreTypes.h"
 
+#include <utility>
+
 namespace LeoEngine
 {
 	inline float linear_to_srgb(float linear) lnoexcept
@@ -38,6 +40,8 @@ namespace LeoEngine
 
 	namespace details
 	{
+		constexpr float f = 1 / 255.f;
+
 		template<typename type_struct, bool anti = false>
 		struct vector_4d_impl {
 			using component_type = typename type_struct::component_type;
@@ -133,6 +137,15 @@ namespace LeoEngine
 			{
 			}
 
+			constexpr explicit vector_4d_impl(uint32 dw) noexcept
+				:data{ 
+				 f* (static_cast<float>(static_cast<uint8>(dw >> 16))),
+				 f* (static_cast<float>(static_cast<uint8>(dw >> 8))),
+				 f* (static_cast<float>(static_cast<uint8>(dw >> 0))),
+				 f* (static_cast<float>(static_cast<uint8>(dw >> 24)))
+				}
+			{}
+
 			constexpr vector_4d_impl() noexcept = default;
 
 			constexpr size_t size() const {
@@ -149,11 +162,11 @@ namespace LeoEngine
 				return data[index];
 			}
 
-			const scalar_type* begin() const noexcept {
+			const constexpr scalar_type* begin() const noexcept {
 				return data + 0;
 			}
 
-			const scalar_type* end() const noexcept {
+			const constexpr scalar_type* end() const noexcept {
 				return data + size();
 			}
 
@@ -163,6 +176,24 @@ namespace LeoEngine
 
 			scalar_type* end() noexcept {
 				return data + size();
+			}
+
+			constexpr uint32 ARGB() const lnoexcept
+			{
+				auto R = static_cast<uint8>(leo::math::saturate(r) * 255 + 0.5f);
+				auto G = static_cast<uint8>(leo::math::saturate(g) * 255 + 0.5f);
+				auto B = static_cast<uint8>(leo::math::saturate(b) * 255 + 0.5f);
+				auto A = static_cast<uint8>(leo::math::saturate(a) * 255 + 0.5f);
+
+				return (A << 24) | (R << 16) | (G << 8) | (B << 0);
+			}
+
+			friend auto constexpr operator<=>(const vector_4d_impl& lhs, const vector_4d_impl& rhs) noexcept {
+				return std::lexicographical_compare_three_way(lhs.begin(),lhs.end(),rhs.begin(),rhs.end());
+			}
+
+			friend bool operator==(const vector_4d_impl& lhs, const vector_4d_impl& rhs) noexcept {
+				return lhs.ARGB() == rhs.ARGB();
 			}
 		};
 	}
@@ -182,7 +213,7 @@ namespace LeoEngine
 	}
 
 	inline LinearColor  lerp(LinearColor lhs, LinearColor rhs, float w) {
-		return { lm::lerp<lm::float4>(lhs.rgba, rhs.rgba, w) };
+		return { lm::lerp<float>(lhs.rgba, rhs.rgba, w) };
 	}
 
 	inline float dot(LinearColor lhs, LinearColor rhs) {
@@ -223,6 +254,7 @@ namespace LeoEngine
 namespace platform
 {
 	using LinearColor = LeoEngine::LinearColor;
+	using FColor = LeoEngine::FColor;
 
 	namespace M {
 		using LeoEngine::ConvertFromABGR32F;

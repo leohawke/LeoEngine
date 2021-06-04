@@ -421,16 +421,6 @@ namespace leo {
 				}
 			};
 
-			template<typename type_struct>
-			struct converter_vector4d<type_struct, 0, 1, 2,3> {
-				using component_type = typename type_struct::component_type;
-				using vector4d_type = typename type_struct::vector4d_type;
-
-				static vector4d_type convert(component_type* data) {
-					return reinterpret_cast<vector4d_type>(data[0]);
-				}
-			};
-
 			template<typename type_struct, bool anti, int index_x, int index_y, int index_z,int index_w>
 			struct sub_vector4d {
 				using component_type = typename type_struct::component_type;

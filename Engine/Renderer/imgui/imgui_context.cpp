@@ -202,7 +202,7 @@ void FillGraphicsPipelineState(GraphicsPipelineStateInitializer& GraphicsPSOInit
 {
     {
         platform::Render::BlendDesc BlendState {};
-        BlendState.blend_factor = M::Color(0, 0, 0, 0);
+        BlendState.blend_factor = LinearColor(0, 0, 0, 0);
         BlendState.alpha_to_coverage_enable = false;
         BlendState.blend_enable[0] = true;
         BlendState.src_blend[0] = BlendFactor::Src_Alpha;

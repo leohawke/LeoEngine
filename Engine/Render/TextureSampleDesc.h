@@ -68,7 +68,7 @@ namespace platform::Render
 
 	struct TextureSampleDesc
 	{
-		M::Color border_clr;
+		LinearColor border_clr;
 
 		TexAddressingMode address_mode_u;
 		TexAddressingMode address_mode_v;

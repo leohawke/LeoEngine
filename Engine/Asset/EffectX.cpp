@@ -466,7 +466,7 @@ namespace platform {
 
 					case constfn_hash("blend_factor"):
 						auto value = to_float4(second);
-						bs_desc.blend_factor = M::Color(value.data);
+						bs_desc.blend_factor = LinearColor(value);
 						break;
 					case constfn_hash("sample_mask"):
 						bs_desc.sample_mask = to_uint32(second);

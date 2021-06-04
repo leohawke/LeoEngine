@@ -3,6 +3,9 @@
 #include <LBase/exception_type.h>
 #include <mutex>
 
+using Color = LeoEngine::LinearColor;
+using LeoEngine::dot;
+
 namespace bc
 {
 	std::mutex singleton_mutex;

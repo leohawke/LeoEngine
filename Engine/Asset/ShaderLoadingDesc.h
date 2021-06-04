@@ -461,7 +461,7 @@ namespace platform::X
 			using namespace Render;
 			if (type == SPT_sampler) {
 				TextureSampleDesc sampler;
-				AccessParam("border_clr", sampler.border_clr = M::Color(to_float4(*value).data));
+				AccessParam("border_clr", sampler.border_clr = LinearColor(to_float4(*value)));
 
 				AccessParam("address_mode_u", sampler.address_mode_u = TextureSampleDesc::to_mode(*value));
 				AccessParam("address_mode_v", sampler.address_mode_v = TextureSampleDesc::to_mode(*value));

@@ -27,6 +27,24 @@ namespace leo::math {
 		return l;
 	}
 
+	template<typename T>
+	inline constexpr vector4<T>& operator*=(vector4<T>& l, vector4<T> r) {
+		l.x *= r.x;
+		l.y *= r.y;
+		l.z *= r.z;
+		l.w *= r.w;
+		return l;
+	}
+
+	template<typename T>
+	inline float4& operator*=(vector4<T>& l, T r) {
+		l.x *= r;
+		l.y *= r;
+		l.z *= r;
+		l.w *= r;
+		return l;
+	}
+
 	template<typename _type>
 	inline vector4<_type>& operator/=(vector4<_type>& l, _type r) {
 		l.x /= r;
@@ -97,14 +115,7 @@ namespace leo {
 			return l;
 		}
 
-		template<typename _type>
-		inline float4& operator*=(float4& l, _type r) {
-			l.x *= r;
-			l.y *= r;
-			l.z *= r;
-			l.w *= r;
-			return l;
-		}
+		
 
 		inline float4& operator/=(float4& l, const float4& r) {
 			l.x /= r.x;
@@ -174,6 +185,13 @@ namespace leo {
 			return ret;
 		}
 
+		inline constexpr float4 operator*(float4 l, float4 r) noexcept
+		{
+			auto ret = l;
+			ret *= r;
+			return ret;
+		}
+
 		template<typename _type, limpl(typename = enable_if_t<is_lmathtype_v<_type>>)>
 		inline constexpr _type operator-(const _type& l, const _type& r) noexcept {
 			auto ret = l;
@@ -219,14 +237,6 @@ namespace leo {
 			ret /= mod;
 			return ret;
 		}
-
-		template<typename _type, limpl(typename = enable_if_t<is_lmathtype_v<_type>>)>
-		inline _type lerp(const _type& l, const _type& r, float t)
-		{
-			return l * (1.f - t) + r * t;
-		}
-
-
 
 		using std::max;
 		using std::min;
@@ -660,9 +670,30 @@ namespace leo {
 			return max(_Min, min(_Max, _X));
 		}
 
-		template<typename vec>
-		inline vec lerp(const vec& a, const vec& b, const vec & t) {
+		inline constexpr float lerp(float a, float b, float t)
+		{
 			return a * (1 - t) + b * t;
+		}
+
+		template<typename vec>
+		requires(!std::is_same_v<vec,float>)
+		inline vec lerp(vec a, vec b, vec  t) {
+			return a * (1 - t) + b * t;
+		}
+
+		template<typename scalar>
+		inline vector4<scalar> lerp(vector4<scalar> a, vector4<scalar> b, scalar  t) {
+			return a * (1 - t) + b * t;
+		}
+
+		template<typename scalar>
+		inline vector3<scalar> lerp(vector3<scalar> a, vector3<scalar> b, scalar  t) {
+			return a * (1 - t) + b * t;
+		}
+
+		inline float saturate(float x)
+		{
+			return  0 < (1 > x ? x : 1) ? (1 > x ? x : 1) : 0;
 		}
 
 		inline float2 saturate(const float2& x) {
