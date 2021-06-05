@@ -590,7 +590,7 @@ private:
 			) * scene.Matrices.GetInvViewProjectionMatrix(),
 			.ViewToClip = projmatrix,
 			.TranslatedWorldToView = viewmatrix,
-			.InvProjectionMatrix =scene.Matrices.GetProjectionMatrix(),
+			.InvProjectionMatrix =scene.Matrices.GetInvProjectionMatrix(),
 			.InvDeviceZToWorldZTransform = LeoEngine::CreateInvDeviceZToWorldZTransform(projmatrix),
 		};
 
@@ -690,6 +690,9 @@ private:
 
 		sun_light.SetTransform(le::RotationMatrix(le::Rotator(-directioal_light.direction)));
 
+		sun_light.DynamicShadowCascades = 1;
+		sun_light.WholeSceneDynamicShadowRadius = modelRaidus *1.5f;
+
 
 		pLightConstatnBuffer = leo::share_raw(Device.CreateConstanBuffer(Buffer::Usage::Dynamic, EAccessHint::EA_GPURead | EAccessHint::EA_GPUStructured, sizeof(DirectLight)*lights.size(), static_cast<EFormat>(sizeof(DirectLight)),lights.data()));
 
@@ -730,61 +733,73 @@ private:
 
 	void OnCombineLUTUI()
 	{
+		if (ImGui::CollapsingHeader("PostProcess"))
+		{
 #define FLOAT4_FIELD(Field) lut_dirty|=ImGui::ColorEdit4(#Field, lut_params.Field.data)
 #define FLOAT_FIELD(Field) lut_dirty|=ImGui::SliderFloat(#Field, &lut_params.Field,0,1)
+			if (ImGui::CollapsingHeader("ColorCorrect"))
+			{
+				ImGui::Indent(16);
+				FLOAT4_FIELD(ColorSaturation);
+				FLOAT4_FIELD(ColorContrast);
+				FLOAT4_FIELD(ColorGamma);
+				FLOAT4_FIELD(ColorGain);
+				FLOAT4_FIELD(ColorOffset);
+				FLOAT4_FIELD(ColorSaturationShadows);
+				FLOAT4_FIELD(ColorContrastShadows);
+				FLOAT4_FIELD(ColorGammaShadows);
+				FLOAT4_FIELD(ColorGainShadows);
+				FLOAT4_FIELD(ColorOffsetShadows);
+				FLOAT4_FIELD(ColorSaturationMidtones);
+				FLOAT4_FIELD(ColorContrastMidtones);
+				FLOAT4_FIELD(ColorGammaMidtones);
+				FLOAT4_FIELD(ColorGainMidtones);
+				FLOAT4_FIELD(ColorOffsetMidtones);
+				FLOAT4_FIELD(ColorSaturationHighlights);
+				FLOAT4_FIELD(ColorContrastHighlights);
+				FLOAT4_FIELD(ColorGammaHighlights);
+				FLOAT4_FIELD(ColorGainHighlights);
+				FLOAT4_FIELD(ColorOffsetHighlights);
+				FLOAT_FIELD(ColorCorrectionShadowsMax);
+				FLOAT_FIELD(ColorCorrectionHighlightsMin);
+				ImGui::Unindent(16);
+			}
 
-		if (ImGui::CollapsingHeader("ColorCorrect"))
-		{
-			ImGui::Indent(16);
-			FLOAT4_FIELD(ColorSaturation);
-			FLOAT4_FIELD(ColorContrast);
-			FLOAT4_FIELD(ColorGamma);
-			FLOAT4_FIELD(ColorGain);
-			FLOAT4_FIELD(ColorOffset);
-			FLOAT4_FIELD(ColorSaturationShadows);
-			FLOAT4_FIELD(ColorContrastShadows);
-			FLOAT4_FIELD(ColorGammaShadows);
-			FLOAT4_FIELD(ColorGainShadows);
-			FLOAT4_FIELD(ColorOffsetShadows);
-			FLOAT4_FIELD(ColorSaturationMidtones);
-			FLOAT4_FIELD(ColorContrastMidtones);
-			FLOAT4_FIELD(ColorGammaMidtones);
-			FLOAT4_FIELD(ColorGainMidtones);
-			FLOAT4_FIELD(ColorOffsetMidtones);
-			FLOAT4_FIELD(ColorSaturationHighlights);
-			FLOAT4_FIELD(ColorContrastHighlights);
-			FLOAT4_FIELD(ColorGammaHighlights);
-			FLOAT4_FIELD(ColorGainHighlights);
-			FLOAT4_FIELD(ColorOffsetHighlights);
-			FLOAT_FIELD(ColorCorrectionShadowsMax);
-			FLOAT_FIELD(ColorCorrectionHighlightsMin);
-			ImGui::Unindent(16);
-		}
+			if (ImGui::CollapsingHeader("WhiteBlance"))
+			{
+				ImGui::Indent(16);
+				lut_dirty |= ImGui::SliderFloat("WhiteTemp", &lut_params.WhiteTemp, 2000, 15000);
+				lut_dirty |= ImGui::SliderFloat("WhiteTint", &lut_params.WhiteTint, -1, 1);
+				ImGui::Unindent(16);
+			}
 
-		if (ImGui::CollapsingHeader("WhiteBlance"))
-		{
-			ImGui::Indent(16);
-			lut_dirty |= ImGui::SliderFloat("WhiteTemp", &lut_params.WhiteTemp, 2000, 15000);
-			lut_dirty |= ImGui::SliderFloat("WhiteTint", &lut_params.WhiteTint, -1, 1);
-			ImGui::Unindent(16);
-		}
+			if (ImGui::CollapsingHeader("ACES"))
+			{
+				ImGui::Indent(16);
+				FLOAT_FIELD(FilmSlope);
+				FLOAT_FIELD(FilmToe);
+				FLOAT_FIELD(FilmShoulder);
+				FLOAT_FIELD(FilmBlackClip);
+				FLOAT_FIELD(FilmWhiteClip);
+				ImGui::Unindent(16);
+			}
 
-		if (ImGui::CollapsingHeader("ACES"))
-		{
-			ImGui::Indent(16);
-			FLOAT_FIELD(FilmSlope);
-			FLOAT_FIELD(FilmToe);
-			FLOAT_FIELD(FilmShoulder);
-			FLOAT_FIELD(FilmBlackClip);
-			FLOAT_FIELD(FilmWhiteClip);
-			ImGui::Unindent(16);
-		}
-
-		lut_dirty |= ImGui::SliderFloat("Gamma", &Environment->Gamma, 1, 2.5f);
-		FLOAT_FIELD(BlueCorrection);
-		FLOAT_FIELD(ExpandGamut);
+			lut_dirty |= ImGui::SliderFloat("Gamma", &Environment->Gamma, 1, 2.5f);
+			FLOAT_FIELD(BlueCorrection);
+			FLOAT_FIELD(ExpandGamut);
 #undef FLOAT4_FIELD
 #undef FLOAT_FIELD
+		}
+
+		if (ImGui::CollapsingHeader("Shadow"))
+		{
+			ImGui::Indent(16);
+			ImGui::SliderFloat("ShadowRadius", &sun_light.WholeSceneDynamicShadowRadius, 0, 200);
+			ImGui::SliderInt("ShadowCascades", &sun_light.DynamicShadowCascades, 1, scene.MaxShadowCascades);
+			ImGui::Unindent(16);
+		}
+
+		
 	}
 
 	void OnRaytracingUI()

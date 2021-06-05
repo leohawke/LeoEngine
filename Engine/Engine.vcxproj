@@ -131,6 +131,7 @@
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
     </ClCompile>
     <ClCompile Include="Runtime\DirectionalLight.cpp" />
+    <ClCompile Include="Runtime\GizmosElements.cpp" />
     <ClCompile Include="Runtime\Light.cpp" />
     <ClCompile Include="Runtime\SceneRendering.cpp" />
     <ClCompile Include="System\NinthTimer.cpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="Asset\ShaderLoadingDesc.h" />
     <ClInclude Include="Asset\TexCompression.hpp" />
     <ClInclude Include="Asset\TextureX.h" />
+    <ClInclude Include="CoreTypes.h" />
     <ClInclude Include="Core\AssetResourceScheduler.h" />
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core\CameraController.h" />
@@ -293,6 +295,7 @@
     <ClInclude Include="Render\ViewPort.h" />
     <CopyFileToFolders Include="Shaders\SSD\SSDDefinitions.h" />
     <ClInclude Include="Runtime\DirectionalLight.h" />
+    <ClInclude Include="Runtime\GizmosElements.h" />
     <ClInclude Include="Runtime\Light.h" />
     <ClInclude Include="Runtime\SceneClasses.h" />
     <ClInclude Include="Runtime\SceneInfo.h" />

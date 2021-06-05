@@ -338,6 +338,9 @@
     <ClCompile Include="Renderer\ScreenRendering.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="Runtime\GizmosElements.cpp">
+      <Filter>Runtime</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Context.h">
@@ -861,6 +864,10 @@
     <ClInclude Include="Renderer\ScreenRendering.h">
       <Filter>Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="Runtime\GizmosElements.h">
+      <Filter>Runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreTypes.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">

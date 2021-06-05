@@ -63,6 +63,11 @@ namespace LeoEngine
 			return ViewMatrix;
 		}
 
+		inline const lm::float4x4& GetViewProjectionMatrix() const
+		{
+			return ViewProjectionMatrix;
+		}
+
 		lm::float3 GetViewOrigin() const
 		{
 			return ViewOrigin;

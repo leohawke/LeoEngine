@@ -8,6 +8,7 @@
 #include <LBase/linttype.hpp>
 #include <LBase/sutility.h>
 #include <LBase/lmacro.h>
+#include <LBase/span.hpp>
 #include "RenderObject.h"
 #include "ShaderParametersMetadata.h"
 namespace platform::Render {
@@ -136,6 +137,8 @@ namespace platform::Render {
 	{
 		return GraphicsBufferRef<TBufferStruct>::CreateGraphicsBuffeImmediate(Value, Usage);
 	}
+
+	GraphicsBuffer* CreateVertexBuffer(leo::span<const byte> Contents, Buffer::Usage Usage,uint32 Access);
 }
 
 #endif
