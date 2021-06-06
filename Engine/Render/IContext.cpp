@@ -53,7 +53,7 @@ namespace platform::Render {
 		return Device.CreateConstanBuffer(Usage, EAccessHint::EA_GPURead,Layout.GetSize(), EFormat::EF_Unknown,Contents);
 	}
 
-	GraphicsBuffer* CreateVertexBuffer(leo::span<const byte*> Contents, Buffer::Usage Usage, uint32 Access)
+	GraphicsBuffer* CreateVertexBuffer(leo::span<const std::byte> Contents, Buffer::Usage Usage, uint32 Access)
 	{
 		auto& Device = Context::Instance().GetDevice();
 

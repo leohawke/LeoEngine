@@ -20,6 +20,7 @@
 #include "Renderer/ScreenSpaceDenoiser.h"
 #include "Renderer/ShadowRendering.h"
 #include "Runtime/DirectionalLight.h"
+#include "Runtime/GizmosElements.h"
 #include "Math/RotationMatrix.h"
 #include "Math/ScaleMatrix.h"
 #include "Math/ShadowProjectionMatrix.h"
@@ -94,6 +95,7 @@ public:
 	unsigned StateFrameIndex = 0;
 
 	std::vector<std::unique_ptr<le::ProjectedShadowInfo>> ShadowInfos;
+	std::vector<le::Sphere> ShadowSphere;
 private:
 	bool SubWndProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam) override
 	{
@@ -113,6 +115,7 @@ private:
 		ImGui::Begin("Settings");
 		OnRaytracingUI();
 		OnCombineLUTUI();
+		OnGizmosUI();
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::End();
 	}
@@ -249,6 +252,7 @@ private:
 		}
 
 		OnPostProcess();
+		OnDrawGizmos(depth_tex);
 		OnDrawUI();
 
 		Context::Instance().EndFrame();
@@ -608,6 +612,34 @@ private:
 		RenderShadowDepth();
 	}
 
+	void OnDrawGizmos(Texture2D* depth_tex)
+	{
+		le::GizmosElements gizmos;
+
+		auto& CmdList = platform::Render::GetCommandList();
+
+		le::LinearColor Colors[] =
+		{
+			lm::float4{1,0,0,1},//Read
+			lm::float4{1,1,0,1},//Yellow
+			lm::float4{0,1,0,1},//Green
+			lm::float4{0,0,1,1},//Blue
+		};
+
+		int Count = std::min<int>(4, ShadowSphere.size());
+		for (int i = 0; i != Count;++i)
+		{
+			gizmos.AddSphere(ShadowSphere[i].Center, ShadowSphere[i].W, Colors[i]);
+		}
+
+		platform::Render::RenderPassInfo GeometryPass(
+			GetScreenTex(), platform::Render::RenderTargetActions::Load_Store,
+			depth_tex, platform::Render::DepthStencilTargetActions::LoadDepthStencil_StoreDepthStencil);
+		CmdList.BeginRenderPass(GeometryPass, "Gizmos");
+
+		gizmos.Draw(CmdList, scene);
+	}
+
 	void OnDrawUI()
 	{
 		auto& CmdList = platform::Render::GetCommandList();
@@ -806,8 +838,64 @@ private:
 	{
 		if (ImGui::CollapsingHeader("Raytracing"))
 		{
+			ImGui::Indent(16);
+
 			ImGui::SliderFloat("SoftShadowAngle", &LightHalfAngle, 0.1f, 10);
 			ImGui::SliderInt("RayPerPixel", &SamplesPerPixel, 1, 8);
+
+			ImGui::Unindent(16);
+		}
+	}
+
+	void OnGizmosUI()
+	{
+		auto label = [&](int index, lm::float3 v)
+		{
+			ImGui::Text("%d\tCenter:%.3f,%.3f,%.3f", index, (float)v.x, (float)v.y, (float)v.z);
+		};
+
+		auto sphere = [&](int index, le::Sphere s)
+		{
+			label(index, s.Center);
+			ImGui::SameLine();
+			ImGui::Text(" R:%.3f", s.W);
+		};
+
+		if (ImGui::CollapsingHeader("Gizmos"))
+		{
+			ImGui::SameLine();
+			if (ImGui::Button("Clear"))
+			{
+				ShadowSphere.clear();
+			}
+
+			ImGui::Indent(16);
+
+			for (int i = 0; i != ShadowSphere.size(); ++i)
+			{
+				sphere(i,ShadowSphere[i]);
+				ImGui::SameLine();
+
+				if (ImGui::Button("-"))
+				{
+					ShadowSphere.erase(ShadowSphere.begin() + i);
+					break;
+				}
+			}
+
+			for (int i = 0; i != ShadowInfos.size() && ShadowSphere.size() < 4; ++i)
+			{
+				sphere(i+ ShadowSphere.size(), ShadowInfos[i]->ShadowBounds);
+				ImGui::SameLine();
+
+				if (ImGui::Button("+"))
+				{
+					ShadowSphere.emplace_back(ShadowInfos[i]->ShadowBounds);
+					break;
+				}
+			}
+
+			ImGui::Unindent(16);
 		}
 	}
 };

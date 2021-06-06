@@ -1064,6 +1064,12 @@
     <None Include="Shaders\ShadowProjectionPixelShader.lsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="Shaders\GizmosElementsVertexShader.lsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\GizmosPixelShader.lsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Render\Effect\Bilt.lsl">

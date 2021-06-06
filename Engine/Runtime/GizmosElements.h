@@ -26,7 +26,8 @@ namespace LeoEngine
 		void AddLine(const lm::float3& Start, const lm::float3& End, const LinearColor& Color, float Thickness = 0.0f, float DepthBias = 0.0f, bool bScreenSpace = false);
 
 		bool Draw(platform::Render::CommandList& CmdList, const LeoEngine::SceneInfo& Info);
-
+	public:
+		void AddSphere(lm::float3 Center, float Radius, const LinearColor& Color, int32 Segments = 16, float Thickness = 0.0f);
 	private:
 		struct BatchPoint
 		{

@@ -138,7 +138,7 @@ namespace platform::Render {
 		return GraphicsBufferRef<TBufferStruct>::CreateGraphicsBuffeImmediate(Value, Usage);
 	}
 
-	GraphicsBuffer* CreateVertexBuffer(leo::span<const byte> Contents, Buffer::Usage Usage,uint32 Access);
+	GraphicsBuffer* CreateVertexBuffer(leo::span<const std::byte> Contents, Buffer::Usage Usage,uint32 Access);
 }
 
 #endif

@@ -338,6 +338,8 @@
     <None Include="Shaders\ACES.h" />
     <None Include="Shaders\Common.h" />
     <None Include="Shaders\GammaCorrectionCommon.h" />
+    <None Include="Shaders\GizmosElementsVertexShader.lsl" />
+    <None Include="Shaders\GizmosPixelShader.lsl" />
     <None Include="Shaders\imgui\imgui.lsl" />
     <None Include="Shaders\MonteCarlo.h" />
     <None Include="Shaders\PostProcess\PostProcessCombineLUTs.lsl" />

@@ -10,8 +10,8 @@ using namespace platform::Render;
 platform::Render::VertexDeclarationElements GizmosElementVertex::VertexDeclaration
 {
 	CtorVertexElement(0,loffsetof(GizmosElementVertex,Position),Vertex::Usage::Position,0,EF_ABGR32F,sizeof(GizmosElementVertex)),
-	CtorVertexElement(0,loffsetof(GizmosElementVertex,TextureCoordinate),Vertex::Usage::Position,0,EF_GR32F,sizeof(GizmosElementVertex)),
-	CtorVertexElement(0,loffsetof(GizmosElementVertex,Color),Vertex::Usage::Position,0,EF_ABGR32F,sizeof(GizmosElementVertex)),
+	CtorVertexElement(0,loffsetof(GizmosElementVertex,TextureCoordinate),Vertex::Usage::TextureCoord,0,EF_GR32F,sizeof(GizmosElementVertex)),
+	CtorVertexElement(0,loffsetof(GizmosElementVertex,Color),Vertex::Usage::Diffuse,0,EF_ABGR32F,sizeof(GizmosElementVertex)),
 };
 
 void GizmosElements::AddLine(const lm::float3& Start, const lm::float3& End, const LinearColor& Color, float Thickness, float DepthBias, bool bScreenSpace)
@@ -88,8 +88,8 @@ bool GizmosElements::Draw(platform::Render::CommandList& CmdList, const LeoEngin
 		
 		VertexShader->SetParameters(CmdList, Transform);
 
-		auto VertexBuffer = CreateVertexBuffer(leo::make_const_span((byte*)Lines.data(), Lines.size() * sizeof(GizmosElementVertex)),
-			Buffer::Usage::SingleDraw,EAccessHint::EA_GPURead);
+		auto VertexBuffer = CreateVertexBuffer(leo::make_const_span((std::byte*)Lines.data(), Lines.size() * sizeof(GizmosElementVertex)),
+			Buffer::Usage::Static,EAccessHint::EA_GPURead);
 
 		CmdList.SetVertexBuffer(0, VertexBuffer);
 
@@ -109,4 +109,47 @@ bool GizmosElements::Draw(platform::Render::CommandList& CmdList, const LeoEngin
 	}
 
 	return true;
+}
+
+void GizmosElements::AddSphere(lm::float3 Center, float Radius, const LinearColor& Color, int32 Segments, float Thickness)
+{
+	Segments = std::max(Segments, 4);
+
+	const float AngleInc = 2.f * lm::PI / Segments;
+
+	auto SegementsY = Segments;
+	float Latitude = AngleInc;
+	float Longitude;
+	float SinY1 = 0.0f, CosY1 = 1.0f, SinY2, CosY2;
+	float SinX, CosX;
+
+	while (SegementsY--)
+	{
+		SinY2 = std::sin(Latitude);
+		CosY2 = std::cos(Latitude);
+
+		auto Vertex1 = lm::float3(SinY1, CosY1, 0.0f) * Radius + Center;
+		auto Vertex3 = lm::float3(SinY2, CosY2, 0.0f) * Radius + Center;
+		Longitude = AngleInc;
+
+		auto SegementsX = Segments;
+		while (SegementsX--)
+		{
+			SinX = std::sin(Longitude);
+			CosX = std::cos(Longitude);
+
+			auto Vertex2 = lm::float3((CosX * SinY1), CosY1, (SinX * SinY1)) * Radius + Center;
+			auto Vertex4 = lm::float3((CosX * SinY2), CosY2, (SinX * SinY2)) * Radius + Center;
+
+			AddLine(Vertex1, Vertex2, Color, Thickness);
+			AddLine(Vertex1, Vertex3, Color, Thickness);
+
+			Vertex1 = Vertex2;
+			Vertex3 = Vertex4;
+			Longitude += AngleInc;
+		}
+		SinY1 = SinY2;
+		CosY1 = CosY2;
+		Latitude += AngleInc;
+	}
 }
