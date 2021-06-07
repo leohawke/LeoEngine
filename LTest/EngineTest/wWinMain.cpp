@@ -157,7 +157,12 @@ private:
 			{0,0,1,0},
 			{0,0,0,1}
 		};
-		auto projmatrix = LeoEngine::X::perspective_fov_lh(3.14f / 4, 720.f / 1280, 1, 1000);
+		float aspect = screen_tex->GetWidth(0);
+		aspect /= screen_tex->GetHeight(0);
+
+		float fov = atan(1/aspect);
+
+		auto projmatrix = LeoEngine::X::perspective_fov_lh(fov*2, aspect, 1, 1000);
 		auto viewmatrix = camera.GetViewMatrix();
 
 		auto viewproj = viewmatrix * projmatrix;

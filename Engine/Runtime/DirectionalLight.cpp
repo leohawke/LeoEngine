@@ -157,7 +157,7 @@ Sphere DirectionalLight::GetShadowSplitBoundsDepthRange(const SceneInfo& scene, 
 	// Calculate the ideal bounding sphere for the subfrustum.
 	//https://lxjk.github.io/2017/04/15/Calculate-Minimal-Bounding-Sphere-of-Frustum.html
 
-	float k = std::sqrt(1 + Aspect * Aspect) * std::tan(HalfHorizontalFOV);
+	float k = std::sqrt(1 + 1 /(Aspect * Aspect)) * std::tan(HalfHorizontalFOV);
 
 	Sphere CascadeSphere(ViewOrigin + CameraDirection * SplitFar, SplitFar*k);
 
