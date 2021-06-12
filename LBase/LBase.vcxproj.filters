@@ -7,6 +7,54 @@
     <Filter Include="VSVisualizer">
       <UniqueIdentifier>{ad2b47d0-c845-4a4f-a5d3-41988161b5be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="folly">
+      <UniqueIdentifier>{d417c40f-7fcf-4247-b53d-623b98dc4911}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="folly\concurrency">
+      <UniqueIdentifier>{69000a1b-e0ea-4f2d-af25-1fa4609b788f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="folly\concurrency\detail">
+      <UniqueIdentifier>{f6673523-0120-47e7-8c0e-01ad5e104b3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="folly\executors">
+      <UniqueIdentifier>{7f215b39-46c7-4a42-8bd5-c0a0ec97a292}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="folly\synchronization">
+      <UniqueIdentifier>{1764ed7d-8779-46d1-8559-856bbb1c248b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="folly\portability">
+      <UniqueIdentifier>{434c4532-36d6-4c7a-8b16-9b1243397d97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="folly\synchronization\detail">
+      <UniqueIdentifier>{22f69168-38e5-41f3-9356-91ca7813f7e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="folly\functional">
+      <UniqueIdentifier>{1e2c5567-0874-4f55-bd72-574964eb4c6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="folly\lang">
+      <UniqueIdentifier>{c5ebb997-0246-47df-9baa-91f09d05e11d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="folly\memory">
+      <UniqueIdentifier>{59ef79aa-9b3a-4963-abcd-79caaa3b5e4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="folly\memory\detail">
+      <UniqueIdentifier>{bf0993cd-325b-40a7-b771-4d981c2ca273}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="folly\hash">
+      <UniqueIdentifier>{cac9fd2e-7c4d-4648-b7e0-140b758ddcbc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="folly\system">
+      <UniqueIdentifier>{3de272ac-9eea-4498-9e70-6377e4b0009e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="folly\detail">
+      <UniqueIdentifier>{57d40ef2-d98d-4d53-83ed-041b1466d868}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="folly\net">
+      <UniqueIdentifier>{28c38eb8-ce6f-40a3-b3e1-ef24af65db0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="folly\net\detail">
+      <UniqueIdentifier>{c5b0fc01-9eae-424c-9d6d-a59bd9a48286}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ldef.h" />
@@ -78,6 +126,231 @@
     <ClInclude Include="string_utility.hpp" />
     <ClInclude Include="exception_type.h" />
     <ClInclude Include="observer_ptr.hpp" />
+    <ClInclude Include="folly\CPortability.h">
+      <Filter>folly</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\folly-config.h">
+      <Filter>folly</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\Portability.h">
+      <Filter>folly</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\concurrency\ConcurrentHashMap.h">
+      <Filter>folly\concurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\concurrency\detail\ConcurrentHashMap-detail.h">
+      <Filter>folly\concurrency\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\synchronization\AsymmetricMemoryBarrier.h">
+      <Filter>folly\synchronization</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\synchronization\Hazptr.h">
+      <Filter>folly\synchronization</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\synchronization\HazptrDomain.h">
+      <Filter>folly\synchronization</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\synchronization\Hazptr-fwd.h">
+      <Filter>folly\synchronization</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\synchronization\HazptrHolder.h">
+      <Filter>folly\synchronization</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\synchronization\HazptrObj.h">
+      <Filter>folly\synchronization</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\synchronization\HazptrObjLinked.h">
+      <Filter>folly\synchronization</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\synchronization\HazptrRec.h">
+      <Filter>folly\synchronization</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\synchronization\HazptrThrLocal.h">
+      <Filter>folly\synchronization</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\portability\Asm.h">
+      <Filter>folly\portability</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\portability\Config.h">
+      <Filter>folly\portability</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\portability\GFlags.h">
+      <Filter>folly\portability</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\synchronization\detail\HazptrUtils.h">
+      <Filter>folly\synchronization\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\synchronization\detail\Sleeper.h">
+      <Filter>folly\synchronization\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\portability\Logging.h">
+      <Filter>folly\portability</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\functional\Invoke.h">
+      <Filter>folly\functional</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\ThreadLocal.h">
+      <Filter>folly</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\Likely.h">
+      <Filter>folly</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\ScopeGuard.h">
+      <Filter>folly</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\Traits.h">
+      <Filter>folly</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\Utility.h">
+      <Filter>folly</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\lang\Exception.h">
+      <Filter>folly\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\CppAttributes.h">
+      <Filter>folly</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\lang\UncaughtExceptions.h">
+      <Filter>folly\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\lang\Align.h">
+      <Filter>folly\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\lang\Aligned.h">
+      <Filter>folly\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\lang\TypeInfo.h">
+      <Filter>folly\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\Memory.h">
+      <Filter>folly</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\lang\Thunk.h">
+      <Filter>folly\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\portability\Malloc.h">
+      <Filter>folly\portability</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\portability\SysTypes.h">
+      <Filter>folly\portability</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\memory\Malloc.h">
+      <Filter>folly\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\memory\detail\MallocImpl.h">
+      <Filter>folly\memory\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\concurrency\CacheLocality.h">
+      <Filter>folly\concurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\hash\Hash.h">
+      <Filter>folly\hash</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\hash\SpookyHashV1.h">
+      <Filter>folly\hash</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\hash\SpookyHashV2.h">
+      <Filter>folly\hash</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\functional\ApplyTuple.h">
+      <Filter>folly\functional</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\lang\Assume.h">
+      <Filter>folly\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\lang\Assume-inl.h">
+      <Filter>folly\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\lang\SafeAssert.h">
+      <Filter>folly\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\portability\Builtins.h">
+      <Filter>folly\portability</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\portability\Windows.h">
+      <Filter>folly\portability</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\lang\Bits.h">
+      <Filter>folly\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\system\ThreadId.h">
+      <Filter>folly\system</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\portability\Unistd.h">
+      <Filter>folly\portability</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\SharedMutex.h">
+      <Filter>folly</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\synchronization\SanitizeThread.h">
+      <Filter>folly\synchronization</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\lang\Extern.h">
+      <Filter>folly\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\ConstexprMath.h">
+      <Filter>folly</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\Unit.h">
+      <Filter>folly</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\synchronization\ParkingLot.h">
+      <Filter>folly\synchronization</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\Hash.h">
+      <Filter>folly</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\detail\Futex.h">
+      <Filter>folly\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\detail\Futex-inl.h">
+      <Filter>folly\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\detail\ThreadLocalDetail.h">
+      <Filter>folly\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\synchronization\MicroSpinLock.h">
+      <Filter>folly\synchronization</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\portability\PThread.h">
+      <Filter>folly\portability</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\portability\Sched.h">
+      <Filter>folly\portability</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\portability\Time.h">
+      <Filter>folly\portability</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\SingletonThreadLocal.h">
+      <Filter>folly</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\detail\Singleton.h">
+      <Filter>folly\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\detail\Iterators.h">
+      <Filter>folly\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\detail\StaticSingletonManager.h">
+      <Filter>folly\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\detail\UniqueInstance.h">
+      <Filter>folly\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\Demangle.h">
+      <Filter>folly</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\lang\CString.h">
+      <Filter>folly\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\net\NetOps.h">
+      <Filter>folly\net</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\net\NetworkSocket.h">
+      <Filter>folly\net</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\net\detail\SocketFileDescriptorMap.h">
+      <Filter>folly\net\detail</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="any.cpp" />
@@ -90,6 +363,84 @@
     <ClCompile Include="operators.hpp" />
     <ClCompile Include="LBase.cpp" />
     <ClCompile Include="cformat.cpp" />
+    <ClCompile Include="folly\synchronization\Hazptr.cpp">
+      <Filter>folly\synchronization</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\synchronization\detail\Sleeper.cpp">
+      <Filter>folly\synchronization\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\ScopeGuard.cpp">
+      <Filter>folly</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\portability\Malloc.cpp">
+      <Filter>folly\portability</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\memory\detail\MallocImpl.cpp">
+      <Filter>folly\memory\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\concurrency\CacheLocality.cpp">
+      <Filter>folly\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\hash\SpookyHashV1.cpp">
+      <Filter>folly\hash</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\hash\SpookyHashV2.cpp">
+      <Filter>folly\hash</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\lang\Assume.cpp">
+      <Filter>folly\lang</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\portability\Builtins.cpp">
+      <Filter>folly\portability</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\system\ThreadId.cpp">
+      <Filter>folly\system</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\portability\Unistd.cpp">
+      <Filter>folly\portability</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\SharedMutex.cpp">
+      <Filter>folly</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\synchronization\SanitizeThread.cpp">
+      <Filter>folly\synchronization</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\synchronization\ParkingLot.cpp">
+      <Filter>folly\synchronization</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\detail\Futex.cpp">
+      <Filter>folly\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\detail\ThreadLocalDetail.cpp">
+      <Filter>folly\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\portability\PThread.cpp">
+      <Filter>folly\portability</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\portability\Sched.cpp">
+      <Filter>folly\portability</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\portability\Time.cpp">
+      <Filter>folly\portability</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\detail\StaticSingletonManager.cpp">
+      <Filter>folly\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\detail\UniqueInstance.cpp">
+      <Filter>folly\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\Demangle.cpp">
+      <Filter>folly</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\lang\CString.cpp">
+      <Filter>folly\lang</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\net\detail\SocketFileDescriptorMap.cpp">
+      <Filter>folly\net\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\net\NetOps.cpp">
+      <Filter>folly\net</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="LBase.natvis">
