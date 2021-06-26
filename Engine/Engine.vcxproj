@@ -422,7 +422,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)Engine;$(SolutionDir);$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)SDKs</IncludePath>
+    <IncludePath>$(SolutionDir)Engine;$(SolutionDir)LBase;$(SolutionDir);$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)SDKs</IncludePath>
     <OutDir>$(ProjectDir)toollib\$(Platform)\</OutDir>
     <TargetName>$(ProjectName)d</TargetName>
     <LibraryPath>$(SolutionDir);$(LibraryPath)</LibraryPath>
@@ -434,7 +434,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)Engine;$(SolutionDir);$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)SDKs</IncludePath>
+    <IncludePath>$(SolutionDir)Engine;$(SolutionDir);$(SolutionDir)LBase;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)SDKs</IncludePath>
     <OutDir>$(ProjectDir)toollib\$(Platform)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

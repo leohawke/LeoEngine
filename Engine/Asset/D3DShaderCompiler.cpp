@@ -4,6 +4,7 @@
 #include <LFramework/Core/LString.h>
 #include <LFramework/Win32/LCLib/Mingw32.h>
 #include <LFramework/Win32/LCLib/NLS.h>
+#include <LBase/ConcurrentHashMap.h>
 #include "D3DShaderCompiler.h"
 #include "../Render/IContext.h"
 #include "../Render/RayTracingDefinitions.h"
@@ -497,8 +498,8 @@ namespace asset::X::Shader::DXIL {
 			auto path = std::filesystem::path(pFilename);
 			auto key = path.string();
 
-			try {
 
+			try {
 				auto itr = caches.find(key);
 				if (itr == caches.end())
 				{
@@ -553,7 +554,8 @@ namespace asset::X::Shader::DXIL {
 			return platform::File(path.wstring(), platform::File::kToRead);
 		}
 
-		std::unordered_map<std::string, IDxcBlobEncoding*> caches;
+
+		leo::ConcurrentHashMap<std::string, IDxcBlobEncoding*> caches;
 
 		COMPtr<IDxcLibrary> Library;
 	} currdir_include;
