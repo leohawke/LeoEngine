@@ -20,7 +20,20 @@
 #include <atomic>
 #include <mutex>
 
+#include <folly/container/HeterogeneousAccess.h>
+#include <folly/container/detail/F14Mask.h>
+#include <folly/lang/Exception.h>
+#include <folly/lang/Launder.h>
 #include <folly/synchronization/Hazptr.h>
+
+#if FOLLY_SSE_PREREQ(4, 2) && !FOLLY_MOBILE
+#include <nmmintrin.h>
+#endif
+
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4200)
+#endif
 
 namespace folly {
 
@@ -195,7 +208,7 @@ class alignas(64) BucketTable {
   // Slightly higher than 1.0, in case hashing to shards isn't
   // perfectly balanced, reserve(size) will still work without
   // rehashing.
-  static constexpr float kDefaultLoadFactor = 1.05;
+  static constexpr float kDefaultLoadFactor = 1.05f;
   typedef std::pair<const KeyType, ValueType> value_type;
 
   using Node =
@@ -217,7 +230,7 @@ class alignas(64) BucketTable {
          (folly::popcount(max_size_ - 1) + ShardBits <= 32)));
     auto buckets = Buckets::create(initial_buckets, cohort);
     buckets_.store(buckets, std::memory_order_release);
-    load_factor_nodes_ = initial_buckets * load_factor_;
+    load_factor_nodes_ =static_cast<size_t>(initial_buckets * load_factor_);
     bucket_count_.store(initial_buckets, std::memory_order_relaxed);
   }
 
@@ -276,14 +289,14 @@ class alignas(64) BucketTable {
   void rehash(size_t bucket_count, hazptr_obj_cohort<Atom>* cohort) {
     auto oldcount = bucket_count_.load(std::memory_order_relaxed);
     // bucket_count must be a power of 2
-    DCHECK_EQ(bucket_count & (bucket_count - 1), 0);
+    DCHECK_EQ((bucket_count & (bucket_count - 1)), 0);
     if (bucket_count <= oldcount) {
       return; // Rehash only if expanding.
     }
     auto buckets = buckets_.load(std::memory_order_relaxed);
     DCHECK(buckets); // Use-after-destruction by user.
     auto newbuckets = Buckets::create(bucket_count, cohort);
-    load_factor_nodes_ = bucket_count * load_factor_;
+    load_factor_nodes_ =static_cast<size_t>(bucket_count * load_factor_);
     for (size_t i = 0; i < oldcount; i++) {
       auto bucket = &buckets->buckets_[i]();
       auto node = bucket->load(std::memory_order_relaxed);
@@ -602,7 +615,7 @@ class alignas(64) BucketTable {
         break;
       }
     }
-    DCHECK(buckets) << "Use-after-destruction by user.";
+    LAssert(buckets,"Use-after-destruction by user.");
   }
 
   template <typename MatchFunc, typename K, typename... Args>
@@ -630,7 +643,7 @@ class alignas(64) BucketTable {
       bcount = bucket_count_.load(std::memory_order_relaxed);
     }
 
-    DCHECK(buckets) << "Use-after-destruction by user.";
+    LAssert(buckets,"Use-after-destruction by user.");
     auto idx = getIdx(bcount, h);
     auto head = &buckets->buckets_[idx]();
     auto node = head->load(std::memory_order_relaxed);
@@ -711,7 +724,6 @@ class alignas(64) BucketTable {
     haznode.reset(cur);
     return true;
   }
-
   Mutex m_;
   float load_factor_;
   size_t load_factor_nodes_;
@@ -1827,3 +1839,7 @@ class alignas(64) ConcurrentHashMapSegment {
 };
 } // namespace detail
 } // namespace folly
+
+#if _MSC_VER
+#pragma warning(pop)
+#endif

@@ -55,6 +55,12 @@
     <Filter Include="folly\net\detail">
       <UniqueIdentifier>{c5b0fc01-9eae-424c-9d6d-a59bd9a48286}</UniqueIdentifier>
     </Filter>
+    <Filter Include="folly\container">
+      <UniqueIdentifier>{07fcda69-fd5d-4081-9522-29c4865112e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="folly\container\detail">
+      <UniqueIdentifier>{6163af11-88f3-460d-86ea-3ce5deee4a19}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ldef.h" />
@@ -351,6 +357,25 @@
     <ClInclude Include="folly\net\detail\SocketFileDescriptorMap.h">
       <Filter>folly\net\detail</Filter>
     </ClInclude>
+    <ClInclude Include="folly\Optional.h">
+      <Filter>folly</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\lang\Launder.h">
+      <Filter>folly\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\container\detail\F14Mask.h">
+      <Filter>folly\container\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\Bits.h">
+      <Filter>folly</Filter>
+    </ClInclude>
+    <ClInclude Include="ConcurrentHashMap.h" />
+    <ClInclude Include="folly\container\HeterogeneousAccess.h">
+      <Filter>folly\container</Filter>
+    </ClInclude>
+    <ClInclude Include="folly\container\HeterogeneousAccess-fwd.h">
+      <Filter>folly\container</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="any.cpp" />
@@ -440,6 +465,9 @@
     </ClCompile>
     <ClCompile Include="folly\net\NetOps.cpp">
       <Filter>folly\net</Filter>
+    </ClCompile>
+    <ClCompile Include="folly\synchronization\AsymmetricMemoryBarrier.cpp">
+      <Filter>folly\synchronization</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

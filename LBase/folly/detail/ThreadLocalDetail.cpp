@@ -216,7 +216,7 @@ void StaticMetaBase::onThreadExit(void* ptr) {
 uint32_t StaticMetaBase::elementsCapacity() const {
   ThreadEntry* threadEntry = (*threadEntry_)();
 
-  return FOLLY_LIKELY(!!threadEntry) ? threadEntry->getElementsCapacity() : 0;
+  return FOLLY_LIKELY(!!threadEntry) ? static_cast<uint32_t>(threadEntry->getElementsCapacity()) : 0;
 }
 
 uint32_t StaticMetaBase::allocate(EntryID* ent) {
@@ -417,7 +417,7 @@ void StaticMetaBase::reserve(EntryID* id) {
     }
 
     for (size_t i = prevCapacity; i < newCapacity; i++) {
-      threadEntry->elements[i].node.initZero(threadEntry, i);
+      threadEntry->elements[i].node.initZero(threadEntry,static_cast<uint32_t>(i));
     }
 
     threadEntry->setElementsCapacity(newCapacity);
@@ -441,7 +441,7 @@ void StaticMetaBase::reserveHeadUnlocked(uint32_t id) {
     }
 
     for (size_t i = prevCapacity; i < newCapacity; i++) {
-      head_.elements[i].node.init(&head_, i);
+      head_.elements[i].node.init(&head_, static_cast<uint32_t>(i));
     }
 
     head_.setElementsCapacity(newCapacity);

@@ -258,7 +258,7 @@ class shared_head_only_list {
     DCHECK_EQ(reentrance_, 0);
     while (true) {
       auto oldval = head();
-      DCHECK_EQ(oldval & kLockBit, kLockBit); // Should be already locked
+      DCHECK_EQ((oldval & kLockBit), kLockBit); // Should be already locked
       auto ptrval = oldval - kLockBit;
       auto ptr = reinterpret_cast<Node*>(ptrval);
       auto t = l.tail();

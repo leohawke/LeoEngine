@@ -29,6 +29,7 @@
     <ClInclude Include="cctype.h" />
     <ClInclude Include="cformat.h" />
     <ClInclude Include="concurrency.h" />
+    <ClInclude Include="ConcurrentHashMap.h" />
     <ClInclude Include="container.hpp" />
     <ClInclude Include="cstdio.h" />
     <ClInclude Include="cstring.h" />
@@ -39,10 +40,14 @@
     <ClInclude Include="examiner.hpp" />
     <ClInclude Include="exception.h" />
     <ClInclude Include="exception_type.h" />
+    <ClInclude Include="folly\Bits.h" />
     <ClInclude Include="folly\concurrency\CacheLocality.h" />
     <ClInclude Include="folly\concurrency\ConcurrentHashMap.h" />
     <ClInclude Include="folly\concurrency\detail\ConcurrentHashMap-detail.h" />
     <ClInclude Include="folly\ConstexprMath.h" />
+    <ClInclude Include="folly\container\detail\F14Mask.h" />
+    <ClInclude Include="folly\container\HeterogeneousAccess-fwd.h" />
+    <ClInclude Include="folly\container\HeterogeneousAccess.h" />
     <ClInclude Include="folly\CPortability.h" />
     <ClInclude Include="folly\CppAttributes.h" />
     <ClInclude Include="folly\Demangle.h" />
@@ -68,6 +73,7 @@
     <ClInclude Include="folly\lang\CString.h" />
     <ClInclude Include="folly\lang\Exception.h" />
     <ClInclude Include="folly\lang\Extern.h" />
+    <ClInclude Include="folly\lang\Launder.h" />
     <ClInclude Include="folly\lang\SafeAssert.h" />
     <ClInclude Include="folly\lang\Thunk.h" />
     <ClInclude Include="folly\lang\TypeInfo.h" />
@@ -79,6 +85,7 @@
     <ClInclude Include="folly\net\detail\SocketFileDescriptorMap.h" />
     <ClInclude Include="folly\net\NetOps.h" />
     <ClInclude Include="folly\net\NetworkSocket.h" />
+    <ClInclude Include="folly\Optional.h" />
     <ClInclude Include="folly\Portability.h" />
     <ClInclude Include="folly\portability\Asm.h" />
     <ClInclude Include="folly\portability\Builtins.h" />
@@ -161,6 +168,7 @@
     <ClCompile Include="folly\portability\Unistd.cpp" />
     <ClCompile Include="folly\ScopeGuard.cpp" />
     <ClCompile Include="folly\SharedMutex.cpp" />
+    <ClCompile Include="folly\synchronization\AsymmetricMemoryBarrier.cpp" />
     <ClCompile Include="folly\synchronization\detail\Sleeper.cpp" />
     <ClCompile Include="folly\synchronization\Hazptr.cpp" />
     <ClCompile Include="folly\synchronization\ParkingLot.cpp" />

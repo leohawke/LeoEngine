@@ -2,6 +2,7 @@
 #include <folly/portability/Windows.h>
 #ifdef _WIN32
 #include <MSWSock.h> // @manual
+#pragma comment(lib,"Ws2_32.lib")
 #endif
 
 namespace folly {

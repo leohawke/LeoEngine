@@ -34,6 +34,11 @@
 #include <folly/synchronization/MicroSpinLock.h>
 #include <folly/system/ThreadId.h>
 
+namespace folly::portability::pthread {
+    void* pthread_getspecific(void* key);
+    int pthread_setspecific(void* key, const void* value);
+}
+
 namespace folly {
 
 enum class TLPDestructionMode { THIS_THREAD, ALL_THREADS };
@@ -433,7 +438,7 @@ struct FOLLY_EXPORT StaticMeta final : StaticMetaBase {
     auto& meta = instance();
     auto key = meta.pthreadKey_;
     ThreadEntry* threadEntry =
-        static_cast<ThreadEntry*>(pthread_getspecific(key));
+        static_cast<ThreadEntry*>(portability::pthread::pthread_getspecific(key));
     if (!threadEntry) {
       ThreadEntryList* threadEntryList = StaticMeta::getThreadEntryList();
       if (kUseThreadLocal) {
@@ -461,8 +466,7 @@ struct FOLLY_EXPORT StaticMeta final : StaticMetaBase {
       threadEntryList->count++;
 
       threadEntry->meta = &meta;
-      int ret = pthread_setspecific(key, threadEntry);
-      checkPosixError(ret, "pthread_setspecific failed");
+      int ret = portability::pthread::pthread_setspecific(key, threadEntry);
     }
     return threadEntry;
   }

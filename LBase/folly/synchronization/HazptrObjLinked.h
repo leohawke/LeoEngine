@@ -117,15 +117,15 @@ class hazptr_obj_linked : public hazptr_obj<Atom> {
 
   void count_inc(Count add) noexcept {
     auto oldval = count_.fetch_add(add, std::memory_order_acq_rel);
-    DCHECK_LT(oldval & kLinkMask, kLinkMask);
-    DCHECK_LT(oldval & kRefMask, kRefMask);
+    DCHECK_LT((oldval & kLinkMask), kLinkMask);
+    DCHECK_LT((oldval & kRefMask), kRefMask);
   }
 
   void count_inc_safe(Count add) noexcept {
     auto oldval = count();
     count_set(oldval + add);
-    DCHECK_LT(oldval & kLinkMask, kLinkMask);
-    DCHECK_LT(oldval & kRefMask, kRefMask);
+    DCHECK_LT((oldval & kLinkMask), kLinkMask);
+    DCHECK_LT((oldval & kRefMask), kRefMask);
   }
 
   bool count_cas(Count& oldval, Count newval) noexcept {
@@ -137,7 +137,7 @@ class hazptr_obj_linked : public hazptr_obj<Atom> {
     auto sub = kLink;
     auto oldval = count();
     while (true) {
-      DCHECK_GT(oldval & kLinkMask, 0u);
+      DCHECK_GT((oldval & kLinkMask), 0u);
       if (oldval == kLink) {
         count_set(0u);
         return true;
@@ -158,7 +158,7 @@ class hazptr_obj_linked : public hazptr_obj<Atom> {
         }
         return true;
       }
-      DCHECK_GT(oldval & kRefMask, 0u);
+      DCHECK_GT((oldval & kRefMask), 0u);
       if (count_cas(oldval, oldval - sub)) {
         return false;
       }
