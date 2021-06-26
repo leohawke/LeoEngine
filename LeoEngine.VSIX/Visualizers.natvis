@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="folly::ConcurrentHashMap&lt;*&gt;">
+    <CustomVisualizer VisualizerId="44C2656E-9C3C-4CEE-8C6B-D5BD8CD16D0E"/>
+  </Type>
+</AutoVisualizer>

@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (c) Microsoft. All rights reserved.
+Licensed under the MIT license. See LICENSE file in the project root for full license information.
+-->
+
+<Configuration xmlns="http://schemas.microsoft.com/vstudio/vsdconfig/2008">
+
+  <DefineGuid Name="guidVisualizerComponentId" Value="807B5D75-D70D-4286-8B8D-0C5D9C9589FC"/>
+
+  <ManagedComponent
+    ComponentId="guidVisualizerComponentId"
+    ComponentLevel="9992500"
+    AssemblyName="LeoEngine.VSIX.Visualizer">
+    <Class Name="LeoEngine.VSIX.Folly.Concurrency.HashmapVisualizerComponent" WorkerProcessSupported="true">
+      <Implements>
+        <InterfaceGroup>
+          <Filter>
+            <!--NOTE: This VisualizerId is also used in the .natvis file.-->
+            <VisualizerId RequiredValue="44C2656E-9C3C-4CEE-8C6B-D5BD8CD16D0E"/>
+          </Filter>
+          <Interface Name="IDkmCustomVisualizer"/>
+        </InterfaceGroup>
+      </Implements>
+    </Class>
+
+  </ManagedComponent>
+</Configuration>

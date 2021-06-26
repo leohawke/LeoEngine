@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31320.298
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D376C393-CA11-42A3-A6AD-13CC06B20BD9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeoEngine.VSIX", "LeoEngine.VSIX.csproj", "{4B487DCD-E622-4C86-95E9-39A4D10E31A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeoEngine.VSIX.Visualizer", "Visualizer\LeoEngine.VSIX.Visualizer.csproj", "{3A999393-AADA-4D82-B711-4F13A4F287D4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4B487DCD-E622-4C86-95E9-39A4D10E31A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B487DCD-E622-4C86-95E9-39A4D10E31A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B487DCD-E622-4C86-95E9-39A4D10E31A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B487DCD-E622-4C86-95E9-39A4D10E31A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A999393-AADA-4D82-B711-4F13A4F287D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A999393-AADA-4D82-B711-4F13A4F287D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A999393-AADA-4D82-B711-4F13A4F287D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A999393-AADA-4D82-B711-4F13A4F287D4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5EF34FB5-F0AC-4CF5-89AC-A290E1FB49EA}
+	EndGlobalSection
+EndGlobal
