@@ -27,6 +27,7 @@
 #include "Math/TranslationMatrix.h"
 #include "Engine/Core/Coroutine/WhenAllReady.h"
 #include "Engine/Core/Coroutine/SyncWait.h"
+#include "Engine/Core/Path.h"
 
 #include "LFramework/Win32/LCLib/Mingw32.h"
 #include "LFramework/Helper/ShellHelper.h"
@@ -35,6 +36,11 @@
 #include "Entities.h"
 #include "LSchemEngineUnitTest.h"
 #include "imgui/imgui_impl_win32.h"
+
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/sinks/msvc_sink.h"
+
 
 #include <windowsx.h>
 
@@ -908,8 +914,35 @@ private:
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR cmdLine, int nCmdShow)
 {
-	leo::FetchCommonLogger().SetSender([](platform::Descriptions::RecordLevel lv, platform::Logger& logger, const char* str) {return
-		platform_ex::SendDebugString(lv,str); });
+	auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_st>((le::PathSet::EngineIntermediateDir() / "logs/EngineTest.log").string(), true);
+	auto msvc_sink = std::make_shared<spdlog::sinks::msvc_sink_st>();
+
+	spdlog::logger spdlog("spdlog", { file_sink,msvc_sink });
+
+	leo::FetchCommonLogger().SetSender([&](platform::Descriptions::RecordLevel lv, platform::Logger& logger, const char* str) {
+		switch (lv)
+		{
+		case platform::Descriptions::Emergent:
+		case platform::Descriptions::Alert:
+		case platform::Descriptions::Critical:
+			spdlog.critical(str);
+			break;
+		case platform::Descriptions::Err:
+			spdlog.error(str);
+			break;
+		case platform::Descriptions::Warning:
+			spdlog.warn(str);
+			break;
+		case platform::Descriptions::Notice:
+		case platform::Descriptions::Informative:
+			spdlog.info(str);
+			break;
+		case platform::Descriptions::Debug:
+			spdlog.debug(str);
+			break;
+		}
+		}
+	);
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();

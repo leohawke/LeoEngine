@@ -11,6 +11,7 @@
 #include "../Render/BuiltInRayTracingShader.h"
 #include "../emacro.h"
 #include "../Core/LFile.h"
+#include "../Core/Path.h"
 #include <filesystem>
 
 #include <algorithm>
@@ -544,8 +545,7 @@ namespace asset::X::Shader::DXIL {
 		}
 
 	private:
-		std::filesystem::path engine_path = std::filesystem::current_path().parent_path().parent_path();
-		std::filesystem::path shaders_path = engine_path / "Engine" / "Shaders";
+		std::filesystem::path shaders_path = LeoEngine::PathSet::EngineDir() / "Shaders";
 		platform::File Open(const std::filesystem::path& path)
 		{
 			auto local_path = shaders_path / path;

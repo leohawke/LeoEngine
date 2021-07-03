@@ -47,6 +47,7 @@
     <ClCompile Include="Core\LSLEvaluator.cpp" />
     <ClCompile Include="Core\Materail.cpp" />
     <ClCompile Include="Core\Mesh.cpp" />
+    <ClCompile Include="Core\Path.cpp" />
     <ClCompile Include="Core\ResourcesHolder.cpp" />
     <ClCompile Include="Core\Threading\AutoResetEvent.cpp" />
     <ClCompile Include="Core\Threading\ManualResetEvent.cpp" />
@@ -187,6 +188,7 @@
     <ClInclude Include="Core\LSLBuilder.h" />
     <ClInclude Include="Core\Materail.h" />
     <ClInclude Include="Core\Mesh.h" />
+    <ClInclude Include="Core\Path.h" />
     <ClInclude Include="Core\Resource.h" />
     <ClInclude Include="Core\ResourcesHolder.h" />
     <ClInclude Include="Core\Threading\AutoResetEvent.h" />

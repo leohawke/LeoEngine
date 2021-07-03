@@ -177,7 +177,7 @@
       <Filter>Render\DeviceInterface</Filter>
     </ClCompile>
     <ClCompile Include="Core\Hash\CityHash.cpp">
-      <Filter>Core\Hash</Filter>
+      <Filter>Core\Coroutine\Hash</Filter>
     </ClCompile>
     <ClCompile Include="Render\D3D12\RootSignature.cpp">
       <Filter>Render\D3D12</Filter>
@@ -340,6 +340,9 @@
     </ClCompile>
     <ClCompile Include="Runtime\GizmosElements.cpp">
       <Filter>Runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Path.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -568,7 +571,7 @@
       <Filter>Render\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="Core\Hash\CityHash.h">
-      <Filter>Core\Hash</Filter>
+      <Filter>Core\Coroutine\Hash</Filter>
     </ClInclude>
     <ClInclude Include="Asset\RayShaderAsset.h">
       <Filter>Asset</Filter>
@@ -868,6 +871,9 @@
       <Filter>Runtime</Filter>
     </ClInclude>
     <ClInclude Include="CoreTypes.h" />
+    <ClInclude Include="Core\Path.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
@@ -914,9 +920,6 @@
     </Filter>
     <Filter Include="Render\D3D12\RayTracing">
       <UniqueIdentifier>{cf26db45-8ae4-489e-9924-9d1945a35667}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Core\Hash">
-      <UniqueIdentifier>{a8d87a4e-523e-4ac2-a78a-ea2f3c546b2d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{560ae77a-67da-46fd-b918-dad253d018e2}</UniqueIdentifier>
@@ -965,6 +968,9 @@
     </Filter>
     <Filter Include="Math">
       <UniqueIdentifier>{d81b66ec-3168-4ea4-9210-ea8fe28dcb62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Coroutine\Hash">
+      <UniqueIdentifier>{a8d87a4e-523e-4ac2-a78a-ea2f3c546b2d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
