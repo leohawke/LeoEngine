@@ -13,7 +13,7 @@ namespace leo {
 		const double t((Timers::HighResolutionClock::now() - base_tick).count()
 			/ 1e6);
 
-		LF_TraceRaw(0xE0, "Performed [%s] in: %f milliseconds.", event_info.c_str(),
+		LF_TraceRaw(0xA0, "Performed [%s] in: %f milliseconds.", event_info.c_str(),
 			t);
 	}
 #endif

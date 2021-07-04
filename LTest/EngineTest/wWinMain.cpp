@@ -917,7 +917,18 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR cmdLine, int nCmdShow)
 	auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_st>((le::PathSet::EngineIntermediateDir() / "logs/EngineTest.log").string(), true);
 	auto msvc_sink = std::make_shared<spdlog::sinks::msvc_sink_st>();
 
-	spdlog::logger spdlog("spdlog", { file_sink,msvc_sink });
+	spdlog::set_default_logger(leo::share_raw(new spdlog::logger("spdlog", { file_sink,msvc_sink })));
+#ifndef NDEBUG
+	spdlog::set_level(spdlog::level::debug);
+#else
+	spdlog::set_level(spdlog::level::info);
+#endif
+
+	file_sink->set_level(spdlog::level::info);
+	spdlog::flush_every(std::chrono::seconds(5));
+	spdlog::flush_on(spdlog::level::warn);
+	file_sink->set_pattern("[%H:%M:%S:%e][%^%l%$][thread %t] %v");
+	msvc_sink->set_pattern("[thread %t] %v");
 
 	leo::FetchCommonLogger().SetSender([&](platform::Descriptions::RecordLevel lv, platform::Logger& logger, const char* str) {
 		switch (lv)
@@ -925,20 +936,20 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR cmdLine, int nCmdShow)
 		case platform::Descriptions::Emergent:
 		case platform::Descriptions::Alert:
 		case platform::Descriptions::Critical:
-			spdlog.critical(str);
+			spdlog::critical(str);
 			break;
 		case platform::Descriptions::Err:
-			spdlog.error(str);
+			spdlog::error(str);
 			break;
 		case platform::Descriptions::Warning:
-			spdlog.warn(str);
 			break;
 		case platform::Descriptions::Notice:
+			file_sink->flush();
 		case platform::Descriptions::Informative:
-			spdlog.info(str);
+			spdlog::info(str);
 			break;
 		case platform::Descriptions::Debug:
-			spdlog.debug(str);
+			spdlog::debug(str);
 			break;
 		}
 		}

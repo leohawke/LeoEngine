@@ -53,6 +53,7 @@
     <ClCompile Include="Core\Threading\ManualResetEvent.cpp" />
     <ClCompile Include="Core\Threading\TaskScheduler.cpp" />
     <ClCompile Include="Core\Threading\Win32Thread.cpp" />
+    <ClCompile Include="Plugins\sqlite\sqlite3.c" />
     <ClCompile Include="Renderer\imgui\imgui_context.cpp" />
     <ClCompile Include="Renderer\PostProcess\PostProcessCombineLUTs.cpp" />
     <ClCompile Include="Renderer\PostProcess\PostProcessToneMap.cpp" />
@@ -126,6 +127,7 @@
     <ClCompile Include="Render\ResourceView.cpp" />
     <ClCompile Include="Render\Shader.cpp" />
     <ClCompile Include="Render\ShaderCore.cpp" />
+    <ClCompile Include="Render\ShaderDB.cpp" />
     <ClCompile Include="Render\ShaderParametersMetadata.cpp" />
     <ClCompile Include="Render\ShaderParameterUtility.cpp" />
     <ClCompile Include="Render\ShaderParamterTraits.cpp">
@@ -204,6 +206,8 @@
     <ClInclude Include="Math\ShadowProjectionMatrix.h" />
     <ClInclude Include="Math\Sphere.h" />
     <ClInclude Include="Math\TranslationMatrix.h" />
+    <ClInclude Include="Plugins\sqlite\sqlite3.h" />
+    <ClInclude Include="Plugins\sqlite\sqlite_orm.h" />
     <ClInclude Include="Renderer\imgui\imgui_context.h" />
     <ClInclude Include="Renderer\PostProcess\PostProcessCombineLUTs.h" />
     <ClInclude Include="Renderer\PostProcess\PostProcessToneMap.h" />
@@ -248,7 +252,6 @@
     <ClInclude Include="Render\D3D12\ShaderCompose.h" />
     <ClInclude Include="Render\D3D12\d3d12_dxgi.h" />
     <ClInclude Include="Render\D3D12\Display.h" />
-    <ClInclude Include="Render\D3D12\test.h" />
     <ClInclude Include="Render\D3D12\Texture.h" />
     <ClInclude Include="Render\D3D12\Utility.h" />
     <ClInclude Include="Render\D3D12\VertexDeclaration.h" />
@@ -277,6 +280,7 @@
     <ClInclude Include="Render\RenderObject.h" />
     <ClInclude Include="Render\IShaderCompose.h" />
     <ClInclude Include="Render\ShaderCore.h" />
+    <ClInclude Include="Render\ShaderDB.h" />
     <ClInclude Include="Render\ShaderParameters.h" />
     <ClInclude Include="Render\ShaderParametersMetadata.h" />
     <ClInclude Include="Render\ShaderParameterStruct.h" />
@@ -424,7 +428,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)Engine;$(SolutionDir)LBase;$(SolutionDir);$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)SDKs</IncludePath>
+    <IncludePath>$(SolutionDir)Engine\Plugins;$(SolutionDir)Engine;$(SolutionDir)LBase;$(SolutionDir);$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)SDKs</IncludePath>
     <OutDir>$(ProjectDir)toollib\$(Platform)\</OutDir>
     <TargetName>$(ProjectName)d</TargetName>
     <LibraryPath>$(SolutionDir);$(LibraryPath)</LibraryPath>
@@ -436,7 +440,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)Engine;$(SolutionDir);$(SolutionDir)LBase;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)SDKs</IncludePath>
+    <IncludePath>$(SolutionDir)Engine\Plugins;$(SolutionDir)Engine;$(SolutionDir);$(SolutionDir)LBase;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)SDKs</IncludePath>
     <OutDir>$(ProjectDir)toollib\$(Platform)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

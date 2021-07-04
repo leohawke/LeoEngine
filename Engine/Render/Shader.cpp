@@ -13,7 +13,9 @@
 #include "../Core/Hash/CityHash.h"
 #include "BuiltInShader.h"
 #include "ShaderParametersMetadata.h"
-
+#include "ShaderDB.h"
+#include "spdlog/spdlog.h"
+#include "spdlog/stopwatch.h"
 
 using namespace platform::Render;
 
@@ -98,15 +100,26 @@ namespace platform::Render::Shader
 	std::string ParseAndMoveShaderParametersToRootConstantBuffer(std::string code,const asset::X::Shader::ShaderCompilerInput& input);
 	void PullRootShaderParametersLayout(asset::X::Shader::ShaderCompilerInput& Input, const ShaderParametersMetadata& ParameterMeta);
 
+	leo::coroutine::Task<bool> IsShaderCache(BuiltInShaderMeta* meta, int32 PermutationId);
+
 	leo::coroutine::Task<void> CompileBuiltInShader(BuiltInShaderMeta* meta,int32 PermutationId)
 	{
-		LFL_DEBUG_DECL_TIMER(Commpile, sfmt("CompileShader %s- Entry:%s ", meta->GetSourceFileName().c_str(), meta->GetEntryPoint().c_str()));
+		LFL_DEBUG_DECL_TIMER(Commpile, std::format("CompileBuiltInShader {} Entry:{} Permutation={} ", meta->GetSourceFileName(), meta->GetEntryPoint(), PermutationId));
 
+		auto cached = co_await IsShaderCache(meta, PermutationId);
+		if (cached)
+			co_return;
+
+		//shader build system
 		asset::X::Shader::ShaderCompilerInput input;
 
 		input.EntryPoint = meta->GetEntryPoint();
 		input.Type = meta->GetShaderType();
 		input.SourceName = meta->GetSourceFileName();
+
+		auto last_write_time = std::filesystem::last_write_time(input.SourceName);
+
+		//meta_write_time
 
 		if (meta->GetRootParametersMetadata())
 		{
@@ -185,7 +198,7 @@ namespace platform::Render::Shader
 
 	void CompileShaderMap()
 	{
-		LFL_DEBUG_DECL_TIMER(Commpile, "CompileGlobalShaderMap");
+		spdlog::stopwatch sw;
 
 		std::vector< leo::coroutine::Task<void>> tasks;
 		for (auto meta : ShaderMeta::GetTypeList())
@@ -206,6 +219,7 @@ namespace platform::Render::Shader
 		}
 
 		leo::coroutine::SyncWait(leo::coroutine::WhenAllReady(std::move(tasks)));
+		spdlog::info("CompileShaderMap: {} seconds", sw);
 	}
 
 	void FillParameterMapByShaderInfo(ShaderParameterMap& target, const ShaderInfo& src)
@@ -241,6 +255,23 @@ namespace platform::Render::Shader
 	BuiltInShaderMap* Shader::GetBuiltInShaderMap()
 	{
 		return &GGlobalBuiltInShaderMap;
+	}
+
+	namespace fs = std::filesystem;
+
+	leo::coroutine::Task<bool> IsShaderCache(BuiltInShaderMeta* meta, int32 PermutationId) {
+		fs::path path_key = meta->GetSourceFileName();
+		auto last_write_time = fs::last_write_time(path_key);
+
+		auto db_time = LeoEngine::ShaderDB::QueryTime(path_key);
+		if (!db_time.has_value() || db_time.value() != last_write_time)
+			co_return false;
+
+		//read manifest
+		//for manifest check file time
+
+		//load cache
+		co_return false;
 	}
 }
 

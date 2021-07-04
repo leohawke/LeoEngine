@@ -26,7 +26,7 @@ namespace {
 			auto pTexSubRes = param->TryGetValue<platform::Render::TextureSubresource>();
 			if (!pTexSubRes)
 			{
-				LF_Trace(platform::Descriptions::RecordLevel::Warning, "SetTextureSRV(%s) Value Null!", param->Name.c_str());
+				LF_Trace(platform::Descriptions::RecordLevel::Debug, "SetTextureSRV(%s) Value Null!", param->Name.c_str());
 			}
 			else if (pTexSubRes->tex) {
 				auto& tex_subres = *pTexSubRes;

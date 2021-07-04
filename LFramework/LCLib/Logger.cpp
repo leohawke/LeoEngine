@@ -251,7 +251,7 @@ namespace platform
 			string str(vsfmt(fmt, args));
 
 			va_end(args);
-			return sfmt("\"%s\":%i:\n", chk_null(file), line) + std::move(str);
+			return sfmt("\"%s\":%i:", chk_null(file), line) + std::move(str);
 		}
 		CatchExpr(...,
 			leo::ltrace(stderr, Descriptions::Emergent, Descriptions::Notice,

@@ -344,6 +344,12 @@
     <ClCompile Include="Core\Path.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Plugins\sqlite\sqlite3.c">
+      <Filter>Plugins\sqlite</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ShaderDB.cpp">
+      <Filter>Render\Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Context.h">
@@ -428,7 +434,6 @@
     <ClInclude Include="Render\D3D12\FrameBuffer.h">
       <Filter>Render\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="Render\D3D12\test.h" />
     <ClInclude Include="Render\Effect\CopyEffect.h">
       <Filter>Render\Effect</Filter>
     </ClInclude>
@@ -874,6 +879,15 @@
     <ClInclude Include="Core\Path.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Plugins\sqlite\sqlite_orm.h">
+      <Filter>Plugins\sqlite</Filter>
+    </ClInclude>
+    <ClInclude Include="Plugins\sqlite\sqlite3.h">
+      <Filter>Plugins\sqlite</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShaderDB.h">
+      <Filter>Render\Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
@@ -971,6 +985,12 @@
     </Filter>
     <Filter Include="Core\Coroutine\Hash">
       <UniqueIdentifier>{a8d87a4e-523e-4ac2-a78a-ea2f3c546b2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Plugins">
+      <UniqueIdentifier>{11f9c427-da87-4b6c-b09c-6b252d3c752c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Plugins\sqlite">
+      <UniqueIdentifier>{7a47ae44-a60e-49c7-83f8-d7bfe26fb855}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
