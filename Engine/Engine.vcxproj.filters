@@ -888,6 +888,9 @@
     <ClInclude Include="Render\ShaderDB.h">
       <Filter>Render\Shader</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Serialization\Archive.h">
+      <Filter>Core\Serialization</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Render">
@@ -991,6 +994,9 @@
     </Filter>
     <Filter Include="Plugins\sqlite">
       <UniqueIdentifier>{7a47ae44-a60e-49c7-83f8-d7bfe26fb855}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Serialization">
+      <UniqueIdentifier>{dcb49f88-74ab-4e39-9f7b-6a779ea0a44b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

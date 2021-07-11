@@ -376,6 +376,9 @@
     <ClInclude Include="folly\container\HeterogeneousAccess-fwd.h">
       <Filter>folly\container</Filter>
     </ClInclude>
+    <ClInclude Include="folly\Expected.h">
+      <Filter>folly</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="any.cpp" />

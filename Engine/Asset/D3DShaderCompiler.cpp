@@ -216,7 +216,7 @@ void FillD3D12Reflect(ID3D1xShaderReflection* pReflection, ShaderInfo* pInfo,Sha
 		if (type == ShaderType::ComputeShader) {
 			UINT x, y, z;
 			pReflection->GetThreadGroupSize(&x, &y, &z);
-			pInfo->CSBlockSize = leo::math::data_storage<leo::uint16, 3>(static_cast<leo::uint16>(x),
+			pInfo->CSBlockSize = leo::math::vector3<leo::uint16>(static_cast<leo::uint16>(x),
 				static_cast<leo::uint16>(y), static_cast<leo::uint16>(z));
 		}
 	}
@@ -344,7 +344,7 @@ void FillD3D11Reflect(ID3D11ShaderReflection* pReflection, ShaderInfo* pInfo, Sh
 	if (type == ShaderType::ComputeShader) {
 		UINT x, y, z;
 		pReflection->GetThreadGroupSize(&x, &y, &z);
-		pInfo->CSBlockSize = leo::math::data_storage<leo::uint16, 3>(static_cast<leo::uint16>(x),
+		pInfo->CSBlockSize = leo::math::vector3<leo::uint16>(static_cast<leo::uint16>(x),
 			static_cast<leo::uint16>(y), static_cast<leo::uint16>(z));
 	}
 }

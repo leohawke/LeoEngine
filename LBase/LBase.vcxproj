@@ -58,6 +58,7 @@
     <ClInclude Include="folly\detail\StaticSingletonManager.h" />
     <ClInclude Include="folly\detail\ThreadLocalDetail.h" />
     <ClInclude Include="folly\detail\UniqueInstance.h" />
+    <ClInclude Include="folly\Expected.h" />
     <ClInclude Include="folly\folly-config.h" />
     <ClInclude Include="folly\functional\ApplyTuple.h" />
     <ClInclude Include="folly\functional\Invoke.h" />

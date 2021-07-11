@@ -15,9 +15,13 @@
 #include "ShaderParametersMetadata.h"
 #include "ShaderDB.h"
 #include "spdlog/spdlog.h"
+#include "Core/Path.h"
+#include "Core/Serialization/Archive.h"
 #include "spdlog/stopwatch.h"
+#include <format>
 
 using namespace platform::Render;
+using namespace LeoEngine;
 
 namespace platform::Render::Shader
 {
@@ -100,15 +104,67 @@ namespace platform::Render::Shader
 	std::string ParseAndMoveShaderParametersToRootConstantBuffer(std::string code,const asset::X::Shader::ShaderCompilerInput& input);
 	void PullRootShaderParametersLayout(asset::X::Shader::ShaderCompilerInput& Input, const ShaderParametersMetadata& ParameterMeta);
 
-	leo::coroutine::Task<bool> IsShaderCache(BuiltInShaderMeta* meta, int32 PermutationId);
+	leo::coroutine::Task<void> operator>>(AsyncArchive& archive, platform::Render::ShaderInitializer& initializer)
+	{
+		auto pBlob = const_cast<ShaderBlob*>(initializer.pBlob);
 
-	leo::coroutine::Task<void> CompileBuiltInShader(BuiltInShaderMeta* meta,int32 PermutationId)
+		co_await (archive >> pBlob->second);
+
+		if (archive.IsLoading())
+		{
+			pBlob->first = std::make_unique<stdex::byte[]>(initializer.pBlob->second);
+		}
+		co_await archive.Serialize(pBlob->first.get(), pBlob->second);
+
+		auto pInfo = const_cast<ShaderInfo*>(initializer.pInfo);
+		co_await pInfo->Serialize(archive);
+	}
+
+	leo::coroutine::Task<bool> IsShaderCache(BuiltInShaderMeta* meta,const fs::path& path);
+
+	leo::coroutine::Task<void> WriteShaderCache(BuiltInShaderMeta* meta);
+
+	void InsertCompileOuput(BuiltInShaderMeta* meta, platform::Render::ShaderInitializer initializer, int32 PermutationId)
+	{
+		auto pBuiltInMeta = meta->GetBuiltInShaderType();
+		if (!pBuiltInMeta)
+			return;
+
+		if (IsRayTracingShader(meta->GetShaderType()))
+		{
+
+			auto& RayDevice = Context::Instance().GetRayContext().GetDevice();
+			auto pRayTracingShaderRHI = RayDevice.CreateRayTracingSahder(initializer);
+
+			RenderShader::CompiledShaderInitializer compileOuput;
+			compileOuput.Shader = pRayTracingShaderRHI;
+			compileOuput.Meta = meta;
+			FillParameterMapByShaderInfo(compileOuput.ParameterMap, *initializer.pInfo);
+
+			auto pShader = static_cast<BuiltInRayTracingShader*>(pBuiltInMeta->Construct(compileOuput));
+
+			GGlobalBuiltInShaderMap.FindOrAddShader(meta, PermutationId, pShader);
+		}
+		else {
+			auto& Device = Context::Instance().GetDevice();
+
+			auto pShaderRHI = Device.CreateShader(initializer);
+
+			RenderShader::CompiledShaderInitializer compileOuput;
+			compileOuput.Shader = pShaderRHI;
+			compileOuput.Meta = meta;
+
+			FillParameterMapByShaderInfo(compileOuput.ParameterMap, *initializer.pInfo);
+
+			auto pShader = pBuiltInMeta->Construct(compileOuput);
+
+			GGlobalBuiltInShaderMap.FindOrAddShader(meta, PermutationId, pShader);
+		}
+	}
+
+	leo::coroutine::Task<void> CompileBuiltInShader(BuiltInShaderMeta* meta,int32 PermutationId,AsyncArchive& archive)
 	{
 		LFL_DEBUG_DECL_TIMER(Commpile, std::format("CompileBuiltInShader {} Entry:{} Permutation={} ", meta->GetSourceFileName(), meta->GetEntryPoint(), PermutationId));
-
-		auto cached = co_await IsShaderCache(meta, PermutationId);
-		if (cached)
-			co_return;
 
 		//shader build system
 		asset::X::Shader::ShaderCompilerInput input;
@@ -151,50 +207,19 @@ namespace platform::Render::Shader
 			, &Info
 		);
 
-		auto pBuiltInMeta = meta->GetBuiltInShaderType();
-		if (!pBuiltInMeta)
-			co_return;
+		platform::Render::ShaderInitializer initializer{
+			.pBlob = &blob,
+			.pInfo = &Info
+		};
+		InsertCompileOuput(meta, initializer, PermutationId);
 
-		if (IsRayTracingShader(meta->GetShaderType()))
-		{
-			platform::Render::RayTracingShaderInitializer initializer;
-			initializer.pBlob = &blob;
-			initializer.pInfo = &Info;
-
-			auto& RayDevice = Context::Instance().GetRayContext().GetDevice();
-			auto pRayTracingShaderRHI = RayDevice.CreateRayTracingSahder(initializer);
-
-			RenderShader::CompiledShaderInitializer compileOuput;
-			compileOuput.Shader = pRayTracingShaderRHI;
-			compileOuput.Meta = meta;
-			FillParameterMapByShaderInfo(compileOuput.ParameterMap, Info);
-
-			auto pShader = static_cast<BuiltInRayTracingShader*>(pBuiltInMeta->Construct(compileOuput));
-
-			GGlobalBuiltInShaderMap.FindOrAddShader(meta, PermutationId, pShader);
-		}
-		else{
-			platform::Render::ShaderInitializer initializer;
-			initializer.pBlob = &blob;
-			initializer.pInfo = &Info;
-
-			auto& Device = Context::Instance().GetDevice();
-
-			auto pShaderRHI = Device.CreateShader(initializer);
-
-			RenderShader::CompiledShaderInitializer compileOuput;
-			compileOuput.Shader = pShaderRHI;
-			compileOuput.Meta = meta;
-
-			FillParameterMapByShaderInfo(compileOuput.ParameterMap, Info);
-
-			auto pShader = pBuiltInMeta->Construct(compileOuput);
-
-			GGlobalBuiltInShaderMap.FindOrAddShader(meta, PermutationId, pShader);
-		}
+		co_await(archive >> PermutationId);
+		co_await(archive >> Info);
 
 		co_return;
 	}
+
+	fs::path FormatShaderSavePath(BuiltInShaderMeta* meta);
 
 	void CompileShaderMap()
 	{
@@ -206,15 +231,33 @@ namespace platform::Render::Shader
 			//TODO:dispatch type
 			if (auto pBuiltInMeta = meta->GetBuiltInShaderType())
 			{
-				int32 PermutationCountToCompile = 0;
-				for (int32 PermutationId = 0; PermutationId < meta->GetPermutationCount(); PermutationId++)
+				tasks.emplace_back([](BuiltInShaderMeta* meta) -> leo::coroutine::Task<void>
 				{
-					if (!pBuiltInMeta->ShouldCompilePermutation(PermutationId))
-						continue;
+					std::vector< leo::coroutine::Task<void>> tasks;
 
-					auto task = Environment->Scheduler->Schedule(CompileBuiltInShader(pBuiltInMeta, PermutationId));
-					tasks.emplace_back(std::move(task));
-				}
+					int32 PermutationCountToCompile = 0;
+
+					auto localcachepath = FormatShaderSavePath(meta);
+
+					if (co_await IsShaderCache(meta, localcachepath))
+						co_return;
+
+					auto pArchive = leo::unique_raw(LeoEngine::CreateFileWriter(localcachepath));
+
+					auto hash = std::hash<std::string>()(meta->GetSourceFileName());
+					//Serialize meta
+					co_await pArchive->Serialize(&hash,sizeof(hash));
+
+					for (int32 PermutationId = 0; PermutationId < meta->GetPermutationCount(); PermutationId++)
+					{
+						if (!meta->ShouldCompilePermutation(PermutationId))
+							continue;
+
+						co_await CompileBuiltInShader(meta, PermutationId,*pArchive);
+					}
+
+					co_await WriteShaderCache(meta);
+				}(pBuiltInMeta));
 			}
 		}
 
@@ -259,11 +302,14 @@ namespace platform::Render::Shader
 
 	namespace fs = std::filesystem;
 
-	leo::coroutine::Task<bool> IsShaderCache(BuiltInShaderMeta* meta, int32 PermutationId) {
+	leo::coroutine::Task<bool> IsShaderCache(BuiltInShaderMeta* meta, const fs::path& path) {
+		if (!fs::exists(path))
+			co_return false;
+
 		fs::path path_key = meta->GetSourceFileName();
 		auto last_write_time = fs::last_write_time(path_key);
 
-		auto db_time = LeoEngine::ShaderDB::QueryTime(path_key);
+		auto db_time = LeoEngine::ShaderDB::QueryTime(meta->GetSourceFileName());
 		if (!db_time.has_value() || db_time.value() != last_write_time)
 			co_return false;
 
@@ -271,8 +317,68 @@ namespace platform::Render::Shader
 		//for manifest check file time
 
 		//load cache
-		co_return false;
+		auto pArchive = leo::unique_raw(LeoEngine::CreateFileReader(path));
+
+		auto hash = std::hash<std::string>()(meta->GetSourceFileName());
+		//Serialize meta
+		co_await pArchive->Serialize(&hash, sizeof(hash));
+
+		for (int32 PermutationId = 0; PermutationId < meta->GetPermutationCount(); PermutationId++)
+		{
+			//cause error when impl change
+			if (!meta->ShouldCompilePermutation(PermutationId))
+				continue;
+
+			ShaderInfo Info{ meta->GetShaderType() };
+			ShaderBlob Blob;
+
+			platform::Render::ShaderInitializer initializer{
+				.pBlob = &Blob,
+				.pInfo = &Info
+			};
+
+			co_await(*pArchive >> initializer);
+
+			InsertCompileOuput(meta, initializer, PermutationId);
+		}
+
+		co_return true;
 	}
+
+	fs::path FormatShaderSavePath(BuiltInShaderMeta* meta) {
+		static auto save_dir = [] {
+			auto directory = (LeoEngine::PathSet::EngineIntermediateDir() / "Shaders");
+			fs::create_directories(directory);
+			return directory.string();
+		}();
+
+		std::string cache_filename;
+
+		auto hash = std::hash<std::string>()(meta->GetSourceFileName());
+		std::format_to(std::back_inserter(cache_filename), "{}/{:X}", save_dir, hash);
+
+		std::array<char, 4> key = {};
+		auto itr = meta->GetSourceFileName().rbegin();
+		for (int i = 0; itr != meta->GetSourceFileName().rend() && i < 8; ++i, ++itr)
+		{
+			if (i > 3)
+				key[i - 4] = *itr;
+		}
+
+		std::format_to(std::back_inserter(cache_filename), "_{:X}", *reinterpret_cast<unsigned*>(key.data()));
+
+		return cache_filename;
+	}
+
+	leo::coroutine::Task<void> WriteShaderCache(BuiltInShaderMeta* meta) {
+		fs::path path_key = meta->GetSourceFileName();
+		auto last_write_time = fs::last_write_time(path_key);
+
+		co_await LeoEngine::ShaderDB::UpdateTime(meta->GetSourceFileName(), last_write_time);
+
+		co_return;
+	}
+
 }
 
 RenderShader* Shader::ShaderMapContent::GetShader(size_t TypeNameHash, int32 PermutationId) const

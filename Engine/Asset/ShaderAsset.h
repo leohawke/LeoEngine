@@ -121,6 +121,10 @@ namespace asset
 			DefGetter(const lnothrow, const ShaderBlob&, Blob, blob)
 
 			DefGetter(const lnothrow, const platform::Render::ShaderInfo&, Info, *pInfo)
+
+			DefGetter(lnothrow,  ShaderBlob&, Blob, blob)
+
+			DefGetter(lnothrow,  platform::Render::ShaderInfo&, Info, *pInfo)
 	private:
 		Type type;
 		ShaderBlob blob;
@@ -145,7 +149,7 @@ namespace asset
 			DefGetter(lnothrow, std::vector<ShaderFragmentAsset>&, FragmentsRef, fragements)
 
 
-		const ShaderBlobAsset& GetBlob(size_t blob_index) const {
+		ShaderBlobAsset& GetBlob(size_t blob_index) {
 			return blobs.find(blob_index)->second;
 		}
 

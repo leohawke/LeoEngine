@@ -234,4 +234,10 @@ namespace leo::coroutine {
 				std::memory_order_acquire));
 		}
 	}
+
+	void IOScheduler::schedule_operation::await_suspend(std::coroutine_handle<> continuation) noexcept
+	{
+		continuation = continuation;
+		service.schedule_impl(this);
+	}
 }

@@ -53,7 +53,12 @@
     <ClCompile Include="Core\Threading\ManualResetEvent.cpp" />
     <ClCompile Include="Core\Threading\TaskScheduler.cpp" />
     <ClCompile Include="Core\Threading\Win32Thread.cpp" />
-    <ClCompile Include="Plugins\sqlite\sqlite3.c" />
+    <ClCompile Include="Plugins\sqlite\sqlite3.c">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MaxSpeed</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Default</BasicRuntimeChecks>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">SQLITE_THREADSAFE=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">SQLITE_THREADSAFE=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
     <ClCompile Include="Renderer\imgui\imgui_context.cpp" />
     <ClCompile Include="Renderer\PostProcess\PostProcessCombineLUTs.cpp" />
     <ClCompile Include="Renderer\PostProcess\PostProcessToneMap.cpp" />
@@ -193,6 +198,7 @@
     <ClInclude Include="Core\Path.h" />
     <ClInclude Include="Core\Resource.h" />
     <ClInclude Include="Core\ResourcesHolder.h" />
+    <ClInclude Include="Core\Serialization\Archive.h" />
     <ClInclude Include="Core\Threading\AutoResetEvent.h" />
     <ClInclude Include="Core\Threading\ManualResetEvent.h" />
     <ClInclude Include="Core\Threading\TaskScheduler.h" />

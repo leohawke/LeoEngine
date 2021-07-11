@@ -24,11 +24,6 @@ namespace leo::threading {
 
 		leo::coroutine::IOScheduler& GetIOScheduler() noexcept;
 
-		[[nodiscard]] leo::coroutine::IOScheduler::schedule_operation schedule_io() noexcept
-		{
-			return GetIOScheduler().schedule();
-		}
-
 		[[nodiscard]] leo::coroutine::ThreadScheduler::schedule_operation schedule_render() noexcept;
 
 		bool is_render_schedule() const noexcept;
