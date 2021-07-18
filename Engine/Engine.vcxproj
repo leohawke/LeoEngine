@@ -38,10 +38,14 @@
     <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Core\CameraController.cpp" />
     <ClCompile Include="Core\Coroutine\file.coroutine.cpp" />
+    <ClCompile Include="Core\Coroutine\FileAsyncStream.cpp" />
     <ClCompile Include="Core\Coroutine\file_read_operation.cpp" />
+    <ClCompile Include="Core\Coroutine\file_write_operation.cpp" />
     <ClCompile Include="Core\Coroutine\IOScheduler.cpp" />
     <ClCompile Include="Core\Coroutine\readable_file.cpp" />
     <ClCompile Include="Core\Coroutine\ReadOnlyFile.cpp" />
+    <ClCompile Include="Core\Coroutine\writable_file.cpp" />
+    <ClCompile Include="Core\Coroutine\WriteOnlyFile.cpp" />
     <ClCompile Include="Core\Hash\CityHash.cpp" />
     <ClCompile Include="Core\LSLBuilder.cpp" />
     <ClCompile Include="Core\LSLEvaluator.cpp" />
@@ -49,6 +53,7 @@
     <ClCompile Include="Core\Mesh.cpp" />
     <ClCompile Include="Core\Path.cpp" />
     <ClCompile Include="Core\ResourcesHolder.cpp" />
+    <ClCompile Include="Core\Serialization\Archive.cpp" />
     <ClCompile Include="Core\Threading\AutoResetEvent.cpp" />
     <ClCompile Include="Core\Threading\ManualResetEvent.cpp" />
     <ClCompile Include="Core\Threading\TaskScheduler.cpp" />
@@ -173,8 +178,10 @@
     <ClInclude Include="Core\CameraController.h" />
     <ClInclude Include="Core\Coroutine\AwaitableTraits.h" />
     <ClInclude Include="Core\Coroutine\file.h" />
+    <ClInclude Include="Core\Coroutine\FileAsyncStream.h" />
     <ClInclude Include="Core\Coroutine\filemode.h" />
     <ClInclude Include="Core\Coroutine\file_read_operation.h" />
+    <ClInclude Include="Core\Coroutine\file_write_operation.hpp" />
     <ClInclude Include="Core\Coroutine\get_awaiter.h" />
     <ClInclude Include="Core\Coroutine\IOScheduler.h" />
     <ClInclude Include="Core\Coroutine\io_state.h" />
@@ -189,6 +196,8 @@
     <ClInclude Include="Core\Coroutine\when_all_counter.h" />
     <ClInclude Include="Core\Coroutine\when_all_ready_awaitable.h" />
     <ClInclude Include="Core\Coroutine\when_all_task.h" />
+    <ClInclude Include="Core\Coroutine\writable_file.h" />
+    <ClInclude Include="Core\Coroutine\WriteOnlyFile.h" />
     <ClInclude Include="Core\Hash\CityHash.h" />
     <ClInclude Include="Core\LFile.h" />
     <ClInclude Include="Core\LSLEvaluator.h" />

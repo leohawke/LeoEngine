@@ -1,26 +1,29 @@
 #pragma once
 
-#include "readable_file.h"
+#include "writable_file.h"
 #include "filemode.h"
 #include "Task.h"
 #include <filesystem>
 
 namespace leo::coroutine {
-
-	class ReadOnlyFile : public readable_file
+	class WriteOnlyFile : public writable_file
 	{
 	public:
 
-		/// Open a file for read-only access.
+		/// Open a file for write-only access.
 		///
 		/// \param ioContext
 		/// The I/O context to use when dispatching I/O completion events.
-		/// When asynchronous read operations on this file complete the
+		/// When asynchronous write operations on this file complete the
 		/// completion events will be dispatched to an I/O thread associated
 		/// with the I/O context.
 		///
-		/// \param path
+		/// \param pathMode
 		/// Path of the file to open.
+		///
+		/// \param openMode
+		/// Specifies how the file should be opened and how to handle cases
+		/// when the file exists or doesn't exist.
 		///
 		/// \param shareMode
 		/// Specifies the access to be allowed on the file concurrently with this file access.
@@ -30,19 +33,19 @@ namespace leo::coroutine {
 		/// of its file buffering.
 		///
 		/// \return
-		/// An object that can be used to read from the file.
+		/// An object that can be used to write to the file.
 		///
 		/// \throw std::system_error
-		/// If the file could not be opened for read.
+		/// If the file could not be opened for write.
 		[[nodiscard]]
-		static ReadOnlyFile open(
+		static WriteOnlyFile open(
 			IOScheduler& ioService,
 			const std::filesystem::path& path,
-			file_share_mode shareMode = file_share_mode::read,
+			file_open_mode openMode = file_open_mode::create_or_open,
+			file_share_mode shareMode = file_share_mode::none,
 			file_buffering_mode bufferingMode = file_buffering_mode::default_);
 
 	protected:
-		ReadOnlyFile(win32::handle_t&& fileHandle) noexcept;
+		WriteOnlyFile(win32::handle_t&& fileHandle) noexcept;
 	};
-
 }

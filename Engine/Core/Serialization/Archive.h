@@ -46,6 +46,8 @@ namespace LeoEngine
 	class AsyncArchive : public ArchiveState
 	{
 	public:
+		virtual ~AsyncArchive() = default;
+
 		Task<AsyncArchive&> operator>>(std::integral auto& v)
 		{
 			return Serialize(&v, sizeof(v));
@@ -53,7 +55,7 @@ namespace LeoEngine
 
 		Task<AsyncArchive&> operator>>(std::string& v)
 		{
-			std::size_t size;
+			std::size_t size = v.size();
 			co_await Serialize(&size,sizeof(size));
 			if (IsLoading())
 			{
@@ -99,7 +101,7 @@ namespace LeoEngine
 	template<typename T> requires Serializable<T> && std::default_initializable<T>
 	Task<AsyncArchive&> operator>>(AsyncArchive& archive, std::vector<T>& v)
 	{
-		std::size_t size;
+		std::size_t size = v.size();
 		co_await(archive >> size);
 		if (archive.IsLoading())
 		{

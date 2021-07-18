@@ -16,6 +16,8 @@
 #include <LBase/smart_ptr.hpp>
 #include <typeindex>
 
+
+
 namespace platform::Render {
 	ShaderInfo::ShaderInfo(ShaderType t)
 		:Type(t)

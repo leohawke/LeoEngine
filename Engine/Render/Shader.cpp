@@ -337,6 +337,9 @@ namespace platform::Render::Shader
 				.pInfo = &Info
 			};
 
+			int32 CheckId;
+			co_await (*pArchive >> CheckId);
+			LAssert(CheckId == PermutationId, "invalid shader achive");
 			co_await(*pArchive >> initializer);
 
 			InsertCompileOuput(meta, initializer, PermutationId);
@@ -355,7 +358,8 @@ namespace platform::Render::Shader
 		std::string cache_filename;
 
 		auto hash = std::hash<std::string>()(meta->GetSourceFileName());
-		std::format_to(std::back_inserter(cache_filename), "{}/{:X}", save_dir, hash);
+		auto entry_hash = std::hash<std::string>()(meta->GetEntryPoint());
+		std::format_to(std::back_inserter(cache_filename), "{}/{:X}{:X}", save_dir, hash,entry_hash);
 
 		std::array<char, 4> key = {};
 		auto itr = meta->GetSourceFileName().rbegin();

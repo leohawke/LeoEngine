@@ -19,10 +19,6 @@ namespace leo::coroutine {
 		/// Get the size of the file in bytes.
 		std::uint64_t size() const;
 
-	protected:
-
-		file(win32::handle_t&& fileHandle) noexcept;
-
 		static win32::handle_t open(
 			win32::dword_t fileAccess,
 			IOScheduler& ioService,
@@ -30,6 +26,9 @@ namespace leo::coroutine {
 			file_open_mode openMode,
 			file_share_mode shareMode,
 			file_buffering_mode bufferingMode);
+	protected:
+
+		file(win32::handle_t&& fileHandle) noexcept;
 
 		win32::handle_t m_fileHandle;
 	};

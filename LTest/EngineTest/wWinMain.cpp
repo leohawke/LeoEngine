@@ -911,13 +911,38 @@ private:
 	}
 };
 
+#ifndef NDEBUG
+class DebugBreakSink : public spdlog::sinks::base_sink<std::mutex>
+{
+protected:
+	void sink_it_(const spdlog::details::log_msg& msg) override
+	{
+		if (IsDebuggerPresent())
+		{
+			DebugBreak();
+		}
+	}
+
+	void flush_() override
+	{}
+};
+#endif
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR cmdLine, int nCmdShow)
 {
 	auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_st>((le::PathSet::EngineIntermediateDir() / "logs/EngineTest.log").string(), true);
 	auto msvc_sink = std::make_shared<spdlog::sinks::msvc_sink_st>();
 
-	spdlog::set_default_logger(leo::share_raw(new spdlog::logger("spdlog", { file_sink,msvc_sink })));
+#ifndef NDEBUG
+	auto break_sink = std::make_shared<DebugBreakSink>();
+	break_sink->set_level(spdlog::level::critical);
+#endif
+
+	spdlog::set_default_logger(leo::share_raw(new spdlog::logger("spdlog", { file_sink,msvc_sink 
+#ifndef NDEBUG
+		,break_sink
+#endif
+		})));
 #ifndef NDEBUG
 	spdlog::set_level(spdlog::level::debug);
 #else

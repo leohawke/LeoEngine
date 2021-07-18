@@ -6,12 +6,24 @@
 #include <LBase/lmathtype.hpp>
 #include <LBase/cformat.h>
 
-#include "Core/Serialization/Archive.h"
 #include <optional>
+
+namespace leo::coroutine
+{
+	template<class T>
+	class Task;
+}
+
+namespace LeoEngine
+{
+	class AsyncArchive;
+}
 
 namespace platform::Render {
 
 	class Texture;
+
+	using leo::coroutine::Task;
 
 	inline namespace Shader
 	{
@@ -27,13 +39,7 @@ namespace platform::Render {
 			uint16 NumUAVs = 0;
 			uint16 NumCBs = 0;
 
-			LeoEngine::Task<void> Serialize(LeoEngine::AsyncArchive& v)
-			{
-				co_await(v >> NumSamplers);
-				co_await(v >> NumSRVs);
-				co_await(v >> NumUAVs);
-				co_await(v >> NumCBs);
-			}
+			Task<void> Serialize(LeoEngine::AsyncArchive& v);
 		};
 
 		enum ShaderType : leo::uint8
@@ -177,12 +183,7 @@ namespace platform::Render {
 			std::string IntersectionEntryPoint;
 
 
-			LeoEngine::Task<void> Serialize(LeoEngine::AsyncArchive& v)
-			{
-				co_await(v >> EntryPoint);
-				co_await(v >> AnyHitEntryPoint);
-				co_await(v >> IntersectionEntryPoint);
-			}
+			Task<void> Serialize(LeoEngine::AsyncArchive& v);
 		};
 
 		enum class ShaderParamClass :uint8_t
@@ -213,16 +214,8 @@ namespace platform::Render {
 					uint16_t elements;
 					uint16_t size;
 
-					LeoEngine::Task<void> Serialize(LeoEngine::AsyncArchive& v)
-					{
-						co_await(v >> name);
-						co_await(v >> start_offset);
-						co_await(v >> type);
-						co_await(v >> rows);
-						co_await(v >> columns);
-						co_await(v >> elements);
-						co_await(v >> size);
-					}
+					Task<void> Serialize(LeoEngine::AsyncArchive& v);
+					
 				};
 				std::vector<VariableInfo> var_desc;
 
@@ -231,14 +224,8 @@ namespace platform::Render {
 				uint16_t size;
 				uint32_t bind_point;
 
-				LeoEngine::Task<void> Serialize(LeoEngine::AsyncArchive& v)
-				{
-					co_await(v >> var_desc);
-					co_await(v >> name);
-					co_await(v >> name_hash);
-					co_await(v >> size);
-					co_await(v >> bind_point);
-				}
+				Task<void> Serialize(LeoEngine::AsyncArchive& v);
+				
 			};
 			std::vector<ConstantBufferInfo> ConstantBufferInfos;
 
@@ -249,12 +236,8 @@ namespace platform::Render {
 				uint8_t dimension;
 				uint16_t bind_point;
 
-				LeoEngine::Task<void> Serialize(LeoEngine::AsyncArchive& v)
-				{
-					co_await(v >> name);
-					co_await(v >> type);
-					co_await(v >> dimension);
-				}
+				Task<void> Serialize(LeoEngine::AsyncArchive& v);
+				
 			};
 			std::vector<BoundResourceInfo> BoundResourceInfos;
 
@@ -265,16 +248,8 @@ namespace platform::Render {
 
 			std::optional<RayTracingShaderInfo> RayTracingInfos = std::nullopt;
 
-			LeoEngine::Task<void> Serialize(LeoEngine::AsyncArchive& v)
-			{
-				co_await(v >> Type);
-				co_await(v >> ConstantBufferInfos);
-				co_await(v >> BoundResourceInfos);
-				co_await(v >> ResourceCounts);
-				co_await(v >> InputSignature);
-				co_await(v >> CSBlockSize);
-				co_await(v >> RayTracingInfos);
-			}
+			Task<void> Serialize(LeoEngine::AsyncArchive& v);
+			
 		};
 
 		using ShaderMacro = std::pair<std::string, std::string>;

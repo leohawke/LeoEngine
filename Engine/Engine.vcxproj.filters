@@ -350,6 +350,21 @@
     <ClCompile Include="Render\ShaderDB.cpp">
       <Filter>Render\Shader</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Serialization\Archive.cpp">
+      <Filter>Core\Coroutine</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Coroutine\file_write_operation.cpp">
+      <Filter>Core\Coroutine</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Coroutine\writable_file.cpp">
+      <Filter>Core\Coroutine</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Coroutine\WriteOnlyFile.cpp">
+      <Filter>Core\Coroutine</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Coroutine\FileAsyncStream.cpp">
+      <Filter>Core\Coroutine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render\D3D12\Context.h">
@@ -890,6 +905,18 @@
     </ClInclude>
     <ClInclude Include="Core\Serialization\Archive.h">
       <Filter>Core\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\file_write_operation.hpp">
+      <Filter>Core\Coroutine</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\writable_file.h">
+      <Filter>Core\Coroutine</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\WriteOnlyFile.h">
+      <Filter>Core\Coroutine</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Coroutine\FileAsyncStream.h">
+      <Filter>Core\Coroutine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

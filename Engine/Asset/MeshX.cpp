@@ -4,7 +4,7 @@
 
 #include "../Core/AssetResourceScheduler.h"
 #include "../Core/LFile.h"
-#include "../Core/Coroutine/ReadOnlyFile.h"
+#include "../Core/Coroutine/FileAsyncStream.h"
 #include "../System/SystemEnvironment.h"
 
 #include "MeshX.h"
@@ -359,7 +359,7 @@ namespace platform {
 
 		leo::coroutine::Task<std::shared_ptr<AssetType>> GetAwaiter()
 		{
-			leo::coroutine::FileAsyncStream file{ Environment->Scheduler->GetIOScheduler() ,mesh_desc.mesh_path };
+			leo::coroutine::FileAsyncStream file{ Environment->Scheduler->GetIOScheduler() ,mesh_desc.mesh_path,leo::coroutine::file_share_mode::read };
 
 			MeshHeader header;
 			header.Signature =co_await Read<leo::uint32>(file);
