@@ -44,12 +44,36 @@ leo::coroutine::FileAsyncStream::~FileAsyncStream()
 {
 	if ((bufferMode & static_cast<std::uint8_t>(leo::coroutine::file_share_mode::write)) != 0)
 	{
+		file_write_operation(
+			m_fileHandle,
+			fileOffset,
+			buffer,
+			bufferOffset);
+
 		DWORD numberOfBytesWritten = 0;
-		auto ok = WriteFile(m_fileHandle, buffer, bufferOffset, &numberOfBytesWritten, nullptr);
-		if (!ok)
+		SetFileCompletionNotificationModes(m_fileHandle, FILE_SKIP_COMPLETION_PORT_ON_SUCCESS);
+		OVERLAPPED overlapped;
+		overlapped.Offset = static_cast<DWORD>(fileOffset);
+		overlapped.OffsetHigh =static_cast<DWORD>(fileOffset>>32);
+		overlapped.hEvent = CreateEventW(nullptr, true, false, nullptr);
+		overlapped.hEvent = (HANDLE)((uintptr_t)overlapped.hEvent | 1);
+		auto ok = WriteFile(m_fileHandle, buffer, bufferOffset, &numberOfBytesWritten, &overlapped);
+
+		overlapped.hEvent = (HANDLE)((uintptr_t)overlapped.hEvent & ~1);
+		auto wait_result = WaitForSingleObject(overlapped.hEvent, INFINITE);
+		if (wait_result == WAIT_FAILED)
 		{
 			spdlog::critical(platform_ex::Windows::Win32Exception::FormatMessage(::GetLastError()));
 		}
+		CloseHandle(overlapped.hEvent);
+
+		/*
+		* SyncWait(file_write_operation(
+			m_fileHandle,
+			fileOffset,
+			buffer,
+			bufferOffset));
+		*/
 	}
 }
 
